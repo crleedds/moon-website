@@ -1,0 +1,42 @@
+# --- Deny-by-default: ignore everything, then re-include work files below ---
+/*
+
+# Re-include wp-content but ignore most of its contents
+!/wp-content/
+/wp-content/*
+!/wp-content/themes/
+!/wp-content/plugins/
+!/wp-content/mu-plugins/
+
+# Re-include only the custom child theme (work content)
+/wp-content/themes/*
+!/wp-content/themes/moondental-child/
+
+# Ignore third-party plugins; whitelist any custom plugin folders here as they appear
+/wp-content/plugins/*
+!/wp-content/plugins/index.php
+
+# Re-include repo metadata
+!/.gitignore
+!/.gitattributes
+!/README.md
+
+# Safety: never commit secrets / local-only files even if rules above shift
+wp-config.php
+wp-config-local.php
+local-xdebuginfo.php
+.env
+.env.*
+*.log
+*.sql
+*.sqlite
+*.sqlite-journal
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
