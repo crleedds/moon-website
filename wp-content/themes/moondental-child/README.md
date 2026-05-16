@@ -1,51 +1,71 @@
-# Moon Dental Child Theme — 설치 가이드
+# Moon Dental Child Theme
 
-## 1. 압축 해제 위치
+한아의료재단 **문치과병원** Astra 자식 테마. 따뜻한 동네 치과 디자인 시스템 + Pretendard 한글 폰트.
 
-이 폴더 전체(`moondental-child/`)를 다음 경로에 복사하세요:
+## 폴더 구조
 
 ```
-C:\Users\<사용자명>\Local Sites\moondentalhospital\app\public\wp-content\themes\
+moondental-child/
+├── style.css                    # 디자인 토큰 + 모든 컴포넌트 CSS
+├── functions.php                # 메뉴/Customizer/병원정보/단축코드
+├── header.php                   # 유틸리티 바 + 메인 헤더 + 모바일 메뉴
+├── footer.php                   # 푸터(병원정보·진료시간·메뉴·SNS)
+├── front-page.php               # 홈페이지 (섹션 조립)
+├── page.php                     # 일반 페이지 기본 템플릿
+├── page-templates/
+│   ├── page-service.php         # 진료영역(임플란트/교정 등) 페이지용
+│   └── page-wide.php            # 풀너비 페이지(오시는길/시설 등)
+├── template-parts/
+│   ├── section-hero.php         # 홈 hero
+│   ├── section-services.php     # 5개 진료영역 그리드
+│   ├── section-doctor.php       # 대표원장 소개
+│   ├── section-info.php         # 진료시간/전화/위치 3컬럼
+│   ├── section-notices.php      # 최근 공지 3개
+│   └── section-cta.php          # 하단 예약 CTA
+└── assets/
+    └── js/main.js               # 모바일 메뉴 + 스크롤 인터랙션
 ```
 
-복사 후 구조:
-```
-wp-content/themes/
-├── astra/                  (부모 테마, 이미 설치됨)
-└── moondental-child/       (← 이것이 새로 들어감)
-    ├── style.css
-    ├── functions.php
-    └── README.md
-```
+## 활성화 순서 (WP 관리자)
 
-## 2. WordPress 관리자에서 활성화
+1. **외모 → 테마 → Moon Dental Child** 활성화
+2. **외모 → 메뉴**
+   - "주 메뉴" 만들기 → 위치를 **주 메뉴 (헤더)** 로 지정
+   - 항목 예시: 병원소개 / 진료안내 / 의료진 / 시설 / 공지사항 / 오시는 길
+3. **설정 → 읽기**
+   - "홈페이지 표시"를 **정적 페이지**로 전환
+   - 홈페이지: "홈" 페이지 새로 만들어 지정 (front-page.php가 자동 사용됨)
+   - 글 페이지: "공지사항" 페이지 지정
+4. **외모 → 사용자 정의하기 → 문치과병원 설정** 패널에서:
+   - 병원 기본 정보 (병원명/전화/주소/대표/사업자번호)
+   - 진료시간
+   - SNS / 외부 링크 (카카오톡 채널, 네이버 플레이스, 인스타, 블로그)
+   - 홈 — Hero 섹션 (메인 카피, 이미지)
+   - 홈 — 의료진 섹션 (약력, 사진)
+5. 진료 페이지 5개 생성 (슬러그 매칭):
+   - `general` (일반진료) · `implant` (임플란트) · `ortho` (교정) · `aesthetic` (심미) · `pediatric` (소아·예방)
+   - 각 페이지 → 우측 패널 "페이지 속성 → 템플릿"에서 **진료 영역 페이지** 선택
+6. `오시는 길` / `시설` 페이지는 템플릿 **풀 너비 페이지** 선택
 
-1. WP 관리자(`http://moondentalhospital.local/wp-admin`) 접속
-2. **외모(Appearance) → 테마(Themes)**
-3. **Moon Dental Child** 카드 찾기 → **활성화(Activate)** 클릭
+## 단축코드
 
-## 3. 활성화 후 확인
+- `[moondental_info key="phone"]` — 병원 정보 출력 (phone, address, rep, hours_wd, name_short 등)
 
-- 페이지 열어서 폰트가 **Pretendard**로 표시되는지 확인
-  (개발자 도구 → Elements → body에서 `font-family` 확인)
-- 페이지 소스(Ctrl+U)에 다음 줄이 있는지 확인:
-  ```
-  https://cdn.jsdelivr.net/gh/orioncactus/pretendard/...
-  ```
+## 디자인 토큰 (style.css 상단)
 
-## 4. 다음 단계
+- Primary: `#D88062` (warm coral)
+- Accent : `#8FAE92` (soft sage)
+- BG     : `#FFFAF4` / Surface: `#FBF2E8` / Alt: `#F5E8D8`
+- Text   : `#3D2F26` (warm brown)
+- 폰트   : Pretendard Variable
 
-1. **수정 필수**: `functions.php` 하단 `moondental_get_info()` 함수의 전화번호/주소/사업자번호를 실제 값으로 변경
-2. **Elementor 글로벌 설정**: `SITE_SPEC.md`의 Phase 2 참고
-3. **플러그인 설치**: KBoard, Contact Form 7, Yoast SEO, Smush, UpdraftPlus, Loginizer
+## 알려진 의존
 
-## 트러블슈팅
+- 부모 테마: **Astra** (free)
+- 폰트 CDN: jsDelivr Pretendard (외부)
 
-**Q. 자식 테마 활성화 후 사이트가 깨졌어요**
-→ functions.php의 PHP 문법 오류 가능성. 파일 첫 줄이 정확히 `<?php`인지, 마지막에 닫는 태그 없이 끝나는지 확인.
+## 백업
 
-**Q. 폰트가 적용 안 돼요**
-→ 브라우저 강력 새로고침(Ctrl+Shift+R). 그래도 안 되면 캐시 플러그인 비활성화 후 재시도.
-
-**Q. Elementor에서 색상이 자동 반영 안 돼요**
-→ Elementor 색상은 별도로 글로벌 설정에 입력해야 합니다(`SITE_SPEC.md` Phase 2-2 참고). CSS 변수와 Elementor 글로벌은 독립적으로 관리됩니다.
+이 폴더는 `c:\Users\user\Local Sites\moon-dental-hospital\app\public`에 git이 초기화되어 있고
+`https://github.com/moonden93/moon-website` 로 푸시됩니다.
+`wp-config.php` 와 워드프레스 코어, 서드파티 플러그인은 `.gitignore`로 제외됩니다.
