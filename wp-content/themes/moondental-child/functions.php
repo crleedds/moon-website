@@ -676,7 +676,7 @@ function moondental_get_team() {
 				array(
 					'name'       => '문은수',
 					'role'       => '대표 병원장',
-					'photo'      => 'doctor-04.jpg',
+					'photo'      => 'doctor-04.png',
 					'philosophy' => '최고의 실력으로 환자를 가족처럼 생각하는 것, 국내 제일의 치과병원 문치과의 철학입니다.',
 					'bio'        => array(
 						'한아의료재단 이사장',
@@ -698,7 +698,7 @@ function moondental_get_team() {
 				array(
 					'name'       => '이승주',
 					'role'       => '원장 · 9F 종합진료센터',
-					'photo'      => 'doctor-07.jpg',
+					'photo'      => 'doctor-07.png',
 					'philosophy' => '최선을 다하여 환자를 가족처럼 생각하며 진료에 임하겠습니다.',
 					'bio'        => array(
 						'단국대학교치과대학 치의학과 졸업',
@@ -710,7 +710,7 @@ function moondental_get_team() {
 				array(
 					'name'       => '이수연',
 					'role'       => '원장 · 9F 종합진료센터',
-					'photo'      => 'doctor-08.jpg',
+					'photo'      => 'doctor-08.png',
 					'philosophy' => '진실된 마음으로 환자분들과 함께하는 의료서비스를 제공하겠습니다.',
 					'bio'        => array(
 						'치과 보철과 전문의 · 통합치의학 전문의',
@@ -724,7 +724,7 @@ function moondental_get_team() {
 				array(
 					'name'       => '권혜진',
 					'role'       => '원장 · 9F 종합진료센터',
-					'photo'      => 'doctor-02.jpg',
+					'photo'      => 'doctor-02.png',
 					'philosophy' => '기본에 충실하되 새로운 변화에 맞춰가며, 환자분을 가족처럼 생각하는 따뜻한 마음으로 진료에 임하겠습니다.',
 					'bio'        => array(
 						'보건복지부 인증 보존과 전문의',
@@ -745,7 +745,7 @@ function moondental_get_team() {
 				array(
 					'name'       => '문지현',
 					'role'       => '원장 · 10F 임플란트센터',
-					'photo'      => 'doctor-05.jpg',
+					'photo'      => 'doctor-05.png',
 					'philosophy' => '구강건강 증진을 통해 환자분들의 삶이 회복되는 과정을 함께 하고 싶습니다. 최선을 다해 진료하겠습니다.',
 					'bio'        => array(
 						'서울대학교 치의학대학원 졸업',
@@ -767,7 +767,7 @@ function moondental_get_team() {
 				array(
 					'name'       => '이창률',
 					'role'       => '원장 · 10F 임플란트센터',
-					'photo'      => 'doctor-01.jpg',
+					'photo'      => 'doctor-01.png',
 					'philosophy' => 'For a lifelong smile. 환자 한 분 한 분을 가족처럼 생각하며, 밝고 편안한 웃음을 위한 진료에 최선을 다하겠습니다.',
 					'bio'        => array(
 						'미국 UCLA 생화학 학사 졸업',
@@ -796,7 +796,7 @@ function moondental_get_team() {
 				array(
 					'name'       => '이영일',
 					'role'       => '원장 · 11F 교정과',
-					'photo'      => 'doctor-09.jpg',
+					'photo'      => 'doctor-09.png',
 					'philosophy' => '최고의 실력으로 환자를 가족처럼 생각하는 것, 국내 제일의 치과병원 문치과의 철학입니다.',
 					'bio'        => array(
 						'단국대학교 치과대학 졸업',
@@ -811,7 +811,7 @@ function moondental_get_team() {
 				array(
 					'name'       => '김세일',
 					'role'       => '원장 · 11F 종합진료센터',
-					'photo'      => 'doctor-03.jpg',
+					'photo'      => 'doctor-03.png',
 					'philosophy' => '건강한 치아는 건강한 일상의 시작입니다. 세밀한 진단과 진료로 환자분들의 건강한 하루를 책임지겠습니다.',
 					'bio'        => array(
 						'단국대학교 치과대학 졸업',
@@ -822,7 +822,7 @@ function moondental_get_team() {
 				array(
 					'name'       => '정석형',
 					'role'       => '원장 · 11F 종합진료센터',
-					'photo'      => 'doctor-06.jpg',
+					'photo'      => 'doctor-06.png',
 					'philosophy' => '저희 문치과를 방문하는 모든 분들이 밝고 건강한 웃음의 주인이 되시길 바라며 항상 최선을 다하겠습니다.',
 					'bio'        => array(
 						'단국대학교 치과대학 치주과 석사',
@@ -838,13 +838,22 @@ function moondental_get_team() {
 }
 
 /**
- * 의료진 사진 파일 URL을 반환. 파일이 없으면 false.
+ * 의료진 사진 파일 URL 반환. 지정 확장자가 없으면 jpg/png/jpeg/webp 순으로 시도.
+ *
+ * @param string $filename 예: 'doctor-01.png'
+ * @return string|false   URL 또는 false (실제 파일이 없을 때)
  */
 function moondental_doctor_photo_url( $filename ) {
 	if ( ! $filename ) return false;
-	$path = MOONDENTAL_DIR . '/assets/images/doctors/' . $filename;
-	if ( file_exists( $path ) ) {
-		return MOONDENTAL_URI . '/assets/images/doctors/' . $filename;
+	$base = pathinfo( $filename, PATHINFO_FILENAME ); // 확장자 제외
+	$exts = array( pathinfo( $filename, PATHINFO_EXTENSION ), 'png', 'jpg', 'jpeg', 'webp' );
+	$exts = array_filter( array_unique( $exts ) );
+	foreach ( $exts as $ext ) {
+		$try_file = $base . '.' . $ext;
+		$path     = MOONDENTAL_DIR . '/assets/images/doctors/' . $try_file;
+		if ( file_exists( $path ) ) {
+			return MOONDENTAL_URI . '/assets/images/doctors/' . $try_file;
+		}
 	}
 	return false;
 }
