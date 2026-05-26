@@ -92,8 +92,9 @@ $info = moondental_get_info();
 		<div class="md-footer__bottom">
 			<div>
 				<?php echo esc_html( $info['name_full'] ); ?>
-				<?php if ( $info['rep'] ) : ?> · 대표원장 <?php echo esc_html( $info['rep'] ); ?><?php endif; ?>
-				<?php if ( $info['biz_no'] ) : ?> · 사업자번호 <?php echo esc_html( $info['biz_no'] ); ?><?php endif; ?>
+				<?php if ( $info['rep'] ) : ?> · 이사장 <?php echo esc_html( $info['rep'] ); ?><?php endif; ?>
+				<?php if ( ! empty( $info['med_inst_no'] ) ) : ?> · 의료기관번호 <?php echo esc_html( $info['med_inst_no'] ); ?><?php endif; ?>
+				<?php if ( ! empty( $info['biz_no'] ) ) : ?> · 사업자번호 <?php echo esc_html( $info['biz_no'] ); ?><?php endif; ?>
 				<br>
 				<?php if ( $info['address'] ) : ?><?php echo esc_html( $info['address'] ); ?><?php endif; ?>
 			</div>

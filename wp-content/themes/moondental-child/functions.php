@@ -121,11 +121,12 @@ function moondental_get_info( $key = '' ) {
 		'address'      => '충청남도 천안시 동남구 만남로 52, 문타워 9~13층 (신부동)',
 		'address_road' => '충남 천안시 동남구 만남로 52, 문타워 9~13층',
 		'hours_wd'     => '평일 09:00 – 20:30 (점심시간 없음)',
-		'hours_thu'    => '목요일 09:00 – 18:30 (야간진료 없음)',
-		'hours_sat'    => '토요일 09:00 – 13:00',
+		'hours_thu'    => '목요일 09:00 – 18:00 (야간진료 없음)',
+		'hours_sat'    => '토요일 09:00 – 14:00',
 		'hours_lunch'  => '',
 		'hours_off'    => '일요일·공휴일 휴진',
 		'biz_no'       => '',
+		'med_inst_no'  => '34400117',
 		'rep'          => '문은수',
 		'email'        => '',
 		'kakao_url'    => 'http://pf.kakao.com/_VTcgE/chat',
@@ -213,6 +214,7 @@ function moondental_customize_register( $wp_customize ) {
 		array( 'key' => 'address',      'label' => '주소 (지번 또는 표기용)',    'section' => 'moondental_section_info', 'type' => 'textarea' ),
 		array( 'key' => 'address_road', 'label' => '도로명 주소',              'section' => 'moondental_section_info' ),
 		array( 'key' => 'biz_no',       'label' => '사업자등록번호',           'section' => 'moondental_section_info' ),
+		array( 'key' => 'med_inst_no',  'label' => '의료기관 고유번호',         'section' => 'moondental_section_info' ),
 
 		// section_hours
 		array( 'key' => 'hours_wd',     'label' => '평일 진료시간',            'section' => 'moondental_section_hours' ),
