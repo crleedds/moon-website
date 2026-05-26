@@ -1,6 +1,8 @@
 <?php
 /**
- * Section: 의료진 팀 그리드 (9명)
+ * Section: 의료진 팀 그리드 (9명) — 홈 페이지용 간단 카드
+ *
+ * 약력 상세는 의료진 페이지(/doctors/)에서. 홈은 사진·이름·직책·진료철학만.
  *
  * @package moondental-child
  */
@@ -13,7 +15,7 @@ $groups = moondental_get_team();
 			<span class="md-section-head__eyebrow">Our Team</span>
 			<h2 class="md-section-head__title">9명의 의료진이 함께합니다</h2>
 			<p class="md-section-head__lead">
-				구강악안면외과·보철·교정·소아·치주 — 각 분야 전문 의료진이 한 자리에서<br>
+				9F 종합진료센터 · 10F 임플란트센터 · 11F 교정과 — 각 분야 전문 의료진이<br>
 				환자 한 분의 평생 치아 건강을 책임집니다.
 			</p>
 		</header>
@@ -36,11 +38,8 @@ $groups = moondental_get_team();
 							<div class="md-team-card__body">
 								<div class="md-team-card__role"><?php echo esc_html( $doc['role'] ); ?></div>
 								<h4 class="md-team-card__name"><?php echo esc_html( $doc['name'] ); ?></h4>
-								<?php if ( ! empty( $doc['specialty'] ) ) : ?>
-									<div class="md-team-card__spec"><?php echo esc_html( $doc['specialty'] ); ?></div>
-								<?php endif; ?>
-								<?php if ( ! empty( $doc['bio'] ) ) : ?>
-									<p class="md-team-card__bio"><?php echo esc_html( $doc['bio'] ); ?></p>
+								<?php if ( ! empty( $doc['philosophy'] ) ) : ?>
+									<p class="md-team-card__bio"><?php echo esc_html( wp_trim_words( $doc['philosophy'], 18, '…' ) ); ?></p>
 								<?php endif; ?>
 							</div>
 						</article>
@@ -51,7 +50,7 @@ $groups = moondental_get_team();
 
 		<div style="text-align:center; margin-top:32px;">
 			<a class="md-btn md-btn-ghost" href="<?php echo esc_url( home_url( '/doctors/' ) ); ?>">
-				의료진 자세히 보기 →
+				의료진 약력 자세히 보기 →
 			</a>
 		</div>
 	</div>

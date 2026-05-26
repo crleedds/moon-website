@@ -753,6 +753,108 @@ button.elementor-button {
 }
 
 /* =============================================================
+   10c. Doctor Row (의료진 페이지 — 사진 + 약력 가로 레이아웃)
+   ============================================================= */
+.md-doc-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 3vw, 40px);
+}
+
+.md-doc-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: clamp(20px, 3vw, 40px);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(20px, 3vw, 32px);
+  align-items: start;
+  transition: all 0.3s var(--ease);
+}
+.md-doc-row:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-soft);
+}
+@media (max-width: 680px) {
+  .md-doc-row {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+.md-doc-row__media {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-alt));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.md-doc-row__media.has-photo { background: var(--color-white); }
+.md-doc-row__media img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+.md-doc-row__initial {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.md-doc-row__role {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-accent);
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+.md-doc-row__name {
+  font-size: clamp(1.375rem, 2.4vw, 1.75rem);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 16px;
+  letter-spacing: -0.02em;
+}
+.md-doc-row__quote {
+  margin: 0 0 20px;
+  padding: 16px 20px;
+  background: var(--color-surface);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-small);
+  color: var(--color-text);
+  line-height: 1.7;
+}
+.md-doc-row__bio {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 4px 16px;
+}
+.md-doc-row__bio li {
+  padding: 4px 0 4px 16px;
+  position: relative;
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  line-height: 1.7;
+}
+.md-doc-row__bio li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 14px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+/* =============================================================
    11. Info Block (진료시간 / 오시는 길 / 연락처)
    ============================================================= */
 .md-info-grid {

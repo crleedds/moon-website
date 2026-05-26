@@ -3,8 +3,7 @@
  * Template Name: 의료진 페이지
  * Template Post Type: page
  *
- * 9명 의료진을 그룹별 카드 그리드로 표시. WP 편집기 본문이 있으면
- * 그리드 위에 도입글로 들어가고, 없으면 기본 도입글 사용.
+ * 9명 의료진 — 그룹별로 사진/약력 상세 카드 (홈의 요약과 달리 약력 전체 표시).
  *
  * @package moondental-child
  */
@@ -20,7 +19,8 @@ $groups = moondental_get_team();
 		</nav>
 		<h1 class="md-page-hero__title"><?php the_title(); ?></h1>
 		<p class="md-page-hero__lead">
-			구강악안면외과·보철·교정·소아·치주 — 각 분야 전문 의료진이 한 자리에서.
+			9F 종합진료센터 · 10F 임플란트센터 · 11F 교정과<br>
+			각 분야 전문 의료진이 한 자리에서 환자 한 분의 평생 치아 건강을 책임집니다.
 		</p>
 	</div>
 </section>
@@ -45,26 +45,38 @@ $groups = moondental_get_team();
 		<?php foreach ( $groups as $group ) : ?>
 			<div class="md-team-group">
 				<h3 class="md-team-group__title"><?php echo esc_html( $group['group'] ); ?></h3>
-				<div class="md-team-grid md-team-grid--lg">
+				<div class="md-doc-list">
 					<?php foreach ( $group['members'] as $doc ) :
 						$photo_url = moondental_doctor_photo_url( $doc['photo'] ?? '' );
 					?>
-						<article class="md-team-card">
-							<div class="md-team-card__avatar md-team-card__avatar--lg<?php echo $photo_url ? ' md-team-card__avatar--photo' : ''; ?>" aria-hidden="true">
+						<article class="md-doc-row">
+							<div class="md-doc-row__media<?php echo $photo_url ? ' has-photo' : ''; ?>">
 								<?php if ( $photo_url ) : ?>
 									<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $doc['name'] ); ?>" loading="lazy">
 								<?php else : ?>
-									<span><?php echo esc_html( mb_substr( $doc['name'], -2 ) ); ?></span>
+									<span class="md-doc-row__initial"><?php echo esc_html( mb_substr( $doc['name'], -2 ) ); ?></span>
 								<?php endif; ?>
 							</div>
-							<div class="md-team-card__body">
-								<div class="md-team-card__role"><?php echo esc_html( $doc['role'] ); ?></div>
-								<h4 class="md-team-card__name"><?php echo esc_html( $doc['name'] ); ?></h4>
-								<?php if ( ! empty( $doc['specialty'] ) ) : ?>
-									<div class="md-team-card__spec"><?php echo esc_html( $doc['specialty'] ); ?></div>
+							<div class="md-doc-row__body">
+								<div class="md-doc-row__role"><?php echo esc_html( $doc['role'] ); ?></div>
+								<h4 class="md-doc-row__name"><?php echo esc_html( $doc['name'] ); ?></h4>
+
+								<?php if ( ! empty( $doc['philosophy'] ) ) : ?>
+									<blockquote class="md-doc-row__quote">
+										<?php echo esc_html( $doc['philosophy'] ); ?>
+									</blockquote>
 								<?php endif; ?>
-								<?php if ( ! empty( $doc['bio'] ) ) : ?>
-									<p class="md-team-card__bio"><?php echo esc_html( $doc['bio'] ); ?></p>
+
+								<?php
+								$bio = $doc['bio'] ?? array();
+								if ( is_string( $bio ) ) { $bio = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", $bio ) ) ); }
+								if ( ! empty( $bio ) ) :
+								?>
+									<ul class="md-doc-row__bio">
+										<?php foreach ( $bio as $line ) : ?>
+											<li><?php echo esc_html( $line ); ?></li>
+										<?php endforeach; ?>
+									</ul>
 								<?php endif; ?>
 							</div>
 						</article>
