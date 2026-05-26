@@ -291,6 +291,138 @@ function moondental_default_doctors_content() {
 
 
 /**
+ * 기술력 / 시설 페이지 기본 본문
+ */
+function moondental_default_facility_content() {
+	return '
+<h2>정밀한 진단, 신뢰할 수 있는 진료를 위한 시설</h2>
+<p class="lead">한아의료재단 문치과병원은 만남로 문타워 9~13층, 총 <strong>5개 층 전체</strong>를 사용하는 종합 치과병원입니다. 진단·임플란트·교정·종합진료 영역을 층별 전문 센터로 분리해 환자분이 필요한 진료를 가장 깊이 있게 받으실 수 있도록 설계했습니다.</p>
+
+<h3>층별 전문 센터</h3>
+<ul>
+<li><strong>9F 종합진료센터</strong> — 보존·치주·보철 통합 진료, 상담실</li>
+<li><strong>10F 임플란트센터</strong> — CT·디지털 가이드 식립 수술실, 멸균실</li>
+<li><strong>11F 교정과 · 종합진료센터</strong> — 투명교정 전담, 일반 교정, 상담실</li>
+<li><strong>12~13F</strong> — 데스크·라운지·환자 휴게 공간, 보철 기공 협진실</li>
+</ul>
+
+<h3>디지털 진단 장비</h3>
+<ul>
+<li><strong>3D CT (Cone-Beam CT)</strong> — 임플란트 식립 전 골밀도·신경 위치를 mm 단위로 분석</li>
+<li><strong>디지털 파노라마 X-ray</strong> — 저선량 촬영, 즉시 판독</li>
+<li><strong>구강 내 디지털 스캐너</strong> — 본뜨기 없이 보철·교정 모형 디지털화</li>
+<li><strong>세팔로 분석 (교정용)</strong> — 골격 분석을 통한 정밀 교정 계획</li>
+</ul>
+
+<h3>임플란트 디지털 가이드 시스템</h3>
+<ul>
+<li>CT 데이터 기반 컴퓨터 시뮬레이션 식립</li>
+<li>3D 프린팅 가이드를 이용한 정확도 ±0.5mm 식립</li>
+<li>즉시 임플란트 / 즉시 부하 케이스 대응</li>
+<li>네비게이션 가이드 수술로 신경 손상 위험 최소화</li>
+</ul>
+
+<h3>멸균 · 감염관리</h3>
+<ul>
+<li><strong>핸드피스 1인 1세트</strong> — 환자마다 멸균된 새 핸드피스 사용</li>
+<li><strong>고압증기 멸균 (Autoclave)</strong> — 진료 기구는 모두 멸균 후 사용</li>
+<li><strong>일회용 기구 적극 사용</strong> — 주사기·바늘·석션팁 등</li>
+<li><strong>진료실 공기 관리</strong> — 헤파 필터 환기, 진료실간 격리</li>
+<li><strong>의료폐기물 별도 처리</strong> — 의료법 기준 엄격 준수</li>
+</ul>
+
+<h3>환자 편의시설</h3>
+<ul>
+<li>건물 자체 주차장 (진료 시 무료)</li>
+<li>전용 엘리베이터로 각 층 진료센터 접근</li>
+<li>어린이 동반 환자를 위한 라운지</li>
+<li>휠체어·유모차 접근 가능 (배리어프리)</li>
+<li>야간진료 운영 (평일 ~20:30, 목·토 제외)</li>
+</ul>';
+}
+
+
+/**
+ * 임상 케이스 페이지 기본 본문
+ */
+function moondental_default_cases_content() {
+	$info = moondental_get_info();
+	return '
+<h2>30년 임상 경험으로 쌓아온 케이스</h2>
+<p class="lead">문치과병원은 1995년 개원 이래 임플란트·교정·심미·보존 등 다양한 임상 케이스를 축적해왔습니다. 각 분야 전문 의료진의 협진으로 단일 치료를 넘어 환자분의 평생 구강 건강을 설계합니다.</p>
+
+<h3>주요 진료 영역별 케이스</h3>
+<ul>
+<li><strong>임플란트 케이스</strong> — 단일·다수·전악 식립, 골이식 동반 케이스, All-on-4/6</li>
+<li><strong>교정 케이스</strong> — 투명교정·설측·소아·성인 종합 교정</li>
+<li><strong>심미 케이스</strong> — 라미네이트·올세라믹·미백 통합 디자인</li>
+<li><strong>보존 (자연치 살리기) 케이스</strong> — 재근관 치료, 치근단 수술 후 보존 사례</li>
+<li><strong>턱관절 케이스</strong> — 스플린트·교합 조정 통합 치료</li>
+<li><strong>전악 통합 치료</strong> — 발치·임플란트·교정·보철을 통합 계획한 풀마우스 케이스</li>
+</ul>
+
+<blockquote>
+<p>실제 환자분의 진료 전·후 사진은 <strong>환자분의 명시적 동의</strong>를 받은 경우에 한해 공개합니다. 의료법상 비교 사진은 정확한 정보 전달과 동시에 환자분의 사생활을 함께 보호해야 하므로, 상세 케이스 사진은 내원하시어 직접 상담 시 보여드리는 것을 원칙으로 합니다.</p>
+</blockquote>
+
+<h3>임상 사례 미리 보기</h3>
+<p>저희 병원의 일상과 진료 모습은 다음 채널에서 확인하실 수 있습니다:</p>
+<ul>
+' . ( $info['instagram'] ? '<li><a href="' . esc_url( $info['instagram'] ) . '" target="_blank" rel="noopener">인스타그램</a> — 진료실 일상, 직원 소식</li>' : '' ) . '
+' . ( $info['blog_url']  ? '<li><a href="' . esc_url( $info['blog_url']  ) . '" target="_blank" rel="noopener">네이버 블로그</a> — 진료 후기, 치과 상식</li>' : '' ) . '
+' . ( $info['facebook_url'] ? '<li><a href="' . esc_url( $info['facebook_url'] ) . '" target="_blank" rel="noopener">페이스북</a> — 병원 소식</li>' : '' ) . '
+</ul>
+
+<h3>상담을 원하신다면</h3>
+<p>본인 케이스와 유사한 임상 사례를 직접 보고 싶으시다면 부담 없이 내원해주세요. 사전 상담 시 비슷한 케이스의 치료 과정·결과를 자세히 설명드립니다.</p>
+<p>📞 <a href="tel:' . esc_attr( $info['phone_link'] ) . '"><strong>' . esc_html( $info['phone'] ) . '</strong></a>로 전화 주시거나, <a href="' . esc_url( $info['kakao_url'] ) . '" target="_blank" rel="noopener">카카오톡 상담</a>으로 편하게 문의 가능합니다.</p>';
+}
+
+
+/**
+ * 진료항목 부모 페이지 (6개 진료 영역 개요)
+ */
+function moondental_default_services_overview_content() {
+	$services = moondental_get_services();
+
+	$html  = '<h2>한 곳에서, 평생 치아 건강을</h2>';
+	$html .= '<p class="lead">문치과병원은 1995년부터 천안에서, 한 분의 환자를 평생 보아온 종합 치과병원입니다. 임플란트·교정부터 자연치 보존·심미·턱관절까지 — 어떤 진료가 필요하시더라도 한 자리에서 일관된 진료를 받으실 수 있습니다.</p>';
+
+	$html .= '<h3>진료 영역</h3>';
+	$html .= '<ul>';
+	foreach ( $services as $svc ) {
+		$page = get_page_by_path( $svc['slug'] );
+		$url  = $page ? get_permalink( $page ) : home_url( '/' . rawurlencode( $svc['slug'] ) . '/' );
+		$html .= sprintf(
+			'<li>%s <strong><a href="%s">%s</a></strong> — %s</li>',
+			$svc['icon'],
+			esc_url( $url ),
+			esc_html( $svc['title'] ),
+			esc_html( $svc['desc'] )
+		);
+	}
+	$html .= '</ul>';
+
+	$html .= '<h3>층별 전문 센터</h3>';
+	$html .= '<ul>
+<li><strong>9F 종합진료센터</strong> — 일반진료·자연치아 살리기·심미 통합 진료</li>
+<li><strong>10F 임플란트센터</strong> — 단일·다수·전악 임플란트, 디지털 가이드 식립</li>
+<li><strong>11F 교정과 · 종합진료센터</strong> — 투명교정 전담, 사랑니 발치, 턱관절 클리닉</li>
+</ul>';
+
+	$html .= '<h3>저희가 가장 신경 쓰는 것</h3>';
+	$html .= '<ul>
+<li><strong>충분한 상담</strong> — 진료실에 들어가시기 전에 환자분의 상황을 먼저 듣습니다</li>
+<li><strong>가장 보존적인 치료부터</strong> — 발치보다 자연치 보존, 임플란트보다 자연치 살리기를 먼저 검토합니다</li>
+<li><strong>투명한 비용 안내</strong> — 시작 전에 옵션·기간·비용을 모두 안내드립니다</li>
+<li><strong>의료진 협진</strong> — 9명의 전문 의료진이 한 케이스를 다각도로 검토합니다</li>
+</ul>';
+
+	return $html;
+}
+
+
+/**
  * 오시는 길 (location) 페이지 기본 본문
  */
 function moondental_default_location_content() {

@@ -62,6 +62,18 @@ get_header();
 						case '오시는-길':
 							echo moondental_default_location_content();
 							break;
+						case 'facility':
+						case '기술력-시설':
+							echo moondental_default_facility_content();
+							break;
+						case 'cases':
+						case '임상-케이스':
+							echo moondental_default_cases_content();
+							break;
+						case 'services':
+						case '진료항목':
+							echo moondental_default_services_overview_content();
+							break;
 						default:
 							/* 진료항목 자식 페이지면 service content 시도 */
 							$svc_html = moondental_default_service_content( $slug );
