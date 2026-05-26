@@ -557,6 +557,15 @@ add_action( 'elementor/theme/register_locations', 'moondental_elementor_location
  * 슬러그가 WP에 URL-encoded 형태로 저장된 경우와 raw UTF-8 한글 모두 처리.
  */
 function moondental_template_router( $template ) {
+	// 소식 페이지가 page_for_posts(글 페이지)로 설정된 경우 → page-news.php
+	if ( is_home() && ! is_front_page() ) {
+		$pfp_id = (int) get_option( 'page_for_posts' );
+		$slug   = $pfp_id ? urldecode( (string) get_post_field( 'post_name', $pfp_id ) ) : '';
+		if ( in_array( $slug, array( '소식', 'news' ), true ) ) {
+			$custom = locate_template( 'page-templates/page-news.php' );
+			if ( $custom ) return $custom;
+		}
+	}
 	if ( ! is_page() ) return $template;
 
 	// 사용자가 명시적으로 템플릿을 지정했으면 그 결정을 존중
@@ -569,6 +578,7 @@ function moondental_template_router( $template ) {
 	$map = array(
 		'의료진'         => 'page-templates/page-doctors.php',
 		'오시는-길'       => 'page-templates/page-location.php',
+		'소식'           => 'page-templates/page-news.php',
 		'임플란트-센터'   => 'page-templates/page-service.php',
 		'투명교정-센터'   => 'page-templates/page-service.php',
 		'자연치아-살리기' => 'page-templates/page-service.php',
@@ -910,6 +920,95 @@ function moondental_doctor_photo_url( $filename ) {
 	}
 	return false;
 }
+
+/**
+ * 네이버 블로그 RSS 피드를 가져와 정리된 배열로 반환.
+ * 1시간 transient 캐싱 (네이버에 부담 X + 새 글 1시간 이내 반영).
+ *
+ * @param int  $limit     반환할 최대 개수 (기본 20)
+ * @param bool $no_cache  true면 캐시 무시하고 새로 fetch
+ * @return array[] [ ['title','link','date','category','thumb','excerpt','tags'] , … ]
+ */
+function moondental_fetch_naver_blog( $limit = 20, $no_cache = false ) {
+	$info    = moondental_get_info();
+	$blog_url = isset( $info['blog_url'] ) ? $info['blog_url'] : '';
+	if ( ! $blog_url ) return array();
+
+	// blog.naver.com/<id> → rss.blog.naver.com/<id>.xml 로 변환
+	if ( preg_match( '#blog\.naver\.com/([A-Za-z0-9_-]+)#', $blog_url, $m ) ) {
+		$rss_url = 'https://rss.blog.naver.com/' . $m[1] . '.xml';
+	} else {
+		return array();
+	}
+
+	$cache_key = 'moondental_naver_rss_' . md5( $rss_url );
+	if ( ! $no_cache ) {
+		$cached = get_transient( $cache_key );
+		if ( is_array( $cached ) ) return array_slice( $cached, 0, $limit );
+	}
+
+	$resp = wp_remote_get( $rss_url, array(
+		'timeout'    => 8,
+		'user-agent' => 'Mozilla/5.0 MoonDental/1.0',
+	) );
+	if ( is_wp_error( $resp ) || wp_remote_retrieve_response_code( $resp ) !== 200 ) {
+		return array();
+	}
+	$xml_text = wp_remote_retrieve_body( $resp );
+
+	// CDATA 살리며 파싱
+	libxml_use_internal_errors( true );
+	$xml = simplexml_load_string( $xml_text, 'SimpleXMLElement', LIBXML_NOCDATA );
+	libxml_clear_errors();
+	if ( ! $xml || ! isset( $xml->channel->item ) ) return array();
+
+	$items = array();
+	foreach ( $xml->channel->item as $it ) {
+		$desc_html = (string) $it->description;
+		// 첫 <img>를 썸네일로
+		$thumb = '';
+		if ( preg_match( '#<img[^>]+src=["\']([^"\']+)["\']#i', $desc_html, $im ) ) {
+			$thumb = $im[1];
+		}
+		// 본문에서 HTML 제거, 200자 요약
+		$plain = trim( html_entity_decode( wp_strip_all_tags( $desc_html ), ENT_QUOTES, 'UTF-8' ) );
+		$plain = preg_replace( '/\s+/u', ' ', $plain );
+		$excerpt = mb_strimwidth( $plain, 0, 160, '…', 'UTF-8' );
+
+		// 카테고리 "문치과병원[치아 이야기]" → "치아 이야기"
+		$cat_raw = (string) $it->category;
+		$category = '';
+		if ( preg_match( '#\[([^\]]+)\]#u', $cat_raw, $cm ) ) {
+			$category = trim( $cm[1] );
+		} elseif ( $cat_raw ) {
+			$category = trim( $cat_raw );
+		}
+
+		// 링크에서 RSS 추적 파라미터 제거
+		$link = (string) $it->link;
+		$link = preg_replace( '#[?&]fromRss=true[^&]*#', '', $link );
+		$link = preg_replace( '#[?&]trackingCode=rss#', '', $link );
+		$link = preg_replace( '#\?$#', '', $link );
+
+		// 태그 (콤마 구분 문자열 → 배열)
+		$tag_raw = (string) $it->tag;
+		$tags    = $tag_raw ? array_map( 'trim', explode( ',', $tag_raw ) ) : array();
+
+		$items[] = array(
+			'title'    => trim( (string) $it->title ),
+			'link'     => $link,
+			'date'     => strtotime( (string) $it->pubDate ),
+			'category' => $category,
+			'thumb'    => $thumb,
+			'excerpt'  => $excerpt,
+			'tags'     => array_slice( $tags, 0, 6 ),
+		);
+	}
+
+	set_transient( $cache_key, $items, HOUR_IN_SECONDS );
+	return array_slice( $items, 0, $limit );
+}
+
 
 /**
  * Flatten team for simple grid rendering.
