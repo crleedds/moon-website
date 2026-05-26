@@ -589,14 +589,37 @@ function moondental_default_services_overview_content() {
 function moondental_default_location_content() {
 	$info = moondental_get_info();
 	$map_embed = $info['map_embed'] ?? '';
+	$map_url   = ! empty( $info['naver_map_url'] ) ? $info['naver_map_url'] : ( $info['naver_place'] ?? '' );
+	$addr      = $info['address_road'] ?: $info['address'];
 
 	$html  = '<h2>천안 만남로 문타워 9~13층</h2>';
 	$html .= '<p class="lead">' . esc_html( $info['address'] ) . '<br>대표전화 <a href="tel:' . esc_attr( $info['phone_link'] ) . '">' . esc_html( $info['phone'] ) . '</a></p>';
 
 	if ( $map_embed ) {
+		// 관리자가 직접 임베드 코드를 넣은 경우 (Naver/Kakao API 키로 받은 iframe)
 		$html .= '<div class="md-map-embed">' . $map_embed . '</div>';
-	} else {
-		$html .= '<div class="md-map-embed md-map-embed--placeholder" style="aspect-ratio:16/9; background:var(--color-surface); border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center; color:var(--color-text-mute); margin:24px 0;">지도 임베드 영역 (관리자 → 사용자 정의하기 → SNS/외부 링크 → 지도 임베드 코드에서 설정)</div>';
+	} elseif ( $map_url ) {
+		// 클릭 가능한 지도 미리보기 카드 — 네이버 지도/플레이스로 새 탭 연결
+		$html .= sprintf(
+			'<a class="md-map-card" href="%1$s" target="_blank" rel="noopener" aria-label="네이버 지도에서 위치 보기">
+				<div class="md-map-card__pattern" aria-hidden="true"></div>
+				<div class="md-map-card__badge">NAVER MAP</div>
+				<div class="md-map-card__pin" aria-hidden="true">
+					<svg viewBox="0 0 32 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M16 0C7.16 0 0 7.16 0 16c0 12 16 28 16 28s16-16 16-28C32 7.16 24.84 0 16 0z" fill="currentColor"/>
+						<circle cx="16" cy="16" r="6" fill="#fff"/>
+					</svg>
+				</div>
+				<div class="md-map-card__info">
+					<h3 class="md-map-card__title">%2$s</h3>
+					<p class="md-map-card__addr">%3$s</p>
+					<span class="md-map-card__cta">네이버 지도에서 보기 <span aria-hidden="true">→</span></span>
+				</div>
+			</a>',
+			esc_url( $map_url ),
+			esc_html( $info['name_short'] ),
+			esc_html( $addr )
+		);
 	}
 
 	$html .= '

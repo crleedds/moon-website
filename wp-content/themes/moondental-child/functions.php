@@ -139,6 +139,7 @@ function moondental_get_info( $key = '' ) {
 		'blog_url'     => 'https://blog.naver.com/moondental1995',
 		'facebook_url' => 'https://www.facebook.com/moondentist',
 		'naver_place'  => 'https://booking.naver.com/booking/13/bizes/485314',
+		'naver_map_url'=> 'https://map.naver.com/p/search/%ED%95%9C%EC%95%84%EC%9D%98%EB%A3%8C%EC%9E%AC%EB%8B%A8%20%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90',
 		'map_embed'    => '',
 	);
 
@@ -231,6 +232,7 @@ function moondental_customize_register( $wp_customize ) {
 		// section_sns
 		array( 'key' => 'kakao_url',    'label' => '카카오톡 채널 URL',         'section' => 'moondental_section_sns' ),
 		array( 'key' => 'naver_place',  'label' => '네이버 예약 URL',          'section' => 'moondental_section_sns' ),
+		array( 'key' => 'naver_map_url','label' => '네이버 지도·플레이스 URL', 'section' => 'moondental_section_sns' ),
 		array( 'key' => 'instagram',    'label' => '인스타그램 URL',          'section' => 'moondental_section_sns' ),
 		array( 'key' => 'blog_url',     'label' => '네이버 블로그 URL',        'section' => 'moondental_section_sns' ),
 		array( 'key' => 'facebook_url', 'label' => '페이스북 URL',            'section' => 'moondental_section_sns' ),
