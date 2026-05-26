@@ -276,54 +276,54 @@ function moondental_get_history() {
 	return array(
 
 		/* ─── 2025 ─── */
-		array( 'year' => '2025', 'month' => '10', 'title' => 'OKTA 글로벌 스타트업 대회', 'desc' => '청년들의 글로벌 네트워크 확장을 위한 블루문드림 홍보 활동.', 'photo' => '' ),
-		array( 'year' => '2025', 'month' => '10', 'title' => '충청남도 희망나눔 걷기대회', 'desc' => '안립청소년 꿈 지원을 위해 30여 명에게 아이패드 지원.', 'photo' => '' ),
-		array( 'year' => '2025', 'month' => '08', 'title' => '몽골 의료봉사 (IN INEED BAYSAL DENTAL CLINIC)', 'desc' => '국제 의료봉사의 가치를 되살리는 현장의 시간. 2025.08.12 – 08.15.', 'photo' => '' ),
+		array( 'year' => '2025', 'month' => '10', 'title' => 'OKTA 글로벌 스타트업 대회', 'desc' => '청년들의 글로벌 네트워크 확장을 위한 블루문드림 홍보 활동.', 'photo' => 'history-slide-30.png' ),
+		array( 'year' => '2025', 'month' => '10', 'title' => '충청남도 희망나눔 걷기대회', 'desc' => '안립청소년 꿈 지원을 위해 30여 명에게 아이패드 지원.', 'photo' => 'history-slide-29.png' ),
+		array( 'year' => '2025', 'month' => '08', 'title' => '몽골 의료봉사 (IN INEED BAYSAL DENTAL CLINIC)', 'desc' => '국제 의료봉사의 가치를 되살리는 현장의 시간. 2025.08.12 – 08.15.', 'photo' => 'history-slide-28.png' ),
 
 		/* ─── 2024 ─── */
-		array( 'year' => '2024', 'month' => '09', 'title' => '실리콘밸리 직무체험단 미팅', 'desc' => '청년들의 글로벌 도전과 미래 디지털 리더 성장의 발판. 제2기 천안형 스타 디지털 인재육성 프로그램.', 'photo' => '' ),
+		array( 'year' => '2024', 'month' => '09', 'title' => '실리콘밸리 직무체험단 미팅', 'desc' => '청년들의 글로벌 도전과 미래 디지털 리더 성장의 발판. 제2기 천안형 스타 디지털 인재육성 프로그램.', 'photo' => 'history-slide-27.png' ),
 
 		/* ─── 2023 ─── */
-		array( 'year' => '2023', 'month' => '10', 'title' => '제21차 세계한인비즈니스대회', 'desc' => '미국 애너하임 컨벤션센터, 한인 경제인들과 네트워킹 및 교류 활동.', 'photo' => '' ),
-		array( 'year' => '2023', 'month' => '03', 'title' => '충남학 학술대회', 'desc' => '상명대학교 천안캠퍼스 충남학 주관, 충남 발전에 대한 따뜻한 응원과 통찰의 나눔 시간.', 'photo' => '' ),
+		array( 'year' => '2023', 'month' => '10', 'title' => '제21차 세계한인비즈니스대회', 'desc' => '미국 애너하임 컨벤션센터, 한인 경제인들과 네트워킹 및 교류 활동.', 'photo' => 'history-slide-26.png' ),
+		array( 'year' => '2023', 'month' => '03', 'title' => '충남학 학술대회', 'desc' => '상명대학교 천안캠퍼스 충남학 주관, 충남 발전에 대한 따뜻한 응원과 통찰의 나눔 시간.', 'photo' => 'history-slide-25.png' ),
 
 		/* ─── 2021 ─── */
-		array( 'year' => '2021', 'month' => '06', 'title' => '블루문드림과 한인상공회의소 MOU', 'desc' => '문치과병원이 지원하는 청년들을 위한 블루문드림과 한인상공회의소가 글로벌 기업 교류·협력 기반 확장.', 'photo' => '' ),
+		array( 'year' => '2021', 'month' => '06', 'title' => '블루문드림과 한인상공회의소 MOU', 'desc' => '문치과병원이 지원하는 청년들을 위한 블루문드림과 한인상공회의소가 글로벌 기업 교류·협력 기반 확장.', 'photo' => 'history-slide-24.png' ),
 
 		/* ─── 2020 ─── */
-		array( 'year' => '2020', 'month' => '03', 'title' => '(사)블루문드림 청년희망의 출발점', 'desc' => '시카고 국제로타리 이사회를 마친 귀국길, 오순 UN대사·한국글로벌포스 윤상현 이사장과 함께 블루문드림 결성.', 'photo' => '' ),
+		array( 'year' => '2020', 'month' => '03', 'title' => '(사)블루문드림 청년희망의 출발점', 'desc' => '시카고 국제로타리 이사회를 마친 귀국길, 오순 UN대사·한국글로벌포스 윤상현 이사장과 함께 블루문드림 결성.', 'photo' => 'history-slide-23.png' ),
 
 		/* ─── 2019 ─── */
-		array( 'year' => '2019', 'month' => '08', 'title' => 'KBS 아침마당 출연', 'desc' => '나눔의 추억을 시작하며 시민들과 소통한 시간.', 'photo' => '' ),
-		array( 'year' => '2019', 'month' => '05', 'title' => '중국 치과의사 3개월 연수', 'desc' => '정직 임플란트 기술 실습 및 교육 — 중국 치과의사 방문.', 'photo' => '' ),
+		array( 'year' => '2019', 'month' => '08', 'title' => 'KBS 아침마당 출연', 'desc' => '나눔의 추억을 시작하며 시민들과 소통한 시간.', 'photo' => 'history-slide-22.png' ),
+		array( 'year' => '2019', 'month' => '05', 'title' => '중국 치과의사 3개월 연수', 'desc' => '정직 임플란트 기술 실습 및 교육 — 중국 치과의사 방문.', 'photo' => 'history-slide-21.png' ),
 
 		/* ─── 2017 ─── */
-		array( 'year' => '2017', 'month' => '12', 'title' => 'TJB 열린토론 출연', 'desc' => '기부문화·나눔문화 활성화를 위한 열린토론 패널 참여.', 'photo' => '' ),
+		array( 'year' => '2017', 'month' => '12', 'title' => 'TJB 열린토론 출연', 'desc' => '기부문화·나눔문화 활성화를 위한 열린토론 패널 참여.', 'photo' => 'history-slide-20.png' ),
 
 		/* ─── 2016 ─── */
-		array( 'year' => '2016', 'month' => '02', 'title' => '몽골 의료봉사활동', 'desc' => '치과 임플란트 정직기술 전수.', 'photo' => '' ),
+		array( 'year' => '2016', 'month' => '02', 'title' => '몽골 의료봉사활동', 'desc' => '치과 임플란트 정직기술 전수.', 'photo' => 'history-slide-19.png' ),
 
 		/* ─── 2015 ─── */
-		array( 'year' => '2015', 'month' => '05', 'title' => '몽골 대통령 우호 훈장 수상', 'desc' => '30여 년간 몽골 의료봉사 공헌으로 몽골 "나이르달 메달" 훈장 수상. 2015년 5월 4일 대통령령 제63호 명령.', 'photo' => '' ),
-		array( 'year' => '2015', 'month' => '05', 'title' => '몽골 의료봉사활동', 'desc' => '오지마을 어린이 구강진료 및 치료.', 'photo' => '' ),
+		array( 'year' => '2015', 'month' => '05', 'title' => '몽골 대통령 우호 훈장 수상', 'desc' => '30여 년간 몽골 의료봉사 공헌으로 몽골 "나이르달 메달" 훈장 수상. 2015년 5월 4일 대통령령 제63호 명령.', 'photo' => 'history-slide-18.png' ),
+		array( 'year' => '2015', 'month' => '05', 'title' => '몽골 의료봉사활동', 'desc' => '오지마을 어린이 구강진료 및 치료.', 'photo' => 'history-slide-17.png' ),
 
 		/* ─── 2014 ─── */
-		array( 'year' => '2014', 'month' => '10', 'title' => 'T-broad 방송 〈힐링코치〉', 'desc' => '임플란트에 대한 정확한 이해와 전달을 돕는 치과 멘토 역할.', 'photo' => '' ),
-		array( 'year' => '2014', 'month' => '07', 'title' => '대전 MBC 의료포커스 〈닥터인〉 자문병원 선정', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2014', 'month' => '04', 'title' => '필리핀 치과의사 연수', 'desc' => '국제로타리 지원연수회 방문 및 임플란트 연수 진행.', 'photo' => '' ),
+		array( 'year' => '2014', 'month' => '10', 'title' => 'T-broad 방송 〈힐링코치〉', 'desc' => '임플란트에 대한 정확한 이해와 전달을 돕는 치과 멘토 역할.', 'photo' => 'history-slide-16.png' ),
+		array( 'year' => '2014', 'month' => '07', 'title' => '대전 MBC 의료포커스 〈닥터인〉 자문병원 선정', 'desc' => '', 'photo' => 'history-slide-15.png' ),
+		array( 'year' => '2014', 'month' => '04', 'title' => '필리핀 치과의사 연수', 'desc' => '국제로타리 지원연수회 방문 및 임플란트 연수 진행.', 'photo' => 'history-slide-14.png' ),
 
 		/* ─── 2013 ─── */
 		array( 'year' => '2013', 'month' => '11', 'title' => '대한병원장 법무부담임자협회 대통령상 수상', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2013', 'month' => '10', 'title' => 'T-broad 방송 〈힐링코치〉', 'desc' => '치아 관련 환자 정보를 알기 쉽게 전달하는 구강코치 역할.', 'photo' => '' ),
+		array( 'year' => '2013', 'month' => '10', 'title' => 'T-broad 방송 〈힐링코치〉', 'desc' => '치아 관련 환자 정보를 알기 쉽게 전달하는 구강코치 역할.', 'photo' => 'history-slide-13.png' ),
 		array( 'year' => '2013', 'month' => '06', 'title' => '기공실 CAD-CAM 장비 도입', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2013', 'month' => '03', 'title' => '충청남도 사회복지함정사 협약 체결', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2013', 'month' => '02', 'title' => '치과의사 보수교육 기관 지정', 'desc' => '몽골·중국 해외연수 의료원.', 'photo' => '' ),
 
 		/* ─── 2012 ─── */
-		array( 'year' => '2012', 'month' => '11', 'title' => '일본 고바타 치과병원 자매결연', 'desc' => '한아의료재단 문치과병원과 일본 의료법인 소반치과의원 MOU 체결 (2012.10.27).', 'photo' => '' ),
+		array( 'year' => '2012', 'month' => '11', 'title' => '일본 고바타 치과병원 자매결연', 'desc' => '한아의료재단 문치과병원과 일본 의료법인 소반치과의원 MOU 체결 (2012.10.27).', 'photo' => 'history-slide-12.png' ),
 		array( 'year' => '2012', 'month' => '09', 'title' => '새사랑 어린이집 정직 건강증진 협약체결', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2012', 'month' => '07', 'title' => '한국로타리 천안서지부 자매결연', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2012', 'month' => '06', 'title' => '예방치과 개설', 'desc' => '문치과병원과 단국대학교가 공동 개발한 환자 구강관리 시스템.', 'photo' => '' ),
+		array( 'year' => '2012', 'month' => '06', 'title' => '예방치과 개설', 'desc' => '문치과병원과 단국대학교가 공동 개발한 환자 구강관리 시스템.', 'photo' => 'history-slide-11.png' ),
 		array( 'year' => '2012', 'month' => '05', 'title' => '충청대학교·선문대학교 산학협력 협약', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2011 ─── */
@@ -360,7 +360,7 @@ function moondental_get_history() {
 		/* ─── 2006 ─── */
 		array( 'year' => '2006', 'month' => '05', 'title' => '남서울대 자매결연 체결', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2006', 'month' => '04', 'title' => '서울 삼성서울병원 협진병원 지정', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2006', 'month' => '01', 'title' => '치과의사 전공의 인턴 수련기관 지정 (보건복지부)', 'desc' => '치과의사 전공의 및 인턴 수련기관 인증.', 'photo' => '' ),
+		array( 'year' => '2006', 'month' => '01', 'title' => '치과의사 전공의 인턴 수련기관 지정 (보건복지부)', 'desc' => '치과의사 전공의 및 인턴 수련기관 인증.', 'photo' => 'history-slide-10.png' ),
 
 		/* ─── 2005 ─── */
 		array( 'year' => '2005', 'month' => '11', 'title' => '갤러리아 백화점 천안점과 전략적 제휴 체결', 'desc' => '〈한방의 통〉 갤러리아 백화점 천안점 전략 제휴.', 'photo' => '' ),
@@ -368,7 +368,7 @@ function moondental_get_history() {
 		array( 'year' => '2005', 'month' => '04', 'title' => '단원 보건대학 산학협력 체결', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2004 ─── */
-		array( 'year' => '2004', 'month' => '11', 'title' => '의료법인 한아의료재단 문치과병원 본원 신축사옥 준공·이전', 'desc' => '신부동 문타워 5개 층, UNIT CHAIR 42대 규모.', 'photo' => '' ),
+		array( 'year' => '2004', 'month' => '11', 'title' => '의료법인 한아의료재단 문치과병원 본원 신축사옥 준공·이전', 'desc' => '신부동 문타워 5개 층, UNIT CHAIR 42대 규모.', 'photo' => 'history-slide-09.png' ),
 		array( 'year' => '2004', 'month' => '09', 'title' => '연암대 비서학과 산학협력 체결', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2004', 'month' => '08', 'title' => '한양대학교 치위생과 산학협력 체결', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2004', 'month' => '04', 'title' => '중국 연길 의사 치과의사 2차 연수교육 (1명)', 'desc' => '', 'photo' => '' ),
@@ -385,21 +385,21 @@ function moondental_get_history() {
 		array( 'year' => '2001', 'month' => '10', 'title' => '문치과 병원으로 승급', 'desc' => 'UNIT CHAIR 9대 의사 6명, 직원 33명.', 'photo' => '' ),
 
 		/* ─── 2000 ─── */
-		array( 'year' => '2000', 'month' => '08', 'title' => '단국대학교 몽골 의료봉사 체어 기증', 'desc' => '몽골 의료봉사 기반 마련을 위한 진료체어 기증. Dental Service in Mongolia / Dental College of Dankook University.', 'photo' => '' ),
-		array( 'year' => '2000', 'month' => '07', 'title' => '연길 둔문 구강병원·정공치과 병원 자매결연', 'desc' => '무료 진료 및 무료 임플란트 시술.', 'photo' => '' ),
-		array( 'year' => '2000', 'month' => '03', 'title' => '제2기 한아임플란트·보철연구소 수료식', 'desc' => '전문 임상 역량 토대를 구축한 연구과정.', 'photo' => '' ),
-		array( 'year' => '2000', 'month' => '02', 'title' => '임플란트 심포지엄 개최 및 제2기 연수회', 'desc' => 'John Beumer, Thomas J. Han 교수 초청 · 800명 참석. Intercontinental Hotel Grand Ballroom.', 'photo' => '' ),
+		array( 'year' => '2000', 'month' => '08', 'title' => '단국대학교 몽골 의료봉사 체어 기증', 'desc' => '몽골 의료봉사 기반 마련을 위한 진료체어 기증. Dental Service in Mongolia / Dental College of Dankook University.', 'photo' => 'history-slide-07.png' ),
+		array( 'year' => '2000', 'month' => '07', 'title' => '연길 둔문 구강병원·정공치과 병원 자매결연', 'desc' => '무료 진료 및 무료 임플란트 시술.', 'photo' => 'history-slide-08.png' ),
+		array( 'year' => '2000', 'month' => '03', 'title' => '제2기 한아임플란트·보철연구소 수료식', 'desc' => '전문 임상 역량 토대를 구축한 연구과정.', 'photo' => 'history-slide-06.png' ),
+		array( 'year' => '2000', 'month' => '02', 'title' => '임플란트 심포지엄 개최 및 제2기 연수회', 'desc' => 'John Beumer, Thomas J. Han 교수 초청 · 800명 참석. Intercontinental Hotel Grand Ballroom.', 'photo' => 'history-slide-05.png' ),
 
 		/* ─── 1999 ─── */
 		array( 'year' => '1999', 'month' => '10', 'title' => '제2기 한아임플란트·보철연구소 연수생 15명', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '1999', 'month' => '08', 'title' => 'NEW MILLENIUM 심포지엄 개최', 'desc' => '고려인사 기념관, 600명 참석.', 'photo' => '' ),
-		array( 'year' => '1999', 'month' => '08', 'title' => '미국 LA, WPDI 자매결연', 'desc' => '대표 THOMAS J. HAN. Thomas J. Han 교수 참석.', 'photo' => '' ),
+		array( 'year' => '1999', 'month' => '08', 'title' => '미국 LA, WPDI 자매결연', 'desc' => '대표 THOMAS J. HAN. Thomas J. Han 교수 참석.', 'photo' => 'history-slide-04.png' ),
 		array( 'year' => '1999', 'month' => '02', 'title' => '임플란트 임상 세미나 개최 및 제1기 연수생 수료식', 'desc' => '대전과 서울에서 진행.', 'photo' => '' ),
 
 		/* ─── 1998 ─── */
-		array( 'year' => '1998', 'month' => '04', 'title' => '한아 임플란트 보철 연구소 설립', 'desc' => '연구소 설립 및 임플란트 임상 세미나 개최 (300명 참석). 제1기 사미·보철 연수 16명, 임플란트 보철 연수 16명.', 'photo' => '' ),
+		array( 'year' => '1998', 'month' => '04', 'title' => '한아 임플란트 보철 연구소 설립', 'desc' => '연구소 설립 및 임플란트 임상 세미나 개최 (300명 참석). 제1기 사미·보철 연수 16명, 임플란트 보철 연수 16명.', 'photo' => 'history-slide-03.png' ),
 		array( 'year' => '1998', 'month' => '04', 'title' => '성정 정신 병원 무료 진료 시작', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '1998', 'month' => '01', 'title' => '문은수 치과의원 확장', 'desc' => 'UNIT CHAIR 9대, 의사 3명, 직원 10명.', 'photo' => '' ),
+		array( 'year' => '1998', 'month' => '01', 'title' => '문은수 치과의원 확장', 'desc' => 'UNIT CHAIR 9대, 의사 3명, 직원 10명.', 'photo' => 'history-slide-02.png' ),
 
 		/* ─── 1997 ─── */
 		array( 'year' => '1997', 'month' => '11', 'title' => '천안 개방 교도소 무료 진료 시작', 'desc' => '', 'photo' => '' ),
@@ -408,7 +408,7 @@ function moondental_get_history() {
 		array( 'year' => '1996', 'month' => '01', 'title' => '스웨덴 NOBEL BIOCARE 자매결연', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 1995 ─── */
-		array( 'year' => '1995', 'month' => '04', 'title' => '문은수 치과의원 개원', 'desc' => '신부동 461-5 정진빌딩 3F, 의사 1명, 직원 4명.', 'photo' => '' ),
+		array( 'year' => '1995', 'month' => '04', 'title' => '문은수 치과의원 개원', 'desc' => '신부동 461-5 정진빌딩 3F, 의사 1명, 직원 4명.', 'photo' => 'history-slide-01.png' ),
 	);
 }
 
