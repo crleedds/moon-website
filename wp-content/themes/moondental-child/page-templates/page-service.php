@@ -46,7 +46,12 @@ foreach ( $services as $svc ) {
 			<?php
 			while ( have_posts() ) :
 				the_post();
-				the_content();
+				$body = trim( get_the_content() );
+				if ( $body ) {
+					the_content();
+				} else {
+					echo moondental_default_service_content( $slug ); // 안전한 정적 HTML
+				}
 			endwhile;
 			?>
 		</article>

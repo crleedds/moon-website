@@ -13,9 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '1.1.0' );
+define( 'MOONDENTAL_VERSION', '1.2.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
+
+require_once MOONDENTAL_DIR . '/inc/content-defaults.php';
 
 
 /* ============================================================
@@ -308,6 +310,158 @@ add_action( 'customize_register', 'moondental_customize_register' );
 
 
 /* ============================================================
+ * 4b. 기본 페이지 자동 생성 도구 (관리자)
+ * ========================================================== */
+
+/**
+ * 사이트 운영에 필요한 페이지 정의. 슬러그·제목·템플릿·정렬을 한 곳에서 관리.
+ */
+function moondental_default_pages() {
+	return array(
+		array( 'slug' => 'home',      'title' => '홈',       'template' => '',                          'order' => 0,  'parent' => '' ),
+		array( 'slug' => 'about',     'title' => '병원소개',  'template' => '',                          'order' => 1,  'parent' => '' ),
+		array( 'slug' => 'doctors',   'title' => '의료진',    'template' => 'page-templates/page-doctors.php',  'order' => 2,  'parent' => '' ),
+		array( 'slug' => 'services',  'title' => '진료안내',  'template' => '',                          'order' => 3,  'parent' => '' ),
+		array( 'slug' => 'general',   'title' => '일반진료',  'template' => 'page-templates/page-service.php',  'order' => 1,  'parent' => 'services' ),
+		array( 'slug' => 'implant',   'title' => '임플란트',  'template' => 'page-templates/page-service.php',  'order' => 2,  'parent' => 'services' ),
+		array( 'slug' => 'ortho',     'title' => '교정',     'template' => 'page-templates/page-service.php',  'order' => 3,  'parent' => 'services' ),
+		array( 'slug' => 'aesthetic', 'title' => '심미치료',  'template' => 'page-templates/page-service.php',  'order' => 4,  'parent' => 'services' ),
+		array( 'slug' => 'pediatric', 'title' => '소아·예방','template' => 'page-templates/page-service.php',  'order' => 5,  'parent' => 'services' ),
+		array( 'slug' => 'location',  'title' => '오시는 길','template' => 'page-templates/page-location.php', 'order' => 4,  'parent' => '' ),
+		array( 'slug' => 'notices',   'title' => '공지사항',  'template' => '',                          'order' => 5,  'parent' => '' ),
+	);
+}
+
+/**
+ * 페이지 일괄 생성. 이미 있는 슬러그는 건드리지 않음.
+ * Admin Toolbar에서 "기본 페이지 만들기" 누르면 실행.
+ */
+function moondental_create_default_pages() {
+	if ( ! current_user_can( 'manage_options' ) ) return new WP_Error( 'forbidden', '권한이 없습니다.' );
+
+	$created = array();
+	$pages   = moondental_default_pages();
+
+	// 1차: parent 없는 페이지 먼저
+	foreach ( $pages as $page ) {
+		if ( $page['parent'] ) continue;
+		if ( get_page_by_path( $page['slug'] ) ) continue;
+		$id = wp_insert_post( array(
+			'post_title'    => $page['title'],
+			'post_name'     => $page['slug'],
+			'post_status'   => 'publish',
+			'post_type'     => 'page',
+			'post_content'  => '',
+			'menu_order'    => $page['order'],
+			'page_template' => $page['template'] ?: 'default',
+		) );
+		if ( $id && ! is_wp_error( $id ) ) {
+			$created[] = $page['slug'];
+		}
+	}
+
+	// 2차: parent 있는 페이지
+	foreach ( $pages as $page ) {
+		if ( ! $page['parent'] ) continue;
+		if ( get_page_by_path( $page['parent'] . '/' . $page['slug'] ) ) continue;
+		if ( get_page_by_path( $page['slug'] ) ) continue;
+		$parent_obj = get_page_by_path( $page['parent'] );
+		$id = wp_insert_post( array(
+			'post_title'    => $page['title'],
+			'post_name'     => $page['slug'],
+			'post_status'   => 'publish',
+			'post_type'     => 'page',
+			'post_content'  => '',
+			'post_parent'   => $parent_obj ? $parent_obj->ID : 0,
+			'menu_order'    => $page['order'],
+			'page_template' => $page['template'] ?: 'default',
+		) );
+		if ( $id && ! is_wp_error( $id ) ) {
+			$created[] = $page['slug'];
+		}
+	}
+
+	// "홈" 페이지를 정적 홈으로 설정 + 공지사항 페이지를 글 페이지로 설정
+	$home    = get_page_by_path( 'home' );
+	$notices = get_page_by_path( 'notices' );
+	if ( $home ) {
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $home->ID );
+	}
+	if ( $notices ) {
+		update_option( 'page_for_posts', $notices->ID );
+	}
+
+	return $created;
+}
+
+/**
+ * 관리자 페이지에 "기본 페이지 만들기" 액션 등록.
+ * URL: /wp-admin/admin.php?page=moondental-tools
+ */
+function moondental_admin_menu() {
+	add_theme_page(
+		'문치과 사이트 도구',
+		'문치과 사이트 도구',
+		'manage_options',
+		'moondental-tools',
+		'moondental_admin_tools_page'
+	);
+}
+add_action( 'admin_menu', 'moondental_admin_menu' );
+
+function moondental_admin_tools_page() {
+	$ran = false; $created = array();
+	if ( isset( $_POST['moondental_seed_pages'] ) && check_admin_referer( 'moondental_seed' ) ) {
+		$created = moondental_create_default_pages();
+		$ran     = true;
+	}
+	?>
+	<div class="wrap">
+		<h1>문치과 사이트 도구</h1>
+
+		<?php if ( $ran ) : ?>
+			<div class="notice notice-success"><p>
+				<?php if ( empty( $created ) || is_wp_error( $created ) ) : ?>
+					이미 모든 기본 페이지가 존재합니다.
+				<?php else : ?>
+					다음 페이지를 새로 만들었습니다: <strong><?php echo esc_html( implode( ', ', $created ) ); ?></strong>
+				<?php endif; ?>
+			</p></div>
+		<?php endif; ?>
+
+		<div class="card" style="max-width:720px; padding:24px;">
+			<h2>기본 페이지 일괄 생성</h2>
+			<p>홈 · 병원소개 · 의료진 · 진료안내(5개 하위) · 오시는 길 · 공지사항 페이지를 한 번에 만듭니다.
+			   각 페이지는 적절한 템플릿이 자동 할당되며, 본문은 비어 있을 때 테마에 정의된 기본 콘텐츠가 자동으로 출력됩니다.
+			   <strong>이미 있는 페이지는 건드리지 않습니다.</strong></p>
+			<form method="post">
+				<?php wp_nonce_field( 'moondental_seed' ); ?>
+				<p>
+					<button type="submit" name="moondental_seed_pages" class="button button-primary button-large">기본 페이지 만들기</button>
+				</p>
+			</form>
+		</div>
+
+		<div class="card" style="max-width:720px; padding:24px; margin-top:16px;">
+			<h2>의료진 사진 업로드 위치</h2>
+			<p>의료진 사진은 워드프레스 미디어가 아니라 테마 폴더에 직접 저장합니다:</p>
+			<p><code style="display:block; padding:12px; background:#f0f0f0;"><?php echo esc_html( str_replace( ABSPATH, '', MOONDENTAL_DIR ) ); ?>/assets/images/doctors/</code></p>
+			<p>이 폴더에 <code>doctor-01.jpg ~ doctor-09.jpg</code> 9장을 저장하면 의료진 그리드에 자동 표시됩니다.
+			   파일명·매칭 규칙은 같은 폴더의 <code>README.md</code> 참고.</p>
+		</div>
+
+		<div class="card" style="max-width:720px; padding:24px; margin-top:16px;">
+			<h2>병원 정보 / 콘텐츠 편집</h2>
+			<p><a href="<?php echo esc_url( admin_url( 'customize.php' ) ); ?>" class="button">사용자 정의하기 열기</a> →
+			   "문치과병원 설정" 패널에서 전화·주소·진료시간·SNS·홈 메인 카피·원장 약력 등 모두 편집 가능합니다.</p>
+		</div>
+	</div>
+	<?php
+}
+
+
+/* ============================================================
  * 5. 사이트 최적화 / 보안 / UX
  * ========================================================== */
 
@@ -507,33 +661,57 @@ function moondental_get_services() {
  * @return array[] role 그룹별 [ 'group' => label, 'members' => [name, …] ]
  */
 function moondental_get_team() {
+	/*
+	 * 사진 파일은 wp-content/themes/moondental-child/assets/images/doctors/
+	 * 폴더에 doctor-01.jpg ~ doctor-09.jpg 로 저장하면 자동 인식.
+	 *
+	 * 이름·전공·약력은 사용자 확인 후 수정 필요한 부분에는 '?' 표시.
+	 * 정확한 정보를 알게 되면 이 배열에서 한 줄씩 교체.
+	 */
 	return array(
 		array(
-			'group'   => '이사장 · 대표원장',
+			'group'   => '이사장',
 			'members' => array(
-				array( 'name' => '문은수', 'role' => '이사장', 'specialty' => '구강악안면외과', 'bio' => '한아의료재단 이사장. 지역사회 무료진료·장학사업 등 활동.' ),
+				array(
+					'name'      => '문은수',
+					'role'      => '이사장 · 대표원장',
+					'photo'     => 'doctor-04.jpg',
+					'specialty' => '구강악안면외과',
+					'bio'       => '한아의료재단 이사장 · 1995년 문치과병원 개원. KBS1 대전 아침마당 출연. 대한적십자사 고액기부자, 지산장학회 장학금 기부 등 지역사회 봉사 활동.',
+				),
 			),
 		),
 		array(
 			'group'   => '진료원장',
 			'members' => array(
-				array( 'name' => '이상민', 'role' => '진료원장', 'specialty' => '' ),
-				array( 'name' => '정석형', 'role' => '진료원장', 'specialty' => '' ),
-				array( 'name' => '이승주', 'role' => '진료원장', 'specialty' => '' ),
-				array( 'name' => '김민경', 'role' => '진료원장', 'specialty' => '' ),
-				array( 'name' => '김세일', 'role' => '진료원장', 'specialty' => '' ),
-				array( 'name' => '이종팔', 'role' => '진료원장', 'specialty' => '' ),
-				array( 'name' => '정상필', 'role' => '진료원장', 'specialty' => '' ),
+				array( 'name' => '이창돈',     'role' => '진료원장', 'photo' => 'doctor-01.jpg', 'specialty' => 'D.D.S., M.S.', 'bio' => '' ),
+				array( 'name' => '원장 (2)',   'role' => '진료원장', 'photo' => 'doctor-02.jpg', 'specialty' => '',             'bio' => '' ),
+				array( 'name' => '김새일',     'role' => '진료원장', 'photo' => 'doctor-03.jpg', 'specialty' => 'D.D.S.',       'bio' => '' ),
+				array( 'name' => '원장 (5)',   'role' => '진료원장', 'photo' => 'doctor-05.jpg', 'specialty' => '',             'bio' => '' ),
+				array( 'name' => '박수민',     'role' => '진료원장', 'photo' => 'doctor-08.jpg', 'specialty' => 'D.D.S., MSCD', 'bio' => '' ),
 			),
 		),
 		array(
 			'group'   => '임상교수',
 			'members' => array(
-				array( 'name' => '홍기석', 'role' => '임상교수', 'specialty' => '' ),
-				array( 'name' => '신승철', 'role' => '임상교수', 'specialty' => '' ),
+				array( 'name' => '임상교수 (6)', 'role' => '임상교수', 'photo' => 'doctor-06.jpg', 'specialty' => '', 'bio' => '' ),
+				array( 'name' => '임상교수 (7)', 'role' => '임상교수', 'photo' => 'doctor-07.jpg', 'specialty' => '', 'bio' => '' ),
+				array( 'name' => '임상교수 (9)', 'role' => '임상교수', 'photo' => 'doctor-09.jpg', 'specialty' => '', 'bio' => '' ),
 			),
 		),
 	);
+}
+
+/**
+ * 의료진 사진 파일 URL을 반환. 파일이 없으면 false.
+ */
+function moondental_doctor_photo_url( $filename ) {
+	if ( ! $filename ) return false;
+	$path = MOONDENTAL_DIR . '/assets/images/doctors/' . $filename;
+	if ( file_exists( $path ) ) {
+		return MOONDENTAL_URI . '/assets/images/doctors/' . $filename;
+	}
+	return false;
 }
 
 /**

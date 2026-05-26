@@ -38,7 +38,29 @@ get_header();
 			<?php
 			while ( have_posts() ) :
 				the_post();
-				the_content();
+				$body = trim( get_the_content() );
+				if ( $body ) {
+					the_content();
+				} else {
+					/* 슬러그별 자동 기본 콘텐츠 — 본문이 비어 있을 때만 */
+					$slug = get_post_field( 'post_name', get_queried_object_id() );
+					switch ( $slug ) {
+						case 'about':
+						case 'hospital':
+							echo moondental_default_about_content();
+							break;
+						case 'doctors':
+						case 'team':
+							echo moondental_default_doctors_content();
+							break;
+						case 'location':
+						case 'directions':
+							echo moondental_default_location_content();
+							break;
+						default:
+							echo '<p style="color:var(--color-text-sub);">콘텐츠 준비 중입니다.</p>';
+					}
+				}
 			endwhile;
 			?>
 		</article>
