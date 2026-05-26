@@ -280,9 +280,9 @@ function moondental_customize_register( $wp_customize ) {
 
 	/* ── Home Doctor section content ───────────────────────────── */
 	$doctor_fields = array(
-		'doctor_role' => array( 'label' => '직책',                 'type' => 'text',     'default' => '이사장 · 한아의료재단' ),
+		'doctor_role' => array( 'label' => '직책',                 'type' => 'text',     'default' => '대표 병원장 · 한아의료재단 이사장' ),
 		'doctor_lead' => array( 'label' => '한 줄 진료 철학',         'type' => 'textarea', 'default' => '1995년부터 천안에서, 한 분의 환자를 가족처럼 오래 보아왔습니다. 진료실 밖에서도 지역사회와 함께 가는 치과를 꿈꿉니다.' ),
-		'doctor_bio'  => array( 'label' => '약력 (줄바꿈으로 구분)', 'type' => 'textarea', 'default' => "한아의료재단 이사장\n구강악안면외과 전문\nKBS1 대전 아침마당 출연 (치과 건강 코너)\n대한적십자사 고액기부자 · 무료진료 활동\n지산장학회 장학금 기부" ),
+		'doctor_bio'  => array( 'label' => '약력 (줄바꿈으로 구분)', 'type' => 'textarea', 'default' => "한아임플란트 보철연구소장\n단국대학교 치과대학 총동창회 학술이사\n대한 구강악안면 임플란트 학회 이사\n충남 치과의사회 학술이사\n단국치대 겸임교수\n이화여대 의과대학 외래교수" ),
 	);
 	foreach ( $doctor_fields as $key => $f ) {
 		$id = 'moondental_' . $key;
@@ -317,18 +317,22 @@ add_action( 'customize_register', 'moondental_customize_register' );
  * 사이트 운영에 필요한 페이지 정의. 슬러그·제목·템플릿·정렬을 한 곳에서 관리.
  */
 function moondental_default_pages() {
+	// 슬러그는 사용자가 만든 한글 슬러그와 일치 — 이미 있는 페이지는 건드리지 않음.
 	return array(
-		array( 'slug' => 'home',      'title' => '홈',       'template' => '',                          'order' => 0,  'parent' => '' ),
-		array( 'slug' => 'about',     'title' => '병원소개',  'template' => '',                          'order' => 1,  'parent' => '' ),
-		array( 'slug' => 'doctors',   'title' => '의료진',    'template' => 'page-templates/page-doctors.php',  'order' => 2,  'parent' => '' ),
-		array( 'slug' => 'services',  'title' => '진료안내',  'template' => '',                          'order' => 3,  'parent' => '' ),
-		array( 'slug' => 'general',   'title' => '일반진료',  'template' => 'page-templates/page-service.php',  'order' => 1,  'parent' => 'services' ),
-		array( 'slug' => 'implant',   'title' => '임플란트',  'template' => 'page-templates/page-service.php',  'order' => 2,  'parent' => 'services' ),
-		array( 'slug' => 'ortho',     'title' => '교정',     'template' => 'page-templates/page-service.php',  'order' => 3,  'parent' => 'services' ),
-		array( 'slug' => 'aesthetic', 'title' => '심미치료',  'template' => 'page-templates/page-service.php',  'order' => 4,  'parent' => 'services' ),
-		array( 'slug' => 'pediatric', 'title' => '소아·예방','template' => 'page-templates/page-service.php',  'order' => 5,  'parent' => 'services' ),
-		array( 'slug' => 'location',  'title' => '오시는 길','template' => 'page-templates/page-location.php', 'order' => 4,  'parent' => '' ),
-		array( 'slug' => 'notices',   'title' => '공지사항',  'template' => '',                          'order' => 5,  'parent' => '' ),
+		array( 'slug' => '홈',              'title' => '홈',           'template' => '',                                 'order' => 0,  'parent' => '' ),
+		array( 'slug' => '병원소개',         'title' => '병원소개',      'template' => '',                                 'order' => 1,  'parent' => '' ),
+		array( 'slug' => '의료진',           'title' => '의료진',        'template' => 'page-templates/page-doctors.php',  'order' => 1,  'parent' => '병원소개' ),
+		array( 'slug' => '기술력-시설',       'title' => '기술력/시설',   'template' => 'page-templates/page-wide.php',     'order' => 2,  'parent' => '병원소개' ),
+		array( 'slug' => '임상-케이스',       'title' => '임상 케이스',    'template' => 'page-templates/page-wide.php',     'order' => 3,  'parent' => '병원소개' ),
+		array( 'slug' => '진료항목',         'title' => '진료항목',      'template' => '',                                 'order' => 2,  'parent' => '' ),
+		array( 'slug' => '임플란트-센터',     'title' => '임플란트 센터',  'template' => 'page-templates/page-service.php',  'order' => 1,  'parent' => '진료항목' ),
+		array( 'slug' => '투명교정-센터',     'title' => '투명교정 센터',  'template' => 'page-templates/page-service.php',  'order' => 2,  'parent' => '진료항목' ),
+		array( 'slug' => '자연치아-살리기',   'title' => '자연치아 살리기','template' => 'page-templates/page-service.php',  'order' => 3,  'parent' => '진료항목' ),
+		array( 'slug' => '턱관절-클리닉',     'title' => '턱관절 클리닉',  'template' => 'page-templates/page-service.php',  'order' => 4,  'parent' => '진료항목' ),
+		array( 'slug' => '사랑니-발치',       'title' => '사랑니 발치',   'template' => 'page-templates/page-service.php',  'order' => 5,  'parent' => '진료항목' ),
+		array( 'slug' => '심미치료',         'title' => '심미치료',      'template' => 'page-templates/page-service.php',  'order' => 6,  'parent' => '진료항목' ),
+		array( 'slug' => '소식',             'title' => '소식',         'template' => '',                                 'order' => 3,  'parent' => '' ),
+		array( 'slug' => '오시는-길',         'title' => '오시는 길',     'template' => 'page-templates/page-location.php', 'order' => 4,  'parent' => '' ),
 	);
 }
 
@@ -381,9 +385,9 @@ function moondental_create_default_pages() {
 		}
 	}
 
-	// "홈" 페이지를 정적 홈으로 설정 + 공지사항 페이지를 글 페이지로 설정
-	$home    = get_page_by_path( 'home' );
-	$notices = get_page_by_path( 'notices' );
+	// 정적 홈 + 글 페이지 자동 설정 (해당 슬러그 페이지가 있을 때만)
+	$home    = get_page_by_path( '홈' );
+	$notices = get_page_by_path( '소식' );
 	if ( $home ) {
 		update_option( 'show_on_front', 'page' );
 		update_option( 'page_on_front', $home->ID );
@@ -617,36 +621,44 @@ function moondental_footer_menu_fallback() {
  * slug → 페이지를 만들고 같은 slug로 두면 자동 링크 연결.
  */
 function moondental_get_services() {
+	// 슬러그는 사용자가 만든 실제 페이지의 한글 슬러그(URL의 한글 부분)와 일치.
+	// 페이지가 없으면 service grid 카드 클릭 시 fallback URL로 이동.
 	return array(
 		array(
-			'slug'  => 'general',
-			'title' => '일반진료',
+			'slug'  => '임플란트-센터',
+			'title' => '임플란트 센터',
 			'icon'  => '🦷',
-			'desc'  => '충치·잇몸·신경치료 등 기본 진료. 정확한 진단과 통증 최소화를 우선합니다.',
+			'desc'  => '10F 임플란트센터 — 단일·다수·전악 임플란트까지, 디지털 가이드와 보철 전문의 협진.',
 		),
 		array(
-			'slug'  => 'implant',
-			'title' => '임플란트',
-			'icon'  => '🪛',
-			'desc'  => '풍부한 임상 경험으로 단일·다수·전악 임플란트까지 안정적으로 식립합니다.',
-		),
-		array(
-			'slug'  => 'ortho',
-			'title' => '교정',
-			'icon'  => '〰',
-			'desc'  => '투명교정·설측·소아교정 — 라이프스타일과 연령에 맞춘 교정 계획을 제시합니다.',
-		),
-		array(
-			'slug'  => 'aesthetic',
-			'title' => '심미치료',
+			'slug'  => '투명교정-센터',
+			'title' => '투명교정 센터',
 			'icon'  => '✨',
-			'desc'  => '라미네이트·미백·올세라믹 — 자연스러우면서도 오래 가는 미소를 디자인합니다.',
+			'desc'  => '11F 교정과 — 치과교정과 전문의·인정의가 라이프스타일에 맞춘 교정 계획을 제시합니다.',
 		),
 		array(
-			'slug'  => 'pediatric',
-			'title' => '소아·예방',
-			'icon'  => '🧒',
-			'desc'  => '소아치과 전담의 진료. 불소도포·실란트·정기검진으로 평생 치아를 지킵니다.',
+			'slug'  => '자연치아-살리기',
+			'title' => '자연치아 살리기',
+			'icon'  => '🌿',
+			'desc'  => '보존과 전문의의 정밀 근관치료. 발치보다 보존을 먼저 고민합니다.',
+		),
+		array(
+			'slug'  => '턱관절-클리닉',
+			'title' => '턱관절 클리닉',
+			'icon'  => '🔄',
+			'desc'  => '대한턱관절교합학회 이사진의 전문 진료. 통증·소리·교합 이상을 함께 봅니다.',
+		),
+		array(
+			'slug'  => '사랑니-발치',
+			'title' => '사랑니 발치',
+			'icon'  => '🦴',
+			'desc'  => '매복 사랑니까지 — 구강악안면외과 진료로 안전하게 발치합니다.',
+		),
+		array(
+			'slug'  => '심미치료',
+			'title' => '심미치료',
+			'icon'  => '💎',
+			'desc'  => '라미네이트·미백·올세라믹 — 자연스러우면서 오래 가는 미소를 디자인합니다.',
 		),
 	);
 }

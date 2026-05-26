@@ -52,9 +52,10 @@ $info = moondental_get_info();
 				<h4>진료안내</h4>
 				<ul>
 					<?php foreach ( moondental_get_services() as $svc ) :
-						$svc_url = get_permalink( get_page_by_path( $svc['slug'] ) );
+						$page    = get_page_by_path( $svc['slug'] );
+						$svc_url = $page ? get_permalink( $page ) : home_url( '/' . rawurlencode( $svc['slug'] ) . '/' );
 						?>
-						<li><a href="<?php echo esc_url( $svc_url ?: '#' ); ?>"><?php echo esc_html( $svc['title'] ); ?></a></li>
+						<li><a href="<?php echo esc_url( $svc_url ); ?>"><?php echo esc_html( $svc['title'] ); ?></a></li>
 					<?php endforeach; ?>
 				</ul>
 			</div>

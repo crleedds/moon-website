@@ -47,18 +47,27 @@ get_header();
 					switch ( $slug ) {
 						case 'about':
 						case 'hospital':
+						case '병원소개':
 							echo moondental_default_about_content();
 							break;
 						case 'doctors':
 						case 'team':
+						case '의료진':
 							echo moondental_default_doctors_content();
 							break;
 						case 'location':
 						case 'directions':
+						case '오시는-길':
 							echo moondental_default_location_content();
 							break;
 						default:
-							echo '<p style="color:var(--color-text-sub);">콘텐츠 준비 중입니다.</p>';
+							/* 진료항목 자식 페이지면 service content 시도 */
+							$svc_html = moondental_default_service_content( $slug );
+							if ( $svc_html ) {
+								echo $svc_html;
+							} else {
+								echo '<p style="color:var(--color-text-sub);">콘텐츠 준비 중입니다.</p>';
+							}
 					}
 				}
 			endwhile;

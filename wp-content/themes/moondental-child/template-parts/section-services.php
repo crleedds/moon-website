@@ -19,8 +19,9 @@ $services = moondental_get_services();
 
 		<div class="md-service-grid">
 			<?php foreach ( $services as $svc ) :
+				// 슬러그가 한글이어도 get_page_by_path 가 그대로 받아들임.
 				$page = get_page_by_path( $svc['slug'] );
-				$url  = $page ? get_permalink( $page ) : home_url( '/services/#' . $svc['slug'] );
+				$url  = $page ? get_permalink( $page ) : home_url( '/' . rawurlencode( $svc['slug'] ) . '/' );
 			?>
 				<article class="md-service-card">
 					<div class="md-service-card__icon" aria-hidden="true"><?php echo $svc['icon']; ?></div>
