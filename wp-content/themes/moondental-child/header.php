@@ -76,16 +76,22 @@
 		<div class="md-container">
 			<div class="md-header__inner">
 
-				<a class="md-header__brand" href="<?php echo esc_url( home_url( '/' ) ); ?>">
+				<a class="md-header__brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php echo esc_attr( moondental_get_info( 'name_full' ) ); ?>">
 					<?php if ( has_custom_logo() ) : ?>
 						<?php the_custom_logo(); ?>
-					<?php else : ?>
-						<span class="md-header__brand-name">
-							<?php echo esc_html( moondental_get_info( 'name_short' ) ); ?>
-						</span>
-						<span class="md-header__brand-en">
-							<?php echo esc_html( moondental_get_info( 'name_en' ) ); ?>
-						</span>
+					<?php else :
+						$theme_logo = MOONDENTAL_URI . '/assets/images/logo/logo-wide.png';
+						if ( file_exists( MOONDENTAL_DIR . '/assets/images/logo/logo-wide.png' ) ) : ?>
+							<img class="md-header__brand-img" src="<?php echo esc_url( $theme_logo ); ?>"
+								 alt="<?php echo esc_attr( moondental_get_info( 'name_full' ) ); ?>" width="200">
+						<?php else : ?>
+							<span class="md-header__brand-name">
+								<?php echo esc_html( moondental_get_info( 'name_short' ) ); ?>
+							</span>
+							<span class="md-header__brand-en">
+								<?php echo esc_html( moondental_get_info( 'name_en' ) ); ?>
+							</span>
+						<?php endif; ?>
 					<?php endif; ?>
 				</a>
 
