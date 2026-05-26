@@ -14,7 +14,16 @@ $info = moondental_get_info();
 		<div class="md-footer__grid">
 
 			<div class="md-footer__brand">
-				<h3><?php echo esc_html( $info['name_full'] ); ?></h3>
+				<?php
+				$footer_logo_path = MOONDENTAL_DIR . '/assets/images/logo/logo-wide-white.png';
+				if ( file_exists( $footer_logo_path ) ) :
+				?>
+					<a class="md-footer__brand-link" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php echo esc_attr( $info['name_full'] ); ?>">
+						<img class="md-footer__brand-img" src="<?php echo esc_url( MOONDENTAL_URI . '/assets/images/logo/logo-wide-white.png' ); ?>" alt="<?php echo esc_attr( $info['name_full'] ); ?>">
+					</a>
+				<?php else : ?>
+					<h3><?php echo esc_html( $info['name_full'] ); ?></h3>
+				<?php endif; ?>
 				<p><?php echo esc_html( $info['tagline'] ); ?></p>
 				<?php if ( ! empty( $info['phone'] ) ) : ?>
 					<p style="color:#fff; font-size:1.25rem; font-weight:700; margin-top:8px;">

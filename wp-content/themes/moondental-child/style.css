@@ -359,13 +359,14 @@ button.elementor-button {
   text-transform: uppercase;
   margin-top: 2px;
 }
-/* ── 헤더 로고 — 동적 효과 (entrance / hover / scroll-shrink) ── */
+/* ── 헤더 로고 — 동적 효과 (entrance + continuous float + hover + scroll-shrink) ── */
 .md-header__brand {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  overflow: hidden;
-  /* 살짝 위로 슬라이드 + 페이드인 (페이지 진입 시 1회) */
-  animation: md-logo-enter 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* 페이지 진입: 살짝 떠오르며 페이드인 + 살짝 bounce */
+  animation: md-logo-enter 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  cursor: pointer;
 }
 .md-header__brand .custom-logo,
 .md-header__brand-img {
@@ -375,36 +376,60 @@ button.elementor-button {
   transform-origin: left center;
   transition:
     max-height 0.35s var(--ease),
-    transform 0.35s var(--ease),
-    filter 0.35s var(--ease);
-  filter: drop-shadow(0 0 0 transparent);
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.45s var(--ease);
+  /* 호버 안 한 상태에서 자체 호흡 (4초 주기, 미세한 float) */
+  animation: md-logo-float 5s ease-in-out infinite;
+  animation-delay: 0.9s;  /* entrance 끝난 후 시작 */
+  filter: drop-shadow(0 2px 6px rgba(216, 128, 98, 0.08));
   will-change: transform, max-height;
 }
 
-/* hover — 미세 확대 + 따뜻한 그림자 강조 (병원 톤에 어울리게 절제) */
+/* hover/focus — float 정지, 명확한 lift + 회전 + 따뜻한 강한 그림자 */
 .md-header__brand:hover .md-header__brand-img,
 .md-header__brand:hover .custom-logo,
 .md-header__brand:focus-visible .md-header__brand-img,
 .md-header__brand:focus-visible .custom-logo {
-  transform: scale(1.04);
-  filter: drop-shadow(0 4px 10px rgba(216, 128, 98, 0.18));
+  animation-play-state: paused;
+  transform: scale(1.06) rotate(-1.5deg) translateY(-2px);
+  filter: drop-shadow(0 8px 18px rgba(216, 128, 98, 0.32));
 }
 
-/* 스크롤 — 헤더 축소 시 로고도 작아짐 (.is-scrolled 는 main.js가 부착) */
+/* 호버 시 N자 마크 뒤에 따뜻한 광채(orange glow) — 반짝이는 듯한 ::before */
+.md-header__brand::before {
+  content: '';
+  position: absolute;
+  left: -4px; top: 50%;
+  width: 70px; height: 70px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(243, 156, 18, 0.35) 0%, transparent 65%);
+  transform: translateY(-50%) scale(0);
+  opacity: 0;
+  transition: transform 0.5s var(--ease-out-back), opacity 0.35s var(--ease);
+  pointer-events: none;
+  z-index: -1;
+}
+.md-header__brand:hover::before,
+.md-header__brand:focus-visible::before {
+  transform: translateY(-50%) scale(1);
+  opacity: 1;
+}
+
+/* 스크롤 — 헤더 축소 시 로고도 부드럽게 축소 */
 .md-site-header.is-scrolled .md-header__brand-img,
 .md-site-header.is-scrolled .custom-logo {
   max-height: 44px;
 }
 
 @keyframes md-logo-enter {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0%   { opacity: 0; transform: translateY(-12px) scale(0.92); }
+  60%  { opacity: 1; transform: translateY(2px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes md-logo-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
 }
 
 @media (max-width: 640px) {
@@ -412,12 +437,33 @@ button.elementor-button {
   .md-header__brand-img { max-height: 44px; }
   .md-site-header.is-scrolled .md-header__brand-img,
   .md-site-header.is-scrolled .custom-logo { max-height: 36px; }
+  .md-header__brand::before { width: 50px; height: 50px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .md-header__brand { animation: none; }
   .md-header__brand .custom-logo,
-  .md-header__brand-img { transition: none; }
+  .md-header__brand-img { transition: none; animation: none; }
+  .md-header__brand::before { display: none; }
+}
+
+/* ── 푸터 로고 (어두운 배경용 흰색 변형) ── */
+.md-footer__brand-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  transition: transform 0.3s var(--ease), filter 0.3s var(--ease);
+}
+.md-footer__brand-link:hover {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 6px 14px rgba(243, 156, 18, 0.3));
+}
+.md-footer__brand-img {
+  max-height: 56px;
+  width: auto;
+  display: block;
+}
+@media (max-width: 520px) {
+  .md-footer__brand-img { max-height: 44px; }
 }
 
 .md-header__nav {
