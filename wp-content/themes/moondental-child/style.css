@@ -359,14 +359,12 @@ button.elementor-button {
   text-transform: uppercase;
   margin-top: 2px;
 }
-/* ── 헤더 로고 — 동적 효과 (entrance + continuous float + hover + scroll-shrink) ── */
+/* ── 헤더 로고 — 차분한 효과 (entrance + 미세 hover + scroll-shrink) ── */
 .md-header__brand {
-  position: relative;
   display: inline-flex;
   align-items: center;
-  /* 페이지 진입: 살짝 떠오르며 페이드인 + 살짝 bounce */
-  animation: md-logo-enter 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  cursor: pointer;
+  /* 페이지 진입: 단순 페이드인 + 살짝 위에서 슬라이드 */
+  animation: md-logo-enter 0.5s ease-out both;
 }
 .md-header__brand .custom-logo,
 .md-header__brand-img {
@@ -375,44 +373,18 @@ button.elementor-button {
   display: block;
   transform-origin: left center;
   transition:
-    max-height 0.35s var(--ease),
-    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-    filter 0.45s var(--ease);
-  /* 호버 안 한 상태에서 자체 호흡 (4초 주기, 미세한 float) */
-  animation: md-logo-float 5s ease-in-out infinite;
-  animation-delay: 0.9s;  /* entrance 끝난 후 시작 */
-  filter: drop-shadow(0 2px 6px rgba(216, 128, 98, 0.08));
-  will-change: transform, max-height;
+    max-height 0.3s var(--ease),
+    transform 0.25s var(--ease),
+    filter 0.25s var(--ease);
 }
 
-/* hover/focus — float 정지, 명확한 lift + 회전 + 따뜻한 강한 그림자 */
+/* hover/focus — 미세 확대만 (회전·광채·강한 그림자 없음) */
 .md-header__brand:hover .md-header__brand-img,
 .md-header__brand:hover .custom-logo,
 .md-header__brand:focus-visible .md-header__brand-img,
 .md-header__brand:focus-visible .custom-logo {
-  animation-play-state: paused;
-  transform: scale(1.06) rotate(-1.5deg) translateY(-2px);
-  filter: drop-shadow(0 8px 18px rgba(216, 128, 98, 0.32));
-}
-
-/* 호버 시 N자 마크 뒤에 따뜻한 광채(orange glow) — 반짝이는 듯한 ::before */
-.md-header__brand::before {
-  content: '';
-  position: absolute;
-  left: -4px; top: 50%;
-  width: 70px; height: 70px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(243, 156, 18, 0.35) 0%, transparent 65%);
-  transform: translateY(-50%) scale(0);
-  opacity: 0;
-  transition: transform 0.5s var(--ease-out-back), opacity 0.35s var(--ease);
-  pointer-events: none;
-  z-index: -1;
-}
-.md-header__brand:hover::before,
-.md-header__brand:focus-visible::before {
-  transform: translateY(-50%) scale(1);
-  opacity: 1;
+  transform: scale(1.03);
+  filter: drop-shadow(0 2px 6px rgba(216, 128, 98, 0.15));
 }
 
 /* 스크롤 — 헤더 축소 시 로고도 부드럽게 축소 */
@@ -422,14 +394,8 @@ button.elementor-button {
 }
 
 @keyframes md-logo-enter {
-  0%   { opacity: 0; transform: translateY(-12px) scale(0.92); }
-  60%  { opacity: 1; transform: translateY(2px) scale(1.02); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes md-logo-float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-3px); }
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 640px) {
@@ -437,14 +403,12 @@ button.elementor-button {
   .md-header__brand-img { max-height: 44px; }
   .md-site-header.is-scrolled .md-header__brand-img,
   .md-site-header.is-scrolled .custom-logo { max-height: 36px; }
-  .md-header__brand::before { width: 50px; height: 50px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .md-header__brand { animation: none; }
   .md-header__brand .custom-logo,
-  .md-header__brand-img { transition: none; animation: none; }
-  .md-header__brand::before { display: none; }
+  .md-header__brand-img { transition: none; }
 }
 
 /* ── 푸터 로고 (어두운 배경용 흰색 변형) ── */
