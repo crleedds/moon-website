@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '1.3.1' );
+define( 'MOONDENTAL_VERSION', '1.4.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -74,12 +74,14 @@ function moondental_enqueue_styles() {
 		'1.3.9'
 	);
 
-	// 3. 자식 테마 스타일
+	// 3. 자식 테마 스타일 — 파일 mtime을 cache-buster로 사용
+	$css_path = MOONDENTAL_DIR . '/style.css';
+	$css_ver  = file_exists( $css_path ) ? filemtime( $css_path ) : MOONDENTAL_VERSION;
 	wp_enqueue_style(
 		'moondental-child-style',
 		MOONDENTAL_URI . '/style.css',
 		array( 'astra-parent-style', 'pretendard-variable' ),
-		MOONDENTAL_VERSION
+		$css_ver
 	);
 
 	// 4. 추가 인터랙션 JS (필요 시)
@@ -89,7 +91,7 @@ function moondental_enqueue_styles() {
 			'moondental-main',
 			MOONDENTAL_URI . '/assets/js/main.js',
 			array(),
-			MOONDENTAL_VERSION,
+			filemtime( $js_path ),
 			true
 		);
 	}
