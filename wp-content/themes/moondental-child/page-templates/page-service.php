@@ -13,7 +13,7 @@
 get_header();
 
 $services    = moondental_get_services();
-$slug        = get_post_field( 'post_name', get_queried_object_id() );
+$slug        = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
 $current_svc = null;
 foreach ( $services as $svc ) {
 	if ( $svc['slug'] === $slug ) {

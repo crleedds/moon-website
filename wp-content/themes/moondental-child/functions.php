@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '1.3.0' );
+define( 'MOONDENTAL_VERSION', '1.3.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -543,6 +543,45 @@ function moondental_elementor_locations( $elementor_theme_manager ) {
 	$elementor_theme_manager->register_all_core_location();
 }
 add_action( 'elementor/theme/register_locations', 'moondental_elementor_locations' );
+
+
+/* ============================================================
+ * 6b. Template Router — 슬러그 기반 자동 템플릿 할당
+ * ========================================================== */
+/**
+ * 사용자가 페이지를 만들 때 "페이지 속성 → 템플릿"을 수동으로 선택하지 않아도
+ * 슬러그가 일치하면 알맞은 템플릿을 자동으로 사용한다.
+ *
+ * 슬러그가 WP에 URL-encoded 형태로 저장된 경우와 raw UTF-8 한글 모두 처리.
+ */
+function moondental_template_router( $template ) {
+	if ( ! is_page() ) return $template;
+
+	// 사용자가 명시적으로 템플릿을 지정했으면 그 결정을 존중
+	$current = get_page_template_slug( get_queried_object_id() );
+	if ( $current && $current !== 'default' ) return $template;
+
+	$slug = (string) get_post_field( 'post_name', get_queried_object_id() );
+	$slug = urldecode( $slug ); // 한글 정규화
+
+	$map = array(
+		'의료진'         => 'page-templates/page-doctors.php',
+		'오시는-길'       => 'page-templates/page-location.php',
+		'임플란트-센터'   => 'page-templates/page-service.php',
+		'투명교정-센터'   => 'page-templates/page-service.php',
+		'자연치아-살리기' => 'page-templates/page-service.php',
+		'턱관절-클리닉'   => 'page-templates/page-service.php',
+		'사랑니-발치'     => 'page-templates/page-service.php',
+		'심미치료'       => 'page-templates/page-service.php',
+	);
+
+	if ( isset( $map[ $slug ] ) ) {
+		$custom = locate_template( $map[ $slug ] );
+		if ( $custom ) return $custom;
+	}
+	return $template;
+}
+add_filter( 'template_include', 'moondental_template_router', 99 );
 
 
 /* ============================================================

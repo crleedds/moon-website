@@ -42,8 +42,10 @@ get_header();
 				if ( $body ) {
 					the_content();
 				} else {
-					/* 슬러그별 자동 기본 콘텐츠 — 본문이 비어 있을 때만 */
-					$slug = get_post_field( 'post_name', get_queried_object_id() );
+					/* 슬러그별 자동 기본 콘텐츠 — 본문이 비어 있을 때만.
+					 * URL-encoded 형태로 저장된 슬러그(%ec%9d%98...)도 정규화. */
+					$slug = (string) get_post_field( 'post_name', get_queried_object_id() );
+					$slug = urldecode( $slug );
 					switch ( $slug ) {
 						case 'about':
 						case 'hospital':
