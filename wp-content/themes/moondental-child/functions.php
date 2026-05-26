@@ -18,6 +18,7 @@ define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
 require_once MOONDENTAL_DIR . '/inc/content-defaults.php';
+require_once MOONDENTAL_DIR . '/inc/naver-importer.php';
 
 
 /* ============================================================
@@ -422,6 +423,11 @@ function moondental_admin_tools_page() {
 		$created = moondental_create_default_pages();
 		$ran     = true;
 	}
+	$sync_ran = false; $sync_result = null;
+	if ( isset( $_POST['moondental_sync_naver'] ) && check_admin_referer( 'moondental_sync' ) ) {
+		$sync_result = moondental_naver_import_all( 20 );
+		$sync_ran    = true;
+	}
 	?>
 	<div class="wrap">
 		<h1>문치과 사이트 도구</h1>
@@ -446,6 +452,41 @@ function moondental_admin_tools_page() {
 				<p>
 					<button type="submit" name="moondental_seed_pages" class="button button-primary button-large">기본 페이지 만들기</button>
 				</p>
+			</form>
+		</div>
+
+		<div class="card" style="max-width:720px; padding:24px; margin-top:16px;">
+			<h2>네이버 블로그 글 가져오기</h2>
+			<p>네이버 블로그(<code><?php echo esc_html( moondental_get_info( 'blog_url' ) ); ?></code>)의
+			   <strong>최신 20개 글의 본문 전체</strong>를 사이트로 가져옵니다.
+			   가져온 글은 <code>/소식/</code>에 카드로 나열되고, 카드 클릭 시 사이트 내 페이지로 열립니다.
+			   같은 글은 다시 가져오지 않으므로 안전하게 여러 번 눌러도 됩니다.</p>
+			<p style="font-size:13px; color:#666;">처음 실행 시 1~2분 정도 걸릴 수 있습니다 (글 사이 0.4초 간격, 네이버 부담 방지).</p>
+
+			<?php if ( $sync_ran && $sync_result ) : ?>
+				<div class="notice notice-info" style="margin:12px 0; padding:12px;">
+					<p>
+						새로 가져온 글: <strong><?php echo count( $sync_result['created'] ); ?>개</strong> ·
+						이미 있어서 건너뜀: <strong><?php echo (int) $sync_result['skipped']; ?>개</strong>
+						<?php if ( ! empty( $sync_result['errors'] ) ) : ?>
+							· 오류: <strong><?php echo count( $sync_result['errors'] ); ?>건</strong>
+						<?php endif; ?>
+					</p>
+					<?php if ( ! empty( $sync_result['errors'] ) ) : ?>
+						<details style="margin-top:8px;"><summary>오류 상세</summary>
+							<ul style="margin:8px 0 0 16px;">
+								<?php foreach ( $sync_result['errors'] as $e ) : ?>
+									<li style="font-size:12px; color:#a00;"><?php echo esc_html( $e ); ?></li>
+								<?php endforeach; ?>
+							</ul>
+						</details>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
+
+			<form method="post">
+				<?php wp_nonce_field( 'moondental_sync' ); ?>
+				<p><button type="submit" name="moondental_sync_naver" class="button button-primary button-large">네이버 블로그 동기화</button></p>
 			</form>
 		</div>
 
