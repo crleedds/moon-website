@@ -944,6 +944,19 @@ function moondental_get_team() {
 }
 
 /**
+ * 역사 페이지 사진 파일 URL 반환. 파일 없으면 false.
+ *
+ * @param string $filename 예: 'history-2025-08-mongol.jpg'
+ * @return string|false
+ */
+function moondental_history_photo_url( $filename ) {
+	if ( ! $filename ) return false;
+	$path = MOONDENTAL_DIR . '/assets/images/history/' . $filename;
+	return file_exists( $path ) ? MOONDENTAL_URI . '/assets/images/history/' . $filename : false;
+}
+
+
+/**
  * 의료진 사진 파일 URL 반환. 지정 확장자가 없으면 jpg/png/jpeg/webp 순으로 시도.
  *
  * @param string $filename 예: 'doctor-01.png'

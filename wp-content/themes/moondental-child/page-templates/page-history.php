@@ -41,27 +41,44 @@ $history = moondental_get_history();
 			?>
 		</article>
 
-		<?php if ( ! empty( $history ) ) : ?>
-			<ol class="md-timeline" aria-label="문치과병원 연혁">
-				<?php foreach ( $history as $row ) :
-					$year  = isset( $row['year'] )  ? $row['year']  : '';
-					$month = isset( $row['month'] ) ? $row['month'] : '';
-					$title = isset( $row['title'] ) ? $row['title'] : '';
-					$desc  = isset( $row['desc'] )  ? $row['desc']  : '';
-				?>
-					<li class="md-timeline__item">
-						<div class="md-timeline__year">
-							<?php echo esc_html( $year ); ?>
-							<?php if ( $month ) : ?><span class="md-timeline__month"><?php echo esc_html( $month ); ?>월</span><?php endif; ?>
-						</div>
-						<div class="md-timeline__dot" aria-hidden="true"></div>
-						<div class="md-timeline__body">
-							<?php if ( $title ) : ?><h3 class="md-timeline__title"><?php echo esc_html( $title ); ?></h3><?php endif; ?>
-							<?php if ( $desc ) : ?><p class="md-timeline__desc"><?php echo esc_html( $desc ); ?></p><?php endif; ?>
-						</div>
-					</li>
+		<?php if ( ! empty( $history ) ) :
+			// 연도별로 그룹화 (디자인상 연도 헤더가 한 번씩 들어가도록)
+			$by_year = array();
+			foreach ( $history as $row ) {
+				$y = isset( $row['year'] ) ? $row['year'] : '';
+				if ( ! isset( $by_year[ $y ] ) ) $by_year[ $y ] = array();
+				$by_year[ $y ][] = $row;
+			}
+		?>
+			<div class="md-timeline" aria-label="문치과병원 연혁">
+				<?php foreach ( $by_year as $year => $rows ) : ?>
+					<section class="md-timeline-group">
+						<h2 class="md-timeline-group__year"><?php echo esc_html( $year ); ?></h2>
+						<ol class="md-timeline-group__items">
+							<?php foreach ( $rows as $row ) :
+								$month = isset( $row['month'] ) ? $row['month'] : '';
+								$title = isset( $row['title'] ) ? $row['title'] : '';
+								$desc  = isset( $row['desc'] )  ? $row['desc']  : '';
+								$photo = isset( $row['photo'] ) ? moondental_history_photo_url( $row['photo'] ) : false;
+							?>
+								<li class="md-timeline__item<?php echo $photo ? ' has-photo' : ''; ?>">
+									<div class="md-timeline__month"><?php echo $month ? esc_html( ltrim( $month, '0' ) ) . '월' : ''; ?></div>
+									<div class="md-timeline__dot" aria-hidden="true"></div>
+									<div class="md-timeline__body">
+										<?php if ( $photo ) : ?>
+											<div class="md-timeline__photo">
+												<img src="<?php echo esc_url( $photo ); ?>" alt="<?php echo esc_attr( $title ); ?>" loading="lazy">
+											</div>
+										<?php endif; ?>
+										<?php if ( $title ) : ?><h3 class="md-timeline__title"><?php echo esc_html( $title ); ?></h3><?php endif; ?>
+										<?php if ( $desc ) : ?><p class="md-timeline__desc"><?php echo esc_html( $desc ); ?></p><?php endif; ?>
+									</div>
+								</li>
+							<?php endforeach; ?>
+						</ol>
+					</section>
 				<?php endforeach; ?>
-			</ol>
+			</div>
 		<?php endif; ?>
 
 	</div>

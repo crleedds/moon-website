@@ -1309,86 +1309,123 @@ button.elementor-button {
 .md-single__nav { text-align: left; }
 
 /* =============================================================
-   10f. Timeline (병원소개 > 역사 — 세로 연표)
+   10f. Timeline (병원소개 > 역사 — 연도 그룹 + 항목 카드)
    ============================================================= */
 .md-timeline {
+  position: relative;
+}
+
+.md-timeline-group + .md-timeline-group {
+  margin-top: clamp(32px, 4vw, 56px);
+}
+.md-timeline-group__year {
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: -0.04em;
+  margin: 0 0 20px;
+  padding-left: 56px;
+  position: relative;
+  line-height: 1;
+  font-feature-settings: 'tnum';
+}
+.md-timeline-group__year::before {
+  content: '';
+  position: absolute;
+  left: 16px; top: 50%;
+  width: 24px; height: 2px;
+  background: var(--color-primary);
+  border-radius: 2px;
+}
+
+.md-timeline-group__items {
   list-style: none;
   margin: 0;
   padding: 0;
   position: relative;
 }
-.md-timeline::before {
+.md-timeline-group__items::before {
   content: '';
   position: absolute;
-  left: 96px;
-  top: 8px;
-  bottom: 8px;
+  left: 27px;
+  top: 12px;
+  bottom: 12px;
   width: 2px;
-  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-border) 100%);
+  background: var(--color-border);
   border-radius: 2px;
 }
 
 .md-timeline__item {
   position: relative;
   display: grid;
-  grid-template-columns: 80px 32px 1fr;
+  grid-template-columns: 56px 1fr;
   gap: 16px;
-  padding: 16px 0;
+  padding: 10px 0;
   align-items: start;
 }
+.md-timeline__item + .md-timeline__item { margin-top: 4px; }
 
-.md-timeline__year {
-  font-size: 1.125rem;
-  font-weight: 800;
-  color: var(--color-primary-dark);
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  padding-top: 2px;
-  text-align: right;
-  font-feature-settings: 'tnum';
-}
 .md-timeline__month {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-mute);
-  margin-top: 2px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-text-sub);
+  padding-top: 18px;
+  text-align: right;
+  padding-right: 10px;
+  font-feature-settings: 'tnum';
 }
 
 .md-timeline__dot {
-  position: relative;
-  width: 16px; height: 16px;
-  margin-top: 6px;
-  margin-inline: auto;
+  position: absolute;
+  left: 21px;
+  top: 18px;
+  width: 14px; height: 14px;
   background: var(--color-white);
-  border: 3px solid var(--color-primary);
+  border: 3px solid var(--color-primary-light);
   border-radius: 50%;
-  box-shadow: 0 0 0 4px var(--color-bg);
   z-index: 1;
-  transition: transform 0.25s var(--ease), background 0.25s var(--ease);
+  transition: transform 0.25s var(--ease), border-color 0.25s var(--ease), background 0.25s var(--ease);
 }
 .md-timeline__item:hover .md-timeline__dot {
   background: var(--color-primary);
-  transform: scale(1.15);
+  border-color: var(--color-primary);
+  transform: scale(1.2);
 }
 
 .md-timeline__body {
   background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 16px 20px;
+  padding: 14px 20px;
   transition: all 0.25s var(--ease);
+  margin-left: 12px;
 }
 .md-timeline__item:hover .md-timeline__body {
   border-color: var(--color-primary-light);
   box-shadow: var(--shadow-soft);
+  transform: translateX(2px);
 }
+
+.md-timeline__photo {
+  margin: -14px -20px 14px;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: var(--color-surface);
+}
+.md-timeline__photo img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .md-timeline__title {
   font-size: 1.0625rem;
   font-weight: 700;
   margin: 0 0 6px;
   color: var(--color-text);
-  line-height: 1.4;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
 }
 .md-timeline__desc {
   font-size: var(--fs-small);
@@ -1398,13 +1435,34 @@ button.elementor-button {
 }
 
 @media (max-width: 640px) {
-  .md-timeline::before { left: 60px; }
-  .md-timeline__item {
-    grid-template-columns: 52px 24px 1fr;
-    gap: 10px;
+  .md-timeline-group__year {
+    padding-left: 40px;
+    font-size: 2rem;
   }
-  .md-timeline__year { font-size: 1rem; }
-  .md-timeline__body { padding: 14px 16px; }
+  .md-timeline-group__year::before {
+    left: 8px;
+    width: 20px;
+  }
+  .md-timeline-group__items::before { left: 19px; }
+  .md-timeline__item {
+    grid-template-columns: 40px 1fr;
+    gap: 8px;
+  }
+  .md-timeline__month {
+    font-size: 0.6875rem;
+    padding-top: 16px;
+    padding-right: 4px;
+  }
+  .md-timeline__dot {
+    left: 13px;
+    top: 16px;
+    width: 12px; height: 12px;
+  }
+  .md-timeline__body {
+    padding: 12px 16px;
+    margin-left: 6px;
+  }
+  .md-timeline__photo { margin: -12px -16px 12px; }
 }
 
 /* =============================================================
