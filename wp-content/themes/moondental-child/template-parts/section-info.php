@@ -19,15 +19,21 @@ $info = moondental_get_info();
 			<div class="md-info-block">
 				<span class="md-info-block__label">진료시간</span>
 				<ul>
-					<?php if ( $info['hours_wd'] ) : ?>
-						<li><strong>평일</strong><span><?php echo esc_html( preg_replace('/^평일\s*/u', '', $info['hours_wd']) ); ?></span></li>
-					<?php endif; ?>
-					<?php if ( $info['hours_sat'] ) : ?>
-						<li><strong>토요일</strong><span><?php echo esc_html( preg_replace('/^토요일\s*/u', '', $info['hours_sat']) ); ?></span></li>
-					<?php endif; ?>
-					<?php if ( $info['hours_lunch'] ) : ?>
-						<li><strong>점심시간</strong><span><?php echo esc_html( preg_replace('/^점심\s*/u', '', $info['hours_lunch']) ); ?></span></li>
-					<?php endif; ?>
+					<?php
+					$rows = array(
+						array( '평일',    $info['hours_wd']    ?? '' ),
+						array( '목요일',  $info['hours_thu']   ?? '' ),
+						array( '토요일',  $info['hours_sat']   ?? '' ),
+						array( '점심시간', $info['hours_lunch'] ?? '' ),
+					);
+					foreach ( $rows as $row ) :
+						list( $label, $value ) = $row;
+						if ( ! $value ) continue;
+						$key = preg_quote( $label === '점심시간' ? '점심' : $label, '/' );
+						$value_clean = preg_replace( '/^' . $key . '\s*/u', '', $value );
+					?>
+						<li><strong><?php echo esc_html( $label ); ?></strong><span><?php echo esc_html( $value_clean ); ?></span></li>
+					<?php endforeach; ?>
 				</ul>
 				<?php if ( $info['hours_off'] ) : ?>
 					<p class="md-info-block__sub" style="margin-top:12px;"><?php echo esc_html( $info['hours_off'] ); ?></p>

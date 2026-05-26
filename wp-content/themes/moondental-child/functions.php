@@ -115,22 +115,24 @@ function moondental_get_info( $key = '' ) {
 		'name_full'    => '한아의료재단 문치과병원',
 		'name_short'   => '문치과병원',
 		'name_en'      => 'Moon Dental Hospital',
-		'tagline'      => '가족처럼 따뜻하게, 전문가답게 정확하게',
-		'phone'        => '041-000-0000',
-		'phone_link'   => '0410000000',
-		'address'      => '충청남도 천안시 …',
-		'address_road' => '',
-		'hours_wd'     => '평일  09:30 – 18:30',
-		'hours_sat'    => '토요일 09:30 – 13:30',
-		'hours_lunch'  => '점심  13:00 – 14:00',
+		'tagline'      => '실력과 품격있는 진료',
+		'phone'        => '041-563-2875',
+		'phone_link'   => '0415632875',
+		'address'      => '충청남도 천안시 동남구 만남로 52, 문타워 9~13층 (신부동)',
+		'address_road' => '충남 천안시 동남구 만남로 52, 문타워 9~13층',
+		'hours_wd'     => '평일 09:00 – 20:30 (점심시간 없음)',
+		'hours_thu'    => '목요일 09:00 – 18:30 (야간진료 없음)',
+		'hours_sat'    => '토요일 09:00 – 13:00',
+		'hours_lunch'  => '',
 		'hours_off'    => '일요일·공휴일 휴진',
-		'biz_no'       => '000-00-00000',
+		'biz_no'       => '',
 		'rep'          => '문은수',
 		'email'        => '',
-		'kakao_url'    => '',
-		'instagram'    => '',
-		'blog_url'     => '',
-		'naver_place'  => '',
+		'kakao_url'    => 'http://pf.kakao.com/_VTcgE/chat',
+		'instagram'    => 'https://www.instagram.com/moondentalhospital_official/',
+		'blog_url'     => 'https://blog.naver.com/moondental1995',
+		'facebook_url' => 'https://www.facebook.com/moondentist',
+		'naver_place'  => 'https://booking.naver.com/booking/13/bizes/485314',
 		'map_embed'    => '',
 	);
 
@@ -214,15 +216,17 @@ function moondental_customize_register( $wp_customize ) {
 
 		// section_hours
 		array( 'key' => 'hours_wd',     'label' => '평일 진료시간',            'section' => 'moondental_section_hours' ),
+		array( 'key' => 'hours_thu',    'label' => '목요일 진료시간',          'section' => 'moondental_section_hours' ),
 		array( 'key' => 'hours_sat',    'label' => '토요일 진료시간',          'section' => 'moondental_section_hours' ),
-		array( 'key' => 'hours_lunch',  'label' => '점심시간',                'section' => 'moondental_section_hours' ),
+		array( 'key' => 'hours_lunch',  'label' => '점심시간 (선택)',          'section' => 'moondental_section_hours' ),
 		array( 'key' => 'hours_off',    'label' => '휴진 안내',                'section' => 'moondental_section_hours' ),
 
 		// section_sns
 		array( 'key' => 'kakao_url',    'label' => '카카오톡 채널 URL',         'section' => 'moondental_section_sns' ),
+		array( 'key' => 'naver_place',  'label' => '네이버 예약 URL',          'section' => 'moondental_section_sns' ),
 		array( 'key' => 'instagram',    'label' => '인스타그램 URL',          'section' => 'moondental_section_sns' ),
-		array( 'key' => 'blog_url',     'label' => '블로그 URL',              'section' => 'moondental_section_sns' ),
-		array( 'key' => 'naver_place',  'label' => '네이버 플레이스 URL',       'section' => 'moondental_section_sns' ),
+		array( 'key' => 'blog_url',     'label' => '네이버 블로그 URL',        'section' => 'moondental_section_sns' ),
+		array( 'key' => 'facebook_url', 'label' => '페이스북 URL',            'section' => 'moondental_section_sns' ),
 		array( 'key' => 'map_embed',    'label' => '지도 임베드 코드 (HTML iframe)', 'section' => 'moondental_section_sns', 'type' => 'textarea' ),
 	);
 
@@ -243,10 +247,10 @@ function moondental_customize_register( $wp_customize ) {
 
 	/* ── Home Hero section content ─────────────────────────────── */
 	$hero_fields = array(
-		'hero_eyebrow' => array( 'label' => '상단 작은 태그',   'type' => 'text',     'default' => '천안 · 가족 치과' ),
-		'hero_title_a' => array( 'label' => '메인 카피 1행',     'type' => 'text',     'default' => '내 가족이 와도 안심할 수 있는' ),
-		'hero_title_b' => array( 'label' => '메인 카피 2행 (강조)','type' => 'text',     'default' => '따뜻한 치과' ),
-		'hero_lead'    => array( 'label' => '서브 카피',          'type' => 'textarea', 'default' => '' ),
+		'hero_eyebrow' => array( 'label' => '상단 작은 태그',   'type' => 'text',     'default' => '천안 만남로 · 1995년부터' ),
+		'hero_title_a' => array( 'label' => '메인 카피 1행',     'type' => 'text',     'default' => '실력과 품격있는 진료,' ),
+		'hero_title_b' => array( 'label' => '메인 카피 2행 (강조)','type' => 'text',     'default' => '가족처럼 오래 곁에' ),
+		'hero_lead'    => array( 'label' => '서브 카피',          'type' => 'textarea', 'default' => "10명의 의료진이 한 자리에서, 일반진료부터 임플란트·교정·심미·소아예방까지.\n충분히 듣고, 꼭 필요한 치료만 권합니다." ),
 	);
 	foreach ( $hero_fields as $key => $f ) {
 		$id = 'moondental_' . $key;
@@ -272,9 +276,9 @@ function moondental_customize_register( $wp_customize ) {
 
 	/* ── Home Doctor section content ───────────────────────────── */
 	$doctor_fields = array(
-		'doctor_role' => array( 'label' => '직책',                 'type' => 'text',     'default' => '대표원장' ),
-		'doctor_lead' => array( 'label' => '한 줄 진료 철학',         'type' => 'textarea', 'default' => '환자의 이야기를 충분히 듣고, 가장 보존적인 치료부터 제안합니다.' ),
-		'doctor_bio'  => array( 'label' => '약력 (줄바꿈으로 구분)', 'type' => 'textarea', 'default' => "서울대학교 치과대학 졸업\n대한치과의사협회 정회원\n대한구강악안면임플란트학회 정회원" ),
+		'doctor_role' => array( 'label' => '직책',                 'type' => 'text',     'default' => '이사장 · 한아의료재단' ),
+		'doctor_lead' => array( 'label' => '한 줄 진료 철학',         'type' => 'textarea', 'default' => '1995년부터 천안에서, 한 분의 환자를 가족처럼 오래 보아왔습니다. 진료실 밖에서도 지역사회와 함께 가는 치과를 꿈꿉니다.' ),
+		'doctor_bio'  => array( 'label' => '약력 (줄바꿈으로 구분)', 'type' => 'textarea', 'default' => "한아의료재단 이사장\n구강악안면외과 전문\nKBS1 대전 아침마당 출연 (치과 건강 코너)\n대한적십자사 고액기부자 · 무료진료 활동\n지산장학회 장학금 기부" ),
 	);
 	foreach ( $doctor_fields as $key => $f ) {
 		$id = 'moondental_' . $key;
@@ -462,19 +466,19 @@ function moondental_get_services() {
 			'slug'  => 'general',
 			'title' => '일반진료',
 			'icon'  => '🦷',
-			'desc'  => '충치·잇몸치료·신경치료 등 기본 진료. 정확한 진단과 통증 최소화를 우선합니다.',
+			'desc'  => '충치·잇몸·신경치료 등 기본 진료. 정확한 진단과 통증 최소화를 우선합니다.',
 		),
 		array(
 			'slug'  => 'implant',
 			'title' => '임플란트',
 			'icon'  => '🪛',
-			'desc'  => '풍부한 임상 경험을 바탕으로 단일·다수·전체 임플란트까지 안정적으로 식립합니다.',
+			'desc'  => '풍부한 임상 경험으로 단일·다수·전악 임플란트까지 안정적으로 식립합니다.',
 		),
 		array(
 			'slug'  => 'ortho',
 			'title' => '교정',
 			'icon'  => '〰',
-			'desc'  => '투명교정·설측·소아교정 — 라이프스타일과 연령에 맞춘 맞춤 교정 계획을 제시합니다.',
+			'desc'  => '투명교정·설측·소아교정 — 라이프스타일과 연령에 맞춘 교정 계획을 제시합니다.',
 		),
 		array(
 			'slug'  => 'aesthetic',
@@ -486,7 +490,60 @@ function moondental_get_services() {
 			'slug'  => 'pediatric',
 			'title' => '소아·예방',
 			'icon'  => '🧒',
-			'desc'  => '아이의 첫 치과 경험이 편안하도록. 불소도포·실란트·정기검진으로 평생 치아를 지킵니다.',
+			'desc'  => '소아치과 전담의 진료. 불소도포·실란트·정기검진으로 평생 치아를 지킵니다.',
 		),
 	);
+}
+
+
+/* ============================================================
+ * 10. Helper: 의료진 팀 (10명 — 이사장 + 원장 + 교수)
+ * ========================================================== */
+/**
+ * 의료진 데이터. 추후 Custom Post Type "doctor"로 이관 가능.
+ *
+ * @return array[] role 그룹별 [ 'group' => label, 'members' => [name, …] ]
+ */
+function moondental_get_team() {
+	return array(
+		array(
+			'group'   => '이사장 · 대표원장',
+			'members' => array(
+				array( 'name' => '문은수', 'role' => '이사장', 'specialty' => '구강악안면외과', 'bio' => '한아의료재단 이사장. 지역사회 무료진료·장학사업 등 활동.' ),
+			),
+		),
+		array(
+			'group'   => '진료원장',
+			'members' => array(
+				array( 'name' => '이상민', 'role' => '진료원장', 'specialty' => '' ),
+				array( 'name' => '정석형', 'role' => '진료원장', 'specialty' => '' ),
+				array( 'name' => '이승주', 'role' => '진료원장', 'specialty' => '' ),
+				array( 'name' => '김민경', 'role' => '진료원장', 'specialty' => '' ),
+				array( 'name' => '김세일', 'role' => '진료원장', 'specialty' => '' ),
+				array( 'name' => '이종팔', 'role' => '진료원장', 'specialty' => '' ),
+				array( 'name' => '정상필', 'role' => '진료원장', 'specialty' => '' ),
+			),
+		),
+		array(
+			'group'   => '임상교수',
+			'members' => array(
+				array( 'name' => '홍기석', 'role' => '임상교수', 'specialty' => '' ),
+				array( 'name' => '신승철', 'role' => '임상교수', 'specialty' => '' ),
+			),
+		),
+	);
+}
+
+/**
+ * Flatten team for simple grid rendering.
+ */
+function moondental_get_team_flat() {
+	$flat = array();
+	foreach ( moondental_get_team() as $group ) {
+		foreach ( $group['members'] as $m ) {
+			$m['group'] = $group['group'];
+			$flat[]     = $m;
+		}
+	}
+	return $flat;
 }

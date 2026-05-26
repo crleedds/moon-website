@@ -658,6 +658,84 @@ button.elementor-button {
 }
 
 /* =============================================================
+   10b. Team Grid (의료진 10명 그리드)
+   ============================================================= */
+.md-team-group + .md-team-group { margin-top: 48px; }
+
+.md-team-group__title {
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--color-border);
+  display: inline-block;
+  letter-spacing: -0.01em;
+}
+
+.md-team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: clamp(16px, 2vw, 24px);
+}
+
+.md-team-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  text-align: center;
+  transition: all 0.3s var(--ease);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.md-team-card:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-4px);
+}
+
+.md-team-card__avatar {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-alt));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  letter-spacing: -0.02em;
+  border: 2px solid var(--color-white);
+  box-shadow: var(--shadow-card);
+}
+.md-team-card__body { width: 100%; }
+.md-team-card__role {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-accent);
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+.md-team-card__name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--color-text);
+}
+.md-team-card__spec {
+  font-size: var(--fs-caption);
+  color: var(--color-text-sub);
+  margin-bottom: 6px;
+}
+.md-team-card__bio {
+  font-size: var(--fs-caption);
+  color: var(--color-text-sub);
+  line-height: 1.6;
+  margin: 4px 0 0;
+}
+
+/* =============================================================
    11. Info Block (진료시간 / 오시는 길 / 연락처)
    ============================================================= */
 .md-info-grid {

@@ -8,14 +8,12 @@
  */
 $info = moondental_get_info();
 
-// Customizer에 hero_eyebrow / hero_title / hero_lead 가 있으면 사용,
-// 없으면 기본 카피. (Customizer에 추후 추가 가능)
-$eyebrow = get_theme_mod( 'moondental_hero_eyebrow', '천안 · 가족 치과' );
-$title_a = get_theme_mod( 'moondental_hero_title_a', '내 가족이 와도 안심할 수 있는' );
-$title_b = get_theme_mod( 'moondental_hero_title_b', '따뜻한 치과' );
+$eyebrow = get_theme_mod( 'moondental_hero_eyebrow', '천안 만남로 · 1995년부터' );
+$title_a = get_theme_mod( 'moondental_hero_title_a', '실력과 품격있는 진료,' );
+$title_b = get_theme_mod( 'moondental_hero_title_b', '가족처럼 오래 곁에' );
 $lead    = get_theme_mod( 'moondental_hero_lead',
-	$info['tagline'] . '. 충분한 상담과 정확한 진단으로,' . "\n" .
-	'환자분이 이해하시고 동의하시는 치료만 진행합니다.'
+	"10명의 의료진이 한 자리에서, 일반진료부터 임플란트·교정·심미·소아예방까지.\n" .
+	"충분히 듣고, 꼭 필요한 치료만 권합니다."
 );
 
 // Hero 이미지 — 외관/진료실/원장님 사진 중 택일 (Customizer로 차후 분리)

@@ -28,15 +28,20 @@ $info = moondental_get_info();
 			<div class="md-footer__col">
 				<h4>진료시간</h4>
 				<ul>
-					<?php if ( $info['hours_wd'] ) : ?>
-						<li class="md-footer__hours"><strong>평일</strong><span><?php echo esc_html( preg_replace( '/^평일\s*/u', '', $info['hours_wd'] ) ); ?></span></li>
-					<?php endif; ?>
-					<?php if ( $info['hours_sat'] ) : ?>
-						<li class="md-footer__hours"><strong>토요일</strong><span><?php echo esc_html( preg_replace( '/^토요일\s*/u', '', $info['hours_sat'] ) ); ?></span></li>
-					<?php endif; ?>
-					<?php if ( $info['hours_lunch'] ) : ?>
-						<li class="md-footer__hours"><strong>점심</strong><span><?php echo esc_html( preg_replace( '/^점심\s*/u', '', $info['hours_lunch'] ) ); ?></span></li>
-					<?php endif; ?>
+					<?php
+					$hour_rows = array(
+						array( '평일',    $info['hours_wd']    ?? '' ),
+						array( '목요일',  $info['hours_thu']   ?? '' ),
+						array( '토요일',  $info['hours_sat']   ?? '' ),
+						array( '점심',    $info['hours_lunch'] ?? '' ),
+					);
+					foreach ( $hour_rows as $row ) :
+						list( $label, $value ) = $row;
+						if ( ! $value ) continue;
+						$value_clean = preg_replace( '/^' . preg_quote( $label, '/' ) . '\s*/u', '', $value );
+					?>
+						<li class="md-footer__hours"><strong><?php echo esc_html( $label ); ?></strong><span><?php echo esc_html( $value_clean ); ?></span></li>
+					<?php endforeach; ?>
 					<?php if ( $info['hours_off'] ) : ?>
 						<li style="margin-top:8px; color:rgba(255,255,255,0.55);"><?php echo esc_html( $info['hours_off'] ); ?></li>
 					<?php endif; ?>
@@ -70,13 +75,14 @@ $info = moondental_get_info();
 				}
 				?>
 
-				<?php if ( $info['kakao_url'] || $info['naver_place'] || $info['instagram'] || $info['blog_url'] ) : ?>
-					<h4 style="margin-top:24px;">SNS</h4>
+				<?php if ( $info['kakao_url'] || $info['naver_place'] || $info['instagram'] || $info['blog_url'] || ! empty( $info['facebook_url'] ) ) : ?>
+					<h4 style="margin-top:24px;">SNS · 예약</h4>
 					<ul>
-						<?php if ( $info['kakao_url'] ) : ?><li><a href="<?php echo esc_url( $info['kakao_url'] ); ?>" target="_blank" rel="noopener">카카오톡 채널</a></li><?php endif; ?>
-						<?php if ( $info['naver_place'] ) : ?><li><a href="<?php echo esc_url( $info['naver_place'] ); ?>" target="_blank" rel="noopener">네이버 플레이스</a></li><?php endif; ?>
+						<?php if ( $info['naver_place'] ) : ?><li><a href="<?php echo esc_url( $info['naver_place'] ); ?>" target="_blank" rel="noopener">네이버 예약</a></li><?php endif; ?>
+						<?php if ( $info['kakao_url'] ) : ?><li><a href="<?php echo esc_url( $info['kakao_url'] ); ?>" target="_blank" rel="noopener">카카오톡 상담</a></li><?php endif; ?>
 						<?php if ( $info['instagram'] ) : ?><li><a href="<?php echo esc_url( $info['instagram'] ); ?>" target="_blank" rel="noopener">인스타그램</a></li><?php endif; ?>
-						<?php if ( $info['blog_url'] ) : ?><li><a href="<?php echo esc_url( $info['blog_url'] ); ?>" target="_blank" rel="noopener">블로그</a></li><?php endif; ?>
+						<?php if ( $info['blog_url'] ) : ?><li><a href="<?php echo esc_url( $info['blog_url'] ); ?>" target="_blank" rel="noopener">네이버 블로그</a></li><?php endif; ?>
+						<?php if ( ! empty( $info['facebook_url'] ) ) : ?><li><a href="<?php echo esc_url( $info['facebook_url'] ); ?>" target="_blank" rel="noopener">페이스북</a></li><?php endif; ?>
 					</ul>
 				<?php endif; ?>
 			</div>

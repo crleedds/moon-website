@@ -7,12 +7,16 @@
  * @package moondental-child
  */
 $info       = moondental_get_info();
-$role       = get_theme_mod( 'moondental_doctor_role',   '대표원장' );
+$role       = get_theme_mod( 'moondental_doctor_role',   '이사장 · 한아의료재단' );
 $rep        = $info['rep'] ?: '문은수';
-$lead       = get_theme_mod( 'moondental_doctor_lead',   '환자의 이야기를 충분히 듣고, 가장 보존적인 치료부터 제안합니다.' );
+$lead       = get_theme_mod( 'moondental_doctor_lead',
+	'1995년부터 천안에서, 한 분의 환자를 가족처럼 오래 보아왔습니다. 진료실 밖에서도 지역사회와 함께 가는 치과를 꿈꿉니다.'
+);
 
 // 약력 — Customizer 'moondental_doctor_bio' 줄바꿈 입력 → 줄 단위 <li>로 렌더
-$bio_text   = get_theme_mod( 'moondental_doctor_bio', "서울대학교 치과대학 졸업\n대한치과의사협회 정회원\n대한구강악안면임플란트학회 정회원\n前 ○○치과 원장" );
+$bio_text   = get_theme_mod( 'moondental_doctor_bio',
+	"한아의료재단 이사장\n구강악안면외과 전문\nKBS1 대전 아침마당 출연 (치과 건강 코너)\n대한적십자사 고액기부자 · 무료진료 활동\n지산장학회 장학금 기부"
+);
 $bio_lines  = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", $bio_text ) ) );
 
 $doctor_img = get_theme_mod( 'moondental_doctor_image', 0 );
