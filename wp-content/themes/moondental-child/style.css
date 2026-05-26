@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      1.1.0
+Version:      1.3.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -369,29 +369,101 @@ button.elementor-button {
   display: flex;
   justify-content: center;
 }
+/* 1차 메뉴(top-level UL)만 flex row — sub-menu는 별도 처리 */
 .md-nav,
-.md-header__nav ul {
+.md-header__nav > ul,
+.md-header__nav > div > ul {
   list-style: none;
   display: flex;
-  gap: clamp(8px, 1.5vw, 28px);
+  gap: clamp(8px, 1.5vw, 24px);
   margin: 0;
   padding: 0;
+  align-items: center;
+}
+.md-nav > li,
+.md-header__nav > ul > li {
+  position: relative; /* sub-menu absolute 기준 */
+  list-style: none;
 }
 .md-nav > li > a,
-.md-header__nav .menu-item > a {
-  display: inline-block;
+.md-header__nav > ul > li > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-weight: 600;
   font-size: 0.9375rem;
   color: var(--color-text);
-  padding: 12px 6px;
+  padding: 14px 4px;
   border-bottom: 2px solid transparent;
   transition: all 0.2s var(--ease);
+  white-space: nowrap;
 }
 .md-nav > li > a:hover,
 .md-nav > li.current-menu-item > a,
-.md-header__nav .menu-item.current-menu-item > a {
+.md-header__nav > ul > li.current-menu-item > a {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
+}
+
+/* 드롭다운 화살표 (Astra가 dropdown-menu-toggle SVG를 박아넣는데, 우리 톤에 맞게 작게) */
+.md-header__nav .ast-header-navigation-arrow,
+.md-header__nav .ast-menu-toggle { display: none; }
+.md-header__nav .menu-item-has-children > a::after {
+  content: '';
+  width: 0; height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  margin-left: 2px;
+  opacity: 0.55;
+  transition: transform 0.2s var(--ease);
+}
+.md-header__nav .menu-item-has-children:hover > a::after {
+  transform: rotate(180deg);
+}
+
+/* 2차 메뉴: 기본 숨김, hover/focus 시 드롭다운으로 표시 */
+.md-header__nav .sub-menu {
+  list-style: none;
+  position: absolute;
+  top: calc(100% - 2px);
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  min-width: 180px;
+  padding: 8px 0;
+  margin: 0;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-hover);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease), visibility 0.2s;
+  z-index: 300;
+}
+.md-header__nav .menu-item-has-children:hover > .sub-menu,
+.md-header__nav .menu-item-has-children:focus-within > .sub-menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+.md-header__nav .sub-menu > li { list-style: none; }
+.md-header__nav .sub-menu > li > a {
+  display: block;
+  padding: 10px 18px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  border-bottom: none;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+.md-header__nav .sub-menu > li > a:hover,
+.md-header__nav .sub-menu > li.current-menu-item > a {
+  background: var(--color-surface);
+  color: var(--color-primary-dark);
 }
 
 .md-header__cta { display: flex; align-items: center; }
@@ -432,17 +504,42 @@ button.elementor-button {
     z-index: 200;
   }
   .md-header__nav.is-open { display: block; }
+
   .md-nav,
-  .md-header__nav ul {
+  .md-header__nav > ul,
+  .md-header__nav > div > ul {
     flex-direction: column;
+    align-items: stretch;
     gap: 0;
   }
   .md-nav > li > a,
-  .md-header__nav .menu-item > a {
+  .md-header__nav > ul > li > a {
     display: block;
     padding: 14px 4px;
     border-bottom: 1px solid var(--color-border);
+    white-space: normal;
   }
+  /* 모바일: sub-menu 인라인 들여쓰기 (드롭다운 X) */
+  .md-header__nav .sub-menu {
+    position: static;
+    transform: none !important;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0 0 8px 16px;
+    min-width: 0;
+    border-radius: 0;
+  }
+  .md-header__nav .menu-item-has-children > a::after { display: none; }
+  .md-header__nav .sub-menu > li > a {
+    padding: 10px 8px;
+    font-size: 0.875rem;
+    color: var(--color-text-sub);
+  }
+
   .md-header__cta { display: none; }
 }
 
@@ -514,7 +611,10 @@ button.elementor-button {
   aspect-ratio: 4 / 5;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  background: var(--color-surface-alt);
+  background:
+    radial-gradient(circle at 30% 20%, rgba(216, 128, 98, 0.18), transparent 55%),
+    radial-gradient(circle at 70% 80%, rgba(143, 174, 146, 0.22), transparent 55%),
+    var(--color-surface-alt);
   box-shadow: var(--shadow-hover);
 }
 .md-hero__media img {
@@ -524,9 +624,21 @@ button.elementor-button {
 }
 .md-hero__media-placeholder {
   position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   color: var(--color-text-mute);
   font-size: var(--fs-small);
+  text-align: center;
+  padding: 24px;
+}
+.md-hero__media-placeholder::before {
+  content: '🦷';
+  font-size: clamp(3.5rem, 7vw, 5.5rem);
+  opacity: 0.65;
+  filter: saturate(0.8);
 }
 
 /* =============================================================
@@ -565,13 +677,19 @@ button.elementor-button {
 
 .md-service-card__icon {
   position: relative;
-  width: 64px; height: 64px;
+  width: 84px; height: 84px;
   margin: 0 auto 20px;
   display: flex; align-items: center; justify-content: center;
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-alt) 100%);
+  border-radius: 50%;
   color: var(--color-primary);
-  font-size: 28px;
+  font-size: 40px;
+  line-height: 1;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6), 0 4px 12px rgba(216, 128, 98, 0.10);
+  transition: transform 0.3s var(--ease-out-back);
+}
+.md-service-card:hover .md-service-card__icon {
+  transform: scale(1.08) rotate(-4deg);
 }
 .md-service-card__title {
   font-size: var(--fs-h4);
@@ -705,7 +823,7 @@ button.elementor-button {
 }
 
 .md-team-card__avatar {
-  width: 120px; height: 120px;
+  width: 144px; height: 144px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--color-surface), var(--color-surface-alt));
   display: flex; align-items: center; justify-content: center;

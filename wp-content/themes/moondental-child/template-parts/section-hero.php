@@ -54,8 +54,10 @@ $hero_image_id = get_theme_mod( 'moondental_hero_image', 0 );
 				<?php if ( $hero_image_id ) : ?>
 					<?php echo wp_get_attachment_image( $hero_image_id, 'moondental-hero', false, array( 'alt' => esc_attr( $info['name_short'] . ' 메인 이미지' ) ) ); ?>
 				<?php else : ?>
-					<div class="md-hero__media-placeholder">
-						<span>메인 이미지 (Customizer에서 등록)</span>
+					<div class="md-hero__media-placeholder" aria-hidden="true">
+						<?php if ( current_user_can( 'edit_theme_options' ) ) : ?>
+							<span style="background:rgba(255,255,255,0.7); padding:6px 14px; border-radius:99px;">관리자에게만 보임 · Customizer에서 메인 이미지 등록 가능</span>
+						<?php endif; ?>
 					</div>
 				<?php endif; ?>
 			</div>
