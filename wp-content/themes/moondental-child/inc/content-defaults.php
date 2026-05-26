@@ -642,7 +642,12 @@ function moondental_default_location_content() {
 <h3>🚗 자가용</h3>
 <ul>
 <li>경부고속도로 천안IC에서 약 10분</li>
-<li>건물 자체 주차장 이용 가능 (진료시 무료)</li>
+</ul>
+
+<h3>🅿️ 주차</h3>
+<ul>
+<li><strong>본원 지하 기계식 주차장</strong>을 무료로 이용하실 수 있습니다.</li>
+<li>기계식 주차가 어려운 <strong>SUV 차량</strong>은 인근 <strong>"신부 제5공영주차장"</strong>(동남구 먹거리1길 10)에 주차하고 방문해주시면 무료 주차 등록을 도와드리겠습니다.</li>
 </ul>
 
 <h3>🚌 대중교통</h3>
