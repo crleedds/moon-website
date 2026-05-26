@@ -599,10 +599,22 @@ function moondental_default_location_content() {
 		// 관리자가 직접 임베드 코드를 넣은 경우 (Naver/Kakao API 키로 받은 iframe)
 		$html .= '<div class="md-map-embed">' . $map_embed . '</div>';
 	} elseif ( $map_url ) {
-		// 클릭 가능한 지도 미리보기 카드 — 네이버 지도/플레이스로 새 탭 연결
+		// assets/images/map/naver-map.* 파일이 있으면 실제 지도 스크린샷 사용,
+		// 없으면 CSS 그라데이션 카드로 fallback
+		$map_image = '';
+		foreach ( array( 'naver-map.png', 'naver-map.jpg', 'naver-map.jpeg', 'naver-map.webp' ) as $f ) {
+			if ( file_exists( MOONDENTAL_DIR . '/assets/images/map/' . $f ) ) {
+				$map_image = MOONDENTAL_URI . '/assets/images/map/' . $f;
+				break;
+			}
+		}
+
+		$style_attr = $map_image ? sprintf( ' style="background-image:url(%s); background-size:cover; background-position:center;"', esc_url( $map_image ) ) : '';
+		$class_mod  = $map_image ? ' md-map-card--has-image' : '';
+
 		$html .= sprintf(
-			'<a class="md-map-card" href="%1$s" target="_blank" rel="noopener" aria-label="네이버 지도에서 위치 보기">
-				<div class="md-map-card__pattern" aria-hidden="true"></div>
+			'<a class="md-map-card%5$s" href="%1$s" target="_blank" rel="noopener" aria-label="네이버 지도에서 위치 보기"%6$s>
+				%7$s
 				<div class="md-map-card__badge">NAVER MAP</div>
 				<div class="md-map-card__pin" aria-hidden="true">
 					<svg viewBox="0 0 32 44" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -618,7 +630,11 @@ function moondental_default_location_content() {
 			</a>',
 			esc_url( $map_url ),
 			esc_html( $info['name_short'] ),
-			esc_html( $addr )
+			esc_html( $addr ),
+			'',
+			$class_mod,
+			$style_attr,
+			$map_image ? '' : '<div class="md-map-card__pattern" aria-hidden="true"></div>'
 		);
 	}
 

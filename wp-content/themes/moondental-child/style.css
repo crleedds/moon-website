@@ -1335,6 +1335,14 @@ button.elementor-button {
   box-shadow: var(--shadow-hover);
 }
 
+/* 실제 지도 스크린샷이 깔린 경우: 페이크 도로/그라데이션 숨김 */
+.md-map-card--has-image::before,
+.md-map-card--has-image::after { display: none; }
+.md-map-card--has-image .md-map-card__pattern { display: none; }
+.md-map-card--has-image .md-map-card__info {
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.96) 55%, var(--color-white) 100%);
+}
+
 /* 지도-스러운 격자 무늬 (subtle grid pattern) */
 .md-map-card__pattern {
   position: absolute;
