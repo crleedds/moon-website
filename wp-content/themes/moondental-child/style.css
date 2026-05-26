@@ -1309,6 +1309,105 @@ button.elementor-button {
 .md-single__nav { text-align: left; }
 
 /* =============================================================
+   10f. Timeline (병원소개 > 역사 — 세로 연표)
+   ============================================================= */
+.md-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+.md-timeline::before {
+  content: '';
+  position: absolute;
+  left: 96px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-border) 100%);
+  border-radius: 2px;
+}
+
+.md-timeline__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 80px 32px 1fr;
+  gap: 16px;
+  padding: 16px 0;
+  align-items: start;
+}
+
+.md-timeline__year {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  padding-top: 2px;
+  text-align: right;
+  font-feature-settings: 'tnum';
+}
+.md-timeline__month {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-mute);
+  margin-top: 2px;
+}
+
+.md-timeline__dot {
+  position: relative;
+  width: 16px; height: 16px;
+  margin-top: 6px;
+  margin-inline: auto;
+  background: var(--color-white);
+  border: 3px solid var(--color-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px var(--color-bg);
+  z-index: 1;
+  transition: transform 0.25s var(--ease), background 0.25s var(--ease);
+}
+.md-timeline__item:hover .md-timeline__dot {
+  background: var(--color-primary);
+  transform: scale(1.15);
+}
+
+.md-timeline__body {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  transition: all 0.25s var(--ease);
+}
+.md-timeline__item:hover .md-timeline__body {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-soft);
+}
+.md-timeline__title {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+.md-timeline__desc {
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  line-height: 1.7;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .md-timeline::before { left: 60px; }
+  .md-timeline__item {
+    grid-template-columns: 52px 24px 1fr;
+    gap: 10px;
+  }
+  .md-timeline__year { font-size: 1rem; }
+  .md-timeline__body { padding: 14px 16px; }
+}
+
+/* =============================================================
    11. Info Block (진료시간 / 오시는 길 / 연락처)
    ============================================================= */
 .md-info-grid {

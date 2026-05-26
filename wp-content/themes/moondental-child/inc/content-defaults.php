@@ -263,6 +263,32 @@ function moondental_default_about_content() {
 
 
 /**
+ * 역사 (history) 페이지용 연표 데이터.
+ * Notion 페이지에서 정리한 내용을 여기에 채워주세요.
+ * 가장 최신부터 과거 순으로 정렬됨 (역연대순).
+ *
+ * 각 항목: ['year' => '2026', 'month' => '01', 'title' => '...', 'desc' => '...']
+ * month 는 선택 (비워두면 연도만 표시).
+ */
+function moondental_get_history() {
+	return array(
+		// TODO: Notion 콘텐츠 받으면 여기에 채움. 아래는 임시 자리.
+		array( 'year' => '1995', 'month' => '',   'title' => '문치과 개원',                'desc' => '천안에서 문치과병원의 첫 진료를 시작했습니다.' ),
+	);
+}
+
+
+/**
+ * 역사 페이지 도입부 (연표 위 인사말)
+ */
+function moondental_default_history_intro() {
+	return '
+<h2>1995년부터, 천안과 함께</h2>
+<p class="lead">한아의료재단 문치과병원은 1995년 천안에서 첫 진료를 시작한 이래, 한 분의 환자를 가족처럼 오래 보아오며 지역사회와 함께 자라왔습니다. 진료실 안의 임상 노력만큼이나 진료실 밖의 봉사와 나눔도 저희 정체성의 한 부분입니다.</p>';
+}
+
+
+/**
  * 의료진 (doctors) 페이지 기본 본문
  */
 function moondental_default_doctors_content() {
