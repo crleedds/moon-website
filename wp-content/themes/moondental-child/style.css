@@ -359,15 +359,65 @@ button.elementor-button {
   text-transform: uppercase;
   margin-top: 2px;
 }
+/* ── 헤더 로고 — 동적 효과 (entrance / hover / scroll-shrink) ── */
+.md-header__brand {
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  /* 살짝 위로 슬라이드 + 페이드인 (페이지 진입 시 1회) */
+  animation: md-logo-enter 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 .md-header__brand .custom-logo,
 .md-header__brand-img {
-  max-height: 56px;
+  max-height: 60px;
   width: auto;
   display: block;
+  transform-origin: left center;
+  transition:
+    max-height 0.35s var(--ease),
+    transform 0.35s var(--ease),
+    filter 0.35s var(--ease);
+  filter: drop-shadow(0 0 0 transparent);
+  will-change: transform, max-height;
 }
+
+/* hover — 미세 확대 + 따뜻한 그림자 강조 (병원 톤에 어울리게 절제) */
+.md-header__brand:hover .md-header__brand-img,
+.md-header__brand:hover .custom-logo,
+.md-header__brand:focus-visible .md-header__brand-img,
+.md-header__brand:focus-visible .custom-logo {
+  transform: scale(1.04);
+  filter: drop-shadow(0 4px 10px rgba(216, 128, 98, 0.18));
+}
+
+/* 스크롤 — 헤더 축소 시 로고도 작아짐 (.is-scrolled 는 main.js가 부착) */
+.md-site-header.is-scrolled .md-header__brand-img,
+.md-site-header.is-scrolled .custom-logo {
+  max-height: 44px;
+}
+
+@keyframes md-logo-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 640px) {
   .md-header__brand .custom-logo,
   .md-header__brand-img { max-height: 44px; }
+  .md-site-header.is-scrolled .md-header__brand-img,
+  .md-site-header.is-scrolled .custom-logo { max-height: 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md-header__brand { animation: none; }
+  .md-header__brand .custom-logo,
+  .md-header__brand-img { transition: none; }
 }
 
 .md-header__nav {
