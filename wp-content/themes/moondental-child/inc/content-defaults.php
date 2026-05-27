@@ -979,6 +979,171 @@ function moondental_default_history_intro() {
 
 
 /**
+ * 개인정보 처리방침 페이지 기본 본문
+ */
+function moondental_default_privacy_content() {
+	$info = moondental_get_info();
+	$rep    = $info['rep']    ?: '문은수';
+	$phone  = $info['phone']  ?: '041-563-2875';
+	$email  = $info['email']  ?: 'moondental1995@naver.com';
+	$addr   = $info['address']?: '충청남도 천안시 동남구 만남로 52, 문타워 9~13층';
+	$name   = $info['name_full'] ?: '한아의료재단 문치과병원';
+
+	ob_start();
+?>
+<div class="md-policy-hero">
+	<span class="md-policy-hero__eyebrow">MOON DENTAL HOSPITAL</span>
+	<p class="md-policy-hero__lead">환자분의 소중한 개인정보를 안전하게 보호합니다.</p>
+	<div class="md-policy-hero__badges">
+		<span>📍 천안 만남로</span>
+		<span>🏥 9명의 의료진</span>
+		<span>🕐 평일 야간 20:30</span>
+		<span>🅿️ 자체 주차장</span>
+	</div>
+	<div class="md-policy-hero__cta">
+		<a class="md-btn md-btn-primary" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>">📅 상담 예약하기</a>
+		<a class="md-btn md-btn-secondary" href="tel:<?php echo esc_attr( preg_replace('/[^0-9]/','',$phone) ); ?>">📞 <?php echo esc_html( $phone ); ?></a>
+	</div>
+</div>
+
+<p class="md-policy-meta">시행일: 2026년 5월 27일 · 최종 수정: 2026년 5월 27일</p>
+
+<h2>제1조 (개인정보의 수집 및 이용목적)</h2>
+<p><?php echo esc_html( $name ); ?>(이하 "병원")은 다음과 같은 목적으로 개인정보를 수집·이용합니다.</p>
+<ul>
+<li><strong>진료 서비스 제공</strong>: 진료 예약, 진료 기록 관리, 치료 계획 수립, 처방전 발급, 검사 결과 안내</li>
+<li><strong>회원 및 환자 관리</strong>: 본인 확인, 진료 이력 관리, 진료 동의 절차 수행, 불량 이용 방지</li>
+<li><strong>마케팅 및 광고</strong>: 신규 진료·이벤트·정기검진 안내, 광고성 정보 제공 (동의한 경우에 한함)</li>
+<li><strong>고객 상담</strong>: 문의 사항 처리, 불만 처리, 진료 후 안내사항 전달, 만족도 조사</li>
+</ul>
+
+<h2>제2조 (수집하는 개인정보의 항목)</h2>
+<table>
+<thead><tr><th>구분</th><th>수집 항목</th><th>수집 목적</th></tr></thead>
+<tbody>
+<tr><td><strong>필수</strong></td><td>성명, 연락처, 생년월일, 성별, 주민등록번호*</td><td>진료 서비스 제공, 본인 확인, 건강보험 청구</td></tr>
+<tr><td><strong>필수</strong></td><td>이메일 주소</td><td>예약 확인 안내, 진료 결과 알림</td></tr>
+<tr><td><strong>필수</strong></td><td>의료 정보 (병력, 알레르기, 복용 약물, 임신 여부 등)</td><td>안전한 진료를 위한 사전 확인</td></tr>
+<tr><td><strong>선택</strong></td><td>주소, 직업, 가족력</td><td>맞춤형 진료 안내, 응급 연락</td></tr>
+<tr><td><strong>자동 수집</strong></td><td>IP 주소, 방문 기록, 쿠키, 접속 로그, 브라우저 정보</td><td>서비스 개선, 보안, 통계 분석</td></tr>
+</tbody>
+</table>
+<p class="md-policy-note">* 주민등록번호는 의료법·건강보험법에 따라 의료기관이 수집·보관해야 하는 법정 정보입니다.</p>
+
+<h2>제3조 (개인정보의 보유 및 이용기간)</h2>
+<p>병원은 개인정보 수집 및 이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 다만, 관련 법령에 따라 보존할 필요가 있는 경우에는 해당 기간 동안 보관합니다.</p>
+<ul>
+<li><strong>의료법에 따른 진료기록부</strong>: <strong>10년</strong> (의료법 시행규칙 제15조)</li>
+<li><strong>처방전</strong>: 2년 (의료법 시행규칙 제15조)</li>
+<li><strong>방사선 사진(X-ray·CT)</strong>: 5년</li>
+<li><strong>전자상거래 등에서의 소비자보호법</strong>: 계약·청약철회 기록 5년 / 소비자 불만·분쟁 처리 기록 3년</li>
+<li><strong>회원 탈퇴 시</strong>: 즉시 파기 (법령에서 정한 보관 기간은 제외)</li>
+</ul>
+
+<h2>제4조 (개인정보의 제3자 제공)</h2>
+<p>병원은 원칙적으로 환자분의 개인정보를 제3자에게 제공하지 않습니다. 다만, 다음의 경우에는 예외로 합니다.</p>
+<ul>
+<li>환자분이 사전에 동의한 경우</li>
+<li>법령의 규정에 의거하거나, 수사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관의 요구가 있는 경우</li>
+<li>국민건강보험공단 등 건강보험 청구를 위한 법정 기관</li>
+<li>응급 상황에서 환자분의 생명·신체 보호를 위해 불가피한 경우</li>
+<li>의료 협진을 위해 환자분의 사전 동의를 받은 의료기관</li>
+</ul>
+
+<h2>제5조 (개인정보의 처리위탁)</h2>
+<p>병원은 원활한 서비스 제공을 위해 일부 업무를 외부 전문업체에 위탁할 수 있습니다.</p>
+<table>
+<thead><tr><th>수탁업체</th><th>위탁 업무 내용</th></tr></thead>
+<tbody>
+<tr><td>예약 관리 시스템 운영사</td><td>예약·접수·진료 일정 관리</td></tr>
+<tr><td>전자의무기록(EMR) 시스템 운영사</td><td>진료 기록 전자 저장·관리</td></tr>
+<tr><td>SMS·알림톡 발송 대행사</td><td>예약 확인·검진 안내 메시지 발송</td></tr>
+<tr><td>결제 대행사 (PG)</td><td>비급여 진료비 결제 처리</td></tr>
+</tbody>
+</table>
+<p>병원은 수탁업체와의 계약 시 개인정보보호 의무를 명시하고 정기적으로 점검·관리합니다.</p>
+
+<h2>제6조 (개인정보의 파기절차 및 방법)</h2>
+<p>병원은 개인정보 보유기간의 경과, 처리목적 달성 등으로 개인정보가 불필요하게 되었을 때에는 지체 없이 해당 개인정보를 파기합니다.</p>
+<ul>
+<li><strong>전자적 파일</strong>: 복원이 불가능한 기술적 방법으로 영구 삭제</li>
+<li><strong>종이 문서</strong>: 분쇄기로 분쇄하거나 소각 처리</li>
+<li><strong>파기 시기</strong>: 보유기간 종료 후 5일 이내</li>
+</ul>
+
+<h2>제7조 (이용자의 권리와 그 행사방법)</h2>
+<p>환자분은 언제든지 자신의 개인정보에 대해 다음과 같은 권리를 행사할 수 있습니다.</p>
+<ul>
+<li><strong>개인정보 열람 요구</strong> — 본인의 진료 기록을 열람할 권리</li>
+<li><strong>오류 정정 요구</strong> — 잘못된 정보의 수정을 요청할 권리</li>
+<li><strong>삭제 요구</strong> — 법령상 보존 의무가 없는 정보의 삭제 요청</li>
+<li><strong>처리 정지 요구</strong> — 개인정보 처리의 일시 중단 요청</li>
+<li><strong>동의 철회</strong> — 마케팅 등 선택적 동의 사항에 대한 철회 요청</li>
+</ul>
+<p>권리 행사는 병원 고객센터(<a href="tel:<?php echo esc_attr( preg_replace('/[^0-9]/','',$phone) ); ?>"><strong><?php echo esc_html( $phone ); ?></strong></a>) 또는 이메일(<a href="mailto:<?php echo esc_attr( $email ); ?>"><?php echo esc_html( $email ); ?></a>)을 통해 요청하실 수 있으며, 병원은 정당한 사유가 없는 한 <strong>10일 이내</strong>에 처리하여 회신드립니다.</p>
+
+<h2>제8조 (개인정보 보호책임자)</h2>
+<p>병원은 개인정보 처리에 관한 업무를 총괄하여 책임지고, 개인정보 처리와 관련한 환자분의 불만 처리 및 피해 구제를 위해 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.</p>
+<table>
+<tbody>
+<tr><td><strong>개인정보 보호책임자</strong></td><td><?php echo esc_html( $rep ); ?> (대표 병원장 · 한아의료재단 이사장)</td></tr>
+<tr><td><strong>연락처</strong></td><td><?php echo esc_html( $phone ); ?></td></tr>
+<tr><td><strong>이메일</strong></td><td><?php echo esc_html( $email ); ?></td></tr>
+<tr><td><strong>주소</strong></td><td><?php echo esc_html( $addr ); ?></td></tr>
+</tbody>
+</table>
+
+<h2>제9조 (쿠키 및 분석 도구 사용)</h2>
+<p>병원은 서비스 개선 및 환자분의 편의 향상을 위해 다음과 같은 쿠키 및 분석 도구를 사용할 수 있습니다.</p>
+<table>
+<thead><tr><th>도구명</th><th>목적</th><th>수집 정보</th><th>보유 기간</th></tr></thead>
+<tbody>
+<tr><td>Google Analytics</td><td>웹사이트 이용 통계 분석</td><td>방문 페이지, 체류 시간, 유입 경로, 기기 정보</td><td>26개월</td></tr>
+<tr><td>WordPress 세션</td><td>로그인 상태 유지</td><td>세션 ID, 사용자 식별 토큰</td><td>세션 종료 시</td></tr>
+<tr><td>예약 폼 보안</td><td>중복 제출 방지, 보안</td><td>IP 주소, 제출 시각</td><td>최대 60초</td></tr>
+</tbody>
+</table>
+
+<h3>쿠키 관리 방법</h3>
+<ul>
+<li>브라우저 설정에서 쿠키를 차단하거나 삭제할 수 있습니다.</li>
+<li>쿠키를 차단할 경우 일부 서비스 이용에 제한이 있을 수 있습니다.</li>
+<li>Google Analytics 수집 거부: <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">https://tools.google.com/dlpage/gaoptout</a></li>
+</ul>
+
+<h3>주요 브라우저별 쿠키 설정</h3>
+<ul>
+<li><strong>Chrome</strong>: 설정 → 개인정보 및 보안 → 쿠키 및 기타 사이트 데이터</li>
+<li><strong>Safari</strong>: 환경설정 → 개인 정보 보호 → 쿠키 및 웹사이트 데이터</li>
+<li><strong>Firefox</strong>: 설정 → 개인 정보 및 보안 → 쿠키 및 사이트 데이터</li>
+<li><strong>Edge</strong>: 설정 → 쿠키 및 사이트 권한 → 쿠키 및 사이트 데이터</li>
+</ul>
+
+<h2>제10조 (개인정보의 안전성 확보 조치)</h2>
+<p>병원은 개인정보의 안전성 확보를 위해 다음과 같은 기술적·관리적 조치를 취하고 있습니다.</p>
+<ul>
+<li><strong>관리적 조치</strong>: 개인정보 보호책임자 지정, 정기적인 직원 교육, 접근 권한 차등 부여</li>
+<li><strong>기술적 조치</strong>: 진료 기록 시스템의 접근 통제, 비밀번호 암호화, 백신·방화벽 운영</li>
+<li><strong>물리적 조치</strong>: 진료 기록 보관실 출입 통제, CCTV 운영, 잠금 장치 관리</li>
+</ul>
+
+<h2>제11조 (개인정보 침해 신고)</h2>
+<p>개인정보 침해에 대한 신고나 상담이 필요하신 경우, 아래 기관에 문의하실 수 있습니다.</p>
+<ul>
+<li><strong>개인정보침해신고센터</strong> (privacy.kisa.or.kr / 국번 없이 118)</li>
+<li><strong>개인정보분쟁조정위원회</strong> (kopico.go.kr / 1833-6972)</li>
+<li><strong>대검찰청 사이버수사과</strong> (spo.go.kr / 02-3480-3573)</li>
+<li><strong>경찰청 사이버수사국</strong> (ecrm.cyber.go.kr / 국번 없이 182)</li>
+</ul>
+
+<h2>제12조 (개인정보 처리방침의 변경)</h2>
+<p>이 개인정보 처리방침은 <strong>2026년 5월 27일</strong>부터 적용됩니다. 법령·정책 또는 보안 기술의 변경에 따라 내용의 추가·삭제 및 수정이 있을 시에는 변경되는 개인정보 처리방침을 시행하기 최소 7일 전에 병원 홈페이지를 통해 사전 공지합니다.</p>
+<?php
+	return ob_get_clean();
+}
+
+
+/**
  * 의료진 (doctors) 페이지 기본 본문
  */
 function moondental_default_doctors_content() {

@@ -1461,6 +1461,76 @@ button.elementor-button {
 }
 
 /* =============================================================
+   10h. Policy hero block (개인정보처리방침 본문 상단 박스)
+   ============================================================= */
+.md-policy-hero {
+  background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-alt) 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(24px, 3vw, 36px);
+  margin-bottom: 32px;
+  text-align: center;
+}
+.md-policy-hero__eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--color-primary-dark);
+  background: var(--color-white);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 12px;
+}
+.md-policy-hero__lead {
+  font-size: 1.0625rem;
+  color: var(--color-text-sub);
+  margin: 0 0 16px;
+  line-height: 1.6;
+}
+.md-policy-hero__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  justify-content: center;
+  margin: 16px 0 20px;
+}
+.md-policy-hero__badges span {
+  font-size: 0.8125rem;
+  color: var(--color-text);
+  background: var(--color-white);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+}
+.md-policy-hero__cta {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.md-policy-meta {
+  font-size: 0.8125rem;
+  color: var(--color-text-mute);
+  font-weight: 600;
+  padding: 8px 14px;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  margin: 0 0 24px;
+}
+.md-policy-note {
+  font-size: 0.8125rem;
+  color: var(--color-text-sub);
+  background: var(--color-surface);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--color-warning);
+  margin: 8px 0 0;
+}
+
+/* =============================================================
    10g. Reservation (상담예약 페이지 — 3-step 위자드)
    ============================================================= */
 .md-page-hero--reservation .md-page-hero__eyebrow {

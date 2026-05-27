@@ -74,6 +74,10 @@ get_header();
 						case '진료항목':
 							echo moondental_default_services_overview_content();
 							break;
+						case 'privacy':
+						case '개인정보처리방침':
+							echo moondental_default_privacy_content();
+							break;
 						default:
 							/* 진료항목 자식 페이지면 service content 시도 */
 							$svc_html = moondental_default_service_content( $slug );
