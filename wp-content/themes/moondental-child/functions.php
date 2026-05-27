@@ -19,6 +19,7 @@ define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
 require_once MOONDENTAL_DIR . '/inc/content-defaults.php';
 require_once MOONDENTAL_DIR . '/inc/naver-importer.php';
+require_once MOONDENTAL_DIR . '/inc/reservation.php';
 
 
 /* ============================================================
@@ -624,6 +625,8 @@ function moondental_template_router( $template ) {
 		'오시는-길'       => 'page-templates/page-location.php',
 		'소식'           => 'page-templates/page-news.php',
 		'역사'           => 'page-templates/page-history.php',
+		'상담예약'       => 'page-templates/page-reservation.php',
+		'reservation'    => 'page-templates/page-reservation.php',
 		'임플란트-센터'   => 'page-templates/page-service.php',
 		'투명교정-센터'   => 'page-templates/page-service.php',
 		'자연치아-살리기' => 'page-templates/page-service.php',
