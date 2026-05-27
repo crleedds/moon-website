@@ -20,29 +20,34 @@ $groups = moondental_get_team();
 			</p>
 		</header>
 
-		<?php foreach ( $groups as $group ) : ?>
+		<?php
+		$doctors_page_url = home_url( '/doctors/' );
+		foreach ( $groups as $group ) : ?>
 			<div class="md-team-group">
 				<h3 class="md-team-group__title"><?php echo esc_html( $group['group'] ); ?></h3>
 				<div class="md-team-grid">
 					<?php foreach ( $group['members'] as $doc ) :
 						$photo_url = moondental_doctor_photo_url( $doc['photo'] ?? '' );
+						$anchor    = 'doctor-' . sanitize_title( $doc['name'] );
+						$profile   = $doctors_page_url . '#' . $anchor;
 					?>
-						<article class="md-team-card">
-							<div class="md-team-card__avatar<?php echo $photo_url ? ' md-team-card__avatar--photo' : ''; ?>" aria-hidden="true">
+						<a class="md-team-card" href="<?php echo esc_url( $profile ); ?>" aria-label="<?php echo esc_attr( $doc['name'] . ' 원장 프로필 보기' ); ?>">
+							<span class="md-team-card__avatar<?php echo $photo_url ? ' md-team-card__avatar--photo' : ''; ?>" aria-hidden="true">
 								<?php if ( $photo_url ) : ?>
 									<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $doc['name'] ); ?>" loading="lazy">
 								<?php else : ?>
 									<span><?php echo esc_html( mb_substr( $doc['name'], -2 ) ); ?></span>
 								<?php endif; ?>
-							</div>
-							<div class="md-team-card__body">
-								<div class="md-team-card__role"><?php echo esc_html( $doc['role'] ); ?></div>
-								<h4 class="md-team-card__name"><?php echo esc_html( $doc['name'] ); ?></h4>
+							</span>
+							<span class="md-team-card__body">
+								<span class="md-team-card__role"><?php echo esc_html( $doc['role'] ); ?></span>
+								<span class="md-team-card__name"><?php echo esc_html( $doc['name'] ); ?></span>
 								<?php if ( ! empty( $doc['philosophy'] ) ) : ?>
-									<p class="md-team-card__bio"><?php echo esc_html( wp_trim_words( $doc['philosophy'], 18, '…' ) ); ?></p>
+									<span class="md-team-card__bio"><?php echo esc_html( wp_trim_words( $doc['philosophy'], 18, '…' ) ); ?></span>
 								<?php endif; ?>
-							</div>
-						</article>
+								<span class="md-team-card__more" aria-hidden="true">프로필 보기 →</span>
+							</span>
+						</a>
 					<?php endforeach; ?>
 				</div>
 			</div>

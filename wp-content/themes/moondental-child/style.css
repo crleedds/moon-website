@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      1.5.0
+Version:      1.6.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -1500,32 +1500,63 @@ button.elementor-button {
 @media (max-width: 768px) {
   .md-mobile-cta { display: flex; }
   body { padding-bottom: 60px; }
-  .md-kakao-fab { display: none !important; }
+  .md-fab-stack { display: none !important; }
 }
 
-.md-kakao-fab {
+/* 데스크탑 우측 하단 — 네이버 예약(상) + 카카오톡(하) 세로 스택 */
+.md-fab-stack {
   position: fixed;
   right: 24px; bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 150;
+  align-items: flex-end;
+}
+.md-fab {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 20px;
-  background: #FEE500;
-  color: #3C1E1E;
+  padding: 12px 18px;
   border-radius: var(--radius-pill);
   text-decoration: none;
   font-weight: 700;
   font-size: 0.9375rem;
   box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-  z-index: 150;
   transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  white-space: nowrap;
 }
-.md-kakao-fab:hover {
+.md-fab:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 28px rgba(0,0,0,0.24);
+}
+.md-fab__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  font-weight: 800;
+  font-size: 0.8125rem;
+  line-height: 1;
+}
+.md-fab__icon--svg { background: transparent; width: 22px; height: 22px; border-radius: 0; }
+
+.md-fab--kakao {
+  background: #FEE500;
   color: #3C1E1E;
 }
-.md-kakao-fab svg { width: 22px; height: 22px; }
+.md-fab--kakao:hover { color: #3C1E1E; }
+
+.md-fab--naver {
+  background: #03C75A;
+  color: #fff;
+}
+.md-fab--naver:hover { color: #fff; }
+.md-fab--naver .md-fab__icon {
+  background: #fff;
+  color: #03C75A;
+}
 
 /* =============================================================
    10j. Testimonials (환자 후기 — 홈)
@@ -2890,4 +2921,276 @@ button.elementor-button {
   background: rgba(255, 255, 255, 0.14);
   color: var(--color-white);
   border-color: var(--color-white);
+}
+
+/* =============================================================
+   23. Team card → anchor 변환 (의료진 프로필 링크화)
+   ============================================================= */
+a.md-team-card {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+a.md-team-card:hover { color: inherit; }
+.md-team-card__role,
+.md-team-card__name,
+.md-team-card__bio,
+.md-team-card__body,
+.md-team-card__more {
+  display: block;
+}
+.md-team-card__more {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  letter-spacing: 0.02em;
+  transition: color 0.2s var(--ease);
+}
+a.md-team-card:hover .md-team-card__more {
+  color: var(--color-primary);
+}
+
+/* =============================================================
+   24. 예약 채널 카드 (예약 페이지 — 네이버/전화/카톡 3개)
+   ============================================================= */
+.md-channel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(14px, 2vw, 22px);
+}
+.md-channel-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: clamp(24px, 3vw, 32px);
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: var(--color-text);
+  transition: all 0.3s var(--ease);
+  overflow: hidden;
+}
+.md-channel-card::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  transition: transform 0.4s var(--ease-out-back);
+  z-index: 0;
+}
+.md-channel-card > * { position: relative; z-index: 1; }
+.md-channel-card:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-4px);
+  color: var(--color-text);
+}
+.md-channel-card:hover::before { transform: scale(1.6); }
+
+.md-channel-card__icon {
+  font-size: 2.25rem;
+  line-height: 1;
+}
+.md-channel-card__title {
+  font-size: var(--fs-h4);
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.015em;
+}
+.md-channel-card__desc {
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  line-height: 1.6;
+}
+.md-channel-card__cta {
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  letter-spacing: 0.02em;
+  transition: gap 0.2s var(--ease);
+}
+
+/* 네이버 예약(primary) 카드 — 강조 */
+.md-channel-card--primary {
+  background: linear-gradient(135deg, #03C75A 0%, #02a64a 100%);
+  border-color: #03C75A;
+  color: #fff;
+}
+.md-channel-card--primary::before { background: rgba(255,255,255,0.10); }
+.md-channel-card--primary .md-channel-card__title,
+.md-channel-card--primary .md-channel-card__desc,
+.md-channel-card--primary .md-channel-card__cta { color: #fff; }
+.md-channel-card--primary .md-channel-card__desc { opacity: 0.92; }
+.md-channel-card--primary:hover {
+  color: #fff;
+  border-color: #02a64a;
+  box-shadow: 0 14px 32px rgba(3, 199, 90, 0.32);
+}
+
+.md-channel-grid__hint {
+  margin: 24px 0 0;
+  text-align: center;
+  font-size: var(--fs-caption);
+  color: var(--color-text-mute);
+}
+
+/* =============================================================
+   25. 3-Map 버튼 그리드 (네이버/카카오/Google)
+   ============================================================= */
+.md-mapbtn-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(12px, 2vw, 20px);
+  margin-bottom: clamp(32px, 4vw, 48px);
+}
+@media (max-width: 720px) {
+  .md-mapbtn-grid { grid-template-columns: 1fr; }
+}
+
+.md-mapbtn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: var(--color-text);
+  transition: all 0.25s var(--ease);
+}
+.md-mapbtn:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  color: var(--color-text);
+}
+.md-mapbtn__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  color: #fff;
+}
+.md-mapbtn--naver  .md-mapbtn__logo { background: #03C75A; }
+.md-mapbtn--kakao  .md-mapbtn__logo { background: #FEE500; color: #3C1E1E; }
+.md-mapbtn--google .md-mapbtn__logo { background: #4285F4; }
+
+.md-mapbtn__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.md-mapbtn__name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+.md-mapbtn__sub {
+  font-size: var(--fs-caption);
+  color: var(--color-text-sub);
+  margin-top: 2px;
+}
+.md-mapbtn__arrow {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-mute);
+  transition: transform 0.25s var(--ease), color 0.25s var(--ease);
+}
+.md-mapbtn:hover .md-mapbtn__arrow {
+  transform: translateX(4px);
+  color: var(--color-primary);
+}
+
+/* =============================================================
+   26. 오시는 길 카드 그리드 (자가용/주차/대중교통/KTX)
+   ============================================================= */
+.md-location-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(14px, 2vw, 20px);
+  margin-bottom: clamp(32px, 4vw, 48px);
+}
+.md-location-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: clamp(20px, 2.5vw, 28px);
+}
+.md-location-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+  color: var(--color-primary-dark);
+  letter-spacing: -0.01em;
+}
+.md-location-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.md-location-card li {
+  position: relative;
+  padding: 6px 0 6px 18px;
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  line-height: 1.65;
+}
+.md-location-card li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 14px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.md-location-floors {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(24px, 3vw, 32px);
+}
+.md-location-floors__title {
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  margin: 0 0 16px;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+.md-location-floors ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px 24px;
+}
+.md-location-floors li {
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--color-border);
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+}
+.md-location-floors li strong {
+  display: inline-block;
+  min-width: 56px;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  font-feature-settings: 'tnum';
 }

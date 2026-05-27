@@ -106,7 +106,16 @@ $info = moondental_get_info();
 				<?php if ( ! empty( $info['med_inst_no'] ) ) : ?> · 의료기관번호 <?php echo esc_html( $info['med_inst_no'] ); ?><?php endif; ?>
 				<?php if ( ! empty( $info['biz_no'] ) ) : ?> · 사업자번호 <?php echo esc_html( $info['biz_no'] ); ?><?php endif; ?>
 				<br>
-				<?php if ( $info['address'] ) : ?><?php echo esc_html( $info['address'] ); ?><?php endif; ?>
+				<?php if ( $info['address'] ) :
+					$place_url = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' );
+					if ( $place_url ) : ?>
+						<a href="<?php echo esc_url( $place_url ); ?>" target="_blank" rel="noopener" data-track="cta-footer-address" style="border-bottom:1px dashed rgba(255,255,255,0.25);">
+							<?php echo esc_html( $info['address'] ); ?>
+						</a>
+					<?php else : ?>
+						<?php echo esc_html( $info['address'] ); ?>
+					<?php endif;
+				endif; ?>
 			</div>
 			<div>&copy; <?php echo esc_html( date_i18n( 'Y' ) ); ?> <?php echo esc_html( $info['name_short'] ); ?>. All rights reserved.</div>
 		</div>

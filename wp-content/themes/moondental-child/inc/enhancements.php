@@ -134,22 +134,66 @@ function moondental_floating_actions() {
 		<?php endif; ?>
 	</div>
 
-	<!-- 데스크탑 카카오톡 플로팅 버튼 (우측 하단, 데스크탑에서만) -->
-	<?php if ( $kakao && $kakao !== '#' ) : ?>
-	<a class="md-kakao-fab"
-	   href="<?php echo esc_url( $kakao ); ?>"
-	   target="_blank" rel="noopener"
-	   data-track="cta-kakao-fab"
-	   aria-label="카카오톡 상담 열기">
-		<svg viewBox="0 0 36 36" aria-hidden="true">
-			<path fill="#3C1E1E" d="M18 6C10.27 6 4 10.93 4 17c0 3.97 2.69 7.46 6.72 9.4l-1.43 5.24c-.13.47.39.85.79.58l6.36-4.2c.51.05 1.02.08 1.56.08 7.73 0 14-4.93 14-11s-6.27-11-14-11z"/>
-		</svg>
-		<span class="md-kakao-fab__label">카카오톡 상담</span>
-	</a>
-	<?php endif; ?>
+	<!-- 데스크탑 우측 하단 플로팅 버튼 스택 (카카오 + 네이버, 데스크탑에서만) -->
+	<div class="md-fab-stack" aria-hidden="false">
+		<?php if ( $naver && $naver !== '#' ) : ?>
+		<a class="md-fab md-fab--naver"
+		   href="<?php echo esc_url( $naver ); ?>"
+		   target="_blank" rel="noopener"
+		   data-track="cta-naver-fab"
+		   aria-label="네이버 예약 열기">
+			<span class="md-fab__icon" aria-hidden="true">N</span>
+			<span class="md-fab__label">네이버 예약</span>
+		</a>
+		<?php endif; ?>
+		<?php if ( $kakao && $kakao !== '#' ) : ?>
+		<a class="md-fab md-fab--kakao"
+		   href="<?php echo esc_url( $kakao ); ?>"
+		   target="_blank" rel="noopener"
+		   data-track="cta-kakao-fab"
+		   aria-label="카카오톡 상담 열기">
+			<svg class="md-fab__icon md-fab__icon--svg" viewBox="0 0 36 36" aria-hidden="true">
+				<path fill="#3C1E1E" d="M18 6C10.27 6 4 10.93 4 17c0 3.97 2.69 7.46 6.72 9.4l-1.43 5.24c-.13.47.39.85.79.58l6.36-4.2c.51.05 1.02.08 1.56.08 7.73 0 14-4.93 14-11s-6.27-11-14-11z"/>
+			</svg>
+			<span class="md-fab__label">카카오톡 상담</span>
+		</a>
+		<?php endif; ?>
+	</div>
 	<?php
 }
 add_action( 'wp_footer', 'moondental_floating_actions', 5 );
+
+
+/* ============================================================
+ * 2b. 기본 메뉴에서 특정 항목 자동 숨기기 (홈/소식/오시는 길)
+ *     — WP 관리자에서 메뉴를 따로 정리하지 않아도 화면에서는 제거됨.
+ *     primary 메뉴 위치에만 적용. 로고 클릭으로 홈 이동은 그대로 유지.
+ * ========================================================== */
+function moondental_filter_nav_items( $items, $args ) {
+	if ( empty( $args->theme_location ) || $args->theme_location !== 'primary' ) {
+		return $items;
+	}
+	$hide_titles = array(
+		'홈', 'home', 'Home',
+		'소식', '공지사항', '공지', 'news', 'News',
+		'오시는 길', '오시는길', '위치', 'location', 'Location',
+	);
+	$hide_url_patterns = array( '/오시는-길/', '/location/', '/notices/', '/news/' );
+	$site_home = trailingslashit( home_url( '/' ) );
+
+	return array_values( array_filter( $items, function( $item ) use ( $hide_titles, $hide_url_patterns, $site_home ) {
+		$title = trim( wp_strip_all_tags( $item->title ) );
+		if ( in_array( $title, $hide_titles, true ) ) return false;
+		// URL이 사이트 홈 그 자체인 메뉴(=홈) 제거
+		$url = trailingslashit( (string) $item->url );
+		if ( $url === $site_home ) return false;
+		foreach ( $hide_url_patterns as $p ) {
+			if ( strpos( $url, $p ) !== false ) return false;
+		}
+		return true;
+	} ) );
+}
+add_filter( 'wp_nav_menu_objects', 'moondental_filter_nav_items', 10, 2 );
 
 
 /* ============================================================

@@ -62,18 +62,28 @@ $info = moondental_get_info();
 
 			<div class="md-info-block">
 				<span class="md-info-block__label">오시는 길</span>
-				<p class="md-info-block__value" style="font-size:1.0625rem; line-height:1.6;">
-					<?php echo esc_html( $info['address_road'] ?: $info['address'] ); ?>
-				</p>
-				<?php if ( $info['naver_place'] ) : ?>
-					<div style="margin-top:16px;">
-						<a class="md-btn md-btn-secondary md-btn--sm" href="<?php echo esc_url( $info['naver_place'] ); ?>" target="_blank" rel="noopener">
-							네이버 지도로 길찾기
+				<?php $place_url = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' ); ?>
+				<?php if ( $place_url ) : ?>
+					<p class="md-info-block__value" style="font-size:1.0625rem; line-height:1.6;">
+						<a href="<?php echo esc_url( $place_url ); ?>" target="_blank" rel="noopener" data-track="cta-address-place" style="color:inherit; text-decoration:none; border-bottom:1px dashed var(--color-border);">
+							<?php echo esc_html( $info['address_road'] ?: $info['address'] ); ?>
+						</a>
+					</p>
+					<div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+						<a class="md-btn md-btn-secondary md-btn--sm" href="<?php echo esc_url( $place_url ); ?>" target="_blank" rel="noopener" data-track="cta-info-naver-map">
+							🟢 네이버 플레이스
+						</a>
+						<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>">
+							지도·교통 자세히 →
 						</a>
 					</div>
+				<?php else : ?>
+					<p class="md-info-block__value" style="font-size:1.0625rem; line-height:1.6;">
+						<?php echo esc_html( $info['address_road'] ?: $info['address'] ); ?>
+					</p>
 				<?php endif; ?>
 				<p class="md-info-block__sub" style="margin-top:12px;">
-					주차 안내 / 대중교통 정보 ▸ <a href="<?php echo esc_url( home_url( '/location/' ) ); ?>">자세히 보기</a>
+					주차·대중교통 안내는 <a href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>">예약·상담 페이지</a>에서 확인하실 수 있습니다.
 				</p>
 			</div>
 
