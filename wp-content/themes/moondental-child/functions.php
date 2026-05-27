@@ -798,7 +798,7 @@ function moondental_get_team() {
 					'name'       => '문은수',
 					'role'       => '대표 병원장',
 					'photo'      => 'doctor-04.png',
-					'philosophy' => '최고의 실력으로 환자를 가족처럼 생각하는 것, 국내 제일의 치과병원 문치과의 철학입니다.',
+					'philosophy' => '환자를 가족처럼 생각하는 마음, 그것이 문치과의 진료 철학입니다.',
 					'bio'        => array(
 						'한아의료재단 이사장',
 						'한아임플란트 보철연구소장',
@@ -918,7 +918,7 @@ function moondental_get_team() {
 					'name'       => '이영일',
 					'role'       => '원장 · 11F 교정과',
 					'photo'      => 'doctor-09.png',
-					'philosophy' => '최고의 실력으로 환자를 가족처럼 생각하는 것, 국내 제일의 치과병원 문치과의 철학입니다.',
+					'philosophy' => '환자를 가족처럼 생각하는 마음, 그것이 문치과의 진료 철학입니다.',
 					'bio'        => array(
 						'단국대학교 치과대학 졸업',
 						'단국대 치과대학원 치의학과 석사',

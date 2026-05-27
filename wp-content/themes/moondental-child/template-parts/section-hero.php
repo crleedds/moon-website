@@ -33,20 +33,18 @@ $hero_image_id = get_theme_mod( 'moondental_hero_image', 0 );
 				<p class="md-hero__lead"><?php echo nl2br( esc_html( $lead ) ); ?></p>
 
 				<div class="md-btn-group">
-					<?php $kakao = $info['kakao_url']; ?>
-					<?php if ( $kakao ) : ?>
-						<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( $kakao ); ?>" target="_blank" rel="noopener">
-							카카오톡으로 상담받기
+					<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-hero-reservation">
+						📅 상담 예약하기
+					</a>
+					<?php if ( ! empty( $info['kakao_url'] ) ) : ?>
+						<a class="md-btn md-btn-secondary md-btn--lg" href="<?php echo esc_url( $info['kakao_url'] ); ?>" target="_blank" rel="noopener" data-track="cta-hero-kakao">
+							카카오톡 상담
 						</a>
 					<?php else : ?>
-						<a class="md-btn md-btn-primary md-btn--lg" href="tel:<?php echo esc_attr( $info['phone_link'] ?: preg_replace('/[^0-9]/', '', $info['phone']) ); ?>">
+						<a class="md-btn md-btn-secondary md-btn--lg" href="tel:<?php echo esc_attr( $info['phone_link'] ?: preg_replace('/[^0-9]/', '', $info['phone']) ); ?>">
 							📞 <?php echo esc_html( $info['phone'] ); ?>
 						</a>
 					<?php endif; ?>
-
-					<a class="md-btn md-btn-secondary md-btn--lg" href="<?php echo esc_url( home_url( '/services/' ) ); ?>">
-						진료안내 보기
-					</a>
 				</div>
 			</div>
 

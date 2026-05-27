@@ -48,8 +48,9 @@ $groups = moondental_get_team();
 				<div class="md-doc-list">
 					<?php foreach ( $group['members'] as $doc ) :
 						$photo_url = moondental_doctor_photo_url( $doc['photo'] ?? '' );
+						$anchor    = 'doctor-' . sanitize_title( $doc['name'] );
 					?>
-						<article class="md-doc-row">
+						<article class="md-doc-row" id="<?php echo esc_attr( $anchor ); ?>">
 							<div class="md-doc-row__media<?php echo $photo_url ? ' has-photo' : ''; ?>">
 								<?php if ( $photo_url ) : ?>
 									<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $doc['name'] ); ?>" loading="lazy">

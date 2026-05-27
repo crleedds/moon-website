@@ -182,6 +182,81 @@ add_action( 'wp_footer', 'moondental_click_tracking', 99 );
 
 
 /* ============================================================
+ * 3b. GA4 & Google Search Console — Customizer 필드 + head 자동 출력
+ * ========================================================== */
+function moondental_analytics_customize( $wp_customize ) {
+	$wp_customize->add_section( 'moondental_analytics', array(
+		'title'    => '분석·검색 도구',
+		'panel'    => 'moondental_panel',
+		'priority' => 30,
+	) );
+	$wp_customize->add_setting( 'moondental_ga4_id', array(
+		'default'           => '',
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'moondental_ga4_id', array(
+		'label'       => 'GA4 측정 ID',
+		'description' => 'Google Analytics 4 측정 ID (예: G-XXXXXXXXXX). 입력 시 자동으로 추적 시작.',
+		'section'     => 'moondental_analytics',
+		'type'        => 'text',
+	) );
+	$wp_customize->add_setting( 'moondental_gsc_verify', array(
+		'default'           => '',
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'moondental_gsc_verify', array(
+		'label'       => 'Google Search Console 인증 코드',
+		'description' => 'google-site-verification 메타 태그 값 (HTML 태그 방식으로 인증 시).',
+		'section'     => 'moondental_analytics',
+		'type'        => 'text',
+	) );
+	$wp_customize->add_setting( 'moondental_naver_verify', array(
+		'default'           => '',
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'moondental_naver_verify', array(
+		'label'       => '네이버 서치어드바이저 인증 코드',
+		'description' => 'naver-site-verification 메타 태그 값.',
+		'section'     => 'moondental_analytics',
+		'type'        => 'text',
+	) );
+}
+add_action( 'customize_register', 'moondental_analytics_customize', 20 );
+
+function moondental_analytics_head() {
+	$ga = trim( (string) get_theme_mod( 'moondental_ga4_id', '' ) );
+	$gv = trim( (string) get_theme_mod( 'moondental_gsc_verify', '' ) );
+	$nv = trim( (string) get_theme_mod( 'moondental_naver_verify', '' ) );
+	if ( $gv ) echo "\n<meta name=\"google-site-verification\" content=\"" . esc_attr( $gv ) . "\">\n";
+	if ( $nv ) echo "<meta name=\"naver-site-verification\" content=\"" . esc_attr( $nv ) . "\">\n";
+	if ( $ga && preg_match( '/^G-[A-Z0-9]+$/i', $ga ) ) {
+		$ga_esc = esc_js( $ga );
+		echo "<!-- GA4 -->\n";
+		echo "<script async src=\"https://www.googletagmanager.com/gtag/js?id={$ga_esc}\"></script>\n";
+		echo "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{$ga_esc}');</script>\n";
+	}
+}
+add_action( 'wp_head', 'moondental_analytics_head', 2 );
+
+
+/* ============================================================
+ * 3c. 모든 이미지에 자동 loading="lazy" + decoding="async" 부착
+ * ========================================================== */
+function moondental_lazy_images( $content ) {
+	if ( is_admin() || is_feed() ) return $content;
+	// 이미 loading 속성이 있는 img는 건드리지 않음
+	return preg_replace_callback( '#<img\b([^>]*)>#i', function( $m ) {
+		$attrs = $m[1];
+		if ( stripos( $attrs, 'loading=' ) === false )  $attrs .= ' loading="lazy"';
+		if ( stripos( $attrs, 'decoding=' ) === false ) $attrs .= ' decoding="async"';
+		return '<img' . $attrs . '>';
+	}, $content );
+}
+add_filter( 'the_content', 'moondental_lazy_images', 99 );
+add_filter( 'post_thumbnail_html', 'moondental_lazy_images', 99 );
+
+
+/* ============================================================
  * 4. 환자 후기 데이터 (홈 섹션용)
  * ========================================================== */
 function moondental_get_testimonials() {

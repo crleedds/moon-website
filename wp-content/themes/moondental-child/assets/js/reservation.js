@@ -191,7 +191,8 @@
         +     '<dt>예약자</dt><dd>' + esc(d.name) + '</dd>'
         +   '</dl>'
         +   '<p class="md-res-success__hint">예약 확정 전 변경이 필요하시면 전화 또는 카카오톡으로 연락주세요.</p>'
-        +   '<div class="md-btn-group" style="justify-content:center; display:flex; margin-top:16px;">'
+        +   '<div class="md-btn-group" style="justify-content:center; display:flex; margin-top:16px; flex-wrap:wrap; gap:10px;">'
+        +     '<a class="md-btn md-btn-primary" href="http://pf.kakao.com/_VTcgE/chat" target="_blank" rel="noopener" data-track="cta-success-kakao">💬 카카오톡 친구 추가</a>'
         +     '<a class="md-btn md-btn-ghost" href="/">홈으로</a>'
         +   '</div>'
         + '</div>';
