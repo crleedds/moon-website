@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      1.4.0
+Version:      1.5.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -2590,4 +2590,304 @@ button.elementor-button {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* =============================================================
+   17. Scroll Reveal (IntersectionObserver-driven)
+   ============================================================= */
+.md-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  will-change: opacity, transform;
+}
+.md-reveal.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Stagger children by data-index */
+.md-reveal[data-reveal-delay="1"] { transition-delay: 0.08s; }
+.md-reveal[data-reveal-delay="2"] { transition-delay: 0.16s; }
+.md-reveal[data-reveal-delay="3"] { transition-delay: 0.24s; }
+.md-reveal[data-reveal-delay="4"] { transition-delay: 0.32s; }
+.md-reveal[data-reveal-delay="5"] { transition-delay: 0.40s; }
+.md-reveal[data-reveal-delay="6"] { transition-delay: 0.48s; }
+.md-reveal[data-reveal-delay="7"] { transition-delay: 0.56s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .md-reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* Screen reader only (for visually-hidden link text in cards) */
+.md-screen-reader-text {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =============================================================
+   18. Hero — Trust Badges (CTA 아래 작은 신뢰 행)
+   ============================================================= */
+.md-hero__badges {
+  list-style: none;
+  padding: 0;
+  margin: 28px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.md-hero__badges li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-caption);
+  color: var(--color-text-sub);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+.md-hero__badges li span[aria-hidden] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--color-accent-light);
+  color: #2F5A39;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* =============================================================
+   19. Trust Band (히어로 직후 stat 4개)
+   ============================================================= */
+.md-trust {
+  background: var(--color-bg);
+  padding-block: clamp(40px, 5vw, 64px);
+  position: relative;
+}
+.md-trust::before,
+.md-trust::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--color-border) 18%,
+    var(--color-border) 82%,
+    transparent 100%);
+}
+.md-trust::before { top: 0; }
+.md-trust::after  { bottom: 0; }
+
+.md-trust__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(12px, 2.5vw, 32px);
+}
+@media (max-width: 880px) {
+  .md-trust__grid { grid-template-columns: repeat(2, 1fr); gap: 24px 12px; }
+}
+
+.md-trust__item {
+  position: relative;
+  padding: clamp(12px, 2vw, 20px) clamp(8px, 1.5vw, 16px);
+  text-align: center;
+}
+.md-trust__item + .md-trust__item::before {
+  content: '';
+  position: absolute;
+  top: 20%; bottom: 20%;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    var(--color-border) 40%,
+    var(--color-border) 60%,
+    transparent 100%);
+}
+@media (max-width: 880px) {
+  .md-trust__item + .md-trust__item::before { display: none; }
+  .md-trust__item:nth-child(odd) + .md-trust__item::before { display: none; }
+}
+
+.md-trust__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px; height: 44px;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-alt));
+  border-radius: 50%;
+  font-size: 1.25rem;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7);
+}
+.md-trust__num {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 4px 0 8px;
+  font-feature-settings: 'tnum';
+}
+.md-trust__value {
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.md-trust__unit {
+  font-size: clamp(0.875rem, 1.4vw, 1.125rem);
+  font-weight: 700;
+  color: var(--color-text-sub);
+}
+.md-trust__label {
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 2px;
+  letter-spacing: -0.01em;
+}
+.md-trust__sub {
+  font-size: var(--fs-caption);
+  color: var(--color-text-mute);
+  line-height: 1.5;
+}
+
+/* =============================================================
+   20. Service Card — Number + Visible 더보기 화살표
+   ============================================================= */
+.md-service-card { padding-top: clamp(32px, 4vw, 44px); }
+
+.md-service-card__num {
+  position: absolute;
+  top: 14px; right: 18px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+  opacity: 0.5;
+  font-feature-settings: 'tnum';
+  z-index: 2;
+  transition: opacity 0.3s var(--ease);
+}
+.md-service-card:hover .md-service-card__num { opacity: 1; }
+
+.md-service-card__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  letter-spacing: 0.02em;
+  transition: gap 0.25s var(--ease);
+}
+.md-service-card__arrow {
+  display: inline-block;
+  transition: transform 0.3s var(--ease);
+}
+.md-service-card:hover .md-service-card__more { gap: 10px; }
+.md-service-card:hover .md-service-card__arrow { transform: translateX(2px); }
+
+/* =============================================================
+   21. Doctor Section — Quote + Badge
+   ============================================================= */
+.md-doctor__photo { position: relative; }
+.md-doctor__badge {
+  position: absolute;
+  bottom: 16px; left: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-primary-dark);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(61, 47, 38, 0.10);
+}
+
+.md-doctor__quote {
+  position: relative;
+  margin: 0 0 8px;
+  padding: 18px 22px 18px 56px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-primary);
+}
+.md-doctor__quote::before {
+  content: '\201C';
+  position: absolute;
+  left: 14px; top: -6px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 4rem;
+  line-height: 1;
+  color: var(--color-primary);
+  opacity: 0.55;
+}
+.md-doctor__quote p {
+  font-size: var(--fs-body);
+  color: var(--color-text);
+  line-height: 1.75;
+  margin: 0;
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+@media (max-width: 768px) {
+  .md-doctor__quote { padding: 16px 18px 16px 48px; }
+  .md-doctor__quote::before { left: 10px; font-size: 3.25rem; }
+}
+
+/* =============================================================
+   22. CTA Banner — Eyebrow + Hint (banner enhancement)
+   ============================================================= */
+.md-cta-banner__eyebrow {
+  display: inline-block;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.18);
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 16px;
+  position: relative;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.md-cta-banner__hint {
+  font-size: var(--fs-caption);
+  color: rgba(255, 255, 255, 0.78);
+  margin: 20px 0 0;
+  position: relative;
+  letter-spacing: -0.005em;
+}
+.md-cta-banner .md-btn-primary {
+  background: var(--color-white);
+  color: var(--color-primary-dark);
+  border-color: var(--color-white);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+.md-cta-banner .md-btn-primary:hover {
+  background: var(--color-surface);
+  color: var(--color-primary-dark);
+}
+.md-cta-banner .md-btn-ghost {
+  background: transparent;
+  color: var(--color-white);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+.md-cta-banner .md-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--color-white);
+  border-color: var(--color-white);
 }

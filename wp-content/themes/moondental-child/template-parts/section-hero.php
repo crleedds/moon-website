@@ -46,6 +46,12 @@ $hero_image_id = get_theme_mod( 'moondental_hero_image', 0 );
 						</a>
 					<?php endif; ?>
 				</div>
+
+				<ul class="md-hero__badges" aria-label="문치과병원의 특징">
+					<li><span aria-hidden="true">✓</span> 1995년 개원 · 30년 임상</li>
+					<li><span aria-hidden="true">✓</span> 의료진 10명 · 통합진료</li>
+					<li><span aria-hidden="true">✓</span> 의료기관번호 34400117</li>
+				</ul>
 			</div>
 
 			<div class="md-hero__media">

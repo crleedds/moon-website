@@ -26,7 +26,7 @@ $doctor_fallback = moondental_doctor_photo_url( 'doctor-04.png' );
 
 <section class="md-section" id="doctor" aria-label="의료진 소개">
 	<div class="md-container">
-		<div class="md-doctor">
+		<div class="md-doctor md-reveal">
 
 			<div class="md-doctor__photo">
 				<?php if ( $doctor_img ) : ?>
@@ -38,6 +38,7 @@ $doctor_fallback = moondental_doctor_photo_url( 'doctor-04.png' );
 						<span>원장님 사진 (Customizer에서 등록)</span>
 					</div>
 				<?php endif; ?>
+				<span class="md-doctor__badge" aria-hidden="true">SINCE 1995</span>
 			</div>
 
 			<div class="md-doctor__text">
@@ -45,7 +46,9 @@ $doctor_fallback = moondental_doctor_photo_url( 'doctor-04.png' );
 				<h2 class="md-doctor__name">
 					<?php echo esc_html( $rep ); ?>
 				</h2>
-				<p class="md-doctor__bio"><?php echo esc_html( $lead ); ?></p>
+				<blockquote class="md-doctor__quote">
+					<p><?php echo esc_html( $lead ); ?></p>
+				</blockquote>
 
 				<?php if ( ! empty( $bio_lines ) ) : ?>
 					<div class="md-doctor__bio">
