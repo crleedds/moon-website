@@ -58,6 +58,31 @@ foreach ( $services as $svc ) {
 	</div>
 </section>
 
+<?php
+/* 해당 service slug의 자동 FAQ 출력 */
+if ( function_exists( 'moondental_get_faqs_by_service' ) ) {
+	$faqs_map = moondental_get_faqs_by_service();
+	if ( isset( $faqs_map[ $slug ] ) && ! empty( $faqs_map[ $slug ] ) ) :
+?>
+<section class="md-section md-section--sm" aria-label="자주 묻는 질문">
+	<div class="md-container md-container--narrow">
+		<header class="md-section-head">
+			<span class="md-section-head__eyebrow">FAQ</span>
+			<h2 class="md-section-head__title">자주 묻는 질문</h2>
+		</header>
+		<div class="md-faq">
+			<?php foreach ( $faqs_map[ $slug ] as $i => $item ) : ?>
+				<details class="md-faq__item"<?php echo $i === 0 ? ' open' : ''; ?>>
+					<summary><?php echo esc_html( $item['q'] ); ?></summary>
+					<p><?php echo wp_kses_post( $item['a'] ); ?></p>
+				</details>
+			<?php endforeach; ?>
+		</div>
+	</div>
+</section>
+<?php endif; }
+?>
+
 <section class="md-section md-section--surface md-section--sm" aria-label="다른 진료 영역">
 	<div class="md-container">
 		<header class="md-section-head">

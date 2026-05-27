@@ -119,13 +119,7 @@
 				</nav>
 
 				<div class="md-header__cta">
-					<?php
-					$kakao_cta = moondental_get_info( 'kakao_url' );
-					if ( $kakao_cta ) : ?>
-						<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( $kakao_cta ); ?>" target="_blank" rel="noopener">예약·상담</a>
-					<?php else : ?>
-						<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">예약·상담</a>
-					<?php endif; ?>
+					<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-header-reservation">예약·상담</a>
 				</div>
 
 			</div>
