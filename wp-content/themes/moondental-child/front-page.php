@@ -18,6 +18,8 @@ get_header();
 
 <?php get_template_part( 'template-parts/section', 'team' ); ?>
 
+<?php get_template_part( 'template-parts/section', 'testimonials' ); ?>
+
 <?php get_template_part( 'template-parts/section', 'info' ); ?>
 
 <?php get_template_part( 'template-parts/section', 'notices' ); ?>

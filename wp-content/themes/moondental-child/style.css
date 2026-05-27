@@ -1461,6 +1461,140 @@ button.elementor-button {
 }
 
 /* =============================================================
+   10i. Mobile sticky CTA bar + Desktop Kakao FAB
+   ============================================================= */
+.md-mobile-cta {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  display: none;
+  background: var(--color-white);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -4px 16px rgba(61, 47, 38, 0.10);
+  z-index: 200;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.md-mobile-cta__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 4px;
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text);
+  transition: background 0.2s var(--ease);
+  text-align: center;
+  min-height: 60px;
+}
+.md-mobile-cta__item:active { background: var(--color-surface); }
+.md-mobile-cta__item--call   { color: var(--color-primary-dark); border-right: 1px solid var(--color-border); }
+.md-mobile-cta__item--kakao  { color: #3C1E1E; background: #FEE500; border-right: 1px solid var(--color-border); }
+.md-mobile-cta__item--naver  { color: #fff; background: #03C75A; }
+.md-mobile-cta__item--kakao:active { background: #F0D900; }
+.md-mobile-cta__item--naver:active { background: #029e49; }
+.md-mobile-cta__icon { font-size: 1.25rem; line-height: 1; }
+
+@media (max-width: 768px) {
+  .md-mobile-cta { display: flex; }
+  body { padding-bottom: 60px; }
+  .md-kakao-fab { display: none !important; }
+}
+
+.md-kakao-fab {
+  position: fixed;
+  right: 24px; bottom: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  background: #FEE500;
+  color: #3C1E1E;
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  z-index: 150;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.md-kakao-fab:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.24);
+  color: #3C1E1E;
+}
+.md-kakao-fab svg { width: 22px; height: 22px; }
+
+/* =============================================================
+   10j. Testimonials (환자 후기 — 홈)
+   ============================================================= */
+.md-testimonials {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.md-testimonial {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(20px, 2.5vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: all 0.3s var(--ease);
+}
+.md-testimonial:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-3px);
+}
+.md-testimonial__stars {
+  color: var(--color-warning);
+  font-size: 1.0625rem;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+.md-testimonial__text {
+  font-size: 0.9375rem;
+  color: var(--color-text);
+  line-height: 1.75;
+  margin: 0;
+  flex: 1;
+}
+.md-testimonial__meta {
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+.md-testimonial__name {
+  display: block;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--color-text);
+}
+.md-testimonial__sub {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--color-text-sub);
+  margin-top: 2px;
+}
+
+/* =============================================================
+   10k. FAQ Group (FAQ 페이지)
+   ============================================================= */
+.md-faq-group + .md-faq-group { margin-top: 40px; }
+.md-faq-group__title {
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  margin: 0 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--color-primary);
+  display: inline-block;
+}
+
+/* =============================================================
    10h. Policy hero block (개인정보처리방침 본문 상단 박스)
    ============================================================= */
 .md-policy-hero {

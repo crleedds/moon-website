@@ -78,6 +78,11 @@ get_header();
 						case '개인정보처리방침':
 							echo moondental_default_privacy_content();
 							break;
+						case 'pricing':
+						case '비급여-진료비':
+						case '진료비안내':
+							echo moondental_default_pricing_content();
+							break;
 						default:
 							/* 진료항목 자식 페이지면 service content 시도 */
 							$svc_html = moondental_default_service_content( $slug );

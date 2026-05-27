@@ -20,6 +20,7 @@ define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 require_once MOONDENTAL_DIR . '/inc/content-defaults.php';
 require_once MOONDENTAL_DIR . '/inc/naver-importer.php';
 require_once MOONDENTAL_DIR . '/inc/reservation.php';
+require_once MOONDENTAL_DIR . '/inc/enhancements.php';
 
 
 /* ============================================================
@@ -627,7 +628,10 @@ function moondental_template_router( $template ) {
 		'역사'           => 'page-templates/page-history.php',
 		'상담예약'       => 'page-templates/page-reservation.php',
 		'reservation'    => 'page-templates/page-reservation.php',
+		'faq'            => 'page-templates/page-faq.php',
+		'자주-묻는-질문' => 'page-templates/page-faq.php',
 		'임플란트-센터'   => 'page-templates/page-service.php',
+		'소아치과'       => 'page-templates/page-service.php',
 		'투명교정-센터'   => 'page-templates/page-service.php',
 		'자연치아-살리기' => 'page-templates/page-service.php',
 		'턱관절-클리닉'   => 'page-templates/page-service.php',
@@ -758,6 +762,12 @@ function moondental_get_services() {
 			'title' => '심미치료',
 			'icon'  => '💎',
 			'desc'  => '라미네이트·미백·올세라믹 — 자연스러우면서 오래 가는 미소를 디자인합니다.',
+		),
+		array(
+			'slug'  => '소아치과',
+			'title' => '소아·예방',
+			'icon'  => '🧒',
+			'desc'  => '아이의 첫 치과 경험부터 정기 검진까지. 평생 치아 건강의 시작.',
 		),
 	);
 }
