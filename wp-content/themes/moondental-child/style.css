@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      1.6.3
+Version:      1.7.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -3193,4 +3193,232 @@ a.md-team-card:hover .md-team-card__more {
   font-weight: 800;
   color: var(--color-primary-dark);
   font-feature-settings: 'tnum';
+}
+
+/* =============================================================
+   27. Mobile-first polish — 한국어 줄바꿈·터치타깃·반응형 보강
+   ============================================================= */
+
+/* 페이지 전체 가로 오버플로우 방어 */
+html, body { overflow-x: hidden; }
+
+/* 한국어 제목 — 단어 단위 줄바꿈 (어색한 한 글자 떨어짐 방지) */
+.md-hero__title,
+.md-section-head__title,
+.md-page-hero__title,
+.md-cta-banner__title,
+.md-trust__label,
+.md-channel-card__title,
+.md-doctor__name,
+.md-doc-row__name,
+.md-team-card__name {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 본문 lead·desc 텍스트도 동일 */
+.md-hero__lead,
+.md-section-head__lead,
+.md-page-hero__lead,
+.md-cta-banner__lead,
+.md-channel-card__desc,
+.md-trust__sub {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 그리드 자식 min-width 0 — overflow 방지 */
+.md-service-grid > *,
+.md-trust__grid > *,
+.md-channel-grid > *,
+.md-mapbtn-grid > *,
+.md-location-grid > *,
+.md-team-grid > *,
+.md-testimonials > *,
+.md-news-grid > *,
+.md-info-grid > * {
+  min-width: 0;
+}
+
+/* 모든 버튼 터치 타깃 ≥ 44px 보장 (md-btn--sm도 모바일에서 키움) */
+@media (max-width: 768px) {
+  .md-btn,
+  .md-btn-primary,
+  .md-btn-secondary,
+  .md-btn-ghost {
+    min-height: 44px;
+    padding-inline: 22px;
+  }
+  .md-btn--sm {
+    padding: 12px 20px;
+    min-height: 44px;
+  }
+  .md-btn--lg {
+    padding: 16px 28px;
+    font-size: 1rem;
+  }
+}
+
+/* ── 768px 이하: 일반 모바일 ─────────────────────────────── */
+@media (max-width: 768px) {
+  /* 섹션 padding 살짝 축소 — 너무 휑하지 않게 */
+  .md-section {
+    padding-block: clamp(48px, 9vw, 80px);
+  }
+  .md-section--sm {
+    padding-block: clamp(36px, 6vw, 56px);
+  }
+
+  /* Hero — 모바일에서 미디어 비율 줄여 첫 화면 안에 텍스트 + CTA 다 들어오게 */
+  .md-hero {
+    padding: clamp(36px, 8vw, 64px) 0 clamp(40px, 9vw, 72px);
+  }
+  .md-hero__media {
+    aspect-ratio: 16 / 11;
+    max-height: 320px;
+  }
+  .md-hero__inner {
+    gap: 24px;
+  }
+  .md-hero__title { letter-spacing: -0.02em; }
+  .md-hero__lead { max-width: none; }
+
+  /* Hero badges — 모바일 줄바꿈 더 자연스럽게 */
+  .md-hero__badges {
+    gap: 6px 14px;
+    margin-top: 20px;
+  }
+
+  /* Hero CTA group — 전체 폭 사용 */
+  .md-hero .md-btn-group {
+    width: 100%;
+  }
+  .md-hero .md-btn-group .md-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Trust band — 4→2 grid 이미 적용, 글자 살짝 축소 */
+  .md-trust { padding-block: 32px; }
+  .md-trust__item { padding: 8px 4px; }
+  .md-trust__icon {
+    width: 36px; height: 36px;
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+  .md-trust__num { margin: 2px 0 4px; }
+
+  /* Service card — 번호 옆 제목과 안 겹치도록 padding 보강, 더보기 명확히 */
+  .md-service-card { padding: 28px 18px 22px; }
+  .md-service-card__num {
+    top: 10px; right: 14px;
+    font-size: 0.6875rem;
+  }
+  .md-service-card__icon {
+    width: 64px; height: 64px;
+    font-size: 28px;
+  }
+
+  /* Reservation channel cards — 모바일 좀더 컴팩트하게 */
+  .md-channel-card { padding: 22px 20px; }
+  .md-channel-card__icon { font-size: 1.875rem; }
+
+  /* Map buttons — 한 줄에 정보 다 들어오게 padding 축소 */
+  .md-mapbtn { padding: 14px 16px; gap: 12px; }
+  .md-mapbtn__logo { width: 40px; height: 40px; font-size: 1.0625rem; }
+
+  /* Location cards */
+  .md-location-card { padding: 20px 18px; }
+  .md-location-floors { padding: 22px 20px; }
+
+  /* CTA banner — 모바일에서 padding/title 줄임 */
+  .md-cta-banner {
+    padding: clamp(28px, 5vw, 40px) clamp(20px, 4vw, 32px);
+    border-radius: var(--radius-lg);
+  }
+  .md-cta-banner__title { font-size: 1.375rem; line-height: 1.4; }
+  .md-cta-banner__lead br { display: none; } /* 모바일 줄바꿈 제거 */
+
+  /* Doctor row (의료진 페이지) — 모바일 가독성 */
+  .md-doc-row__bio { grid-template-columns: 1fr; gap: 2px 0; }
+
+  /* Page hero — 모바일 padding 축소 */
+  .md-page-hero {
+    padding: clamp(40px, 7vw, 64px) 0 clamp(28px, 4vw, 40px);
+  }
+
+  /* 모바일 utilbar 시간 텍스트 너무 길면 축약 */
+  .md-utilbar__hours {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 60vw;
+  }
+
+  /* Form input 16px (iOS zoom 방지) — 폼이 다시 들어올 때 대비 */
+  .md-field__input,
+  .md-faq summary {
+    font-size: 1rem !important; /* < 16px이면 iOS Safari 줌인 */
+  }
+
+  /* FAQ summary 터치 영역 확보 */
+  .md-faq__item summary {
+    padding-block: 14px;
+    min-height: 48px;
+  }
+}
+
+/* ── 480px 이하: 작은 폰 (iPhone SE 등) ─────────────── */
+@media (max-width: 480px) {
+  /* Hero title 더 축소 */
+  .md-hero__title { font-size: 1.75rem; }
+  .md-hero__eyebrow { font-size: 0.6875rem; padding: 6px 14px; }
+
+  /* CTA 버튼 1열로 — 가독성 우선 */
+  .md-hero .md-btn-group { flex-direction: column; align-items: stretch; }
+  .md-hero .md-btn-group .md-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .md-cta-banner .md-btn-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  .md-cta-banner .md-btn-group .md-btn { width: 100%; justify-content: center; }
+
+  /* Trust 4 → 1 col이 아니라 2 col 유지 (수치 비교용) */
+  .md-trust__value { font-size: 1.75rem; }
+  .md-trust__label { font-size: 0.8125rem; }
+  .md-trust__sub { font-size: 0.75rem; }
+
+  /* Section head padding 축소 */
+  .md-section-head { margin-bottom: 32px; }
+
+  /* Channel grid stagger off — 1열일 땐 stagger 자체가 어색 */
+  .md-channel-card .md-channel-card__cta { font-size: 0.8125rem; }
+
+  /* 의료진 그리드 — 사진 좀더 작게 */
+  .md-team-card { padding: 18px 14px; }
+  .md-team-card__avatar { width: 112px; height: 112px; }
+
+  /* 푸터 grid 1열, 텍스트 간격 좁힘 */
+  .md-footer { padding-top: 36px; }
+  .md-footer__brand-img,
+  .md-footer__brand .md-footer__brand-img { max-height: 40px; }
+  .md-footer__col h4 { margin-bottom: 10px; }
+
+  /* Utility bar — 작은 폰에서 hours 숨김 (전화만 강조) */
+  .md-utilbar__hours { display: none; }
+}
+
+/* Tap highlight 차분하게 (회색 깜빡임 제거) */
+a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
+  -webkit-tap-highlight-color: rgba(216, 128, 98, 0.18);
+}
+
+/* Sticky 모바일 CTA 위로 컨텐츠 가리지 않게 추가 여백 (이미 60px 적용됨, FAQ 등 details 마지막 항목 보호) */
+@media (max-width: 768px) {
+  .md-faq + .md-section,
+  .md-section:last-child { padding-bottom: clamp(64px, 9vw, 96px); }
 }
