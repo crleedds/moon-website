@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      1.7.0
+Version:      1.7.1
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -947,12 +947,13 @@ button.elementor-button {
 
 .md-doc-row {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: clamp(20px, 3vw, 40px);
+  /* 의료진 사진 면적 ≈ 3배 확대 (220px → 380px, 220² → 380²/√3) */
+  grid-template-columns: 380px 1fr;
+  gap: clamp(24px, 3.5vw, 56px);
   background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: clamp(20px, 3vw, 32px);
+  padding: clamp(20px, 3vw, 36px);
   align-items: start;
   transition: all 0.3s var(--ease);
 }
@@ -960,10 +961,22 @@ button.elementor-button {
   border-color: var(--color-primary-light);
   box-shadow: var(--shadow-soft);
 }
+/* 중간 화면(태블릿) — 사진 컬럼 다소 축소 */
+@media (max-width: 1080px) {
+  .md-doc-row { grid-template-columns: 320px 1fr; }
+}
+@media (max-width: 880px) {
+  .md-doc-row { grid-template-columns: 260px 1fr; }
+}
 @media (max-width: 680px) {
   .md-doc-row {
     grid-template-columns: 1fr;
     text-align: center;
+    justify-items: center;
+  }
+  /* 모바일에서는 사진이 화면 가득 차지 않도록 — 시선 자연스럽게 */
+  .md-doc-row__media {
+    max-width: 320px;
   }
 }
 
