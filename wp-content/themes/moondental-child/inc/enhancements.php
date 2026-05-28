@@ -179,41 +179,61 @@ function moondental_filter_nav_items( $items, $args ) {
 		'오시는 길', '오시는길', '위치', 'location', 'Location',
 	);
 	$hide_url_patterns = array( '/오시는-길/', '/location/', '/notices/', '/news/' );
-	$site_home = trailingslashit( home_url( '/' ) );
+	$doctors_titles    = array( '의료진', 'doctors', 'Doctors' );
+	$site_home         = trailingslashit( home_url( '/' ) );
 
-	// 1) 숨길 항목 제거
-	$items = array_values( array_filter( $items, function( $item ) use ( $hide_titles, $hide_url_patterns, $site_home ) {
+	$is_doctors_item = function( $item ) use ( $doctors_titles ) {
 		$title = trim( wp_strip_all_tags( $item->title ) );
+		$url   = trailingslashit( (string) $item->url );
+		$url_decoded = urldecode( $url );
+		if ( in_array( $title, $doctors_titles, true ) ) return true;
+		if ( strpos( $url, '/doctors/' ) !== false ) return true;
+		if ( strpos( $url_decoded, '/의료진/' ) !== false ) return true;
+		return false;
+	};
+
+	// 1) 사전 스캔: 톱레벨 의료진 존재 여부, 서브메뉴 의료진 URL 캡처, 진료안내 인덱스
+	$has_top_doctors        = false;
+	$sub_doctors_url        = '';
+	$insert_after           = -1;
+	foreach ( $items as $idx => $item ) {
+		$is_top = empty( $item->menu_item_parent ) || (int) $item->menu_item_parent === 0;
+		if ( $is_doctors_item( $item ) ) {
+			if ( $is_top ) {
+				$has_top_doctors = true;
+			} else {
+				if ( empty( $sub_doctors_url ) && ! empty( $item->url ) ) {
+					$sub_doctors_url = $item->url;
+				}
+			}
+		}
+		if ( $is_top ) {
+			$title = trim( wp_strip_all_tags( $item->title ) );
+			if ( in_array( $title, array( '진료안내', '진료항목', '진료', 'services', 'Services' ), true ) ) {
+				$insert_after = $idx;
+			}
+		}
+	}
+
+	// 2) 숨김 처리: 기본 hide 목록 + 서브메뉴 의료진 (사용자 요구사항 — 톱으로 승격됐으니 서브 중복 제거)
+	$items = array_values( array_filter( $items, function( $item ) use ( $hide_titles, $hide_url_patterns, $site_home, $is_doctors_item ) {
+		$title = trim( wp_strip_all_tags( $item->title ) );
+		$url   = trailingslashit( (string) $item->url );
+		$is_top = empty( $item->menu_item_parent ) || (int) $item->menu_item_parent === 0;
+		// 일반 hide 목록
 		if ( in_array( $title, $hide_titles, true ) ) return false;
-		$url = trailingslashit( (string) $item->url );
 		if ( $url === $site_home ) return false;
 		foreach ( $hide_url_patterns as $p ) {
 			if ( strpos( $url, $p ) !== false ) return false;
 		}
+		// 서브메뉴 의료진은 제거 — 톱레벨 의료진 탭으로 일원화
+		if ( ! $is_top && $is_doctors_item( $item ) ) return false;
 		return true;
 	} ) );
 
-	// 2) "의료진" 톱레벨 항목 누락 시 자동 삽입.
-	//    서브메뉴에 있어도 상단에 노출시키기 위해 톱레벨(menu_item_parent=0)만 검사.
-	$doctors_titles = array( '의료진', 'doctors', 'Doctors' );
-	$has_top_doctors = false;
-	$insert_after    = -1;
-	foreach ( $items as $idx => $item ) {
-		$is_top = empty( $item->menu_item_parent ) || (int) $item->menu_item_parent === 0;
-		if ( ! $is_top ) continue;
-		$title = trim( wp_strip_all_tags( $item->title ) );
-		$url   = trailingslashit( (string) $item->url );
-		if ( in_array( $title, $doctors_titles, true ) || strpos( $url, '/doctors/' ) !== false ) {
-			$has_top_doctors = true;
-			break;
-		}
-		if ( in_array( $title, array( '진료안내', '진료항목', '진료', 'services', 'Services' ), true ) ) {
-			$insert_after = $idx;
-		}
-	}
-	$has_doctors = $has_top_doctors;
-
-	if ( ! $has_doctors ) {
+	// 3) 톱레벨 의료진 부재 시 삽입.
+	//    URL 우선순위: 서브메뉴에서 캡처한 URL > /doctors/ 기본값.
+	if ( ! $has_top_doctors ) {
 		$max_id = 90000;
 		foreach ( $items as $it ) {
 			if ( ! empty( $it->ID ) && $it->ID > $max_id ) $max_id = (int) $it->ID;
@@ -226,7 +246,7 @@ function moondental_filter_nav_items( $items, $args ) {
 			'type'             => 'custom',
 			'type_label'       => 'Custom Link',
 			'title'            => '의료진',
-			'url'              => home_url( '/doctors/' ),
+			'url'              => $sub_doctors_url ?: home_url( '/doctors/' ),
 			'menu_item_parent' => 0,
 			'menu_order'       => 999,
 			'classes'          => array( 'menu-item', 'menu-item-type-custom', 'menu-item-doctors' ),
@@ -234,12 +254,21 @@ function moondental_filter_nav_items( $items, $args ) {
 			'description'      => '',
 			'target'           => '',
 			'xfn'              => '',
-			'current'          => is_page( 'doctors' ),
+			'current'          => false,
 			'current_item_ancestor' => false,
 			'current_item_parent'   => false,
 		);
-		if ( $insert_after >= 0 ) {
-			array_splice( $items, $insert_after + 1, 0, array( $doc_item ) );
+		// insert_after는 hide 처리 전 인덱스이므로, hide 후 다시 진료안내 위치를 찾는다.
+		$ia = -1;
+		foreach ( $items as $idx => $it ) {
+			$t = trim( wp_strip_all_tags( $it->title ) );
+			$top = empty( $it->menu_item_parent ) || (int) $it->menu_item_parent === 0;
+			if ( $top && in_array( $t, array( '진료안내', '진료항목', '진료', 'services', 'Services' ), true ) ) {
+				$ia = $idx;
+			}
+		}
+		if ( $ia >= 0 ) {
+			array_splice( $items, $ia + 1, 0, array( $doc_item ) );
 		} else {
 			$items[] = $doc_item;
 		}
