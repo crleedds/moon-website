@@ -53,6 +53,25 @@
       });
     }
 
+    // 8. 비용 안내 페이지 — 치료별 비용 탭 전환
+    document.querySelectorAll('[data-pricetab]').forEach(function (root) {
+      var btns   = root.querySelectorAll('[data-pricetab-target]');
+      var panels = root.querySelectorAll('[data-pricetab-panel]');
+      btns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var target = btn.getAttribute('data-pricetab-target');
+          btns.forEach(function (b) {
+            var on = b === btn;
+            b.classList.toggle('is-active', on);
+            b.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
+          panels.forEach(function (p) {
+            p.classList.toggle('is-active', p.getAttribute('data-pricetab-panel') === target);
+          });
+        });
+      });
+    });
+
     // 3. Reduced motion respect — skip everything below
     var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

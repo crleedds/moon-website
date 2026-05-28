@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '1.7.5' );
+define( 'MOONDENTAL_VERSION', '1.8.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -637,6 +637,10 @@ function moondental_template_router( $template ) {
 		'턱관절-클리닉'   => 'page-templates/page-service.php',
 		'사랑니-발치'     => 'page-templates/page-service.php',
 		'심미치료'       => 'page-templates/page-service.php',
+		'비용-안내'      => 'page-templates/page-pricing.php',
+		'비급여-진료비'   => 'page-templates/page-pricing.php',
+		'진료비안내'      => 'page-templates/page-pricing.php',
+		'pricing'        => 'page-templates/page-pricing.php',
 	);
 
 	if ( isset( $map[ $slug ] ) ) {
