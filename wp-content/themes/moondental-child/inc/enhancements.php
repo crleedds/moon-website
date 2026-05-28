@@ -195,98 +195,125 @@ function moondental_filter_nav_items( $items, $args ) {
 		'오시는 길', '오시는길', '위치', 'location', 'Location',
 	);
 	$hide_url_patterns = array( '/오시는-길/', '/location/', '/notices/', '/news/' );
-	$doctors_titles    = array( '의료진', 'doctors', 'Doctors' );
 	$site_home         = trailingslashit( home_url( '/' ) );
 
-	$is_doctors_item = function( $item ) use ( $doctors_titles ) {
-		$title = trim( wp_strip_all_tags( $item->title ) );
-		$url   = trailingslashit( (string) $item->url );
+	/**
+	 * 톱레벨로 승격할 항목 정의.
+	 * 서브메뉴에서 발견되면 (1) 서브에서 숨기고 (2) 톱레벨에 같은 URL로 자동 노출.
+	 */
+	$promote_defs = array(
+		'doctors' => array(
+			'title'           => '의료진',
+			'titles'          => array( '의료진', 'doctors', 'Doctors' ),
+			'url_substrings'  => array( '/doctors/', '/의료진/' ),
+			'fallback_url'    => home_url( '/doctors/' ),
+			'class_suffix'    => 'doctors',
+			'menu_order'      => 999,
+		),
+		'pricing' => array(
+			'title'           => '비용안내',
+			'titles'          => array( '비용안내', '비용 안내', '비급여진료비', '비급여 진료비', '비급여 진료비 안내', '진료비안내', '진료비 안내', '진료비', 'pricing', 'Pricing' ),
+			'url_substrings'  => array( '/pricing/', '/비용-안내/', '/비용안내/', '/비급여-진료비/', '/비급여진료비/', '/진료비안내/', '/진료비/' ),
+			'fallback_url'    => home_url( '/비용-안내/' ),
+			'class_suffix'    => 'pricing',
+			'menu_order'      => 1000,
+		),
+	);
+
+	$is_match = function( $item, $def ) {
+		$title       = trim( wp_strip_all_tags( $item->title ) );
+		$url         = trailingslashit( (string) $item->url );
 		$url_decoded = urldecode( $url );
-		if ( in_array( $title, $doctors_titles, true ) ) return true;
-		if ( strpos( $url, '/doctors/' ) !== false ) return true;
-		if ( strpos( $url_decoded, '/의료진/' ) !== false ) return true;
+		if ( in_array( $title, $def['titles'], true ) ) return true;
+		foreach ( $def['url_substrings'] as $sub ) {
+			if ( strpos( $url, $sub ) !== false || strpos( $url_decoded, $sub ) !== false ) return true;
+		}
 		return false;
 	};
 
-	// 1) 사전 스캔: 톱레벨 의료진 존재 여부, 서브메뉴 의료진 URL 캡처, 진료안내 인덱스
-	$has_top_doctors        = false;
-	$sub_doctors_url        = '';
-	$insert_after           = -1;
-	foreach ( $items as $idx => $item ) {
+	// 1) 사전 스캔: 톱레벨 존재 여부 + 서브메뉴 URL 캡처
+	$state = array();
+	foreach ( $promote_defs as $key => $def ) {
+		$state[ $key ] = array( 'has_top' => false, 'sub_url' => '' );
+	}
+	foreach ( $items as $item ) {
 		$is_top = empty( $item->menu_item_parent ) || (int) $item->menu_item_parent === 0;
-		if ( $is_doctors_item( $item ) ) {
+		foreach ( $promote_defs as $key => $def ) {
+			if ( ! $is_match( $item, $def ) ) continue;
 			if ( $is_top ) {
-				$has_top_doctors = true;
-			} else {
-				if ( empty( $sub_doctors_url ) && ! empty( $item->url ) ) {
-					$sub_doctors_url = $item->url;
-				}
-			}
-		}
-		if ( $is_top ) {
-			$title = trim( wp_strip_all_tags( $item->title ) );
-			if ( in_array( $title, array( '진료안내', '진료항목', '진료', 'services', 'Services' ), true ) ) {
-				$insert_after = $idx;
+				$state[ $key ]['has_top'] = true;
+			} elseif ( empty( $state[ $key ]['sub_url'] ) && ! empty( $item->url ) ) {
+				$state[ $key ]['sub_url'] = $item->url;
 			}
 		}
 	}
 
-	// 2) 숨김 처리: 기본 hide 목록 + 서브메뉴 의료진 (사용자 요구사항 — 톱으로 승격됐으니 서브 중복 제거)
-	$items = array_values( array_filter( $items, function( $item ) use ( $hide_titles, $hide_url_patterns, $site_home, $is_doctors_item ) {
-		$title = trim( wp_strip_all_tags( $item->title ) );
-		$url   = trailingslashit( (string) $item->url );
+	// 2) 숨김 처리: 기본 hide + 승격 대상 서브메뉴 항목
+	$items = array_values( array_filter( $items, function( $item ) use ( $hide_titles, $hide_url_patterns, $site_home, $promote_defs, $is_match ) {
+		$title  = trim( wp_strip_all_tags( $item->title ) );
+		$url    = trailingslashit( (string) $item->url );
 		$is_top = empty( $item->menu_item_parent ) || (int) $item->menu_item_parent === 0;
-		// 일반 hide 목록
+
 		if ( in_array( $title, $hide_titles, true ) ) return false;
 		if ( $url === $site_home ) return false;
 		foreach ( $hide_url_patterns as $p ) {
 			if ( strpos( $url, $p ) !== false ) return false;
 		}
-		// 서브메뉴 의료진은 제거 — 톱레벨 의료진 탭으로 일원화
-		if ( ! $is_top && $is_doctors_item( $item ) ) return false;
+		// 승격 대상 서브메뉴는 제거
+		if ( ! $is_top ) {
+			foreach ( $promote_defs as $def ) {
+				if ( $is_match( $item, $def ) ) return false;
+			}
+		}
 		return true;
 	} ) );
 
-	// 3) 톱레벨 의료진 부재 시 삽입.
-	//    URL 우선순위: 서브메뉴에서 캡처한 URL > /doctors/ 기본값.
-	if ( ! $has_top_doctors ) {
-		$max_id = 90000;
-		foreach ( $items as $it ) {
-			if ( ! empty( $it->ID ) && $it->ID > $max_id ) $max_id = (int) $it->ID;
-		}
-		$doc_item = (object) array(
-			'ID'               => $max_id + 1,
-			'db_id'            => $max_id + 1,
-			'object_id'        => $max_id + 1,
-			'object'           => 'custom',
-			'type'             => 'custom',
-			'type_label'       => 'Custom Link',
-			'title'            => '의료진',
-			'url'              => $sub_doctors_url ?: home_url( '/doctors/' ),
-			'menu_item_parent' => 0,
-			'menu_order'       => 999,
-			'classes'          => array( 'menu-item', 'menu-item-type-custom', 'menu-item-doctors' ),
-			'attr_title'       => '',
-			'description'      => '',
-			'target'           => '',
-			'xfn'              => '',
-			'current'          => false,
-			'current_item_ancestor' => false,
-			'current_item_parent'   => false,
-		);
-		// insert_after는 hide 처리 전 인덱스이므로, hide 후 다시 진료안내 위치를 찾는다.
+	// 3) 톱레벨 부재 시 삽입 — 진료안내 뒤(없으면 끝)
+	$find_insert_after = function( $items ) {
 		$ia = -1;
 		foreach ( $items as $idx => $it ) {
-			$t = trim( wp_strip_all_tags( $it->title ) );
+			$t   = trim( wp_strip_all_tags( $it->title ) );
 			$top = empty( $it->menu_item_parent ) || (int) $it->menu_item_parent === 0;
 			if ( $top && in_array( $t, array( '진료안내', '진료항목', '진료', 'services', 'Services' ), true ) ) {
 				$ia = $idx;
 			}
 		}
+		return $ia;
+	};
+
+	$max_id = 90000;
+	foreach ( $items as $it ) {
+		if ( ! empty( $it->ID ) && $it->ID > $max_id ) $max_id = (int) $it->ID;
+	}
+
+	foreach ( $promote_defs as $key => $def ) {
+		if ( $state[ $key ]['has_top'] ) continue;
+		$max_id += 1;
+		$new_item = (object) array(
+			'ID'                    => $max_id,
+			'db_id'                 => $max_id,
+			'object_id'             => $max_id,
+			'object'                => 'custom',
+			'type'                  => 'custom',
+			'type_label'            => 'Custom Link',
+			'title'                 => $def['title'],
+			'url'                   => $state[ $key ]['sub_url'] ?: $def['fallback_url'],
+			'menu_item_parent'      => 0,
+			'menu_order'            => $def['menu_order'],
+			'classes'               => array( 'menu-item', 'menu-item-type-custom', 'menu-item-' . $def['class_suffix'] ),
+			'attr_title'            => '',
+			'description'           => '',
+			'target'                => '',
+			'xfn'                   => '',
+			'current'               => false,
+			'current_item_ancestor' => false,
+			'current_item_parent'   => false,
+		);
+		$ia = $find_insert_after( $items );
 		if ( $ia >= 0 ) {
-			array_splice( $items, $ia + 1, 0, array( $doc_item ) );
+			array_splice( $items, $ia + 1, 0, array( $new_item ) );
 		} else {
-			$items[] = $doc_item;
+			$items[] = $new_item;
 		}
 		$items = array_values( $items );
 	}
