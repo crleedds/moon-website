@@ -43,30 +43,7 @@
 					</span>
 				</div>
 
-				<div class="md-utilbar__right">
-					<?php
-					$kakao = moondental_get_info( 'kakao_url' );
-					$blog  = moondental_get_info( 'blog_url' );
-					$insta = moondental_get_info( 'instagram' );
-					$place = moondental_get_info( 'naver_place' );
-					?>
-					<?php if ( $kakao ) : ?><a href="<?php echo esc_url( $kakao ); ?>" target="_blank" rel="noopener">카카오톡 상담</a><?php endif; ?>
-					<?php if ( $place ) : ?><a href="<?php echo esc_url( $place ); ?>" target="_blank" rel="noopener">네이버 예약</a><?php endif; ?>
-					<?php if ( $blog ) : ?><a href="<?php echo esc_url( $blog ); ?>" target="_blank" rel="noopener">블로그</a><?php endif; ?>
-					<?php if ( $insta ) : ?><a href="<?php echo esc_url( $insta ); ?>" target="_blank" rel="noopener">인스타그램</a><?php endif; ?>
-
-					<?php
-					if ( has_nav_menu( 'utility' ) ) {
-						wp_nav_menu( array(
-							'theme_location' => 'utility',
-							'container'      => false,
-							'menu_class'     => 'md-utilbar__menu',
-							'depth'          => 1,
-							'fallback_cb'    => '__return_empty_string',
-						) );
-					}
-					?>
-				</div>
+				<?php /* utilbar 우측 외부 채널 링크 — 헤더 CTA·FAB 스택과 중복되어 제거 */ ?>
 			</div>
 		</div>
 	</div>
