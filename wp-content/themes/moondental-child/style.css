@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      1.7.3
+Version:      1.7.4
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -1585,6 +1585,68 @@ button.elementor-button {
 .md-fab--phone .md-fab__icon {
   background: rgba(255, 255, 255, 0.20);
   font-size: 0.9375rem;
+}
+
+/* =============================================================
+   맨 위로 스크롤 버튼 — FAB 스택 위쪽에 작은 원형 버튼
+   ============================================================= */
+.md-totop {
+  position: fixed;
+  right: 24px;
+  /* 데스크탑: FAB 스택(전화/네이버/카톡 3개) 위 — 스택 약 200px + 여백 */
+  bottom: 220px;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: var(--color-white);
+  color: var(--color-primary-dark);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(61, 47, 38, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px) scale(0.92);
+  transition:
+    opacity 0.25s var(--ease),
+    transform 0.25s var(--ease),
+    visibility 0.25s,
+    background 0.2s var(--ease),
+    color 0.2s var(--ease),
+    box-shadow 0.2s var(--ease);
+  z-index: 150;
+}
+.md-totop[hidden] { display: none; }
+.md-totop.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+.md-totop:hover,
+.md-totop:focus-visible {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+  transform: translateY(-2px) scale(1);
+  box-shadow: 0 8px 22px rgba(216, 128, 98, 0.32);
+}
+.md-totop svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* 모바일 — 하단 CTA 바(60px) 위로 띄움, FAB 스택은 모바일에서 숨김 */
+@media (max-width: 768px) {
+  .md-totop {
+    right: 16px;
+    bottom: 76px;
+    width: 42px;
+    height: 42px;
+  }
+  .md-totop svg { width: 20px; height: 20px; }
 }
 
 /* =============================================================

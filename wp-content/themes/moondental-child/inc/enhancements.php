@@ -168,6 +168,13 @@ function moondental_floating_actions() {
 		</a>
 		<?php endif; ?>
 	</div>
+
+	<!-- 맨 위로 스크롤 버튼 (스크롤 시 등장) -->
+	<button class="md-totop" type="button" aria-label="페이지 맨 위로 이동" data-track="cta-scroll-top" hidden>
+		<svg viewBox="0 0 24 24" aria-hidden="true">
+			<path d="M12 5l-7 7 1.41 1.41L12 7.83l5.59 5.58L19 12z" fill="currentColor"/>
+		</svg>
+	</button>
 	<?php
 }
 add_action( 'wp_footer', 'moondental_floating_actions', 5 );

@@ -31,18 +31,26 @@
       });
     }
 
-    // 2. Sticky header shadow on scroll
+    // 2. Sticky header shadow + scroll-to-top button visibility
     var header = document.querySelector('.md-site-header');
-    if (header) {
-      var onScroll = function () {
-        if (window.scrollY > 12) {
-          header.classList.add('is-scrolled');
-        } else {
-          header.classList.remove('is-scrolled');
-        }
-      };
-      window.addEventListener('scroll', onScroll, { passive: true });
-      onScroll();
+    var toTop  = document.querySelector('.md-totop');
+    if (toTop) toTop.removeAttribute('hidden'); // CSS로 visibility 제어
+    var showAt = 320; // px
+
+    var onScroll = function () {
+      var y = window.scrollY;
+      if (header) header.classList.toggle('is-scrolled', y > 12);
+      if (toTop)  toTop.classList.toggle('is-visible', y > showAt);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // scroll-to-top 클릭 — smooth scroll, reduced-motion 사용자에겐 즉시 이동
+    if (toTop) {
+      toTop.addEventListener('click', function () {
+        var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+      });
     }
 
     // 3. Reduced motion respect — skip everything below
