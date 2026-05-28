@@ -125,35 +125,33 @@ $map_kakao  = 'https://map.kakao.com/?q=' . $q_short;
 			</a>
 		</div>
 
-		<div class="md-location-grid">
-			<div class="md-location-card">
-				<h3>🚗 자가용</h3>
-				<ul>
-					<li>경부고속도로 천안IC에서 약 10분</li>
-					<li>천안종합버스터미널·천안고속버스터미널 일대</li>
-				</ul>
+		<div class="md-park">
+			<div class="md-park__head">
+				<span class="md-park__badge">🅿️ 주차 안내</span>
+				<h3 class="md-park__title">본원 지하 기계식 주차장 <strong>무료</strong></h3>
+				<p class="md-park__lead">방문 시 데스크에 주차권을 제출하시면 등록해드립니다.</p>
 			</div>
-			<div class="md-location-card">
-				<h3>🅿️ 주차</h3>
-				<ul>
-					<li><strong>본원 지하 기계식 주차장</strong> 무료</li>
-					<li>SUV는 <strong>신부 제5공영주차장</strong>(동남구 먹거리1길 10) — 무료 주차 등록 도와드림</li>
-				</ul>
-			</div>
-			<div class="md-location-card">
-				<h3>🚌 대중교통</h3>
-				<ul>
-					<li>천안종합버스터미널·천안고속버스터미널에서 도보 5분</li>
-					<li>신부동 일대 시내버스 다수 정차</li>
-				</ul>
-			</div>
-			<div class="md-location-card">
-				<h3>🚆 KTX / SRT</h3>
-				<ul>
-					<li>천안아산역에서 시내버스·택시 약 15분</li>
-					<li>천안역에서 시내버스·택시 약 10분</li>
-				</ul>
-			</div>
+
+			<ul class="md-park__list">
+				<li>
+					<span class="md-park__num">01</span>
+					<div>
+						<strong>본원 지하 기계식 주차장</strong>
+						<span>주차요원 안내에 따라 입차 — 진료 시간 동안 무료 이용 가능합니다.</span>
+					</div>
+				</li>
+				<li>
+					<span class="md-park__num">02</span>
+					<div>
+						<strong>SUV·대형차 — 신부 제5공영주차장</strong>
+						<span>기계식 주차가 어려우신 차량은 인근 <strong>신부 제5공영주차장</strong>(충남 천안시 동남구 먹거리1길 10)에 주차하신 후, 데스크에 주차권을 제출해주세요. <strong>무료 주차 등록</strong>을 도와드립니다.</span>
+					</div>
+				</li>
+			</ul>
+
+			<p class="md-park__walk">
+				🚌 <strong>천안종합버스터미널 · 천안고속버스터미널</strong>에서 도보 약 5분 거리.
+			</p>
 		</div>
 
 		<div class="md-location-floors">

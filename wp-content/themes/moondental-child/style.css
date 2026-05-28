@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      1.7.4
+Version:      1.7.5
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -3284,6 +3284,141 @@ a.md-team-card:hover .md-team-card__more {
   font-weight: 800;
   color: var(--color-primary-dark);
   font-feature-settings: 'tnum';
+}
+
+/* =============================================================
+   26b. 주차 안내 단독 블록 (예약 페이지 — 자가용/대중교통 제거 후 주차 중심)
+   ============================================================= */
+.md-park {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(24px, 3.5vw, 40px);
+  margin-bottom: clamp(32px, 4vw, 48px);
+  position: relative;
+  overflow: hidden;
+}
+.md-park::before {
+  content: '';
+  position: absolute;
+  top: -50px; right: -50px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  opacity: 0.6;
+  pointer-events: none;
+}
+.md-park > * { position: relative; }
+
+.md-park__head { margin-bottom: clamp(20px, 2.5vw, 28px); }
+.md-park__badge {
+  display: inline-block;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 12px;
+}
+.md-park__title {
+  font-size: clamp(1.25rem, 2.4vw, 1.625rem);
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0 0 8px;
+  letter-spacing: -0.015em;
+  word-break: keep-all;
+}
+.md-park__title strong {
+  color: var(--color-primary-dark);
+}
+.md-park__lead {
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  margin: 0;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+.md-park__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 clamp(20px, 2.5vw, 28px);
+  display: grid;
+  gap: 14px;
+}
+.md-park__list li {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 16px 18px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-primary);
+}
+.md-park__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px; height: 44px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  border-radius: 50%;
+  font-feature-settings: 'tnum';
+  flex-shrink: 0;
+}
+.md-park__list li > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.md-park__list li strong {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+.md-park__list li span {
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  line-height: 1.7;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+.md-park__list li span strong {
+  display: inline;
+  font-size: inherit;
+  color: var(--color-text);
+}
+
+.md-park__walk {
+  margin: 0;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-surface) 100%);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-small);
+  color: var(--color-text);
+  line-height: 1.65;
+  word-break: keep-all;
+}
+.md-park__walk strong {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+@media (max-width: 480px) {
+  .md-park__list li {
+    grid-template-columns: 36px 1fr;
+    gap: 12px;
+    padding: 14px 14px;
+  }
+  .md-park__num { width: 36px; height: 36px; font-size: 0.8125rem; }
 }
 
 /* =============================================================
