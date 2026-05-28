@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '1.6.1' );
+define( 'MOONDENTAL_VERSION', '1.6.2' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -674,12 +674,10 @@ add_filter( 'body_class', 'moondental_body_class' );
  */
 function moondental_nav_fallback() {
 	$items = array(
-		array( 'label' => '병원소개', 'url' => home_url( '/about/' ) ),
+		array( 'label' => '병원안내', 'url' => home_url( '/about/' ) ),
 		array( 'label' => '진료안내', 'url' => home_url( '/services/' ) ),
 		array( 'label' => '의료진',   'url' => home_url( '/doctors/' ) ),
 		array( 'label' => '시설',     'url' => home_url( '/facility/' ) ),
-		array( 'label' => '공지사항', 'url' => home_url( '/notices/' ) ),
-		array( 'label' => '오시는 길','url' => home_url( '/location/' ) ),
 	);
 	echo '<ul class="md-nav">';
 	foreach ( $items as $item ) {

@@ -193,21 +193,25 @@ function moondental_filter_nav_items( $items, $args ) {
 		return true;
 	} ) );
 
-	// 2) "의료진" 항목 누락 시 자동 삽입 (진료안내/진료항목 뒤, 없으면 맨 뒤)
+	// 2) "의료진" 톱레벨 항목 누락 시 자동 삽입.
+	//    서브메뉴에 있어도 상단에 노출시키기 위해 톱레벨(menu_item_parent=0)만 검사.
 	$doctors_titles = array( '의료진', 'doctors', 'Doctors' );
-	$has_doctors = false;
-	$insert_after = -1;
+	$has_top_doctors = false;
+	$insert_after    = -1;
 	foreach ( $items as $idx => $item ) {
+		$is_top = empty( $item->menu_item_parent ) || (int) $item->menu_item_parent === 0;
+		if ( ! $is_top ) continue;
 		$title = trim( wp_strip_all_tags( $item->title ) );
 		$url   = trailingslashit( (string) $item->url );
 		if ( in_array( $title, $doctors_titles, true ) || strpos( $url, '/doctors/' ) !== false ) {
-			$has_doctors = true;
+			$has_top_doctors = true;
 			break;
 		}
 		if ( in_array( $title, array( '진료안내', '진료항목', '진료', 'services', 'Services' ), true ) ) {
 			$insert_after = $idx;
 		}
 	}
+	$has_doctors = $has_top_doctors;
 
 	if ( ! $has_doctors ) {
 		$max_id = 90000;
