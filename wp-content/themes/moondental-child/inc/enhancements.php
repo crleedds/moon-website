@@ -181,10 +181,10 @@ function moondental_filter_nav_items( $items, $args ) {
 	$hide_url_patterns = array( '/오시는-길/', '/location/', '/notices/', '/news/' );
 	$site_home = trailingslashit( home_url( '/' ) );
 
-	return array_values( array_filter( $items, function( $item ) use ( $hide_titles, $hide_url_patterns, $site_home ) {
+	// 1) 숨길 항목 제거
+	$items = array_values( array_filter( $items, function( $item ) use ( $hide_titles, $hide_url_patterns, $site_home ) {
 		$title = trim( wp_strip_all_tags( $item->title ) );
 		if ( in_array( $title, $hide_titles, true ) ) return false;
-		// URL이 사이트 홈 그 자체인 메뉴(=홈) 제거
 		$url = trailingslashit( (string) $item->url );
 		if ( $url === $site_home ) return false;
 		foreach ( $hide_url_patterns as $p ) {
@@ -192,6 +192,57 @@ function moondental_filter_nav_items( $items, $args ) {
 		}
 		return true;
 	} ) );
+
+	// 2) "의료진" 항목 누락 시 자동 삽입 (진료안내/진료항목 뒤, 없으면 맨 뒤)
+	$doctors_titles = array( '의료진', 'doctors', 'Doctors' );
+	$has_doctors = false;
+	$insert_after = -1;
+	foreach ( $items as $idx => $item ) {
+		$title = trim( wp_strip_all_tags( $item->title ) );
+		$url   = trailingslashit( (string) $item->url );
+		if ( in_array( $title, $doctors_titles, true ) || strpos( $url, '/doctors/' ) !== false ) {
+			$has_doctors = true;
+			break;
+		}
+		if ( in_array( $title, array( '진료안내', '진료항목', '진료', 'services', 'Services' ), true ) ) {
+			$insert_after = $idx;
+		}
+	}
+
+	if ( ! $has_doctors ) {
+		$max_id = 90000;
+		foreach ( $items as $it ) {
+			if ( ! empty( $it->ID ) && $it->ID > $max_id ) $max_id = (int) $it->ID;
+		}
+		$doc_item = (object) array(
+			'ID'               => $max_id + 1,
+			'db_id'            => $max_id + 1,
+			'object_id'        => $max_id + 1,
+			'object'           => 'custom',
+			'type'             => 'custom',
+			'type_label'       => 'Custom Link',
+			'title'            => '의료진',
+			'url'              => home_url( '/doctors/' ),
+			'menu_item_parent' => 0,
+			'menu_order'       => 999,
+			'classes'          => array( 'menu-item', 'menu-item-type-custom', 'menu-item-doctors' ),
+			'attr_title'       => '',
+			'description'      => '',
+			'target'           => '',
+			'xfn'              => '',
+			'current'          => is_page( 'doctors' ),
+			'current_item_ancestor' => false,
+			'current_item_parent'   => false,
+		);
+		if ( $insert_after >= 0 ) {
+			array_splice( $items, $insert_after + 1, 0, array( $doc_item ) );
+		} else {
+			$items[] = $doc_item;
+		}
+		$items = array_values( $items );
+	}
+
+	return $items;
 }
 add_filter( 'wp_nav_menu_objects', 'moondental_filter_nav_items', 10, 2 );
 
