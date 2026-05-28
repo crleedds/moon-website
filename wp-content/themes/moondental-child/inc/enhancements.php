@@ -134,8 +134,17 @@ function moondental_floating_actions() {
 		<?php endif; ?>
 	</div>
 
-	<!-- 데스크탑 우측 하단 플로팅 버튼 스택 (카카오 + 네이버, 데스크탑에서만) -->
+	<!-- 데스크탑 우측 하단 플로팅 버튼 스택 (전화 + 네이버 + 카카오, 데스크탑에서만) -->
 	<div class="md-fab-stack" aria-hidden="false">
+		<?php if ( $phone_link ) : ?>
+		<a class="md-fab md-fab--phone"
+		   href="tel:<?php echo esc_attr( $phone_link ); ?>"
+		   data-track="cta-phone-fab"
+		   aria-label="전화 상담 — <?php echo esc_attr( $info['phone'] ); ?>">
+			<span class="md-fab__icon" aria-hidden="true">📞</span>
+			<span class="md-fab__label">전화 상담</span>
+		</a>
+		<?php endif; ?>
 		<?php if ( $naver && $naver !== '#' ) : ?>
 		<a class="md-fab md-fab--naver"
 		   href="<?php echo esc_url( $naver ); ?>"
