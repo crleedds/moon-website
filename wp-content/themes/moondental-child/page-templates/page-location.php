@@ -32,6 +32,18 @@ foreach ( array( 'naver-map.png', 'naver-map.jpg', 'naver-map.jpeg', 'naver-map.
 
 // 오늘 요일 — 진료시간 행 강조용
 $today_dow = (int) wp_date( 'w' ); // 0=일, 4=목, 6=토
+
+// 진료시간 — Customizer 값에서 시간 부분만 추출 (extract_time_range 헬퍼)
+$time_wd  = function_exists( 'moondental_extract_time_range' )
+	? moondental_extract_time_range( $info['hours_wd']  ?? '' )
+	: ( $info['hours_wd']  ?? '' );
+$time_thu = function_exists( 'moondental_extract_time_range' )
+	? moondental_extract_time_range( $info['hours_thu'] ?? '' )
+	: ( $info['hours_thu'] ?? '' );
+$time_sat = function_exists( 'moondental_extract_time_range' )
+	? moondental_extract_time_range( $info['hours_sat'] ?? '' )
+	: ( $info['hours_sat'] ?? '' );
+$off_text = $info['hours_off'] ?: '휴진';
 ?>
 
 <section class="md-page-hero md-page-hero--location">
@@ -105,15 +117,15 @@ $today_dow = (int) wp_date( 'w' ); // 0=일, 4=목, 6=토
 				<ul class="md-hours__list">
 					<li<?php echo in_array( $today_dow, array(1,2,3,5), true ) ? ' class="is-today"' : ''; ?>>
 						<span class="md-hours__day">평일 <small>(월·화·수·금)</small></span>
-						<span class="md-hours__time">09:00 – 20:30</span>
+						<span class="md-hours__time"><?php echo esc_html( $time_wd ); ?></span>
 					</li>
 					<li<?php echo $today_dow === 4 ? ' class="is-today"' : ''; ?>>
 						<span class="md-hours__day">목요일</span>
-						<span class="md-hours__time">09:00 – 18:00</span>
+						<span class="md-hours__time"><?php echo esc_html( $time_thu ); ?></span>
 					</li>
 					<li<?php echo $today_dow === 6 ? ' class="is-today"' : ''; ?>>
 						<span class="md-hours__day">토요일</span>
-						<span class="md-hours__time">09:00 – 14:00</span>
+						<span class="md-hours__time"><?php echo esc_html( $time_sat ); ?></span>
 					</li>
 					<li class="md-hours__off<?php echo $today_dow === 0 ? ' is-today' : ''; ?>">
 						<span class="md-hours__day">일요일 · 공휴일</span>
