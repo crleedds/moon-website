@@ -189,6 +189,14 @@ function moondental_filter_nav_items( $items, $args ) {
 	if ( empty( $args->theme_location ) || $args->theme_location !== 'primary' ) {
 		return $items;
 	}
+
+	// "역사" 타이틀 항목을 "사명 & 역사"로 자동 표기 변환
+	foreach ( $items as $item ) {
+		$t = trim( wp_strip_all_tags( $item->title ) );
+		if ( $t === '역사' ) {
+			$item->title = '사명 & 역사';
+		}
+	}
 	$hide_titles = array(
 		'홈', 'home', 'Home',
 		'소식', '공지사항', '공지', 'news', 'News',

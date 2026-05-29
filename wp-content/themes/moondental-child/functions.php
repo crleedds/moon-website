@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '1.9.0' );
+define( 'MOONDENTAL_VERSION', '2.0.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -624,6 +624,8 @@ function moondental_template_router( $template ) {
 	$map = array(
 		'의료진'         => 'page-templates/page-doctors.php',
 		'오시는-길'       => 'page-templates/page-location.php',
+		'오시는길'        => 'page-templates/page-location.php',
+		'location'        => 'page-templates/page-location.php',
 		'소식'           => 'page-templates/page-news.php',
 		'역사'           => 'page-templates/page-history.php',
 		'상담예약'       => 'page-templates/page-reservation.php',

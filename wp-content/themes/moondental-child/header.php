@@ -2,10 +2,14 @@
 /**
  * Header template — Moon Dental Child
  *
- * Astra 헤더를 완전히 대체. 유틸리티 바 + 메인 헤더(로고/메뉴/CTA) 구조.
+ * 단일 행 헤더: 로고 / 메뉴 / 전화·시간 정보 / 오시는길 CTA.
+ * sticky로 스크롤 시에도 계속 따라옴.
  *
  * @package moondental-child
  */
+$phone      = moondental_get_info( 'phone' );
+$phone_link = moondental_get_info( 'phone_link' );
+$hours_wd   = moondental_get_info( 'hours_wd' );
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -22,33 +26,6 @@
 <a class="md-sr-only" href="#md-main">본문 바로가기</a>
 
 <header class="md-site-header" role="banner">
-
-	<?php /* ── 1. Utility bar ─────────────────────────────────────── */ ?>
-	<div class="md-utilbar">
-		<div class="md-container">
-			<div class="md-utilbar__inner">
-				<div class="md-utilbar__left">
-					<?php
-					$phone      = moondental_get_info( 'phone' );
-					$phone_link = moondental_get_info( 'phone_link' );
-					if ( $phone ) :
-					?>
-						<a class="md-utilbar__phone" href="tel:<?php echo esc_attr( $phone_link ?: preg_replace( '/[^0-9]/', '', $phone ) ); ?>">
-							📞 <?php echo esc_html( $phone ); ?>
-						</a>
-					<?php endif; ?>
-
-					<span class="md-utilbar__hours">
-						<?php echo esc_html( moondental_get_info( 'hours_wd' ) ); ?>
-					</span>
-				</div>
-
-				<?php /* utilbar 우측 외부 채널 링크 — 헤더 CTA·FAB 스택과 중복되어 제거 */ ?>
-			</div>
-		</div>
-	</div>
-
-	<?php /* ── 2. Main header ─────────────────────────────────────── */ ?>
 	<div class="md-header">
 		<div class="md-container">
 			<div class="md-header__inner">
@@ -57,7 +34,6 @@
 					<?php if ( has_custom_logo() ) : ?>
 						<?php the_custom_logo(); ?>
 					<?php else :
-						// 등록번호 없는 가로형이 있으면 그것 우선, 없으면 등록번호 포함 가로형
 						$logo_candidates = array( 'logo-wide-noreg.png', 'logo-wide.png' );
 						$theme_logo = '';
 						foreach ( $logo_candidates as $cand ) {
@@ -95,8 +71,26 @@
 					?>
 				</nav>
 
-				<div class="md-header__cta">
-					<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-header-reservation">예약·상담</a>
+				<div class="md-header__aside">
+					<div class="md-header__info" aria-label="진료시간 및 전화">
+						<?php if ( $phone ) : ?>
+							<a class="md-header__phone" href="tel:<?php echo esc_attr( $phone_link ?: preg_replace( '/[^0-9]/', '', $phone ) ); ?>" data-track="cta-header-call">
+								<span class="md-header__phone-icon" aria-hidden="true">📞</span>
+								<span class="md-header__phone-num"><?php echo esc_html( $phone ); ?></span>
+							</a>
+						<?php endif; ?>
+						<?php if ( $hours_wd ) : ?>
+							<span class="md-header__hours"><?php echo esc_html( $hours_wd ); ?></span>
+						<?php endif; ?>
+					</div>
+
+					<div class="md-header__cta">
+						<a class="md-btn md-btn-primary md-btn--sm md-header__cta-btn"
+						   href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>"
+						   data-track="cta-header-location">
+							<span aria-hidden="true">📍</span> 오시는 길
+						</a>
+					</div>
 				</div>
 
 			</div>

@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      1.9.0
+Version:      2.0.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -4641,4 +4641,344 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
   color: var(--color-primary-dark);
   border-bottom-color: var(--color-primary);
   font-weight: 700;
+}
+
+/* =============================================================
+   34. 헤더 — 단일행 레이아웃 (utilbar 통합)
+   브랜드 | 메뉴 | 전화·시간 정보 | 오시는길 CTA
+   ============================================================= */
+.md-header__inner {
+  gap: clamp(12px, 2vw, 24px);
+  justify-content: flex-start;
+}
+.md-header__brand { flex-shrink: 0; }
+
+/* 우측 aside (전화+시간) + (오시는길 CTA) */
+.md-header__aside {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.5vw, 14px);
+  flex-shrink: 0;
+}
+.md-header__info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 14px;
+  border-right: 1px solid var(--color-border);
+  white-space: nowrap;
+  font-feature-settings: 'tnum';
+}
+.md-header__phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s var(--ease);
+}
+.md-header__phone:hover { color: var(--color-primary-dark); }
+.md-header__phone-icon { font-size: 0.9375rem; }
+.md-header__hours {
+  font-size: 0.75rem;
+  color: var(--color-text-sub);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+/* 오시는길 CTA — 잘 보이게 강조 */
+.md-header__cta-btn {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+  padding: 11px 20px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(216, 128, 98, 0.32);
+  letter-spacing: -0.005em;
+}
+.md-header__cta-btn:hover {
+  background: var(--color-primary-dark);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(216, 128, 98, 0.42);
+}
+
+/* 반응형 — 정보 영역 단계별 숨김 */
+@media (max-width: 1100px) {
+  .md-header__hours { display: none; }
+  .md-header__info { padding-right: 10px; gap: 8px; }
+}
+@media (max-width: 880px) {
+  .md-header__info { display: none; }
+  .md-header__cta { display: inline-flex; }
+}
+@media (max-width: 480px) {
+  .md-header__cta-btn {
+    padding: 10px 14px;
+    font-size: 0.8125rem;
+  }
+  .md-header__cta-btn span:first-child { font-size: 1rem; }
+}
+@media (max-width: 360px) {
+  .md-header__cta { display: none; }
+}
+
+/* =============================================================
+   35. 오시는 길 페이지 — 직사각형 네이버 지도 카드
+   ============================================================= */
+.md-locmap {
+  position: relative;
+  display: block;
+  aspect-ratio: 21 / 9;
+  max-height: 540px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  text-decoration: none;
+  color: var(--color-text);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  cursor: pointer;
+}
+.md-locmap:hover,
+.md-locmap:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  color: var(--color-text);
+}
+.md-locmap__pattern {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(122, 107, 95, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(122, 107, 95, 0.07) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+.md-locmap__badge {
+  position: absolute;
+  top: 16px; left: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-primary-dark);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  z-index: 2;
+}
+.md-locmap__pin {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  width: 52px; height: 72px;
+  transform: translate(-50%, -50%);
+  color: var(--color-primary);
+  filter: drop-shadow(0 8px 14px rgba(216, 128, 98, 0.40));
+  animation: md-locmap-pin-bob 3s ease-in-out infinite;
+  z-index: 2;
+}
+.md-locmap__pin svg { width: 100%; height: 100%; }
+@keyframes md-locmap-pin-bob {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50%      { transform: translate(-50%, calc(-50% - 5px)); }
+}
+.md-locmap__info {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: clamp(20px, 2.8vw, 32px);
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.92) 50%, var(--color-white) 100%);
+  z-index: 2;
+}
+.md-locmap__title {
+  font-size: clamp(1.125rem, 1.8vw, 1.375rem);
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0 0 4px;
+  letter-spacing: -0.015em;
+}
+.md-locmap__addr {
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  margin: 0 0 10px;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+.md-locmap__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-small);
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  transition: gap 0.25s var(--ease);
+}
+.md-locmap:hover .md-locmap__cta { gap: 12px; }
+@media (max-width: 768px) {
+  .md-locmap { aspect-ratio: 16 / 10; }
+}
+@media (max-width: 480px) {
+  .md-locmap { aspect-ratio: 4 / 3; }
+  .md-locmap__pin { width: 42px; height: 58px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-locmap__pin { animation: none; }
+}
+
+/* =============================================================
+   36. Footer — 주소·전화·소셜 가로 행
+   ============================================================= */
+.md-footer__phone {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 12px 0 6px;
+}
+.md-footer__phone a {
+  color: #fff;
+  font-feature-settings: 'tnum';
+}
+.md-footer__phone a:hover { color: var(--color-primary-light); }
+
+.md-footer__addr {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0 0 18px;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+.md-footer__addr a {
+  color: rgba(255, 255, 255, 0.82);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.25);
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.md-footer__addr a:hover {
+  color: var(--color-primary-light);
+  border-bottom-color: var(--color-primary-light);
+}
+
+.md-footer__social {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.md-footer__social li { list-style: none; }
+.md-fsoc {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s var(--ease), filter 0.2s var(--ease);
+  text-decoration: none;
+}
+.md-fsoc:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+.md-fsoc svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* =============================================================
+   37. 사명 & 역사 페이지 — 사명 인트로
+   ============================================================= */
+.md-mission {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+.md-mission__head {
+  text-align: center;
+  margin-bottom: clamp(32px, 4vw, 56px);
+}
+.md-mission__chip {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--color-primary-dark);
+  background: var(--color-surface);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 16px;
+}
+.md-mission__title {
+  font-size: clamp(1.5rem, 3.2vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 0 0 18px;
+  line-height: 1.4;
+  color: var(--color-text);
+  word-break: keep-all;
+}
+.md-mission__title em {
+  color: var(--color-primary);
+  font-style: normal;
+  position: relative;
+}
+.md-mission__title em::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 4px;
+  height: 10px;
+  background: var(--color-accent-light);
+  opacity: 0.5;
+  z-index: -1;
+  border-radius: 6px;
+}
+.md-mission__lead {
+  font-size: var(--fs-body);
+  color: var(--color-text-sub);
+  line-height: 1.85;
+  margin: 0 auto;
+  max-width: 640px;
+  word-break: keep-all;
+}
+.md-mission__values {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(14px, 2vw, 24px);
+}
+@media (max-width: 880px) { .md-mission__values { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .md-mission__values { grid-template-columns: 1fr; } }
+.md-mission__value {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(22px, 2.8vw, 30px);
+  text-align: center;
+  transition: all 0.3s var(--ease);
+}
+.md-mission__value:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-3px);
+}
+.md-mission__value-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+.md-mission__value h3 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+.md-mission__value p {
+  font-size: var(--fs-caption);
+  color: var(--color-text-sub);
+  line-height: 1.7;
+  margin: 0;
+  word-break: keep-all;
 }
