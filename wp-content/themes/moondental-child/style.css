@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      2.5.6
+Version:      2.6.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -3660,6 +3660,179 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
 /* 지도가 들어가는 섹션 — 위 여백 최소 */
 .md-section--tight {
   padding-block: clamp(16px, 2vw, 24px);
+}
+
+/* =============================================================
+   오시는 길 — 진료시간 + 주차 안내 2-col 그리드
+   ============================================================= */
+.md-info-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(18px, 2.4vw, 28px);
+  align-items: stretch;
+}
+@media (max-width: 880px) {
+  .md-info-pair { grid-template-columns: 1fr; }
+}
+
+/* ── 진료시간 카드 ── */
+.md-hours {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(22px, 3vw, 32px);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.md-hours::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  pointer-events: none;
+}
+.md-hours__head {
+  margin-bottom: clamp(16px, 2vw, 22px);
+}
+.md-hours__badge {
+  display: inline-block;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #2F5A39;
+  background: var(--color-accent-light);
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 10px;
+}
+.md-hours__title {
+  font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+.md-hours__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+.md-hours__list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--color-border);
+  transition: background 0.2s var(--ease);
+}
+.md-hours__list li:last-child { border-bottom: none; }
+.md-hours__list li.is-today {
+  margin: 0 -10px;
+  padding-left: 14px;
+  padding-right: 14px;
+  background: linear-gradient(90deg, rgba(216, 128, 98, 0.10), rgba(216, 128, 98, 0.03));
+  border-radius: var(--radius-md);
+  border-bottom-color: transparent;
+  position: relative;
+}
+.md-hours__list li.is-today::before {
+  content: 'TODAY';
+  position: absolute;
+  top: 6px; right: 14px;
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--color-primary);
+}
+.md-hours__day {
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+.md-hours__day small {
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--color-text-mute);
+  margin-left: 4px;
+  letter-spacing: -0.01em;
+}
+.md-hours__time {
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  font-feature-settings: 'tnum';
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.md-hours__off .md-hours__time {
+  color: var(--color-text-mute);
+  font-weight: 600;
+}
+.md-hours__note {
+  margin: clamp(14px, 1.8vw, 18px) 0 0;
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-caption);
+  color: var(--color-text-sub);
+  text-align: center;
+  letter-spacing: -0.005em;
+}
+
+/* ── 주차 카드 compact 변형 ── */
+.md-park--compact {
+  margin-bottom: 0;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: clamp(22px, 3vw, 32px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.md-park--compact::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-warning) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+.md-park--compact .md-park__head { margin-bottom: 16px; }
+.md-park--compact .md-park__badge {
+  background: rgba(216, 128, 98, 0.15);
+  color: var(--color-primary-dark);
+}
+.md-park--compact .md-park__title {
+  font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+}
+.md-park--compact .md-park__lead {
+  font-size: var(--fs-caption);
+  margin-top: 4px;
+}
+.md-park--compact .md-park__list { gap: 10px; margin: 0 0 14px; }
+.md-park--compact .md-park__list li {
+  padding: 12px 14px;
+  grid-template-columns: 32px 1fr;
+  gap: 12px;
+  background: var(--color-surface);
+}
+.md-park--compact .md-park__num {
+  width: 32px; height: 32px;
+  font-size: 0.75rem;
+}
+.md-park--compact .md-park__list li strong { font-size: 0.9375rem; }
+.md-park--compact .md-park__list li span { font-size: var(--fs-caption); line-height: 1.6; }
+.md-park--compact .md-park__walk {
+  padding: 10px 14px;
+  font-size: var(--fs-caption);
+  margin-top: auto;
 }
 
 /* =============================================================
