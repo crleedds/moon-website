@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '2.2.1' );
+define( 'MOONDENTAL_VERSION', '2.3.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -165,6 +165,44 @@ function moondental_info_shortcode( $atts ) {
 }
 add_shortcode( 'moondental_info', 'moondental_info_shortcode' );
 
+/**
+ * 진료시간 문자열에서 "09:00 – 18:00" 같은 시간 부분만 추출.
+ */
+function moondental_extract_time_range( $str ) {
+	if ( preg_match( '/(\d{1,2}\s*:\s*\d{2}\s*[~\-–—]\s*\d{1,2}\s*:\s*\d{2})/u', (string) $str, $m ) ) {
+		return trim( $m[1] );
+	}
+	return $str;
+}
+
+/**
+ * 오늘 요일에 맞는 진료시간 라벨 반환. 예: "목요일 09:00 – 18:00", "일요일 휴진".
+ * 한국 timezone(KST) 기준 — wp_date() 사용.
+ */
+function moondental_get_today_hours_label() {
+	$info = moondental_get_info();
+	$dow  = (int) wp_date( 'w' ); // 0=일 ~ 6=토
+	$kor  = array( '일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일' );
+	$today = $kor[ $dow ];
+
+	if ( $dow === 0 ) {
+		return $today . ' 휴진';
+	}
+
+	$source = '';
+	if ( $dow === 4 ) {
+		$source = $info['hours_thu'] ?? '';
+	} elseif ( $dow === 6 ) {
+		$source = $info['hours_sat'] ?? '';
+	} else {
+		$source = $info['hours_wd'] ?? '';
+	}
+
+	$time = moondental_extract_time_range( $source );
+	if ( ! $time ) return $today;
+	return $today . ' ' . $time;
+}
+
 
 /* ============================================================
  * 4. WordPress Customizer (관리자에서 병원 정보 편집)
@@ -313,33 +351,53 @@ function moondental_customize_register( $wp_customize ) {
 		'mime_type' => 'image',
 	) ) );
 
-	/* ── 의료진 사진 크기 조정 (개인별 줌) ───────────────────────── */
+	/* ── 의료진 사진 크기 조정 (개인별 zoom + translateY) ──────────── */
 	$wp_customize->add_section( 'moondental_section_team_photos', array(
-		'title'       => '의료진 — 사진 크기',
+		'title'       => '의료진 — 사진 크기·위치',
 		'panel'       => 'moondental_panel',
-		'description' => '의료진 페이지(/의료진/)의 사진별 줌(피사체 크기)을 조정합니다. ' .
-		                 '1.00 = 원본 그대로 · 1.20 = 20% 확대 · 0.90 = 10% 축소. ' .
-		                 '얼굴이 너무 크면 값을 낮추고, 너무 작으면 높이세요.',
+		'description' => '의료진 페이지(/의료진/)의 사진별 머리 크기와 위치를 조정합니다. ' .
+		                 'Zoom: 1.00 = 원본 그대로 · 1.50 = 50% 확대 (머리 크기). ' .
+		                 'TranslateY: 음수 = 위로 올림 · 양수 = 아래로 내림 (% 단위, 머리 최상단 위치).',
 		'priority'    => 40,
 	) );
 
 	$team_zoom_defaults = moondental_team_zoom_defaults();
 	foreach ( $team_zoom_defaults as $slug => $info ) {
-		$setting_id = 'moondental_team_zoom_' . $slug;
-		$wp_customize->add_setting( $setting_id, array(
+		/* Zoom */
+		$setting_id_z = 'moondental_team_zoom_' . $slug;
+		$wp_customize->add_setting( $setting_id_z, array(
 			'default'           => $info['default'],
 			'sanitize_callback' => 'moondental_sanitize_zoom',
 			'transport'         => 'refresh',
 		) );
-		$wp_customize->add_control( $setting_id, array(
-			'label'       => $info['name'] . ' (' . $info['role'] . ')',
-			'description' => '기본값: ' . number_format( $info['default'], 2 ) . ' · 권장 범위 0.80 ~ 1.80',
+		$wp_customize->add_control( $setting_id_z, array(
+			'label'       => $info['name'] . ' · 머리 크기 (Zoom)',
+			'description' => '기본값 ' . number_format( $info['default'], 2 ) . ' · 범위 0.80~2.50',
 			'section'     => 'moondental_section_team_photos',
 			'type'        => 'number',
 			'input_attrs' => array(
 				'min'  => 0.80,
-				'max'  => 1.80,
-				'step' => 0.02,
+				'max'  => 2.50,
+				'step' => 0.05,
+			),
+		) );
+
+		/* TranslateY */
+		$setting_id_t = 'moondental_team_ty_' . $slug;
+		$wp_customize->add_setting( $setting_id_t, array(
+			'default'           => $info['ty'],
+			'sanitize_callback' => 'moondental_sanitize_translatey',
+			'transport'         => 'refresh',
+		) );
+		$wp_customize->add_control( $setting_id_t, array(
+			'label'       => $info['name'] . ' · 머리 위치 (TranslateY %)',
+			'description' => '기본값 ' . (int) $info['ty'] . '% · 범위 -40 ~ 40 · 음수=위로 올림',
+			'section'     => 'moondental_section_team_photos',
+			'type'        => 'number',
+			'input_attrs' => array(
+				'min'  => -40,
+				'max'  => 40,
+				'step' => 1,
 			),
 		) );
 	}
@@ -351,28 +409,62 @@ add_action( 'customize_register', 'moondental_customize_register' );
  * 슬러그(sanitize_title 한 이름) → [name, role, default]
  */
 function moondental_team_zoom_defaults() {
-	// 기준: 이창률 사진(타이트 헤드샷, 얼굴 ~40%)에 다른 의료진 얼굴 크기를 맞춤.
+	/*
+	 * 각 의료진별 zoom(머리 크기 통일) + translateY(머리 최상단 위치 통일).
+	 * 목표: 모든 카드에서 머리가 같은 크기(약 38% of card height)이고
+	 *        머리 최상단이 카드 위에서 4% 위치에 오도록.
+	 *
+	 * 계산식:
+	 *   zoom = target_head_size / original_head_size
+	 *   translateY% = target_top_position - original_head_top * zoom
+	 *
+	 * 원본 사진의 머리 크기/위치 추정값 기반 — 실제 화면에서 보고 미세 조정 가능.
+	 */
 	return array(
-		sanitize_title( '문은수' ) => array( 'name' => '문은수', 'role' => '대표 병원장',           'default' => 1.30 ),
-		sanitize_title( '이승주' ) => array( 'name' => '이승주', 'role' => '9F 종합진료센터',       'default' => 1.20 ),
-		sanitize_title( '이수연' ) => array( 'name' => '이수연', 'role' => '9F 종합진료센터',       'default' => 1.15 ),
-		sanitize_title( '권혜진' ) => array( 'name' => '권혜진', 'role' => '9F 종합진료센터',       'default' => 1.65 ),
-		sanitize_title( '문지현' ) => array( 'name' => '문지현', 'role' => '10F 임플란트센터',     'default' => 1.15 ),
-		sanitize_title( '이창률' ) => array( 'name' => '이창률', 'role' => '10F 임플란트센터',     'default' => 1.00 ),
-		sanitize_title( '이영일' ) => array( 'name' => '이영일', 'role' => '11F 교정과',           'default' => 1.15 ),
-		sanitize_title( '김세일' ) => array( 'name' => '김세일', 'role' => '11F 종합진료센터',     'default' => 1.20 ),
-		sanitize_title( '정석형' ) => array( 'name' => '정석형', 'role' => '11F 종합진료센터',     'default' => 1.15 ),
+		sanitize_title( '문은수' ) => array( 'name' => '문은수', 'role' => '대표 병원장',          'default' => 1.90, 'ty' => -15 ),
+		sanitize_title( '이승주' ) => array( 'name' => '이승주', 'role' => '9F 종합진료센터',      'default' => 1.40, 'ty' => -3  ),
+		sanitize_title( '이수연' ) => array( 'name' => '이수연', 'role' => '9F 종합진료센터',      'default' => 1.35, 'ty' => -5  ),
+		sanitize_title( '권혜진' ) => array( 'name' => '권혜진', 'role' => '9F 종합진료센터',      'default' => 1.65, 'ty' => -6  ),
+		sanitize_title( '문지현' ) => array( 'name' => '문지현', 'role' => '10F 임플란트센터',     'default' => 1.35, 'ty' => -7  ),
+		sanitize_title( '이창률' ) => array( 'name' => '이창률', 'role' => '10F 임플란트센터',     'default' => 1.10, 'ty' => -1  ),
+		sanitize_title( '이영일' ) => array( 'name' => '이영일', 'role' => '11F 교정과',           'default' => 1.40, 'ty' => -7  ),
+		sanitize_title( '김세일' ) => array( 'name' => '김세일', 'role' => '11F 종합진료센터',     'default' => 1.35, 'ty' => -12 ),
+		sanitize_title( '정석형' ) => array( 'name' => '정석형', 'role' => '11F 종합진료센터',     'default' => 1.35, 'ty' => -7  ),
 	);
 }
 
 /**
- * 사진 줌 값을 0.80~1.80 범위로 정제.
+ * 사진 줌 값을 0.80~2.50 범위로 정제.
  */
 function moondental_sanitize_zoom( $value ) {
 	$v = (float) $value;
 	if ( $v < 0.80 ) return 0.80;
-	if ( $v > 1.80 ) return 1.80;
+	if ( $v > 2.50 ) return 2.50;
 	return round( $v, 2 );
+}
+
+/**
+ * 머리 위치(translateY) -40 ~ 40% 범위로 정제.
+ */
+function moondental_sanitize_translatey( $value ) {
+	$v = (float) $value;
+	if ( $v < -40 ) return -40;
+	if ( $v >  40 ) return  40;
+	return round( $v, 1 );
+}
+
+/**
+ * 의료진 이름으로 현재 translateY 값(%)을 반환.
+ */
+function moondental_get_doctor_ty( $name, $fallback = 0 ) {
+	$slug    = sanitize_title( $name );
+	$default = $fallback;
+	$map     = moondental_team_zoom_defaults();
+	if ( isset( $map[ $slug ] ) ) {
+		$default = $map[ $slug ]['ty'];
+	}
+	$v = get_theme_mod( 'moondental_team_ty_' . $slug, $default );
+	return moondental_sanitize_translatey( $v );
 }
 
 /**
@@ -876,8 +968,8 @@ function moondental_get_team() {
 					'name'       => '문은수',
 					'role'       => '대표 병원장',
 					'photo'      => 'doctor-04.png',
-					'photo_focus'=> '0%',
-					'photo_zoom' => 1.30,
+					'photo_zoom' => 1.90,
+					'photo_ty'   => -15,
 					'philosophy' => '환자를 가족처럼 생각하는 마음, 그것이 문치과의 진료 철학입니다.',
 					'bio'        => array(
 						'한아의료재단 이사장',
@@ -900,8 +992,8 @@ function moondental_get_team() {
 					'name'       => '이승주',
 					'role'       => '원장 · 9F 종합진료센터',
 					'photo'      => 'doctor-07.png',
-					'photo_focus'=> '0%',
-					'photo_zoom' => 1.20,
+					'photo_zoom' => 1.40,
+					'photo_ty'   => -3,
 					'philosophy' => '최선을 다하여 환자를 가족처럼 생각하며 진료에 임하겠습니다.',
 					'bio'        => array(
 						'단국대학교치과대학 치의학과 졸업',
@@ -914,8 +1006,8 @@ function moondental_get_team() {
 					'name'       => '이수연',
 					'role'       => '원장 · 9F 종합진료센터',
 					'photo'      => 'doctor-08.png',
-					'photo_focus'=> '0%',
-					'photo_zoom' => 1.15,
+					'photo_zoom' => 1.35,
+					'photo_ty'   => -5,
 					'philosophy' => '진실된 마음으로 환자분들과 함께하는 의료서비스를 제공하겠습니다.',
 					'bio'        => array(
 						'치과 보철과 전문의 · 통합치의학 전문의',
@@ -930,8 +1022,8 @@ function moondental_get_team() {
 					'name'       => '권혜진',
 					'role'       => '원장 · 9F 종합진료센터',
 					'photo'      => 'doctor-02.png',
-					'photo_focus'=> '0%',
 					'photo_zoom' => 1.65,
+					'photo_ty'   => -6,
 					'philosophy' => '기본에 충실하되 새로운 변화에 맞춰가며, 환자분을 가족처럼 생각하는 따뜻한 마음으로 진료에 임하겠습니다.',
 					'bio'        => array(
 						'보건복지부 인증 보존과 전문의',
@@ -953,8 +1045,8 @@ function moondental_get_team() {
 					'name'       => '문지현',
 					'role'       => '원장 · 10F 임플란트센터',
 					'photo'      => 'doctor-05.png',
-					'photo_focus'=> '0%',
-					'photo_zoom' => 1.15,
+					'photo_zoom' => 1.35,
+					'photo_ty'   => -7,
 					'philosophy' => '구강건강 증진을 통해 환자분들의 삶이 회복되는 과정을 함께 하고 싶습니다. 최선을 다해 진료하겠습니다.',
 					'bio'        => array(
 						'서울대학교 치의학대학원 졸업',
@@ -977,8 +1069,8 @@ function moondental_get_team() {
 					'name'       => '이창률',
 					'role'       => '원장 · 10F 임플란트센터',
 					'photo'      => 'doctor-01.png',
-					'photo_focus'=> '0%',
-					'photo_zoom' => 1.00,
+					'photo_zoom' => 1.10,
+					'photo_ty'   => -1,
 					'philosophy' => 'For a lifelong smile. 환자 한 분 한 분을 가족처럼 생각하며, 밝고 편안한 웃음을 위한 진료에 최선을 다하겠습니다.',
 					'bio'        => array(
 						'미국 UCLA 생화학 학사 졸업',
@@ -1008,8 +1100,8 @@ function moondental_get_team() {
 					'name'       => '이영일',
 					'role'       => '원장 · 11F 교정과',
 					'photo'      => 'doctor-09.png',
-					'photo_focus'=> '0%',
-					'photo_zoom' => 1.15,
+					'photo_zoom' => 1.40,
+					'photo_ty'   => -7,
 					'philosophy' => '환자를 가족처럼 생각하는 마음, 그것이 문치과의 진료 철학입니다.',
 					'bio'        => array(
 						'단국대학교 치과대학 졸업',
@@ -1025,8 +1117,8 @@ function moondental_get_team() {
 					'name'       => '김세일',
 					'role'       => '원장 · 11F 종합진료센터',
 					'photo'      => 'doctor-03.png',
-					'photo_focus'=> '0%',
-					'photo_zoom' => 1.20,
+					'photo_zoom' => 1.35,
+					'photo_ty'   => -12,
 					'philosophy' => '건강한 치아는 건강한 일상의 시작입니다. 세밀한 진단과 진료로 환자분들의 건강한 하루를 책임지겠습니다.',
 					'bio'        => array(
 						'단국대학교 치과대학 졸업',
@@ -1038,8 +1130,8 @@ function moondental_get_team() {
 					'name'       => '정석형',
 					'role'       => '원장 · 11F 종합진료센터',
 					'photo'      => 'doctor-06.png',
-					'photo_focus'=> '0%',
-					'photo_zoom' => 1.15,
+					'photo_zoom' => 1.35,
+					'photo_ty'   => -7,
 					'philosophy' => '저희 문치과를 방문하는 모든 분들이 밝고 건강한 웃음의 주인이 되시길 바라며 항상 최선을 다하겠습니다.',
 					'bio'        => array(
 						'단국대학교 치과대학 치주과 석사',
@@ -1065,8 +1157,10 @@ function moondental_get_team_with_customizer() {
 	if ( ! function_exists( 'get_theme_mod' ) ) return $groups;
 	foreach ( $groups as $gi => $group ) {
 		foreach ( $group['members'] as $mi => $m ) {
-			$fallback = isset( $m['photo_zoom'] ) ? (float) $m['photo_zoom'] : 1.00;
-			$groups[ $gi ]['members'][ $mi ]['photo_zoom'] = moondental_get_doctor_zoom( $m['name'], $fallback );
+			$z_fallback = isset( $m['photo_zoom'] ) ? (float) $m['photo_zoom'] : 1.00;
+			$t_fallback = isset( $m['photo_ty'] )   ? (float) $m['photo_ty']   : 0.00;
+			$groups[ $gi ]['members'][ $mi ]['photo_zoom'] = moondental_get_doctor_zoom( $m['name'], $z_fallback );
+			$groups[ $gi ]['members'][ $mi ]['photo_ty']   = moondental_get_doctor_ty(   $m['name'], $t_fallback );
 		}
 	}
 	return $groups;

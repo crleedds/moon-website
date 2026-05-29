@@ -104,12 +104,12 @@ $specialties = array(
 					$bio       = $doc['bio'] ?? array();
 					if ( is_string( $bio ) ) { $bio = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", $bio ) ) ); }
 
-					// 사진 framing 통일 — 의료진별 focus/zoom 적용
-					$photo_focus = isset( $doc['photo_focus'] ) ? $doc['photo_focus'] : '25%';
-					$photo_zoom  = isset( $doc['photo_zoom'] )  ? (float) $doc['photo_zoom'] : 1.0;
+					// 사진 머리 크기·위치 통일 — 의료진별 zoom + translateY 적용
+					$photo_zoom = isset( $doc['photo_zoom'] ) ? (float) $doc['photo_zoom'] : 1.0;
+					$photo_ty   = isset( $doc['photo_ty'] )   ? (float) $doc['photo_ty']   : 0.0;
 					$photo_style = sprintf(
-						'object-position: center %s; transform: scale(%s); transform-origin: center top;',
-						esc_attr( $photo_focus ),
+						'transform: translateY(%s%%) scale(%s); transform-origin: center top; object-position: center top;',
+						esc_attr( number_format( $photo_ty,   1 ) ),
 						esc_attr( number_format( $photo_zoom, 2 ) )
 					);
 			?>

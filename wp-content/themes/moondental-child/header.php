@@ -9,7 +9,9 @@
  */
 $phone      = moondental_get_info( 'phone' );
 $phone_link = moondental_get_info( 'phone_link' );
-$hours_wd   = moondental_get_info( 'hours_wd' );
+$hours_wd   = function_exists( 'moondental_get_today_hours_label' )
+	? moondental_get_today_hours_label()
+	: moondental_get_info( 'hours_wd' );
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
