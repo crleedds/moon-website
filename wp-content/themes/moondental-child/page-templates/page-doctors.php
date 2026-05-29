@@ -11,7 +11,9 @@
 get_header();
 $info       = moondental_get_info();
 $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'] );
-$groups     = moondental_get_team();
+$groups     = function_exists( 'moondental_get_team_with_customizer' )
+	? moondental_get_team_with_customizer()
+	: moondental_get_team();
 
 // 그룹 → 필터 키 매핑 (한글 라벨 → kebab key for data-attr)
 $group_keys = array();

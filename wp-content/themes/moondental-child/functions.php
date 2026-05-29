@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '2.1.4' );
+define( 'MOONDENTAL_VERSION', '2.2.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -312,8 +312,81 @@ function moondental_customize_register( $wp_customize ) {
 		'section'   => 'moondental_section_home_doctor',
 		'mime_type' => 'image',
 	) ) );
+
+	/* ── 의료진 사진 크기 조정 (개인별 줌) ───────────────────────── */
+	$wp_customize->add_section( 'moondental_section_team_photos', array(
+		'title'       => '의료진 — 사진 크기',
+		'panel'       => 'moondental_panel',
+		'description' => '의료진 페이지(/의료진/)의 사진별 줌(피사체 크기)을 조정합니다. ' .
+		                 '1.00 = 원본 그대로 · 1.20 = 20% 확대 · 0.90 = 10% 축소. ' .
+		                 '얼굴이 너무 크면 값을 낮추고, 너무 작으면 높이세요.',
+		'priority'    => 40,
+	) );
+
+	$team_zoom_defaults = moondental_team_zoom_defaults();
+	foreach ( $team_zoom_defaults as $slug => $info ) {
+		$setting_id = 'moondental_team_zoom_' . $slug;
+		$wp_customize->add_setting( $setting_id, array(
+			'default'           => $info['default'],
+			'sanitize_callback' => 'moondental_sanitize_zoom',
+			'transport'         => 'refresh',
+		) );
+		$wp_customize->add_control( $setting_id, array(
+			'label'       => $info['name'] . ' (' . $info['role'] . ')',
+			'description' => '기본값: ' . number_format( $info['default'], 2 ) . ' · 권장 범위 0.80 ~ 1.80',
+			'section'     => 'moondental_section_team_photos',
+			'type'        => 'number',
+			'input_attrs' => array(
+				'min'  => 0.80,
+				'max'  => 1.80,
+				'step' => 0.02,
+			),
+		) );
+	}
 }
 add_action( 'customize_register', 'moondental_customize_register' );
+
+/**
+ * 의료진별 사진 줌 기본값. Customizer 미설정 시 이 값이 적용됨.
+ * 슬러그(sanitize_title 한 이름) → [name, role, default]
+ */
+function moondental_team_zoom_defaults() {
+	return array(
+		sanitize_title( '문은수' ) => array( 'name' => '문은수', 'role' => '대표 병원장',           'default' => 1.08 ),
+		sanitize_title( '이승주' ) => array( 'name' => '이승주', 'role' => '9F 종합진료센터',       'default' => 1.18 ),
+		sanitize_title( '이수연' ) => array( 'name' => '이수연', 'role' => '9F 종합진료센터',       'default' => 1.00 ),
+		sanitize_title( '권혜진' ) => array( 'name' => '권혜진', 'role' => '9F 종합진료센터',       'default' => 1.00 ),
+		sanitize_title( '문지현' ) => array( 'name' => '문지현', 'role' => '10F 임플란트센터',     'default' => 1.00 ),
+		sanitize_title( '이창률' ) => array( 'name' => '이창률', 'role' => '10F 임플란트센터',     'default' => 1.00 ),
+		sanitize_title( '이영일' ) => array( 'name' => '이영일', 'role' => '11F 교정과',           'default' => 1.00 ),
+		sanitize_title( '김세일' ) => array( 'name' => '김세일', 'role' => '11F 종합진료센터',     'default' => 1.00 ),
+		sanitize_title( '정석형' ) => array( 'name' => '정석형', 'role' => '11F 종합진료센터',     'default' => 1.00 ),
+	);
+}
+
+/**
+ * 사진 줌 값을 0.80~1.80 범위로 정제.
+ */
+function moondental_sanitize_zoom( $value ) {
+	$v = (float) $value;
+	if ( $v < 0.80 ) return 0.80;
+	if ( $v > 1.80 ) return 1.80;
+	return round( $v, 2 );
+}
+
+/**
+ * 의료진 이름으로 현재 줌 값을 반환 — Customizer 값 우선, 없으면 default.
+ */
+function moondental_get_doctor_zoom( $name, $fallback = 1.00 ) {
+	$slug    = sanitize_title( $name );
+	$default = $fallback;
+	$map     = moondental_team_zoom_defaults();
+	if ( isset( $map[ $slug ] ) ) {
+		$default = $map[ $slug ]['default'];
+	}
+	$v = get_theme_mod( 'moondental_team_zoom_' . $slug, $default );
+	return moondental_sanitize_zoom( $v );
+}
 
 
 /* ============================================================
@@ -978,6 +1051,39 @@ function moondental_get_team() {
 			),
 		),
 	);
+}
+
+/**
+ * 의료진 그룹 데이터에 Customizer 값(개인별 줌)을 덧입혀 반환.
+ *
+ * page-doctors.php 등 모든 호출처는 그대로 moondental_get_team() 만 사용해도
+ * Customizer 값이 자동 반영되도록, 이 wrapper를 통해 후처리한다.
+ */
+function moondental_get_team_with_customizer() {
+	$groups = moondental_get_team();
+	if ( ! function_exists( 'get_theme_mod' ) ) return $groups;
+	foreach ( $groups as $gi => $group ) {
+		foreach ( $group['members'] as $mi => $m ) {
+			$fallback = isset( $m['photo_zoom'] ) ? (float) $m['photo_zoom'] : 1.00;
+			$groups[ $gi ]['members'][ $mi ]['photo_zoom'] = moondental_get_doctor_zoom( $m['name'], $fallback );
+		}
+	}
+	return $groups;
+}
+
+/**
+ * moondental_get_team() 호출 결과를 Customizer 값으로 덮어쓰는 필터 wrapper.
+ * 외부에서 add_filter( 'moondental_team', 'moondental_get_team_with_customizer' ) 형태로 후킹 가능.
+ */
+add_filter( 'moondental_team_data', 'moondental_apply_team_zoom_customizer', 10, 1 );
+function moondental_apply_team_zoom_customizer( $groups ) {
+	foreach ( $groups as $gi => $group ) {
+		foreach ( $group['members'] as $mi => $m ) {
+			$fallback = isset( $m['photo_zoom'] ) ? (float) $m['photo_zoom'] : 1.00;
+			$groups[ $gi ]['members'][ $mi ]['photo_zoom'] = moondental_get_doctor_zoom( $m['name'], $fallback );
+		}
+	}
+	return $groups;
 }
 
 /**
