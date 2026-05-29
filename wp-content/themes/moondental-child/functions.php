@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '2.2.0' );
+define( 'MOONDENTAL_VERSION', '2.2.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -351,16 +351,17 @@ add_action( 'customize_register', 'moondental_customize_register' );
  * 슬러그(sanitize_title 한 이름) → [name, role, default]
  */
 function moondental_team_zoom_defaults() {
+	// 기준: 이창률 사진(타이트 헤드샷, 얼굴 ~40%)에 다른 의료진 얼굴 크기를 맞춤.
 	return array(
-		sanitize_title( '문은수' ) => array( 'name' => '문은수', 'role' => '대표 병원장',           'default' => 1.08 ),
-		sanitize_title( '이승주' ) => array( 'name' => '이승주', 'role' => '9F 종합진료센터',       'default' => 1.18 ),
-		sanitize_title( '이수연' ) => array( 'name' => '이수연', 'role' => '9F 종합진료센터',       'default' => 1.00 ),
-		sanitize_title( '권혜진' ) => array( 'name' => '권혜진', 'role' => '9F 종합진료센터',       'default' => 1.00 ),
-		sanitize_title( '문지현' ) => array( 'name' => '문지현', 'role' => '10F 임플란트센터',     'default' => 1.00 ),
+		sanitize_title( '문은수' ) => array( 'name' => '문은수', 'role' => '대표 병원장',           'default' => 1.30 ),
+		sanitize_title( '이승주' ) => array( 'name' => '이승주', 'role' => '9F 종합진료센터',       'default' => 1.20 ),
+		sanitize_title( '이수연' ) => array( 'name' => '이수연', 'role' => '9F 종합진료센터',       'default' => 1.15 ),
+		sanitize_title( '권혜진' ) => array( 'name' => '권혜진', 'role' => '9F 종합진료센터',       'default' => 1.65 ),
+		sanitize_title( '문지현' ) => array( 'name' => '문지현', 'role' => '10F 임플란트센터',     'default' => 1.15 ),
 		sanitize_title( '이창률' ) => array( 'name' => '이창률', 'role' => '10F 임플란트센터',     'default' => 1.00 ),
-		sanitize_title( '이영일' ) => array( 'name' => '이영일', 'role' => '11F 교정과',           'default' => 1.00 ),
-		sanitize_title( '김세일' ) => array( 'name' => '김세일', 'role' => '11F 종합진료센터',     'default' => 1.00 ),
-		sanitize_title( '정석형' ) => array( 'name' => '정석형', 'role' => '11F 종합진료센터',     'default' => 1.00 ),
+		sanitize_title( '이영일' ) => array( 'name' => '이영일', 'role' => '11F 교정과',           'default' => 1.15 ),
+		sanitize_title( '김세일' ) => array( 'name' => '김세일', 'role' => '11F 종합진료센터',     'default' => 1.20 ),
+		sanitize_title( '정석형' ) => array( 'name' => '정석형', 'role' => '11F 종합진료센터',     'default' => 1.15 ),
 	);
 }
 
@@ -876,7 +877,7 @@ function moondental_get_team() {
 					'role'       => '대표 병원장',
 					'photo'      => 'doctor-04.png',
 					'photo_focus'=> '0%',
-					'photo_zoom' => 1.08,
+					'photo_zoom' => 1.30,
 					'philosophy' => '환자를 가족처럼 생각하는 마음, 그것이 문치과의 진료 철학입니다.',
 					'bio'        => array(
 						'한아의료재단 이사장',
@@ -899,8 +900,8 @@ function moondental_get_team() {
 					'name'       => '이승주',
 					'role'       => '원장 · 9F 종합진료센터',
 					'photo'      => 'doctor-07.png',
-					'photo_focus'=> '20%',
-					'photo_zoom' => 1.18,
+					'photo_focus'=> '0%',
+					'photo_zoom' => 1.20,
 					'philosophy' => '최선을 다하여 환자를 가족처럼 생각하며 진료에 임하겠습니다.',
 					'bio'        => array(
 						'단국대학교치과대학 치의학과 졸업',
@@ -914,7 +915,7 @@ function moondental_get_team() {
 					'role'       => '원장 · 9F 종합진료센터',
 					'photo'      => 'doctor-08.png',
 					'photo_focus'=> '0%',
-					'photo_zoom' => 1.00,
+					'photo_zoom' => 1.15,
 					'philosophy' => '진실된 마음으로 환자분들과 함께하는 의료서비스를 제공하겠습니다.',
 					'bio'        => array(
 						'치과 보철과 전문의 · 통합치의학 전문의',
@@ -930,7 +931,7 @@ function moondental_get_team() {
 					'role'       => '원장 · 9F 종합진료센터',
 					'photo'      => 'doctor-02.png',
 					'photo_focus'=> '0%',
-					'photo_zoom' => 1.00,
+					'photo_zoom' => 1.65,
 					'philosophy' => '기본에 충실하되 새로운 변화에 맞춰가며, 환자분을 가족처럼 생각하는 따뜻한 마음으로 진료에 임하겠습니다.',
 					'bio'        => array(
 						'보건복지부 인증 보존과 전문의',
@@ -953,7 +954,7 @@ function moondental_get_team() {
 					'role'       => '원장 · 10F 임플란트센터',
 					'photo'      => 'doctor-05.png',
 					'photo_focus'=> '0%',
-					'photo_zoom' => 1.00,
+					'photo_zoom' => 1.15,
 					'philosophy' => '구강건강 증진을 통해 환자분들의 삶이 회복되는 과정을 함께 하고 싶습니다. 최선을 다해 진료하겠습니다.',
 					'bio'        => array(
 						'서울대학교 치의학대학원 졸업',
@@ -976,7 +977,7 @@ function moondental_get_team() {
 					'name'       => '이창률',
 					'role'       => '원장 · 10F 임플란트센터',
 					'photo'      => 'doctor-01.png',
-					'photo_focus'=> '24%',
+					'photo_focus'=> '0%',
 					'photo_zoom' => 1.00,
 					'philosophy' => 'For a lifelong smile. 환자 한 분 한 분을 가족처럼 생각하며, 밝고 편안한 웃음을 위한 진료에 최선을 다하겠습니다.',
 					'bio'        => array(
@@ -1008,7 +1009,7 @@ function moondental_get_team() {
 					'role'       => '원장 · 11F 교정과',
 					'photo'      => 'doctor-09.png',
 					'photo_focus'=> '0%',
-					'photo_zoom' => 1.00,
+					'photo_zoom' => 1.15,
 					'philosophy' => '환자를 가족처럼 생각하는 마음, 그것이 문치과의 진료 철학입니다.',
 					'bio'        => array(
 						'단국대학교 치과대학 졸업',
@@ -1024,8 +1025,8 @@ function moondental_get_team() {
 					'name'       => '김세일',
 					'role'       => '원장 · 11F 종합진료센터',
 					'photo'      => 'doctor-03.png',
-					'photo_focus'=> '28%',
-					'photo_zoom' => 1.00,
+					'photo_focus'=> '0%',
+					'photo_zoom' => 1.20,
 					'philosophy' => '건강한 치아는 건강한 일상의 시작입니다. 세밀한 진단과 진료로 환자분들의 건강한 하루를 책임지겠습니다.',
 					'bio'        => array(
 						'단국대학교 치과대학 졸업',
@@ -1038,7 +1039,7 @@ function moondental_get_team() {
 					'role'       => '원장 · 11F 종합진료센터',
 					'photo'      => 'doctor-06.png',
 					'photo_focus'=> '0%',
-					'photo_zoom' => 1.00,
+					'photo_zoom' => 1.15,
 					'philosophy' => '저희 문치과를 방문하는 모든 분들이 밝고 건강한 웃음의 주인이 되시길 바라며 항상 최선을 다하겠습니다.',
 					'bio'        => array(
 						'단국대학교 치과대학 치주과 석사',
