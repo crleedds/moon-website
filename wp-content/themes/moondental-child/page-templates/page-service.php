@@ -59,6 +59,110 @@ foreach ( $services as $svc ) {
 </section>
 
 <?php
+/* === 환자 고민 / 솔루션 6쌍 — bdbddc.com 패턴 참고 === */
+if ( function_exists( 'moondental_service_pain_points' ) ) {
+	$pp_map = moondental_service_pain_points();
+	if ( isset( $pp_map[ $slug ] ) && ! empty( $pp_map[ $slug ] ) ) :
+?>
+<section class="md-section md-section--surface" aria-label="환자분 고민·솔루션">
+	<div class="md-container">
+		<header class="md-section-head">
+			<span class="md-section-head__eyebrow">환자분의 마음</span>
+			<h2 class="md-section-head__title">혹시 이런 고민 하고 계시죠?</h2>
+			<p class="md-section-head__lead">
+				많은 환자분이 같은 걱정을 안고 오십니다. 문치과병원이 어떻게 답해드리는지 확인하세요.
+			</p>
+		</header>
+		<ul class="md-pain">
+			<?php foreach ( $pp_map[ $slug ] as $pp ) : ?>
+				<li class="md-pain__pair">
+					<div class="md-pain__concern">
+						<span class="md-pain__tag">고민</span>
+						<p>"<?php echo esc_html( $pp['concern'] ); ?>"</p>
+					</div>
+					<div class="md-pain__solution">
+						<span class="md-pain__tag md-pain__tag--alt">문치과의 답</span>
+						<p><?php echo esc_html( $pp['solution'] ); ?></p>
+					</div>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+	</div>
+</section>
+<?php endif; }
+?>
+
+<?php
+/* === 종합치과병원 vs 일반 치과의원 비교표 — 객관적 차이 === */
+if ( function_exists( 'moondental_clinic_comparison' ) ) {
+	$cmp = moondental_clinic_comparison();
+?>
+<section class="md-section" aria-label="치과병원과 일반 치과의 차이">
+	<div class="md-container md-container--narrow">
+		<header class="md-section-head">
+			<span class="md-section-head__eyebrow">Difference</span>
+			<h2 class="md-section-head__title">치과병원과 일반 치과의 차이</h2>
+			<p class="md-section-head__lead">
+				의료기관 종별·시설·운영의 객관적 차이입니다.
+			</p>
+		</header>
+		<div class="md-compare">
+			<div class="md-compare__head">
+				<div class="md-compare__cell md-compare__cell--label">구분</div>
+				<div class="md-compare__cell md-compare__cell--us">문치과병원 (치과병원)</div>
+				<div class="md-compare__cell md-compare__cell--them">일반 치과의원</div>
+			</div>
+			<?php foreach ( $cmp as $row ) : ?>
+				<div class="md-compare__row">
+					<div class="md-compare__cell md-compare__cell--label"><?php echo esc_html( $row['label'] ); ?></div>
+					<div class="md-compare__cell md-compare__cell--us"><strong><?php echo esc_html( $row['hospital'] ); ?></strong></div>
+					<div class="md-compare__cell md-compare__cell--them"><?php echo esc_html( $row['clinic'] ); ?></div>
+				</div>
+			<?php endforeach; ?>
+		</div>
+		<p class="md-compare__note">
+			ⓘ 일반 치과의원의 시설·운영은 의원별로 다를 수 있으며, 위 비교는 일반적 기준입니다.
+		</p>
+	</div>
+</section>
+<?php }
+?>
+
+<?php
+/* === 이런 분께 추천합니다 === */
+if ( function_exists( 'moondental_service_ideal_candidates' ) ) {
+	$cand_map = moondental_service_ideal_candidates();
+	if ( isset( $cand_map[ $slug ] ) && ! empty( $cand_map[ $slug ] ) ) :
+?>
+<section class="md-section md-section--surface md-section--sm" aria-label="추천 대상">
+	<div class="md-container md-container--narrow">
+		<div class="md-ideal">
+			<header class="md-ideal__head">
+				<span class="md-ideal__chip">For You</span>
+				<h2 class="md-ideal__title">이런 분께 추천합니다</h2>
+				<p class="md-ideal__lead">
+					해당하시는 항목이 있으시면 부담 없이 상담받으세요.
+				</p>
+			</header>
+			<ul class="md-ideal__list">
+				<?php foreach ( $cand_map[ $slug ] as $item ) : ?>
+					<li>
+						<span class="md-ideal__check" aria-hidden="true">✓</span>
+						<span><?php echo esc_html( $item ); ?></span>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+			<div class="md-ideal__cta">
+				<a class="md-btn md-btn-primary" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>">📅 상담 예약하기</a>
+				<a class="md-btn md-btn-secondary" href="tel:<?php echo esc_attr( preg_replace('/[^0-9]/', '', moondental_get_info('phone')) ); ?>">📞 <?php echo esc_html( moondental_get_info('phone') ); ?></a>
+			</div>
+		</div>
+	</div>
+</section>
+<?php endif; }
+?>
+
+<?php
 /* 해당 service slug의 자동 FAQ 출력 */
 if ( function_exists( 'moondental_get_faqs_by_service' ) ) {
 	$faqs_map = moondental_get_faqs_by_service();

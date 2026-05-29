@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      2.4.0
+Version:      2.5.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -3647,6 +3647,261 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
 .md-pricing-hero__crumbs,
 .md-priceX-hero__crumbs {
   display: none !important;
+}
+
+/* =============================================================
+   39. 진료 페이지 — 환자 고민 / 솔루션 6쌍 (.md-pain)
+   ============================================================= */
+.md-pain {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(14px, 2vw, 22px);
+  max-width: 1080px;
+  margin-inline: auto;
+}
+@media (max-width: 880px) { .md-pain { grid-template-columns: 1fr; } }
+
+.md-pain__pair {
+  display: grid;
+  grid-template-rows: auto auto;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.3s var(--ease);
+}
+.md-pain__pair:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-3px);
+}
+.md-pain__concern,
+.md-pain__solution {
+  padding: clamp(18px, 2.3vw, 24px);
+}
+.md-pain__concern {
+  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-alt));
+  border-bottom: 1px dashed var(--color-border);
+}
+.md-pain__solution {
+  background: var(--color-white);
+}
+.md-pain__concern p,
+.md-pain__solution p {
+  margin: 0;
+  font-size: var(--fs-small);
+  line-height: 1.7;
+  word-break: keep-all;
+}
+.md-pain__concern p {
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+.md-pain__solution p {
+  color: var(--color-text);
+  line-height: 1.75;
+}
+.md-pain__tag {
+  display: inline-block;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--color-text-mute);
+  background: rgba(0, 0, 0, 0.06);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 8px;
+}
+.md-pain__tag--alt {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* =============================================================
+   40. 진료 페이지 — 종합치과병원 vs 일반 치과 비교표 (.md-compare)
+   ============================================================= */
+.md-compare {
+  display: grid;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-white);
+}
+.md-compare__head,
+.md-compare__row {
+  display: grid;
+  grid-template-columns: 1.1fr 1.6fr 1.4fr;
+}
+.md-compare__head {
+  background: var(--color-surface);
+  font-weight: 800;
+  font-size: var(--fs-small);
+  letter-spacing: -0.01em;
+  border-bottom: 2px solid var(--color-border);
+}
+.md-compare__row {
+  border-top: 1px solid var(--color-border);
+  transition: background 0.2s var(--ease);
+}
+.md-compare__row:hover { background: var(--color-surface); }
+.md-compare__cell {
+  padding: 14px 18px;
+  font-size: var(--fs-small);
+  line-height: 1.65;
+  word-break: keep-all;
+}
+.md-compare__cell--label {
+  color: var(--color-text-sub);
+  background: rgba(216, 128, 98, 0.04);
+  font-weight: 700;
+  border-right: 1px solid var(--color-border);
+}
+.md-compare__cell--us {
+  color: var(--color-text);
+  background: rgba(216, 128, 98, 0.08);
+  border-right: 1px solid var(--color-border);
+}
+.md-compare__cell--us strong {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+.md-compare__cell--them {
+  color: var(--color-text-mute);
+}
+.md-compare__head .md-compare__cell--label { background: var(--color-surface-alt); }
+.md-compare__head .md-compare__cell--us { background: var(--color-primary); color: #fff; }
+.md-compare__head .md-compare__cell--them { background: var(--color-surface-alt); color: var(--color-text-sub); }
+.md-compare__head .md-compare__cell--us strong { color: #fff; }
+
+@media (max-width: 720px) {
+  .md-compare__head,
+  .md-compare__row { grid-template-columns: 1fr; }
+  .md-compare__cell { padding: 10px 16px; }
+  .md-compare__cell--label {
+    background: var(--color-surface-alt);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .md-compare__cell--us {
+    border-right: none;
+    border-bottom: 1px dashed var(--color-border);
+  }
+  .md-compare__cell--us::before {
+    content: '✓ ';
+    color: var(--color-primary);
+    font-weight: 800;
+  }
+  .md-compare__cell--them::before {
+    content: '⚬ ';
+    color: var(--color-text-mute);
+  }
+  .md-compare__head { display: none; }
+}
+
+.md-compare__note {
+  text-align: center;
+  font-size: var(--fs-caption);
+  color: var(--color-text-mute);
+  margin: 14px 0 0;
+  word-break: keep-all;
+}
+
+/* =============================================================
+   41. 진료 페이지 — 이런 분께 추천합니다 (.md-ideal)
+   ============================================================= */
+.md-ideal {
+  max-width: 760px;
+  margin: 0 auto;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(28px, 4vw, 44px);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.md-ideal::before {
+  content: '';
+  position: absolute;
+  top: -50px; right: -50px;
+  width: 180px; height: 180px;
+  background: var(--color-surface);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.md-ideal > * { position: relative; }
+.md-ideal__head { margin-bottom: 20px; }
+.md-ideal__chip {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--color-primary-dark);
+  background: var(--color-surface);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 14px;
+}
+.md-ideal__title {
+  font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+  font-weight: 800;
+  margin: 0 0 10px;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+.md-ideal__lead {
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  margin: 0;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+.md-ideal__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: grid;
+  gap: 10px;
+  text-align: left;
+}
+.md-ideal__list li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-small);
+  color: var(--color-text);
+  line-height: 1.65;
+  word-break: keep-all;
+}
+.md-ideal__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.md-ideal__cta {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* =============================================================
