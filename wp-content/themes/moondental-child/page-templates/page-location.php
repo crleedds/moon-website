@@ -3,8 +3,7 @@
  * Template Name: 오시는 길
  * Template Post Type: page
  *
- * 네이버 지도(직사각형) → 3 맵 버튼(네이버/카카오/구글) → 3 연락 버튼(전화/카톡/네이버예약)
- * + 주차·교통 안내.
+ * 흐름: Hero(주소 강조) → 지도(여백 최소) → 3 맵 버튼 → 주차 → 3 연락 채널.
  *
  * @package moondental-child
  */
@@ -32,13 +31,13 @@ foreach ( array( 'naver-map.png', 'naver-map.jpg', 'naver-map.jpeg', 'naver-map.
 }
 ?>
 
-<section class="md-page-hero">
+<section class="md-page-hero md-page-hero--location">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>오시는 길</span>
 		</nav>
 		<h1 class="md-page-hero__title">오시는 길</h1>
-		<p class="md-page-hero__lead">
+		<p class="md-page-hero__lead md-page-hero__lead--big">
 			<a href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener" style="color:inherit; border-bottom:1px dashed var(--color-border);">
 				<?php echo esc_html( $info['address'] ); ?>
 			</a>
@@ -46,8 +45,8 @@ foreach ( array( 'naver-map.png', 'naver-map.jpg', 'naver-map.jpeg', 'naver-map.
 	</div>
 </section>
 
-<!-- ============ 1. 네이버 지도 (직사각형) ============ -->
-<section class="md-section">
+<!-- ============ 1. 네이버 지도 (직사각형) — 히어로 바로 아래, 여백 최소 ============ -->
+<section class="md-section md-section--tight">
 	<div class="md-container">
 		<a class="md-locmap<?php echo $map_image ? ' md-locmap--has-image' : ''; ?>"
 		   href="<?php echo esc_url( $map_naver ); ?>"
@@ -59,18 +58,9 @@ foreach ( array( 'naver-map.png', 'naver-map.jpg', 'naver-map.jpeg', 'naver-map.
 				<div class="md-locmap__pattern" aria-hidden="true"></div>
 			<?php endif; ?>
 		</a>
-	</div>
-</section>
 
-<!-- ============ 2. 3 맵 버튼 ============ -->
-<section class="md-section md-section--sm md-section--surface">
-	<div class="md-container">
-		<header class="md-section-head" style="margin-bottom: clamp(24px, 3vw, 32px);">
-			<span class="md-section-head__eyebrow">길찾기</span>
-			<h2 class="md-section-head__title">선호하시는 지도로 길찾기</h2>
-		</header>
-
-		<div class="md-mapbtn-grid">
+		<!-- 지도 사진 바로 아래 3 맵 버튼 -->
+		<div class="md-mapbtn-grid" style="margin-top: clamp(16px, 2vw, 24px);">
 			<a class="md-mapbtn md-mapbtn--naver" href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener" data-track="cta-location-map-naver">
 				<span class="md-mapbtn__logo" aria-hidden="true">N</span>
 				<span class="md-mapbtn__body">
@@ -99,8 +89,42 @@ foreach ( array( 'naver-map.png', 'naver-map.jpg', 'naver-map.jpeg', 'naver-map.
 	</div>
 </section>
 
-<!-- ============ 3. 3 연락 버튼 (전화/카톡/네이버 예약) ============ -->
-<section class="md-section md-section--sm">
+<!-- ============ 2. 주차·도보 안내 ============ -->
+<section class="md-section md-section--surface">
+	<div class="md-container">
+		<div class="md-park">
+			<div class="md-park__head">
+				<span class="md-park__badge">🅿️ 주차 안내</span>
+				<h3 class="md-park__title">본원 지하 기계식 주차장 <strong>무료</strong></h3>
+				<p class="md-park__lead">방문 시 데스크에 주차권을 제출하시면 등록해드립니다.</p>
+			</div>
+
+			<ul class="md-park__list">
+				<li>
+					<span class="md-park__num">01</span>
+					<div>
+						<strong>본원 지하 기계식 주차장</strong>
+						<span>주차요원 안내에 따라 입차 — 진료 시간 동안 무료 이용 가능합니다.</span>
+					</div>
+				</li>
+				<li>
+					<span class="md-park__num">02</span>
+					<div>
+						<strong>SUV·대형차 — 신부 제5공영주차장</strong>
+						<span>기계식 주차가 어려우신 차량은 인근 <strong>신부 제5공영주차장</strong>(충남 천안시 동남구 먹거리1길 10)에 주차하신 후, 데스크에 주차권을 제출해주세요. <strong>무료 주차 등록</strong>을 도와드립니다.</span>
+					</div>
+				</li>
+			</ul>
+
+			<p class="md-park__walk">
+				🚌 <strong>천안종합버스터미널 · 천안고속버스터미널</strong>에서 도보 약 5분 거리.
+			</p>
+		</div>
+	</div>
+</section>
+
+<!-- ============ 3. 편하신 방법으로 연락주세요 (전화/카톡/네이버 예약) ============ -->
+<section class="md-section">
 	<div class="md-container">
 		<header class="md-section-head" style="margin-bottom: clamp(24px, 3vw, 32px);">
 			<span class="md-section-head__eyebrow">예약·문의</span>
@@ -132,40 +156,6 @@ foreach ( array( 'naver-map.png', 'naver-map.jpg', 'naver-map.jpeg', 'naver-map.
 				<span class="md-channel-card__cta">예약하러 가기 →</span>
 			</a>
 			<?php endif; ?>
-		</div>
-	</div>
-</section>
-
-<!-- ============ 4. 주차·도보 안내 ============ -->
-<section class="md-section md-section--surface">
-	<div class="md-container">
-		<div class="md-park">
-			<div class="md-park__head">
-				<span class="md-park__badge">🅿️ 주차 안내</span>
-				<h3 class="md-park__title">본원 지하 기계식 주차장 <strong>무료</strong></h3>
-				<p class="md-park__lead">방문 시 데스크에 주차권을 제출하시면 등록해드립니다.</p>
-			</div>
-
-			<ul class="md-park__list">
-				<li>
-					<span class="md-park__num">01</span>
-					<div>
-						<strong>본원 지하 기계식 주차장</strong>
-						<span>주차요원 안내에 따라 입차 — 진료 시간 동안 무료 이용 가능합니다.</span>
-					</div>
-				</li>
-				<li>
-					<span class="md-park__num">02</span>
-					<div>
-						<strong>SUV·대형차 — 신부 제5공영주차장</strong>
-						<span>기계식 주차가 어려우신 차량은 인근 <strong>신부 제5공영주차장</strong>(충남 천안시 동남구 먹거리1길 10)에 주차하신 후, 데스크에 주차권을 제출해주세요. <strong>무료 주차 등록</strong>을 도와드립니다.</span>
-					</div>
-				</li>
-			</ul>
-
-			<p class="md-park__walk">
-				🚌 <strong>천안종합버스터미널 · 천안고속버스터미널</strong>에서 도보 약 5분 거리.
-			</p>
 		</div>
 	</div>
 </section>
