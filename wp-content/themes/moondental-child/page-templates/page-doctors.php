@@ -42,19 +42,18 @@ $specialties = array(
 		<nav class="md-docs-hero__crumbs" aria-label="breadcrumb">
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>의료진</span>
 		</nav>
-		<span class="md-docs-hero__chip">MOON DENTAL HOSPITAL · OUR DOCTORS</span>
+		<span class="md-docs-hero__chip"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_chip', 'MOON DENTAL HOSPITAL · OUR DOCTORS' ) : 'MOON DENTAL HOSPITAL · OUR DOCTORS' ); ?></span>
 		<h1 class="md-docs-hero__title">
-			30년 임상,<br>
-			<em><?php echo (int) $total_doctors; ?>인 의료진 협진</em>
+			<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_title_a', '30년 임상,' ) : '30년 임상,' ); ?><br>
+			<em><?php echo (int) $total_doctors; ?><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_title_b', '인 의료진 협진' ) : '인 의료진 협진' ); ?></em>
 		</h1>
 		<p class="md-docs-hero__lead">
-			보철·교정·보존·외과 — 각 분야 전문 의료진이 한 자리에서<br>
-			환자 한 분의 치아를 함께 봅니다.
+			<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_lead', "보철·교정·보존·외과 — 각 분야 전문 의료진이 한 자리에서\n환자 한 분의 치아를 함께 봅니다." ) : "보철·교정·보존·외과 — 각 분야 전문 의료진이 한 자리에서\n환자 한 분의 치아를 함께 봅니다." ) ); ?>
 		</p>
 		<ul class="md-docs-hero__stats">
-			<li><strong><?php echo (int) $total_doctors; ?>인</strong><span>전문 의료진</span></li>
-			<li><strong>3개층</strong><span>9F · 10F · 11F</span></li>
-			<li><strong>30년</strong><span>1995년 개원</span></li>
+			<li><strong><?php echo (int) $total_doctors; ?>인</strong><span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_1_label', '전문 의료진' ) : '전문 의료진' ); ?></span></li>
+			<li><strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_2_value', '3개층' ) : '3개층' ); ?></strong><span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_2_label', '9F · 10F · 11F' ) : '9F · 10F · 11F' ); ?></span></li>
+			<li><strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_3_value', '30년' ) : '30년' ); ?></strong><span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_3_label', '1995년 개원' ) : '1995년 개원' ); ?></span></li>
 		</ul>
 		<div class="md-btn-group">
 			<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-docs-hero-reservation">
@@ -71,10 +70,10 @@ $specialties = array(
 <section class="md-section md-section--surface" id="doctors-list">
 	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">Our Doctors</span>
-			<h2 class="md-section-head__title">전체 의료진</h2>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_list_eyebrow', 'Our Doctors' ) : 'Our Doctors' ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_list_title', '전체 의료진' ) : '전체 의료진' ); ?></h2>
 			<p class="md-section-head__lead">
-				각 분야 전문의의 정성스러운 진료를 받으실 수 있습니다.
+				<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_list_lead', '각 분야 전문의의 정성스러운 진료를 받으실 수 있습니다.' ) : '각 분야 전문의의 정성스러운 진료를 받으실 수 있습니다.' ) ); ?>
 			</p>
 		</header>
 
@@ -149,7 +148,7 @@ $specialties = array(
 		</div>
 
 		<p class="md-docs-grid__hint">
-			ⓘ 진료 예약 시 원하시는 의료진을 지정하실 수 있습니다.
+			ⓘ <?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_grid_hint', '진료 예약 시 원하시는 의료진을 지정하실 수 있습니다.' ) : '진료 예약 시 원하시는 의료진을 지정하실 수 있습니다.' ); ?>
 		</p>
 	</div>
 </section>
@@ -181,10 +180,10 @@ $specialties = array(
 <section class="md-section md-section--sm">
 	<div class="md-container">
 		<div class="md-docs-cta">
-			<span class="md-docs-cta__chip">상담 예약</span>
-			<h2 class="md-docs-cta__title">어떤 원장님께 진료받고 싶으신가요?</h2>
+			<span class="md-docs-cta__chip"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_cta_chip', '상담 예약' ) : '상담 예약' ); ?></span>
+			<h2 class="md-docs-cta__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_cta_title', '어떤 원장님께 진료받고 싶으신가요?' ) : '어떤 원장님께 진료받고 싶으신가요?' ); ?></h2>
 			<p class="md-docs-cta__lead">
-				부담 없이 상담받으세요. 환자분께 맞는 의료진을 안내드립니다.
+				<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_cta_lead', '부담 없이 상담받으세요. 환자분께 맞는 의료진을 안내드립니다.' ) : '부담 없이 상담받으세요. 환자분께 맞는 의료진을 안내드립니다.' ) ); ?>
 			</p>
 			<div class="md-btn-group" style="justify-content:center; display:flex;">
 				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-docs-banner-reservation">

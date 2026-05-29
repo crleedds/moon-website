@@ -625,11 +625,27 @@ function moondental_get_faqs_by_service() {
 
 
 /**
+ * 슬러그 → Customizer key 매핑.
+ */
+function moondental_service_slug_to_key( $slug ) {
+	$map = array(
+		'임플란트-센터'   => 'implant',
+		'투명교정-센터'   => 'ortho',
+		'자연치아-살리기' => 'endo',
+		'턱관절-클리닉'   => 'tmj',
+		'사랑니-발치'     => 'wisdom',
+		'심미치료'        => 'aesthetic',
+		'소아치과'        => 'pediatric',
+	);
+	return $map[ $slug ] ?? null;
+}
+
+/**
  * 진료 영역별 환자 고민 / 솔루션 6쌍 — bdbddc.com 모델 참고.
- * 슬러그 → [ ['concern'=>'…', 'solution'=>'…'], … ]
+ * Customizer 값이 입력되어 있으면 우선, 없으면 아래 하드코딩 기본값.
  */
 function moondental_service_pain_points() {
-	return array(
+	$result = array(
 		'임플란트-센터' => array(
 			array( 'concern' => '수술이 무서워요',                       'solution' => '디지털 가이드 수술 + PCA 자가진통조절기로 통증과 불안을 최소화합니다.' ),
 			array( 'concern' => '뼈가 부족하다고 들었어요',              'solution' => 'CBCT 정밀 분석 후 GBR·상악동 거상술 등 환자 골 상태에 맞춘 옵션을 제시합니다.' ),
@@ -687,13 +703,35 @@ function moondental_service_pain_points() {
 			array( 'concern' => '건강보험은 어디까지 되나요?',           'solution' => '만 12세 이하 영구치 레진 충전, 실란트, 발치, X-ray 등이 적용됩니다.' ),
 		),
 	);
+
+	/* Customizer 값으로 덮어쓰기 — 각 슬러그별 "고민 | 솔루션" 파이프 텍스트 파싱 */
+	if ( function_exists( 'md_content' ) && function_exists( 'moondental_service_slug_to_key' ) ) {
+		foreach ( $result as $slug => $_ ) {
+			$key = moondental_service_slug_to_key( $slug );
+			if ( ! $key ) continue;
+			$text = md_content( "service_{$key}_pains", '' );
+			if ( ! $text ) continue;
+			$parsed = array();
+			foreach ( preg_split( "/\r\n|\r|\n/", $text ) as $line ) {
+				$line = trim( $line );
+				if ( ! $line || strpos( $line, '#' ) === 0 ) continue;
+				$parts = array_map( 'trim', explode( '|', $line ) );
+				if ( count( $parts ) >= 2 ) {
+					$parsed[] = array( 'concern' => $parts[0], 'solution' => $parts[1] );
+				}
+			}
+			if ( $parsed ) $result[ $slug ] = $parsed;
+		}
+	}
+	return $result;
 }
 
 /**
  * 진료 영역별 "이런 분께 추천합니다" 5~6개.
+ * Customizer 값이 있으면 우선, 없으면 기본값.
  */
 function moondental_service_ideal_candidates() {
-	return array(
+	$result = array(
 		'임플란트-센터' => array(
 			'치아가 빠지거나 발치 예정인 분',
 			'틀니가 불편해 식사가 어려운 분',
@@ -744,6 +782,24 @@ function moondental_service_ideal_candidates() {
 			'치과를 무서워해 진료가 어려운 아이',
 		),
 	);
+
+	/* Customizer 값으로 덮어쓰기 — 한 줄당 1 항목 */
+	if ( function_exists( 'md_content' ) && function_exists( 'moondental_service_slug_to_key' ) ) {
+		foreach ( $result as $slug => $_ ) {
+			$key = moondental_service_slug_to_key( $slug );
+			if ( ! $key ) continue;
+			$text = md_content( "service_{$key}_candidates", '' );
+			if ( ! $text ) continue;
+			$parsed = array();
+			foreach ( preg_split( "/\r\n|\r|\n/", $text ) as $line ) {
+				$line = trim( $line );
+				if ( ! $line || strpos( $line, '#' ) === 0 ) continue;
+				$parsed[] = $line;
+			}
+			if ( $parsed ) $result[ $slug ] = $parsed;
+		}
+	}
+	return $result;
 }
 
 /**

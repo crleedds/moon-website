@@ -67,21 +67,25 @@ if ( function_exists( 'moondental_service_pain_points' ) ) {
 <section class="md-section md-section--surface" aria-label="환자분 고민·솔루션">
 	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">환자분의 마음</span>
-			<h2 class="md-section-head__title">혹시 이런 고민 하고 계시죠?</h2>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_pain_eyebrow', '환자분의 마음' ) : '환자분의 마음' ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_pain_title', '혹시 이런 고민 하고 계시죠?' ) : '혹시 이런 고민 하고 계시죠?' ); ?></h2>
 			<p class="md-section-head__lead">
-				많은 환자분이 같은 걱정을 안고 오십니다. 문치과병원이 어떻게 답해드리는지 확인하세요.
+				<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'service_pain_lead', '많은 환자분이 같은 걱정을 안고 오십니다. 문치과병원이 어떻게 답해드리는지 확인하세요.' ) : '많은 환자분이 같은 걱정을 안고 오십니다.' ) ); ?>
 			</p>
 		</header>
+		<?php
+		$pain_tag_q = function_exists( 'md_content' ) ? md_content( 'service_pain_tag_q', '고민' ) : '고민';
+		$pain_tag_a = function_exists( 'md_content' ) ? md_content( 'service_pain_tag_a', '문치과의 답' ) : '문치과의 답';
+		?>
 		<ul class="md-pain">
 			<?php foreach ( $pp_map[ $slug ] as $pp ) : ?>
 				<li class="md-pain__pair">
 					<div class="md-pain__concern">
-						<span class="md-pain__tag">고민</span>
+						<span class="md-pain__tag"><?php echo esc_html( $pain_tag_q ); ?></span>
 						<p>"<?php echo esc_html( $pp['concern'] ); ?>"</p>
 					</div>
 					<div class="md-pain__solution">
-						<span class="md-pain__tag md-pain__tag--alt">문치과의 답</span>
+						<span class="md-pain__tag md-pain__tag--alt"><?php echo esc_html( $pain_tag_a ); ?></span>
 						<p><?php echo esc_html( $pp['solution'] ); ?></p>
 					</div>
 				</li>
@@ -100,10 +104,10 @@ if ( function_exists( 'moondental_clinic_comparison' ) ) {
 <section class="md-section" aria-label="치과병원과 일반 치과의 차이">
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">Difference</span>
-			<h2 class="md-section-head__title">치과병원과 일반 치과의 차이</h2>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_eyebrow', 'Difference' ) : 'Difference' ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_title', '치과병원과 일반 치과의 차이' ) : '치과병원과 일반 치과의 차이' ); ?></h2>
 			<p class="md-section-head__lead">
-				의료기관 종별·시설·운영의 객관적 차이입니다.
+				<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_lead', '의료기관 종별·시설·운영의 객관적 차이입니다.' ) : '의료기관 종별·시설·운영의 객관적 차이입니다.' ) ); ?>
 			</p>
 		</header>
 		<div class="md-compare">
@@ -121,7 +125,7 @@ if ( function_exists( 'moondental_clinic_comparison' ) ) {
 			<?php endforeach; ?>
 		</div>
 		<p class="md-compare__note">
-			ⓘ 일반 치과의원의 시설·운영은 의원별로 다를 수 있으며, 위 비교는 일반적 기준입니다.
+			ⓘ <?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_note', '일반 치과의원의 시설·운영은 의원별로 다를 수 있으며, 위 비교는 일반적 기준입니다.' ) : '일반 치과의원의 시설·운영은 의원별로 다를 수 있으며, 위 비교는 일반적 기준입니다.' ); ?>
 		</p>
 	</div>
 </section>
@@ -138,10 +142,10 @@ if ( function_exists( 'moondental_service_ideal_candidates' ) ) {
 	<div class="md-container md-container--narrow">
 		<div class="md-ideal">
 			<header class="md-ideal__head">
-				<span class="md-ideal__chip">For You</span>
-				<h2 class="md-ideal__title">이런 분께 추천합니다</h2>
+				<span class="md-ideal__chip"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_ideal_chip', 'For You' ) : 'For You' ); ?></span>
+				<h2 class="md-ideal__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_ideal_title', '이런 분께 추천합니다' ) : '이런 분께 추천합니다' ); ?></h2>
 				<p class="md-ideal__lead">
-					해당하시는 항목이 있으시면 부담 없이 상담받으세요.
+					<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'service_ideal_lead', '해당하시는 항목이 있으시면 부담 없이 상담받으세요.' ) : '해당하시는 항목이 있으시면 부담 없이 상담받으세요.' ) ); ?>
 				</p>
 			</header>
 			<ul class="md-ideal__list">

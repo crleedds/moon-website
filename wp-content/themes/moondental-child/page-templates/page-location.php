@@ -111,8 +111,8 @@ $off_text = $info['hours_off'] ?: '휴진';
 			<!-- 진료시간 카드 -->
 			<aside class="md-hours">
 				<header class="md-hours__head">
-					<span class="md-hours__badge">🕐 진료시간</span>
-					<h3 class="md-hours__title">진료 가능 시간</h3>
+					<span class="md-hours__badge"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_hours_badge', '🕐 진료시간' ) : '🕐 진료시간' ); ?></span>
+					<h3 class="md-hours__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_hours_title', '진료 가능 시간' ) : '진료 가능 시간' ); ?></h3>
 				</header>
 				<ul class="md-hours__list">
 					<li<?php echo in_array( $today_dow, array(1,2,3,5), true ) ? ' class="is-today"' : ''; ?>>
@@ -133,35 +133,35 @@ $off_text = $info['hours_off'] ?: '휴진';
 					</li>
 				</ul>
 				<p class="md-hours__note">
-					평일 점심시간 없이 진료 · 야간진료 운영
+					<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_hours_note', '평일 점심시간 없이 진료 · 야간진료 운영' ) : '평일 점심시간 없이 진료 · 야간진료 운영' ); ?>
 				</p>
 			</aside>
 
 			<!-- 주차 안내 카드 -->
 			<aside class="md-park md-park--compact">
 				<header class="md-park__head">
-					<span class="md-park__badge">🅿️ 주차 안내</span>
-					<h3 class="md-park__title">본원 지하 기계식 <strong>무료</strong></h3>
-					<p class="md-park__lead">방문 시 데스크에 주차권을 제출하시면 등록해드립니다.</p>
+					<span class="md-park__badge"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_badge', '🅿️ 주차 안내' ) : '🅿️ 주차 안내' ); ?></span>
+					<h3 class="md-park__title"><?php echo wp_kses_post( str_replace( '무료', '<strong>무료</strong>', esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_title', '본원 지하 기계식 무료' ) : '본원 지하 기계식 무료' ) ) ); ?></h3>
+					<p class="md-park__lead"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_lead', '방문 시 데스크에 주차권을 제출하시면 등록해드립니다.' ) : '방문 시 데스크에 주차권을 제출하시면 등록해드립니다.' ); ?></p>
 				</header>
 				<ul class="md-park__list">
 					<li>
 						<span class="md-park__num">01</span>
 						<div>
-							<strong>본원 지하 기계식 주차장</strong>
-							<span>진료 시간 동안 무료 이용</span>
+							<strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_1_title', '본원 지하 기계식 주차장' ) : '본원 지하 기계식 주차장' ); ?></strong>
+							<span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_1_desc', '진료 시간 동안 무료 이용' ) : '진료 시간 동안 무료 이용' ); ?></span>
 						</div>
 					</li>
 					<li>
 						<span class="md-park__num">02</span>
 						<div>
-							<strong>SUV·대형차 — 신부 제5공영주차장</strong>
-							<span>인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 주차권 제출 → 무료 등록</span>
+							<strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_2_title', 'SUV·대형차 — 신부 제5공영주차장' ) : 'SUV·대형차 — 신부 제5공영주차장' ); ?></strong>
+							<span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_2_desc', '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 주차권 제출 → 무료 등록' ) : '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 주차권 제출 → 무료 등록' ); ?></span>
 						</div>
 					</li>
 				</ul>
 				<p class="md-park__walk">
-					🚌 <strong>천안종합·고속버스터미널</strong>에서 도보 약 5분
+					<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_walk', '🚌 천안종합·고속버스터미널에서 도보 약 5분' ) : '🚌 천안종합·고속버스터미널에서 도보 약 5분' ); ?>
 				</p>
 			</aside>
 
@@ -173,8 +173,8 @@ $off_text = $info['hours_off'] ?: '휴진';
 <section class="md-section md-section--surface">
 	<div class="md-container">
 		<header class="md-section-head" style="margin-bottom: clamp(20px, 2.6vw, 32px);">
-			<span class="md-section-head__eyebrow">예약·문의</span>
-			<h2 class="md-section-head__title">편하신 방법으로 연락주세요</h2>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_channels_eyebrow', '예약·문의' ) : '예약·문의' ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_channels_title', '편하신 방법으로 연락주세요' ) : '편하신 방법으로 연락주세요' ); ?></h2>
 		</header>
 
 		<div class="md-channel-grid">

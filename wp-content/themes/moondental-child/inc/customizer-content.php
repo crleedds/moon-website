@@ -465,6 +465,217 @@ function moondental_pricing_content_fields() {
 }
 
 /**
+ * 진료 페이지 7개 콘텐츠 필드 정의 (공통 + 진료별 고민·추천 대상).
+ */
+function moondental_service_content_fields() {
+	/* 슬러그 → key 매핑 (Customizer key 짧게) */
+	$services = array(
+		'implant'   => array( 'label' => '임플란트 센터',   'slug' => '임플란트-센터' ),
+		'ortho'     => array( 'label' => '투명교정 센터',   'slug' => '투명교정-센터' ),
+		'endo'      => array( 'label' => '자연치아 살리기', 'slug' => '자연치아-살리기' ),
+		'tmj'       => array( 'label' => '턱관절 클리닉',   'slug' => '턱관절-클리닉' ),
+		'wisdom'    => array( 'label' => '사랑니 발치',     'slug' => '사랑니-발치' ),
+		'aesthetic' => array( 'label' => '심미치료',        'slug' => '심미치료' ),
+		'pediatric' => array( 'label' => '소아치과',        'slug' => '소아치과' ),
+	);
+
+	$defaults_pains = array(
+		'implant'   => "수술이 무서워요 | 디지털 가이드 수술 + PCA 자가진통조절기로 통증과 불안을 최소화합니다.\n뼈가 부족하다고 들었어요 | CBCT 정밀 분석 후 GBR·상악동 거상술 등 환자 골 상태에 맞춘 옵션을 제시합니다.\n비용이 부담돼요 | 사전 견적서 제공 + 카드 무이자 할부 가능. 만 65세 이상은 건강보험 적용도 안내드립니다.\n전신질환이 있어 거절당했어요 | 혈압·당검사·심전도·산소포화도 상시 측정으로 안전하게 진행합니다.\n다른 치과 임플란트가 흔들려요 | 리무버 키트로 안전 제거 후 골손실을 최소화하며 재식립합니다.\n오래 사용할 수 있나요? | 정기 검진 + 평생 A/S 시스템으로 10~20년 이상 유지를 목표합니다.",
+		'ortho'     => "성인인데 교정이 가능한가요? | 잇몸·치주가 건강하면 50~60대도 충분히 가능합니다.\n발치 없이 안 되나요? | 정밀 진단 후 비발치를 우선 검토합니다. 부분교정만 필요한 경우도 많습니다.\n비용·기간이 길어 부담돼요 | 난이도별 옵션과 부분교정(150만 원~)도 안내드리며, 카드 무이자 할부 지원합니다.\n투명교정 vs 일반교정 뭐가 좋나요? | 라이프스타일·난이도에 맞춰 교정 전문의가 최적안을 추천드립니다.\n교정 후 다시 돌아간다고 들었어요 | 유지장치(retainer) 평생 야간 착용으로 안정 유지가 가능합니다.\n통증이 심한가요? | 디지털 정밀 진단으로 와이어 힘을 정확히 조절해 통증을 최소화합니다.",
+		'endo'      => "신경치료 vs 발치 후 임플란트? | 자연치를 살릴 수 있다면 보존이 우선입니다. 비용·신체 부담이 모두 적습니다.\n재근관치료 가능한가요? | 현미경 정밀 진료로 약 70~80% 성공률을 보입니다. 보존과 전문의가 직접 진료합니다.\n통증이 심한가요? | 국소마취 + 진통제로 충분히 조절 가능합니다. 시술 중 통증은 거의 없습니다.\n치아 색이 변했어요 | 워킹 블리치(내부 미백)로 신경치료 치아도 색상 개선이 가능합니다.\n신경치료 후 꼭 씌워야 하나요? | 신경치료 치아는 약해지므로 크라운으로 잘 보호해야 평생 사용할 수 있습니다.\n다른 치과 신경치료가 실패했어요 | 보존과 전문의의 재근관치료 + 치근단 수술로 단계적 접근이 가능합니다.",
+		'tmj'       => "턱에서 소리만 나고 통증은 없는데? | 디스크 변위 가능성이 있어 정기 검진을 권합니다. 조기 진단이 중요합니다.\n보톡스로 정말 좋아지나요? | 교근 과긴장이 통증 원인이면 효과적입니다. 단, 습관 교정·스플린트와 병행을 권합니다.\n두통이 턱관절 때문일까요? | 측두근·교근 과긴장이 두통으로 이어지는 경우가 많습니다. 만성 두통 환자 다수가 호전됩니다.\n스플린트는 평생 착용해야 하나요? | 대개 3~6개월 야간 착용 후 증상 호전 시 사용 빈도를 줄입니다.\n수술까지 가는 경우는? | 극히 드뭅니다. 대부분 비수술 보존 치료로 호전됩니다.\n임플란트 후 턱관절이 아파요 | 교합 변화가 원인일 수 있습니다. 보철 후에도 턱관절까지 함께 관리합니다.",
+		'wisdom'    => "신경 마비가 걱정돼요 | 3D CT 사전 분석으로 신경 위치를 파악해 위험을 최소화합니다. 위험 시 부분 발치(Coronectomy) 옵션도 있습니다.\n임신 중 발치가 가능한가요? | 가급적 출산 후를 권하지만, 급성 염증 시 임신 중기에 최소 침습으로 진행 가능합니다.\n발치 후 통증이 얼마나 가나요? | 일반은 2~3일, 매복 사랑니는 3~5일 통증 피크. 1주일 후 거의 사라집니다.\n4개를 한 번에 빼도 되나요? | 건강한 성인은 가능하나, 회복 부담 고려해 좌/우 또는 위/아래 나눠 진행을 권합니다.\n발치 후 운동은 언제부터? | 가벼운 산책은 다음 날부터, 격렬한 운동은 1주일 후부터 권장합니다.\n수면 마취로 받고 싶어요 | 국소마취 + 물방울 레이저 + PCA로 충분히 편안하게 진행 가능합니다.",
+		'aesthetic' => "라미네이트 vs 미백 뭐가 좋나요? | 단순 변색은 미백 우선, 형태·배열까지 함께 개선하려면 라미네이트가 적합합니다.\n미백 후 다시 어두워지나요? | 1~2년 후 자연스러운 재착색이 있습니다. 보강 미백(touch-up)으로 유지합니다.\n신경치료 치아도 미백 가능한가요? | 워킹 블리치라는 내부 미백법으로 가능합니다. 상담 시 적합 여부를 확인합니다.\n라미네이트로 치아가 약해지지 않나요? | 최소 삭제 라미네이트로 자연치를 최대한 보존합니다. 충분한 상담 후 진행합니다.\n잇몸 라인이 신경 쓰여요 | 거미스마일·잇몸 미백 등 잇몸 라인 개선 시술이 가능합니다.\n비용이 어느 정도인가요? | 라미네이트 치아당 66만원~, 전문가 미백 33만원~. 정확한 견적은 진단 후 안내드립니다.",
+		'pediatric' => "아이가 치과를 무서워해요 | 거부 시 절대 강제 진료하지 않습니다. 첫 방문은 진료실 구경부터 시작할 수 있습니다.\n몇 살부터 치과 진료가 필요한가요? | 첫 어금니가 나오는 만 1~2세부터 첫 방문을 권합니다. 이후 6개월 단위 정기 검진.\n실란트(홈 메우기)는 꼭 필요한가요? | 필수는 아니나 만 6~8세 영구치 어금니에 50% 이상 충치 예방 효과. 건강보험도 적용됩니다.\n소아 교정은 언제 시작해야 하나요? | 골격성 부정교합은 만 7~10세가 골든타임. 일반 부정교합은 영구치 다 나온 후(만 12세+).\n아이 충치 치료는 어떻게 하나요? | 유치는 글래스아이오노머·콤포지트로 짧은 시간에 치료. 아이가 협조 어려우면 분할 진행합니다.\n건강보험은 어디까지 되나요? | 만 12세 이하 영구치 레진 충전, 실란트, 발치, X-ray 등이 적용됩니다.",
+	);
+
+	$defaults_candidates = array(
+		'implant'   => "치아가 빠지거나 발치 예정인 분\n틀니가 불편해 식사가 어려운 분\n인접 치아를 갈지 않고 복원하고 싶은 분\n잇몸·전신질환이 있어 다른 곳에서 거절당한 분\n만 65세 이상 건강보험 임플란트 대상자",
+		'ortho'     => "치아 배열이 고르지 않은 분\n외모 콤플렉스가 있는 분\n발음·저작 기능에 영향이 있는 부정교합\n골격성 부정교합 의심 청소년 (만 7~10세)\n타치과에서 발치 교정을 권유받았으나 비발치 검토를 원하는 분",
+		'endo'      => "신경치료 후 다시 통증이 있는 분\n충치가 깊어 발치를 권유받은 분\n자연치를 최대한 살리고 싶은 분\n치아 변색·외상이 있는 분\n재근관치료가 필요한 분",
+		'tmj'       => "턱관절에서 소리가 나거나 통증이 있는 분\n입을 크게 벌리기 어려운 분\n이갈이·이악물기 습관이 있는 분\n만성 두통·이명이 있는 분\n임플란트·보철 치료 후 교합이 불편한 분",
+		'wisdom'    => "매복 사랑니로 통증·잇몸 부음이 있는 분\n사랑니 주변 충치·잇몸염이 반복되는 분\n교정 치료를 앞두고 사랑니 발치가 필요한 분\n타치과에서 발치 위험으로 거절당한 매복 사랑니\n급성 염증이 있어 빠른 처치가 필요한 분",
+		'aesthetic' => "앞니 변색·결손으로 자신감이 떨어진 분\n미백으로 안 되는 심한 변색이 있는 분\n잇몸이 많이 보이는 거미스마일\n특별한 행사 전 단기간 심미 개선을 원하는 분\n전치부 작은 결손·반점을 자연스럽게 보완하고 싶은 분",
+		'pediatric' => "만 1~2세 첫 치과 방문이 필요한 아이\n유치 충치가 생긴 아이\n영구치 어금니가 나오는 만 6~8세 (실란트 적기)\n골격성 부정교합 의심 청소년 (1차 교정 골든타임)\n치과를 무서워해 진료가 어려운 아이",
+	);
+
+	$groups = array(
+
+		/* ─── 공통 섹션 head ─── */
+		'service_common' => array(
+			'title'  => '진료 페이지 — 공통 섹션 head',
+			'fields' => array(
+				'service_pain_eyebrow'    => array( 'default' => '환자분의 마음', 'label' => '환자 고민 — eyebrow', 'type' => 'text' ),
+				'service_pain_title'      => array( 'default' => '혹시 이런 고민 하고 계시죠?', 'label' => '환자 고민 — 제목', 'type' => 'text' ),
+				'service_pain_lead'       => array( 'default' => '많은 환자분이 같은 걱정을 안고 오십니다. 문치과병원이 어떻게 답해드리는지 확인하세요.', 'label' => '환자 고민 — 설명', 'type' => 'textarea' ),
+				'service_pain_tag_q'      => array( 'default' => '고민', 'label' => '카드 — 왼쪽 태그 ("고민")', 'type' => 'text' ),
+				'service_pain_tag_a'      => array( 'default' => '문치과의 답', 'label' => '카드 — 오른쪽 태그 ("문치과의 답")', 'type' => 'text' ),
+
+				'service_compare_eyebrow' => array( 'default' => 'Difference', 'label' => '비교표 — eyebrow', 'type' => 'text' ),
+				'service_compare_title'   => array( 'default' => '치과병원과 일반 치과의 차이', 'label' => '비교표 — 제목', 'type' => 'text' ),
+				'service_compare_lead'    => array( 'default' => '의료기관 종별·시설·운영의 객관적 차이입니다.', 'label' => '비교표 — 설명', 'type' => 'textarea' ),
+				'service_compare_note'    => array( 'default' => '일반 치과의원의 시설·운영은 의원별로 다를 수 있으며, 위 비교는 일반적 기준입니다.', 'label' => '비교표 — 하단 주석', 'type' => 'textarea' ),
+
+				'service_ideal_chip'  => array( 'default' => 'For You', 'label' => '추천 대상 — chip', 'type' => 'text' ),
+				'service_ideal_title' => array( 'default' => '이런 분께 추천합니다', 'label' => '추천 대상 — 제목', 'type' => 'text' ),
+				'service_ideal_lead'  => array( 'default' => '해당하시는 항목이 있으시면 부담 없이 상담받으세요.', 'label' => '추천 대상 — 설명', 'type' => 'textarea' ),
+			),
+		),
+	);
+
+	/* 7 진료별 그룹 — 고민/추천 각 1 텍스트영역 + 본문 도입 텍스트 */
+	foreach ( $services as $key => $svc ) {
+		$groups[ 'svc_' . $key ] = array(
+			'title'  => '진료 — ' . $svc['label'],
+			'fields' => array(
+				"service_{$key}_pains" => array(
+					'default' => $defaults_pains[ $key ] ?? '',
+					'label'   => '환자 고민 6쌍 (한 줄당 1개, "고민 | 솔루션" 파이프 구분)',
+					'type'    => 'textarea',
+				),
+				"service_{$key}_candidates" => array(
+					'default' => $defaults_candidates[ $key ] ?? '',
+					'label'   => '추천 대상 (한 줄당 1개)',
+					'type'    => 'textarea',
+				),
+			),
+		);
+	}
+
+	return $groups;
+}
+
+/**
+ * 의료진 9명 콘텐츠 (철학 + 약력 override).
+ *  사진/이름/직책은 functions.php 데이터 기준, 여기서는 자주 바뀌는 철학·약력만 편집.
+ */
+function moondental_doctor_content_fields() {
+	$doctors = array(
+		'munes'  => array( 'name' => '문은수', 'role' => '대표 병원장' ),
+		'leesj'  => array( 'name' => '이승주', 'role' => '9F 종합진료센터' ),
+		'leesu'  => array( 'name' => '이수연', 'role' => '9F 종합진료센터' ),
+		'kwon'   => array( 'name' => '권혜진', 'role' => '9F 종합진료센터' ),
+		'munji'  => array( 'name' => '문지현', 'role' => '10F 임플란트센터' ),
+		'leech'  => array( 'name' => '이창률', 'role' => '10F 임플란트센터' ),
+		'leeyi'  => array( 'name' => '이영일', 'role' => '11F 교정과' ),
+		'kimsi'  => array( 'name' => '김세일', 'role' => '11F 종합진료센터' ),
+		'jeong'  => array( 'name' => '정석형', 'role' => '11F 종합진료센터' ),
+	);
+
+	$groups = array();
+	foreach ( $doctors as $key => $doc ) {
+		$groups[ 'doc_' . $key ] = array(
+			'title'  => '의료진 — ' . $doc['name'] . ' (' . $doc['role'] . ')',
+			'fields' => array(
+				"doctor_{$key}_philosophy" => array(
+					'default' => '',
+					'label'   => '진료 철학 (빈칸 = 기본값)',
+					'type'    => 'textarea',
+				),
+				"doctor_{$key}_bio" => array(
+					'default' => '',
+					'label'   => '약력 (한 줄당 1개, 빈칸 = 기본값)',
+					'type'    => 'textarea',
+				),
+			),
+		);
+	}
+
+	return $groups;
+}
+
+/**
+ * 오시는 길 / 사명·역사 / 의료진 / 예약 페이지 텍스트.
+ */
+function moondental_subpage_content_fields() {
+	return array(
+
+		/* ─── 오시는 길 — 주차 안내 ─── */
+		'location_parking' => array(
+			'title'  => '오시는 길 — 주차 안내',
+			'fields' => array(
+				'loc_park_badge'     => array( 'default' => '🅿️ 주차 안내', 'label' => '배지', 'type' => 'text' ),
+				'loc_park_title'     => array( 'default' => '본원 지하 기계식 무료', 'label' => '주차 카드 — 제목 (강조는 자동)', 'type' => 'text' ),
+				'loc_park_lead'      => array( 'default' => '방문 시 데스크에 주차권을 제출하시면 등록해드립니다.', 'label' => '주차 카드 — 설명', 'type' => 'textarea' ),
+
+				'loc_park_1_title' => array( 'default' => '본원 지하 기계식 주차장', 'label' => '①번 항목 — 제목', 'type' => 'text' ),
+				'loc_park_1_desc'  => array( 'default' => '진료 시간 동안 무료 이용', 'label' => '①번 항목 — 설명', 'type' => 'textarea' ),
+
+				'loc_park_2_title' => array( 'default' => 'SUV·대형차 — 신부 제5공영주차장', 'label' => '②번 항목 — 제목', 'type' => 'text' ),
+				'loc_park_2_desc'  => array( 'default' => '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 주차권 제출 → 무료 등록', 'label' => '②번 항목 — 설명', 'type' => 'textarea' ),
+
+				'loc_park_walk'    => array( 'default' => '🚌 천안종합·고속버스터미널에서 도보 약 5분', 'label' => '하단 도보 안내', 'type' => 'text' ),
+
+				'loc_hours_badge'  => array( 'default' => '🕐 진료시간', 'label' => '진료시간 카드 — 배지', 'type' => 'text' ),
+				'loc_hours_title'  => array( 'default' => '진료 가능 시간', 'label' => '진료시간 카드 — 제목', 'type' => 'text' ),
+				'loc_hours_note'   => array( 'default' => '평일 점심시간 없이 진료 · 야간진료 운영', 'label' => '진료시간 카드 — 하단 안내', 'type' => 'text' ),
+
+				'loc_channels_eyebrow' => array( 'default' => '예약·문의', 'label' => '연락 채널 섹션 — eyebrow', 'type' => 'text' ),
+				'loc_channels_title'   => array( 'default' => '편하신 방법으로 연락주세요', 'label' => '연락 채널 섹션 — 제목', 'type' => 'text' ),
+			),
+		),
+
+		/* ─── 사명 & 역사 ─── */
+		'mission' => array(
+			'title'  => '사명 & 역사 페이지',
+			'fields' => array(
+				'mission_chip'        => array( 'default' => 'OUR MISSION · 사명', 'label' => '사명 — chip', 'type' => 'text' ),
+				'mission_title_a'     => array( 'default' => '환자를 가족처럼 생각하는 마음,', 'label' => '사명 — 제목 1행', 'type' => 'text' ),
+				'mission_title_b'     => array( 'default' => '그것이 문치과의 진료 철학입니다.', 'label' => '사명 — 제목 2행 (강조)', 'type' => 'text' ),
+				'mission_lead'        => array( 'default' => '1995년부터 한자리에서, 한 분의 환자를 가족처럼 오래 보아왔습니다. 진료실 밖에서도 지역사회와 함께 가는 치과를 꿈꿉니다.', 'label' => '사명 — 설명', 'type' => 'textarea' ),
+
+				'mission_v_1_icon'  => array( 'default' => '🤝', 'label' => '핵심가치 ①번 — 아이콘', 'type' => 'text' ),
+				'mission_v_1_title' => array( 'default' => '정직', 'label' => '핵심가치 ①번 — 제목', 'type' => 'text' ),
+				'mission_v_1_desc'  => array( 'default' => '환자분께 필요한 진료만 권합니다. 시작 전 모든 비용을 안내합니다.', 'label' => '핵심가치 ①번 — 설명', 'type' => 'textarea' ),
+
+				'mission_v_2_icon'  => array( 'default' => '🛡️', 'label' => '핵심가치 ②번 — 아이콘', 'type' => 'text' ),
+				'mission_v_2_title' => array( 'default' => '신뢰', 'label' => '핵심가치 ②번 — 제목', 'type' => 'text' ),
+				'mission_v_2_desc'  => array( 'default' => '30년 동안 한자리에서 — 환자 한 분의 평생 치아를 길게 봅니다.', 'label' => '핵심가치 ②번 — 설명', 'type' => 'textarea' ),
+
+				'mission_v_3_icon'  => array( 'default' => '🌱', 'label' => '핵심가치 ③번 — 아이콘', 'type' => 'text' ),
+				'mission_v_3_title' => array( 'default' => '책임', 'label' => '핵심가치 ③번 — 제목', 'type' => 'text' ),
+				'mission_v_3_desc'  => array( 'default' => '시술 시점뿐 아니라 정기 검진·사후 관리까지 평생 함께합니다.', 'label' => '핵심가치 ③번 — 설명', 'type' => 'textarea' ),
+
+				'mission_v_4_icon'  => array( 'default' => '❤️', 'label' => '핵심가치 ④번 — 아이콘', 'type' => 'text' ),
+				'mission_v_4_title' => array( 'default' => '헌신', 'label' => '핵심가치 ④번 — 제목', 'type' => 'text' ),
+				'mission_v_4_desc'  => array( 'default' => '지역사회와 함께 — 의료재단으로서 장학·기부를 이어가고 있습니다.', 'label' => '핵심가치 ④번 — 설명', 'type' => 'textarea' ),
+
+				'history_eyebrow'  => array( 'default' => 'Our History', 'label' => '역사 섹션 — eyebrow', 'type' => 'text' ),
+				'history_title'    => array( 'default' => '30년의 발자취', 'label' => '역사 섹션 — 제목', 'type' => 'text' ),
+				'history_lead'     => array( 'default' => '1995년 개원부터 현재까지 — 환자분과 함께 걸어온 길.', 'label' => '역사 섹션 — 설명', 'type' => 'textarea' ),
+			),
+		),
+
+		/* ─── 의료진 페이지 Hero·CTA ─── */
+		'doctors_page' => array(
+			'title'  => '의료진 페이지 — Hero / CTA',
+			'fields' => array(
+				'doctors_chip'       => array( 'default' => 'MOON DENTAL HOSPITAL · OUR DOCTORS', 'label' => 'Hero — chip', 'type' => 'text' ),
+				'doctors_title_a'    => array( 'default' => '30년 임상,', 'label' => 'Hero — 제목 1행', 'type' => 'text' ),
+				'doctors_title_b'    => array( 'default' => '인 의료진 협진', 'label' => 'Hero — 제목 2행 (앞에 의료진 수 자동)', 'type' => 'text' ),
+				'doctors_lead'       => array( 'default' => "보철·교정·보존·외과 — 각 분야 전문 의료진이 한 자리에서\n환자 한 분의 치아를 함께 봅니다.", 'label' => 'Hero — 설명 (줄바꿈 가능)', 'type' => 'textarea' ),
+
+				'doctors_stat_1_label' => array( 'default' => '전문 의료진', 'label' => 'stat ①번 라벨', 'type' => 'text' ),
+				'doctors_stat_2_value' => array( 'default' => '3개층', 'label' => 'stat ②번 숫자', 'type' => 'text' ),
+				'doctors_stat_2_label' => array( 'default' => '9F · 10F · 11F', 'label' => 'stat ②번 라벨', 'type' => 'text' ),
+				'doctors_stat_3_value' => array( 'default' => '30년', 'label' => 'stat ③번 숫자', 'type' => 'text' ),
+				'doctors_stat_3_label' => array( 'default' => '1995년 개원', 'label' => 'stat ③번 라벨', 'type' => 'text' ),
+
+				'doctors_list_eyebrow' => array( 'default' => 'Our Doctors', 'label' => '의료진 그리드 — eyebrow', 'type' => 'text' ),
+				'doctors_list_title'   => array( 'default' => '전체 의료진', 'label' => '의료진 그리드 — 제목', 'type' => 'text' ),
+				'doctors_list_lead'    => array( 'default' => '각 분야 전문의의 정성스러운 진료를 받으실 수 있습니다.', 'label' => '의료진 그리드 — 설명', 'type' => 'textarea' ),
+				'doctors_grid_hint'    => array( 'default' => '진료 예약 시 원하시는 의료진을 지정하실 수 있습니다.', 'label' => '의료진 그리드 — 하단 안내', 'type' => 'text' ),
+
+				'doctors_cta_chip'  => array( 'default' => '상담 예약', 'label' => 'CTA 배너 — chip', 'type' => 'text' ),
+				'doctors_cta_title' => array( 'default' => '어떤 원장님께 진료받고 싶으신가요?', 'label' => 'CTA 배너 — 제목', 'type' => 'text' ),
+				'doctors_cta_lead'  => array( 'default' => '부담 없이 상담받으세요. 환자분께 맞는 의료진을 안내드립니다.', 'label' => 'CTA 배너 — 설명', 'type' => 'textarea' ),
+			),
+		),
+
+	);
+}
+
+/**
  * 헤더·푸터 콘텐츠 필드 정의.
  */
 function moondental_chrome_content_fields() {
@@ -617,3 +828,76 @@ function moondental_register_chrome_content_customizer( $wp_customize ) {
 	}
 }
 add_action( 'customize_register', 'moondental_register_chrome_content_customizer', 32 );
+
+/**
+ * 진료 페이지 7개 콘텐츠 등록.
+ */
+function moondental_register_service_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_service_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '진료 페이지 (7 진료)',
+		'description' => '7개 진료 페이지의 환자 고민·추천 대상과 공통 섹션 텍스트를 편집합니다. 환자 고민은 한 줄에 "고민 | 솔루션" 형식.',
+		'priority'    => 33,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_service_content_fields(), 'md_section_service_' );
+}
+add_action( 'customize_register', 'moondental_register_service_content_customizer', 33 );
+
+/**
+ * 의료진 콘텐츠 (철학·약력 override) 등록.
+ */
+function moondental_register_doctor_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_doctor_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '의료진 — 철학·약력 (9명)',
+		'description' => '각 의료진의 진료 철학·약력을 편집합니다. 빈칸으로 두면 기본값 표시.',
+		'priority'    => 34,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_doctor_content_fields(), 'md_section_doctor_' );
+}
+add_action( 'customize_register', 'moondental_register_doctor_content_customizer', 34 );
+
+/**
+ * 서브 페이지 (오시는 길·사명&역사·의료진 페이지·예약) 콘텐츠 등록.
+ */
+function moondental_register_subpage_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_subpage_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '서브 페이지 텍스트',
+		'description' => '오시는 길·사명 & 역사·의료진 페이지 등의 텍스트를 편집합니다.',
+		'priority'    => 35,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_subpage_content_fields(), 'md_section_subpage_' );
+}
+add_action( 'customize_register', 'moondental_register_subpage_content_customizer', 35 );
+
+/**
+ * 공통 헬퍼 — 그룹 정의를 받아 섹션·세팅·컨트롤을 등록.
+ */
+function moondental_register_panel_groups( $wp_customize, $panel_id, $groups, $section_id_prefix ) {
+	$prio = 10;
+	foreach ( $groups as $group_key => $group ) {
+		$section_id = $section_id_prefix . $group_key;
+		$wp_customize->add_section( $section_id, array(
+			'title'    => $group['title'],
+			'panel'    => $panel_id,
+			'priority' => $prio,
+		) );
+		$prio += 10;
+		foreach ( $group['fields'] as $key => $field ) {
+			$setting_id = 'md_content_' . $key;
+			$default    = $field['default'];
+			$type       = $field['type'] ?? 'text';
+			$wp_customize->add_setting( $setting_id, array(
+				'default'           => $default,
+				'sanitize_callback' => $type === 'textarea' ? 'sanitize_textarea_field' : 'sanitize_text_field',
+				'transport'         => 'refresh',
+			) );
+			$wp_customize->add_control( $setting_id, array(
+				'label'   => $field['label'],
+				'section' => $section_id,
+				'type'    => $type,
+			) );
+		}
+	}
+}

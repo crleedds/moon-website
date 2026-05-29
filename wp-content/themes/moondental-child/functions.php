@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '2.8.0' );
+define( 'MOONDENTAL_VERSION', '2.9.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1156,12 +1156,48 @@ function moondental_get_team() {
 function moondental_get_team_with_customizer() {
 	$groups = moondental_get_team();
 	if ( ! function_exists( 'get_theme_mod' ) ) return $groups;
+
+	/* 의료진 이름 → Customizer key 매핑 */
+	$name_to_key = array(
+		'문은수' => 'munes',
+		'이승주' => 'leesj',
+		'이수연' => 'leesu',
+		'권혜진' => 'kwon',
+		'문지현' => 'munji',
+		'이창률' => 'leech',
+		'이영일' => 'leeyi',
+		'김세일' => 'kimsi',
+		'정석형' => 'jeong',
+	);
+
 	foreach ( $groups as $gi => $group ) {
 		foreach ( $group['members'] as $mi => $m ) {
+			/* 사진 zoom·translateY */
 			$z_fallback = isset( $m['photo_zoom'] ) ? (float) $m['photo_zoom'] : 1.00;
 			$t_fallback = isset( $m['photo_ty'] )   ? (float) $m['photo_ty']   : 0.00;
 			$groups[ $gi ]['members'][ $mi ]['photo_zoom'] = moondental_get_doctor_zoom( $m['name'], $z_fallback );
 			$groups[ $gi ]['members'][ $mi ]['photo_ty']   = moondental_get_doctor_ty(   $m['name'], $t_fallback );
+
+			/* 철학 + 약력 Customizer override */
+			$key = $name_to_key[ $m['name'] ] ?? null;
+			if ( $key && function_exists( 'md_content' ) ) {
+				$phil_override = md_content( "doctor_{$key}_philosophy", '' );
+				if ( $phil_override ) {
+					$groups[ $gi ]['members'][ $mi ]['philosophy'] = $phil_override;
+				}
+				$bio_override = md_content( "doctor_{$key}_bio", '' );
+				if ( $bio_override ) {
+					$bio_lines = array();
+					foreach ( preg_split( "/\r\n|\r|\n/", $bio_override ) as $line ) {
+						$line = trim( $line );
+						if ( ! $line || strpos( $line, '#' ) === 0 ) continue;
+						$bio_lines[] = $line;
+					}
+					if ( $bio_lines ) {
+						$groups[ $gi ]['members'][ $mi ]['bio'] = $bio_lines;
+					}
+				}
+			}
 		}
 	}
 	return $groups;
