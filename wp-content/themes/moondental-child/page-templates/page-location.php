@@ -58,12 +58,6 @@ foreach ( array( 'naver-map.png', 'naver-map.jpg', 'naver-map.jpeg', 'naver-map.
 			<?php if ( ! $map_image ) : ?>
 				<div class="md-locmap__pattern" aria-hidden="true"></div>
 			<?php endif; ?>
-			<div class="md-locmap__badge">NAVER MAP</div>
-			<div class="md-locmap__info">
-				<h2 class="md-locmap__title"><?php echo esc_html( $info['name_short'] ); ?></h2>
-				<p class="md-locmap__addr"><?php echo esc_html( $info['address_road'] ?: $info['address'] ); ?></p>
-				<span class="md-locmap__cta">네이버 지도에서 보기 <span aria-hidden="true">→</span></span>
-			</div>
 		</a>
 	</div>
 </section>
