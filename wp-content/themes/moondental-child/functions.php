@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '2.1.1' );
+define( 'MOONDENTAL_VERSION', '2.1.2' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -802,8 +802,8 @@ function moondental_get_team() {
 					'name'       => '문은수',
 					'role'       => '대표 병원장',
 					'photo'      => 'doctor-04.png',
-					'photo_focus'=> '14%',
-					'photo_zoom' => 1.50,
+					'photo_focus'=> '8%',
+					'photo_zoom' => 1.35,
 					'philosophy' => '환자를 가족처럼 생각하는 마음, 그것이 문치과의 진료 철학입니다.',
 					'bio'        => array(
 						'한아의료재단 이사장',
@@ -840,8 +840,8 @@ function moondental_get_team() {
 					'name'       => '이수연',
 					'role'       => '원장 · 9F 종합진료센터',
 					'photo'      => 'doctor-08.png',
-					'photo_focus'=> '26%',
-					'photo_zoom' => 1.05,
+					'photo_focus'=> '18%',
+					'photo_zoom' => 1.18,
 					'philosophy' => '진실된 마음으로 환자분들과 함께하는 의료서비스를 제공하겠습니다.',
 					'bio'        => array(
 						'치과 보철과 전문의 · 통합치의학 전문의',
@@ -856,7 +856,7 @@ function moondental_get_team() {
 					'name'       => '권혜진',
 					'role'       => '원장 · 9F 종합진료센터',
 					'photo'      => 'doctor-02.png',
-					'photo_focus'=> '24%',
+					'photo_focus'=> '16%',
 					'photo_zoom' => 1.00,
 					'philosophy' => '기본에 충실하되 새로운 변화에 맞춰가며, 환자분을 가족처럼 생각하는 따뜻한 마음으로 진료에 임하겠습니다.',
 					'bio'        => array(
@@ -879,8 +879,8 @@ function moondental_get_team() {
 					'name'       => '문지현',
 					'role'       => '원장 · 10F 임플란트센터',
 					'photo'      => 'doctor-05.png',
-					'photo_focus'=> '28%',
-					'photo_zoom' => 1.02,
+					'photo_focus'=> '18%',
+					'photo_zoom' => 1.18,
 					'philosophy' => '구강건강 증진을 통해 환자분들의 삶이 회복되는 과정을 함께 하고 싶습니다. 최선을 다해 진료하겠습니다.',
 					'bio'        => array(
 						'서울대학교 치의학대학원 졸업',
@@ -934,8 +934,8 @@ function moondental_get_team() {
 					'name'       => '이영일',
 					'role'       => '원장 · 11F 교정과',
 					'photo'      => 'doctor-09.png',
-					'photo_focus'=> '24%',
-					'photo_zoom' => 1.02,
+					'photo_focus'=> '18%',
+					'photo_zoom' => 1.18,
 					'philosophy' => '환자를 가족처럼 생각하는 마음, 그것이 문치과의 진료 철학입니다.',
 					'bio'        => array(
 						'단국대학교 치과대학 졸업',
@@ -964,8 +964,8 @@ function moondental_get_team() {
 					'name'       => '정석형',
 					'role'       => '원장 · 11F 종합진료센터',
 					'photo'      => 'doctor-06.png',
-					'photo_focus'=> '24%',
-					'photo_zoom' => 1.05,
+					'photo_focus'=> '18%',
+					'photo_zoom' => 1.18,
 					'philosophy' => '저희 문치과를 방문하는 모든 분들이 밝고 건강한 웃음의 주인이 되시길 바라며 항상 최선을 다하겠습니다.',
 					'bio'        => array(
 						'단국대학교 치과대학 치주과 석사',
