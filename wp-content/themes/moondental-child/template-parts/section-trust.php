@@ -1,39 +1,39 @@
 <?php
 /**
- * Section: Trust Band — 신뢰 stat 4개 (히어로 직후)
+ * Section: Trust Band — 신뢰 stat 4개
  *
- * 30년 / 10명 / 3개층 / 1:1 — 가로 띠 형태로 핵심 지표 노출.
+ * 모든 텍스트는 사용자 정의하기 → 홈 콘텐츠 → 신뢰 stat 4개 에서 편집 가능.
  *
  * @package moondental-child
  */
 $stats = array(
 	array(
-		'value'  => '30',
-		'unit'   => '년',
-		'label'  => '1995년 개원',
-		'sub'    => '한자리에서 이어온 신뢰',
-		'icon'   => '🏥',
+		'value' => md_content( 'trust_1_value', '30' ),
+		'unit'  => md_content( 'trust_1_unit',  '년' ),
+		'label' => md_content( 'trust_1_label', '1995년 개원' ),
+		'sub'   => md_content( 'trust_1_sub',   '한자리에서 이어온 신뢰' ),
+		'icon'  => '🏥',
 	),
 	array(
-		'value'  => '10',
-		'unit'   => '명',
-		'label'  => '각 분야 전문 의료진',
-		'sub'    => '보철 · 교정 · 보존 · 외과',
-		'icon'   => '👥',
+		'value' => md_content( 'trust_2_value', '10' ),
+		'unit'  => md_content( 'trust_2_unit',  '명' ),
+		'label' => md_content( 'trust_2_label', '각 분야 전문 의료진' ),
+		'sub'   => md_content( 'trust_2_sub',   '보철 · 교정 · 보존 · 외과' ),
+		'icon'  => '👥',
 	),
 	array(
-		'value'  => '3',
-		'unit'   => '개층',
-		'label'  => '통합 진료센터',
-		'sub'    => '9F 종합 · 10F 임플란트 · 11F 교정',
-		'icon'   => '🏢',
+		'value' => md_content( 'trust_3_value', '3' ),
+		'unit'  => md_content( 'trust_3_unit',  '개층' ),
+		'label' => md_content( 'trust_3_label', '통합 진료센터' ),
+		'sub'   => md_content( 'trust_3_sub',   '9F 종합 · 10F 임플란트 · 11F 교정' ),
+		'icon'  => '🏢',
 	),
 	array(
-		'value'  => '1:1',
-		'unit'   => '',
-		'label'  => '충분한 사전 상담',
-		'sub'    => '들어보고, 꼭 필요한 치료만',
-		'icon'   => '🤝',
+		'value' => md_content( 'trust_4_value', '1:1' ),
+		'unit'  => md_content( 'trust_4_unit',  '' ),
+		'label' => md_content( 'trust_4_label', '충분한 사전 상담' ),
+		'sub'   => md_content( 'trust_4_sub',   '들어보고, 꼭 필요한 치료만' ),
+		'icon'  => '🤝',
 	),
 );
 ?>

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '2.6.1' );
+define( 'MOONDENTAL_VERSION', '2.7.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -21,6 +21,7 @@ require_once MOONDENTAL_DIR . '/inc/content-defaults.php';
 require_once MOONDENTAL_DIR . '/inc/naver-importer.php';
 require_once MOONDENTAL_DIR . '/inc/reservation.php';
 require_once MOONDENTAL_DIR . '/inc/enhancements.php';
+require_once MOONDENTAL_DIR . '/inc/customizer-content.php';
 
 
 /* ============================================================
