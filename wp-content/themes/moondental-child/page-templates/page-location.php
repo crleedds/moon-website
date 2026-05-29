@@ -59,12 +59,6 @@ foreach ( array( 'naver-map.png', 'naver-map.jpg', 'naver-map.jpeg', 'naver-map.
 				<div class="md-locmap__pattern" aria-hidden="true"></div>
 			<?php endif; ?>
 			<div class="md-locmap__badge">NAVER MAP</div>
-			<div class="md-locmap__pin" aria-hidden="true">
-				<svg viewBox="0 0 32 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M16 0C7.16 0 0 7.16 0 16c0 12 16 28 16 28s16-16 16-28C32 7.16 24.84 0 16 0z" fill="currentColor"/>
-					<circle cx="16" cy="16" r="6" fill="#fff"/>
-				</svg>
-			</div>
 			<div class="md-locmap__info">
 				<h2 class="md-locmap__title"><?php echo esc_html( $info['name_short'] ); ?></h2>
 				<p class="md-locmap__addr"><?php echo esc_html( $info['address_road'] ?: $info['address'] ); ?></p>
