@@ -86,11 +86,19 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 						<?php endif; ?>
 					</div>
 
+					<?php
+					$header_cta_url   = function_exists( 'md_content' ) ? md_content( 'header_cta_url',   '/오시는-길/' ) : '/오시는-길/';
+					$header_cta_label = function_exists( 'md_content' ) ? md_content( 'header_cta_label', '오시는 길' ) : '오시는 길';
+					$header_cta_icon  = function_exists( 'md_content' ) ? md_content( 'header_cta_icon',  '📍' ) : '📍';
+					// 사이트 내 상대경로(/...)는 home_url로 절대화, 그 외(https?://...)는 그대로 사용
+					$header_cta_href  = ( $header_cta_url && $header_cta_url[0] === '/' ) ? home_url( $header_cta_url ) : $header_cta_url;
+					?>
 					<div class="md-header__cta">
 						<a class="md-btn md-btn-primary md-btn--sm md-header__cta-btn"
-						   href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>"
+						   href="<?php echo esc_url( $header_cta_href ); ?>"
 						   data-track="cta-header-location">
-							<span aria-hidden="true">📍</span> 오시는 길
+							<?php if ( $header_cta_icon ) : ?><span aria-hidden="true"><?php echo esc_html( $header_cta_icon ); ?></span><?php endif; ?>
+							<?php echo esc_html( $header_cta_label ); ?>
 						</a>
 					</div>
 				</div>

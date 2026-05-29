@@ -26,7 +26,7 @@ $place_url  = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' );
 				<?php else : ?>
 					<h3><?php echo esc_html( $info['name_full'] ); ?></h3>
 				<?php endif; ?>
-				<p><?php echo esc_html( $info['tagline'] ); ?></p>
+				<p><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'footer_brand_tagline', $info['tagline'] ) : $info['tagline'] ); ?></p>
 
 				<?php if ( ! empty( $info['phone'] ) ) : ?>
 					<p class="md-footer__phone">
@@ -124,7 +124,7 @@ $place_url  = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' );
 			</div>
 
 			<div class="md-footer__col">
-				<h4>진료시간</h4>
+				<h4><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'footer_col_hours_title', '진료시간' ) : '진료시간' ); ?></h4>
 				<ul>
 					<?php
 					$hour_rows = array(
@@ -147,7 +147,7 @@ $place_url  = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' );
 			</div>
 
 			<div class="md-footer__col">
-				<h4>진료안내</h4>
+				<h4><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'footer_col_services_title', '진료안내' ) : '진료안내' ); ?></h4>
 				<ul>
 					<?php foreach ( moondental_get_services() as $svc ) :
 						$page    = get_page_by_path( $svc['slug'] );
@@ -159,7 +159,7 @@ $place_url  = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' );
 			</div>
 
 			<div class="md-footer__col">
-				<h4>병원안내</h4>
+				<h4><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'footer_col_about_title', '병원안내' ) : '병원안내' ); ?></h4>
 				<?php
 				if ( has_nav_menu( 'footer' ) ) {
 					wp_nav_menu( array(
@@ -179,7 +179,7 @@ $place_url  = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' );
 
 		<div class="md-footer__bottom">
 			<div><?php echo esc_html( $info['name_full'] ); ?></div>
-			<div>&copy; <?php echo esc_html( date_i18n( 'Y' ) ); ?> <?php echo esc_html( $info['name_short'] ); ?>. All rights reserved.</div>
+			<div>&copy; <?php echo esc_html( date_i18n( 'Y' ) ); ?> <?php echo esc_html( $info['name_short'] ); ?>. <?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'footer_copyright', 'All rights reserved.' ) : 'All rights reserved.' ); ?></div>
 		</div>
 
 	</div>
