@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      1.8.1
+Version:      1.9.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -4333,4 +4333,312 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
   .md-priceX-step__no { font-size: 1.25rem; }
   .md-priceX-pay__item { padding: 14px 16px; grid-template-columns: 44px 1fr; }
   .md-priceX-pay__icon { width: 44px; height: 44px; font-size: 1.25rem; }
+}
+
+/* =============================================================
+   29. 홈 — Why 문치과 (4 USP 카드)
+   ============================================================= */
+.md-why-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(16px, 2vw, 24px);
+}
+@media (max-width: 880px) { .md-why-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .md-why-grid { grid-template-columns: 1fr; } }
+
+.md-why {
+  position: relative;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(24px, 3vw, 32px) clamp(20px, 2.5vw, 28px);
+  text-align: left;
+  transition: all 0.3s var(--ease);
+  overflow: hidden;
+}
+.md-why::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  background: var(--color-surface);
+  border-radius: 50%;
+  transition: transform 0.4s var(--ease-out-back);
+  z-index: 0;
+}
+.md-why > * { position: relative; z-index: 1; }
+.md-why:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-4px);
+}
+.md-why:hover::before { transform: scale(1.5); }
+
+.md-why__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px; height: 56px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-alt));
+  border-radius: 16px;
+  font-size: 1.625rem;
+  line-height: 1;
+}
+.md-why__title {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  margin: 0 0 10px;
+  color: var(--color-text);
+  letter-spacing: -0.015em;
+  word-break: keep-all;
+}
+.md-why__desc {
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  line-height: 1.7;
+  margin: 0;
+  word-break: keep-all;
+}
+
+/* =============================================================
+   30. 홈 — 진료 흐름 6단계
+   ============================================================= */
+.md-process {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: clamp(12px, 1.8vw, 20px);
+  position: relative;
+}
+@media (max-width: 1080px) { .md-process { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px)  { .md-process { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 400px)  { .md-process { grid-template-columns: 1fr; } }
+
+.md-process__item {
+  position: relative;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: clamp(18px, 2.3vw, 24px) clamp(14px, 2vw, 20px);
+  transition: all 0.3s var(--ease);
+}
+.md-process__item:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-2px);
+}
+/* 데스크탑 6열 — 항목 사이 화살표 */
+@media (min-width: 1081px) {
+  .md-process__item:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-primary-light);
+    font-size: 1.125rem;
+    font-weight: 700;
+    z-index: 2;
+  }
+}
+
+.md-process__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.md-process__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-alt));
+  border-radius: 10px;
+  font-size: 0.9375rem;
+}
+.md-process__no {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: -0.03em;
+  font-feature-settings: 'tnum';
+}
+.md-process__title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--color-text);
+  letter-spacing: -0.015em;
+  word-break: keep-all;
+}
+.md-process__desc {
+  font-size: var(--fs-caption);
+  color: var(--color-text-sub);
+  line-height: 1.6;
+  margin: 0;
+  word-break: keep-all;
+}
+
+/* =============================================================
+   31. 홈 — 시설·장비 6 카드
+   ============================================================= */
+.md-facility-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(16px, 2vw, 24px);
+}
+@media (max-width: 880px) { .md-facility-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .md-facility-grid { grid-template-columns: 1fr; } }
+
+.md-facility {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(24px, 3vw, 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: all 0.3s var(--ease);
+  position: relative;
+  overflow: hidden;
+}
+.md-facility::before {
+  content: '';
+  position: absolute;
+  bottom: -50px; left: -50px;
+  width: 140px; height: 140px;
+  background: var(--color-accent-light);
+  opacity: 0.25;
+  border-radius: 50%;
+  transition: transform 0.4s var(--ease-out-back);
+  z-index: 0;
+}
+.md-facility > * { position: relative; z-index: 1; }
+.md-facility:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-4px);
+}
+.md-facility:hover::before { transform: scale(1.4); }
+
+.md-facility__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px; height: 60px;
+  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-alt));
+  border-radius: 18px;
+  font-size: 1.75rem;
+}
+.md-facility__title {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text);
+  letter-spacing: -0.015em;
+  word-break: keep-all;
+}
+.md-facility__desc {
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  line-height: 1.7;
+  margin: 0;
+  word-break: keep-all;
+}
+
+/* =============================================================
+   32. 홈 — 핵심 FAQ 6개 (Expandable)
+   ============================================================= */
+.md-home-faq {
+  display: grid;
+  gap: 12px;
+}
+.md-home-faq__item {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  overflow: hidden;
+}
+.md-home-faq__item[open] {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-soft);
+}
+.md-home-faq__item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: clamp(16px, 2vw, 20px) clamp(18px, 2.2vw, 24px);
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: var(--fs-body);
+  user-select: none;
+  min-height: 56px;
+}
+.md-home-faq__item summary::-webkit-details-marker { display: none; }
+.md-home-faq__item summary:hover { background: var(--color-surface); }
+
+.md-home-faq__q {
+  flex: 1;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  word-break: keep-all;
+}
+.md-home-faq__chev {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  border-radius: 50%;
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: transform 0.3s var(--ease), background 0.2s var(--ease), color 0.2s var(--ease);
+}
+.md-home-faq__item[open] .md-home-faq__chev {
+  background: var(--color-primary);
+  color: #fff;
+  transform: rotate(45deg);
+}
+.md-home-faq__a {
+  padding: 0 clamp(18px, 2.2vw, 24px) clamp(18px, 2.2vw, 22px);
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  line-height: 1.8;
+  word-break: keep-all;
+  animation: md-home-faq-fade 0.25s var(--ease);
+}
+.md-home-faq__a a {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.md-home-faq__a strong { color: var(--color-text); font-weight: 700; }
+@keyframes md-home-faq-fade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================================
+   33. Header — 현재 페이지 active 표시 강화
+   ============================================================= */
+.md-nav > li.current-menu-item > a,
+.md-nav > li.current-menu-ancestor > a,
+.md-nav > li.current-page-ancestor > a,
+.md-header__nav > ul > li.current-menu-item > a,
+.md-header__nav > ul > li.current-menu-ancestor > a,
+.md-header__nav > ul > li.current-page-ancestor > a {
+  color: var(--color-primary-dark);
+  border-bottom-color: var(--color-primary);
+  font-weight: 700;
 }

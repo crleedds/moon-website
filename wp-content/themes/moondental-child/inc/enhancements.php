@@ -409,6 +409,15 @@ function moondental_analytics_head() {
 }
 add_action( 'wp_head', 'moondental_analytics_head', 2 );
 
+/**
+ * 모바일 브라우저 주소창·앱 스위처 색상을 브랜드 코럴로 통일.
+ */
+function moondental_theme_color_meta() {
+	echo "\n<meta name=\"theme-color\" content=\"#D88062\">\n";
+	echo "<meta name=\"msapplication-TileColor\" content=\"#D88062\">\n";
+}
+add_action( 'wp_head', 'moondental_theme_color_meta', 1 );
+
 
 /* ============================================================
  * 3c. 모든 이미지에 자동 loading="lazy" + decoding="async" 부착
