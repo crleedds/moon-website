@@ -101,11 +101,20 @@ $specialties = array(
 					$anchor    = 'doctor-' . sanitize_title( $doc['name'] );
 					$bio       = $doc['bio'] ?? array();
 					if ( is_string( $bio ) ) { $bio = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", $bio ) ) ); }
+
+					// 사진 framing 통일 — 의료진별 focus/zoom 적용
+					$photo_focus = isset( $doc['photo_focus'] ) ? $doc['photo_focus'] : '25%';
+					$photo_zoom  = isset( $doc['photo_zoom'] )  ? (float) $doc['photo_zoom'] : 1.0;
+					$photo_style = sprintf(
+						'object-position: center %s; transform: scale(%s); transform-origin: center top;',
+						esc_attr( $photo_focus ),
+						esc_attr( number_format( $photo_zoom, 2 ) )
+					);
 			?>
 				<article class="md-doccard" data-doc-group="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $anchor ); ?>">
 					<div class="md-doccard__photo">
 						<?php if ( $photo_url ) : ?>
-							<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $doc['name'] ); ?>" loading="lazy">
+							<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $doc['name'] ); ?>" loading="lazy" style="<?php echo esc_attr( $photo_style ); ?>">
 						<?php else : ?>
 							<span class="md-doccard__initial"><?php echo esc_html( mb_substr( $doc['name'], -2 ) ); ?></span>
 						<?php endif; ?>
