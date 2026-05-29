@@ -3,93 +3,192 @@
  * Template Name: 의료진 페이지
  * Template Post Type: page
  *
- * 9명 의료진 — 그룹별로 사진/약력 상세 카드 (홈의 요약과 달리 약력 전체 표시).
+ * Hero / 층별 필터 탭 / 그리드 카드(약력 펼치기) / 진료 전문과 / CTA 배너.
  *
  * @package moondental-child
  */
 
 get_header();
-$groups = moondental_get_team();
+$info       = moondental_get_info();
+$phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'] );
+$groups     = moondental_get_team();
+
+// 그룹 → 필터 키 매핑 (한글 라벨 → kebab key for data-attr)
+$group_keys = array();
+foreach ( $groups as $g ) {
+	$group_keys[ $g['group'] ] = sanitize_title( $g['group'] );
+}
+
+// 의료진 총원 계산
+$total_doctors = 0;
+foreach ( $groups as $g ) $total_doctors += count( $g['members'] );
+
+// 진료 전문과 안내
+$specialties = array(
+	array( 'icon' => '🦷', 'title' => '치과보철과',   'desc' => '임플란트·크라운·틀니 등 손상된 치아 복원 전문' ),
+	array( 'icon' => '✨', 'title' => '치과교정과',   'desc' => '부정교합 · 투명교정 · 부분교정 등 치아 배열 전문' ),
+	array( 'icon' => '🌿', 'title' => '치과보존과',   'desc' => '신경치료 · 충치 치료 등 자연치 보존 전문' ),
+	array( 'icon' => '🩺', 'title' => '치주과',       'desc' => '잇몸 질환 · 잇몸 수술 · 치주 관리 전문' ),
+	array( 'icon' => '🧒', 'title' => '소아치과',     'desc' => '아이의 첫 치과 진료부터 청소년 교정까지' ),
+	array( 'icon' => '🦴', 'title' => '구강악안면외과', 'desc' => '사랑니 · 매복치 · 임플란트 외과 진료' ),
+);
 ?>
 
-<section class="md-page-hero">
+<!-- ============ Hero ============ -->
+<section class="md-docs-hero">
 	<div class="md-container">
-		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span><?php the_title(); ?></span>
+		<nav class="md-docs-hero__crumbs" aria-label="breadcrumb">
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>의료진</span>
 		</nav>
-		<h1 class="md-page-hero__title"><?php the_title(); ?></h1>
-		<p class="md-page-hero__lead">
-			9F 종합진료센터 · 10F 임플란트센터 · 11F 교정과<br>
-			각 분야 전문 의료진이 한 자리에서 환자 한 분의 평생 치아 건강을 책임집니다.
+		<span class="md-docs-hero__chip">MOON DENTAL HOSPITAL · OUR DOCTORS</span>
+		<h1 class="md-docs-hero__title">
+			30년 임상,<br>
+			<em><?php echo (int) $total_doctors; ?>인 의료진 협진</em>
+		</h1>
+		<p class="md-docs-hero__lead">
+			보철·교정·보존·외과 — 각 분야 전문 의료진이 한 자리에서<br>
+			환자 한 분의 치아를 함께 봅니다.
+		</p>
+		<ul class="md-docs-hero__stats">
+			<li><strong><?php echo (int) $total_doctors; ?>인</strong><span>전문 의료진</span></li>
+			<li><strong>3개층</strong><span>9F · 10F · 11F</span></li>
+			<li><strong>30년</strong><span>1995년 개원</span></li>
+		</ul>
+		<div class="md-btn-group">
+			<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-docs-hero-reservation">
+				📅 상담 예약하기
+			</a>
+			<a class="md-btn md-btn-secondary md-btn--lg" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-docs-hero-call">
+				📞 <?php echo esc_html( $info['phone'] ); ?>
+			</a>
+		</div>
+	</div>
+</section>
+
+<!-- ============ 의료진 그리드 (필터 + 카드) ============ -->
+<section class="md-section md-section--surface" id="doctors-list">
+	<div class="md-container">
+		<header class="md-section-head">
+			<span class="md-section-head__eyebrow">Our Doctors</span>
+			<h2 class="md-section-head__title">전체 의료진</h2>
+			<p class="md-section-head__lead">
+				각 분야 전문의의 정성스러운 진료를 받으실 수 있습니다.
+			</p>
+		</header>
+
+		<!-- 층별 필터 -->
+		<div class="md-docs-filter" role="tablist" aria-label="진료센터 필터">
+			<button class="md-docs-filter__btn is-active" type="button" data-doc-filter="all">
+				전체 <span class="md-docs-filter__count"><?php echo (int) $total_doctors; ?></span>
+			</button>
+			<?php foreach ( $groups as $g ) :
+				$key = $group_keys[ $g['group'] ];
+				$n   = count( $g['members'] );
+			?>
+				<button class="md-docs-filter__btn" type="button" data-doc-filter="<?php echo esc_attr( $key ); ?>">
+					<?php echo esc_html( $g['group'] ); ?>
+					<span class="md-docs-filter__count"><?php echo (int) $n; ?></span>
+				</button>
+			<?php endforeach; ?>
+		</div>
+
+		<!-- 의료진 카드 그리드 -->
+		<div class="md-docs-grid">
+			<?php foreach ( $groups as $g ) :
+				$key = $group_keys[ $g['group'] ];
+				foreach ( $g['members'] as $doc ) :
+					$photo_url = moondental_doctor_photo_url( $doc['photo'] ?? '' );
+					$anchor    = 'doctor-' . sanitize_title( $doc['name'] );
+					$bio       = $doc['bio'] ?? array();
+					if ( is_string( $bio ) ) { $bio = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", $bio ) ) ); }
+			?>
+				<article class="md-doccard" data-doc-group="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $anchor ); ?>">
+					<div class="md-doccard__photo">
+						<?php if ( $photo_url ) : ?>
+							<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $doc['name'] ); ?>" loading="lazy">
+						<?php else : ?>
+							<span class="md-doccard__initial"><?php echo esc_html( mb_substr( $doc['name'], -2 ) ); ?></span>
+						<?php endif; ?>
+						<span class="md-doccard__role"><?php echo esc_html( $doc['role'] ); ?></span>
+					</div>
+					<div class="md-doccard__body">
+						<h3 class="md-doccard__name"><?php echo esc_html( $doc['name'] ); ?></h3>
+						<?php if ( ! empty( $doc['philosophy'] ) ) : ?>
+							<p class="md-doccard__phil">
+								<span aria-hidden="true">“</span><?php echo esc_html( $doc['philosophy'] ); ?><span aria-hidden="true">”</span>
+							</p>
+						<?php endif; ?>
+
+						<?php if ( ! empty( $bio ) ) : ?>
+							<details class="md-doccard__bio">
+								<summary>
+									<span>학력 · 경력 보기</span>
+									<span class="md-doccard__chev" aria-hidden="true">+</span>
+								</summary>
+								<ul>
+									<?php foreach ( $bio as $line ) : ?>
+										<li><?php echo esc_html( $line ); ?></li>
+									<?php endforeach; ?>
+								</ul>
+							</details>
+						<?php endif; ?>
+					</div>
+				</article>
+			<?php endforeach; endforeach; ?>
+		</div>
+
+		<p class="md-docs-grid__hint">
+			ⓘ 진료 예약 시 원하시는 의료진을 지정하실 수 있습니다.
 		</p>
 	</div>
 </section>
 
+<!-- ============ 진료 전문과 안내 ============ -->
 <section class="md-section">
 	<div class="md-container">
+		<header class="md-section-head">
+			<span class="md-section-head__eyebrow">전문 분야</span>
+			<h2 class="md-section-head__title">진료 전문과 안내</h2>
+			<p class="md-section-head__lead">
+				문치과병원은 6개 전문 진료과의 협진 체계를 운영합니다.
+			</p>
+		</header>
 
-		<div class="md-page-content" style="max-width:760px; margin:0 auto clamp(32px, 5vw, 64px);">
-			<?php
-			while ( have_posts() ) :
-				the_post();
-				$body = trim( get_the_content() );
-				if ( $body ) {
-					the_content();
-				} else {
-					echo moondental_default_doctors_content();
-				}
-			endwhile;
-			?>
+		<div class="md-spec-grid">
+			<?php foreach ( $specialties as $sp ) : ?>
+				<article class="md-spec">
+					<div class="md-spec__icon" aria-hidden="true"><?php echo $sp['icon']; ?></div>
+					<h3 class="md-spec__title"><?php echo esc_html( $sp['title'] ); ?></h3>
+					<p class="md-spec__desc"><?php echo esc_html( $sp['desc'] ); ?></p>
+				</article>
+			<?php endforeach; ?>
 		</div>
-
-		<?php foreach ( $groups as $group ) : ?>
-			<div class="md-team-group">
-				<h3 class="md-team-group__title"><?php echo esc_html( $group['group'] ); ?></h3>
-				<div class="md-doc-list">
-					<?php foreach ( $group['members'] as $doc ) :
-						$photo_url = moondental_doctor_photo_url( $doc['photo'] ?? '' );
-						$anchor    = 'doctor-' . sanitize_title( $doc['name'] );
-					?>
-						<article class="md-doc-row" id="<?php echo esc_attr( $anchor ); ?>">
-							<div class="md-doc-row__media<?php echo $photo_url ? ' has-photo' : ''; ?>">
-								<?php if ( $photo_url ) : ?>
-									<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $doc['name'] ); ?>" loading="lazy">
-								<?php else : ?>
-									<span class="md-doc-row__initial"><?php echo esc_html( mb_substr( $doc['name'], -2 ) ); ?></span>
-								<?php endif; ?>
-							</div>
-							<div class="md-doc-row__body">
-								<div class="md-doc-row__role"><?php echo esc_html( $doc['role'] ); ?></div>
-								<h4 class="md-doc-row__name"><?php echo esc_html( $doc['name'] ); ?></h4>
-
-								<?php if ( ! empty( $doc['philosophy'] ) ) : ?>
-									<blockquote class="md-doc-row__quote">
-										<?php echo esc_html( $doc['philosophy'] ); ?>
-									</blockquote>
-								<?php endif; ?>
-
-								<?php
-								$bio = $doc['bio'] ?? array();
-								if ( is_string( $bio ) ) { $bio = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", $bio ) ) ); }
-								if ( ! empty( $bio ) ) :
-								?>
-									<ul class="md-doc-row__bio">
-										<?php foreach ( $bio as $line ) : ?>
-											<li><?php echo esc_html( $line ); ?></li>
-										<?php endforeach; ?>
-									</ul>
-								<?php endif; ?>
-							</div>
-						</article>
-					<?php endforeach; ?>
-				</div>
-			</div>
-		<?php endforeach; ?>
-
 	</div>
 </section>
 
-<?php get_template_part( 'template-parts/section', 'cta' ); ?>
+<!-- ============ CTA 배너 ============ -->
+<section class="md-section md-section--sm">
+	<div class="md-container">
+		<div class="md-docs-cta">
+			<span class="md-docs-cta__chip">상담 예약</span>
+			<h2 class="md-docs-cta__title">어떤 원장님께 진료받고 싶으신가요?</h2>
+			<p class="md-docs-cta__lead">
+				부담 없이 상담받으세요. 환자분께 맞는 의료진을 안내드립니다.
+			</p>
+			<div class="md-btn-group" style="justify-content:center; display:flex;">
+				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-docs-banner-reservation">
+					📅 상담 예약하기
+				</a>
+				<a class="md-btn md-btn-ghost md-btn--lg" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-docs-banner-call">
+					📞 <?php echo esc_html( $info['phone'] ); ?>
+				</a>
+			</div>
+			<p class="md-docs-cta__hours">
+				🕐 평일 09:00–20:30 · 목 09:00–18:00 · 토 09:00–14:00 · 일/공휴일 휴진
+			</p>
+		</div>
+	</div>
+</section>
 
 <?php
 get_footer();

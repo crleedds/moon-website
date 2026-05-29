@@ -72,6 +72,22 @@
       });
     });
 
+    // 9. 의료진 페이지 — 층별 필터 (전체/9F/10F/11F)
+    var docFilterBtns = document.querySelectorAll('[data-doc-filter]');
+    var docCards      = document.querySelectorAll('[data-doc-group]');
+    if (docFilterBtns.length && docCards.length) {
+      docFilterBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var target = btn.getAttribute('data-doc-filter');
+          docFilterBtns.forEach(function (b) { b.classList.toggle('is-active', b === btn); });
+          docCards.forEach(function (card) {
+            var show = (target === 'all') || (card.getAttribute('data-doc-group') === target);
+            card.classList.toggle('is-hidden', !show);
+          });
+        });
+      });
+    }
+
     // 3. Reduced motion respect — skip everything below
     var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
