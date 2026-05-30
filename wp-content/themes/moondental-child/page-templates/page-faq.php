@@ -15,9 +15,9 @@ $faqs = moondental_get_faqs();
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>자주 묻는 질문</span>
 		</nav>
-		<h1 class="md-page-hero__title"><?php the_title(); ?></h1>
+		<h1 class="md-page-hero__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'faq_page_title', get_the_title() ) : get_the_title() ); ?></h1>
 		<p class="md-page-hero__lead">
-			환자분들이 가장 많이 문의하시는 질문을 카테고리별로 정리했습니다.
+			<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'faq_page_lead', '환자분들이 가장 많이 문의하시는 질문을 카테고리별로 정리했습니다.' ) : '환자분들이 가장 많이 문의하시는 질문을 카테고리별로 정리했습니다.' ) ); ?>
 		</p>
 	</div>
 </section>
