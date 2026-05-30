@@ -233,6 +233,35 @@ function moondental_home_content_fields() {
 			),
 		),
 
+		/* ─── 홈 — Info 섹션 (진료시간 / 전화 / 위치) ─── */
+		'info' => array(
+			'title'  => '홈 — Info 섹션 (진료시간/전화/위치)',
+			'fields' => array(
+				'info_eyebrow' => array( 'default' => 'Information',          'label' => '섹션 — eyebrow', 'type' => 'text' ),
+				'info_title'   => array( 'default' => '진료시간 & 오시는 길', 'label' => '섹션 — 제목',    'type' => 'text' ),
+
+				'info_block_hours_label'    => array( 'default' => '진료시간',     'label' => '①번 카드 — 라벨', 'type' => 'text' ),
+				'info_block_phone_label'    => array( 'default' => '전화 문의',    'label' => '②번 카드 — 라벨', 'type' => 'text' ),
+				'info_block_phone_sub'      => array( 'default' => "전화 예약 / 진료 문의\n진료시간 내에만 응답 가능합니다.", 'label' => '②번 카드 — 설명 (줄바꿈)', 'type' => 'textarea' ),
+				'info_block_phone_btn'      => array( 'default' => '카카오톡 상담', 'label' => '②번 카드 — 버튼 라벨', 'type' => 'text' ),
+
+				'info_block_location_label' => array( 'default' => '오시는 길',    'label' => '③번 카드 — 라벨', 'type' => 'text' ),
+				'info_block_location_btn1'  => array( 'default' => '🟢 네이버 플레이스', 'label' => '③번 카드 — 버튼 1', 'type' => 'text' ),
+				'info_block_location_btn2'  => array( 'default' => '지도·교통 자세히 →', 'label' => '③번 카드 — 버튼 2', 'type' => 'text' ),
+				'info_block_location_sub'   => array( 'default' => '주차·대중교통 안내는 예약·상담 페이지에서 확인하실 수 있습니다.', 'label' => '③번 카드 — 하단 안내', 'type' => 'textarea' ),
+			),
+		),
+
+		/* ─── 홈 — 소식 섹션 ─── */
+		'notices' => array(
+			'title'  => '홈 — 소식 섹션',
+			'fields' => array(
+				'notices_eyebrow'        => array( 'default' => 'News',         'label' => '섹션 — eyebrow', 'type' => 'text' ),
+				'notices_title'          => array( 'default' => '공지사항',     'label' => '섹션 — 제목',    'type' => 'text' ),
+				'notices_all_link_label' => array( 'default' => '전체보기 →',  'label' => '전체보기 링크 라벨', 'type' => 'text' ),
+			),
+		),
+
 		/* ─── CTA 배너 ─────────────────────────────────────── */
 		'cta' => array(
 			'title'  => '홈 — 하단 CTA 배너',
@@ -643,6 +672,42 @@ function moondental_subpage_content_fields() {
 				'history_eyebrow'  => array( 'default' => 'Our History', 'label' => '역사 섹션 — eyebrow', 'type' => 'text' ),
 				'history_title'    => array( 'default' => '30년의 발자취', 'label' => '역사 섹션 — 제목', 'type' => 'text' ),
 				'history_lead'     => array( 'default' => '1995년 개원부터 현재까지 — 환자분과 함께 걸어온 길.', 'label' => '역사 섹션 — 설명', 'type' => 'textarea' ),
+			),
+		),
+
+		/* ─── 예약·상담 페이지 ─── */
+		'reservation' => array(
+			'title'  => '예약·상담 페이지',
+			'fields' => array(
+				'res_hero_eyebrow' => array( 'default' => 'RESERVATION',                 'label' => 'Hero — eyebrow', 'type' => 'text' ),
+				'res_hero_title'   => array( 'default' => '예약·상담 그리고 오시는 길',  'label' => 'Hero — 제목',    'type' => 'text' ),
+				'res_hero_lead'    => array( 'default' => "네이버 예약 · 전화 · 카카오톡 — 가장 편하신 방법으로 예약해주세요.\n아래에서 진료시간·찾아오시는 길도 함께 확인하실 수 있습니다.", 'label' => 'Hero — 설명 (줄바꿈)', 'type' => 'textarea' ),
+
+				'res_channels_eyebrow' => array( 'default' => '예약 채널',                 'label' => '예약 채널 섹션 — eyebrow', 'type' => 'text' ),
+				'res_channels_title'   => array( 'default' => '편하신 방법으로 예약해주세요', 'label' => '예약 채널 섹션 — 제목', 'type' => 'text' ),
+				'res_channels_lead'    => array( 'default' => '문치과병원은 네이버 예약으로 24시간 자동 예약을 받고 있으며, 전화·카카오톡 상담도 함께 운영합니다.', 'label' => '예약 채널 섹션 — 설명', 'type' => 'textarea' ),
+
+				'res_naver_title' => array( 'default' => '네이버 예약',                       'label' => '네이버 카드 — 제목',  'type' => 'text' ),
+				'res_naver_desc'  => array( 'default' => '24시간 자동 예약 · 가장 빠른 일정 확인', 'label' => '네이버 카드 — 설명',  'type' => 'text' ),
+				'res_naver_cta'   => array( 'default' => '예약하러 가기 →',                  'label' => '네이버 카드 — CTA',   'type' => 'text' ),
+
+				'res_call_title'  => array( 'default' => '전화 예약',                         'label' => '전화 카드 — 제목',    'type' => 'text' ),
+				'res_call_desc'   => array( 'default' => '진료시간 내 응답',                  'label' => '전화 카드 — 설명 (전화번호 자동 표시)', 'type' => 'text' ),
+				'res_call_cta'    => array( 'default' => '바로 전화 →',                       'label' => '전화 카드 — CTA',     'type' => 'text' ),
+
+				'res_kakao_title' => array( 'default' => '카카오톡 상담',                     'label' => '카카오 카드 — 제목',  'type' => 'text' ),
+				'res_kakao_desc'  => array( 'default' => '24시간 메시지 · 진료시간 내 답변',  'label' => '카카오 카드 — 설명',  'type' => 'text' ),
+				'res_kakao_cta'   => array( 'default' => '카카오톡 채널 →',                  'label' => '카카오 카드 — CTA',   'type' => 'text' ),
+			),
+		),
+
+		/* ─── FAQ 페이지 Hero ─── */
+		'faq_page' => array(
+			'title'  => 'FAQ 페이지 — Hero',
+			'fields' => array(
+				'faq_page_eyebrow' => array( 'default' => 'FAQ',                     'label' => 'eyebrow', 'type' => 'text' ),
+				'faq_page_title'   => array( 'default' => '자주 묻는 질문',           'label' => '제목',    'type' => 'text' ),
+				'faq_page_lead'    => array( 'default' => '환자분들이 가장 많이 궁금해하시는 질문과 답변을 정리했습니다.', 'label' => '설명', 'type' => 'textarea' ),
 			),
 		),
 

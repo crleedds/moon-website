@@ -32,11 +32,10 @@ $map_kakao  = 'https://map.kakao.com/?q=' . $q_short;
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>예약·상담 / 오시는 길</span>
 		</nav>
-		<span class="md-page-hero__eyebrow">RESERVATION</span>
-		<h1 class="md-page-hero__title">예약·상담 그리고 오시는 길</h1>
+		<span class="md-page-hero__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_hero_eyebrow', 'RESERVATION' ) : 'RESERVATION' ); ?></span>
+		<h1 class="md-page-hero__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_hero_title', '예약·상담 그리고 오시는 길' ) : '예약·상담 그리고 오시는 길' ); ?></h1>
 		<p class="md-page-hero__lead">
-			네이버 예약 · 전화 · 카카오톡 — 가장 편하신 방법으로 예약해주세요.<br>
-			아래에서 진료시간·찾아오시는 길도 함께 확인하실 수 있습니다.
+			<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'res_hero_lead', "네이버 예약 · 전화 · 카카오톡 — 가장 편하신 방법으로 예약해주세요.\n아래에서 진료시간·찾아오시는 길도 함께 확인하실 수 있습니다." ) : "네이버 예약 · 전화 · 카카오톡 — 가장 편하신 방법으로 예약해주세요.\n아래에서 진료시간·찾아오시는 길도 함께 확인하실 수 있습니다." ) ); ?>
 		</p>
 	</div>
 </section>
@@ -45,10 +44,10 @@ $map_kakao  = 'https://map.kakao.com/?q=' . $q_short;
 <section class="md-section">
 	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">예약 채널</span>
-			<h2 class="md-section-head__title">편하신 방법으로 예약해주세요</h2>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_channels_eyebrow', '예약 채널' ) : '예약 채널' ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_channels_title', '편하신 방법으로 예약해주세요' ) : '편하신 방법으로 예약해주세요' ); ?></h2>
 			<p class="md-section-head__lead">
-				문치과병원은 <strong>네이버 예약</strong>으로 24시간 자동 예약을 받고 있으며, 전화·카카오톡 상담도 함께 운영합니다.
+				<?php echo wp_kses_post( function_exists( 'md_content' ) ? md_content( 'res_channels_lead', '문치과병원은 <strong>네이버 예약</strong>으로 24시간 자동 예약을 받고 있으며, 전화·카카오톡 상담도 함께 운영합니다.' ) : '문치과병원은 <strong>네이버 예약</strong>으로 24시간 자동 예약을 받고 있으며, 전화·카카오톡 상담도 함께 운영합니다.' ); ?>
 			</p>
 		</header>
 
@@ -56,25 +55,25 @@ $map_kakao  = 'https://map.kakao.com/?q=' . $q_short;
 			<?php if ( $naver_book ) : ?>
 			<a class="md-channel-card md-channel-card--primary" href="<?php echo esc_url( $naver_book ); ?>" target="_blank" rel="noopener" data-track="cta-reservation-naver">
 				<span class="md-channel-card__icon" aria-hidden="true">🟢</span>
-				<span class="md-channel-card__title">네이버 예약</span>
-				<span class="md-channel-card__desc">24시간 자동 예약 · 가장 빠른 일정 확인</span>
-				<span class="md-channel-card__cta">예약하러 가기 →</span>
+				<span class="md-channel-card__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_naver_title', '네이버 예약' ) : '네이버 예약' ); ?></span>
+				<span class="md-channel-card__desc"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_naver_desc', '24시간 자동 예약 · 가장 빠른 일정 확인' ) : '24시간 자동 예약 · 가장 빠른 일정 확인' ); ?></span>
+				<span class="md-channel-card__cta"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_naver_cta', '예약하러 가기 →' ) : '예약하러 가기 →' ); ?></span>
 			</a>
 			<?php endif; ?>
 
 			<a class="md-channel-card" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-reservation-call">
 				<span class="md-channel-card__icon" aria-hidden="true">📞</span>
-				<span class="md-channel-card__title">전화 예약</span>
-				<span class="md-channel-card__desc"><?php echo esc_html( $info['phone'] ); ?> · 진료시간 내 응답</span>
-				<span class="md-channel-card__cta">바로 전화 →</span>
+				<span class="md-channel-card__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_call_title', '전화 예약' ) : '전화 예약' ); ?></span>
+				<span class="md-channel-card__desc"><?php echo esc_html( $info['phone'] ); ?> · <?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_call_desc', '진료시간 내 응답' ) : '진료시간 내 응답' ); ?></span>
+				<span class="md-channel-card__cta"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_call_cta', '바로 전화 →' ) : '바로 전화 →' ); ?></span>
 			</a>
 
 			<?php if ( $kakao_url ) : ?>
 			<a class="md-channel-card" href="<?php echo esc_url( $kakao_url ); ?>" target="_blank" rel="noopener" data-track="cta-reservation-kakao">
 				<span class="md-channel-card__icon" aria-hidden="true">💬</span>
-				<span class="md-channel-card__title">카카오톡 상담</span>
-				<span class="md-channel-card__desc">24시간 메시지 · 진료시간 내 답변</span>
-				<span class="md-channel-card__cta">카카오톡 채널 →</span>
+				<span class="md-channel-card__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_kakao_title', '카카오톡 상담' ) : '카카오톡 상담' ); ?></span>
+				<span class="md-channel-card__desc"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_kakao_desc', '24시간 메시지 · 진료시간 내 답변' ) : '24시간 메시지 · 진료시간 내 답변' ); ?></span>
+				<span class="md-channel-card__cta"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_kakao_cta', '카카오톡 채널 →' ) : '카카오톡 채널 →' ); ?></span>
 			</a>
 			<?php endif; ?>
 		</div>

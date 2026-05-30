@@ -19,11 +19,11 @@ if ( ! $recent->have_posts() ) {
 	<div class="md-container">
 		<header class="md-section-head" style="text-align:left; max-width:none; display:flex; justify-content:space-between; align-items:end; gap:16px; flex-wrap:wrap;">
 			<div>
-				<span class="md-section-head__eyebrow">News</span>
-				<h2 class="md-section-head__title" style="margin:0;">공지사항</h2>
+				<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'notices_eyebrow', 'News' ) : 'News' ); ?></span>
+				<h2 class="md-section-head__title" style="margin:0;"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'notices_title', '공지사항' ) : '공지사항' ); ?></h2>
 			</div>
 			<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( get_post_type_archive_link( 'post' ) ?: home_url( '/notices/' ) ); ?>">
-				전체보기 →
+				<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'notices_all_link_label', '전체보기 →' ) : '전체보기 →' ); ?>
 			</a>
 		</header>
 
