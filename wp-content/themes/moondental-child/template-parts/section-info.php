@@ -78,7 +78,7 @@ $info = moondental_get_info();
 					</div>
 				<?php else : ?>
 					<p class="md-info-block__value" style="font-size:1.0625rem; line-height:1.6;">
-						<?php echo esc_html( $info['address_road'] ?: $info['address'] ); ?>
+						<?php echo md_address_link( $info['address_road'] ?: $info['address'] ); ?>
 					</p>
 				<?php endif; ?>
 				<p class="md-info-block__sub" style="margin-top:12px;">

@@ -64,7 +64,7 @@ $map_kakao  = 'https://map.kakao.com/?q=' . $q_short;
 			<a class="md-channel-card" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-reservation-call">
 				<span class="md-channel-card__icon" aria-hidden="true">📞</span>
 				<span class="md-channel-card__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_call_title', '전화 예약' ) : '전화 예약' ); ?></span>
-				<span class="md-channel-card__desc"><?php echo esc_html( $info['phone'] ); ?> · <?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_call_desc', '진료시간 내 응답' ) : '진료시간 내 응답' ); ?></span>
+				<span class="md-channel-card__desc"><?php echo md_phone_link(); ?> · <?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_call_desc', '진료시간 내 응답' ) : '진료시간 내 응답' ); ?></span>
 				<span class="md-channel-card__cta"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_call_cta', '바로 전화 →' ) : '바로 전화 →' ); ?></span>
 			</a>
 

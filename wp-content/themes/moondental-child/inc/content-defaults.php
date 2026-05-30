@@ -863,8 +863,8 @@ function moondental_default_about_content() {
 <p>한아의료재단은 진료실 밖에서도 천안 시민과 함께해왔습니다. 대한적십자사 무료 진료봉사, 지산장학회 장학금 기부, 지역 학교 구강보건 교육 등 — 치과는 단순한 사업장이 아니라 지역사회의 일원이라는 마음으로 운영하고 있습니다.</p>
 
 <h3>찾아오시는 길</h3>
-<p>충청남도 천안시 동남구 만남로 52, 문타워 9~13층 (신부동, 문타워빌딩)<br>
-대표전화 041-563-2875</p>
+<p>' . md_address_link( '충청남도 천안시 동남구 만남로 52, 문타워 9~13층 (신부동, 문타워빌딩)' ) . '<br>
+대표전화 ' . md_phone_link() . '</p>
 
 <p>자세한 교통·주차 안내는 <a href="/오시는-길/">오시는 길</a> 페이지를 참고해주세요.</p>';
 }
@@ -1495,7 +1495,7 @@ function moondental_default_location_content() {
 	$addr      = $info['address_road'] ?: $info['address'];
 
 	$html  = '<h2>천안 만남로 문타워 9~13층</h2>';
-	$html .= '<p class="lead">' . esc_html( $info['address'] ) . '<br>대표전화 <a href="tel:' . esc_attr( $info['phone_link'] ) . '">' . esc_html( $info['phone'] ) . '</a></p>';
+	$html .= '<p class="lead">' . md_address_link() . '<br>대표전화 ' . md_phone_link() . '</p>';
 
 	if ( $map_embed ) {
 		// 관리자가 직접 임베드 코드를 넣은 경우 (Naver/Kakao API 키로 받은 iframe)

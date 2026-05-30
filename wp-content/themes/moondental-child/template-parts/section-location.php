@@ -24,7 +24,11 @@ foreach ( array( 'naver-map.png', 'naver-map.jpg', 'naver-map.jpeg', 'naver-map.
 }
 
 $title   = function_exists( 'md_content' ) ? md_content( 'flocation_title', '오시는 길' ) : '오시는 길';
-$address = function_exists( 'md_content' ) ? md_content( 'flocation_address', $info['address'] ?? '' ) : ( $info['address'] ?? '' );
+// flocation_address: Customizer 값이 비어있으면 병원 기본 주소로 자동 fallback
+$address = function_exists( 'md_content' ) ? md_content( 'flocation_address', '' ) : '';
+if ( $address === '' ) {
+	$address = $info['address'] ?? '';
+}
 
 // 진료시간 — 오늘 요일 강조용
 $today_dow = (int) wp_date( 'w' ); // 0=일, 4=목, 6=토
@@ -123,9 +127,6 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 						<span class="md-hours__time">휴진</span>
 					</li>
 				</ul>
-				<p class="md-hours__note">
-					<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_hours_note', '평일 점심시간 없이 진료 · 야간진료 운영' ) : '평일 점심시간 없이 진료 · 야간진료 운영' ); ?>
-				</p>
 			</aside>
 
 			<aside class="md-park md-park--compact">

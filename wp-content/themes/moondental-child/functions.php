@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.4.0' );
+define( 'MOONDENTAL_VERSION', '3.5.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -203,6 +203,60 @@ function moondental_get_today_hours_label() {
 	$time = moondental_extract_time_range( $source );
 	if ( ! $time ) return $today;
 	return $today . ' ' . $time;
+}
+
+/**
+ * 병원 주소 → 네이버 지도 링크 헬퍼.
+ *  비어있으면 빈 문자열 반환. 입력 주소가 없으면 moondental_get_info('address') 사용.
+ *
+ * @param string $text   화면에 표시할 텍스트 (비우면 주소 그대로 표시)
+ * @param array  $attrs  추가 anchor 속성: class, data-track 등
+ */
+function md_address_link( $text = '', $attrs = array() ) {
+	$info = moondental_get_info();
+	$addr = $info['address'] ?? '';
+	if ( ! $addr ) return '';
+
+	$display = $text !== '' ? $text : $addr;
+	$href = $info['naver_map_url'] ?: ( 'https://map.naver.com/p/search/' . rawurlencode( $info['name_full'] ?? '문치과병원' ) );
+
+	$class = isset( $attrs['class'] ) ? $attrs['class'] : 'md-addr-link';
+	$track = isset( $attrs['track'] ) ? $attrs['track'] : 'cta-address';
+
+	return sprintf(
+		'<a href="%s" target="_blank" rel="noopener" class="%s" data-track="%s" aria-label="네이버 지도에서 위치 보기">%s</a>',
+		esc_url( $href ),
+		esc_attr( $class ),
+		esc_attr( $track ),
+		esc_html( $display )
+	);
+}
+
+/**
+ * 전화번호 → tel: 링크 헬퍼.
+ *  비어있으면 빈 문자열 반환.
+ *
+ * @param string $text   화면에 표시할 텍스트 (비우면 전화번호 그대로 표시)
+ * @param array  $attrs  추가 anchor 속성: class, data-track 등
+ */
+function md_phone_link( $text = '', $attrs = array() ) {
+	$info = moondental_get_info();
+	$phone = $info['phone'] ?? '';
+	if ( ! $phone ) return '';
+
+	$link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $phone );
+	$display = $text !== '' ? $text : $phone;
+
+	$class = isset( $attrs['class'] ) ? $attrs['class'] : 'md-tel-link';
+	$track = isset( $attrs['track'] ) ? $attrs['track'] : 'cta-tel';
+
+	return sprintf(
+		'<a href="tel:%s" class="%s" data-track="%s">%s</a>',
+		esc_attr( $link ),
+		esc_attr( $class ),
+		esc_attr( $track ),
+		esc_html( $display )
+	);
 }
 
 /**
