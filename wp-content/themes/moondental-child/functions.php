@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.1.3' );
+define( 'MOONDENTAL_VERSION', '3.2.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -202,6 +202,88 @@ function moondental_get_today_hours_label() {
 	$time = moondental_extract_time_range( $source );
 	if ( ! $time ) return $today;
 	return $today . ' ' . $time;
+}
+
+/**
+ * 전역 예약 CTA 버튼 — 네이버 예약 + 카카오톡 상담 + 전화.
+ *  URL/라벨은 사용자 정의하기 → 사이트 공통 콘텐츠 → 전역 예약 CTA 버튼 에서 편집.
+ *  네이버/카카오 URL이 비어있으면 SNS 섹션의 값을 fallback으로 사용.
+ *  라벨이 비어있으면 해당 버튼 자동 숨김.
+ *
+ * @param array $args {
+ *   @type string $size   'lg' 또는 ''                — 버튼 크기 (기본 lg)
+ *   @type string $align  'center' 또는 ''           — 가운데 정렬 여부 (기본 center)
+ *   @type string $track  data-track prefix          — 분석용
+ *   @type bool   $show_naver/$show_kakao/$show_call — 개별 버튼 강제 숨김
+ * }
+ * @return string HTML
+ */
+function md_render_reservation_ctas( $args = array() ) {
+	$args = wp_parse_args( $args, array(
+		'size'       => 'lg',
+		'align'      => 'center',
+		'track'      => 'cta',
+		'show_naver' => true,
+		'show_kakao' => true,
+		'show_call'  => true,
+	) );
+
+	$info = moondental_get_info();
+
+	// URL fallback chain: cta_btn_*_url → 병원정보의 SNS URL
+	$naver_url = function_exists( 'md_content' ) ? md_content( 'cta_btn_naver_url', '' ) : '';
+	if ( empty( $naver_url ) ) $naver_url = $info['naver_place'] ?? '';
+
+	$kakao_url = function_exists( 'md_content' ) ? md_content( 'cta_btn_kakao_url', '' ) : '';
+	if ( empty( $kakao_url ) ) $kakao_url = $info['kakao_url'] ?? '';
+
+	$naver_label = function_exists( 'md_content' ) ? md_content( 'cta_btn_naver_label', '📅 네이버 예약하기' ) : '📅 네이버 예약하기';
+	$kakao_label = function_exists( 'md_content' ) ? md_content( 'cta_btn_kakao_label', '💬 카카오톡 상담하기' ) : '💬 카카오톡 상담하기';
+	$call_label  = function_exists( 'md_content' ) ? md_content( 'cta_btn_call_label',  '📞 전화 상담' )       : '📞 전화 상담';
+	$show_phone  = function_exists( 'md_content' ) ? md_content( 'cta_btn_show_phone',  'yes' )              : 'yes';
+
+	$phone       = $info['phone'] ?? '';
+	$phone_link  = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $phone );
+
+	$btn_size_cls = $args['size'] === 'lg' ? ' md-btn--lg' : '';
+
+	$group_style = 'display:flex; flex-wrap:wrap; gap:12px;';
+	if ( $args['align'] === 'center' ) {
+		$group_style .= ' justify-content:center;';
+	}
+
+	$out  = '<div class="md-btn-group md-rcta" style="' . esc_attr( $group_style ) . '">';
+
+	// 네이버 예약 (primary)
+	if ( $args['show_naver'] && $naver_label && $naver_url ) {
+		$out .= '<a class="md-btn md-btn-primary' . esc_attr( $btn_size_cls ) . ' md-rcta__naver" '
+		     . 'href="' . esc_url( $naver_url ) . '" target="_blank" rel="noopener" '
+		     . 'data-track="' . esc_attr( $args['track'] ) . '-naver">'
+		     . esc_html( $naver_label ) . '</a>';
+	}
+
+	// 카카오톡 상담 (secondary - yellow)
+	if ( $args['show_kakao'] && $kakao_label && $kakao_url ) {
+		$out .= '<a class="md-btn md-btn--kakao' . esc_attr( $btn_size_cls ) . ' md-rcta__kakao" '
+		     . 'href="' . esc_url( $kakao_url ) . '" target="_blank" rel="noopener" '
+		     . 'data-track="' . esc_attr( $args['track'] ) . '-kakao">'
+		     . esc_html( $kakao_label ) . '</a>';
+	}
+
+	// 전화 (ghost)
+	if ( $args['show_call'] && $call_label && $phone_link ) {
+		$label = $call_label;
+		if ( $show_phone !== 'no' && $phone ) {
+			$label .= ' ' . $phone;
+		}
+		$out .= '<a class="md-btn md-btn-ghost' . esc_attr( $btn_size_cls ) . ' md-rcta__call" '
+		     . 'href="tel:' . esc_attr( $phone_link ) . '" '
+		     . 'data-track="' . esc_attr( $args['track'] ) . '-call">'
+		     . esc_html( $label ) . '</a>';
+	}
+
+	$out .= '</div>';
+	return $out;
 }
 
 

@@ -1076,8 +1076,7 @@ function moondental_default_privacy_content() {
 		<span>🅿️ 자체 주차장</span>
 	</div>
 	<div class="md-policy-hero__cta">
-		<a class="md-btn md-btn-primary" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>">📅 상담 예약하기</a>
-		<a class="md-btn md-btn-secondary" href="tel:<?php echo esc_attr( preg_replace('/[^0-9]/','',$phone) ); ?>">📞 <?php echo esc_html( $phone ); ?></a>
+		<?php if ( function_exists( 'md_render_reservation_ctas' ) ) { echo md_render_reservation_ctas( array( 'track' => 'cta-policy', 'size' => '', 'align' => 'center' ) ); } ?>
 	</div>
 </div>
 

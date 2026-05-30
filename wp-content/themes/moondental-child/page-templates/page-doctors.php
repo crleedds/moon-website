@@ -167,14 +167,7 @@ $specialties = array(
 			<p class="md-docs-cta__lead">
 				<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_cta_lead', '부담 없이 상담받으세요. 환자분께 맞는 의료진을 안내드립니다.' ) : '부담 없이 상담받으세요. 환자분께 맞는 의료진을 안내드립니다.' ) ); ?>
 			</p>
-			<div class="md-btn-group" style="justify-content:center; display:flex;">
-				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>" data-track="cta-docs-banner-reservation">
-					📅 상담 예약하기
-				</a>
-				<a class="md-btn md-btn-ghost md-btn--lg" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-docs-banner-call">
-					📞 <?php echo esc_html( $info['phone'] ); ?>
-				</a>
-			</div>
+			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-docs-banner', 'size' => 'lg', 'align' => 'center' ) ); ?>
 			<p class="md-docs-cta__hours">
 				🕐 평일 09:00–20:30 · 목 09:00–18:00 · 토 09:00–14:00 · 일/공휴일 휴진
 			</p>

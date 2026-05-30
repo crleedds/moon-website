@@ -32,20 +32,7 @@ $hero_image_id = get_theme_mod( 'moondental_hero_image', 0 );
 				</h1>
 				<p class="md-hero__lead"><?php echo nl2br( esc_html( $lead ) ); ?></p>
 
-				<div class="md-btn-group">
-					<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>" data-track="cta-hero-reservation">
-						📅 상담 예약하기
-					</a>
-					<?php if ( ! empty( $info['kakao_url'] ) ) : ?>
-						<a class="md-btn md-btn-secondary md-btn--lg" href="<?php echo esc_url( $info['kakao_url'] ); ?>" target="_blank" rel="noopener" data-track="cta-hero-kakao">
-							카카오톡 상담
-						</a>
-					<?php else : ?>
-						<a class="md-btn md-btn-secondary md-btn--lg" href="tel:<?php echo esc_attr( $info['phone_link'] ?: preg_replace('/[^0-9]/', '', $info['phone']) ); ?>">
-							📞 <?php echo esc_html( $info['phone'] ); ?>
-						</a>
-					<?php endif; ?>
-				</div>
+				<?php echo md_render_reservation_ctas( array( 'track' => 'cta-hero', 'size' => 'lg', 'align' => 'start' ) ); ?>
 
 				<ul class="md-hero__badges" aria-label="문치과병원의 특징">
 					<li><span aria-hidden="true">✓</span> 1995년 개원 · 30년 임상</li>

@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.1.3
+Version:      3.2.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -244,11 +244,47 @@ ul, ol { padding-left: 1.25em; }
 .md-btn--lg { padding: 18px 40px; font-size: 1.0625rem; }
 .md-btn--sm { padding: 10px 22px; font-size: var(--fs-small); }
 
+/* KakaoTalk 옐로우 버튼 — 브랜드 인지 위해 카카오 컬러 사용 */
+.md-btn--kakao {
+  background-color: #FEE500;
+  color: #181600;
+  border-color: #FEE500;
+}
+.md-btn--kakao:hover {
+  background-color: #ffd900;
+  color: #181600;
+  border-color: #ffd900;
+  transform: translateY(-2px);
+}
+
 .md-btn-group {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+}
+
+/* 전역 예약 CTA — 네이버/카카오/전화 3 버튼 그룹 (md_render_reservation_ctas) */
+.md-rcta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.md-rcta .md-btn { white-space: nowrap; }
+@media (max-width: 540px) {
+  .md-rcta {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+  }
+  .md-rcta .md-btn {
+    width: 100%;
+    justify-content: center;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }
 
 /* Apply pill style to native WP/Elementor buttons too, if present */
