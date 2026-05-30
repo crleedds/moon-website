@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.1.2' );
+define( 'MOONDENTAL_VERSION', '3.1.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -856,6 +856,46 @@ function moondental_doctor_single_router( $template ) {
 	return $template;
 }
 add_filter( 'template_include', 'moondental_doctor_single_router', 98 );
+
+/**
+ * URL 직접 가로채기 — rewrite rule이 동작하지 않는 환경(공지사항 fallback 등) 대비.
+ *  template_redirect 최우선 hook으로 /의료진/{slug}/ 패턴 검출 시
+ *  page-doctor-single.php 템플릿 직접 로드.
+ */
+function moondental_doctor_intercept() {
+	$uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
+	$path = parse_url( $uri, PHP_URL_PATH );
+	if ( ! $path ) return;
+	$path = trim( urldecode( $path ), '/' );
+
+	// 패턴: 의료진/{slug}/ 또는 doctors/{slug}/
+	if ( ! preg_match( '#^(?:의료진|doctors)/([^/]+)/?$#u', $path, $m ) ) return;
+
+	$slug = trim( $m[1] );
+	if ( ! $slug ) return;
+
+	$doctor = function_exists( 'moondental_get_doctor_by_slug' )
+		? moondental_get_doctor_by_slug( $slug )
+		: null;
+	if ( ! $doctor ) return; // 의료진 없으면 WP 기본 라우팅에 맡김
+
+	// 의료진 발견 — page-doctor-single.php 로 강제 라우팅
+	set_query_var( 'doctor_slug', $slug );
+	global $wp_query;
+	$wp_query->is_404      = false;
+	$wp_query->is_page     = true;
+	$wp_query->is_singular = true;
+	$wp_query->is_home     = false;
+	$wp_query->is_archive  = false;
+	status_header( 200 );
+
+	$tpl = locate_template( 'page-templates/page-doctor-single.php' );
+	if ( $tpl ) {
+		include $tpl;
+		exit;
+	}
+}
+add_action( 'template_redirect', 'moondental_doctor_intercept', 1 );
 
 /* 테마 활성화 시 rewrite rules flush — 새 rule 패턴 반영 위해 버전 키 증가 */
 function moondental_flush_rewrites_once() {
