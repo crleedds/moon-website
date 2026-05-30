@@ -879,6 +879,28 @@ function moondental_default_about_content() {
  * month 는 선택 (비워두면 연도만 표시).
  */
 function moondental_get_history() {
+	/* Customizer override 우선 — 한 줄당 "연도 | 월 | 제목 | 설명 | 사진파일명" 형식 */
+	if ( function_exists( 'md_content' ) ) {
+		$text = md_content( 'history_timeline', '' );
+		if ( $text ) {
+			$parsed = array();
+			foreach ( preg_split( "/\r\n|\r|\n/", $text ) as $line ) {
+				$line = trim( $line );
+				if ( ! $line || strpos( $line, '#' ) === 0 ) continue;
+				$parts = array_map( 'trim', explode( '|', $line ) );
+				if ( count( $parts ) >= 3 ) {
+					$parsed[] = array(
+						'year'  => $parts[0],
+						'month' => $parts[1],
+						'title' => $parts[2],
+						'desc'  => $parts[3] ?? '',
+						'photo' => $parts[4] ?? '',
+					);
+				}
+			}
+			if ( $parsed ) return $parsed;
+		}
+	}
 	// 출처: Notion 페이지 (사용자 제공). 역연대 순(최신 → 과거).
 	// 'photo' 필드는 선택. assets/images/history/<파일명> 파일이 있으면 자동 표시.
 	return array(

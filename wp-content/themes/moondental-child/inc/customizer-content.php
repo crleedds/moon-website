@@ -767,6 +767,190 @@ function moondental_chrome_content_fields() {
 }
 
 /**
+ * 환자 후기 6개 콘텐츠 필드.
+ *  6 reviews × 6 fields = 36 fields
+ */
+function moondental_testimonials_content_fields() {
+	$defaults = array(
+		1 => array( 'name' => '김○○', 'gender' => '여성', 'age' => '40대', 'service' => '임플란트', 'rating' => '5', 'text' => '오랫동안 미루던 임플란트를 30년 경력 원장님께 받았습니다. 수술 당일 통증이 거의 없었고, 자가혈을 함께 사용한다는 점이 안심됐어요. 평일 야간 진료가 있어 직장인에게 정말 편합니다.' ),
+		2 => array( 'name' => '박○○', 'gender' => '남성', 'age' => '50대', 'service' => '전악 보철', 'rating' => '5', 'text' => '여러 치과를 다녀봤지만 이렇게 충분히 설명해주시는 곳은 처음입니다. 전악 보철까지 진행했는데 의료진 협진이 정말 체계적이에요. 비용도 시작 전에 명확히 알려주셔서 신뢰가 갔습니다.' ),
+		3 => array( 'name' => '이○○', 'gender' => '여성', 'age' => '30대', 'service' => '투명교정', 'rating' => '5', 'text' => '인비절라인 투명교정 받았는데 처음에 걱정했던 것보다 훨씬 편했어요. 11F 교정과 원장님이 사진 시뮬레이션으로 결과를 미리 보여주셨고, 6개월 만에 만족스러운 결과를 얻었습니다.' ),
+		4 => array( 'name' => '최○○', 'gender' => '남성', 'age' => '60대', 'service' => '임플란트 + 보철', 'rating' => '5', 'text' => '고혈압이 있어서 다른 곳에서는 거절당했는데, 여기는 혈압 체크부터 약물까지 세심하게 봐주셨습니다. 수술 후 귀가 서비스까지 챙겨주셔서 감동이었어요.' ),
+		5 => array( 'name' => '정○○', 'gender' => '여성', 'age' => '40대', 'service' => '자연치아 살리기', 'rating' => '5', 'text' => '발치하고 임플란트 하라던 치아를 보존과 전문의 원장님이 살려주셨어요. 재근관치료로 자연치를 지킬 수 있어서 정말 감사합니다.' ),
+		6 => array( 'name' => '한○○', 'gender' => '여성', 'age' => '50대', 'service' => '심미 라미네이트', 'rating' => '5', 'text' => '앞니 라미네이트를 했는데 자연스럽게 잘 나왔어요. 무리한 치아 삭제 없이 보존적으로 해주신다는 점이 마음에 들었고, 결과도 만족합니다.' ),
+	);
+
+	$groups = array();
+	for ( $i = 1; $i <= 6; $i++ ) {
+		$d = $defaults[ $i ];
+		$groups[ 'review_' . $i ] = array(
+			'title'  => '환자 후기 #' . $i,
+			'fields' => array(
+				"review_{$i}_name"    => array( 'default' => $d['name'],    'label' => '이름 (예: 김○○, 비우면 카드 자동 숨김)', 'type' => 'text' ),
+				"review_{$i}_gender"  => array( 'default' => $d['gender'],  'label' => '성별', 'type' => 'text' ),
+				"review_{$i}_age"     => array( 'default' => $d['age'],     'label' => '연령대', 'type' => 'text' ),
+				"review_{$i}_service" => array( 'default' => $d['service'], 'label' => '받은 진료', 'type' => 'text' ),
+				"review_{$i}_rating"  => array( 'default' => $d['rating'],  'label' => '별점 (1-5)', 'type' => 'text' ),
+				"review_{$i}_text"    => array( 'default' => $d['text'],    'label' => '후기 내용', 'type' => 'textarea' ),
+			),
+		);
+	}
+	return $groups;
+}
+
+/**
+ * 비교표 (종합치과병원 vs 일반 치과의원) 9 행 콘텐츠 필드.
+ */
+function moondental_compare_content_fields() {
+	$defaults = array(
+		1 => array( 'label' => '의료기관 종별',     'hospital' => '치과병원 (병원급)',                          'clinic' => '치과의원 (의원급)' ),
+		2 => array( 'label' => '의료진 규모',       'hospital' => '9인 전문 의료진 협진',                       'clinic' => '1~2인 진료' ),
+		3 => array( 'label' => '전문 진료과',       'hospital' => '보철·교정·보존·치주·소아·외과 6과',          'clinic' => '일반 진료 위주' ),
+		4 => array( 'label' => '진료 시설',         'hospital' => '9F~13F 5개 층 통합 진료센터',                'clinic' => '단일 진료 공간' ),
+		5 => array( 'label' => '디지털 진단 장비',  'hospital' => 'CBCT · 디지털 가이드 · 구강스캐너',          'clinic' => '기본 X-ray 위주' ),
+		6 => array( 'label' => '보철 제작',         'hospital' => '자체 한아 임플란트 보철연구소',              'clinic' => '외부 기공소 의뢰' ),
+		7 => array( 'label' => '전신질환 대응',     'hospital' => '혈압 · 당검사 · 심전도 · 산소포화도 상시',   'clinic' => '제한적 대응' ),
+		8 => array( 'label' => '평일 진료시간',     'hospital' => '~ 20:30 야간진료 운영',                      'clinic' => '~ 18:00 일반적' ),
+		9 => array( 'label' => '임상 경력',         'hospital' => '1995년부터 30년 한자리 진료',                'clinic' => '의원별 상이' ),
+	);
+
+	$groups = array(
+		'compare_header' => array(
+			'title'  => '비교표 — 헤더 컬럼',
+			'fields' => array(
+				'compare_col_us'    => array( 'default' => '문치과병원 (치과병원)', 'label' => '왼쪽 헤더 (우리 병원)', 'type' => 'text' ),
+				'compare_col_them'  => array( 'default' => '일반 치과의원',          'label' => '오른쪽 헤더 (비교 대상)', 'type' => 'text' ),
+				'compare_col_label' => array( 'default' => '구분',                   'label' => '구분 컬럼 헤더', 'type' => 'text' ),
+			),
+		),
+	);
+
+	for ( $i = 1; $i <= 9; $i++ ) {
+		$d = $defaults[ $i ];
+		$groups[ 'compare_row_' . $i ] = array(
+			'title'  => '비교표 — 행 ' . $i . ' (' . $d['label'] . ')',
+			'fields' => array(
+				"compare_{$i}_label"    => array( 'default' => $d['label'],    'label' => '항목명 (비우면 행 자동 숨김)', 'type' => 'text' ),
+				"compare_{$i}_hospital" => array( 'default' => $d['hospital'], 'label' => '우리 병원',     'type' => 'text' ),
+				"compare_{$i}_clinic"   => array( 'default' => $d['clinic'],   'label' => '비교 대상',    'type' => 'text' ),
+			),
+		);
+	}
+	return $groups;
+}
+
+/**
+ * 진료영역별 FAQ 콘텐츠 필드 (7 서비스 × 1 텍스트영역).
+ *  형식: "Q | A" 한 줄에 하나씩 (HTML 가능)
+ */
+function moondental_service_faq_content_fields() {
+	$services = array(
+		'implant'   => '임플란트 센터',
+		'ortho'     => '투명교정 센터',
+		'endo'      => '자연치아 살리기',
+		'tmj'       => '턱관절 클리닉',
+		'wisdom'    => '사랑니 발치',
+		'aesthetic' => '심미치료',
+		'pediatric' => '소아치과',
+	);
+
+	$defaults = array(
+		'implant' => "임플란트 수술 후 통증이 많이 있나요? | 국소마취 하에 진행되며 수술 자체는 거의 통증이 없습니다. PCA 자가진통조절기와 물방울 레이저로 통증을 최대한 줄입니다.\n임플란트는 얼마나 오래 사용할 수 있나요? | 관리에 따라 10~20년 이상 유지가 가능합니다. 1년 4회 정기 검진과 매일 구강위생 관리가 핵심이며, 평생 A/S 시스템을 운영합니다.\n뼈가 부족하다고 들었는데 임플란트가 가능할까요? | CT 정밀 분석 후 골이식·상악동 거상술·M-GBR 등 환자 골 상태에 맞춘 다양한 옵션이 있습니다.\n당일 임플란트는 누구나 가능한가요? | 발치+뼈이식+식립을 하루에 진행하는 시술입니다. 뼈 상태·잇몸 건강·전신 상태에 따라 가능 여부가 결정됩니다.\n건강보험 임플란트 혜택이 있나요? | 만 65세 이상 건강보험 가입자는 평생 2개까지 본인부담 30%로 적용 가능합니다.\n타치과에서 한 임플란트가 흔들리는데 다시 가능한가요? | 리무버 키트로 안전하게 제거 후 재식립 가능합니다. 골손실을 최소화하며 필요 시 골이식을 병행합니다.",
+
+		'ortho' => "성인도 교정이 가능한가요? | 잇몸·치주 상태가 건강하다면 50~60대도 교정이 가능합니다.\n투명교정과 일반 교정 중 어느 것이 좋나요? | 케이스 난이도·라이프스타일·예산에 따라 다릅니다. 정밀 진단 후 추천드립니다.\n교정 중 통증은 얼마나 심한가요? | 장치 부착 직후·조정 후 2~3일간 둔한 통증이 있을 수 있습니다. 진통제로 조절 가능하며 1주일 이내 적응됩니다.\n교정 후 다시 돌아간다고 들었는데? | 유지장치(retainer)를 권장대로 착용하면 거의 재발하지 않습니다.\n발치를 해야만 교정이 되나요? | 케이스마다 다릅니다. 정밀 진단 후 비발치도 가능합니다.\n비용은 얼마나 드나요? | 메탈 브라켓 400~600만 원, 투명교정 600~1,000만 원 선입니다.",
+
+		'endo' => "신경치료한 치아는 얼마나 오래 사용할 수 있나요? | 크라운 보철로 잘 보호하면 평생 사용도 가능합니다.\n신경치료가 많이 아픈가요? | 국소마취 하에 진행되어 시술 중 통증은 거의 없습니다.\n신경치료보다 발치하고 임플란트 하는 게 낫지 않나요? | 자연치를 살릴 수 있다면 무조건 살리는 것이 우선입니다.\n재근관치료는 성공률이 어느 정도인가요? | 1차 신경치료보다는 낮지만 약 70~80% 성공률을 보입니다.\n신경이 죽은 치아를 그냥 두면 어떻게 되나요? | 치근 끝에 농양·낭종이 생기고, 결국 뼈를 녹이며 인접치까지 영향을 줍니다.",
+
+		'tmj' => "턱에서 소리만 나고 통증은 없는데 치료가 필요한가요? | 디스크 변위 가능성이 있어 정기 검진을 권합니다.\n보톡스로 정말 턱관절 통증이 좋아지나요? | 교근의 긴장이 통증의 주된 원인인 경우 효과가 빠릅니다.\n스플린트는 평생 착용해야 하나요? | 통상 3~6개월 야간 착용 후 증상이 호전되면 사용 빈도를 줄입니다.\n턱관절 수술까지 가는 경우는? | 거의 드뭅니다. 대부분 비수술적 치료로 호전됩니다.\n두통이 턱관절 때문일 수 있나요? | 네, 매우 흔합니다. 측두근·교근의 과긴장이 두통으로 이어집니다.\n임플란트 후 턱관절이 아픈데요? | 전악 임플란트나 다수 보철 후 교합이 변하면서 턱관절에 무리가 갈 수 있습니다.",
+
+		'wisdom' => "사랑니 발치 시 신경 마비 위험은 얼마나 되나요? | 3D CT 사전 분석으로 위험을 최대한 줄입니다.\n임신 중 사랑니 발치가 가능한가요? | 가급적 출산 후로 미루는 것이 좋습니다.\n발치 후 통증은 얼마나 오래 가나요? | 일반 발치는 2~3일, 매복 사랑니는 3~5일이 통증 피크. 1주일 후엔 거의 사라집니다.\n사랑니 4개를 한 번에 빼도 되나요? | 건강한 성인의 경우 가능합니다. 보통 나눠서 진행을 권장합니다.\n발치 후 운동은 언제부터 가능한가요? | 가벼운 산책은 다음 날부터 가능합니다. 격렬한 운동은 1주일 후부터 권장합니다.\n통증이 무서운데 수면 마취도 가능한가요? | 국소마취 + 물방울 레이저 + PCA 자가진통조절기로 충분히 편안하게 진행 가능합니다.",
+
+		'aesthetic' => "라미네이트와 미백 중 무엇이 좋나요? | 미백으로 해결 가능한 단순 변색은 미백을 우선 권합니다.\n미백 후 색이 다시 어두워지나요? | 시간이 지나며 자연스럽게 다시 착색됩니다. 보통 1~2년 후 보강 미백을 권장합니다.\n임플란트 틀니와 일반 틀니 중 무엇이 좋나요? | 임플란트 틀니가 훨씬 안정적입니다.\n전악 보철은 한 번에 모두 진행되나요? | 환자 상태에 따라 수개월~1년 이상 단계적으로 진행됩니다.\n신경치료한 치아도 미백 가능한가요? | 워킹 블리치라는 내부 미백법으로 개선 가능합니다.\n라미네이트 시술하면 치아가 약해지지 않나요? | 치아 삭제를 최소화하는 라미네이트는 자연치를 최대한 보존합니다.",
+
+		'pediatric' => "아이는 몇 살부터 치과 진료를 받아야 하나요? | 첫 어금니가 나오는 만 1~2세부터 치과 첫 방문을 권합니다.\n아이가 치과를 너무 무서워하는데 어떻게 해야 하나요? | 거부 시 절대 강제 진료하지 않습니다. 첫 방문은 진료실 구경부터 시작할 수 있습니다.\n실란트는 꼭 해야 하나요? | 필수는 아니지만 만 6~8세 영구치 어금니가 막 나왔을 때 충치 예방 효과가 50% 이상입니다.\n소아 교정은 언제 시작해야 하나요? | 골격성 부정교합은 만 7~10세가 1차 교정 골든타임입니다.\n아이 충치 치료는 어떻게 진행되나요? | 유치 충치는 글래스아이오노머·콤포지트로 가능한 한 짧은 시간에 치료합니다.",
+	);
+
+	$groups = array();
+	foreach ( $services as $key => $label ) {
+		$groups[ 'svc_faq_' . $key ] = array(
+			'title'  => '진료 FAQ — ' . $label,
+			'fields' => array(
+				"service_{$key}_faqs" => array(
+					'default' => $defaults[ $key ] ?? '',
+					'label'   => 'FAQ (한 줄당 1개, "질문 | 답변" 파이프 구분, HTML 가능)',
+					'type'    => 'textarea',
+				),
+			),
+		);
+	}
+	return $groups;
+}
+
+/**
+ * 의료진 그룹명·직책 콘텐츠 필드.
+ *  - 4 그룹 라벨
+ *  - 9 의료진 직책 (예: "원장 · 9F 종합진료센터")
+ */
+function moondental_doctor_meta_content_fields() {
+	$role_defaults = array(
+		'munes' => array( 'name' => '문은수', 'role' => '대표 병원장' ),
+		'leesj' => array( 'name' => '이승주', 'role' => '원장 · 9F 종합진료센터' ),
+		'leesu' => array( 'name' => '이수연', 'role' => '원장 · 9F 종합진료센터' ),
+		'kwon'  => array( 'name' => '권혜진', 'role' => '원장 · 9F 종합진료센터' ),
+		'munji' => array( 'name' => '문지현', 'role' => '원장 · 10F 임플란트센터' ),
+		'leech' => array( 'name' => '이창률', 'role' => '원장 · 10F 임플란트센터' ),
+		'leeyi' => array( 'name' => '이영일', 'role' => '원장 · 11F 교정과' ),
+		'kimsi' => array( 'name' => '김세일', 'role' => '원장 · 11F 종합진료센터' ),
+		'jeong' => array( 'name' => '정석형', 'role' => '원장 · 11F 종합진료센터' ),
+	);
+
+	$groups = array(
+		'doctor_groups' => array(
+			'title'  => '의료진 — 진료센터 그룹명 (4개)',
+			'fields' => array(
+				'doctor_group_1' => array( 'default' => '대표 병원장',                       'label' => '그룹 1 — 라벨', 'type' => 'text' ),
+				'doctor_group_2' => array( 'default' => '9F 종합진료센터',                   'label' => '그룹 2 — 라벨', 'type' => 'text' ),
+				'doctor_group_3' => array( 'default' => '10F 임플란트센터',                  'label' => '그룹 3 — 라벨', 'type' => 'text' ),
+				'doctor_group_4' => array( 'default' => '11F 교정과 · 종합진료센터',         'label' => '그룹 4 — 라벨', 'type' => 'text' ),
+			),
+		),
+		'doctor_roles' => array(
+			'title'  => '의료진 — 9명 직책 (역할 라벨)',
+			'fields' => array(),
+		),
+	);
+
+	foreach ( $role_defaults as $key => $d ) {
+		$groups['doctor_roles']['fields'][ "doctor_{$key}_role" ] = array(
+			'default' => $d['role'],
+			'label'   => $d['name'] . ' — 직책',
+			'type'    => 'text',
+		);
+	}
+
+	return $groups;
+}
+
+/**
+ * 역사 타임라인 콘텐츠 필드 (단일 텍스트영역, 한 줄당 1 항목).
+ *  형식: "연도 | 월 | 제목 | 설명 | 사진파일명(선택)"
+ */
+function moondental_history_content_fields() {
+	return array(
+		'history' => array(
+			'title'  => '역사 타임라인',
+			'fields' => array(
+				'history_timeline' => array(
+					'default' => '',
+					'label'   => '역사 항목 (한 줄당 1개, "연도 | 월 | 제목 | 설명 | 사진파일명" 파이프 구분, 빈 줄/#=주석. 비워두면 functions.php 기본값 사용)',
+					'type'    => 'textarea',
+				),
+			),
+		),
+	);
+}
+
+/**
  * 모든 홈 콘텐츠 필드를 Customizer에 일괄 등록.
  */
 function moondental_register_home_content_customizer( $wp_customize ) {
@@ -935,6 +1119,76 @@ function moondental_register_subpage_content_customizer( $wp_customize ) {
 	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_subpage_content_fields(), 'md_section_subpage_' );
 }
 add_action( 'customize_register', 'moondental_register_subpage_content_customizer', 35 );
+
+/**
+ * 환자 후기 콘텐츠 등록.
+ */
+function moondental_register_testimonials_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_testimonials_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '환자 후기 (6개)',
+		'description' => '홈페이지 환자 후기 6개를 편집합니다. 이름을 비우면 해당 후기 카드가 자동으로 숨겨집니다.',
+		'priority'    => 36,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_testimonials_content_fields(), 'md_section_testi_' );
+}
+add_action( 'customize_register', 'moondental_register_testimonials_content_customizer', 36 );
+
+/**
+ * 비교표 콘텐츠 등록.
+ */
+function moondental_register_compare_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_compare_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '비교표 (치과병원 vs 일반치과)',
+		'description' => '진료 페이지 비교표의 9개 행을 편집합니다. 행 항목명을 비우면 해당 행이 숨겨집니다.',
+		'priority'    => 37,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_compare_content_fields(), 'md_section_compare_' );
+}
+add_action( 'customize_register', 'moondental_register_compare_content_customizer', 37 );
+
+/**
+ * 진료별 FAQ 콘텐츠 등록.
+ */
+function moondental_register_service_faq_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_service_faq_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '진료영역별 FAQ (7 진료)',
+		'description' => '각 진료 페이지 하단 FAQ를 편집합니다. 한 줄에 "질문 | 답변" 파이프 구분으로 입력하세요.',
+		'priority'    => 38,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_service_faq_content_fields(), 'md_section_svc_faq_' );
+}
+add_action( 'customize_register', 'moondental_register_service_faq_content_customizer', 38 );
+
+/**
+ * 의료진 직책·그룹명 콘텐츠 등록.
+ */
+function moondental_register_doctor_meta_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_doctor_meta_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '의료진 — 그룹명·직책',
+		'description' => '의료진 진료센터 그룹명 4개와 9명 직책(역할 라벨)을 편집합니다.',
+		'priority'    => 39,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_doctor_meta_content_fields(), 'md_section_doc_meta_' );
+}
+add_action( 'customize_register', 'moondental_register_doctor_meta_content_customizer', 39 );
+
+/**
+ * 역사 타임라인 콘텐츠 등록.
+ */
+function moondental_register_history_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_history_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '역사 타임라인',
+		'description' => '역사 페이지 연표 항목을 텍스트로 편집합니다. 한 줄당 1 항목, 파이프(|)로 필드 구분.',
+		'priority'    => 40,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_history_content_fields(), 'md_section_history_' );
+}
+add_action( 'customize_register', 'moondental_register_history_content_customizer', 40 );
 
 /**
  * 공통 헬퍼 — 그룹 정의를 받아 섹션·세팅·컨트롤을 등록.

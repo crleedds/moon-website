@@ -448,7 +448,7 @@ add_filter( 'post_thumbnail_html', 'moondental_lazy_images', 99 );
  * 4. 환자 후기 데이터 (홈 섹션용)
  * ========================================================== */
 function moondental_get_testimonials() {
-	return array(
+	$defaults = array(
 		array(
 			'name'    => '김○○',
 			'gender'  => '여성',
@@ -498,6 +498,24 @@ function moondental_get_testimonials() {
 			'text'    => '앞니 라미네이트를 했는데 자연스럽게 잘 나왔어요. 무리한 치아 삭제 없이 보존적으로 해주신다는 점이 마음에 들었고, 결과도 만족합니다.',
 		),
 	);
+
+	/* Customizer override — 6 reviews. 이름이 비어있으면 카드 자동 숨김. */
+	if ( ! function_exists( 'md_content' ) ) return $defaults;
+	$result = array();
+	for ( $i = 1; $i <= 6; $i++ ) {
+		$d = $defaults[ $i - 1 ] ?? array();
+		$name = md_content( "review_{$i}_name", $d['name'] ?? '' );
+		if ( ! $name ) continue; // 이름 비우면 숨김
+		$result[] = array(
+			'name'    => $name,
+			'gender'  => md_content( "review_{$i}_gender",  $d['gender']  ?? '' ),
+			'age'     => md_content( "review_{$i}_age",     $d['age']     ?? '' ),
+			'service' => md_content( "review_{$i}_service", $d['service'] ?? '' ),
+			'rating'  => (int) md_content( "review_{$i}_rating", $d['rating'] ?? 5 ),
+			'text'    => md_content( "review_{$i}_text",    $d['text']    ?? '' ),
+		);
+	}
+	return $result;
 }
 
 
@@ -511,7 +529,7 @@ function moondental_get_testimonials() {
  * page-service.php가 자동으로 해당 service의 FAQ를 출력.
  */
 function moondental_get_faqs_by_service() {
-	return array(
+	$defaults = array(
 		'임플란트-센터' => array(
 			array( 'q' => '임플란트 수술 후 통증이 많이 있나요?',
 				   'a' => '국소마취 하에 진행되며 수술 자체는 거의 통증이 없습니다. PCA 자가진통조절기와 물방울 레이저로 통증을 최대한 줄입니다. 1~2일간의 둔한 통증은 진통제로 충분히 조절됩니다.' ),
@@ -621,6 +639,27 @@ function moondental_get_faqs_by_service() {
 				   'a' => '유치 충치는 글래스아이오노머·콤포지트로 가능한 한 짧은 시간에 치료합니다. 아이가 협조 어려우면 여러 차례 나눠 진행하기도 합니다. 강제 진료는 하지 않습니다.' ),
 		),
 	);
+
+	/* Customizer override — 각 슬러그에 대해 "질문 | 답변" 파이프 텍스트 파싱 */
+	if ( function_exists( 'md_content' ) && function_exists( 'moondental_service_slug_to_key' ) ) {
+		foreach ( $defaults as $slug => $_ ) {
+			$key = moondental_service_slug_to_key( $slug );
+			if ( ! $key ) continue;
+			$text = md_content( "service_{$key}_faqs", '' );
+			if ( ! $text ) continue;
+			$parsed = array();
+			foreach ( preg_split( "/\r\n|\r|\n/", $text ) as $line ) {
+				$line = trim( $line );
+				if ( ! $line || strpos( $line, '#' ) === 0 ) continue;
+				$parts = array_map( 'trim', explode( '|', $line, 2 ) );
+				if ( count( $parts ) >= 2 ) {
+					$parsed[] = array( 'q' => $parts[0], 'a' => $parts[1] );
+				}
+			}
+			if ( $parsed ) $defaults[ $slug ] = $parsed;
+		}
+	}
+	return $defaults;
 }
 
 
@@ -809,17 +848,32 @@ function moondental_service_ideal_candidates() {
  * @return array [ ['label'=>'', 'hospital'=>'…(문치과)', 'clinic'=>'…(일반)'], … ]
  */
 function moondental_clinic_comparison() {
-	return array(
-		array( 'label' => '의료기관 종별',     'hospital' => '치과병원 (병원급)',                'clinic' => '치과의원 (의원급)' ),
-		array( 'label' => '의료진 규모',       'hospital' => '9인 전문 의료진 협진',              'clinic' => '1~2인 진료' ),
-		array( 'label' => '전문 진료과',       'hospital' => '보철·교정·보존·치주·소아·외과 6과', 'clinic' => '일반 진료 위주' ),
-		array( 'label' => '진료 시설',         'hospital' => '9F~13F 5개 층 통합 진료센터',       'clinic' => '단일 진료 공간' ),
-		array( 'label' => '디지털 진단 장비',  'hospital' => 'CBCT · 디지털 가이드 · 구강스캐너', 'clinic' => '기본 X-ray 위주' ),
-		array( 'label' => '보철 제작',         'hospital' => '자체 한아 임플란트 보철연구소',     'clinic' => '외부 기공소 의뢰' ),
-		array( 'label' => '전신질환 대응',     'hospital' => '혈압 · 당검사 · 심전도 · 산소포화도 상시', 'clinic' => '제한적 대응' ),
-		array( 'label' => '평일 진료시간',     'hospital' => '~ 20:30 야간진료 운영',             'clinic' => '~ 18:00 일반적' ),
-		array( 'label' => '임상 경력',         'hospital' => '1995년부터 30년 한자리 진료',       'clinic' => '의원별 상이' ),
+	$defaults = array(
+		1 => array( 'label' => '의료기관 종별',     'hospital' => '치과병원 (병원급)',                          'clinic' => '치과의원 (의원급)' ),
+		2 => array( 'label' => '의료진 규모',       'hospital' => '9인 전문 의료진 협진',                       'clinic' => '1~2인 진료' ),
+		3 => array( 'label' => '전문 진료과',       'hospital' => '보철·교정·보존·치주·소아·외과 6과',          'clinic' => '일반 진료 위주' ),
+		4 => array( 'label' => '진료 시설',         'hospital' => '9F~13F 5개 층 통합 진료센터',                'clinic' => '단일 진료 공간' ),
+		5 => array( 'label' => '디지털 진단 장비',  'hospital' => 'CBCT · 디지털 가이드 · 구강스캐너',          'clinic' => '기본 X-ray 위주' ),
+		6 => array( 'label' => '보철 제작',         'hospital' => '자체 한아 임플란트 보철연구소',              'clinic' => '외부 기공소 의뢰' ),
+		7 => array( 'label' => '전신질환 대응',     'hospital' => '혈압 · 당검사 · 심전도 · 산소포화도 상시',   'clinic' => '제한적 대응' ),
+		8 => array( 'label' => '평일 진료시간',     'hospital' => '~ 20:30 야간진료 운영',                      'clinic' => '~ 18:00 일반적' ),
+		9 => array( 'label' => '임상 경력',         'hospital' => '1995년부터 30년 한자리 진료',                'clinic' => '의원별 상이' ),
 	);
+
+	if ( ! function_exists( 'md_content' ) ) return array_values( $defaults );
+
+	$result = array();
+	for ( $i = 1; $i <= 9; $i++ ) {
+		$d = $defaults[ $i ];
+		$label = md_content( "compare_{$i}_label", $d['label'] );
+		if ( ! $label ) continue; // 라벨 비우면 행 숨김
+		$result[] = array(
+			'label'    => $label,
+			'hospital' => md_content( "compare_{$i}_hospital", $d['hospital'] ),
+			'clinic'   => md_content( "compare_{$i}_clinic", $d['clinic'] ),
+		);
+	}
+	return $result;
 }
 
 
