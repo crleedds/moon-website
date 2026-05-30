@@ -2,7 +2,7 @@
 /**
  * Section: 오시는 길 (footer-wide, every page).
  *  footer.php에서 자동 include — /오시는-길/ 페이지에서는 중복 방지 위해 skip.
- *  텍스트는 사용자 정의하기 → 사이트 공통 콘텐츠 → 푸터 오시는 길 섹션 에서 편집.
+ *  텍스트는 사용자 정의하기 → 사이트 공통 콘텐츠 → 모든 페이지 — 오시는 길 섹션 + 오시는 길 콘텐츠 에서 편집.
  *
  * @package moondental-child
  */
@@ -25,6 +25,22 @@ foreach ( array( 'naver-map.png', 'naver-map.jpg', 'naver-map.jpeg', 'naver-map.
 
 $title   = function_exists( 'md_content' ) ? md_content( 'flocation_title', '오시는 길' ) : '오시는 길';
 $address = function_exists( 'md_content' ) ? md_content( 'flocation_address', $info['address'] ?? '' ) : ( $info['address'] ?? '' );
+
+// 진료시간 — 오늘 요일 강조용
+$today_dow = (int) wp_date( 'w' ); // 0=일, 4=목, 6=토
+
+$time_wd  = function_exists( 'moondental_extract_time_range' )
+	? moondental_extract_time_range( $info['hours_wd']  ?? '' )
+	: ( $info['hours_wd']  ?? '' );
+$time_thu = function_exists( 'moondental_extract_time_range' )
+	? moondental_extract_time_range( $info['hours_thu'] ?? '' )
+	: ( $info['hours_thu'] ?? '' );
+$time_sat = function_exists( 'moondental_extract_time_range' )
+	? moondental_extract_time_range( $info['hours_sat'] ?? '' )
+	: ( $info['hours_sat'] ?? '' );
+
+$park_walk  = function_exists( 'md_content' ) ? md_content( 'loc_park_walk',  '🚌 천안종합·고속버스터미널에서 도보 약 5분' ) : '🚌 천안종합·고속버스터미널에서 도보 약 5분';
+$park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '🚆 천안역에서 버스로 약 10분' )            : '🚆 천안역에서 버스로 약 10분';
 ?>
 <section class="md-flocation" aria-label="오시는 길">
 	<div class="md-container">
@@ -79,6 +95,73 @@ $address = function_exists( 'md_content' ) ? md_content( 'flocation_address', $i
 				</span>
 				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
 			</a>
+		</div>
+
+		<!-- 진료시간 + 주차 안내 (2-col) -->
+		<div class="md-info-pair md-flocation__pair">
+
+			<aside class="md-hours">
+				<header class="md-hours__head">
+					<span class="md-hours__badge"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_hours_badge', '🕐 진료시간' ) : '🕐 진료시간' ); ?></span>
+					<h3 class="md-hours__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_hours_title', '진료 가능 시간' ) : '진료 가능 시간' ); ?></h3>
+				</header>
+				<ul class="md-hours__list">
+					<li<?php echo in_array( $today_dow, array(1,2,3,5), true ) ? ' class="is-today"' : ''; ?>>
+						<span class="md-hours__day">평일 <small>(월·화·수·금)</small></span>
+						<span class="md-hours__time"><?php echo esc_html( $time_wd ); ?></span>
+					</li>
+					<li<?php echo $today_dow === 4 ? ' class="is-today"' : ''; ?>>
+						<span class="md-hours__day">목요일</span>
+						<span class="md-hours__time"><?php echo esc_html( $time_thu ); ?></span>
+					</li>
+					<li<?php echo $today_dow === 6 ? ' class="is-today"' : ''; ?>>
+						<span class="md-hours__day">토요일</span>
+						<span class="md-hours__time"><?php echo esc_html( $time_sat ); ?></span>
+					</li>
+					<li class="md-hours__off<?php echo $today_dow === 0 ? ' is-today' : ''; ?>">
+						<span class="md-hours__day">일요일 · 공휴일</span>
+						<span class="md-hours__time">휴진</span>
+					</li>
+				</ul>
+				<p class="md-hours__note">
+					<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_hours_note', '평일 점심시간 없이 진료 · 야간진료 운영' ) : '평일 점심시간 없이 진료 · 야간진료 운영' ); ?>
+				</p>
+			</aside>
+
+			<aside class="md-park md-park--compact">
+				<header class="md-park__head">
+					<span class="md-park__badge"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_badge', '🅿️ 주차 안내' ) : '🅿️ 주차 안내' ); ?></span>
+					<h3 class="md-park__title"><?php echo wp_kses_post( str_replace( '무료', '<strong>무료</strong>', esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_title', '본원 지하 기계식 무료' ) : '본원 지하 기계식 무료' ) ) ); ?></h3>
+					<p class="md-park__lead"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_lead', '방문 시 데스크에 주차권을 제출하시면 등록해드립니다.' ) : '방문 시 데스크에 주차권을 제출하시면 등록해드립니다.' ); ?></p>
+				</header>
+				<ul class="md-park__list">
+					<li>
+						<span class="md-park__num">01</span>
+						<div>
+							<strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_1_title', '본원 지하 기계식 주차장' ) : '본원 지하 기계식 주차장' ); ?></strong>
+							<span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_1_desc', '진료 시간 동안 무료 이용' ) : '진료 시간 동안 무료 이용' ); ?></span>
+						</div>
+					</li>
+					<li>
+						<span class="md-park__num">02</span>
+						<div>
+							<strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_2_title', 'SUV·대형차 — 신부 제5공영주차장' ) : 'SUV·대형차 — 신부 제5공영주차장' ); ?></strong>
+							<span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_2_desc', '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ) : '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ); ?></span>
+						</div>
+					</li>
+				</ul>
+				<?php if ( $park_walk || $park_train ) : ?>
+				<p class="md-park__walk">
+					<?php if ( $park_walk ) : ?>
+						<span><?php echo esc_html( $park_walk ); ?></span>
+					<?php endif; ?>
+					<?php if ( $park_train ) : ?>
+						<span><?php echo esc_html( $park_train ); ?></span>
+					<?php endif; ?>
+				</p>
+				<?php endif; ?>
+			</aside>
+
 		</div>
 	</div>
 </section>
