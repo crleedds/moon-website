@@ -87,18 +87,50 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 					</div>
 
 					<?php
-					$header_cta_url   = function_exists( 'md_content' ) ? md_content( 'header_cta_url',   '/오시는-길/' ) : '/오시는-길/';
-					$header_cta_label = function_exists( 'md_content' ) ? md_content( 'header_cta_label', '오시는 길' ) : '오시는 길';
-					$header_cta_icon  = function_exists( 'md_content' ) ? md_content( 'header_cta_icon',  '📍' ) : '📍';
+					$header_cta_url   = function_exists( 'md_content' ) ? md_content( 'header_cta_url',   '/상담예약/' ) : '/상담예약/';
+					$header_cta_label = function_exists( 'md_content' ) ? md_content( 'header_cta_label', '📅 상담 예약하기' ) : '📅 상담 예약하기';
 					// 사이트 내 상대경로(/...)는 home_url로 절대화, 그 외(https?://...)는 그대로 사용
 					$header_cta_href  = ( $header_cta_url && $header_cta_url[0] === '/' ) ? home_url( $header_cta_url ) : $header_cta_url;
+
+					// 스크롤에 따라 라벨·색이 바뀌는 변형 변수 (라벨 | 배경 | 글자 | 그림자 RGBA)
+					$cta_cycle_default = "📅 상담 예약하기 | #D88062 | #FFFFFF | 216,128,98\n"
+						. "💬 지금 카톡 상담 | #FEE500 | #181600 | 254,229,0\n"
+						. "📞 전화 한 통이면 끝 | #5CB89A | #FFFFFF | 92,184,154\n"
+						. "🦷 첫 진료 무료 상담 | #E37B5C | #FFFFFF | 227,123,92\n"
+						. "✨ 1분만에 예약하기 | #2D8E7F | #FFFFFF | 45,142,127\n"
+						. "🎁 30년 신뢰의 예약 | #9B3D5B | #FFFFFF | 155,61,91";
+					$cta_cycle_raw = function_exists( 'md_content' )
+						? md_content( 'header_cta_cycle', $cta_cycle_default )
+						: $cta_cycle_default;
+
+					$cta_variants = array();
+					foreach ( preg_split( "/\r\n|\r|\n/", trim( (string) $cta_cycle_raw ) ) as $line ) {
+						$line = trim( $line );
+						if ( ! $line || strpos( $line, '#' ) === 0 ) continue;
+						$parts = array_map( 'trim', explode( '|', $line ) );
+						if ( count( $parts ) < 2 ) continue;
+						$cta_variants[] = array(
+							'label'  => $parts[0],
+							'bg'     => $parts[1] ?? '',
+							'fg'     => $parts[2] ?? '#FFFFFF',
+							'shadow' => $parts[3] ?? '',
+						);
+					}
+					$cta_data_attr = $cta_variants ? wp_json_encode( array_values( $cta_variants ) ) : '';
+					$first = $cta_variants[0] ?? array( 'label' => $header_cta_label, 'bg' => '', 'fg' => '', 'shadow' => '' );
+
+					$style_bits = array();
+					if ( ! empty( $first['bg'] ) )     $style_bits[] = '--cta-bg:' . esc_attr( $first['bg'] );
+					if ( ! empty( $first['fg'] ) )     $style_bits[] = '--cta-fg:' . esc_attr( $first['fg'] );
+					if ( ! empty( $first['shadow'] ) ) $style_bits[] = '--cta-shadow:' . esc_attr( $first['shadow'] );
 					?>
 					<div class="md-header__cta">
-						<a class="md-btn md-btn-primary md-btn--sm md-header__cta-btn"
+						<a class="md-btn md-btn-primary md-btn--sm md-header__cta-btn md-header__cta-btn--cycle"
 						   href="<?php echo esc_url( $header_cta_href ); ?>"
-						   data-track="cta-header-location">
-							<?php if ( $header_cta_icon ) : ?><span aria-hidden="true"><?php echo esc_html( $header_cta_icon ); ?></span><?php endif; ?>
-							<?php echo esc_html( $header_cta_label ); ?>
+						   data-track="cta-header-reservation"
+						   <?php if ( $cta_data_attr ) : ?>data-md-cta-cycle="<?php echo esc_attr( $cta_data_attr ); ?>"<?php endif; ?>
+						   <?php if ( $style_bits ) : ?>style="<?php echo esc_attr( implode( '; ', $style_bits ) ); ?>"<?php endif; ?>>
+							<span class="md-header__cta-label" data-md-cta-text><?php echo esc_html( $first['label'] ?: $header_cta_label ); ?></span>
 						</a>
 					</div>
 				</div>

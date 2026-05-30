@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.6.0' );
+define( 'MOONDENTAL_VERSION', '3.7.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -675,8 +675,31 @@ function moondental_default_pages() {
 		array( 'slug' => '심미치료',         'title' => '심미치료',      'template' => 'page-templates/page-service.php',  'order' => 6,  'parent' => '진료항목' ),
 		array( 'slug' => '소식',             'title' => '소식',         'template' => '',                                 'order' => 3,  'parent' => '' ),
 		array( 'slug' => '오시는-길',         'title' => '오시는 길',     'template' => 'page-templates/page-location.php', 'order' => 4,  'parent' => '' ),
+		array( 'slug' => '상담예약',         'title' => '상담 예약',     'template' => 'page-templates/page-reservation.php', 'order' => 5, 'parent' => '' ),
 	);
 }
+
+/**
+ * 헤더 CTA가 가리키는 /상담예약/ 페이지 자동 생성 — 테마 활성화 시 1회.
+ *  이미 있으면 건드리지 않음.
+ */
+function moondental_ensure_reservation_page() {
+	if ( get_page_by_path( '상담예약' ) ) return;
+	wp_insert_post( array(
+		'post_title'    => '상담 예약',
+		'post_name'     => '상담예약',
+		'post_status'   => 'publish',
+		'post_type'     => 'page',
+		'post_content'  => '',
+		'page_template' => 'page-templates/page-reservation.php',
+	) );
+}
+add_action( 'after_switch_theme', 'moondental_ensure_reservation_page' );
+add_action( 'admin_init', function() {
+	if ( get_option( 'moondental_reservation_page_v1' ) === '1' ) return;
+	moondental_ensure_reservation_page();
+	update_option( 'moondental_reservation_page_v1', '1' );
+} );
 
 /**
  * 페이지 일괄 생성. 이미 있는 슬러그는 건드리지 않음.

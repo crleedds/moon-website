@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.6.0
+Version:      3.7.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -357,23 +357,28 @@ button.elementor-button {
   top: 0;
   z-index: 100;
   background-color: var(--color-bg);
-  transition: box-shadow 0.25s var(--ease);
+  /* 평소에도 옅은 그림자로 헤더 영역 명확히 분리 */
+  box-shadow: 0 2px 8px rgba(61, 47, 38, 0.06);
+  transition: box-shadow 0.25s var(--ease), background-color 0.25s var(--ease);
+  backdrop-filter: saturate(1.15);
+  -webkit-backdrop-filter: saturate(1.15);
 }
 .md-site-header.is-scrolled {
-  box-shadow: 0 2px 12px rgba(61, 47, 38, 0.08);
+  box-shadow: 0 6px 20px rgba(61, 47, 38, 0.12);
+  background-color: rgba(255, 252, 248, 0.96);
 }
 
 .md-header {
-  background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  border-bottom: 2px solid var(--color-border);
 }
 .md-header__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  min-height: 76px;
-  padding-block: 12px;
+  min-height: 84px;
+  padding-block: 14px;
 }
 .md-header__brand {
   display: flex;
@@ -5506,38 +5511,62 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
 .md-header__phone {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-weight: 700;
-  font-size: 0.9375rem;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 1rem;
   color: var(--color-primary);
   text-decoration: none;
-  transition: color 0.2s var(--ease);
+  transition: color 0.2s var(--ease), transform 0.2s var(--ease);
 }
-.md-header__phone:hover { color: var(--color-primary-dark); }
-.md-header__phone-icon { font-size: 0.9375rem; }
+.md-header__phone:hover { color: var(--color-primary-dark); transform: translateY(-1px); }
+.md-header__phone-icon { font-size: 1rem; }
 .md-header__hours {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--color-text-sub);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -0.005em;
 }
 
-/* 오시는길 CTA — 잘 보이게 강조 */
+/* CTA — 스크롤 시 라벨·색 자동 변경 (--cta-bg / --cta-fg / --cta-shadow R,G,B) */
 .md-header__cta-btn {
-  background: var(--color-primary);
-  color: #fff;
-  border-color: var(--color-primary);
-  padding: 11px 20px;
+  background: var(--cta-bg, var(--color-primary));
+  color: var(--cta-fg, #fff);
+  border-color: var(--cta-bg, var(--color-primary));
+  padding: 12px 22px;
   font-size: 0.9375rem;
-  font-weight: 700;
-  box-shadow: 0 6px 18px rgba(216, 128, 98, 0.32);
+  font-weight: 800;
+  box-shadow: 0 8px 20px rgba(var(--cta-shadow, 216, 128, 98), 0.36);
   letter-spacing: -0.005em;
+  position: relative;
+  overflow: hidden;
+}
+.md-header__cta-btn--cycle {
+  transition:
+    background-color 0.5s var(--ease),
+    color 0.5s var(--ease),
+    border-color 0.5s var(--ease),
+    box-shadow 0.5s var(--ease),
+    transform 0.25s var(--ease);
 }
 .md-header__cta-btn:hover {
-  background: var(--color-primary-dark);
-  color: #fff;
+  background: var(--cta-bg, var(--color-primary-dark));
+  color: var(--cta-fg, #fff);
+  filter: brightness(0.94);
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(216, 128, 98, 0.42);
+  box-shadow: 0 12px 28px rgba(var(--cta-shadow, 216, 128, 98), 0.48);
+}
+.md-header__cta-label {
+  display: inline-block;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  will-change: opacity, transform;
+}
+.md-header__cta-label.is-changing {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-header__cta-btn--cycle,
+  .md-header__cta-label { transition: none; }
 }
 
 /* 반응형 — 정보 영역 단계별 숨김 */

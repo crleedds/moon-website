@@ -45,6 +45,63 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 
+    // 2b. Header CTA — scroll-cycled label + colors
+    var cta = document.querySelector('.md-header__cta-btn[data-md-cta-cycle]');
+    if (cta) {
+      var ctaVariants = null;
+      try { ctaVariants = JSON.parse(cta.getAttribute('data-md-cta-cycle')); }
+      catch (e) { ctaVariants = null; }
+
+      if (ctaVariants && ctaVariants.length > 1) {
+        var ctaLabel = cta.querySelector('[data-md-cta-text]') || cta;
+        var ctaLastIdx = 0;
+        var ctaTicking = false;
+        var ctaReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        var ctaPickIdx = function () {
+          var docH = document.documentElement.scrollHeight - window.innerHeight;
+          if (docH < 1) return 0;
+          var p = Math.min(1, Math.max(0, window.scrollY / docH));
+          // 마지막 변형도 끝까지 보이도록 length로 나눔
+          var idx = Math.floor(p * ctaVariants.length);
+          if (idx >= ctaVariants.length) idx = ctaVariants.length - 1;
+          return idx;
+        };
+
+        var ctaApply = function (idx) {
+          if (idx === ctaLastIdx) return;
+          ctaLastIdx = idx;
+          var v = ctaVariants[idx];
+          if (!v) return;
+          if (v.bg)     cta.style.setProperty('--cta-bg',     v.bg);
+          if (v.fg)     cta.style.setProperty('--cta-fg',     v.fg);
+          if (v.shadow) cta.style.setProperty('--cta-shadow', v.shadow);
+          if (v.label && ctaLabel) {
+            if (ctaReduced) {
+              ctaLabel.textContent = v.label;
+            } else {
+              ctaLabel.classList.add('is-changing');
+              setTimeout(function () {
+                ctaLabel.textContent = v.label;
+                ctaLabel.classList.remove('is-changing');
+              }, 180);
+            }
+          }
+        };
+
+        var onCtaScroll = function () {
+          if (ctaTicking) return;
+          ctaTicking = true;
+          requestAnimationFrame(function () {
+            ctaApply(ctaPickIdx());
+            ctaTicking = false;
+          });
+        };
+        window.addEventListener('scroll', onCtaScroll, { passive: true });
+        window.addEventListener('resize', onCtaScroll, { passive: true });
+      }
+    }
+
     // scroll-to-top 클릭 — smooth scroll, reduced-motion 사용자에겐 즉시 이동
     if (toTop) {
       toTop.addEventListener('click', function () {
