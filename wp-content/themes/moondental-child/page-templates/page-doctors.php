@@ -93,7 +93,7 @@ $specialties = array(
 				foreach ( $g['members'] as $doc ) :
 					$photo_url   = moondental_doctor_photo_url( $doc['photo'] ?? '' );
 					$anchor      = 'doctor-' . sanitize_title( $doc['name'] );
-					$doctor_link = home_url( '/의료진/' . rawurlencode( $doc['name'] ) . '/' );
+					$doctor_link = home_url( '/의료진/' . moondental_doctor_name_to_slug( $doc['name'] ) . '/' );
 					$bio         = $doc['bio'] ?? array();
 					if ( is_string( $bio ) ) { $bio = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", $bio ) ) ); }
 

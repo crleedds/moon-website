@@ -219,7 +219,7 @@ foreach ( $all_groups as $g ) {
 
 		<div class="md-docsingle-others">
 			<?php foreach ( $others as $other ) :
-				$other_url = home_url( '/의료진/' . rawurlencode( $other['name'] ) . '/' );
+				$other_url = home_url( '/의료진/' . moondental_doctor_name_to_slug( $other['name'] ) . '/' );
 				$other_photo = moondental_doctor_photo_url( $other['photo'] ?? '' );
 				$other_zoom  = isset( $other['photo_zoom'] ) ? (float) $other['photo_zoom'] : 1.0;
 				$other_ty    = isset( $other['photo_ty'] )   ? (float) $other['photo_ty']   : 0.0;
