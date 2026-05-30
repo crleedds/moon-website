@@ -98,9 +98,10 @@ $specialties = array(
 			<?php foreach ( $groups as $g ) :
 				$key = $group_keys[ $g['group'] ];
 				foreach ( $g['members'] as $doc ) :
-					$photo_url = moondental_doctor_photo_url( $doc['photo'] ?? '' );
-					$anchor    = 'doctor-' . sanitize_title( $doc['name'] );
-					$bio       = $doc['bio'] ?? array();
+					$photo_url   = moondental_doctor_photo_url( $doc['photo'] ?? '' );
+					$anchor      = 'doctor-' . sanitize_title( $doc['name'] );
+					$doctor_link = home_url( '/의료진/' . rawurlencode( $doc['name'] ) . '/' );
+					$bio         = $doc['bio'] ?? array();
 					if ( is_string( $bio ) ) { $bio = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", $bio ) ) ); }
 
 					// 사진 머리 크기·위치 통일 — 의료진별 zoom + translateY 적용
@@ -112,7 +113,7 @@ $specialties = array(
 						esc_attr( number_format( $photo_zoom, 2 ) )
 					);
 			?>
-				<article class="md-doccard" data-doc-group="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $anchor ); ?>">
+				<article class="md-doccard md-doccard--linked" data-doc-group="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $anchor ); ?>"><a class="md-doccard__link-wrap" href="<?php echo esc_url( $doctor_link ); ?>" aria-label="<?php echo esc_attr( $doc['name'] . ' ' . $doc['role'] . ' 상세 페이지' ); ?>"></a>
 					<div class="md-doccard__photo">
 						<?php if ( $photo_url ) : ?>
 							<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $doc['name'] ); ?>" loading="lazy" style="<?php echo esc_attr( $photo_style ); ?>">
@@ -129,19 +130,7 @@ $specialties = array(
 							</p>
 						<?php endif; ?>
 
-						<?php if ( ! empty( $bio ) ) : ?>
-							<details class="md-doccard__bio">
-								<summary>
-									<span>학력 · 경력 보기</span>
-									<span class="md-doccard__chev" aria-hidden="true">+</span>
-								</summary>
-								<ul>
-									<?php foreach ( $bio as $line ) : ?>
-										<li><?php echo esc_html( $line ); ?></li>
-									<?php endforeach; ?>
-								</ul>
-							</details>
-						<?php endif; ?>
+						<span class="md-doccard__view">상세 프로필 보기 <span aria-hidden="true">→</span></span>
 					</div>
 				</article>
 			<?php endforeach; endforeach; ?>

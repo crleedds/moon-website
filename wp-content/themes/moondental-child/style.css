@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.0.0
+Version:      3.1.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -3642,6 +3642,360 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
 .md-pricing-hero__crumbs,
 .md-priceX-hero__crumbs {
   display: none !important;
+}
+
+/* =============================================================
+   의료진 카드 — 상세 페이지로 링크 (.md-doccard--linked)
+   ============================================================= */
+.md-doccard--linked {
+  position: relative;
+  cursor: pointer;
+}
+.md-doccard__link-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  text-decoration: none;
+  /* 카드 전체 클릭 — 시각 표시 없음 */
+}
+.md-doccard__view {
+  display: block;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--color-border);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  letter-spacing: 0.02em;
+  transition: color 0.2s var(--ease), gap 0.2s var(--ease);
+}
+.md-doccard--linked:hover .md-doccard__view {
+  color: var(--color-primary);
+}
+
+/* =============================================================
+   의료진 상세 페이지 (page-doctor-single.php)
+   ============================================================= */
+
+/* ── Hero ── */
+.md-docsingle-hero {
+  position: relative;
+  padding: clamp(56px, 8vw, 96px) 0 clamp(32px, 4vw, 48px);
+  background:
+    radial-gradient(circle at 88% 8%, rgba(216, 128, 98, 0.12), transparent 50%),
+    radial-gradient(circle at 12% 92%, rgba(143, 174, 146, 0.10), transparent 50%),
+    var(--color-bg);
+  text-align: center;
+}
+.md-docsingle-hero__eyebrow {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--color-primary-dark);
+  background: var(--color-surface);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 16px;
+}
+.md-docsingle-hero__title {
+  font-size: clamp(2rem, 4.8vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 16px;
+  color: var(--color-text);
+}
+.md-docsingle-hero__title small {
+  display: block;
+  font-size: 0.4em;
+  font-weight: 600;
+  color: var(--color-text-sub);
+  letter-spacing: -0.01em;
+  margin-top: 8px;
+  letter-spacing: 0.02em;
+}
+.md-docsingle-hero__intro {
+  font-size: clamp(0.9375rem, 1.3vw, 1.0625rem);
+  color: var(--color-text-sub);
+  line-height: 1.85;
+  margin: 0 auto 28px;
+  max-width: 640px;
+  font-style: italic;
+  word-break: keep-all;
+}
+
+/* ── Doctor card (photo + credentials) ── */
+.md-docsingle-card {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) 1fr;
+  gap: clamp(24px, 3.5vw, 56px);
+  align-items: center;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: clamp(28px, 3.5vw, 48px);
+  max-width: 1040px;
+  margin: 0 auto;
+  box-shadow: var(--shadow-soft);
+}
+@media (max-width: 768px) {
+  .md-docsingle-card {
+    grid-template-columns: 1fr;
+    text-align: center;
+    justify-items: center;
+  }
+}
+.md-docsingle-card__photo {
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.md-docsingle-card__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transform-origin: center top;
+  display: block;
+}
+.md-docsingle-card__initial {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+}
+.md-docsingle-card__role {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--color-primary-dark);
+  background: var(--color-surface);
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 12px;
+}
+.md-docsingle-card__name {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  margin: 0 0 18px;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+.md-docsingle-card__creds {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.md-docsingle-card__creds li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-small);
+  color: var(--color-text);
+  line-height: 1.55;
+  word-break: keep-all;
+}
+.md-docsingle-card__creds li span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-success);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 800;
+}
+
+/* ── Q&A ── */
+.md-docsingle-qa {
+  display: grid;
+  gap: clamp(16px, 2.4vw, 24px);
+}
+.md-docsingle-qa__item {
+  display: grid;
+  grid-template-columns: 1fr;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  padding: clamp(20px, 2.6vw, 28px);
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.md-docsingle-qa__item.is-alt {
+  border-left-color: var(--color-accent);
+}
+.md-docsingle-qa__item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+.md-docsingle-qa__q {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--color-border);
+}
+.md-docsingle-qa__no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-pill);
+}
+.md-docsingle-qa__item.is-alt .md-docsingle-qa__no {
+  background: var(--color-accent);
+}
+.md-docsingle-qa__q h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+.md-docsingle-qa__a p {
+  margin: 0;
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  line-height: 1.85;
+  word-break: keep-all;
+}
+
+/* ── Education / Interests 2-col ── */
+.md-docsingle-edu {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(20px, 3vw, 32px);
+}
+@media (max-width: 768px) {
+  .md-docsingle-edu { grid-template-columns: 1fr; }
+}
+.md-docsingle-edu__col {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(22px, 2.8vw, 32px);
+}
+.md-docsingle-edu__col-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0 0 16px;
+  letter-spacing: -0.01em;
+}
+.md-docsingle-edu__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.md-docsingle-edu__list li {
+  position: relative;
+  padding: 8px 0 8px 16px;
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  line-height: 1.65;
+  border-bottom: 1px dashed var(--color-border);
+  word-break: keep-all;
+}
+.md-docsingle-edu__list li:last-child { border-bottom: none; }
+.md-docsingle-edu__list li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 16px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.md-docsingle-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.md-docsingle-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  letter-spacing: -0.005em;
+}
+
+/* ── 다른 의료진 ── */
+.md-docsingle-others {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: clamp(12px, 1.8vw, 20px);
+  max-width: 1040px;
+  margin: 0 auto;
+}
+.md-docsingle-other {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 12px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.25s var(--ease);
+}
+.md-docsingle-other:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-3px);
+  color: inherit;
+}
+.md-docsingle-other__photo {
+  width: 88px;
+  height: 110px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #ffffff;
+  margin-bottom: 10px;
+}
+.md-docsingle-other__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.md-docsingle-other__name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 2px;
+  letter-spacing: -0.015em;
+}
+.md-docsingle-other__role {
+  font-size: 0.6875rem;
+  color: var(--color-text-mute);
+  letter-spacing: -0.005em;
+  word-break: keep-all;
 }
 
 /* =============================================================

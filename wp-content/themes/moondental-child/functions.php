@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.0.0' );
+define( 'MOONDENTAL_VERSION', '3.1.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -819,6 +819,77 @@ function moondental_template_router( $template ) {
 	return $template;
 }
 add_filter( 'template_include', 'moondental_template_router', 99 );
+
+
+/* ============================================================
+ * 6b. 의료진 상세 페이지 — /의료진/{slug}/ 자동 라우팅
+ * ========================================================== */
+function moondental_doctor_rewrite_rules() {
+	/* /의료진/{slug}/ → query var doctor_slug.
+	 * 단, /의료진/ 루트 자체는 기존 페이지(/의료진/ 자체)로 라우팅되도록
+	 *  슬러그가 비어있으면 매치 안 함.
+	 */
+	add_rewrite_rule( '^의료진/([^/]+)/?$', 'index.php?doctor_slug=$matches[1]', 'top' );
+	add_rewrite_rule( '^doctors/([^/]+)/?$', 'index.php?doctor_slug=$matches[1]', 'top' );
+}
+add_action( 'init', 'moondental_doctor_rewrite_rules' );
+
+function moondental_doctor_query_vars( $vars ) {
+	$vars[] = 'doctor_slug';
+	return $vars;
+}
+add_filter( 'query_vars', 'moondental_doctor_query_vars' );
+
+/* 의료진 상세 페이지 라우팅 — doctor_slug query var가 있으면 단일 템플릿으로 */
+function moondental_doctor_single_router( $template ) {
+	$doctor_slug = get_query_var( 'doctor_slug' );
+	if ( ! $doctor_slug ) return $template;
+	$custom = locate_template( 'page-templates/page-doctor-single.php' );
+	if ( $custom ) {
+		// 404 방지 — 강제로 200 응답
+		status_header( 200 );
+		global $wp_query;
+		$wp_query->is_404 = false;
+		return $custom;
+	}
+	return $template;
+}
+add_filter( 'template_include', 'moondental_doctor_single_router', 98 );
+
+/* 테마 활성화 시 rewrite rules flush — Customizer 페이지 / 새 페이지 추가 시 자동 적용 */
+function moondental_flush_rewrites_once() {
+	if ( get_option( 'moondental_rewrite_flushed_v3' ) !== '1' ) {
+		moondental_doctor_rewrite_rules();
+		flush_rewrite_rules( false );
+		update_option( 'moondental_rewrite_flushed_v3', '1' );
+	}
+}
+add_action( 'init', 'moondental_flush_rewrites_once', 99 );
+
+/**
+ * 의료진 이름 → URL 슬러그 (sanitize_title은 한글을 깨므로 직접 매핑).
+ */
+function moondental_doctor_name_to_slug( $name ) {
+	// 이름 자체를 URL slug로 사용 (한글 그대로). rawurlencode로 안전 처리.
+	return $name;
+}
+
+/**
+ * URL 슬러그(또는 sanitize_title 결과) → 의료진 데이터 반환.
+ */
+function moondental_get_doctor_by_slug( $slug ) {
+	$slug = urldecode( $slug );
+	$groups = function_exists( 'moondental_get_team_with_customizer' )
+		? moondental_get_team_with_customizer()
+		: moondental_get_team();
+	foreach ( $groups as $group ) {
+		foreach ( $group['members'] as $m ) {
+			if ( $m['name'] === $slug ) return $m;
+			if ( sanitize_title( $m['name'] ) === sanitize_title( $slug ) ) return $m;
+		}
+	}
+	return null;
+}
 
 
 /* ============================================================

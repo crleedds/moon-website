@@ -932,6 +932,80 @@ function moondental_doctor_meta_content_fields() {
 }
 
 /**
+ * 의료진 상세 페이지 — 공통 라벨 + 9명 개별 콘텐츠.
+ */
+function moondental_doctor_single_content_fields() {
+	$doctors = array(
+		'munes' => '문은수',
+		'leesj' => '이승주',
+		'leesu' => '이수연',
+		'kwon'  => '권혜진',
+		'munji' => '문지현',
+		'leech' => '이창률',
+		'leeyi' => '이영일',
+		'kimsi' => '김세일',
+		'jeong' => '정석형',
+	);
+
+	$groups = array(
+
+		/* ─── 공통 라벨·CTA ─── */
+		'doc_single_common' => array(
+			'title'  => '의료진 상세 — 공통 라벨',
+			'fields' => array(
+				'doc_single_intro_eyebrow' => array( 'default' => 'DOCTOR PROFILE', 'label' => 'Hero — eyebrow', 'type' => 'text' ),
+				'doc_single_qa_eyebrow'    => array( 'default' => '원장 인터뷰',      'label' => 'Q&A 섹션 — eyebrow', 'type' => 'text' ),
+				'doc_single_qa_title'      => array( 'default' => '원장님께 직접 들어봅니다', 'label' => 'Q&A 섹션 — 제목', 'type' => 'text' ),
+				'doc_single_qa_lead'       => array( 'default' => '환자분이 가장 궁금해하시는 질문에 원장님이 직접 답변드립니다.', 'label' => 'Q&A 섹션 — 설명', 'type' => 'textarea' ),
+
+				'doc_single_edu_eyebrow' => array( 'default' => 'Education & Career', 'label' => '학력/경력 섹션 — eyebrow', 'type' => 'text' ),
+				'doc_single_edu_title'   => array( 'default' => '학력 · 경력',         'label' => '학력/경력 섹션 — 제목', 'type' => 'text' ),
+
+				'doc_single_others_title' => array( 'default' => '다른 의료진',  'label' => '다른 의료진 섹션 — 제목', 'type' => 'text' ),
+
+				'doc_single_cta_chip'  => array( 'default' => '상담 예약',                        'label' => '하단 CTA — chip', 'type' => 'text' ),
+				'doc_single_cta_title' => array( 'default' => '원장님께 진료받고 싶으시면',         'label' => '하단 CTA — 제목 (원장님 이름은 앞에 자동)', 'type' => 'text' ),
+				'doc_single_cta_lead'  => array( 'default' => '원하시는 일정에 맞춰 진료 예약을 도와드립니다.', 'label' => '하단 CTA — 설명', 'type' => 'textarea' ),
+				'doc_single_cta_btn1'  => array( 'default' => '📅 상담 예약하기',                  'label' => '하단 CTA — 버튼 1', 'type' => 'text' ),
+
+				'doc_single_back_label' => array( 'default' => '← 의료진 전체 보기', 'label' => '의료진 전체 보기 링크 라벨', 'type' => 'text' ),
+			),
+		),
+	);
+
+	/* 9명 개별 — intro / 자격사항 4개 / Q&A 텍스트영역 */
+	foreach ( $doctors as $key => $name ) {
+		$groups[ 'doc_single_' . $key ] = array(
+			'title'  => '의료진 상세 — ' . $name,
+			'fields' => array(
+				"doc_{$key}_intro" => array(
+					'default' => '',
+					'label'   => $name . ' — Hero 인트로 (2~3 문장, 빈칸 시 자동 생성)',
+					'type'    => 'textarea',
+				),
+				"doc_{$key}_credentials" => array(
+					'default' => '',
+					'label'   => $name . ' — 자격 체크리스트 (한 줄당 1개, 4개 권장, 빈칸 시 약력 앞부분 자동 사용)',
+					'type'    => 'textarea',
+				),
+				"doc_{$key}_qa" => array(
+					'default' => '',
+					'label'   => $name . ' — Q&A (한 줄당 1개, "질문 | 답변" 파이프 구분)',
+					'type'    => 'textarea',
+				),
+				"doc_{$key}_interests" => array(
+					'default' => '',
+					'label'   => $name . ' — 관심 분야 (한 줄당 1개)',
+					'type'    => 'textarea',
+				),
+			),
+		);
+	}
+
+	return $groups;
+}
+
+/**
  * 역사 타임라인 콘텐츠 필드 (단일 텍스트영역, 한 줄당 1 항목).
  *  형식: "연도 | 월 | 제목 | 설명 | 사진파일명(선택)"
  */
@@ -1175,6 +1249,20 @@ function moondental_register_doctor_meta_content_customizer( $wp_customize ) {
 	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_doctor_meta_content_fields(), 'md_section_doc_meta_' );
 }
 add_action( 'customize_register', 'moondental_register_doctor_meta_content_customizer', 39 );
+
+/**
+ * 의료진 상세 페이지 콘텐츠 등록.
+ */
+function moondental_register_doctor_single_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_doctor_single_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '의료진 상세 페이지 (9명)',
+		'description' => '/의료진/{이름}/ 개별 의료진 상세 페이지의 텍스트를 편집합니다. 모든 필드를 비우면 적절한 기본값으로 자동 표시.',
+		'priority'    => 41,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_doctor_single_content_fields(), 'md_section_doc_single_' );
+}
+add_action( 'customize_register', 'moondental_register_doctor_single_content_customizer', 41 );
 
 /**
  * 역사 타임라인 콘텐츠 등록.
