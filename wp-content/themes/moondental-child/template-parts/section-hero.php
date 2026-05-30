@@ -33,7 +33,7 @@ $hero_image_id = get_theme_mod( 'moondental_hero_image', 0 );
 				<p class="md-hero__lead"><?php echo nl2br( esc_html( $lead ) ); ?></p>
 
 				<div class="md-btn-group">
-					<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-hero-reservation">
+					<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>" data-track="cta-hero-reservation">
 						📅 상담 예약하기
 					</a>
 					<?php if ( ! empty( $info['kakao_url'] ) ) : ?>

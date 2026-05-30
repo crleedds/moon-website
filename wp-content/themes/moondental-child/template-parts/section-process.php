@@ -41,7 +41,7 @@ for ( $i = 1; $i <= 6; $i++ ) {
 		</ol>
 
 		<div style="text-align:center; margin-top: clamp(28px, 3.5vw, 40px);">
-			<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-process-reservation">
+			<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>" data-track="cta-process-reservation">
 				<?php echo esc_html( md_content( 'process_cta', '📅 첫 단계 시작하기' ) ); ?>
 			</a>
 		</div>

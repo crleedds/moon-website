@@ -108,7 +108,7 @@ foreach ( $all_groups as $g ) {
 		<?php endif; ?>
 
 		<div class="md-btn-group">
-			<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-docsingle-hero-reservation">
+			<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>" data-track="cta-docsingle-hero-reservation">
 				📅 상담 예약하기
 			</a>
 			<a class="md-btn md-btn-secondary md-btn--lg" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-docsingle-hero-call">
@@ -262,7 +262,7 @@ foreach ( $all_groups as $g ) {
 				<?php echo nl2br( esc_html( md_content( 'doc_single_cta_lead', '원하시는 일정에 맞춰 진료 예약을 도와드립니다.' ) ) ); ?>
 			</p>
 			<div class="md-btn-group" style="justify-content:center; display:flex;">
-				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-docsingle-banner-reservation">
+				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>" data-track="cta-docsingle-banner-reservation">
 					<?php echo esc_html( md_content( 'doc_single_cta_btn1', '📅 상담 예약하기' ) ); ?>
 				</a>
 				<a class="md-btn md-btn-ghost md-btn--lg" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-docsingle-banner-call">

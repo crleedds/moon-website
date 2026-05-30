@@ -157,7 +157,7 @@ if ( function_exists( 'moondental_service_ideal_candidates' ) ) {
 				<?php endforeach; ?>
 			</ul>
 			<div class="md-ideal__cta">
-				<a class="md-btn md-btn-primary" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>">📅 상담 예약하기</a>
+				<a class="md-btn md-btn-primary" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>">📅 상담 예약하기</a>
 				<a class="md-btn md-btn-secondary" href="tel:<?php echo esc_attr( preg_replace('/[^0-9]/', '', moondental_get_info('phone')) ); ?>">📞 <?php echo esc_html( moondental_get_info('phone') ); ?></a>
 			</div>
 		</div>

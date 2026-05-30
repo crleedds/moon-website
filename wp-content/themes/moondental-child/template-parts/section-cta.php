@@ -18,7 +18,7 @@ $info = moondental_get_info();
 				<?php echo nl2br( esc_html( md_content( 'cta_lead', "환자분의 상황을 먼저 듣고, 꼭 필요한 치료만 권합니다.\n지금 상담을 신청하시면 진료시간 내 빠르게 연락드릴게요." ) ) ); ?>
 			</p>
 			<div class="md-btn-group" style="justify-content:center; display:flex;">
-				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-banner-reservation">
+				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>" data-track="cta-banner-reservation">
 					<?php echo esc_html( md_content( 'cta_btn1', '📅 상담 예약하기' ) ); ?>
 				</a>
 				<a class="md-btn md-btn-secondary md-btn--lg" href="tel:<?php echo esc_attr( $info['phone_link'] ?: preg_replace('/[^0-9]/', '', $info['phone']) ); ?>" data-track="cta-banner-call">

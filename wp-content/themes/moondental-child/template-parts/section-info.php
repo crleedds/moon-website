@@ -72,7 +72,7 @@ $info = moondental_get_info();
 						<a class="md-btn md-btn-secondary md-btn--sm" href="<?php echo esc_url( $place_url ); ?>" target="_blank" rel="noopener" data-track="cta-info-naver-map">
 							<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'info_block_location_btn1', '🟢 네이버 플레이스' ) : '🟢 네이버 플레이스' ); ?>
 						</a>
-						<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>">
+						<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>">
 							<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'info_block_location_btn2', '지도·교통 자세히 →' ) : '지도·교통 자세히 →' ); ?>
 						</a>
 					</div>
@@ -82,7 +82,7 @@ $info = moondental_get_info();
 					</p>
 				<?php endif; ?>
 				<p class="md-info-block__sub" style="margin-top:12px;">
-					<?php echo nl2br( wp_kses_post( function_exists( 'md_content' ) ? md_content( 'info_block_location_sub', '주차·대중교통 안내는 <a href="' . esc_url( home_url( '/상담예약/' ) ) . '">예약·상담 페이지</a>에서 확인하실 수 있습니다.' ) : '주차·대중교통 안내는 <a href="' . esc_url( home_url( '/상담예약/' ) ) . '">예약·상담 페이지</a>에서 확인하실 수 있습니다.' ) ); ?>
+					<?php echo nl2br( wp_kses_post( function_exists( 'md_content' ) ? md_content( 'info_block_location_sub', '주차·대중교통 안내는 <a href="' . esc_url( home_url( '/오시는-길/' ) ) . '">예약·상담 페이지</a>에서 확인하실 수 있습니다.' ) : '주차·대중교통 안내는 <a href="' . esc_url( home_url( '/오시는-길/' ) ) . '">예약·상담 페이지</a>에서 확인하실 수 있습니다.' ) ); ?>
 				</p>
 			</div>
 

@@ -55,14 +55,7 @@ $specialties = array(
 			<li><strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_2_value', '3개층' ) : '3개층' ); ?></strong><span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_2_label', '9F · 10F · 11F' ) : '9F · 10F · 11F' ); ?></span></li>
 			<li><strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_3_value', '30년' ) : '30년' ); ?></strong><span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_3_label', '1995년 개원' ) : '1995년 개원' ); ?></span></li>
 		</ul>
-		<div class="md-btn-group">
-			<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-docs-hero-reservation">
-				📅 상담 예약하기
-			</a>
-			<a class="md-btn md-btn-secondary md-btn--lg" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-docs-hero-call">
-				📞 <?php echo esc_html( $info['phone'] ); ?>
-			</a>
-		</div>
+<?php /* Hero CTA 버튼 제거 (요청: 의료진 페이지에서 상담예약/전화 버튼 없앰) */ ?>
 	</div>
 </section>
 
@@ -175,7 +168,7 @@ $specialties = array(
 				<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_cta_lead', '부담 없이 상담받으세요. 환자분께 맞는 의료진을 안내드립니다.' ) : '부담 없이 상담받으세요. 환자분께 맞는 의료진을 안내드립니다.' ) ); ?>
 			</p>
 			<div class="md-btn-group" style="justify-content:center; display:flex;">
-				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>" data-track="cta-docs-banner-reservation">
+				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>" data-track="cta-docs-banner-reservation">
 					📅 상담 예약하기
 				</a>
 				<a class="md-btn md-btn-ghost md-btn--lg" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-docs-banner-call">
