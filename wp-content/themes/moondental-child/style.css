@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.5.0
+Version:      3.6.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -5687,10 +5687,12 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
   margin: 0 0 12px;
 }
 .md-flocation__addr {
-  font-size: var(--fs-small);
-  color: var(--color-text-sub);
+  font-size: clamp(1rem, 1.4vw, 1.1875rem);
+  font-weight: 500;
+  color: var(--color-text);
   margin: 0;
   word-break: keep-all;
+  line-height: 1.55;
 }
 .md-flocation__addr-link,
 .md-addr-link,
@@ -5714,6 +5716,23 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
   margin-bottom: clamp(18px, 2.2vw, 24px);
   aspect-ratio: 21 / 9;
   max-height: 500px;
+}
+/* iframe 임베드 (구글·카카오·NCP) */
+.md-flocation__map--embed {
+  aspect-ratio: 21 / 9;
+  max-height: 500px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+.md-flocation__map--embed iframe,
+.md-flocation__map--embed > div,
+.md-flocation__map--embed > div > iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: 0;
+  display: block;
 }
 @media (max-width: 768px) {
   .md-flocation__map { aspect-ratio: 16 / 11; }

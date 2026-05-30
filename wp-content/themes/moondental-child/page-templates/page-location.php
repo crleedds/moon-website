@@ -156,7 +156,20 @@ $off_text = $info['hours_off'] ?: '휴진';
 						<span class="md-park__num">02</span>
 						<div>
 							<strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_2_title', 'SUV·대형차 — 신부 제5공영주차장' ) : 'SUV·대형차 — 신부 제5공영주차장' ); ?></strong>
-							<span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_2_desc', '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ) : '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ); ?></span>
+							<?php
+							$park2_desc     = function_exists( 'md_content' ) ? md_content( 'loc_park_2_desc', '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ) : '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록';
+							$park2_addr     = function_exists( 'md_content' ) ? md_content( 'loc_park_2_addr', '동남구 먹거리1길 10' ) : '동남구 먹거리1길 10';
+							$park2_addr_url = function_exists( 'md_content' ) ? md_content( 'loc_park_2_addr_url', 'https://map.naver.com/p/search/%EC%8B%A0%EB%B6%80%20%EC%A0%9C5%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5' ) : '';
+							$park2_html     = esc_html( $park2_desc );
+							if ( $park2_addr && $park2_addr_url && strpos( $park2_desc, $park2_addr ) !== false ) {
+								$park2_html = str_replace(
+									esc_html( $park2_addr ),
+									'<a href="' . esc_url( $park2_addr_url ) . '" target="_blank" rel="noopener" class="md-addr-link" data-track="cta-park-5gongyoung">' . esc_html( $park2_addr ) . '</a>',
+									$park2_html
+								);
+							}
+							?>
+							<span><?php echo wp_kses_post( $park2_html ); ?></span>
 						</div>
 					</li>
 				</ul>

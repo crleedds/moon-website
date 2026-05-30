@@ -59,7 +59,7 @@ if ( is_page() ) {
 								<?php echo esc_html( $info['address'] ); ?>
 							</a>
 						<?php else : ?>
-							<?php echo esc_html( $info['address'] ); ?>
+							<?php echo md_address_link( $info['address'] ); ?>
 						<?php endif; ?>
 					</p>
 				<?php endif; ?>

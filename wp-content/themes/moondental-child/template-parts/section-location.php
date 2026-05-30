@@ -15,11 +15,20 @@ $map_google = 'https://www.google.com/maps/search/?api=1&query=' . $q_full;
 $map_naver  = $naver_map ?: 'https://map.naver.com/p/search/' . $q_short;
 $map_kakao  = 'https://map.kakao.com/?q=' . $q_short;
 
-$map_image = '';
-foreach ( array( 'naver-map.png', 'naver-map.jpg', 'naver-map.jpeg', 'naver-map.webp' ) as $f ) {
-	if ( file_exists( MOONDENTAL_DIR . '/assets/images/map/' . $f ) ) {
-		$map_image = MOONDENTAL_URI . '/assets/images/map/' . $f;
-		break;
+// 지도 소스 우선순위: 임베드 HTML > Customizer 업로드 이미지 > 로컬 assets 스크린샷
+$map_embed_html = trim( (string) get_theme_mod( 'moondental_flocation_map_embed', '' ) );
+$map_image      = '';
+$map_image_id   = (int) get_theme_mod( 'moondental_flocation_map_image', 0 );
+if ( $map_image_id ) {
+	$src = wp_get_attachment_image_url( $map_image_id, 'full' );
+	if ( $src ) { $map_image = $src; }
+}
+if ( ! $map_image ) {
+	foreach ( array( 'naver-map.png', 'naver-map.jpg', 'naver-map.jpeg', 'naver-map.webp' ) as $f ) {
+		if ( file_exists( MOONDENTAL_DIR . '/assets/images/map/' . $f ) ) {
+			$map_image = MOONDENTAL_URI . '/assets/images/map/' . $f;
+			break;
+		}
 	}
 }
 
@@ -63,16 +72,36 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 			<?php endif; ?>
 		</header>
 
-		<a class="md-locmap md-flocation__map<?php echo $map_image ? ' md-locmap--has-image' : ''; ?>"
-		   href="<?php echo esc_url( $map_naver ); ?>"
-		   target="_blank" rel="noopener"
-		   data-track="cta-flocation-mainmap"
-		   aria-label="네이버 지도에서 위치 보기"
-		   <?php echo $map_image ? 'style="background-image:url(' . esc_url( $map_image ) . ');"' : ''; ?>>
-			<?php if ( ! $map_image ) : ?>
-				<div class="md-locmap__pattern" aria-hidden="true"></div>
-			<?php endif; ?>
-		</a>
+		<?php if ( $map_embed_html ) : ?>
+			<div class="md-flocation__map md-flocation__map--embed">
+				<?php
+				echo wp_kses(
+					$map_embed_html,
+					array(
+						'iframe' => array(
+							'src'             => true, 'width' => true, 'height' => true, 'frameborder' => true,
+							'style'           => true, 'allow' => true, 'allowfullscreen' => true,
+							'loading'         => true, 'referrerpolicy' => true, 'title' => true,
+							'sandbox'         => true,
+						),
+						'div'    => array( 'class' => true, 'id' => true, 'style' => true ),
+						'script' => array( 'src' => true, 'async' => true, 'defer' => true, 'type' => true ),
+					)
+				);
+				?>
+			</div>
+		<?php else : ?>
+			<a class="md-locmap md-flocation__map<?php echo $map_image ? ' md-locmap--has-image' : ''; ?>"
+			   href="<?php echo esc_url( $map_naver ); ?>"
+			   target="_blank" rel="noopener"
+			   data-track="cta-flocation-mainmap"
+			   aria-label="네이버 지도에서 위치 보기"
+			   <?php echo $map_image ? 'style="background-image:url(' . esc_url( $map_image ) . ');"' : ''; ?>>
+				<?php if ( ! $map_image ) : ?>
+					<div class="md-locmap__pattern" aria-hidden="true"></div>
+				<?php endif; ?>
+			</a>
+		<?php endif; ?>
 
 		<div class="md-mapbtn-grid md-flocation__btns">
 			<a class="md-mapbtn md-mapbtn--naver" href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener" data-track="cta-flocation-naver">
@@ -147,7 +176,20 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 						<span class="md-park__num">02</span>
 						<div>
 							<strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_2_title', 'SUV·대형차 — 신부 제5공영주차장' ) : 'SUV·대형차 — 신부 제5공영주차장' ); ?></strong>
-							<span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_2_desc', '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ) : '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ); ?></span>
+							<?php
+							$park2_desc     = function_exists( 'md_content' ) ? md_content( 'loc_park_2_desc', '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ) : '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록';
+							$park2_addr     = function_exists( 'md_content' ) ? md_content( 'loc_park_2_addr', '동남구 먹거리1길 10' ) : '동남구 먹거리1길 10';
+							$park2_addr_url = function_exists( 'md_content' ) ? md_content( 'loc_park_2_addr_url', 'https://map.naver.com/p/search/%EC%8B%A0%EB%B6%80%20%EC%A0%9C5%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5' ) : '';
+							$park2_html     = esc_html( $park2_desc );
+							if ( $park2_addr && $park2_addr_url && strpos( $park2_desc, $park2_addr ) !== false ) {
+								$park2_html = str_replace(
+									esc_html( $park2_addr ),
+									'<a href="' . esc_url( $park2_addr_url ) . '" target="_blank" rel="noopener" class="md-addr-link" data-track="cta-park-5gongyoung">' . esc_html( $park2_addr ) . '</a>',
+									$park2_html
+								);
+							}
+							?>
+							<span><?php echo wp_kses_post( $park2_html ); ?></span>
 						</div>
 					</li>
 				</ul>

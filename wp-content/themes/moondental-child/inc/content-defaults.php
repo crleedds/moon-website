@@ -1161,9 +1161,9 @@ function moondental_default_privacy_content() {
 <table>
 <tbody>
 <tr><td><strong>개인정보 보호책임자</strong></td><td><?php echo esc_html( $rep ); ?> (대표 병원장 · 한아의료재단 이사장)</td></tr>
-<tr><td><strong>연락처</strong></td><td><?php echo esc_html( $phone ); ?></td></tr>
+<tr><td><strong>연락처</strong></td><td><?php echo md_phone_link( $phone ); ?></td></tr>
 <tr><td><strong>이메일</strong></td><td><?php echo esc_html( $email ); ?></td></tr>
-<tr><td><strong>주소</strong></td><td><?php echo esc_html( $addr ); ?></td></tr>
+<tr><td><strong>주소</strong></td><td><?php echo md_address_link( $addr ); ?></td></tr>
 </tbody>
 </table>
 

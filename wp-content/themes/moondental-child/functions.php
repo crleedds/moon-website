@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.5.0' );
+define( 'MOONDENTAL_VERSION', '3.6.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -461,6 +461,35 @@ function moondental_customize_register( $wp_customize ) {
 		'section'   => 'moondental_section_home_hero',
 		'mime_type' => 'image',
 	) ) );
+
+	/* ── 모든 페이지 — 오시는 길 섹션 (푸터 위) — 지도 이미지 / iframe 임베드 ───── */
+	$wp_customize->add_section( 'moondental_section_flocation_map', array(
+		'title'       => '오시는 길 — 지도 이미지/임베드',
+		'panel'       => 'moondental_panel',
+		'description' => '모든 페이지 푸터 위에 표시되는 지도. 우선순위: ①임베드 HTML > ②업로드 이미지 > ③/assets/images/map/naver-map.*. 네이버 지도는 보안상 iframe 임베드 불가 — 옵션 안내는 각 필드 설명 참고.',
+	) );
+
+	$wp_customize->add_setting( 'moondental_flocation_map_image', array(
+		'default'           => 0,
+		'sanitize_callback' => 'absint',
+	) );
+	$wp_customize->add_control( new WP_Customize_Media_Control( $wp_customize, 'moondental_flocation_map_image', array(
+		'label'       => '① 지도 이미지 업로드 (가장 쉬움)',
+		'description' => '네이버 지도에서 화면 캡처한 후 여기에 업로드하세요. 가로/세로 비율 21:9 권장. 비워두면 /assets/images/map/naver-map.png(jpg/webp) 파일로 자동 fallback.',
+		'section'     => 'moondental_section_flocation_map',
+		'mime_type'   => 'image',
+	) ) );
+
+	$wp_customize->add_setting( 'moondental_flocation_map_embed', array(
+		'default'           => '',
+		'sanitize_callback' => 'wp_kses_post',
+	) );
+	$wp_customize->add_control( 'moondental_flocation_map_embed', array(
+		'label'       => '② 지도 임베드 HTML (실시간 — 선택)',
+		'description' => "비우면 위 이미지 사용. 옵션:\n• 구글 지도 — maps.google.com 에서 검색 → '공유' → '지도 임베드' → iframe 코드 복사·붙여넣기 (키 불필요)\n• 카카오 지도 — map.kakao.com 에서 검색 → '공유' → '지도 임베드'\n• 네이버 클라우드 플랫폼 Maps API — Client ID 발급 후 JS 코드 사용 (무료 60,000건/일)\n네이버 지도 자체는 보안상 iframe 임베드를 차단합니다.",
+		'section'     => 'moondental_section_flocation_map',
+		'type'        => 'textarea',
+	) );
 
 	/* ── Home Doctor section content ───────────────────────────── */
 	$doctor_fields = array(
