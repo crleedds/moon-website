@@ -156,13 +156,24 @@ $off_text = $info['hours_off'] ?: '휴진';
 						<span class="md-park__num">02</span>
 						<div>
 							<strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_2_title', 'SUV·대형차 — 신부 제5공영주차장' ) : 'SUV·대형차 — 신부 제5공영주차장' ); ?></strong>
-							<span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_2_desc', '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 주차권 제출 → 무료 등록' ) : '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 주차권 제출 → 무료 등록' ); ?></span>
+							<span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_2_desc', '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ) : '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ); ?></span>
 						</div>
 					</li>
 				</ul>
+				<?php
+				$park_walk  = function_exists( 'md_content' ) ? md_content( 'loc_park_walk',  '🚌 천안종합·고속버스터미널에서 도보 약 5분' ) : '🚌 천안종합·고속버스터미널에서 도보 약 5분';
+				$park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '🚆 천안역에서 버스로 약 10분' )            : '🚆 천안역에서 버스로 약 10분';
+				if ( $park_walk || $park_train ) :
+				?>
 				<p class="md-park__walk">
-					<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_walk', '🚌 천안종합·고속버스터미널에서 도보 약 5분' ) : '🚌 천안종합·고속버스터미널에서 도보 약 5분' ); ?>
+					<?php if ( $park_walk ) : ?>
+						<span><?php echo esc_html( $park_walk ); ?></span>
+					<?php endif; ?>
+					<?php if ( $park_train ) : ?>
+						<span><?php echo esc_html( $park_train ); ?></span>
+					<?php endif; ?>
 				</p>
+				<?php endif; ?>
 			</aside>
 
 		</div>

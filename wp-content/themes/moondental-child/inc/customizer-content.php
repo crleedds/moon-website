@@ -631,9 +631,10 @@ function moondental_subpage_content_fields() {
 				'loc_park_1_desc'  => array( 'default' => '진료 시간 동안 무료 이용', 'label' => '①번 항목 — 설명', 'type' => 'textarea' ),
 
 				'loc_park_2_title' => array( 'default' => 'SUV·대형차 — 신부 제5공영주차장', 'label' => '②번 항목 — 제목', 'type' => 'text' ),
-				'loc_park_2_desc'  => array( 'default' => '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 주차권 제출 → 무료 등록', 'label' => '②번 항목 — 설명', 'type' => 'textarea' ),
+				'loc_park_2_desc'  => array( 'default' => '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록', 'label' => '②번 항목 — 설명', 'type' => 'textarea' ),
 
-				'loc_park_walk'    => array( 'default' => '🚌 천안종합·고속버스터미널에서 도보 약 5분', 'label' => '하단 도보 안내', 'type' => 'text' ),
+				'loc_park_walk'    => array( 'default' => '🚌 천안종합·고속버스터미널에서 도보 약 5분', 'label' => '하단 도보 안내 ①', 'type' => 'text' ),
+				'loc_park_train'   => array( 'default' => '🚆 천안역에서 버스로 약 10분', 'label' => '하단 도보 안내 ② (비우면 숨김)', 'type' => 'text' ),
 
 				'loc_hours_badge'  => array( 'default' => '🕐 진료시간', 'label' => '진료시간 카드 — 배지', 'type' => 'text' ),
 				'loc_hours_title'  => array( 'default' => '진료 가능 시간', 'label' => '진료시간 카드 — 제목', 'type' => 'text' ),
