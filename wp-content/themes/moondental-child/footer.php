@@ -7,8 +7,24 @@
 $info       = moondental_get_info();
 $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'] );
 $place_url  = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' );
+
+/**
+ * /오시는-길/ 페이지에서는 footer 위 위치 섹션을 중복 출력하지 않음.
+ * 'Template Name: 오시는 길' 템플릿을 사용하는 페이지를 감지.
+ */
+$md_is_location_page = false;
+if ( is_page() ) {
+	$_tpl = get_page_template_slug( get_queried_object_id() );
+	if ( $_tpl === 'page-templates/page-location.php' ) {
+		$md_is_location_page = true;
+	}
+}
 ?>
 </main><?php /* /#md-main */ ?>
+
+<?php if ( ! $md_is_location_page ) {
+	get_template_part( 'template-parts/section-location' );
+} ?>
 
 <footer class="md-footer" role="contentinfo">
 	<div class="md-container">
@@ -49,34 +65,8 @@ $place_url  = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' );
 				<?php endif; ?>
 
 				<?php
-				/* ── 소셜·예약 채널 가로 아이콘 행 ── */
+				/* ── 소셜 아이콘 행 (전화·네이버예약·카카오톡은 CTA 버튼 영역으로 분리) ── */
 				$socials = array();
-				if ( ! empty( $info['naver_place'] ) ) {
-					$socials[] = array(
-						'href'  => $info['naver_place'],
-						'label' => '네이버 예약',
-						'track' => 'cta-footer-naver-book',
-						'cls'   => 'md-fsoc--naver',
-						'svg'   => '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#03C75A"/><path d="M9 8h2.2l3.6 5.1V8H17v8h-2.2l-3.6-5.1V16H9V8z" fill="#fff"/></svg>',
-					);
-				}
-				if ( ! empty( $info['kakao_url'] ) ) {
-					$socials[] = array(
-						'href'  => $info['kakao_url'],
-						'label' => '카카오톡 상담',
-						'track' => 'cta-footer-kakao',
-						'cls'   => 'md-fsoc--kakao',
-						'svg'   => '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#FEE500"/><path d="M12 6.4c-3.7 0-6.7 2.4-6.7 5.4 0 1.9 1.3 3.6 3.2 4.5l-.7 2.6c-.06.23.18.4.38.27l3.05-2c.25.03.51.04.78.04 3.7 0 6.7-2.4 6.7-5.4S15.7 6.4 12 6.4z" fill="#3C1E1E"/></svg>',
-					);
-				}
-				$socials[] = array(
-					'href'  => 'tel:' . esc_attr( $phone_link ),
-					'label' => '전화 상담',
-					'track' => 'cta-footer-call-icon',
-					'cls'   => 'md-fsoc--phone',
-					'target'=> '',
-					'svg'   => '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#D88062"/><path d="M8.6 9.4c.6 1.6 1.9 2.9 3.5 3.5l1.2-1.2c.2-.2.4-.2.7-.2 1 .3 2.1.5 3.2.5.4 0 .8.4.8.8v1.9c0 .4-.4.8-.8.8C9.4 15.5 6.5 12.6 6.5 6.8c0-.4.4-.8.8-.8h1.9c.4 0 .8.4.8.8 0 1.1.2 2.2.5 3.2.1.2 0 .5-.2.7L8.6 9.4z" fill="#fff"/></svg>',
-				);
 				if ( ! empty( $info['instagram'] ) ) {
 					$socials[] = array(
 						'href'  => $info['instagram'],
@@ -102,6 +92,15 @@ $place_url  = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' );
 						'track' => 'cta-footer-facebook',
 						'cls'   => 'md-fsoc--fb',
 						'svg'   => '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#1877F2"/><path d="M14.5 12.7h-1.7V18h-2.2v-5.3H9.4v-2h1.2V9.2c0-1.5 1-2.6 2.5-2.6h1.5v2.1h-1c-.5 0-.8.3-.8.8v1.3h1.8l-.1 2z" fill="#fff"/></svg>',
+					);
+				}
+				if ( ! empty( $info['youtube_url'] ) ) {
+					$socials[] = array(
+						'href'  => $info['youtube_url'],
+						'label' => '유튜브',
+						'track' => 'cta-footer-youtube',
+						'cls'   => 'md-fsoc--yt',
+						'svg'   => '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#FF0000"/><path d="M16.8 8.4c-.1-.5-.5-.9-1-1C14.9 7.2 12 7.2 12 7.2s-2.9 0-3.8.2c-.5.1-.9.5-1 1C7 9.3 7 12 7 12s0 2.7.2 3.6c.1.5.5.9 1 1 .9.2 3.8.2 3.8.2s2.9 0 3.8-.2c.5-.1.9-.5 1-1 .2-.9.2-3.6.2-3.6s0-2.7-.2-3.6zM10.8 13.9V10.1l3.3 1.9-3.3 1.9z" fill="#fff"/></svg>',
 					);
 				}
 				if ( ! empty( $socials ) ) :

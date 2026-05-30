@@ -774,6 +774,19 @@ function moondental_chrome_content_fields() {
 				'cta_btn_show_phone'  => array( 'default' => 'yes', 'label' => '전화 버튼에 전화번호 같이 표시 (yes/no)', 'type' => 'text' ),
 			),
 		),
+		'flocation' => array(
+			'title'  => '모든 페이지 — 오시는 길 섹션 (푸터 위)',
+			'fields' => array(
+				'flocation_title'        => array( 'default' => '오시는 길', 'label' => '섹션 제목', 'type' => 'text' ),
+				'flocation_address'      => array( 'default' => '', 'label' => '주소 (비우면 병원 기본 정보의 주소 사용)', 'type' => 'text' ),
+				'flocation_btn_naver'     => array( 'default' => '네이버 지도', 'label' => '버튼 1 — 라벨', 'type' => 'text' ),
+				'flocation_btn_naver_sub' => array( 'default' => '길찾기 · 대중교통', 'label' => '버튼 1 — 부제', 'type' => 'text' ),
+				'flocation_btn_kakao'     => array( 'default' => '카카오맵', 'label' => '버튼 2 — 라벨', 'type' => 'text' ),
+				'flocation_btn_kakao_sub' => array( 'default' => '길찾기 · 로드뷰', 'label' => '버튼 2 — 부제', 'type' => 'text' ),
+				'flocation_btn_google'    => array( 'default' => 'Google Maps', 'label' => '버튼 3 — 라벨', 'type' => 'text' ),
+				'flocation_btn_google_sub'=> array( 'default' => 'Directions · Street View', 'label' => '버튼 3 — 부제', 'type' => 'text' ),
+			),
+		),
 	);
 }
 
