@@ -31,7 +31,15 @@ $address = function_exists( 'md_content' ) ? md_content( 'flocation_address', $i
 		<header class="md-flocation__head">
 			<h2 class="md-flocation__title"><?php echo esc_html( $title ); ?></h2>
 			<?php if ( $address ) : ?>
-				<p class="md-flocation__addr"><?php echo esc_html( $address ); ?></p>
+				<p class="md-flocation__addr">
+					<a href="<?php echo esc_url( $map_naver ); ?>"
+					   target="_blank" rel="noopener"
+					   class="md-flocation__addr-link"
+					   data-track="cta-flocation-addr"
+					   aria-label="네이버 지도에서 위치 보기">
+						<?php echo esc_html( $address ); ?>
+					</a>
+				</p>
 			<?php endif; ?>
 		</header>
 
