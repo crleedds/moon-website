@@ -754,7 +754,7 @@ function moondental_chrome_content_fields() {
 				'header_cta_label' => array( 'default' => '📅 상담 예약하기', 'label' => 'CTA 버튼 — 기본 라벨 (스크롤 시 아래 변형으로 자동 변경됨)', 'type' => 'text' ),
 				'header_cta_url'   => array( 'default' => '/상담예약/', 'label' => 'CTA 버튼 — 링크 (사이트 내 경로 또는 전체 URL)', 'type' => 'text' ),
 				'header_cta_cycle' => array(
-					'default' => "📅 상담 예약하기 | #D88062 | #FFFFFF | 216,128,98\n💬 지금 카톡 상담 | #FEE500 | #181600 | 254,229,0\n📞 전화 한 통이면 끝 | #5CB89A | #FFFFFF | 92,184,154\n🦷 첫 진료 무료 상담 | #E37B5C | #FFFFFF | 227,123,92\n✨ 1분만에 예약하기 | #2D8E7F | #FFFFFF | 45,142,127\n🎁 30년 신뢰의 예약 | #9B3D5B | #FFFFFF | 155,61,91",
+					'default' => "📅 상담 예약하기 | #D88062 | #FFFFFF | 216,128,98\n💬 지금 카톡 상담 | #FEE500 | #181600 | 254,229,0\n📞 전화 상담 | #5CB89A | #FFFFFF | 92,184,154\n🦷 내 구강상태 진단받기 | #E37B5C | #FFFFFF | 227,123,92",
 					'label'   => 'CTA 버튼 — 스크롤 시 자동 변경 변형 (한 줄당 1 변형, 파이프(|)로 구분: 라벨 | 배경 #hex | 글자 #hex | 그림자 R,G,B)',
 					'type'    => 'textarea',
 				),

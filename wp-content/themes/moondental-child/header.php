@@ -95,10 +95,8 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 					// 스크롤에 따라 라벨·색이 바뀌는 변형 변수 (라벨 | 배경 | 글자 | 그림자 RGBA)
 					$cta_cycle_default = "📅 상담 예약하기 | #D88062 | #FFFFFF | 216,128,98\n"
 						. "💬 지금 카톡 상담 | #FEE500 | #181600 | 254,229,0\n"
-						. "📞 전화 한 통이면 끝 | #5CB89A | #FFFFFF | 92,184,154\n"
-						. "🦷 첫 진료 무료 상담 | #E37B5C | #FFFFFF | 227,123,92\n"
-						. "✨ 1분만에 예약하기 | #2D8E7F | #FFFFFF | 45,142,127\n"
-						. "🎁 30년 신뢰의 예약 | #9B3D5B | #FFFFFF | 155,61,91";
+						. "📞 전화 상담 | #5CB89A | #FFFFFF | 92,184,154\n"
+						. "🦷 내 구강상태 진단받기 | #E37B5C | #FFFFFF | 227,123,92";
 					$cta_cycle_raw = function_exists( 'md_content' )
 						? md_content( 'header_cta_cycle', $cta_cycle_default )
 						: $cta_cycle_default;
