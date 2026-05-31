@@ -9,20 +9,23 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 $place_url  = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' );
 
 /**
- * /오시는-길/ 페이지에서는 footer 위 위치 섹션을 중복 출력하지 않음.
- * 'Template Name: 오시는 길' 템플릿을 사용하는 페이지를 감지.
+ * /오시는-길/, /상담예약/ 페이지에서는 footer 위 위치 섹션을 중복 출력하지 않음.
+ *  (각 페이지 자체에 오시는 길 안내가 더 자세하게 포함되어 있음)
  */
-$md_is_location_page = false;
+$md_skip_flocation = false;
 if ( is_page() ) {
 	$_tpl = get_page_template_slug( get_queried_object_id() );
-	if ( $_tpl === 'page-templates/page-location.php' ) {
-		$md_is_location_page = true;
+	if ( in_array( $_tpl, array(
+		'page-templates/page-location.php',
+		'page-templates/page-reservation.php',
+	), true ) ) {
+		$md_skip_flocation = true;
 	}
 }
 ?>
 </main><?php /* /#md-main */ ?>
 
-<?php if ( ! $md_is_location_page ) {
+<?php if ( ! $md_skip_flocation ) {
 	get_template_part( 'template-parts/section-location' );
 } ?>
 
