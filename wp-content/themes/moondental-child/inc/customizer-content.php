@@ -167,7 +167,7 @@ function moondental_home_content_fields() {
 			'fields' => array(
 				'facility_eyebrow' => array( 'default' => 'Facility & Equipment', 'label' => '섹션 — eyebrow', 'type' => 'text' ),
 				'facility_title'   => array( 'default' => '정확한 진단과 안전한 진료를 위한 인프라', 'label' => '섹션 — 제목', 'type' => 'text' ),
-				'facility_lead'    => array( 'default' => '9F~13F 통합 진료센터 — 디지털 진단·수술 시스템과 응급 의료 장비를 갖추고 있습니다.', 'label' => '섹션 — 설명', 'type' => 'textarea' ),
+				'facility_lead'    => array( 'default' => '9·10·11·13F 통합 진료센터 — 디지털 진단·수술 시스템과 응급 의료 장비를 갖추고 있습니다.', 'label' => '섹션 — 설명', 'type' => 'textarea' ),
 
 				'facility_1_icon'  => array( 'default' => '🩻', 'label' => '①번 — 아이콘', 'type' => 'text' ),
 				'facility_1_title' => array( 'default' => '디지털 CBCT 3D 진단', 'label' => '①번 — 제목', 'type' => 'text' ),
@@ -477,7 +477,7 @@ function moondental_pricing_content_fields() {
 				'price_cta_meta_2_value' => array( 'default' => '전화 · 카카오톡 · 네이버 예약 (24시간)', 'label' => '메타 ②번 — 값', 'type' => 'text' ),
 
 				'price_cta_meta_3_label' => array( 'default' => '위치', 'label' => '메타 ③번 — 라벨', 'type' => 'text' ),
-				'price_cta_meta_3_value' => array( 'default' => '충남 천안시 동남구 만남로 52, 문타워 9~13층', 'label' => '메타 ③번 — 값', 'type' => 'text' ),
+				'price_cta_meta_3_value' => array( 'default' => '충남 천안시 동남구 만남로 52, 문타워 9·10·11·13층', 'label' => '메타 ③번 — 값', 'type' => 'text' ),
 			),
 		),
 
@@ -830,40 +830,32 @@ function moondental_testimonials_content_fields() {
 }
 
 /**
- * 비교표 (종합치과병원 vs 일반 치과의원) 9 행 콘텐츠 필드.
+ * 문치과병원의 강점 9 카드 콘텐츠 필드.
+ *  (구) 비교표를 강점 카드로 전환 — 비교 어휘 없이 우리 병원의 사실만 명시.
+ *  데이터 키는 호환을 위해 compare_* 유지.
  */
 function moondental_compare_content_fields() {
 	$defaults = array(
-		1 => array( 'label' => '의료기관 종별',     'hospital' => '치과병원 (병원급)',                          'clinic' => '치과의원 (의원급)' ),
-		2 => array( 'label' => '의료진 규모',       'hospital' => '9인 전문 의료진 협진',                       'clinic' => '1~2인 진료' ),
-		3 => array( 'label' => '전문 진료과',       'hospital' => '보철·교정·보존·치주·소아·외과 6과',          'clinic' => '일반 진료 위주' ),
-		4 => array( 'label' => '진료 시설',         'hospital' => '9F~13F 5개 층 통합 진료센터',                'clinic' => '단일 진료 공간' ),
-		5 => array( 'label' => '디지털 진단 장비',  'hospital' => 'CBCT · 디지털 가이드 · 구강스캐너',          'clinic' => '기본 X-ray 위주' ),
-		6 => array( 'label' => '보철 제작',         'hospital' => '자체 한아 임플란트 보철연구소',              'clinic' => '외부 기공소 의뢰' ),
-		7 => array( 'label' => '전신질환 대응',     'hospital' => '혈압 · 당검사 · 심전도 · 산소포화도 상시',   'clinic' => '제한적 대응' ),
-		8 => array( 'label' => '평일 진료시간',     'hospital' => '~ 20:30 야간진료 운영',                      'clinic' => '~ 18:00 일반적' ),
-		9 => array( 'label' => '임상 경력',         'hospital' => '1995년부터 30여년 한자리 진료',                'clinic' => '의원별 상이' ),
+		1 => array( 'label' => '의료기관 종별',     'value' => '치과병원 (병원급)',                            'icon' => '🏥' ),
+		2 => array( 'label' => '의료진 규모',       'value' => '9인 전문 의료진 협진',                         'icon' => '👨‍⚕️' ),
+		3 => array( 'label' => '전문 진료과 6과',   'value' => '보철·교정·보존·치주·소아·외과',                'icon' => '🦷' ),
+		4 => array( 'label' => '통합 진료센터',     'value' => '9·10·11·13F 4개 층 운영',                      'icon' => '🏢' ),
+		5 => array( 'label' => '디지털 진단 장비',  'value' => 'CBCT · 디지털 가이드 · 구강스캐너',            'icon' => '🔬' ),
+		6 => array( 'label' => '자체 보철 제작',    'value' => '한아 임플란트 보철연구소 · 원내 기공실 (13F)', 'icon' => '⚙️' ),
+		7 => array( 'label' => '전신질환 대응',     'value' => '혈압 · 당검사 · 심전도 · 산소포화도 상시',     'icon' => '❤️' ),
+		8 => array( 'label' => '평일 야간진료',     'value' => '평일 ~ 20:30 운영',                             'icon' => '🌙' ),
+		9 => array( 'label' => '임상 경력',         'value' => '1995년부터 30여년 한자리 진료',                'icon' => '⏳' ),
 	);
 
-	$groups = array(
-		'compare_header' => array(
-			'title'  => '비교표 — 헤더 컬럼',
-			'fields' => array(
-				'compare_col_us'    => array( 'default' => '문치과병원 (치과병원)', 'label' => '왼쪽 헤더 (우리 병원)', 'type' => 'text' ),
-				'compare_col_them'  => array( 'default' => '일반 치과의원',          'label' => '오른쪽 헤더 (비교 대상)', 'type' => 'text' ),
-				'compare_col_label' => array( 'default' => '구분',                   'label' => '구분 컬럼 헤더', 'type' => 'text' ),
-			),
-		),
-	);
-
+	$groups = array();
 	for ( $i = 1; $i <= 9; $i++ ) {
 		$d = $defaults[ $i ];
 		$groups[ 'compare_row_' . $i ] = array(
-			'title'  => '비교표 — 행 ' . $i . ' (' . $d['label'] . ')',
+			'title'  => '강점 카드 — ' . $i . ' (' . $d['label'] . ')',
 			'fields' => array(
-				"compare_{$i}_label"    => array( 'default' => $d['label'],    'label' => '항목명 (비우면 행 자동 숨김)', 'type' => 'text' ),
-				"compare_{$i}_hospital" => array( 'default' => $d['hospital'], 'label' => '우리 병원',     'type' => 'text' ),
-				"compare_{$i}_clinic"   => array( 'default' => $d['clinic'],   'label' => '비교 대상',    'type' => 'text' ),
+				"compare_{$i}_label"    => array( 'default' => $d['label'], 'label' => '카드 라벨 (비우면 카드 자동 숨김)', 'type' => 'text' ),
+				"compare_{$i}_hospital" => array( 'default' => $d['value'], 'label' => '카드 본문 (우리 병원 사실)',    'type' => 'text' ),
+				"compare_{$i}_icon"     => array( 'default' => $d['icon'],  'label' => '카드 아이콘 (이모지)',          'type' => 'text' ),
 			),
 		);
 	}

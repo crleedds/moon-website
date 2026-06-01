@@ -875,22 +875,22 @@ function moondental_service_ideal_candidates() {
 }
 
 /**
- * 종합치과병원 vs 일반 치과의원 비교표 — 의료기관 종별·시설·운영 기준의 객관적 차이.
- *   주: 의료광고법상 비교 광고는 신중. 객관적 사실 기반·중립 어휘 사용.
+ * 문치과병원의 강점 — 의료기관 종별·시설·운영 측면의 객관적 특징.
+ *   비교 어휘 없이 우리 병원의 사실만 명시.
  *
- * @return array [ ['label'=>'', 'hospital'=>'…(문치과)', 'clinic'=>'…(일반)'], … ]
+ * @return array [ ['label'=>'', 'value'=>'…', 'icon'=>'…'], … ]
  */
 function moondental_clinic_comparison() {
 	$defaults = array(
-		1 => array( 'label' => '의료기관 종별',     'hospital' => '치과병원 (병원급)',                          'clinic' => '치과의원 (의원급)' ),
-		2 => array( 'label' => '의료진 규모',       'hospital' => '9인 전문 의료진 협진',                       'clinic' => '1~2인 진료' ),
-		3 => array( 'label' => '전문 진료과',       'hospital' => '보철·교정·보존·치주·소아·외과 6과',          'clinic' => '일반 진료 위주' ),
-		4 => array( 'label' => '진료 시설',         'hospital' => '9F~13F 5개 층 통합 진료센터',                'clinic' => '단일 진료 공간' ),
-		5 => array( 'label' => '디지털 진단 장비',  'hospital' => 'CBCT · 디지털 가이드 · 구강스캐너',          'clinic' => '기본 X-ray 위주' ),
-		6 => array( 'label' => '보철 제작',         'hospital' => '자체 한아 임플란트 보철연구소',              'clinic' => '외부 기공소 의뢰' ),
-		7 => array( 'label' => '전신질환 대응',     'hospital' => '혈압 · 당검사 · 심전도 · 산소포화도 상시',   'clinic' => '제한적 대응' ),
-		8 => array( 'label' => '평일 진료시간',     'hospital' => '~ 20:30 야간진료 운영',                      'clinic' => '~ 18:00 일반적' ),
-		9 => array( 'label' => '임상 경력',         'hospital' => '1995년부터 30여년 한자리 진료',                'clinic' => '의원별 상이' ),
+		1 => array( 'label' => '의료기관 종별',     'value' => '치과병원 (병원급)',                            'icon' => '🏥' ),
+		2 => array( 'label' => '의료진 규모',       'value' => '9인 전문 의료진 협진',                         'icon' => '👨‍⚕️' ),
+		3 => array( 'label' => '전문 진료과 6과',   'value' => '보철·교정·보존·치주·소아·외과',                'icon' => '🦷' ),
+		4 => array( 'label' => '통합 진료센터',     'value' => '9·10·11·13F 4개 층 운영',                      'icon' => '🏢' ),
+		5 => array( 'label' => '디지털 진단 장비',  'value' => 'CBCT · 디지털 가이드 · 구강스캐너',            'icon' => '🔬' ),
+		6 => array( 'label' => '자체 보철 제작',    'value' => '한아 임플란트 보철연구소 · 원내 기공실 (13F)', 'icon' => '⚙️' ),
+		7 => array( 'label' => '전신질환 대응',     'value' => '혈압 · 당검사 · 심전도 · 산소포화도 상시',     'icon' => '❤️' ),
+		8 => array( 'label' => '평일 야간진료',     'value' => '평일 ~ 20:30 운영',                             'icon' => '🌙' ),
+		9 => array( 'label' => '임상 경력',         'value' => '1995년부터 30여년 한자리 진료',                'icon' => '⏳' ),
 	);
 
 	if ( ! function_exists( 'md_content' ) ) return array_values( $defaults );
@@ -899,11 +899,11 @@ function moondental_clinic_comparison() {
 	for ( $i = 1; $i <= 9; $i++ ) {
 		$d = $defaults[ $i ];
 		$label = md_content( "compare_{$i}_label", $d['label'] );
-		if ( ! $label ) continue; // 라벨 비우면 행 숨김
+		if ( ! $label ) continue; // 라벨 비우면 항목 숨김
 		$result[] = array(
-			'label'    => $label,
-			'hospital' => md_content( "compare_{$i}_hospital", $d['hospital'] ),
-			'clinic'   => md_content( "compare_{$i}_clinic", $d['clinic'] ),
+			'label' => $label,
+			'value' => md_content( "compare_{$i}_hospital", $d['value'] ),
+			'icon'  => md_content( "compare_{$i}_icon",     $d['icon'] ),
 		);
 	}
 	return $result;

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.10.0' );
+define( 'MOONDENTAL_VERSION', '3.11.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -126,8 +126,8 @@ function moondental_get_info( $key = '' ) {
 		'tagline'      => '실력과 품격있는 진료',
 		'phone'        => '041-563-2875',
 		'phone_link'   => '0415632875',
-		'address'      => '충청남도 천안시 동남구 만남로 52, 문타워 9~13층 (신부동)',
-		'address_road' => '충남 천안시 동남구 만남로 52, 문타워 9~13층',
+		'address'      => '충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층 (신부동)',
+		'address_road' => '충남 천안시 동남구 만남로 52, 문타워 9·10·11·13층',
 		'hours_wd'     => '평일 09:00 – 20:30 (점심시간 없음)',
 		'hours_thu'    => '목요일 09:00 – 18:00 (야간진료 없음)',
 		'hours_sat'    => '토요일 09:00 – 14:00',
@@ -290,6 +290,11 @@ function md_autolink_addresses( $html ) {
 		// 본원 (병원 네이버 지도로 연결)
 		'본원 지하 기계식 주차장'                              => $hospital_url,
 		'본원 지하 기계식'                                    => $hospital_url,
+		'충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층 (신부동, 문타워빌딩)' => $hospital_url,
+		'충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층 (신부동)' => $hospital_url,
+		'충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층'      => $hospital_url,
+		'충남 천안시 동남구 만남로 52, 문타워 9·10·11·13층'          => $hospital_url,
+		// 구 표기 호환 — 사용자가 직접 입력한 옛 주소도 클릭 가능하게
 		'충청남도 천안시 동남구 만남로 52, 문타워 9~13층 (신부동, 문타워빌딩)' => $hospital_url,
 		'충청남도 천안시 동남구 만남로 52, 문타워 9~13층 (신부동)' => $hospital_url,
 		'충청남도 천안시 동남구 만남로 52, 문타워 9~13층'      => $hospital_url,

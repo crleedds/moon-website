@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.10.0
+Version:      3.11.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -4332,7 +4332,69 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
 }
 
 /* =============================================================
-   40. 진료 페이지 — 종합치과병원 vs 일반 치과 비교표 (.md-compare)
+   40a. 진료 페이지 — 문치과병원의 강점 카드 그리드 (.md-strengths)
+        비교 어휘 없이 우리 병원의 사실만 카드로 표현.
+   ============================================================= */
+.md-strengths {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(14px, 1.6vw, 22px);
+}
+@media (max-width: 900px) {
+  .md-strengths { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 540px) {
+  .md-strengths { grid-template-columns: 1fr; }
+}
+.md-strength {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: clamp(18px, 2vw, 24px) clamp(18px, 2vw, 22px);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.md-strength:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(61, 47, 38, 0.08);
+  border-color: var(--color-primary);
+}
+.md-strength__icon {
+  font-size: clamp(1.5rem, 2.2vw, 1.875rem);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border-radius: 50%;
+}
+.md-strength__body { min-width: 0; flex: 1; }
+.md-strength__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-primary-dark);
+  text-transform: uppercase;
+  margin: 0 0 4px;
+}
+.md-strength__value {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--color-text);
+  margin: 0;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+
+/* =============================================================
+   40. (구) 종합치과병원 vs 일반 치과 비교표 — 미사용 보존
+        새 페이지는 .md-strengths 사용. 본 스타일은 호환성 위해 유지.
    ============================================================= */
 .md-compare {
   display: grid;

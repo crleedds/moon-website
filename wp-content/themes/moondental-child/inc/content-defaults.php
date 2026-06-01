@@ -891,7 +891,7 @@ function moondental_default_service_content( $slug ) {
 function moondental_default_about_content() {
 	return '
 <h2>1995년부터, 천안에서</h2>
-<p class="lead">한아의료재단 문치과병원은 1995년 개원 이래 천안 시민과 함께 자라온 종합 치과병원입니다. 만남로 문타워 9~13층, 5개 층 전체를 사용하며 9명의 의료진이 임플란트·교정·심미·자연치아 살리기·턱관절·구강외과까지 한 자리에서 진료합니다.</p>
+<p class="lead">한아의료재단 문치과병원은 1995년 개원 이래 천안 시민과 함께 자라온 종합 치과병원입니다. 만남로 문타워 9·10·11·13층, 총 4개 층을 사용하며 9명의 의료진이 임플란트·교정·심미·자연치아 살리기·턱관절·구강외과까지 한 자리에서 진료합니다. (13층은 한아문화센터 · 원내 기공실)</p>
 
 <h3>저희가 약속드리는 것</h3>
 <ul>
@@ -905,7 +905,7 @@ function moondental_default_about_content() {
 <p>한아의료재단은 진료실 밖에서도 천안 시민과 함께해왔습니다. 대한적십자사 무료 진료봉사, 지산장학회 장학금 기부, 지역 학교 구강보건 교육 등 — 치과는 단순한 사업장이 아니라 지역사회의 일원이라는 마음으로 운영하고 있습니다.</p>
 
 <h3>찾아오시는 길</h3>
-<p>' . md_address_link( '충청남도 천안시 동남구 만남로 52, 문타워 9~13층 (신부동, 문타워빌딩)' ) . '<br>
+<p>' . md_address_link( '충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층 (신부동, 문타워빌딩)' ) . '<br>
 대표전화 ' . md_phone_link() . '</p>
 
 <p>자세한 교통·주차 안내는 <a href="/오시는-길/">오시는 길</a> 페이지를 참고해주세요.</p>';
@@ -1103,7 +1103,7 @@ function moondental_default_privacy_content() {
 	$rep    = $info['rep']    ?: '문은수';
 	$phone  = $info['phone']  ?: '041-563-2875';
 	$email  = $info['email']  ?: 'moondental1995@naver.com';
-	$addr   = $info['address']?: '충청남도 천안시 동남구 만남로 52, 문타워 9~13층';
+	$addr   = $info['address']?: '충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층';
 	$name   = $info['name_full'] ?: '한아의료재단 문치과병원';
 
 	ob_start();
@@ -1293,14 +1293,14 @@ function moondental_default_doctors_content() {
 function moondental_default_facility_content() {
 	return '
 <h2>정밀한 진단, 신뢰할 수 있는 진료를 위한 시설</h2>
-<p class="lead">한아의료재단 문치과병원은 만남로 문타워 9~13층, 총 <strong>5개 층 전체</strong>를 사용하는 종합 치과병원입니다. 진단·임플란트·교정·종합진료 영역을 층별 전문 센터로 분리해 환자분이 필요한 진료를 가장 깊이 있게 받으실 수 있도록 설계했습니다.</p>
+<p class="lead">한아의료재단 문치과병원은 만남로 문타워 9·10·11·13층, 총 <strong>4개 층</strong>을 사용하는 종합 치과병원입니다. 진단·임플란트·교정·종합진료 영역을 층별 전문 센터로 분리하고, 13층에 한아문화센터와 원내 기공실을 직접 운영해 환자분이 필요한 진료를 가장 깊이 있게 받으실 수 있도록 설계했습니다.</p>
 
 <h3>층별 전문 센터</h3>
 <ul>
 <li><strong>9F 종합진료센터</strong> — 보존·치주·보철 통합 진료, 상담실</li>
 <li><strong>10F 임플란트센터</strong> — CT·디지털 가이드 식립 수술실, 멸균실</li>
 <li><strong>11F 교정과 · 종합진료센터</strong> — 투명교정 전담, 일반 교정, 상담실</li>
-<li><strong>12~13F</strong> — 데스크·라운지·환자 휴게 공간, 보철 기공 협진실</li>
+<li><strong>13F</strong> — 한아문화센터 · 원내 기공실 (보철 자체 제작)</li>
 </ul>
 
 <h3>디지털 진단 장비</h3>
@@ -1536,7 +1536,7 @@ function moondental_default_location_content() {
 	$map_url   = ! empty( $info['naver_map_url'] ) ? $info['naver_map_url'] : ( $info['naver_place'] ?? '' );
 	$addr      = $info['address_road'] ?: $info['address'];
 
-	$html  = '<h2>천안 만남로 문타워 9~13층</h2>';
+	$html  = '<h2>천안 만남로 문타워 9·10·11·13층</h2>';
 	$html .= '<p class="lead">' . md_address_link() . '<br>대표전화 ' . md_phone_link() . '</p>';
 
 	if ( $map_embed ) {

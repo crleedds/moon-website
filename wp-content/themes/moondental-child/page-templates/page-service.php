@@ -97,36 +97,30 @@ if ( function_exists( 'moondental_service_pain_points' ) ) {
 ?>
 
 <?php
-/* === 종합치과병원 vs 일반 치과의원 비교표 — 객관적 차이 === */
+/* === 문치과병원의 강점 카드 (비교 표현 없이 우리 병원의 사실만 명시) === */
 if ( function_exists( 'moondental_clinic_comparison' ) ) {
-	$cmp = moondental_clinic_comparison();
+	$strengths = moondental_clinic_comparison();
 ?>
-<section class="md-section" aria-label="치과병원과 일반 치과의 차이">
-	<div class="md-container md-container--narrow">
+<section class="md-section" aria-label="문치과병원의 강점">
+	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_eyebrow', 'Difference' ) : 'Difference' ); ?></span>
-			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_title', '치과병원과 일반 치과의 차이' ) : '치과병원과 일반 치과의 차이' ); ?></h2>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_eyebrow', 'STRENGTHS' ) : 'STRENGTHS' ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_title', '문치과병원의 강점' ) : '문치과병원의 강점' ); ?></h2>
 			<p class="md-section-head__lead">
-				<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_lead', '의료기관 종별·시설·운영의 객관적 차이입니다.' ) : '의료기관 종별·시설·운영의 객관적 차이입니다.' ) ); ?>
+				<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_lead', '의료기관 종별·시설·운영·임상 측면에서 갖추고 있는 9가지 강점입니다.' ) : '의료기관 종별·시설·운영·임상 측면에서 갖추고 있는 9가지 강점입니다.' ) ); ?>
 			</p>
 		</header>
-		<div class="md-compare">
-			<div class="md-compare__head">
-				<div class="md-compare__cell md-compare__cell--label">구분</div>
-				<div class="md-compare__cell md-compare__cell--us">문치과병원 (치과병원)</div>
-				<div class="md-compare__cell md-compare__cell--them">일반 치과의원</div>
-			</div>
-			<?php foreach ( $cmp as $row ) : ?>
-				<div class="md-compare__row">
-					<div class="md-compare__cell md-compare__cell--label"><?php echo esc_html( $row['label'] ); ?></div>
-					<div class="md-compare__cell md-compare__cell--us"><strong><?php echo esc_html( $row['hospital'] ); ?></strong></div>
-					<div class="md-compare__cell md-compare__cell--them"><?php echo esc_html( $row['clinic'] ); ?></div>
-				</div>
+		<div class="md-strengths">
+			<?php foreach ( $strengths as $s ) : ?>
+				<article class="md-strength">
+					<div class="md-strength__icon" aria-hidden="true"><?php echo $s['icon']; ?></div>
+					<div class="md-strength__body">
+						<h3 class="md-strength__label"><?php echo esc_html( $s['label'] ); ?></h3>
+						<p class="md-strength__value"><?php echo esc_html( $s['value'] ); ?></p>
+					</div>
+				</article>
 			<?php endforeach; ?>
 		</div>
-		<p class="md-compare__note">
-			ⓘ <?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_note', '일반 치과의원의 시설·운영은 의원별로 다를 수 있으며, 위 비교는 일반적 기준입니다.' ) : '일반 치과의원의 시설·운영은 의원별로 다를 수 있으며, 위 비교는 일반적 기준입니다.' ); ?>
-		</p>
 	</div>
 </section>
 <?php }
