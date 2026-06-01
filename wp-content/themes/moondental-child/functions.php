@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.11.0' );
+define( 'MOONDENTAL_VERSION', '3.12.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -22,6 +22,7 @@ require_once MOONDENTAL_DIR . '/inc/naver-importer.php';
 require_once MOONDENTAL_DIR . '/inc/reservation.php';
 require_once MOONDENTAL_DIR . '/inc/enhancements.php';
 require_once MOONDENTAL_DIR . '/inc/customizer-content.php';
+require_once MOONDENTAL_DIR . '/inc/strengths.php';
 
 
 /* ============================================================
@@ -1078,6 +1079,9 @@ function moondental_template_router( $template ) {
 		'비급여-진료비'   => 'page-templates/page-pricing.php',
 		'진료비안내'      => 'page-templates/page-pricing.php',
 		'pricing'        => 'page-templates/page-pricing.php',
+		'기술력-시설'     => 'page-templates/page-facility.php',
+		'기술력시설'      => 'page-templates/page-facility.php',
+		'facility'       => 'page-templates/page-facility.php',
 	);
 
 	if ( isset( $map[ $slug ] ) ) {
@@ -1165,12 +1169,49 @@ function moondental_doctor_intercept() {
 }
 add_action( 'template_redirect', 'moondental_doctor_intercept', 1 );
 
+/**
+ * /강점/{slug}/ URL 가로채기 — 강점 상세 페이지 라우팅.
+ *  template_redirect 우선순위 1로 패턴 매칭 → page-strength.php 강제 로드.
+ */
+function moondental_strength_intercept() {
+	$uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
+	$path = parse_url( $uri, PHP_URL_PATH );
+	if ( ! $path ) return;
+	$path = trim( urldecode( $path ), '/' );
+
+	if ( ! preg_match( '#^(?:강점|strengths?)/([a-z0-9_-]+)/?$#u', $path, $m ) ) return;
+
+	$slug = trim( $m[1] );
+	if ( ! $slug ) return;
+
+	$data = function_exists( 'moondental_get_strength_by_slug' )
+		? moondental_get_strength_by_slug( $slug )
+		: null;
+	if ( ! $data ) return; // 알 수 없는 슬러그면 WP 기본 라우팅에 맡김
+
+	set_query_var( 'strength_slug', $slug );
+	global $wp_query;
+	$wp_query->is_404      = false;
+	$wp_query->is_page     = true;
+	$wp_query->is_singular = true;
+	$wp_query->is_home     = false;
+	$wp_query->is_archive  = false;
+	status_header( 200 );
+
+	$tpl = locate_template( 'page-templates/page-strength.php' );
+	if ( $tpl ) {
+		include $tpl;
+		exit;
+	}
+}
+add_action( 'template_redirect', 'moondental_strength_intercept', 1 );
+
 /* 테마 활성화 시 rewrite rules flush — 새 rule 패턴 반영 위해 버전 키 증가 */
 function moondental_flush_rewrites_once() {
-	if ( get_option( 'moondental_rewrite_flushed_v4' ) !== '1' ) {
+	if ( get_option( 'moondental_rewrite_flushed_v5' ) !== '1' ) {
 		moondental_doctor_rewrite_rules();
 		flush_rewrite_rules( false );
-		update_option( 'moondental_rewrite_flushed_v4', '1' );
+		update_option( 'moondental_rewrite_flushed_v5', '1' );
 	}
 }
 add_action( 'init', 'moondental_flush_rewrites_once', 99 );

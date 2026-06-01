@@ -96,34 +96,7 @@ if ( function_exists( 'moondental_service_pain_points' ) ) {
 <?php endif; }
 ?>
 
-<?php
-/* === 문치과병원의 강점 카드 (비교 표현 없이 우리 병원의 사실만 명시) === */
-if ( function_exists( 'moondental_clinic_comparison' ) ) {
-	$strengths = moondental_clinic_comparison();
-?>
-<section class="md-section" aria-label="문치과병원의 강점">
-	<div class="md-container">
-		<header class="md-section-head">
-			<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_eyebrow', 'STRENGTHS' ) : 'STRENGTHS' ); ?></span>
-			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_title', '문치과병원의 강점' ) : '문치과병원의 강점' ); ?></h2>
-			<p class="md-section-head__lead">
-				<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'service_compare_lead', '의료기관 종별·시설·운영·임상 측면에서 갖추고 있는 9가지 강점입니다.' ) : '의료기관 종별·시설·운영·임상 측면에서 갖추고 있는 9가지 강점입니다.' ) ); ?>
-			</p>
-		</header>
-		<div class="md-strengths">
-			<?php foreach ( $strengths as $s ) : ?>
-				<article class="md-strength">
-					<div class="md-strength__icon" aria-hidden="true"><?php echo $s['icon']; ?></div>
-					<div class="md-strength__body">
-						<h3 class="md-strength__label"><?php echo esc_html( $s['label'] ); ?></h3>
-						<p class="md-strength__value"><?php echo esc_html( $s['value'] ); ?></p>
-					</div>
-				</article>
-			<?php endforeach; ?>
-		</div>
-	</div>
-</section>
-<?php }
+<?php /* 강점 카드 섹션은 /기술력-시설/ 페이지로 이동됨 (v3.12.0) */ ?>
 ?>
 
 <?php
