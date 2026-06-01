@@ -110,6 +110,162 @@
       });
     }
 
+    // 7b. 구강 자가진단 봇 — Yes/No 질문 → 추천 진료과
+    (function initDentalBot() {
+      var bot = document.querySelector('[data-md-bot]');
+      if (!bot) return;
+      var data;
+      try { data = JSON.parse(bot.getAttribute('data-md-bot-json') || '{}'); }
+      catch (e) { return; }
+      if (!data.questions || !data.questions.length || !data.depts) return;
+
+      var Qs = data.questions;
+      var depts = data.depts;
+      var screens = {
+        intro:  bot.querySelector('[data-md-bot-screen="intro"]'),
+        quiz:   bot.querySelector('[data-md-bot-screen="quiz"]'),
+        result: bot.querySelector('[data-md-bot-screen="result"]')
+      };
+      var idxEl   = bot.querySelector('[data-md-bot-idx]');
+      var totalEl = bot.querySelector('[data-md-bot-total]');
+      var fillEl  = bot.querySelector('[data-md-bot-fill]');
+      var catEl   = bot.querySelector('[data-md-bot-cat]');
+      var qEl     = bot.querySelector('[data-md-bot-q]');
+      var backEl  = bot.querySelector('[data-md-bot-back]');
+      var resultsEl = bot.querySelector('[data-md-bot-results]');
+      var resultLeadEl = bot.querySelector('[data-md-bot-result-lead]');
+
+      var state = { idx: 0, answers: [] };
+
+      function show(name) {
+        Object.keys(screens).forEach(function (k) {
+          if (!screens[k]) return;
+          if (k === name) screens[k].removeAttribute('hidden');
+          else screens[k].setAttribute('hidden', '');
+        });
+      }
+
+      function renderQ() {
+        var q = Qs[state.idx];
+        if (!q) return;
+        if (idxEl)   idxEl.textContent   = String(state.idx + 1);
+        if (totalEl) totalEl.textContent = String(Qs.length);
+        if (fillEl)  fillEl.style.width  = ((state.idx) / Qs.length * 100).toFixed(1) + '%';
+        if (catEl)   catEl.textContent   = q.cat || '';
+        if (qEl)     qEl.textContent     = q.q || '';
+        if (backEl)  backEl.hidden       = state.idx === 0;
+      }
+
+      function answer(isYes) {
+        state.answers[state.idx] = !!isYes;
+        state.idx++;
+        if (state.idx >= Qs.length) {
+          if (fillEl) fillEl.style.width = '100%';
+          showResult();
+        } else {
+          renderQ();
+        }
+      }
+
+      function computeScores() {
+        var scores = {};
+        for (var i = 0; i < Qs.length; i++) {
+          if (!state.answers[i]) continue;
+          var w = Qs[i].yes || {};
+          for (var k in w) {
+            if (Object.prototype.hasOwnProperty.call(w, k)) {
+              scores[k] = (scores[k] || 0) + Number(w[k] || 0);
+            }
+          }
+        }
+        return scores;
+      }
+
+      function showResult() {
+        var scores = computeScores();
+        var keys = Object.keys(scores).sort(function (a, b) { return scores[b] - scores[a]; });
+        keys = keys.filter(function (k) { return scores[k] > 0; });
+
+        if (!resultsEl) return;
+        resultsEl.innerHTML = '';
+
+        if (!keys.length) {
+          if (resultLeadEl) resultLeadEl.textContent = '특별한 증상은 없으신 것 같습니다. 정기 검진·스케일링을 권해드립니다.';
+          var d = depts['일반-검진'];
+          if (d) keys = ['일반-검진'];
+        } else if (resultLeadEl) {
+          resultLeadEl.textContent = keys.length === 1
+            ? '아래 진료과가 가장 적합합니다.'
+            : '아래 ' + Math.min(keys.length, 3) + '개 진료과를 우선순위로 추천드립니다.';
+        }
+
+        var topMax = Math.min(keys.length, 3);
+        var topScore = scores[keys[0]] || 1;
+        for (var i = 0; i < topMax; i++) {
+          var key = keys[i];
+          var d = depts[key];
+          if (!d) continue;
+          var pct = Math.round((scores[key] / topScore) * 100);
+          if (pct > 100) pct = 100;
+          if (pct < 30)  pct = 30;
+          var rank = i + 1;
+          var card = document.createElement('a');
+          card.className = 'md-bot-card md-bot-card--rank-' + rank;
+          card.setAttribute('href', d.url);
+          card.setAttribute('role', 'listitem');
+          card.setAttribute('data-track', 'cta-bot-dept-' + key);
+          card.innerHTML =
+            '<div class="md-bot-card__rank">#' + rank + '</div>' +
+            '<div class="md-bot-card__body">' +
+              '<div class="md-bot-card__name">' + escapeHtml(d.name) + '</div>' +
+              '<div class="md-bot-card__sub">' + escapeHtml(d.sub || '') + '</div>' +
+              '<p class="md-bot-card__summary">' + escapeHtml(d.summary || '') + '</p>' +
+              '<div class="md-bot-card__match" aria-label="적합도">' +
+                '<div class="md-bot-card__match-bar"><span style="width:' + pct + '%"></span></div>' +
+                '<span class="md-bot-card__match-text">적합도 ' + pct + '%</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="md-bot-card__arrow" aria-hidden="true">→</div>';
+          resultsEl.appendChild(card);
+        }
+
+        show('result');
+      }
+
+      function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+          return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]);
+        });
+      }
+
+      bot.querySelectorAll('[data-md-bot-start]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          state = { idx: 0, answers: [] };
+          show('quiz');
+          renderQ();
+        });
+      });
+      bot.querySelectorAll('[data-md-bot-answer]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          answer(b.getAttribute('data-md-bot-answer') === 'yes');
+        });
+      });
+      if (backEl) backEl.addEventListener('click', function () {
+        if (state.idx > 0) {
+          state.idx--;
+          state.answers.pop();
+          renderQ();
+        }
+      });
+      bot.querySelectorAll('[data-md-bot-restart]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          state = { idx: 0, answers: [] };
+          if (fillEl) fillEl.style.width = '0%';
+          show('intro');
+        });
+      });
+    })();
+
     // 8. 비용 안내 페이지 — 치료별 비용 탭 전환
     document.querySelectorAll('[data-pricetab]').forEach(function (root) {
       var btns   = root.querySelectorAll('[data-pricetab-target]');

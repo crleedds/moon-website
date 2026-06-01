@@ -11,14 +11,20 @@ $place_url  = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' );
 /**
  * /오시는-길/, /상담예약/ 페이지에서는 footer 위 위치 섹션을 중복 출력하지 않음.
  *  (각 페이지 자체에 오시는 길 안내가 더 자세하게 포함되어 있음)
+ *  템플릿 메타가 누락된 경우를 대비해 페이지 슬러그로도 감지.
  */
 $md_skip_flocation = false;
 if ( is_page() ) {
-	$_tpl = get_page_template_slug( get_queried_object_id() );
-	if ( in_array( $_tpl, array(
-		'page-templates/page-location.php',
-		'page-templates/page-reservation.php',
-	), true ) ) {
+	$_pid  = get_queried_object_id();
+	$_tpl  = get_page_template_slug( $_pid );
+	$_slug = urldecode( (string) get_post_field( 'post_name', $_pid ) );
+	if (
+		in_array( $_tpl, array(
+			'page-templates/page-location.php',
+			'page-templates/page-reservation.php',
+		), true )
+		|| in_array( $_slug, array( '오시는-길', '오시는길', 'location', '상담예약', 'reservation' ), true )
+	) {
 		$md_skip_flocation = true;
 	}
 }
