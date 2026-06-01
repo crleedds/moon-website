@@ -143,7 +143,7 @@ add_action( 'wp_ajax_nopriv_moondental_reservation', 'moondental_handle_reservat
 function moondental_reservation_services() {
 	return array(
 		array( 'value' => '임플란트',          'title' => '임플란트',        'desc' => '치아 식립·뼈이식·재식립' ),
-		array( 'value' => '투명교정',          'title' => '투명교정',        'desc' => '인비절라인·설측·일반교정' ),
+		array( 'value' => '투명교정',          'title' => '투명교정',        'desc' => '슈어스마일·설측·일반교정' ),
 		array( 'value' => '자연치아 살리기',  'title' => '자연치아 살리기', 'desc' => '신경·근관·치근단 보존' ),
 		array( 'value' => '턱관절 클리닉',     'title' => '턱관절 클리닉',   'desc' => '통증·소리·이갈이' ),
 		array( 'value' => '사랑니 발치',       'title' => '사랑니 발치',     'desc' => '매복 사랑니 안전 발치' ),
