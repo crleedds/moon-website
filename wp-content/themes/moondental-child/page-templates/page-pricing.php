@@ -385,47 +385,7 @@ for ( $i = 1; $i <= 4; $i++ ) {
 	</div>
 </section>
 
-<!-- ============ 위치 ============ -->
-<section class="md-section md-section--surface">
-	<div class="md-container">
-		<header class="md-section-head">
-			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'price_loc_eyebrow', 'Location' ) ); ?></span>
-			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'price_loc_title', '문치과병원 위치' ) ); ?></h2>
-			<p class="md-section-head__lead">
-				<a href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener" style="color:inherit; border-bottom:1px dashed var(--color-border);">
-					<?php echo esc_html( $info['address'] ); ?>
-				</a>
-			</p>
-		</header>
-
-		<div class="md-mapbtn-grid">
-			<a class="md-mapbtn md-mapbtn--naver" href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener" data-track="cta-priceX-map-naver">
-				<span class="md-mapbtn__logo" aria-hidden="true">N</span>
-				<span class="md-mapbtn__body">
-					<span class="md-mapbtn__name">네이버 지도</span>
-					<span class="md-mapbtn__sub">길찾기 · 대중교통</span>
-				</span>
-				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
-			</a>
-			<a class="md-mapbtn md-mapbtn--kakao" href="<?php echo esc_url( $map_kakao ); ?>" target="_blank" rel="noopener" data-track="cta-priceX-map-kakao">
-				<span class="md-mapbtn__logo" aria-hidden="true">k</span>
-				<span class="md-mapbtn__body">
-					<span class="md-mapbtn__name">카카오맵</span>
-					<span class="md-mapbtn__sub">길찾기 · 로드뷰</span>
-				</span>
-				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
-			</a>
-			<a class="md-mapbtn md-mapbtn--google" href="<?php echo esc_url( $map_google ); ?>" target="_blank" rel="noopener" data-track="cta-priceX-map-google">
-				<span class="md-mapbtn__logo" aria-hidden="true">G</span>
-				<span class="md-mapbtn__body">
-					<span class="md-mapbtn__name">Google Maps</span>
-					<span class="md-mapbtn__sub">Directions · Street View</span>
-				</span>
-				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
-			</a>
-		</div>
-	</div>
-</section>
+<?php /* 위치 섹션은 푸터 위 section-location과 중복되어 제거됨 — v3.12.3 */ ?>
 
 <?php
 get_footer();
