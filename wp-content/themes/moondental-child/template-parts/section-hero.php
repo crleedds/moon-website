@@ -12,7 +12,7 @@ $eyebrow = get_theme_mod( 'moondental_hero_eyebrow', '천안 만남로 · 1995�
 $title_a = get_theme_mod( 'moondental_hero_title_a', '실력과 품격있는 진료,' );
 $title_b = get_theme_mod( 'moondental_hero_title_b', '가족처럼 오래 곁에' );
 $lead    = get_theme_mod( 'moondental_hero_lead',
-	"10명의 의료진이 한 자리에서, 일반진료부터 임플란트·교정·심미·소아예방까지.\n" .
+	"분야별 전문 의료진이 한 자리에서, 일반진료부터 임플란트·교정·심미·소아예방까지.\n" .
 	"충분히 듣고, 꼭 필요한 치료만 권합니다."
 );
 
@@ -36,7 +36,7 @@ $hero_image_id = get_theme_mod( 'moondental_hero_image', 0 );
 
 				<ul class="md-hero__badges" aria-label="문치과병원의 특징">
 					<li><span aria-hidden="true">✓</span> 1995년 개원 · 30여년 임상</li>
-					<li><span aria-hidden="true">✓</span> 의료진 10명 · 통합진료</li>
+					<li><span aria-hidden="true">✓</span> 분야별 전문 의료진 · 통합진료</li>
 					<li><span aria-hidden="true">✓</span> 의료기관번호 34400117</li>
 				</ul>
 			</div>

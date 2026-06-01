@@ -73,10 +73,10 @@ function moondental_home_content_fields() {
 				'trust_1_label' => array( 'default' => '1995년 개원', 'label' => '①번 — 라벨', 'type' => 'text' ),
 				'trust_1_sub'   => array( 'default' => '한자리에서 이어온 신뢰', 'label' => '①번 — 부제', 'type' => 'text' ),
 
-				'trust_2_value' => array( 'default' => '10',    'label' => '②번 — 숫자',     'type' => 'text' ),
-				'trust_2_unit'  => array( 'default' => '명',     'label' => '②번 — 단위',     'type' => 'text' ),
-				'trust_2_label' => array( 'default' => '각 분야 전문 의료진', 'label' => '②번 — 라벨', 'type' => 'text' ),
-				'trust_2_sub'   => array( 'default' => '보철 · 교정 · 보존 · 외과', 'label' => '②번 — 부제', 'type' => 'text' ),
+				'trust_2_value' => array( 'default' => '6',     'label' => '②번 — 숫자',     'type' => 'text' ),
+				'trust_2_unit'  => array( 'default' => '과',    'label' => '②번 — 단위',     'type' => 'text' ),
+				'trust_2_label' => array( 'default' => '전문 진료과', 'label' => '②번 — 라벨', 'type' => 'text' ),
+				'trust_2_sub'   => array( 'default' => '보철·교정·보존·치주·소아·외과', 'label' => '②번 — 부제', 'type' => 'text' ),
 
 				'trust_3_value' => array( 'default' => '3',     'label' => '③번 — 숫자',     'type' => 'text' ),
 				'trust_3_unit'  => array( 'default' => '개층',   'label' => '③번 — 단위',     'type' => 'text' ),
@@ -575,7 +575,7 @@ function moondental_service_content_fields() {
 }
 
 /**
- * 의료진 9명 콘텐츠 (철학 + 약력 override).
+ * 의료진 콘텐츠 (철학 + 약력 override).
  *  사진/이름/직책은 functions.php 데이터 기준, 여기서는 자주 바뀌는 철학·약력만 편집.
  */
 function moondental_doctor_content_fields() {
@@ -837,7 +837,7 @@ function moondental_testimonials_content_fields() {
 function moondental_compare_content_fields() {
 	$defaults = array(
 		1 => array( 'label' => '의료기관 종별',     'value' => '치과병원 (병원급)',                            'icon' => '🏥' ),
-		2 => array( 'label' => '의료진 규모',       'value' => '9인 전문 의료진 협진',                         'icon' => '👨‍⚕️' ),
+		2 => array( 'label' => '의료진 협진',       'value' => '분야별 전문 의료진 협진',                       'icon' => '👨‍⚕️' ),
 		3 => array( 'label' => '전문 진료과 6과',   'value' => '보철·교정·보존·치주·소아·외과',                'icon' => '🦷' ),
 		4 => array( 'label' => '통합 진료센터',     'value' => '9·10·11·13F 4개 층 운영',                      'icon' => '🏢' ),
 		5 => array( 'label' => '디지털 진단 장비',  'value' => 'CBCT · 디지털 가이드 · 구강스캐너',            'icon' => '🔬' ),

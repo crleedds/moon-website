@@ -891,7 +891,7 @@ function moondental_default_service_content( $slug ) {
 function moondental_default_about_content() {
 	return '
 <h2>1995년부터, 천안에서</h2>
-<p class="lead">한아의료재단 문치과병원은 1995년 개원 이래 천안 시민과 함께 자라온 종합 치과병원입니다. 만남로 문타워 9·10·11·13층, 총 4개 층을 사용하며 9명의 의료진이 임플란트·교정·심미·자연치아 살리기·턱관절·구강외과까지 한 자리에서 진료합니다. (13층은 한아문화센터 · 원내 기공실)</p>
+<p class="lead">한아의료재단 문치과병원은 1995년 개원 이래 천안 시민과 함께 자라온 종합 치과병원입니다. 만남로 문타워 9·10·11·13층, 총 4개 층을 사용하며 분야별 전문 의료진이 임플란트·교정·심미·자연치아 살리기·턱관절·구강외과까지 한 자리에서 진료합니다. (13층은 한아문화센터 · 원내 기공실)</p>
 
 <h3>저희가 약속드리는 것</h3>
 <ul>
@@ -1113,7 +1113,7 @@ function moondental_default_privacy_content() {
 	<p class="md-policy-hero__lead">환자분의 소중한 개인정보를 안전하게 보호합니다.</p>
 	<div class="md-policy-hero__badges">
 		<span>📍 천안 만남로</span>
-		<span>🏥 9명의 의료진</span>
+		<span>🏥 전문 의료진 협진</span>
 		<span>🕐 평일 야간 20:30</span>
 		<span>🅿️ 자체 주차장</span>
 	</div>
@@ -1264,7 +1264,7 @@ function moondental_default_privacy_content() {
  */
 function moondental_default_doctors_content() {
 	return '
-<h2>9명의 의료진이 함께합니다</h2>
+<h2>분야별 전문 의료진이 함께합니다</h2>
 <p class="lead">한 분의 환자를 평생 보기 위해서는, 한 분의 원장만으로는 부족합니다. 문치과병원에는 <strong>구강악안면외과·보철·교정·치주·보존·턱관절·통합치의학</strong> 등 각 분야의 전문 의료진이 함께 있어 어떤 진료가 필요하더라도 한 곳에서 일관된 진료를 받으실 수 있습니다.</p>
 
 <h3>층별 전문 센터</h3>

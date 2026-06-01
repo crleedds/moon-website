@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.12.1' );
+define( 'MOONDENTAL_VERSION', '3.12.2' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -517,7 +517,7 @@ function moondental_customize_register( $wp_customize ) {
 		'hero_eyebrow' => array( 'label' => '상단 작은 태그',   'type' => 'text',     'default' => '천안 만남로 · 1995년부터' ),
 		'hero_title_a' => array( 'label' => '메인 카피 1행',     'type' => 'text',     'default' => '실력과 품격있는 진료,' ),
 		'hero_title_b' => array( 'label' => '메인 카피 2행 (강조)','type' => 'text',     'default' => '가족처럼 오래 곁에' ),
-		'hero_lead'    => array( 'label' => '서브 카피',          'type' => 'textarea', 'default' => "10명의 의료진이 한 자리에서, 일반진료부터 임플란트·교정·심미·소아예방까지.\n충분히 듣고, 꼭 필요한 치료만 권합니다." ),
+		'hero_lead'    => array( 'label' => '서브 카피',          'type' => 'textarea', 'default' => "분야별 전문 의료진이 한 자리에서, 일반진료부터 임플란트·교정·심미·소아예방까지.\n충분히 듣고, 꼭 필요한 치료만 권합니다." ),
 	);
 	foreach ( $hero_fields as $key => $f ) {
 		$id = 'moondental_' . $key;

@@ -21,7 +21,7 @@ get_header();
 
 <?php get_template_part( 'template-parts/section', 'services' ); ?>
 
-<?php get_template_part( 'template-parts/section', 'process' ); ?>
+<?php /* section-process(첫 방문부터 사후관리까지)는 홈에서 제거 — v3.12.2 */ ?>
 
 <?php get_template_part( 'template-parts/section', 'facility' ); ?>
 
