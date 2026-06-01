@@ -67,24 +67,38 @@ $price_tabs = array(
 );
 $first_tab_key = array_key_first( $price_tabs );
 
-// 비용 확정까지 4단계 — Customizer 연동
+// 비용 확정까지 4단계 — Customizer 연동 (기본값은 Customizer 정의와 동일)
+$step_defaults = array(
+	1 => array( 'icon' => '💬', 'title' => '편안한 상담',  'desc' => '증상·예산·일정·우려를 충분히 듣습니다. 전화·카톡·내원 모두 가능.' ),
+	2 => array( 'icon' => '🔬', 'title' => '정밀 진단',    'desc' => 'X-ray · CT · 구강 검사로 정확한 상태를 파악합니다.' ),
+	3 => array( 'icon' => '📄', 'title' => '상세 견적서',   'desc' => '치료 옵션별 비용·기간·과정을 문서로 안내드립니다.' ),
+	4 => array( 'icon' => '✅', 'title' => '동의 후 치료', 'desc' => '충분히 검토하시고 동의하신 항목만 진행. 추가 비용 0원.' ),
+);
 $steps = array();
 for ( $i = 1; $i <= 4; $i++ ) {
+	$d = $step_defaults[ $i ];
 	$steps[] = array(
 		'num'   => sprintf( '%02d', $i ),
-		'title' => md_content( "price_step_{$i}_title", '' ),
-		'desc'  => md_content( "price_step_{$i}_desc",  '' ),
-		'icon'  => md_content( "price_step_{$i}_icon",  '' ),
+		'title' => md_content( "price_step_{$i}_title", $d['title'] ),
+		'desc'  => md_content( "price_step_{$i}_desc",  $d['desc'] ),
+		'icon'  => md_content( "price_step_{$i}_icon",  $d['icon'] ),
 	);
 }
 
-// 가격 정책 4 — Customizer 연동
+// 가격 정책 4 — Customizer 연동 (기본값은 Customizer 정의와 동일)
+$policy_defaults = array(
+	1 => array( 'title' => '환자 중심 결정',   'desc' => '비용보다 환자분의 치아 보존이 먼저입니다. 발치보다 보존, 임플란트보다 신경치료를 우선 검토합니다.' ),
+	2 => array( 'title' => '사전 견적서 제공', 'desc' => '치료 시작 전에 옵션별 비용·기간을 문서로 안내드립니다. 시작 후 추가 비용이 발생하지 않습니다.' ),
+	3 => array( 'title' => '난이도 단계 안내', 'desc' => '임플란트·교정 등은 케이스 난이도에 따라 가격대가 명확히 다릅니다. 어느 단계인지 사전에 설명드립니다.' ),
+	4 => array( 'title' => '평생 A/S 시스템',  'desc' => '시술 후 정기 검진·문제 발생 시 대응까지 함께 봅니다. 비용은 시술 시점에만 발생하지 않습니다.' ),
+);
 $policies = array();
 for ( $i = 1; $i <= 4; $i++ ) {
+	$d = $policy_defaults[ $i ];
 	$policies[] = array(
 		'num'   => sprintf( '%02d', $i ),
-		'title' => md_content( "price_policy_{$i}_title", '' ),
-		'desc'  => md_content( "price_policy_{$i}_desc",  '' ),
+		'title' => md_content( "price_policy_{$i}_title", $d['title'] ),
+		'desc'  => md_content( "price_policy_{$i}_desc",  $d['desc'] ),
 	);
 }
 
@@ -92,13 +106,20 @@ for ( $i = 1; $i <= 4; $i++ ) {
 $ins_covered   = md_parse_lines( md_content( 'price_ins_yes_items', "스케일링 (만 19세 이상, 연 1회)\n레진 충전 (만 12세 이하 영구치)\n신경치료 · 치주치료 · 발치\n사랑니 발치 (매복 포함)\nX-ray · 파노라마 · CBCT\n틀니 (만 65세 이상, 7년 1회)\n임플란트 (만 65세 이상, 평생 2개, 본인부담 30%)" ) );
 $ins_uncovered = md_parse_lines( md_content( 'price_ins_no_items',  "임플란트 (만 65세 미만 전체)\n교정 (메탈·세라믹·투명·설측)\n심미 라미네이트 · 미백\n심미 보철 (지르코니아·올세라믹)\n심미 인레이 / 온레이\n치아 성형 (레진 심미)\n턱관절 보톡스 · 스플린트 일부" ) );
 
-// 결제 안내 4 — Customizer 연동
+// 결제 안내 4 — Customizer 연동 (기본값은 Customizer 정의와 동일)
+$pay_defaults = array(
+	1 => array( 'icon' => '💳', 'title' => '신용·체크카드', 'desc' => '모든 카드사 결제 가능' ),
+	2 => array( 'icon' => '📊', 'title' => '무이자 할부',   'desc' => '고액 진료 시 카드사 2~12개월' ),
+	3 => array( 'icon' => '📱', 'title' => '간편결제',     'desc' => '삼성페이·카카오페이 등' ),
+	4 => array( 'icon' => '💵', 'title' => '현금 결제',     'desc' => '현금영수증 발급' ),
+);
 $payment_methods = array();
 for ( $i = 1; $i <= 4; $i++ ) {
+	$d = $pay_defaults[ $i ];
 	$payment_methods[] = array(
-		'icon'  => md_content( "price_pay_{$i}_icon", '' ),
-		'title' => md_content( "price_pay_{$i}_title", '' ),
-		'desc'  => md_content( "price_pay_{$i}_desc",  '' ),
+		'icon'  => md_content( "price_pay_{$i}_icon",  $d['icon'] ),
+		'title' => md_content( "price_pay_{$i}_title", $d['title'] ),
+		'desc'  => md_content( "price_pay_{$i}_desc",  $d['desc'] ),
 	);
 }
 ?>
@@ -137,13 +158,21 @@ for ( $i = 1; $i <= 4; $i++ ) {
 					<span class="md-priceX-promise__year"><?php echo esc_html( md_content( 'price_promise_year', 'SINCE 1995' ) ); ?></span>
 					<span class="md-priceX-promise__title"><?php echo esc_html( md_content( 'price_promise_title', '문치과의 3가지 약속' ) ); ?></span>
 				</header>
+				<?php
+				$promise_defaults = array(
+					1 => array( 'title' => '견적 그대로',          'desc' => '치료 시작 후 추가 비용 0원' ),
+					2 => array( 'title' => '모든 비급여 사전 안내', 'desc' => '한 항목도 빠뜨리지 않고 미리' ),
+					3 => array( 'title' => '치아 보존이 우선',     'desc' => '발치보다 살리기를 먼저 고민' ),
+				);
+				?>
 				<ul class="md-priceX-promise__list">
-					<?php for ( $i = 1; $i <= 3; $i++ ) : ?>
+					<?php for ( $i = 1; $i <= 3; $i++ ) :
+						$pd = $promise_defaults[ $i ]; ?>
 						<li>
 							<span class="md-priceX-promise__no"><?php echo sprintf( '%02d', $i ); ?></span>
 							<div>
-								<strong><?php echo esc_html( md_content( "price_promise_{$i}_title", '' ) ); ?></strong>
-								<span><?php echo esc_html( md_content( "price_promise_{$i}_desc", '' ) ); ?></span>
+								<strong><?php echo esc_html( md_content( "price_promise_{$i}_title", $pd['title'] ) ); ?></strong>
+								<span><?php echo esc_html( md_content( "price_promise_{$i}_desc",  $pd['desc']  ) ); ?></span>
 							</div>
 						</li>
 					<?php endfor; ?>

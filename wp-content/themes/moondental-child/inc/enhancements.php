@@ -331,6 +331,39 @@ function moondental_filter_nav_items( $items, $args ) {
 add_filter( 'wp_nav_menu_objects', 'moondental_filter_nav_items', 10, 2 );
 
 
+/**
+ * 독립 탭 페이지(비용안내·의료진 등)에서 부모 메뉴 항목의 ancestor 하이라이트 제거.
+ *
+ *  문제: 비용안내·의료진 페이지가 WP 페이지 계층상 '병원소개'의 하위 페이지로
+ *        설정되어 있어, 해당 페이지 방문 시 병원안내 메뉴 항목에
+ *        current_page_parent / current_page_ancestor / current-menu-ancestor
+ *        클래스가 자동 추가되어 잘못 하이라이트됨.
+ *  해결: 페이지 슬러그가 '독립 탭' 목록에 있을 때 모든 메뉴 항목의
+ *        parent/ancestor 류 클래스를 제거. 정확한 현재 항목(current-menu-item)만 유지.
+ */
+function moondental_strip_ancestor_classes_on_standalone( $classes, $item ) {
+	if ( ! is_page() ) return $classes;
+
+	$slug = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
+	$standalone = array(
+		'비용-안내', '비용안내', '비급여-진료비', '진료비안내', 'pricing',
+		'의료진', 'doctors',
+	);
+	if ( ! in_array( $slug, $standalone, true ) ) return $classes;
+
+	$strip = array(
+		'current_page_parent',
+		'current_page_ancestor',
+		'current-menu-parent',
+		'current-menu-ancestor',
+		'current-page-parent',
+		'current-page-ancestor',
+	);
+	return array_values( array_diff( (array) $classes, $strip ) );
+}
+add_filter( 'nav_menu_css_class', 'moondental_strip_ancestor_classes_on_standalone', 20, 2 );
+
+
 /* ============================================================
  * 3. GA4 클릭 이벤트 트래킹 (전화·카톡·네이버 예약·예약폼 제출)
  *    GA4 측정 ID가 설정돼있을 때만 gtag 호출. 없으면 dataLayer만.
