@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.8.0' );
+define( 'MOONDENTAL_VERSION', '3.8.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -258,6 +258,64 @@ function md_phone_link( $text = '', $attrs = array() ) {
 		esc_html( $display )
 	);
 }
+
+/**
+ * 사이트 전역 텍스트에서 알려진 주소 문자열을 네이버 지도 anchor로 자동 wrap.
+ *  이미 anchor 안에 있는 텍스트는 건드리지 않음.
+ *  지원 주소:
+ *    - 신부 제5공영주차장 / (동남구 먹거리1길 10) — 5공영주차장
+ *    - 충청남도 천안시 동남구 만남로 52 ... — 병원 본원
+ *
+ * @param string $html HTML or plain text
+ * @return string
+ */
+function md_autolink_addresses( $html ) {
+	if ( ! is_string( $html ) || $html === '' ) return $html;
+
+	$info = moondental_get_info();
+	$hospital_url = $info['naver_map_url']
+		?: ( 'https://map.naver.com/p/search/' . rawurlencode( $info['name_full'] ?? '문치과병원' ) );
+	$park5_url = 'https://map.naver.com/p/search/' . rawurlencode( '신부 제5공영주차장' );
+
+	// 구체적 → 일반 순서: 긴 패턴이 먼저 매칭되도록
+	$patterns = array(
+		'신부 제5공영주차장(동남구 먹거리1길 10)'              => $park5_url,
+		'신부 제5공영주차장 (동남구 먹거리1길 10)'             => $park5_url,
+		'"신부 제5공영주차장"(동남구 먹거리1길 10)'            => $park5_url,
+		'"신부 제5공영주차장" (동남구 먹거리1길 10)'           => $park5_url,
+		'신부 제5공영주차장'                                  => $park5_url,
+		'"신부 제5공영주차장"'                                => $park5_url,
+		'동남구 먹거리1길 10'                                 => $park5_url,
+		'충청남도 천안시 동남구 만남로 52, 문타워 9~13층 (신부동, 문타워빌딩)' => $hospital_url,
+		'충청남도 천안시 동남구 만남로 52, 문타워 9~13층 (신부동)' => $hospital_url,
+		'충청남도 천안시 동남구 만남로 52, 문타워 9~13층'      => $hospital_url,
+		'충남 천안시 동남구 만남로 52, 문타워 9~13층'          => $hospital_url,
+	);
+
+	// anchor 내부 보호: <a ...>...</a> 영역을 plain placeholder로 임시 치환
+	$anchors = array();
+	$html = preg_replace_callback( '#<a\b[^>]*>.*?</a>#siu', function( $m ) use ( &$anchors ) {
+		$anchors[] = $m[0];
+		return '___MDA_' . ( count( $anchors ) - 1 ) . '___';
+	}, $html );
+
+	foreach ( $patterns as $needle => $url ) {
+		if ( strpos( $html, $needle ) === false ) continue;
+		$anchor = '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener" class="md-addr-link" data-track="cta-autolink-addr">' . esc_html( $needle ) . '</a>';
+		// 한 번에 모두 치환 (str_replace는 이미 치환된 위치를 다시 검사하지 않음)
+		$html = str_replace( $needle, $anchor, $html );
+	}
+
+	// 복원
+	foreach ( $anchors as $i => $orig ) {
+		$html = str_replace( '___MDA_' . $i . '___', $orig, $html );
+	}
+
+	return $html;
+}
+
+// 사이트 전역 the_content 필터로 자동 주소 링크 (priority 90 — wpautop 후 / lazy-image 전)
+add_filter( 'the_content', 'md_autolink_addresses', 90 );
 
 /**
  * 전역 예약 CTA 버튼 — 네이버 예약 + 카카오톡 상담 + 전화.

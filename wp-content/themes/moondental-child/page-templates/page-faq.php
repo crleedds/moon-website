@@ -42,7 +42,7 @@ $faqs = moondental_get_faqs();
 					<?php foreach ( $items as $item ) : ?>
 						<details class="md-faq__item">
 							<summary><?php echo esc_html( $item['q'] ); ?></summary>
-							<p><?php echo esc_html( $item['a'] ); ?></p>
+							<p><?php echo wp_kses_post( md_autolink_addresses( $item['a'] ) ); ?></p>
 						</details>
 					<?php endforeach; ?>
 				</div>

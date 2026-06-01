@@ -181,7 +181,7 @@ if ( function_exists( 'moondental_get_faqs_by_service' ) ) {
 			<?php foreach ( $faqs_map[ $slug ] as $i => $item ) : ?>
 				<details class="md-faq__item"<?php echo $i === 0 ? ' open' : ''; ?>>
 					<summary><?php echo esc_html( $item['q'] ); ?></summary>
-					<p><?php echo wp_kses_post( $item['a'] ); ?></p>
+					<p><?php echo wp_kses_post( md_autolink_addresses( $item['a'] ) ); ?></p>
 				</details>
 			<?php endforeach; ?>
 		</div>

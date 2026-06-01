@@ -32,7 +32,7 @@ for ( $i = 1; $i <= 6; $i++ ) {
 						<span class="md-home-faq__q"><?php echo esc_html( $faq['q'] ); ?></span>
 						<span class="md-home-faq__chev" aria-hidden="true">+</span>
 					</summary>
-					<div class="md-home-faq__a"><?php echo wp_kses_post( wpautop( $faq['a'] ) ); ?></div>
+					<div class="md-home-faq__a"><?php echo wp_kses_post( wpautop( md_autolink_addresses( $faq['a'] ) ) ); ?></div>
 				</details>
 			<?php endforeach; ?>
 		</div>
