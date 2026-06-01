@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.9.0' );
+define( 'MOONDENTAL_VERSION', '3.9.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -323,6 +323,14 @@ function md_autolink_addresses( $html ) {
 
 // 사이트 전역 the_content 필터로 자동 주소 링크 (priority 90 — wpautop 후 / lazy-image 전)
 add_filter( 'the_content', 'md_autolink_addresses', 90 );
+
+/**
+ * Astra 부모 테마의 기본 scroll-to-top 버튼 끄기 — 테마 자체 .md-totop만 사용.
+ *  Astra 4+ 옵션 키 'scroll-to-top-enable' 를 false로 강제.
+ *  옵션 키가 다른 버전에서도 CSS .ast-scroll-top* 숨김으로 이중 안전.
+ */
+add_filter( 'astra_get_option_scroll-to-top-enable', '__return_false', 99 );
+add_filter( 'astra_get_option_scroll-to-top-device', function() { return ''; }, 99 );
 
 /**
  * 전역 예약 CTA 버튼 — 네이버 예약 + 카카오톡 상담 + 전화.

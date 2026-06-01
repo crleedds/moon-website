@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.9.0
+Version:      3.9.1
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -1622,6 +1622,30 @@ button.elementor-button {
 .md-fab--phone .md-fab__icon {
   background: transparent;
   font-size: 1rem;
+}
+
+/* =============================================================
+   외부(부모 테마·플러그인) scroll-to-top 버튼 숨김
+   — 테마 자체 .md-totop 한 개만 노출하도록 통일
+   ============================================================= */
+#ast-scroll-top,
+.ast-scroll-top,
+.ast-scroll-top-icon,
+.ast-scroll-to-top,
+.astra-scroll-to-top,
+.ast-back-to-top,
+.elementor-back-to-top,
+.kc-back-to-top,
+.scroll-to-top-button,
+.scroll-top,
+.scrolltotop,
+.wpfront-scroll-top-container,
+#scroll-to-top,
+#back-to-top,
+.back-to-top:not(.md-totop) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 /* =============================================================
