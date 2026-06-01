@@ -1,9 +1,9 @@
 <?php
 /**
- * Template Name: 사명 & 역사
+ * Template Name: 30여년의 발자취
  * Template Post Type: page
  *
- * 병원소개 → 사명 & 역사 페이지.
+ * 병원소개 → 30여년의 발자취 페이지.
  * 상단: 사명·핵심 가치 / 하단: moondental_get_history() 연표.
  *
  * @package moondental-child
@@ -11,13 +11,13 @@
 
 get_header();
 $history       = moondental_get_history();
-$display_title = '사명 & 역사';
+$display_title = '30여년의 발자취';
 
 $values = array();
 for ( $i = 1; $i <= 4; $i++ ) {
 	$_defaults = array(
 		1 => array( 'icon' => '🤝', 'title' => '정직', 'desc' => '환자분께 필요한 진료만 권합니다. 시작 전 모든 비용을 안내합니다.' ),
-		2 => array( 'icon' => '🛡️', 'title' => '신뢰', 'desc' => '30년 동안 한자리에서 — 환자 한 분의 평생 치아를 길게 봅니다.' ),
+		2 => array( 'icon' => '🛡️', 'title' => '신뢰', 'desc' => '30여년 동안 한자리에서 — 환자 한 분의 평생 치아를 길게 봅니다.' ),
 		3 => array( 'icon' => '🌱', 'title' => '책임', 'desc' => '시술 시점뿐 아니라 정기 검진·사후 관리까지 평생 함께합니다.' ),
 		4 => array( 'icon' => '❤️', 'title' => '헌신', 'desc' => '지역사회와 함께 — 의료재단으로서 장학·기부를 이어가고 있습니다.' ),
 	);
@@ -39,7 +39,7 @@ for ( $i = 1; $i <= 4; $i++ ) {
 		</nav>
 		<h1 class="md-page-hero__title"><?php echo esc_html( $display_title ); ?></h1>
 		<p class="md-page-hero__lead">
-			1995년부터 천안에서 — 환자 한 분의 평생 치아 건강을 책임지는 마음으로 진료해온 30년의 기록.
+			1995년부터 천안에서 — 환자 한 분의 평생 치아 건강을 책임지는 마음으로 진료해온 30여년의 기록.
 		</p>
 	</div>
 </section>
@@ -78,7 +78,7 @@ for ( $i = 1; $i <= 4; $i++ ) {
 
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'history_eyebrow', 'Our History' ) : 'Our History' ); ?></span>
-			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'history_title', '30년의 발자취' ) : '30년의 발자취' ); ?></h2>
+			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'history_title', '30여년의 발자취' ) : '30여년의 발자취' ); ?></h2>
 			<p class="md-section-head__lead">
 				<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'history_lead', '1995년 개원부터 현재까지 — 환자분과 함께 걸어온 길.' ) : '1995년 개원부터 현재까지 — 환자분과 함께 걸어온 길.' ) ); ?>
 			</p>

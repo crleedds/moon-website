@@ -118,7 +118,7 @@ for ( $i = 1; $i <= 4; $i++ ) {
 					<em><?php echo esc_html( md_content( 'price_hero_title_b', '치료가 끝날 때까지' ) ); ?></em> <?php echo esc_html( md_content( 'price_hero_title_c', '그대로.' ) ); ?>
 				</h1>
 				<p class="md-priceX-hero__lead">
-					<?php echo nl2br( esc_html( md_content( 'price_hero_lead', '문치과병원은 30년 동안 정직한 진료비를 약속해왔습니다. 불필요한 치료를 권하지 않고, 시작 후 추가 비용이 발생하지 않습니다.' ) ) ); ?>
+					<?php echo nl2br( esc_html( md_content( 'price_hero_lead', '문치과병원은 30여년 동안 정직한 진료비를 약속해왔습니다. 불필요한 치료를 권하지 않고, 시작 후 추가 비용이 발생하지 않습니다.' ) ) ); ?>
 				</p>
 				<div class="md-btn-group">
 					<a class="md-btn md-btn-primary md-btn--lg" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-priceX-hero-call">

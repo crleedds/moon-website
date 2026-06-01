@@ -190,11 +190,11 @@ function moondental_filter_nav_items( $items, $args ) {
 		return $items;
 	}
 
-	// "역사" 타이틀 항목을 "사명 & 역사"로 자동 표기 변환
+	// "역사" 타이틀 항목을 "30여년의 발자취"로 자동 표기 변환
 	foreach ( $items as $item ) {
 		$t = trim( wp_strip_all_tags( $item->title ) );
-		if ( $t === '역사' ) {
-			$item->title = '사명 & 역사';
+		if ( $t === '역사' || $t === '사명 & 역사' ) {
+			$item->title = '30여년의 발자취';
 		}
 	}
 	$hide_titles = array(
@@ -455,7 +455,7 @@ function moondental_get_testimonials() {
 			'age'     => '40대',
 			'service' => '임플란트',
 			'rating'  => 5,
-			'text'    => '오랫동안 미루던 임플란트를 30년 경력 원장님께 받았습니다. 수술 당일 통증이 거의 없었고, 자가혈을 함께 사용한다는 점이 안심됐어요. 평일 야간 진료가 있어 직장인에게 정말 편합니다.',
+			'text'    => '오랫동안 미루던 임플란트를 30여년 경력 원장님께 받았습니다. 수술 당일 통증이 거의 없었고, 자가혈을 함께 사용한다는 점이 안심됐어요. 평일 야간 진료가 있어 직장인에게 정말 편합니다.',
 		),
 		array(
 			'name'    => '박○○',
@@ -857,7 +857,7 @@ function moondental_clinic_comparison() {
 		6 => array( 'label' => '보철 제작',         'hospital' => '자체 한아 임플란트 보철연구소',              'clinic' => '외부 기공소 의뢰' ),
 		7 => array( 'label' => '전신질환 대응',     'hospital' => '혈압 · 당검사 · 심전도 · 산소포화도 상시',   'clinic' => '제한적 대응' ),
 		8 => array( 'label' => '평일 진료시간',     'hospital' => '~ 20:30 야간진료 운영',                      'clinic' => '~ 18:00 일반적' ),
-		9 => array( 'label' => '임상 경력',         'hospital' => '1995년부터 30년 한자리 진료',                'clinic' => '의원별 상이' ),
+		9 => array( 'label' => '임상 경력',         'hospital' => '1995년부터 30여년 한자리 진료',                'clinic' => '의원별 상이' ),
 	);
 
 	if ( ! function_exists( 'md_content' ) ) return array_values( $defaults );

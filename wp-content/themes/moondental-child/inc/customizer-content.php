@@ -96,10 +96,10 @@ function moondental_home_content_fields() {
 			'fields' => array(
 				'why_eyebrow' => array( 'default' => 'Why Moon Dental', 'label' => '섹션 — eyebrow', 'type' => 'text' ),
 				'why_title'   => array( 'default' => '왜 문치과병원을 찾으시나요?', 'label' => '섹션 — 제목', 'type' => 'text' ),
-				'why_lead'    => array( 'default' => '30년 동안 환자분들이 선택해온 이유 — 4가지로 정리해드립니다.', 'label' => '섹션 — 설명', 'type' => 'textarea' ),
+				'why_lead'    => array( 'default' => '30여년 동안 환자분들이 선택해온 이유 — 4가지로 정리해드립니다.', 'label' => '섹션 — 설명', 'type' => 'textarea' ),
 
 				'why_1_icon'  => array( 'default' => '🏥', 'label' => '①번 — 아이콘(이모지)', 'type' => 'text' ),
-				'why_1_title' => array( 'default' => '30년, 한자리에서', 'label' => '①번 — 제목', 'type' => 'text' ),
+				'why_1_title' => array( 'default' => '30여년, 한자리에서', 'label' => '①번 — 제목', 'type' => 'text' ),
 				'why_1_desc'  => array( 'default' => '1995년부터 천안 만남로 한자리에서 진료해온 동네 치과. 환자 한 분의 평생 치아를 길게 봅니다.', 'label' => '①번 — 설명', 'type' => 'textarea' ),
 
 				'why_2_icon'  => array( 'default' => '🏢', 'label' => '②번 — 아이콘', 'type' => 'text' ),
@@ -312,7 +312,7 @@ function moondental_pricing_content_fields() {
 				'price_hero_title_a' => array( 'default' => '처음 들으신 견적,', 'label' => '제목 1행', 'type' => 'text' ),
 				'price_hero_title_b' => array( 'default' => '치료가 끝날 때까지', 'label' => '제목 2행 (강조)', 'type' => 'text' ),
 				'price_hero_title_c' => array( 'default' => '그대로.', 'label' => '제목 2행 끝부분', 'type' => 'text' ),
-				'price_hero_lead'    => array( 'default' => '문치과병원은 30년 동안 정직한 진료비를 약속해왔습니다. 불필요한 치료를 권하지 않고, 시작 후 추가 비용이 발생하지 않습니다.', 'label' => '설명', 'type' => 'textarea' ),
+				'price_hero_lead'    => array( 'default' => '문치과병원은 30여년 동안 정직한 진료비를 약속해왔습니다. 불필요한 치료를 권하지 않고, 시작 후 추가 비용이 발생하지 않습니다.', 'label' => '설명', 'type' => 'textarea' ),
 				'price_hero_btn1'    => array( 'default' => '📞 무료 비용 상담', 'label' => 'CTA 1 라벨 (전화번호 자동 추가)', 'type' => 'text' ),
 				'price_hero_btn2'    => array( 'default' => '🟢 네이버 예약', 'label' => 'CTA 2 라벨', 'type' => 'text' ),
 			),
@@ -647,9 +647,9 @@ function moondental_subpage_content_fields() {
 			),
 		),
 
-		/* ─── 사명 & 역사 ─── */
+		/* ─── 30여년의 발자취 ─── */
 		'mission' => array(
-			'title'  => '사명 & 역사 페이지',
+			'title'  => '30여년의 발자취 페이지',
 			'fields' => array(
 				'mission_chip'        => array( 'default' => 'OUR MISSION · 사명', 'label' => '사명 — chip', 'type' => 'text' ),
 				'mission_title_a'     => array( 'default' => '환자를 가족처럼 생각하는 마음,', 'label' => '사명 — 제목 1행', 'type' => 'text' ),
@@ -662,7 +662,7 @@ function moondental_subpage_content_fields() {
 
 				'mission_v_2_icon'  => array( 'default' => '🛡️', 'label' => '핵심가치 ②번 — 아이콘', 'type' => 'text' ),
 				'mission_v_2_title' => array( 'default' => '신뢰', 'label' => '핵심가치 ②번 — 제목', 'type' => 'text' ),
-				'mission_v_2_desc'  => array( 'default' => '30년 동안 한자리에서 — 환자 한 분의 평생 치아를 길게 봅니다.', 'label' => '핵심가치 ②번 — 설명', 'type' => 'textarea' ),
+				'mission_v_2_desc'  => array( 'default' => '30여년 동안 한자리에서 — 환자 한 분의 평생 치아를 길게 봅니다.', 'label' => '핵심가치 ②번 — 설명', 'type' => 'textarea' ),
 
 				'mission_v_3_icon'  => array( 'default' => '🌱', 'label' => '핵심가치 ③번 — 아이콘', 'type' => 'text' ),
 				'mission_v_3_title' => array( 'default' => '책임', 'label' => '핵심가치 ③번 — 제목', 'type' => 'text' ),
@@ -673,7 +673,7 @@ function moondental_subpage_content_fields() {
 				'mission_v_4_desc'  => array( 'default' => '지역사회와 함께 — 의료재단으로서 장학·기부를 이어가고 있습니다.', 'label' => '핵심가치 ④번 — 설명', 'type' => 'textarea' ),
 
 				'history_eyebrow'  => array( 'default' => 'Our History', 'label' => '역사 섹션 — eyebrow', 'type' => 'text' ),
-				'history_title'    => array( 'default' => '30년의 발자취', 'label' => '역사 섹션 — 제목', 'type' => 'text' ),
+				'history_title'    => array( 'default' => '30여년의 발자취', 'label' => '역사 섹션 — 제목', 'type' => 'text' ),
 				'history_lead'     => array( 'default' => '1995년 개원부터 현재까지 — 환자분과 함께 걸어온 길.', 'label' => '역사 섹션 — 설명', 'type' => 'textarea' ),
 			),
 		),
@@ -719,14 +719,14 @@ function moondental_subpage_content_fields() {
 			'title'  => '의료진 페이지 — Hero / CTA',
 			'fields' => array(
 				'doctors_chip'       => array( 'default' => 'MOON DENTAL HOSPITAL · OUR DOCTORS', 'label' => 'Hero — chip', 'type' => 'text' ),
-				'doctors_title_a'    => array( 'default' => '30년 임상,', 'label' => 'Hero — 제목 1행', 'type' => 'text' ),
+				'doctors_title_a'    => array( 'default' => '30여년 임상,', 'label' => 'Hero — 제목 1행', 'type' => 'text' ),
 				'doctors_title_b'    => array( 'default' => '인 의료진 협진', 'label' => 'Hero — 제목 2행 (앞에 의료진 수 자동)', 'type' => 'text' ),
 				'doctors_lead'       => array( 'default' => "보철·교정·보존·외과 — 각 분야 전문 의료진이 한 자리에서\n환자 한 분의 치아를 함께 봅니다.", 'label' => 'Hero — 설명 (줄바꿈 가능)', 'type' => 'textarea' ),
 
 				'doctors_stat_1_label' => array( 'default' => '전문 의료진', 'label' => 'stat ①번 라벨', 'type' => 'text' ),
 				'doctors_stat_2_value' => array( 'default' => '3개층', 'label' => 'stat ②번 숫자', 'type' => 'text' ),
 				'doctors_stat_2_label' => array( 'default' => '9F · 10F · 11F', 'label' => 'stat ②번 라벨', 'type' => 'text' ),
-				'doctors_stat_3_value' => array( 'default' => '30년', 'label' => 'stat ③번 숫자', 'type' => 'text' ),
+				'doctors_stat_3_value' => array( 'default' => '30여년', 'label' => 'stat ③번 숫자', 'type' => 'text' ),
 				'doctors_stat_3_label' => array( 'default' => '1995년 개원', 'label' => 'stat ③번 라벨', 'type' => 'text' ),
 
 				'doctors_list_eyebrow' => array( 'default' => 'Our Doctors', 'label' => '의료진 그리드 — eyebrow', 'type' => 'text' ),
@@ -803,7 +803,7 @@ function moondental_chrome_content_fields() {
  */
 function moondental_testimonials_content_fields() {
 	$defaults = array(
-		1 => array( 'name' => '김○○', 'gender' => '여성', 'age' => '40대', 'service' => '임플란트', 'rating' => '5', 'text' => '오랫동안 미루던 임플란트를 30년 경력 원장님께 받았습니다. 수술 당일 통증이 거의 없었고, 자가혈을 함께 사용한다는 점이 안심됐어요. 평일 야간 진료가 있어 직장인에게 정말 편합니다.' ),
+		1 => array( 'name' => '김○○', 'gender' => '여성', 'age' => '40대', 'service' => '임플란트', 'rating' => '5', 'text' => '오랫동안 미루던 임플란트를 30여년 경력 원장님께 받았습니다. 수술 당일 통증이 거의 없었고, 자가혈을 함께 사용한다는 점이 안심됐어요. 평일 야간 진료가 있어 직장인에게 정말 편합니다.' ),
 		2 => array( 'name' => '박○○', 'gender' => '남성', 'age' => '50대', 'service' => '전악 보철', 'rating' => '5', 'text' => '여러 치과를 다녀봤지만 이렇게 충분히 설명해주시는 곳은 처음입니다. 전악 보철까지 진행했는데 의료진 협진이 정말 체계적이에요. 비용도 시작 전에 명확히 알려주셔서 신뢰가 갔습니다.' ),
 		3 => array( 'name' => '이○○', 'gender' => '여성', 'age' => '30대', 'service' => '투명교정', 'rating' => '5', 'text' => '인비절라인 투명교정 받았는데 처음에 걱정했던 것보다 훨씬 편했어요. 11F 교정과 원장님이 사진 시뮬레이션으로 결과를 미리 보여주셨고, 6개월 만에 만족스러운 결과를 얻었습니다.' ),
 		4 => array( 'name' => '최○○', 'gender' => '남성', 'age' => '60대', 'service' => '임플란트 + 보철', 'rating' => '5', 'text' => '고혈압이 있어서 다른 곳에서는 거절당했는데, 여기는 혈압 체크부터 약물까지 세심하게 봐주셨습니다. 수술 후 귀가 서비스까지 챙겨주셔서 감동이었어요.' ),
@@ -842,7 +842,7 @@ function moondental_compare_content_fields() {
 		6 => array( 'label' => '보철 제작',         'hospital' => '자체 한아 임플란트 보철연구소',              'clinic' => '외부 기공소 의뢰' ),
 		7 => array( 'label' => '전신질환 대응',     'hospital' => '혈압 · 당검사 · 심전도 · 산소포화도 상시',   'clinic' => '제한적 대응' ),
 		8 => array( 'label' => '평일 진료시간',     'hospital' => '~ 20:30 야간진료 운영',                      'clinic' => '~ 18:00 일반적' ),
-		9 => array( 'label' => '임상 경력',         'hospital' => '1995년부터 30년 한자리 진료',                'clinic' => '의원별 상이' ),
+		9 => array( 'label' => '임상 경력',         'hospital' => '1995년부터 30여년 한자리 진료',                'clinic' => '의원별 상이' ),
 	);
 
 	$groups = array(
@@ -1218,7 +1218,7 @@ function moondental_register_subpage_content_customizer( $wp_customize ) {
 	$panel_id = 'md_panel_subpage_content';
 	$wp_customize->add_panel( $panel_id, array(
 		'title'       => '서브 페이지 텍스트',
-		'description' => '오시는 길·사명 & 역사·의료진 페이지 등의 텍스트를 편집합니다.',
+		'description' => '오시는 길·30여년의 발자취·의료진 페이지 등의 텍스트를 편집합니다.',
 		'priority'    => 35,
 	) );
 	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_subpage_content_fields(), 'md_section_subpage_' );

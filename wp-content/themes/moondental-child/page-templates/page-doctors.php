@@ -44,7 +44,7 @@ $specialties = array(
 		</nav>
 		<span class="md-docs-hero__chip"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_chip', 'MOON DENTAL HOSPITAL · OUR DOCTORS' ) : 'MOON DENTAL HOSPITAL · OUR DOCTORS' ); ?></span>
 		<h1 class="md-docs-hero__title">
-			<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_title_a', '30년 임상,' ) : '30년 임상,' ); ?><br>
+			<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_title_a', '30여년 임상,' ) : '30여년 임상,' ); ?><br>
 			<em><?php echo (int) $total_doctors; ?><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_title_b', '인 의료진 협진' ) : '인 의료진 협진' ); ?></em>
 		</h1>
 		<p class="md-docs-hero__lead">
@@ -53,7 +53,7 @@ $specialties = array(
 		<ul class="md-docs-hero__stats">
 			<li><strong><?php echo (int) $total_doctors; ?>인</strong><span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_1_label', '전문 의료진' ) : '전문 의료진' ); ?></span></li>
 			<li><strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_2_value', '3개층' ) : '3개층' ); ?></strong><span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_2_label', '9F · 10F · 11F' ) : '9F · 10F · 11F' ); ?></span></li>
-			<li><strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_3_value', '30년' ) : '30년' ); ?></strong><span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_3_label', '1995년 개원' ) : '1995년 개원' ); ?></span></li>
+			<li><strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_3_value', '30여년' ) : '30여년' ); ?></strong><span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_3_label', '1995년 개원' ) : '1995년 개원' ); ?></span></li>
 		</ul>
 <?php /* Hero CTA 버튼 제거 (요청: 의료진 페이지에서 상담예약/전화 버튼 없앰) */ ?>
 	</div>

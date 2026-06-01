@@ -9,7 +9,7 @@
 $points = array(
 	array(
 		'icon'  => md_content( 'why_1_icon',  '🏥' ),
-		'title' => md_content( 'why_1_title', '30년, 한자리에서' ),
+		'title' => md_content( 'why_1_title', '30여년, 한자리에서' ),
 		'desc'  => md_content( 'why_1_desc',  '1995년부터 천안 만남로 한자리에서 진료해온 동네 치과. 환자 한 분의 평생 치아를 길게 봅니다.' ),
 	),
 	array(
@@ -36,7 +36,7 @@ $points = array(
 			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'why_eyebrow', 'Why Moon Dental' ) ); ?></span>
 			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'why_title', '왜 문치과병원을 찾으시나요?' ) ); ?></h2>
 			<p class="md-section-head__lead">
-				<?php echo nl2br( esc_html( md_content( 'why_lead', '30년 동안 환자분들이 선택해온 이유 — 4가지로 정리해드립니다.' ) ) ); ?>
+				<?php echo nl2br( esc_html( md_content( 'why_lead', '30여년 동안 환자분들이 선택해온 이유 — 4가지로 정리해드립니다.' ) ) ); ?>
 			</p>
 		</header>
 
