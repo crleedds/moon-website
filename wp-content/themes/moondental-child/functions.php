@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.8.1' );
+define( 'MOONDENTAL_VERSION', '3.8.2' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -292,22 +292,25 @@ function md_autolink_addresses( $html ) {
 		'충남 천안시 동남구 만남로 52, 문타워 9~13층'          => $hospital_url,
 	);
 
-	// anchor 내부 보호: <a ...>...</a> 영역을 plain placeholder로 임시 치환
-	$anchors = array();
-	$html = preg_replace_callback( '#<a\b[^>]*>.*?</a>#siu', function( $m ) use ( &$anchors ) {
-		$anchors[] = $m[0];
-		return '___MDA_' . ( count( $anchors ) - 1 ) . '___';
+	// 1) 기존 anchor 보호: <a ...>...</a> 를 토큰으로 임시 치환
+	$tokens = array();
+	$html = preg_replace_callback( '#<a\b[^>]*>.*?</a>#siu', function( $m ) use ( &$tokens ) {
+		$tokens[] = $m[0];
+		return '___MDA_' . ( count( $tokens ) - 1 ) . '___';
 	}, $html );
 
+	// 2) 주소 패턴 매칭 — 새로 만든 anchor도 토큰으로 보관해
+	//    후속 패턴이 이미 wrap된 텍스트를 재차 wrap하는 nested anchor 버그 방지.
 	foreach ( $patterns as $needle => $url ) {
 		if ( strpos( $html, $needle ) === false ) continue;
 		$anchor = '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener" class="md-addr-link" data-track="cta-autolink-addr">' . esc_html( $needle ) . '</a>';
-		// 한 번에 모두 치환 (str_replace는 이미 치환된 위치를 다시 검사하지 않음)
-		$html = str_replace( $needle, $anchor, $html );
+		$tokens[] = $anchor;
+		$token = '___MDA_' . ( count( $tokens ) - 1 ) . '___';
+		$html = str_replace( $needle, $token, $html );
 	}
 
-	// 복원
-	foreach ( $anchors as $i => $orig ) {
+	// 3) 토큰 → 원본/anchor 복원
+	foreach ( $tokens as $i => $orig ) {
 		$html = str_replace( '___MDA_' . $i . '___', $orig, $html );
 	}
 

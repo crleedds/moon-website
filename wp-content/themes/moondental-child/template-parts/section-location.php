@@ -159,37 +159,32 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 			</aside>
 
 			<aside class="md-park md-park--compact">
+				<?php
+				// 헬퍼: Customizer 텍스트를 esc_html → md_autolink_addresses 처리
+				$mdf = function( $key, $default ) {
+					$raw = function_exists( 'md_content' ) ? md_content( $key, $default ) : $default;
+					$out = esc_html( $raw );
+					return function_exists( 'md_autolink_addresses' ) ? md_autolink_addresses( $out ) : $out;
+				};
+				?>
 				<header class="md-park__head">
 					<span class="md-park__badge"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_badge', '🅿️ 주차 안내' ) : '🅿️ 주차 안내' ); ?></span>
-					<h3 class="md-park__title"><?php echo wp_kses_post( str_replace( '무료', '<strong>무료</strong>', esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_title', '본원 지하 기계식 무료' ) : '본원 지하 기계식 무료' ) ) ); ?></h3>
-					<p class="md-park__lead"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_lead', '방문 시 데스크에 주차권을 제출하시면 등록해드립니다.' ) : '방문 시 데스크에 주차권을 제출하시면 등록해드립니다.' ); ?></p>
+					<h3 class="md-park__title"><?php echo wp_kses_post( str_replace( '무료', '<strong>무료</strong>', $mdf( 'loc_park_title', '본원 지하 기계식 무료' ) ) ); ?></h3>
+					<p class="md-park__lead"><?php echo wp_kses_post( $mdf( 'loc_park_lead', '방문 시 데스크에 주차권을 제출하시면 등록해드립니다.' ) ); ?></p>
 				</header>
 				<ul class="md-park__list">
 					<li>
 						<span class="md-park__num">01</span>
 						<div>
-							<strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_1_title', '본원 지하 기계식 주차장' ) : '본원 지하 기계식 주차장' ); ?></strong>
-							<span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_1_desc', '진료 시간 동안 무료 이용' ) : '진료 시간 동안 무료 이용' ); ?></span>
+							<strong><?php echo wp_kses_post( $mdf( 'loc_park_1_title', '본원 지하 기계식 주차장' ) ); ?></strong>
+							<span><?php echo wp_kses_post( $mdf( 'loc_park_1_desc', '진료 시간 동안 무료 이용' ) ); ?></span>
 						</div>
 					</li>
 					<li>
 						<span class="md-park__num">02</span>
 						<div>
-							<strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_2_title', 'SUV·대형차 — 신부 제5공영주차장' ) : 'SUV·대형차 — 신부 제5공영주차장' ); ?></strong>
-							<?php
-							$park2_desc     = function_exists( 'md_content' ) ? md_content( 'loc_park_2_desc', '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ) : '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록';
-							$park2_addr     = function_exists( 'md_content' ) ? md_content( 'loc_park_2_addr', '동남구 먹거리1길 10' ) : '동남구 먹거리1길 10';
-							$park2_addr_url = function_exists( 'md_content' ) ? md_content( 'loc_park_2_addr_url', 'https://map.naver.com/p/search/%EC%8B%A0%EB%B6%80%20%EC%A0%9C5%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5' ) : '';
-							$park2_html     = esc_html( $park2_desc );
-							if ( $park2_addr && $park2_addr_url && strpos( $park2_desc, $park2_addr ) !== false ) {
-								$park2_html = str_replace(
-									esc_html( $park2_addr ),
-									'<a href="' . esc_url( $park2_addr_url ) . '" target="_blank" rel="noopener" class="md-addr-link" data-track="cta-park-5gongyoung">' . esc_html( $park2_addr ) . '</a>',
-									$park2_html
-								);
-							}
-							?>
-							<span><?php echo wp_kses_post( $park2_html ); ?></span>
+							<strong><?php echo wp_kses_post( $mdf( 'loc_park_2_title', 'SUV·대형차 — 신부 제5공영주차장' ) ); ?></strong>
+							<span><?php echo wp_kses_post( $mdf( 'loc_park_2_desc', '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ) ); ?></span>
 						</div>
 					</li>
 				</ul>
