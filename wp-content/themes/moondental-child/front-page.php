@@ -29,7 +29,7 @@ get_header();
 
 <?php get_template_part( 'template-parts/section', 'faq-home' ); ?>
 
-<?php get_template_part( 'template-parts/section', 'info' ); ?>
+<?php /* section-info(진료시간 & 오시는 길 3컬럼)는 푸터 위 section-location과 중복되어 제거됨 — v3.12.1 */ ?>
 
 <?php get_template_part( 'template-parts/section', 'notices' ); ?>
 
