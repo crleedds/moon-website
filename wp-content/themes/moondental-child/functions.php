@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.8.2' );
+define( 'MOONDENTAL_VERSION', '3.8.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -279,6 +279,7 @@ function md_autolink_addresses( $html ) {
 
 	// 구체적 → 일반 순서: 긴 패턴이 먼저 매칭되도록
 	$patterns = array(
+		// 5공영주차장
 		'신부 제5공영주차장(동남구 먹거리1길 10)'              => $park5_url,
 		'신부 제5공영주차장 (동남구 먹거리1길 10)'             => $park5_url,
 		'"신부 제5공영주차장"(동남구 먹거리1길 10)'            => $park5_url,
@@ -286,6 +287,9 @@ function md_autolink_addresses( $html ) {
 		'신부 제5공영주차장'                                  => $park5_url,
 		'"신부 제5공영주차장"'                                => $park5_url,
 		'동남구 먹거리1길 10'                                 => $park5_url,
+		// 본원 (병원 네이버 지도로 연결)
+		'본원 지하 기계식 주차장'                              => $hospital_url,
+		'본원 지하 기계식'                                    => $hospital_url,
 		'충청남도 천안시 동남구 만남로 52, 문타워 9~13층 (신부동, 문타워빌딩)' => $hospital_url,
 		'충청남도 천안시 동남구 만남로 52, 문타워 9~13층 (신부동)' => $hospital_url,
 		'충청남도 천안시 동남구 만남로 52, 문타워 9~13층'      => $hospital_url,
