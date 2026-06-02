@@ -20,7 +20,7 @@ for ( $i = 1; $i <= 6; $i++ ) {
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'facility_eyebrow', 'Facility & Equipment' ) ); ?></span>
-			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'facility_title', '정확한 진단과 안전한 진료를 위한 인프라' ) ); ?></h2>
+			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'facility_title', '천안 만남로 — 정확한 진단과 안전한 진료를 위한 인프라' ) ); ?></h2>
 			<p class="md-section-head__lead">
 				<?php echo nl2br( esc_html( md_content( 'facility_lead', '9·10·11·13F 통합 진료센터 — 디지털 진단·수술 시스템과 응급 의료 장비를 갖추고 있습니다.' ) ) ); ?>
 			</p>

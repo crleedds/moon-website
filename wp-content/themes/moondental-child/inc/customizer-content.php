@@ -95,8 +95,8 @@ function moondental_home_content_fields() {
 			'title'  => '홈 — Why 차별점 4 카드',
 			'fields' => array(
 				'why_eyebrow' => array( 'default' => 'Why Moon Dental', 'label' => '섹션 — eyebrow', 'type' => 'text' ),
-				'why_title'   => array( 'default' => '왜 문치과병원을 찾으시나요?', 'label' => '섹션 — 제목', 'type' => 'text' ),
-				'why_lead'    => array( 'default' => '30여년 동안 환자분들이 선택해온 이유 — 4가지로 정리해드립니다.', 'label' => '섹션 — 설명', 'type' => 'textarea' ),
+				'why_title'   => array( 'default' => '천안에서 왜 문치과병원을 찾으시나요?', 'label' => '섹션 — 제목', 'type' => 'text' ),
+				'why_lead'    => array( 'default' => '천안 만남로에서 30여년 — 환자분들이 선택해온 이유 4가지로 정리해드립니다.', 'label' => '섹션 — 설명', 'type' => 'textarea' ),
 
 				'why_1_icon'  => array( 'default' => '🏥', 'label' => '①번 — 아이콘(이모지)', 'type' => 'text' ),
 				'why_1_title' => array( 'default' => '30여년, 한자리에서', 'label' => '①번 — 제목', 'type' => 'text' ),
@@ -120,9 +120,9 @@ function moondental_home_content_fields() {
 		'services' => array(
 			'title'  => '홈 — 진료안내 섹션 head',
 			'fields' => array(
-				'services_eyebrow' => array( 'default' => 'Services', 'label' => 'eyebrow', 'type' => 'text' ),
-				'services_title'   => array( 'default' => '한 곳에서, 평생 치아 건강을', 'label' => '제목', 'type' => 'text' ),
-				'services_lead'    => array( 'default' => '일반진료부터 임플란트·교정·심미·소아예방까지 — 한 분의 환자를 오래 보는 동네 치과의 마음으로 진료합니다.', 'label' => '설명', 'type' => 'textarea' ),
+				'services_eyebrow' => array( 'default' => 'CLINICAL SERVICES · 천안 진료항목', 'label' => 'eyebrow', 'type' => 'text' ),
+				'services_title'   => array( 'default' => '천안에서 한 곳에서, 평생 치아 건강을', 'label' => '제목', 'type' => 'text' ),
+				'services_lead'    => array( 'default' => '천안 임플란트·천안 투명교정·천안 라미네이트·천안 자연치아 살리기·천안 사랑니 발치까지 — 한 분의 환자를 오래 보는 천안 만남로 치과의 마음으로 진료합니다.', 'label' => '설명', 'type' => 'textarea' ),
 			),
 		),
 
@@ -166,7 +166,7 @@ function moondental_home_content_fields() {
 			'title'  => '홈 — 시설·장비 6 카드',
 			'fields' => array(
 				'facility_eyebrow' => array( 'default' => 'Facility & Equipment', 'label' => '섹션 — eyebrow', 'type' => 'text' ),
-				'facility_title'   => array( 'default' => '정확한 진단과 안전한 진료를 위한 인프라', 'label' => '섹션 — 제목', 'type' => 'text' ),
+				'facility_title'   => array( 'default' => '천안 만남로 — 정확한 진단과 안전한 진료를 위한 인프라', 'label' => '섹션 — 제목', 'type' => 'text' ),
 				'facility_lead'    => array( 'default' => '9·10·11·13F 통합 진료센터 — 디지털 진단·수술 시스템과 응급 의료 장비를 갖추고 있습니다.', 'label' => '섹션 — 설명', 'type' => 'textarea' ),
 
 				'facility_1_icon'  => array( 'default' => '🩻', 'label' => '①번 — 아이콘', 'type' => 'text' ),

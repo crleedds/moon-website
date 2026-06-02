@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.12.6' );
+define( 'MOONDENTAL_VERSION', '3.13.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -514,10 +514,10 @@ function moondental_customize_register( $wp_customize ) {
 
 	/* ── Home Hero section content ─────────────────────────────── */
 	$hero_fields = array(
-		'hero_eyebrow' => array( 'label' => '상단 작은 태그',   'type' => 'text',     'default' => '천안 만남로 · 1995년부터' ),
-		'hero_title_a' => array( 'label' => '메인 카피 1행',     'type' => 'text',     'default' => '실력과 품격있는 진료,' ),
-		'hero_title_b' => array( 'label' => '메인 카피 2행 (강조)','type' => 'text',     'default' => '가족처럼 오래 곁에' ),
-		'hero_lead'    => array( 'label' => '서브 카피',          'type' => 'textarea', 'default' => "분야별 전문 의료진이 한 자리에서, 일반진료부터 임플란트·교정·심미·소아예방까지.\n충분히 듣고, 꼭 필요한 치료만 권합니다." ),
+		'hero_eyebrow' => array( 'label' => '상단 작은 태그',     'type' => 'text',     'default' => '천안 만남로 · 1995년부터 한자리에서' ),
+		'hero_title_a' => array( 'label' => '메인 카피 1행',       'type' => 'text',     'default' => '천안에서 30여년,' ),
+		'hero_title_b' => array( 'label' => '메인 카피 2행 (강조)', 'type' => 'text',     'default' => '환자 한 분의 평생 치아를' ),
+		'hero_lead'    => array( 'label' => '서브 카피',            'type' => 'textarea', 'default' => "천안 임플란트·천안 투명교정·천안 라미네이트·천안 자연치아 살리기까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다." ),
 	);
 	foreach ( $hero_fields as $key => $f ) {
 		$id = 'moondental_' . $key;
@@ -1334,45 +1334,45 @@ function moondental_get_services() {
 	return array(
 		array(
 			'slug'  => '임플란트-센터',
-			'title' => '임플란트 센터',
+			'title' => '천안 임플란트',
 			'icon'  => '🦷',
-			'desc'  => '10F 임플란트센터 — 단일·다수·전악 임플란트까지, 디지털 가이드와 보철 전문의 협진.',
+			'desc'  => '천안 만남로 10F 임플란트센터 — 단일·다수·전악 임플란트까지, CBCT 디지털 가이드 수술과 보철 전문의 협진.',
 		),
 		array(
 			'slug'  => '투명교정-센터',
-			'title' => '투명교정 센터',
+			'title' => '천안 투명교정',
 			'icon'  => '✨',
-			'desc'  => '11F 교정과 — 치과교정과 전문의·인정의가 라이프스타일에 맞춘 교정 계획을 제시합니다.',
+			'desc'  => '천안 만남로 11F 교정과 — 슈어스마일(SureSmile) AI 투명교정 + 치과교정과 전문의·인정의 라이프스타일 맞춤 진료.',
 		),
 		array(
 			'slug'  => '자연치아-살리기',
-			'title' => '자연치아 살리기',
+			'title' => '천안 자연치아 살리기',
 			'icon'  => '🌿',
-			'desc'  => '보존과 전문의의 정밀 근관치료. 발치보다 보존을 먼저 고민합니다.',
+			'desc'  => '천안 신경치료·재근관치료·치주치료. 보존과 전문의의 정밀 진료 — 발치보다 보존을 먼저 고민합니다.',
 		),
 		array(
 			'slug'  => '턱관절-클리닉',
-			'title' => '턱관절 클리닉',
+			'title' => '천안 턱관절 클리닉',
 			'icon'  => '🔄',
-			'desc'  => '대한턱관절교합학회 이사진의 전문 진료. 통증·소리·교합 이상을 함께 봅니다.',
+			'desc'  => '천안 턱관절 통증·소리·개구장애 — 대한턱관절교합학회 이사진의 전문 진료. 보존적 치료 우선.',
 		),
 		array(
 			'slug'  => '사랑니-발치',
-			'title' => '사랑니 발치',
+			'title' => '천안 사랑니 발치',
 			'icon'  => '🦴',
-			'desc'  => '매복 사랑니까지 — 구강악안면외과 진료로 안전하게 발치합니다.',
+			'desc'  => '천안 매복 사랑니까지 — CBCT 3D 정밀 진단으로 구강악안면외과 전문 의료진이 안전하게 발치합니다.',
 		),
 		array(
 			'slug'  => '심미치료',
-			'title' => '심미치료',
+			'title' => '천안 라미네이트·미백',
 			'icon'  => '💎',
-			'desc'  => '라미네이트·미백·올세라믹 — 자연스러우면서 오래 가는 미소를 디자인합니다.',
+			'desc'  => '천안 라미네이트·치아미백·올세라믹 — 최소 삭제 보존적 접근으로 자연스러운 미소를 디자인합니다.',
 		),
 		array(
 			'slug'  => '소아치과',
-			'title' => '소아·예방',
+			'title' => '천안 소아치과',
 			'icon'  => '🧒',
-			'desc'  => '아이의 첫 치과 경험부터 정기 검진까지. 평생 치아 건강의 시작.',
+			'desc'  => '천안 어린이 첫 치과 경험부터 정기 검진·예방·1차 교정까지. 평생 구강 건강의 시작.',
 		),
 	);
 }

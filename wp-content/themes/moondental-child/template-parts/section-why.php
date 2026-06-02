@@ -34,9 +34,9 @@ $points = array(
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'why_eyebrow', 'Why Moon Dental' ) ); ?></span>
-			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'why_title', '왜 문치과병원을 찾으시나요?' ) ); ?></h2>
+			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'why_title', '천안에서 왜 문치과병원을 찾으시나요?' ) ); ?></h2>
 			<p class="md-section-head__lead">
-				<?php echo nl2br( esc_html( md_content( 'why_lead', '30여년 동안 환자분들이 선택해온 이유 — 4가지로 정리해드립니다.' ) ) ); ?>
+				<?php echo nl2br( esc_html( md_content( 'why_lead', '천안 만남로에서 30여년 — 환자분들이 선택해온 이유 4가지로 정리해드립니다.' ) ) ); ?>
 			</p>
 		</header>
 

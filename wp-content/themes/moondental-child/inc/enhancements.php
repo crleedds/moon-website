@@ -12,6 +12,178 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  * 1. JSON-LD 구조화 데이터 (Dentist / LocalBusiness)
  *    네이버·구글 검색 결과에 평점·주소·시간·전화 풍부 표시
  * ========================================================== */
+/**
+ * SEO 메타 태그 — description / keywords / Open Graph / Twitter Card.
+ *  네이버·구글·카카오·SNS 공유 시 풍부한 정보 노출.
+ *  '천안' 지역 키워드를 모든 페이지에 자동 삽입.
+ */
+function moondental_seo_meta_tags() {
+	$info = moondental_get_info();
+	$site_name = $info['name_full'] ?: '문치과병원';
+	$site_url  = home_url( '/' );
+	$default_image = MOONDENTAL_URI . '/assets/images/logo/logo-square.png';
+
+	// 페이지별 컨텍스트 결정
+	$meta_title = '';
+	$meta_desc  = '';
+	$meta_keywords = '';
+	$og_type    = 'website';
+
+	if ( is_front_page() ) {
+		$meta_title    = '천안 치과 | 천안 임플란트·천안 투명교정·천안 자연치아살리기 — ' . $site_name;
+		$meta_desc     = '천안 만남로 1995년 개원 30여년 한자리 진료. 천안 임플란트·천안 투명교정·천안 라미네이트·천안 사랑니 발치·천안 턱관절 치료. 분야별 전문 의료진 협진·CBCT 디지털 가이드·평일 야간진료(20:30).';
+		$meta_keywords = '천안 치과, 천안치과, 천안 임플란트, 천안 투명교정, 천안 라미네이트, 천안 자연치아 살리기, 천안 사랑니 발치, 천안 턱관절, 천안 신경치료, 천안 미백, 천안 치과병원, 천안 만남로 치과, 천안 신부동 치과, 천안 동남구 치과, 한아의료재단, 문치과병원, 슈어스마일 투명교정';
+	} elseif ( is_page() ) {
+		$slug = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
+		$page_title = wp_strip_all_tags( get_the_title() );
+
+		$service_map = array(
+			'임플란트-센터'     => array(
+				'title' => '천안 임플란트 | CBCT 디지털 가이드 수술 — ' . $site_name,
+				'desc'  => '천안 임플란트 시작가 85만원~. 천안 만남로 30여년 임상, 분야별 전문 의료진 협진, CBCT 디지털 가이드 수술, 전신질환 안심 진료. 자체 한아 임플란트 보철연구소.',
+				'kw'    => '천안 임플란트, 천안 임플란트 가격, 천안 임플란트 전문, 천안 디지털 임플란트, 천안 골이식 임플란트, 천안 노인 임플란트, 천안 만남로 임플란트',
+			),
+			'투명교정-센터'     => array(
+				'title' => '천안 투명교정 | 슈어스마일 SureSmile — ' . $site_name,
+				'desc'  => '천안 투명교정 슈어스마일 (Dentsply Sirona). 천안 만남로 치과교정과 전문의 진료, AI 3D 시뮬레이션, Lite·Standard·Advanced 단계별 합리적 가격(190만원~).',
+				'kw'    => '천안 투명교정, 천안 슈어스마일, 천안 교정, 천안 치아교정, 천안 성인교정, 천안 부분교정, 천안 투명교정 가격',
+			),
+			'자연치아-살리기'   => array(
+				'title' => '천안 자연치아 살리기 | 신경치료·재근관치료·치주치료 — ' . $site_name,
+				'desc'  => '천안 자연치아 살리기. 발치보다 보존 우선 — 신경치료·재근관치료·치주치료로 자연치아 최대한 살리는 천안 만남로 치과병원.',
+				'kw'    => '천안 신경치료, 천안 자연치아 살리기, 천안 치주치료, 천안 잇몸치료, 천안 재근관치료, 천안 충치치료',
+			),
+			'턱관절-클리닉'     => array(
+				'title' => '천안 턱관절 치료 | 통증·소리·개구장애 — ' . $site_name,
+				'desc'  => '천안 턱관절 클리닉. 턱 소리·통증·개구장애 진단 및 치료. 천안 만남로 치과병원에서 보존적 치료 우선, 11F 교정과 협진으로 교합 안정화.',
+				'kw'    => '천안 턱관절, 천안 턱관절 치료, 천안 턱 소리, 천안 이갈이, 천안 턱관절 보톡스, 천안 스플린트',
+			),
+			'사랑니-발치'       => array(
+				'title' => '천안 사랑니 발치 | CBCT 안전 진단 — ' . $site_name,
+				'desc'  => '천안 사랑니 발치. CBCT 3D 진단으로 신경 손상 위험 최소화, 매복 사랑니까지 천안 만남로 구강악안면외과 진료. 진정요법 가능.',
+				'kw'    => '천안 사랑니 발치, 천안 매복 사랑니, 천안 사랑니, 천안 구강외과, 천안 사랑니 발치 가격',
+			),
+			'심미치료'         => array(
+				'title' => '천안 라미네이트·천안 미백 | 자연스러운 미소 — ' . $site_name,
+				'desc'  => '천안 라미네이트·천안 치아미백·천안 심미보철. 최소 삭제 보존적 접근, 자연스러운 미소를 만드는 천안 만남로 심미치료 전문.',
+				'kw'    => '천안 라미네이트, 천안 미백, 천안 치아미백, 천안 심미치료, 천안 라미네이트 가격, 천안 앞니 라미네이트',
+			),
+			'비용-안내'         => array(
+				'title' => '천안 치과 비용 안내 | 정직한 진료비 — ' . $site_name,
+				'desc'  => '천안 치과 비용 — 천안 임플란트·천안 투명교정·천안 라미네이트·천안 사랑니 발치 비용 안내. 사전 견적서 제공, 시작 후 추가 비용 0원.',
+				'kw'    => '천안 치과 비용, 천안 임플란트 비용, 천안 투명교정 비용, 천안 라미네이트 비용, 천안 사랑니 비용, 천안 치과 가격',
+			),
+			'의료진'           => array(
+				'title' => '천안 치과 의료진 | 분야별 전문 의료진 협진 — ' . $site_name,
+				'desc'  => '천안 만남로 문치과병원 의료진 — 보철·교정·보존·치주·소아·외과 분야별 전문 의료진이 한 케이스를 함께 봅니다.',
+				'kw'    => '천안 치과 의사, 천안 치과 의료진, 천안 임플란트 전문의, 천안 교정 전문의, 문치과병원 원장',
+			),
+			'오시는-길'         => array(
+				'title' => '천안 만남로 치과 — 오시는 길 · 주차 · 진료시간 — ' . $site_name,
+				'desc'  => '천안 동남구 만남로 52 문타워 9·10·11·13층. 천안종합·고속버스터미널 도보 5분, 천안역 버스 10분. 본원 지하 기계식 주차장 무료.',
+				'kw'    => '천안 만남로 치과, 천안 신부동 치과, 천안 동남구 치과, 천안 버스터미널 치과, 문치과병원 위치',
+			),
+			'상담예약'         => array(
+				'title' => '천안 치과 예약 — 네이버 예약·카카오톡 상담 — ' . $site_name,
+				'desc'  => '천안 만남로 문치과병원 예약. 네이버 예약 24시간, 전화·카카오톡 상담. 평일 야간진료 20:30까지.',
+				'kw'    => '천안 치과 예약, 천안 치과 상담, 천안 만남로 치과 예약, 문치과병원 예약',
+			),
+			'역사'             => array(
+				'title' => '문치과병원 30여년의 발자취 | 천안 만남로 1995년 개원 — ' . $site_name,
+				'desc'  => '천안 만남로에서 1995년부터 30여년 한자리 진료. 한아의료재단 비영리 법인의 30여년 발자취와 핵심 가치.',
+				'kw'    => '문치과병원 역사, 한아의료재단, 천안 30년 치과, 천안 만남로 치과 1995',
+			),
+			'기술력-시설'       => array(
+				'title' => '천안 치과 시설 | CBCT·디지털 가이드·원내 기공실 — ' . $site_name,
+				'desc'  => '천안 만남로 문치과병원 기술력·시설 — 의료기관 종별, 9·10·11·13F 4개 층 통합 진료센터, 디지털 진단·자체 보철 제작·전신질환 대응.',
+				'kw'    => '천안 치과 시설, 천안 디지털 치과, 천안 CBCT, 천안 임플란트 가이드, 천안 치과 장비',
+			),
+			'faq'              => array(
+				'title' => '천안 치과 자주 묻는 질문 — 예약·비용·진료 안내 — ' . $site_name,
+				'desc'  => '천안 만남로 문치과병원 자주 묻는 질문 — 예약·비용·진료·전신질환 대응·주차·진료시간 등.',
+				'kw'    => '천안 치과 FAQ, 천안 치과 문의, 문치과병원 FAQ',
+			),
+		);
+
+		if ( isset( $service_map[ $slug ] ) ) {
+			$meta_title    = $service_map[ $slug ]['title'];
+			$meta_desc     = $service_map[ $slug ]['desc'];
+			$meta_keywords = $service_map[ $slug ]['kw'];
+		} else {
+			$meta_title = $page_title . ' — ' . $site_name . ' (천안 치과)';
+			$meta_desc  = '천안 만남로 ' . $site_name . ' — ' . $page_title . '. 1995년부터 천안에서 진료해온 종합 치과병원.';
+			$meta_keywords = '천안 치과, 천안 ' . $page_title . ', ' . $site_name;
+		}
+		$og_type = 'article';
+	} elseif ( is_single() ) {
+		$post_title = wp_strip_all_tags( get_the_title() );
+		$excerpt    = wp_strip_all_tags( get_the_excerpt() );
+		$meta_title = $post_title . ' — ' . $site_name . ' (천안 치과)';
+		$meta_desc  = $excerpt ?: ( '천안 만남로 ' . $site_name . ' — ' . $post_title );
+		$meta_keywords = '천안 치과, 천안 치과 소식, ' . $site_name;
+		$og_type    = 'article';
+	}
+
+	if ( ! $meta_title ) return;
+
+	// Featured image 또는 hero image 또는 기본 로고
+	$og_image = $default_image;
+	if ( is_singular() && has_post_thumbnail() ) {
+		$og_image = get_the_post_thumbnail_url( null, 'full' );
+	} else {
+		$hero_id = (int) get_theme_mod( 'moondental_hero_image', 0 );
+		if ( $hero_id ) {
+			$src = wp_get_attachment_image_url( $hero_id, 'full' );
+			if ( $src ) $og_image = $src;
+		}
+	}
+
+	$current_url = is_singular() ? get_permalink() : home_url( add_query_arg( null, null ) );
+
+	echo "\n<!-- moondental SEO meta -->\n";
+	echo '<meta name="description" content="' . esc_attr( $meta_desc ) . '">' . "\n";
+	if ( $meta_keywords ) {
+		echo '<meta name="keywords" content="' . esc_attr( $meta_keywords ) . '">' . "\n";
+	}
+	echo '<meta name="naver-site-verification" content="">' . "\n";
+	echo '<meta name="google-site-verification" content="">' . "\n";
+
+	// Open Graph
+	echo '<meta property="og:type" content="' . esc_attr( $og_type ) . '">' . "\n";
+	echo '<meta property="og:site_name" content="' . esc_attr( $site_name ) . '">' . "\n";
+	echo '<meta property="og:title" content="' . esc_attr( $meta_title ) . '">' . "\n";
+	echo '<meta property="og:description" content="' . esc_attr( $meta_desc ) . '">' . "\n";
+	echo '<meta property="og:url" content="' . esc_url( $current_url ) . '">' . "\n";
+	echo '<meta property="og:image" content="' . esc_url( $og_image ) . '">' . "\n";
+	echo '<meta property="og:locale" content="ko_KR">' . "\n";
+
+	// Twitter Card
+	echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
+	echo '<meta name="twitter:title" content="' . esc_attr( $meta_title ) . '">' . "\n";
+	echo '<meta name="twitter:description" content="' . esc_attr( $meta_desc ) . '">' . "\n";
+	echo '<meta name="twitter:image" content="' . esc_url( $og_image ) . '">' . "\n";
+
+	// 지역 SEO
+	echo '<meta name="geo.region" content="KR-44">' . "\n"; // 충청남도
+	echo '<meta name="geo.placename" content="천안시 동남구 신부동">' . "\n";
+	echo '<meta name="geo.position" content="36.8210;127.1572">' . "\n";
+	echo '<meta name="ICBM" content="36.8210, 127.1572">' . "\n";
+	echo '<!-- /moondental SEO meta -->' . "\n\n";
+}
+add_action( 'wp_head', 'moondental_seo_meta_tags', 5 );
+
+/**
+ * <title> 태그도 SEO 친화적으로 재정의.
+ */
+function moondental_document_title_parts( $parts ) {
+	if ( is_front_page() ) {
+		$parts['title'] = '천안 치과 | 천안 임플란트·천안 투명교정·천안 라미네이트';
+		$parts['tagline'] = '한아의료재단 문치과병원 (천안 만남로)';
+	}
+	return $parts;
+}
+add_filter( 'document_title_parts', 'moondental_document_title_parts', 10 );
+
 function moondental_jsonld_schema() {
 	$info = moondental_get_info();
 	$site = home_url( '/' );

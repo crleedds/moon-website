@@ -10,10 +10,10 @@ $services = moondental_get_services();
 <section class="md-section md-section--surface" id="services" aria-label="진료안내">
 	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'services_eyebrow', 'Services' ) ); ?></span>
-			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'services_title', '한 곳에서, 평생 치아 건강을' ) ); ?></h2>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'services_eyebrow', 'CLINICAL SERVICES · 천안 진료항목' ) ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'services_title', '천안에서 한 곳에서, 평생 치아 건강을' ) ); ?></h2>
 			<p class="md-section-head__lead">
-				<?php echo nl2br( esc_html( md_content( 'services_lead', '일반진료부터 임플란트·교정·심미·소아예방까지 — 한 분의 환자를 오래 보는 동네 치과의 마음으로 진료합니다.' ) ) ); ?>
+				<?php echo nl2br( esc_html( md_content( 'services_lead', '천안 임플란트·천안 투명교정·천안 라미네이트·천안 자연치아 살리기·천안 사랑니 발치까지 — 한 분의 환자를 오래 보는 천안 만남로 치과의 마음으로 진료합니다.' ) ) ); ?>
 			</p>
 		</header>
 
