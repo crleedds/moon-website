@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.14.3
+Version:      3.14.4
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -408,28 +408,6 @@ button.elementor-button {
 .md-header__brand-img,
 .md-header__brand .custom-logo {
   forced-color-adjust: none;
-}
-/* 두 로고 동시 렌더 + CSS로 모드별 표시 — 부모 선택자로 specificity 확보 */
-.md-header__brand .md-header__brand-img--light { display: block !important; }
-.md-header__brand .md-header__brand-img--dark  { display: none  !important; }
-
-/* 다크 모드 — 흰 로고로 교체 + 옅은 배경으로 separation */
-@media (prefers-color-scheme: dark) {
-  .md-header__brand .md-header__brand-img--light { display: none  !important; }
-  .md-header__brand .md-header__brand-img--dark  { display: block !important; }
-  .md-header__brand {
-    background-color: rgba(255, 255, 255, 0.08);
-  }
-}
-
-/* 강제 컬러 환경 (윈도우 고대비·iOS 색상 필터 등) */
-@media (forced-colors: active) {
-  .md-header__brand {
-    background-color: Canvas;
-    border: 1px solid CanvasText;
-  }
-  .md-header__brand .md-header__brand-img--light { display: none  !important; }
-  .md-header__brand .md-header__brand-img--dark  { display: block !important; }
 }
 .md-header__inner {
   display: flex;
