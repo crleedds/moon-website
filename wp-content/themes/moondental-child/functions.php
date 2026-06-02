@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.14.2' );
+define( 'MOONDENTAL_VERSION', '3.14.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1161,6 +1161,7 @@ function moondental_doctor_intercept() {
 	$wp_query->is_home     = false;
 	$wp_query->is_archive  = false;
 	status_header( 200 );
+	moondental_intercept_setup_post( '의료진' );
 
 	$tpl = locate_template( 'page-templates/page-doctor-single.php' );
 	if ( $tpl ) {
@@ -1169,6 +1170,26 @@ function moondental_doctor_intercept() {
 	}
 }
 add_action( 'template_redirect', 'moondental_doctor_intercept', 1 );
+
+/**
+ * 강제 라우팅된 페이지에서 body_class()·get_the_title() 등이 정상 동작하도록
+ * 베이스 페이지를 queried object로 설정. PHP 경고 방지.
+ *
+ * @param string $base_slug 베이스 페이지 슬러그 (예: '의료진', '오시는-길', '기술력-시설')
+ */
+function moondental_intercept_setup_post( $base_slug ) {
+	$base = get_page_by_path( $base_slug );
+	if ( ! $base ) return;
+	global $wp_query, $post;
+	$post = $base;
+	$wp_query->post              = $base;
+	$wp_query->posts             = array( $base );
+	$wp_query->queried_object    = $base;
+	$wp_query->queried_object_id = $base->ID;
+	$wp_query->post_count        = 1;
+	$wp_query->current_post      = -1;
+	$wp_query->found_posts       = 1;
+}
 
 /**
  * /강점/{slug}/ URL 가로채기 — 강점 상세 페이지 라우팅.
@@ -1198,6 +1219,7 @@ function moondental_strength_intercept() {
 	$wp_query->is_home     = false;
 	$wp_query->is_archive  = false;
 	status_header( 200 );
+	moondental_intercept_setup_post( '기술력-시설' );
 
 	$tpl = locate_template( 'page-templates/page-strength.php' );
 	if ( $tpl ) {
@@ -1237,6 +1259,7 @@ function moondental_region_intercept() {
 	$wp_query->is_home     = false;
 	$wp_query->is_archive  = false;
 	status_header( 200 );
+	moondental_intercept_setup_post( '오시는-길' );
 
 	$tpl = locate_template( 'page-templates/page-region.php' );
 	if ( $tpl ) {
