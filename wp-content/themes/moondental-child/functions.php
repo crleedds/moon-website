@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.13.0' );
+define( 'MOONDENTAL_VERSION', '3.14.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -23,6 +23,7 @@ require_once MOONDENTAL_DIR . '/inc/reservation.php';
 require_once MOONDENTAL_DIR . '/inc/enhancements.php';
 require_once MOONDENTAL_DIR . '/inc/customizer-content.php';
 require_once MOONDENTAL_DIR . '/inc/strengths.php';
+require_once MOONDENTAL_DIR . '/inc/regions.php';
 
 
 /* ============================================================
@@ -1205,6 +1206,45 @@ function moondental_strength_intercept() {
 	}
 }
 add_action( 'template_redirect', 'moondental_strength_intercept', 1 );
+
+/**
+ * /오시는-길/{region-slug}/ URL 가로채기 — 지역별 랜딩 페이지 라우팅.
+ *  template_redirect 우선순위 1로 패턴 매칭 → page-region.php 강제 로드.
+ *  지역 SEO를 위한 28개 지역 페이지의 URL 라우팅 핵심.
+ */
+function moondental_region_intercept() {
+	$uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
+	$path = parse_url( $uri, PHP_URL_PATH );
+	if ( ! $path ) return;
+	$path = trim( urldecode( $path ), '/' );
+
+	// 패턴: 오시는-길/{ascii-slug}/ 또는 오시는길/{ascii-slug}/ 또는 location/{ascii-slug}/
+	if ( ! preg_match( '#^(?:오시는-길|오시는길|location)/([a-z0-9_-]+)/?$#u', $path, $m ) ) return;
+
+	$slug = trim( $m[1] );
+	if ( ! $slug ) return;
+
+	$region = function_exists( 'moondental_get_region_by_slug' )
+		? moondental_get_region_by_slug( $slug )
+		: null;
+	if ( ! $region ) return;
+
+	set_query_var( 'region_slug', $slug );
+	global $wp_query;
+	$wp_query->is_404      = false;
+	$wp_query->is_page     = true;
+	$wp_query->is_singular = true;
+	$wp_query->is_home     = false;
+	$wp_query->is_archive  = false;
+	status_header( 200 );
+
+	$tpl = locate_template( 'page-templates/page-region.php' );
+	if ( $tpl ) {
+		include $tpl;
+		exit;
+	}
+}
+add_action( 'template_redirect', 'moondental_region_intercept', 1 );
 
 /* 테마 활성화 시 rewrite rules flush — 새 rule 패턴 반영 위해 버전 키 증가 */
 function moondental_flush_rewrites_once() {

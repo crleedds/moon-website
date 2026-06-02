@@ -29,11 +29,24 @@ function moondental_seo_meta_tags() {
 	$meta_keywords = '';
 	$og_type    = 'website';
 
-	if ( is_front_page() ) {
+	// 지역별 랜딩 페이지 — /오시는-길/{slug}/ 가 가장 우선 매칭
+	$region_slug = get_query_var( 'region_slug' );
+	if ( $region_slug && function_exists( 'moondental_get_region_by_slug' ) ) {
+		$region = moondental_get_region_by_slug( $region_slug );
+		if ( $region ) {
+			$rn = $region['name'];
+			$meta_title    = $rn . '에서 천안 치과 | ' . $rn . ' 임플란트·' . $rn . ' 교정 — ' . $site_name;
+			$meta_desc     = $rn . '에서 천안 만남로 문치과병원까지 자동차 약 ' . $region['duration_min'] . '분 (' . $region['distance_km'] . 'km). ' . $rn . ' 환자분께 천안 임플란트·천안 투명교정·천안 라미네이트 진료. 1995년부터 30여년 한자리.';
+			$meta_keywords = $rn . ' 치과, ' . $rn . ' 임플란트, ' . $rn . ' 교정, ' . $rn . ' 투명교정, ' . $rn . ' 라미네이트, ' . $rn . ' 사랑니 발치, ' . $rn . ' 신경치료, ' . $rn . ' 치과 추천, 천안 치과, 천안 임플란트, 문치과병원';
+			$og_type = 'article';
+		}
+	}
+
+	if ( ! $meta_title && is_front_page() ) {
 		$meta_title    = '천안 치과 | 천안 임플란트·천안 투명교정·천안 자연치아살리기 — ' . $site_name;
 		$meta_desc     = '천안 만남로 1995년 개원 30여년 한자리 진료. 천안 임플란트·천안 투명교정·천안 라미네이트·천안 사랑니 발치·천안 턱관절 치료. 분야별 전문 의료진 협진·CBCT 디지털 가이드·평일 야간진료(20:30).';
 		$meta_keywords = '천안 치과, 천안치과, 천안 임플란트, 천안 투명교정, 천안 라미네이트, 천안 자연치아 살리기, 천안 사랑니 발치, 천안 턱관절, 천안 신경치료, 천안 미백, 천안 치과병원, 천안 만남로 치과, 천안 신부동 치과, 천안 동남구 치과, 한아의료재단, 문치과병원, 슈어스마일 투명교정';
-	} elseif ( is_page() ) {
+	} elseif ( ! $meta_title && is_page() ) {
 		$slug = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
 		$page_title = wp_strip_all_tags( get_the_title() );
 
