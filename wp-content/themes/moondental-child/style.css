@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.12.4
+Version:      3.12.5
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -393,18 +393,23 @@ button.elementor-button {
   border-bottom: 2px solid var(--color-border);
 }
 
-/* 헤더 로고 — OS 다크/인버트 모드에서 명시적 배경으로 가독성 보강 */
+/* 헤더 로고 — 다크/인버트 모드 시각화 보강 */
 .md-header__brand {
+  /* 페이지 색과 동일한 cream — 평소엔 자연스럽게 녹아들고, 인버트 모드에서도
+     로고 영역이 다른 영역과 동일 색이라 일관됨 */
   background-color: #FFFAF4;
   padding: 4px 8px;
   border-radius: 8px;
-  /* color-scheme: light only로 처리 안 되는 OS 강제 인버트(예: iOS Smart Invert) 시
-     로고가 사라지지 않도록 배경을 명시적으로 페이지 색과 동일하게 고정. */
 }
 .md-header__brand-img,
-.md-header__brand .custom-logo {
-  /* 이미지에 강제 컬러 조정 끄기 — Windows 고대비 모드 등에서도 원본 표시 */
+.md-header__brand .custom-logo,
+.md-header__brand picture {
+  display: block;
   forced-color-adjust: none;
+}
+/* prefers-color-scheme: dark 환경 — 로고 영역 배경을 어둡게 + 흰 로고 srcset 활용 */
+@media (prefers-color-scheme: dark) {
+  .md-header__brand { background-color: transparent; }
 }
 .md-header__inner {
   display: flex;
@@ -620,14 +625,13 @@ button.elementor-button {
   visibility: hidden !important;
 }
 
-/* Mobile toggle — 우리 테마의 햄버거 */
+/* Mobile toggle — 우리 테마의 햄버거 (3줄 메뉴 버튼) */
 .md-header__nav-toggle {
   display: none;
   flex-direction: column;
   justify-content: center;
   width: 44px; height: 44px;
-  /* 다크모드·인버트 환경에서도 또렷하게 보이도록 옅은 배경 */
-  background-color: rgba(216, 128, 98, 0.10);
+  background-color: transparent;
   border: 1px solid var(--color-border);
   border-radius: 10px;
   cursor: pointer;
@@ -639,7 +643,7 @@ button.elementor-button {
 }
 .md-header__nav-toggle:hover,
 .md-header__nav-toggle:focus-visible {
-  background-color: rgba(216, 128, 98, 0.18);
+  background-color: var(--color-surface);
   border-color: var(--color-primary);
 }
 .md-header__nav-toggle span {
@@ -5872,6 +5876,13 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
   .md-header__cta { display: inline-flex; }
   .md-header__inner { gap: 12px; min-height: 72px; padding-block: 10px; }
   .md-header__aside { gap: 8px; }
+  /* 햄버거를 맨 오른쪽으로 — flex order로 시각적 순서 변경
+     DOM 순서: [로고] [햄버거] [nav] [aside(CTA)]
+     화면 표시: [로고] [공간] [CTA] [햄버거] */
+  .md-header__brand       { order: 1; }
+  .md-header__nav         { order: 2; }
+  .md-header__aside       { order: 3; margin-left: auto; }
+  .md-header__nav-toggle  { order: 4; margin-left: 4px; }
 }
 @media (max-width: 540px) {
   .md-header__cta-btn {
