@@ -5,11 +5,33 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.12.3
+Version:      3.12.4
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
 */
+
+/* =============================================================
+   0. Color Scheme — Light theme only
+        브라우저/OS 다크모드·인버트 모드가 강제 적용되지 않도록 명시.
+   ============================================================= */
+:root,
+html {
+  color-scheme: light only;
+  supported-color-schemes: light;
+  forced-color-adjust: none;
+}
+/* 페이지 기본 배경·텍스트를 명시적으로 고정 — OS 다크모드 시에도 유지 */
+html,
+body {
+  background-color: #FFFAF4;
+  color: #3D2F26;
+}
+/* prefers-color-scheme: dark 환경에서도 같은 배경 유지 (color-scheme로도 처리되지만 이중 안전) */
+@media (prefers-color-scheme: dark) {
+  html, body { background-color: #FFFAF4 !important; color: #3D2F26 !important; }
+  .md-site-header { background-color: #FFFAF4 !important; }
+}
 
 /* =============================================================
    1. Design Tokens — Warm Family Clinic
@@ -356,21 +378,33 @@ button.elementor-button {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: var(--color-bg);
-  /* 평소에도 옅은 그림자로 헤더 영역 명확히 분리 */
+  /* color-scheme: light로도 막히지 않는 OS 인버트/다크모드를 위해 명시적 컬러 */
+  background-color: #FFFAF4 !important;
+  color: #3D2F26 !important;
   box-shadow: 0 2px 8px rgba(61, 47, 38, 0.06);
-  transition: box-shadow 0.25s var(--ease), background-color 0.25s var(--ease);
-  backdrop-filter: saturate(1.15);
-  -webkit-backdrop-filter: saturate(1.15);
+  transition: box-shadow 0.25s var(--ease);
 }
 .md-site-header.is-scrolled {
   box-shadow: 0 6px 20px rgba(61, 47, 38, 0.12);
-  background-color: rgba(255, 252, 248, 0.96);
 }
 
 .md-header {
   background: transparent;
   border-bottom: 2px solid var(--color-border);
+}
+
+/* 헤더 로고 — OS 다크/인버트 모드에서 명시적 배경으로 가독성 보강 */
+.md-header__brand {
+  background-color: #FFFAF4;
+  padding: 4px 8px;
+  border-radius: 8px;
+  /* color-scheme: light only로 처리 안 되는 OS 강제 인버트(예: iOS Smart Invert) 시
+     로고가 사라지지 않도록 배경을 명시적으로 페이지 색과 동일하게 고정. */
+}
+.md-header__brand-img,
+.md-header__brand .custom-logo {
+  /* 이미지에 강제 컬러 조정 끄기 — Windows 고대비 모드 등에서도 원본 표시 */
+  forced-color-adjust: none;
 }
 .md-header__inner {
   display: flex;
@@ -571,22 +605,47 @@ button.elementor-button {
 
 .md-header__cta { display: flex; align-items: center; }
 
-/* Mobile toggle */
+/* 부모 테마(Astra)·플러그인이 끼워 넣을 수 있는 모바일 메뉴 버튼 강제 숨김
+   — 테마 자체 .md-header__nav-toggle 한 개만 노출. */
+.menu-toggle,
+.main-header-menu-toggle,
+.ast-menu-toggle,
+.ast-mobile-menu-trigger-fill,
+.ast-mobile-menu-trigger-minimal,
+.ast-mobile-menu-trigger-fill-clickable,
+.ast-mobile-menu-buttons,
+#masthead .menu-toggle,
+[class*="ast-mobile-menu-buttons"]:not(.md-header__nav-toggle) {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Mobile toggle — 우리 테마의 햄버거 */
 .md-header__nav-toggle {
   display: none;
   flex-direction: column;
   justify-content: center;
   width: 44px; height: 44px;
-  background: transparent;
-  border: none;
+  /* 다크모드·인버트 환경에서도 또렷하게 보이도록 옅은 배경 */
+  background-color: rgba(216, 128, 98, 0.10);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
   cursor: pointer;
   padding: 10px;
   gap: 5px;
+  -webkit-appearance: none;
+  appearance: none;
+  color: var(--color-text);
+}
+.md-header__nav-toggle:hover,
+.md-header__nav-toggle:focus-visible {
+  background-color: rgba(216, 128, 98, 0.18);
+  border-color: var(--color-primary);
 }
 .md-header__nav-toggle span {
   display: block;
   height: 2px;
-  background: var(--color-text);
+  background-color: var(--color-text);
   border-radius: 2px;
   transition: all 0.25s var(--ease);
 }
@@ -5811,16 +5870,27 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
 @media (max-width: 880px) {
   .md-header__info { display: none; }
   .md-header__cta { display: inline-flex; }
+  .md-header__inner { gap: 12px; min-height: 72px; padding-block: 10px; }
+  .md-header__aside { gap: 8px; }
 }
-@media (max-width: 480px) {
+@media (max-width: 540px) {
   .md-header__cta-btn {
-    padding: 10px 14px;
+    padding: 9px 14px;
     font-size: 0.8125rem;
+    letter-spacing: -0.015em;
+    white-space: nowrap;
   }
-  .md-header__cta-btn span:first-child { font-size: 1rem; }
 }
+@media (max-width: 420px) {
+  .md-header__cta-btn {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+  }
+  .md-header__brand { padding: 3px 6px; }
+}
+/* 360px 이하에서도 CTA 유지 — 사용자 가시성 우선 */
 @media (max-width: 360px) {
-  .md-header__cta { display: none; }
+  .md-header__cta-btn { padding: 7px 10px; font-size: 0.6875rem; }
 }
 
 /* =============================================================
