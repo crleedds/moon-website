@@ -39,16 +39,27 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 					<?php if ( has_custom_logo() ) : ?>
 						<?php the_custom_logo(); ?>
 					<?php else :
-						$theme_logo = '';
+						// 라이트 모드용 컬러 로고 + 다크/흑백 모드용 흰 로고 변형
+						$logo_light = '';
 						foreach ( array( 'logo-wide-noreg.png', 'logo-wide.png' ) as $cand ) {
 							if ( file_exists( MOONDENTAL_DIR . '/assets/images/logo/' . $cand ) ) {
-								$theme_logo = MOONDENTAL_URI . '/assets/images/logo/' . $cand;
+								$logo_light = MOONDENTAL_URI . '/assets/images/logo/' . $cand;
 								break;
 							}
 						}
-						if ( $theme_logo ) : ?>
-							<img class="md-header__brand-img" src="<?php echo esc_url( $theme_logo ); ?>"
+						$logo_dark = '';
+						if ( file_exists( MOONDENTAL_DIR . '/assets/images/logo/logo-wide-white.png' ) ) {
+							$logo_dark = MOONDENTAL_URI . '/assets/images/logo/logo-wide-white.png';
+						}
+						if ( $logo_light ) :
+							// 두 로고를 같이 렌더하고 CSS로 모드별 표시
+						?>
+							<img class="md-header__brand-img md-header__brand-img--light" src="<?php echo esc_url( $logo_light ); ?>"
 								 alt="<?php echo esc_attr( moondental_get_info( 'name_full' ) ); ?>">
+							<?php if ( $logo_dark ) : ?>
+								<img class="md-header__brand-img md-header__brand-img--dark" src="<?php echo esc_url( $logo_dark ); ?>"
+									 alt="" aria-hidden="true">
+							<?php endif; ?>
 						<?php else : ?>
 							<span class="md-header__brand-name">
 								<?php echo esc_html( moondental_get_info( 'name_short' ) ); ?>

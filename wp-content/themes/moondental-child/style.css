@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.14.0
+Version:      3.14.1
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -393,28 +393,44 @@ button.elementor-button {
   border-bottom: 2px solid var(--color-border);
 }
 
-/* 헤더 로고 — 어떤 색 모드(라이트·다크·강제 다크·인버트)에서도 또렷하게 보이도록
-   순백 카드 안에 고정. 로고는 어두운 색 변형이라 흰 BG에서 항상 잘 보임. */
+/* 헤더 로고 — 라이트 모드에선 페이지 cream 색과 자연스럽게 블렌딩.
+   다크/흑백 모드에선 흰 로고 변형으로 교체. */
 .md-header__brand {
-  background-color: #FFFFFF !important;
-  padding: 6px 12px;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  /* 브라우저 강제 다크모드가 BG를 변경하지 못하도록 */
+  /* 페이지 BG와 동일한 cream — 평소엔 카드 없이 자연스럽게 녹아듦 */
+  background-color: transparent;
+  padding: 4px 6px;
+  border-radius: 8px;
   color-scheme: light;
   forced-color-adjust: none;
+  display: inline-flex;
+  align-items: center;
 }
 .md-header__brand-img,
 .md-header__brand .custom-logo {
   display: block;
   forced-color-adjust: none;
 }
-/* 다크모드 환경에서도 흰 카드 유지 — 그림자만 약간 강화 */
+/* 두 로고 동시 렌더 + CSS로 모드별 표시 */
+.md-header__brand-img--light { display: block; }
+.md-header__brand-img--dark  { display: none; }
+
+/* 다크 모드 — 흰 로고로 교체 + 그림자로 separation */
 @media (prefers-color-scheme: dark) {
+  .md-header__brand-img--light { display: none; }
+  .md-header__brand-img--dark  { display: block; }
   .md-header__brand {
-    background-color: #FFFFFF !important;
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.15);
+    background-color: rgba(255, 255, 255, 0.08);
   }
+}
+
+/* 흑백/색약 환경 대비 (강제 컬러) — 윈도우 고대비, iOS 색상 필터 등 */
+@media (forced-colors: active) {
+  .md-header__brand {
+    background-color: Canvas;
+    border: 1px solid CanvasText;
+  }
+  .md-header__brand-img--light { display: none; }
+  .md-header__brand-img--dark  { display: block; }
 }
 .md-header__inner {
   display: flex;
