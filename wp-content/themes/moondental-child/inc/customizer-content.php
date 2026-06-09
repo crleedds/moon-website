@@ -637,7 +637,6 @@ function moondental_subpage_content_fields() {
 
 				'loc_park_walk'    => array( 'default' => '🚌 천안종합·고속버스터미널에서 도보 약 5분', 'label' => '하단 도보 안내 ①', 'type' => 'text' ),
 				'loc_park_train'   => array( 'default' => '🚆 천안역에서 버스로 약 10분', 'label' => '하단 도보 안내 ② (비우면 숨김)', 'type' => 'text' ),
-				'loc_park_neighbor'=> array( 'default' => '🚶 천안 신부동 일대 도보 5분 거리 (신부동 중심)', 'label' => '하단 도보 안내 ③ — 신부동 (비우면 숨김)', 'type' => 'text' ),
 
 				'loc_hours_badge'  => array( 'default' => '🕐 진료시간', 'label' => '진료시간 카드 — 배지', 'type' => 'text' ),
 				'loc_hours_title'  => array( 'default' => '진료 가능 시간', 'label' => '진료시간 카드 — 제목', 'type' => 'text' ),

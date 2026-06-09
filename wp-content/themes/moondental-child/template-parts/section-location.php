@@ -52,9 +52,8 @@ $time_sat = function_exists( 'moondental_extract_time_range' )
 	? moondental_extract_time_range( $info['hours_sat'] ?? '' )
 	: ( $info['hours_sat'] ?? '' );
 
-$park_walk     = function_exists( 'md_content' ) ? md_content( 'loc_park_walk',     '🚌 천안종합·고속버스터미널에서 도보 약 5분' ) : '🚌 천안종합·고속버스터미널에서 도보 약 5분';
-$park_train    = function_exists( 'md_content' ) ? md_content( 'loc_park_train',    '🚆 천안역에서 버스로 약 10분' )                : '🚆 천안역에서 버스로 약 10분';
-$park_neighbor = function_exists( 'md_content' ) ? md_content( 'loc_park_neighbor', '🚶 천안 신부동 일대 도보 5분 거리 (신부동 중심)' ) : '🚶 천안 신부동 일대 도보 5분 거리 (신부동 중심)';
+$park_walk  = function_exists( 'md_content' ) ? md_content( 'loc_park_walk',  '🚌 천안종합·고속버스터미널에서 도보 약 5분' ) : '🚌 천안종합·고속버스터미널에서 도보 약 5분';
+$park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '🚆 천안역에서 버스로 약 10분' )                : '🚆 천안역에서 버스로 약 10분';
 ?>
 <section class="md-flocation" aria-label="오시는 길">
 	<div class="md-container">
@@ -189,11 +188,8 @@ $park_neighbor = function_exists( 'md_content' ) ? md_content( 'loc_park_neighbo
 						</div>
 					</li>
 				</ul>
-				<?php if ( $park_walk || $park_train || $park_neighbor ) : ?>
+				<?php if ( $park_walk || $park_train ) : ?>
 				<p class="md-park__walk">
-					<?php if ( $park_neighbor ) : ?>
-						<span><?php echo esc_html( $park_neighbor ); ?></span>
-					<?php endif; ?>
 					<?php if ( $park_walk ) : ?>
 						<span><?php echo esc_html( $park_walk ); ?></span>
 					<?php endif; ?>
