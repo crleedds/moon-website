@@ -59,51 +59,6 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 <!-- ============ 3. 오시는 길 (모든 페이지 푸터 위와 동일 컴포넌트 재사용) ============ -->
 <?php get_template_part( 'template-parts/section-location' ); ?>
 
-<!-- ============ 3b. 각 지역에서 문치과병원까지 (28개 지역 SEO 그리드) ============ -->
-<?php if ( function_exists( 'moondental_get_regions_by_province' ) ) : ?>
-<section class="md-section md-section--sm" aria-label="지역별 오시는 길">
-	<div class="md-container">
-		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">🌐 지역별 오시는 길</span>
-			<h2 class="md-section-head__title">각 지역에서 문치과병원까지</h2>
-			<p class="md-section-head__lead">
-				충남·충북·세종·대전·경기 중부권 28개 지역별 상세 교통 안내.<br>
-				지역명을 클릭하시면 해당 지역에서 천안 만남로까지의 상세 경로와 진료 안내를 보실 수 있습니다.
-			</p>
-		</header>
-
-		<?php foreach ( moondental_get_regions_by_province() as $prov => $list ) :
-			if ( empty( $list ) ) continue;
-			$prov_emoji = array(
-				'충남' => '🌊', '충북' => '🏔️', '세종' => '🏛️',
-				'대전' => '🏙️', '경기' => '🌆',
-			);
-			$emoji = $prov_emoji[ $prov ] ?? '📍'; ?>
-			<div class="md-region-province">
-				<h3 class="md-region-province__title">
-					<span aria-hidden="true"><?php echo esc_html( $emoji ); ?></span>
-					<?php echo esc_html( $prov ); ?>
-					<small>(<?php echo count( $list ); ?>개 지역)</small>
-				</h3>
-				<div class="md-region-grid">
-					<?php foreach ( $list as $r ) : ?>
-						<a class="md-region-pill" href="<?php echo esc_url( home_url( '/오시는-길/' . $r['slug'] . '/' ) ); ?>" data-track="cta-region-<?php echo esc_attr( $r['slug'] ); ?>">
-							<span class="md-region-pill__icon" aria-hidden="true">🚗</span>
-							<span class="md-region-pill__name"><?php echo esc_html( $r['name'] ); ?></span>
-							<span class="md-region-pill__time"><?php echo esc_html( $r['duration_min'] ); ?>분</span>
-						</a>
-					<?php endforeach; ?>
-				</div>
-			</div>
-		<?php endforeach; ?>
-
-		<p class="md-region-note">
-			ⓘ 이동 시간은 자동차 기준 대략적인 값입니다. 실제 교통 상황에 따라 달라질 수 있습니다.
-		</p>
-	</div>
-</section>
-<?php endif; ?>
-
 <!-- ============ 4. 예약 FAQ ============ -->
 <section class="md-section" id="reservation-faq">
 	<div class="md-container md-container--narrow">
