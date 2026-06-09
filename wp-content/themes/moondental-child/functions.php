@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.16.2' );
+define( 'MOONDENTAL_VERSION', '3.16.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1493,6 +1493,53 @@ function moondental_auto_setup_menu_once() {
 	update_option( 'moondental_menu_v2_seeded', '1' );
 }
 add_action( 'admin_init', 'moondental_auto_setup_menu_once' );
+
+/**
+ * 누락된 페이지 자동 생성 — admin 수동 작업 없이 메뉴 항목들이 모두 정상 동작하도록.
+ *  스마일디자인센터·예방클리닉·상시채용 등이 기본 페이지 자동 생성 버튼을 누르지 않아도 만들어짐.
+ *  옵션 키로 1회만 실행.
+ */
+function moondental_auto_create_pages_once() {
+	if ( get_option( 'moondental_pages_v316_seeded' ) === '1' ) return;
+	// 페이지 정의를 가져와서 빠진 것만 만들기 (권한 체크 우회 — 1회용 시드)
+	if ( ! function_exists( 'moondental_default_pages' ) ) return;
+	$pages = moondental_default_pages();
+
+	// 1차: parent 없는 페이지
+	foreach ( $pages as $page ) {
+		if ( $page['parent'] ) continue;
+		if ( get_page_by_path( $page['slug'] ) ) continue;
+		wp_insert_post( array(
+			'post_title'    => $page['title'],
+			'post_name'     => $page['slug'],
+			'post_status'   => 'publish',
+			'post_type'     => 'page',
+			'post_content'  => '',
+			'menu_order'    => $page['order'],
+			'page_template' => $page['template'] ?: 'default',
+		) );
+	}
+	// 2차: parent 있는 페이지
+	foreach ( $pages as $page ) {
+		if ( ! $page['parent'] ) continue;
+		if ( get_page_by_path( $page['parent'] . '/' . $page['slug'] ) ) continue;
+		if ( get_page_by_path( $page['slug'] ) ) continue;
+		$parent_obj = get_page_by_path( $page['parent'] );
+		wp_insert_post( array(
+			'post_title'    => $page['title'],
+			'post_name'     => $page['slug'],
+			'post_status'   => 'publish',
+			'post_type'     => 'page',
+			'post_content'  => '',
+			'post_parent'   => $parent_obj ? $parent_obj->ID : 0,
+			'menu_order'    => $page['order'],
+			'page_template' => $page['template'] ?: 'default',
+		) );
+	}
+	update_option( 'moondental_pages_v316_seeded', '1' );
+}
+// wp_loaded — WP 핵심이 로드된 후, 출력 전. 프론트엔드 방문 시에도 한 번 실행.
+add_action( 'wp_loaded', 'moondental_auto_create_pages_once' );
 
 /**
  * 헤더 주 메뉴 구조 데이터 — 사용자 스크린샷 기준 (수정은 여기서)
