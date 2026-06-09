@@ -169,7 +169,7 @@ $specialties = array(
 			</p>
 			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-docs-banner', 'size' => 'lg', 'align' => 'center' ) ); ?>
 			<p class="md-docs-cta__hours">
-				🕐 평일 09:00–20:30 · 목 09:00–18:00 · 토 09:00–14:00 · 일/공휴일 휴진
+				🕐 월·화·수·금 09:00–20:30 · 목 09:00–18:00 · 토 09:00–14:00 · 일/공휴일 휴진
 			</p>
 		</div>
 	</div>

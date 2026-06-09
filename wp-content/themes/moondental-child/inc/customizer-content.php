@@ -271,7 +271,7 @@ function moondental_home_content_fields() {
 				'cta_lead'    => array( 'default' => "환자분의 상황을 먼저 듣고, 꼭 필요한 치료만 권합니다.\n지금 상담을 신청하시면 진료시간 내 빠르게 연락드릴게요.", 'label' => '설명 (줄바꿈 가능)', 'type' => 'textarea' ),
 				'cta_btn1'    => array( 'default' => '📅 상담 예약하기', 'label' => '버튼 1 라벨', 'type' => 'text' ),
 				'cta_btn2'    => array( 'default' => '카카오톡', 'label' => '버튼 2 라벨', 'type' => 'text' ),
-				'cta_hint'    => array( 'default' => '진료시간: 평일 09:00–20:30 · 토 09:00–14:00 · 일/공휴일 휴진', 'label' => '하단 진료시간 안내', 'type' => 'text' ),
+				'cta_hint'    => array( 'default' => '진료시간: 월·화·수·금 09:00–20:30 · 목 09:00–18:00 · 토 09:00–14:00 · 일/공휴일 휴진', 'label' => '하단 진료시간 안내', 'type' => 'text' ),
 			),
 		),
 
@@ -471,7 +471,7 @@ function moondental_pricing_content_fields() {
 				'price_cta_lead'  => array( 'default' => '정확한 진단 후 맞춤 견적서를 안내드립니다. 부담 없이 먼저 들어보세요.', 'label' => '설명', 'type' => 'textarea' ),
 
 				'price_cta_meta_1_label' => array( 'default' => '진료시간', 'label' => '메타 ①번 — 라벨', 'type' => 'text' ),
-				'price_cta_meta_1_value' => array( 'default' => '평일 09:00–20:30 · 목 ~18:00 · 토 ~14:00', 'label' => '메타 ①번 — 값', 'type' => 'text' ),
+				'price_cta_meta_1_value' => array( 'default' => '월·화·수·금 09:00–20:30 · 목 ~18:00 · 토 ~14:00', 'label' => '메타 ①번 — 값', 'type' => 'text' ),
 
 				'price_cta_meta_2_label' => array( 'default' => '예약 채널', 'label' => '메타 ②번 — 라벨', 'type' => 'text' ),
 				'price_cta_meta_2_value' => array( 'default' => '전화 · 카카오톡 · 네이버 예약 (24시간)', 'label' => '메타 ②번 — 값', 'type' => 'text' ),

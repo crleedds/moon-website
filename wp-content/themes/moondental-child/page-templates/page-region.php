@@ -180,7 +180,7 @@ $is_walking     = ! empty( $region['duration_label'] ) && strpos( $region['durat
 			<article class="md-region-reason">
 				<div class="md-region-reason__num">06</div>
 				<h3>🌙 평일 야간진료</h3>
-				<p>평일 09:00~20:30 점심시간 없이 진료. <?php echo esc_html( $region_name ); ?>에서 퇴근 후 출발하셔도 충분한 진료 시간.</p>
+				<p>월·화·수·금 09:00~20:30 점심시간 없이 진료 · 목 09:00~18:00 · 토 09:00~14:00. <?php echo esc_html( $region_name ); ?>에서 퇴근 후 출발하셔도 충분한 진료 시간.</p>
 			</article>
 		</div>
 	</div>
@@ -236,10 +236,11 @@ $is_walking     = ! empty( $region['duration_label'] ) && strpos( $region['durat
 				지금 바로 상담 받아보세요
 			</h2>
 			<p class="md-region-cta__lead">
-				네이버 예약 24시간 자동 / 월·화·수·금 야간진료 20:30까지 / 전화·카카오톡 상담
+				네이버 예약 24시간 자동 / 전화·카카오톡 상담
 			</p>
 			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-region-' . $slug, 'size' => 'lg', 'align' => 'center' ) ); ?>
-			<p class="md-region-cta__hint">📍 천안 만남로 52 문타워 9·10·11·13층 · 평일 09:00~20:30</p>
+			<p class="md-region-cta__hint">진료시간: 월·화·수·금 09:00–20:30 · 목 09:00–18:00 · 토 09:00–14:00 · 일/공휴일 휴진</p>
+			<p class="md-region-cta__hint" style="opacity:0.85; margin-top:6px;">📍 천안 만남로 52 문타워 9·10·11·13층</p>
 		</div>
 	</div>
 </section>
