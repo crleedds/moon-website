@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.15.1' );
+define( 'MOONDENTAL_VERSION', '3.15.2' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -755,6 +755,7 @@ function moondental_default_pages() {
 		array( 'slug' => '심미치료',         'title' => '심미치료',      'template' => 'page-templates/page-service.php',  'order' => 6,  'parent' => '진료항목' ),
 		array( 'slug' => '스마일디자인센터', 'title' => '스마일디자인센터', 'template' => 'page-templates/page-smile-design.php', 'order' => 7, 'parent' => '' ),
 		array( 'slug' => '예방클리닉',       'title' => '예방클리닉',     'template' => 'page-templates/page-prevention.php', 'order' => 8, 'parent' => '진료항목' ),
+		array( 'slug' => '상시채용',         'title' => '상시채용',       'template' => 'page-templates/page-recruit.php',    'order' => 6, 'parent' => '병원소개' ),
 		array( 'slug' => '소식',             'title' => '소식',         'template' => '',                                 'order' => 3,  'parent' => '' ),
 		array( 'slug' => '오시는-길',         'title' => '오시는 길',     'template' => 'page-templates/page-location.php', 'order' => 4,  'parent' => '' ),
 		array( 'slug' => '상담예약',         'title' => '상담 예약',     'template' => 'page-templates/page-reservation.php', 'order' => 5, 'parent' => '' ),
@@ -1090,6 +1091,10 @@ function moondental_template_router( $template ) {
 		'예방클리닉'      => 'page-templates/page-prevention.php',
 		'예방-클리닉'     => 'page-templates/page-prevention.php',
 		'prevention'      => 'page-templates/page-prevention.php',
+		'상시채용'        => 'page-templates/page-recruit.php',
+		'채용'           => 'page-templates/page-recruit.php',
+		'recruit'        => 'page-templates/page-recruit.php',
+		'careers'        => 'page-templates/page-recruit.php',
 	);
 
 	if ( isset( $map[ $slug ] ) ) {
@@ -1350,19 +1355,55 @@ add_filter( 'body_class', 'moondental_body_class' );
  * 주 메뉴가 미설정일 때 보여줄 임시 메뉴.
  */
 function moondental_nav_fallback() {
+	// 신규 메뉴 구조 (사용자 요청 — 스크린샷 기준)
+	// 임플란트센터 · 교정센터 · 스마일디자인센터 · 자연치아살리기 · 진료과 · 의료진 · 비용안내 · 병원안내
 	$items = array(
-		array( 'label' => '병원안내', 'url' => home_url( '/about/' ) ),
-		array( 'label' => '진료안내', 'url' => home_url( '/services/' ) ),
-		array( 'label' => '의료진',   'url' => home_url( '/doctors/' ) ),
-		array( 'label' => '시설',     'url' => home_url( '/facility/' ) ),
+		array( 'label' => '임플란트센터',  'url' => home_url( '/임플란트-센터/' ),    'children' => array() ),
+		array( 'label' => '교정센터',      'url' => home_url( '/투명교정-센터/' ),    'children' => array() ),
+		array( 'label' => '스마일디자인센터','url' => home_url( '/스마일디자인센터/' ), 'children' => array() ),
+		array( 'label' => '자연치아살리기', 'url' => home_url( '/자연치아-살리기/' ),  'children' => array(
+			array( 'label' => '충치치료',  'url' => home_url( '/자연치아-살리기/#cavity' ) ),
+			array( 'label' => '신경치료',  'url' => home_url( '/자연치아-살리기/#endo' ) ),
+			array( 'label' => '잇몸치료',  'url' => home_url( '/자연치아-살리기/#perio' ) ),
+		)),
+		array( 'label' => '진료과',        'url' => home_url( '/진료항목/' ), 'children' => array(
+			array( 'label' => '턱관절',           'url' => home_url( '/턱관절-클리닉/' ) ),
+			array( 'label' => '이갈이·이악물기', 'url' => home_url( '/턱관절-클리닉/' ) ),
+			array( 'label' => '사랑니',           'url' => home_url( '/사랑니-발치/' ) ),
+			array( 'label' => '소아치과',         'url' => home_url( '/소아치과/' ) ),
+			array( 'label' => '예방클리닉',       'url' => home_url( '/예방클리닉/' ) ),
+		)),
+		array( 'label' => '의료진',        'url' => home_url( '/의료진/' ),       'children' => array() ),
+		array( 'label' => '비용안내',      'url' => home_url( '/비용-안내/' ),    'children' => array() ),
+		array( 'label' => '병원안내',      'url' => home_url( '/병원소개/' ), 'children' => array(
+			array( 'label' => '오시는길·진료시간', 'url' => home_url( '/오시는-길/' ) ),
+			array( 'label' => '30여년의 역사',    'url' => home_url( '/역사/' ) ),
+			array( 'label' => '기술력/시설',       'url' => home_url( '/기술력-시설/' ) ),
+			array( 'label' => '병원소식',         'url' => home_url( '/소식/' ) ),
+			array( 'label' => '상시채용',         'url' => home_url( '/상시채용/' ) ),
+		)),
 	);
 	echo '<ul class="md-nav">';
 	foreach ( $items as $item ) {
+		$has_kids = ! empty( $item['children'] );
 		printf(
-			'<li class="menu-item"><a href="%s">%s</a></li>',
+			'<li class="menu-item%s"><a href="%s">%s</a>',
+			$has_kids ? ' menu-item-has-children' : '',
 			esc_url( $item['url'] ),
 			esc_html( $item['label'] )
 		);
+		if ( $has_kids ) {
+			echo '<ul class="sub-menu">';
+			foreach ( $item['children'] as $kid ) {
+				printf(
+					'<li class="menu-item"><a href="%s">%s</a></li>',
+					esc_url( $kid['url'] ),
+					esc_html( $kid['label'] )
+				);
+			}
+			echo '</ul>';
+		}
+		echo '</li>';
 	}
 	echo '</ul>';
 }

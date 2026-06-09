@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.15.1
+Version:      3.15.2
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -4487,6 +4487,146 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
 /* 스무스 스크롤 (앵커 클릭 시) */
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* =============================================================
+   병원소식 — 공지사항 리스트 (.md-notice-list)
+   ============================================================= */
+.md-notice-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.md-notice-item {
+  border-bottom: 1px solid var(--color-border);
+}
+.md-notice-item:last-child { border-bottom: 0; }
+.md-notice-item a {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.6vw, 20px);
+  padding: clamp(14px, 1.8vw, 20px) clamp(16px, 2vw, 24px);
+  text-decoration: none;
+  color: var(--color-text);
+  transition: background-color 0.2s var(--ease);
+}
+.md-notice-item a:hover {
+  background-color: var(--color-surface);
+}
+.md-notice-item__tag {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 4px 10px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.md-notice-item__title {
+  flex: 1;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.md-notice-item__date {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-sub);
+  font-feature-settings: 'tnum';
+}
+@media (max-width: 540px) {
+  .md-notice-item__title { white-space: normal; }
+  .md-notice-item__date { display: none; }
+}
+
+/* 상시채용 페이지 (.md-recruit-card) */
+.md-recruit-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: clamp(24px, 3vw, 36px);
+}
+.md-recruit-card__head { margin-bottom: clamp(20px, 2.5vw, 28px); }
+.md-recruit-card__badge {
+  display: inline-block;
+  padding: 6px 14px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+.md-recruit-card__badge--alt { background: #5C8B82; }
+.md-recruit-card h3 {
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  font-weight: 800;
+  margin: 0 0 8px;
+  letter-spacing: -0.015em;
+}
+.md-recruit-card__lead {
+  margin: 0;
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  line-height: 1.65;
+  word-break: keep-all;
+}
+.md-recruit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(16px, 2vw, 24px);
+}
+@media (max-width: 720px) { .md-recruit-grid { grid-template-columns: 1fr; } }
+.md-recruit-block h4 {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  margin: 0 0 10px;
+  color: var(--color-primary-dark);
+  letter-spacing: -0.015em;
+}
+.md-recruit-block ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.md-recruit-block li {
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 6px;
+  font-size: var(--fs-small);
+  line-height: 1.65;
+  color: var(--color-text);
+  word-break: keep-all;
+}
+.md-recruit-block li::before {
+  content: '·';
+  position: absolute;
+  left: 4px; top: -2px;
+  color: var(--color-primary);
+  font-weight: 800;
+  font-size: 1.25rem;
+}
+
+/* 홈 소식 스니펫 (.md-home-news) */
+.md-home-news-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(14px, 1.8vw, 22px);
+}
+@media (max-width: 900px) { .md-home-news-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px) { .md-home-news-grid { grid-template-columns: 1fr; } }
 
 /* 앵커 타겟이 sticky 헤더·앵커네비에 가리지 않도록 offset */
 #cavity, #endo, #perio,
