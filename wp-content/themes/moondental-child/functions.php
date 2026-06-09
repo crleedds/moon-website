@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.16.1' );
+define( 'MOONDENTAL_VERSION', '3.16.2' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1494,41 +1494,57 @@ function moondental_auto_setup_menu_once() {
 }
 add_action( 'admin_init', 'moondental_auto_setup_menu_once' );
 
-function moondental_nav_fallback() {
-	// 신규 메뉴 구조 (사용자 요청 — 스크린샷 기준)
-	// 임플란트센터 · 교정센터 · 스마일디자인센터 · 자연치아살리기 · 진료과 · 의료진 · 비용안내 · 병원안내
-	$items = array(
-		array( 'label' => '임플란트센터',  'url' => home_url( '/임플란트-센터/' ),    'children' => array() ),
-		array( 'label' => '교정센터',      'url' => home_url( '/투명교정-센터/' ),    'children' => array() ),
-		array( 'label' => '스마일디자인센터','url' => home_url( '/스마일디자인센터/' ), 'children' => array() ),
-		array( 'label' => '자연치아살리기', 'url' => home_url( '/자연치아-살리기/' ),  'children' => array(
-			array( 'label' => '충치치료',  'url' => home_url( '/자연치아-살리기/#cavity' ) ),
-			array( 'label' => '신경치료',  'url' => home_url( '/자연치아-살리기/#endo' ) ),
-			array( 'label' => '잇몸치료',  'url' => home_url( '/자연치아-살리기/#perio' ) ),
-		)),
-		array( 'label' => '진료과',        'url' => home_url( '/진료항목/' ), 'children' => array(
-			array( 'label' => '턱관절',           'url' => home_url( '/턱관절-클리닉/' ) ),
-			array( 'label' => '이갈이·이악물기', 'url' => home_url( '/턱관절-클리닉/' ) ),
-			array( 'label' => '사랑니',           'url' => home_url( '/사랑니-발치/' ) ),
-			array( 'label' => '소아치과',         'url' => home_url( '/소아치과/' ) ),
-			array( 'label' => '예방클리닉',       'url' => home_url( '/예방클리닉/' ) ),
-		)),
-		array( 'label' => '의료진',        'url' => home_url( '/의료진/' ),       'children' => array() ),
-		array( 'label' => '비용안내',      'url' => home_url( '/비용-안내/' ),    'children' => array() ),
-		array( 'label' => '병원안내',      'url' => home_url( '/병원소개/' ), 'children' => array(
-			array( 'label' => '오시는길·진료시간', 'url' => home_url( '/오시는-길/' ) ),
-			array( 'label' => '30여년의 역사',    'url' => home_url( '/역사/' ) ),
-			array( 'label' => '기술력/시설',       'url' => home_url( '/기술력-시설/' ) ),
-			array( 'label' => '병원소식',         'url' => home_url( '/소식/' ) ),
-			array( 'label' => '상시채용',         'url' => home_url( '/상시채용/' ) ),
-		)),
+/**
+ * 헤더 주 메뉴 구조 데이터 — 사용자 스크린샷 기준 (수정은 여기서)
+ */
+function moondental_primary_menu_data() {
+	$home = home_url( '/' );
+	return array(
+		array( 'label' => '임플란트센터',     'url' => $home . '임플란트-센터/',     'children' => array() ),
+		array( 'label' => '교정센터',         'url' => $home . '투명교정-센터/',     'children' => array() ),
+		array( 'label' => '스마일디자인센터', 'url' => $home . '스마일디자인센터/',  'children' => array() ),
+		array( 'label' => '자연치아살리기',   'url' => $home . '자연치아-살리기/',   'children' => array(
+			array( 'label' => '충치치료', 'url' => $home . '자연치아-살리기/#cavity' ),
+			array( 'label' => '신경치료', 'url' => $home . '자연치아-살리기/#endo' ),
+			array( 'label' => '잇몸치료', 'url' => $home . '자연치아-살리기/#perio' ),
+		) ),
+		array( 'label' => '진료과',           'url' => $home . '진료항목/',           'children' => array(
+			array( 'label' => '턱관절',          'url' => $home . '턱관절-클리닉/' ),
+			array( 'label' => '이갈이·이악물기','url' => $home . '턱관절-클리닉/' ),
+			array( 'label' => '사랑니',          'url' => $home . '사랑니-발치/' ),
+			array( 'label' => '소아치과',        'url' => $home . '소아치과/' ),
+			array( 'label' => '예방클리닉',      'url' => $home . '예방클리닉/' ),
+		) ),
+		array( 'label' => '의료진',           'url' => $home . '의료진/',             'children' => array() ),
+		array( 'label' => '비용안내',         'url' => $home . '비용-안내/',          'children' => array() ),
+		array( 'label' => '병원안내',         'url' => $home . '병원소개/',           'children' => array(
+			array( 'label' => '오시는길·진료시간', 'url' => $home . '오시는-길/' ),
+			array( 'label' => '30여년의 역사',     'url' => $home . '역사/' ),
+			array( 'label' => '기술력/시설',        'url' => $home . '기술력-시설/' ),
+			array( 'label' => '병원소식',          'url' => $home . '소식/' ),
+			array( 'label' => '상시채용',          'url' => $home . '상시채용/' ),
+		) ),
 	);
+}
+
+/**
+ * 주 메뉴 HTML 렌더 — UL.md-nav 형태로 출력 (현재 페이지 강조 포함).
+ */
+function moondental_render_primary_menu() {
+	$items = moondental_primary_menu_data();
+	$current = trailingslashit( home_url( add_query_arg( null, null ) ) );
 	echo '<ul class="md-nav">';
 	foreach ( $items as $item ) {
 		$has_kids = ! empty( $item['children'] );
+		$classes  = array( 'menu-item' );
+		if ( $has_kids ) $classes[] = 'menu-item-has-children';
+		// 현재 페이지면 current-menu-item
+		if ( untrailingslashit( $item['url'] ) === untrailingslashit( $current ) ) {
+			$classes[] = 'current-menu-item';
+		}
 		printf(
-			'<li class="menu-item%s"><a href="%s">%s</a>',
-			$has_kids ? ' menu-item-has-children' : '',
+			'<li class="%s"><a href="%s">%s</a>',
+			esc_attr( implode( ' ', $classes ) ),
 			esc_url( $item['url'] ),
 			esc_html( $item['label'] )
 		);
@@ -1547,6 +1563,41 @@ function moondental_nav_fallback() {
 	}
 	echo '</ul>';
 }
+
+/**
+ * fallback_cb (이전 호환).
+ */
+function moondental_nav_fallback() {
+	moondental_render_primary_menu();
+}
+
+/**
+ * 강제 출력 — wp_nav_menu 가 primary location을 호출하면 DB에 있는 메뉴와
+ * 상관없이 항상 우리 구조를 출력. 사용자가 admin UI에서 메뉴를 만들거나
+ * '주 메뉴 자동 설정' 버튼을 누르지 않아도 즉시 새 구조가 헤더에 보임.
+ */
+function moondental_force_primary_menu( $output, $args ) {
+	if ( empty( $args->theme_location ) || $args->theme_location !== 'primary' ) {
+		return $output;
+	}
+	ob_start();
+	moondental_render_primary_menu();
+	$inner = ob_get_clean();
+
+	// wp_nav_menu 기본 wrapper 모방
+	$container       = ! empty( $args->container )       ? $args->container       : 'div';
+	$container_class = ! empty( $args->container_class ) ? $args->container_class : '';
+	$container_id    = ! empty( $args->container_id )    ? $args->container_id    : '';
+
+	if ( $args->container === false ) {
+		return $inner;
+	}
+	$attrs = '';
+	if ( $container_class ) $attrs .= ' class="' . esc_attr( $container_class ) . '"';
+	if ( $container_id )    $attrs .= ' id="'    . esc_attr( $container_id ) . '"';
+	return '<' . tag_escape( $container ) . $attrs . '>' . $inner . '</' . tag_escape( $container ) . '>';
+}
+add_filter( 'pre_wp_nav_menu', 'moondental_force_primary_menu', 10, 2 );
 
 /**
  * 푸터 메뉴 fallback.
