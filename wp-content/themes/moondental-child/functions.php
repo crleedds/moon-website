@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.16.3' );
+define( 'MOONDENTAL_VERSION', '3.17.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -387,34 +387,57 @@ function md_render_reservation_ctas( $args = array() ) {
 		$group_style .= ' justify-content:center;';
 	}
 
+	// 라벨에서 앞쪽 이모지(📅·💬·📞) 자동 제거 — 브랜드 SVG 로고로 대체
+	$strip_emoji = function( $s ) {
+		return trim( preg_replace( '/^[\x{1F300}-\x{1FAFF}\x{2600}-\x{27BF}\x{1F000}-\x{1F2FF}]+\s*/u', '', (string) $s ) );
+	};
+
+	// SVG 로고 (Naver, Kakao, Phone)
+	$svg_naver = '<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">'
+		. '<rect width="24" height="24" rx="4" fill="#ffffff"/>'
+		. '<path d="M9 8h2.2l3.6 5.1V8H17v8h-2.2l-3.6-5.1V16H9V8z" fill="#03C75A"/>'
+		. '</svg>';
+	$svg_kakao = '<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">'
+		. '<path d="M12 6c-3.7 0-6.7 2.4-6.7 5.4 0 1.9 1.3 3.6 3.2 4.5l-.7 2.6c-.06.23.18.4.38.27l3.05-2c.25.03.51.04.78.04 3.7 0 6.7-2.4 6.7-5.4S15.7 6 12 6z" fill="#3C1E1E"/>'
+		. '</svg>';
+	$svg_phone = '<svg class="md-rcta__icon md-rcta__icon--stroke" viewBox="0 0 24 24" aria-hidden="true">'
+		. '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+		. '</svg>';
+
 	$out  = '<div class="md-btn-group md-rcta" style="' . esc_attr( $group_style ) . '">';
 
-	// 네이버 예약 (primary)
+	// 네이버 예약 (Naver green)
 	if ( $args['show_naver'] && $naver_label && $naver_url ) {
-		$out .= '<a class="md-btn md-btn-primary' . esc_attr( $btn_size_cls ) . ' md-rcta__naver" '
+		$clean_label = $strip_emoji( $naver_label );
+		$out .= '<a class="md-btn md-btn--naver' . esc_attr( $btn_size_cls ) . ' md-rcta__naver md-rcta__btn" '
 		     . 'href="' . esc_url( $naver_url ) . '" target="_blank" rel="noopener" '
 		     . 'data-track="' . esc_attr( $args['track'] ) . '-naver">'
-		     . esc_html( $naver_label ) . '</a>';
+		     . $svg_naver
+		     . '<span class="md-rcta__label">' . esc_html( $clean_label ) . '</span></a>';
 	}
 
-	// 카카오톡 상담 (secondary - yellow)
+	// 카카오톡 상담 (Kakao yellow)
 	if ( $args['show_kakao'] && $kakao_label && $kakao_url ) {
-		$out .= '<a class="md-btn md-btn--kakao' . esc_attr( $btn_size_cls ) . ' md-rcta__kakao" '
+		$clean_label = $strip_emoji( $kakao_label );
+		$out .= '<a class="md-btn md-btn--kakao' . esc_attr( $btn_size_cls ) . ' md-rcta__kakao md-rcta__btn" '
 		     . 'href="' . esc_url( $kakao_url ) . '" target="_blank" rel="noopener" '
 		     . 'data-track="' . esc_attr( $args['track'] ) . '-kakao">'
-		     . esc_html( $kakao_label ) . '</a>';
+		     . $svg_kakao
+		     . '<span class="md-rcta__label">' . esc_html( $clean_label ) . '</span></a>';
 	}
 
 	// 전화 (ghost)
 	if ( $args['show_call'] && $call_label && $phone_link ) {
-		$label = $call_label;
+		$clean_label = $strip_emoji( $call_label );
+		$label_html  = esc_html( $clean_label );
 		if ( $show_phone !== 'no' && $phone ) {
-			$label .= ' ' . $phone;
+			$label_html .= ' ' . esc_html( $phone );
 		}
-		$out .= '<a class="md-btn md-btn-ghost' . esc_attr( $btn_size_cls ) . ' md-rcta__call" '
+		$out .= '<a class="md-btn md-btn-ghost' . esc_attr( $btn_size_cls ) . ' md-rcta__call md-rcta__btn" '
 		     . 'href="tel:' . esc_attr( $phone_link ) . '" '
 		     . 'data-track="' . esc_attr( $args['track'] ) . '-call">'
-		     . esc_html( $label ) . '</a>';
+		     . $svg_phone
+		     . '<span class="md-rcta__label">' . $label_html . '</span></a>';
 	}
 
 	$out .= '</div>';
@@ -759,6 +782,8 @@ function moondental_default_pages() {
 		array( 'slug' => '소식',             'title' => '소식',         'template' => '',                                 'order' => 3,  'parent' => '' ),
 		array( 'slug' => '오시는-길',         'title' => '오시는 길',     'template' => 'page-templates/page-location.php', 'order' => 4,  'parent' => '' ),
 		array( 'slug' => '상담예약',         'title' => '상담 예약',     'template' => 'page-templates/page-reservation.php', 'order' => 5, 'parent' => '' ),
+		array( 'slug' => '비용-안내',        'title' => '비용 안내',     'template' => 'page-templates/page-pricing.php',     'order' => 6, 'parent' => '' ),
+		array( 'slug' => '기술력-시설',       'title' => '기술력/시설',   'template' => 'page-templates/page-facility.php',    'order' => 7, 'parent' => '병원소개' ),
 	);
 }
 
@@ -1500,7 +1525,8 @@ add_action( 'admin_init', 'moondental_auto_setup_menu_once' );
  *  옵션 키로 1회만 실행.
  */
 function moondental_auto_create_pages_once() {
-	if ( get_option( 'moondental_pages_v316_seeded' ) === '1' ) return;
+	// 옵션 키 v317로 변경 — 비용-안내·기술력-시설 등 신규 추가 페이지 재시드 유도
+	if ( get_option( 'moondental_pages_v317_seeded' ) === '1' ) return;
 	// 페이지 정의를 가져와서 빠진 것만 만들기 (권한 체크 우회 — 1회용 시드)
 	if ( ! function_exists( 'moondental_default_pages' ) ) return;
 	$pages = moondental_default_pages();
@@ -1536,7 +1562,7 @@ function moondental_auto_create_pages_once() {
 			'page_template' => $page['template'] ?: 'default',
 		) );
 	}
-	update_option( 'moondental_pages_v316_seeded', '1' );
+	update_option( 'moondental_pages_v317_seeded', '1' );
 }
 // wp_loaded — WP 핵심이 로드된 후, 출력 전. 프론트엔드 방문 시에도 한 번 실행.
 add_action( 'wp_loaded', 'moondental_auto_create_pages_once' );
