@@ -219,7 +219,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 						<a class="md-region-pill" href="<?php echo esc_url( home_url( '/오시는-길/' . $r['slug'] . '/' ) ); ?>" data-track="cta-region-<?php echo esc_attr( $r['slug'] ); ?>">
 							<span class="md-region-pill__icon" aria-hidden="true">🚗</span>
 							<span class="md-region-pill__name"><?php echo esc_html( $r['name'] ); ?></span>
-							<span class="md-region-pill__time"><?php echo esc_html( $r['duration_min'] ); ?>분</span>
+							<span class="md-region-pill__time"><?php echo esc_html( ! empty( $r['duration_label'] ) ? $r['duration_label'] : ( $r['duration_min'] . '분' ) ); ?></span>
 						</a>
 					<?php endforeach; ?>
 				</div>

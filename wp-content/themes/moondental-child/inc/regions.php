@@ -22,7 +22,15 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 function moondental_get_regions() {
 	return array(
 
-		/* ───────── 충청남도 (15) ───────── */
+		/* ───────── 충청남도 (16) ───────── */
+		'sinbu' => array(
+			'slug' => 'sinbu', 'name' => '신부동', 'name_long' => '천안 동남구 신부동', 'province' => '충남',
+			'distance_km' => 0.5, 'duration_min' => 5, 'duration_label' => '도보 5분',
+			'highway' => '도보 — 신부동 일대 어디서든 5~10분 이내',
+			'ktx' => '천안종합·고속버스터미널에서 도보 5분',
+			'bus' => '신부동 일대 시내버스 다수 정차 (신세계백화점·터미널 인근)',
+			'note' => '신부동 일대 도보 5분 — 문치과병원이 자리한 동네',
+		),
 		'asan' => array(
 			'slug' => 'asan', 'name' => '아산', 'name_long' => '아산시', 'province' => '충남',
 			'distance_km' => 15, 'duration_min' => 25, 'highway' => '국도 21호선·39호선',

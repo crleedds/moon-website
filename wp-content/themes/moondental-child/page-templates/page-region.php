@@ -42,11 +42,13 @@ $kakao      = $info['kakao_url'] ?? '';
 $naver_book = $info['naver_place'] ?? '';
 $naver_map  = $info['naver_map_url'] ?: ( 'https://map.naver.com/p/search/' . rawurlencode( '한아의료재단 문치과병원' ) );
 
-$region_name = $region['name'];          // 예: '아산'
-$region_long = $region['name_long'];     // 예: '아산시'
-$province    = $region['province'];      // 예: '충남'
-$distance    = $region['distance_km'];
-$duration    = $region['duration_min'];
+$region_name    = $region['name'];          // 예: '아산'
+$region_long    = $region['name_long'];     // 예: '아산시'
+$province       = $region['province'];      // 예: '충남'
+$distance       = $region['distance_km'];
+$duration       = $region['duration_min'];
+$duration_label = ! empty( $region['duration_label'] ) ? $region['duration_label'] : ( $duration . '분' );
+$is_walking     = ! empty( $region['duration_label'] ) && strpos( $region['duration_label'], '도보' ) !== false;
 ?>
 
 <!-- ============ Hero ============ -->
@@ -63,13 +65,24 @@ $duration    = $region['duration_min'];
 			<em>임플란트·교정 잘하는 천안 치과</em>
 		</h1>
 		<p class="md-region-hero__lead">
-			<?php echo esc_html( $region_name ); ?>에서 천안 만남로 <strong>한아의료재단 문치과병원</strong>까지
-			자동차로 약 <strong><?php echo esc_html( $duration ); ?>분</strong> (<?php echo esc_html( $distance ); ?>km).<br>
-			1995년부터 30여년 한자리 진료 — 분야별 전문 의료진 협진으로 통합 진료해드립니다.
+			<?php if ( $is_walking ) : ?>
+				<?php echo esc_html( $region_name ); ?>에서 천안 만남로 <strong>한아의료재단 문치과병원</strong>까지
+				<strong><?php echo esc_html( $duration_label ); ?></strong> 거리.<br>
+				1995년부터 30여년 한자리 진료 — 분야별 전문 의료진 협진으로 통합 진료해드립니다.
+			<?php else : ?>
+				<?php echo esc_html( $region_name ); ?>에서 천안 만남로 <strong>한아의료재단 문치과병원</strong>까지
+				자동차로 약 <strong><?php echo esc_html( $duration ); ?>분</strong> (<?php echo esc_html( $distance ); ?>km).<br>
+				1995년부터 30여년 한자리 진료 — 분야별 전문 의료진 협진으로 통합 진료해드립니다.
+			<?php endif; ?>
 		</p>
 		<div class="md-region-hero__badges">
-			<span>🚗 자동차 <?php echo esc_html( $duration ); ?>분</span>
-			<span>🚌 시외버스 가능</span>
+			<?php if ( $is_walking ) : ?>
+				<span>🚶 <?php echo esc_html( $duration_label ); ?></span>
+				<span>🚌 시내버스·터미널 근접</span>
+			<?php else : ?>
+				<span>🚗 자동차 <?php echo esc_html( $duration ); ?>분</span>
+				<span>🚌 시외버스 가능</span>
+			<?php endif; ?>
 			<span>🌙 평일 야간진료 20:30까지</span>
 		</div>
 	</div>
@@ -285,7 +298,7 @@ $duration    = $region['duration_min'];
 					<a class="md-region-pill" href="<?php echo esc_url( home_url( '/오시는-길/' . $r['slug'] . '/' ) ); ?>">
 						<span class="md-region-pill__icon" aria-hidden="true">🚗</span>
 						<span class="md-region-pill__name"><?php echo esc_html( $r['name'] ); ?></span>
-						<span class="md-region-pill__time"><?php echo esc_html( $r['duration_min'] ); ?>분</span>
+						<span class="md-region-pill__time"><?php echo esc_html( ! empty( $r['duration_label'] ) ? $r['duration_label'] : ( $r['duration_min'] . '분' ) ); ?></span>
 					</a>
 			<?php endforeach; endforeach; ?>
 		</div>
