@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.15.0' );
+define( 'MOONDENTAL_VERSION', '3.15.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -753,6 +753,8 @@ function moondental_default_pages() {
 		array( 'slug' => '턱관절-클리닉',     'title' => '턱관절 클리닉',  'template' => 'page-templates/page-service.php',  'order' => 4,  'parent' => '진료항목' ),
 		array( 'slug' => '사랑니-발치',       'title' => '사랑니 발치',   'template' => 'page-templates/page-service.php',  'order' => 5,  'parent' => '진료항목' ),
 		array( 'slug' => '심미치료',         'title' => '심미치료',      'template' => 'page-templates/page-service.php',  'order' => 6,  'parent' => '진료항목' ),
+		array( 'slug' => '스마일디자인센터', 'title' => '스마일디자인센터', 'template' => 'page-templates/page-smile-design.php', 'order' => 7, 'parent' => '' ),
+		array( 'slug' => '예방클리닉',       'title' => '예방클리닉',     'template' => 'page-templates/page-prevention.php', 'order' => 8, 'parent' => '진료항목' ),
 		array( 'slug' => '소식',             'title' => '소식',         'template' => '',                                 'order' => 3,  'parent' => '' ),
 		array( 'slug' => '오시는-길',         'title' => '오시는 길',     'template' => 'page-templates/page-location.php', 'order' => 4,  'parent' => '' ),
 		array( 'slug' => '상담예약',         'title' => '상담 예약',     'template' => 'page-templates/page-reservation.php', 'order' => 5, 'parent' => '' ),
@@ -1072,7 +1074,7 @@ function moondental_template_router( $template ) {
 		'임플란트-센터'   => 'page-templates/page-service.php',
 		'소아치과'       => 'page-templates/page-service.php',
 		'투명교정-센터'   => 'page-templates/page-service.php',
-		'자연치아-살리기' => 'page-templates/page-service.php',
+		'자연치아-살리기' => 'page-templates/page-preservation.php',
 		'턱관절-클리닉'   => 'page-templates/page-service.php',
 		'사랑니-발치'     => 'page-templates/page-service.php',
 		'심미치료'       => 'page-templates/page-service.php',
@@ -1083,6 +1085,11 @@ function moondental_template_router( $template ) {
 		'기술력-시설'     => 'page-templates/page-facility.php',
 		'기술력시설'      => 'page-templates/page-facility.php',
 		'facility'       => 'page-templates/page-facility.php',
+		'스마일디자인센터' => 'page-templates/page-smile-design.php',
+		'smile-design'    => 'page-templates/page-smile-design.php',
+		'예방클리닉'      => 'page-templates/page-prevention.php',
+		'예방-클리닉'     => 'page-templates/page-prevention.php',
+		'prevention'      => 'page-templates/page-prevention.php',
 	);
 
 	if ( isset( $map[ $slug ] ) ) {
