@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.15.2' );
+define( 'MOONDENTAL_VERSION', '3.16.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -868,6 +868,11 @@ function moondental_admin_tools_page() {
 		$created = moondental_create_default_pages();
 		$ran     = true;
 	}
+	$menu_ran = false; $menu_result = null;
+	if ( isset( $_POST['moondental_setup_menu'] ) && check_admin_referer( 'moondental_menu' ) ) {
+		$menu_result = moondental_setup_primary_menu( true );
+		$menu_ran    = true;
+	}
 	$sync_ran = false; $sync_result = null;
 	if ( isset( $_POST['moondental_sync_naver'] ) && check_admin_referer( 'moondental_sync' ) ) {
 		$sync_result = moondental_naver_import_all( 20 );
@@ -886,6 +891,26 @@ function moondental_admin_tools_page() {
 				<?php endif; ?>
 			</p></div>
 		<?php endif; ?>
+
+		<?php if ( $menu_ran && $menu_result ) : ?>
+			<div class="notice notice-success"><p>
+				<strong>주 메뉴 자동 설정 완료.</strong>
+				생성·갱신된 항목 <?php echo (int) $menu_result['count']; ?>개. 메뉴는 외모 → 메뉴에서 추가 편집 가능.
+			</p></div>
+		<?php endif; ?>
+
+		<div class="card" style="max-width:720px; padding:24px; margin-bottom:16px;">
+			<h2>주 메뉴 자동 설정 (헤더 메뉴)</h2>
+			<p>스크린샷 기준 8개 메뉴 구조를 자동 설정합니다. (임플란트센터·교정센터·스마일디자인센터·자연치아살리기·진료과·의료진·비용안내·병원안내)
+			   하위 메뉴 포함. <strong>이미 메뉴가 있다면 비우고 새로 채웁니다.</strong></p>
+			<p style="font-size:13px; color:#666;">⚠️ 실행 전: 위의 "기본 페이지 만들기"를 먼저 실행해야 하위 페이지가 모두 생성됩니다.</p>
+			<form method="post">
+				<?php wp_nonce_field( 'moondental_menu' ); ?>
+				<p>
+					<button type="submit" name="moondental_setup_menu" class="button button-primary button-large">주 메뉴 자동 설정</button>
+				</p>
+			</form>
+		</div>
 
 		<div class="card" style="max-width:720px; padding:24px;">
 			<h2>기본 페이지 일괄 생성</h2>
@@ -1354,6 +1379,121 @@ add_filter( 'body_class', 'moondental_body_class' );
 /**
  * 주 메뉴가 미설정일 때 보여줄 임시 메뉴.
  */
+/**
+ * 주 메뉴 자동 설정 — DB에 직접 wp_nav_menu 와 item을 생성.
+ *  사용자가 외모 → 메뉴 UI를 만지지 않아도 헤더에 신규 8개 메뉴 구조가 노출됨.
+ *
+ * @param bool $force  기존 메뉴 비우고 새로 채울지
+ * @return array       ['menu_id'=>int, 'count'=>int, 'items'=>array]
+ */
+function moondental_setup_primary_menu( $force = false ) {
+	$menu_name = '주 메뉴 (자동 생성)';
+	$menu_obj  = wp_get_nav_menu_object( $menu_name );
+	if ( ! $menu_obj ) {
+		$menu_id = wp_create_nav_menu( $menu_name );
+		if ( is_wp_error( $menu_id ) ) return array( 'menu_id'=>0, 'count'=>0, 'items'=>array() );
+	} else {
+		$menu_id = (int) $menu_obj->term_id;
+		if ( $force ) {
+			$existing = wp_get_nav_menu_items( $menu_id );
+			if ( $existing ) {
+				foreach ( $existing as $it ) wp_delete_post( $it->ID, true );
+			}
+		}
+	}
+
+	// primary 위치에 할당
+	$locations = get_theme_mod( 'nav_menu_locations', array() );
+	$locations['primary'] = $menu_id;
+	set_theme_mod( 'nav_menu_locations', $locations );
+
+	$home = home_url( '/' );
+
+	$structure = array(
+		array( 'title'=>'임플란트센터',     'url'=>$home.'임플란트-센터/' ),
+		array( 'title'=>'교정센터',         'url'=>$home.'투명교정-센터/' ),
+		array( 'title'=>'스마일디자인센터', 'url'=>$home.'스마일디자인센터/' ),
+		array( 'title'=>'자연치아살리기',   'url'=>$home.'자연치아-살리기/', 'children'=>array(
+			array( 'title'=>'충치치료', 'url'=>$home.'자연치아-살리기/#cavity' ),
+			array( 'title'=>'신경치료', 'url'=>$home.'자연치아-살리기/#endo' ),
+			array( 'title'=>'잇몸치료', 'url'=>$home.'자연치아-살리기/#perio' ),
+		)),
+		array( 'title'=>'진료과', 'url'=>$home.'진료항목/', 'children'=>array(
+			array( 'title'=>'턱관절',           'url'=>$home.'턱관절-클리닉/' ),
+			array( 'title'=>'이갈이·이악물기', 'url'=>$home.'턱관절-클리닉/' ),
+			array( 'title'=>'사랑니',           'url'=>$home.'사랑니-발치/' ),
+			array( 'title'=>'소아치과',         'url'=>$home.'소아치과/' ),
+			array( 'title'=>'예방클리닉',       'url'=>$home.'예방클리닉/' ),
+		)),
+		array( 'title'=>'의료진',   'url'=>$home.'의료진/' ),
+		array( 'title'=>'비용안내', 'url'=>$home.'비용-안내/' ),
+		array( 'title'=>'병원안내', 'url'=>$home.'병원소개/', 'children'=>array(
+			array( 'title'=>'오시는길·진료시간', 'url'=>$home.'오시는-길/' ),
+			array( 'title'=>'30여년의 역사',    'url'=>$home.'역사/' ),
+			array( 'title'=>'기술력/시설',       'url'=>$home.'기술력-시설/' ),
+			array( 'title'=>'병원소식',         'url'=>$home.'소식/' ),
+			array( 'title'=>'상시채용',         'url'=>$home.'상시채용/' ),
+		)),
+	);
+
+	$count = 0;
+	$order = 0;
+	$items_log = array();
+
+	foreach ( $structure as $item ) {
+		$order += 10;
+		$parent_id = wp_update_nav_menu_item( $menu_id, 0, array(
+			'menu-item-title'     => $item['title'],
+			'menu-item-url'       => $item['url'],
+			'menu-item-type'      => 'custom',
+			'menu-item-status'    => 'publish',
+			'menu-item-position'  => $order,
+			'menu-item-parent-id' => 0,
+		) );
+		if ( ! is_wp_error( $parent_id ) ) {
+			$count++;
+			$items_log[] = $item['title'];
+		}
+
+		if ( ! empty( $item['children'] ) ) {
+			$child_order = 0;
+			foreach ( $item['children'] as $child ) {
+				$child_order += 10;
+				$child_id = wp_update_nav_menu_item( $menu_id, 0, array(
+					'menu-item-title'     => $child['title'],
+					'menu-item-url'       => $child['url'],
+					'menu-item-type'      => 'custom',
+					'menu-item-status'    => 'publish',
+					'menu-item-position'  => $child_order,
+					'menu-item-parent-id' => (int) $parent_id,
+				) );
+				if ( ! is_wp_error( $child_id ) ) {
+					$count++;
+					$items_log[] = '  ↳ ' . $child['title'];
+				}
+			}
+		}
+	}
+
+	return array(
+		'menu_id' => $menu_id,
+		'count'   => $count,
+		'items'   => $items_log,
+	);
+}
+
+/**
+ * 테마 활성화 시 1회만 자동 메뉴 설정 (옵션 키로 중복 실행 방지).
+ */
+function moondental_auto_setup_menu_once() {
+	if ( get_option( 'moondental_menu_v2_seeded' ) === '1' ) return;
+	// 페이지가 존재해야 의미있는 URL이 됨 — 페이지 존재 확인 후 진행
+	if ( ! get_page_by_path( '임플란트-센터' ) ) return;
+	moondental_setup_primary_menu( true );
+	update_option( 'moondental_menu_v2_seeded', '1' );
+}
+add_action( 'admin_init', 'moondental_auto_setup_menu_once' );
+
 function moondental_nav_fallback() {
 	// 신규 메뉴 구조 (사용자 요청 — 스크린샷 기준)
 	// 임플란트센터 · 교정센터 · 스마일디자인센터 · 자연치아살리기 · 진료과 · 의료진 · 비용안내 · 병원안내

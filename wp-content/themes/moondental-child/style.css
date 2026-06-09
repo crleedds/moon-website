@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.15.2
+Version:      3.16.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -4548,6 +4548,200 @@ html { scroll-behavior: smooth; }
 @media (max-width: 540px) {
   .md-notice-item__title { white-space: normal; }
   .md-notice-item__date { display: none; }
+}
+
+/* =============================================================
+   사명 + 인증/협력 의료기관 (.md-mission-band)
+   ============================================================= */
+.md-mission-band {
+  background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-alt) 100%);
+  padding-block: clamp(48px, 6vw, 80px);
+}
+.md-mission-band__inner { text-align: center; }
+.md-mission-band__eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.md-mission-band__quote {
+  margin: 0 0 clamp(28px, 3.5vw, 44px);
+  padding: 0;
+  border: 0;
+}
+.md-mission-band__quote p {
+  font-size: clamp(1.0625rem, 2vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--color-text);
+  margin: 0;
+  letter-spacing: -0.015em;
+  word-break: keep-all;
+}
+.md-mission-band__certs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+@media (max-width: 720px) { .md-mission-band__certs { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .md-mission-band__certs { grid-template-columns: 1fr; } }
+
+.md-mission-band__certs li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.005em;
+}
+.md-mission-band__certs li > span:first-child {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* =============================================================
+   6개 센터 소개 (.md-clinic-intro)
+   ============================================================= */
+.md-clinic-intro__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(16px, 2vw, 24px);
+  margin-bottom: clamp(24px, 3vw, 36px);
+}
+@media (max-width: 1024px) { .md-clinic-intro__grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { .md-clinic-intro__grid { grid-template-columns: 1fr; } }
+
+.md-clinic-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: clamp(22px, 2.5vw, 30px);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s var(--ease), border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.md-clinic-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+  box-shadow: 0 10px 24px rgba(61, 47, 38, 0.08);
+}
+.md-clinic-card > header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  position: relative;
+}
+.md-clinic-card__num {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  background: rgba(216, 128, 98, 0.10);
+  padding: 4px 10px;
+  border-radius: 99px;
+}
+.md-clinic-card__icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.md-clinic-card > header h3 {
+  flex: 1;
+  font-size: 1.0625rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.015em;
+  color: var(--color-text);
+}
+.md-clinic-card__lead {
+  margin: 0 0 14px;
+  font-size: var(--fs-small);
+  line-height: 1.65;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+}
+.md-clinic-card__lead strong { color: var(--color-text); }
+.md-clinic-card__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 14px;
+  display: grid;
+  gap: 6px;
+  flex: 1;
+}
+.md-clinic-card__list li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--color-text);
+  word-break: keep-all;
+}
+.md-clinic-card__list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0; top: 0;
+  color: var(--color-primary);
+  font-weight: 800;
+  font-size: 0.75rem;
+}
+.md-clinic-card__more {
+  display: inline-block;
+  margin-top: auto;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: gap 0.2s var(--ease);
+}
+.md-clinic-card__more:hover {
+  color: var(--color-primary-dark);
+}
+
+/* 야간진료 강조 박스 */
+.md-clinic-night {
+  background: linear-gradient(135deg, #4A3B30 0%, #2C2218 100%);
+  color: #FFF1D9;
+  padding: clamp(22px, 2.6vw, 30px);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.md-clinic-night > span {
+  font-size: clamp(2rem, 3vw, 2.5rem);
+  line-height: 1;
+  flex-shrink: 0;
+}
+.md-clinic-night strong {
+  display: block;
+  font-size: 1.0625rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+  color: #FEE500;
+}
+.md-clinic-night p {
+  margin: 0;
+  font-size: var(--fs-small);
+  line-height: 1.65;
+  word-break: keep-all;
+  color: rgba(255, 241, 217, 0.92);
+}
+.md-clinic-night p strong {
+  display: inline;
+  color: #FEE500;
+  font-weight: 800;
 }
 
 /* 상시채용 페이지 (.md-recruit-card) */

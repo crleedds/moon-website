@@ -15,9 +15,13 @@ get_header();
 
 <?php get_template_part( 'template-parts/section', 'hero' ); ?>
 
+<?php get_template_part( 'template-parts/section', 'mission' ); ?>
+
 <?php get_template_part( 'template-parts/section', 'trust' ); ?>
 
 <?php get_template_part( 'template-parts/section', 'why' ); ?>
+
+<?php get_template_part( 'template-parts/section', 'clinic-intro' ); ?>
 
 <?php get_template_part( 'template-parts/section', 'services' ); ?>
 
