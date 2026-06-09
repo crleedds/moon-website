@@ -83,7 +83,7 @@ $is_walking     = ! empty( $region['duration_label'] ) && strpos( $region['durat
 				<span>🚗 자동차 <?php echo esc_html( $duration ); ?>분</span>
 				<span>🚌 시외버스 가능</span>
 			<?php endif; ?>
-			<span>🌙 평일 야간진료 20:30까지</span>
+			<span>🌙 월·화·수·금 야간진료 20:30까지</span>
 		</div>
 	</div>
 </section>
@@ -236,7 +236,7 @@ $is_walking     = ! empty( $region['duration_label'] ) && strpos( $region['durat
 				지금 바로 상담 받아보세요
 			</h2>
 			<p class="md-region-cta__lead">
-				네이버 예약 24시간 자동 / 평일 야간진료 20:30까지 / 전화·카카오톡 상담
+				네이버 예약 24시간 자동 / 월·화·수·금 야간진료 20:30까지 / 전화·카카오톡 상담
 			</p>
 			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-region-' . $slug, 'size' => 'lg', 'align' => 'center' ) ); ?>
 			<p class="md-region-cta__hint">📍 천안 만남로 52 문타워 9·10·11·13층 · 평일 09:00~20:30</p>

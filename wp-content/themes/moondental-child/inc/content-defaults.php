@@ -1126,7 +1126,7 @@ function moondental_default_privacy_content() {
 	<div class="md-policy-hero__badges">
 		<span>📍 천안 만남로</span>
 		<span>🏥 전문 의료진 협진</span>
-		<span>🕐 평일 야간 20:30</span>
+		<span>🕐 월·화·수·금 야간 20:30</span>
 		<span>🅿️ 자체 주차장</span>
 	</div>
 	<div class="md-policy-hero__cta">

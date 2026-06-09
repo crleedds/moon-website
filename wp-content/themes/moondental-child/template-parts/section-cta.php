@@ -18,7 +18,7 @@ $info = moondental_get_info();
 				<?php echo nl2br( esc_html( md_content( 'cta_lead', "환자분의 상황을 먼저 듣고, 꼭 필요한 치료만 권합니다.\n지금 상담을 신청하시면 진료시간 내 빠르게 연락드릴게요." ) ) ); ?>
 			</p>
 			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-banner', 'size' => 'lg', 'align' => 'center' ) ); ?>
-			<p class="md-cta-banner__hint"><?php echo esc_html( md_content( 'cta_hint', '진료시간: 평일 09:00–20:30 · 토 09:00–14:00 · 일/공휴일 휴진' ) ); ?></p>
+			<p class="md-cta-banner__hint"><?php echo esc_html( md_content( 'cta_hint', '진료시간: 월·화·수·금 09:00–20:30 · 목 09:00–18:00 · 토 09:00–14:00 · 일/공휴일 휴진' ) ); ?></p>
 		</div>
 	</div>
 </section>
