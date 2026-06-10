@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.19.0
+Version:      3.20.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -2738,6 +2738,82 @@ button.elementor-button {
   flex-wrap: wrap;
   font-size: var(--fs-caption);
   color: rgba(255, 255, 255, 0.5);
+}
+@media (max-width: 540px) {
+  .md-footer__bottom { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+
+/* 푸터 — 의료기관 법적 표시 (.md-footer__legal) */
+.md-footer__legal {
+  margin-top: clamp(28px, 3.5vw, 40px);
+  padding: clamp(18px, 2.2vw, 24px) 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+.md-footer__legal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 8px 24px;
+  margin: 0 0 14px;
+}
+.md-footer__legal-row {
+  display: flex;
+  gap: 10px;
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.6);
+}
+.md-footer__legal-row dt {
+  flex-shrink: 0;
+  min-width: 78px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+}
+.md-footer__legal-row dd { margin: 0; }
+.md-footer__legal-extra {
+  margin: 12px 0 0;
+  font-size: 0.7rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.45);
+  word-break: keep-all;
+}
+.md-footer__policy-links {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 0.75rem;
+}
+.md-footer__policy-links li { position: relative; padding-left: 14px; }
+.md-footer__policy-links li:first-child { padding-left: 0; }
+.md-footer__policy-links li:not(:first-child)::before {
+  content: '·';
+  position: absolute;
+  left: 4px; top: 0;
+  color: rgba(255, 255, 255, 0.4);
+}
+.md-footer__policy-links a {
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+  text-decoration: none;
+}
+.md-footer__policy-links a:hover { color: var(--color-primary-light); }
+
+/* 푸터 모바일 — 컬럼별 자연 정렬 */
+@media (max-width: 720px) {
+  .md-footer__brand { text-align: center; }
+  .md-footer__phone,
+  .md-footer__addr { text-align: center; }
+  .md-footer__social { justify-content: center; }
+  .md-footer__col h4 { font-size: 0.9375rem; }
+  .md-footer__col ul { padding: 0; }
+  .md-footer__col li { padding: 6px 0; font-size: 0.875rem; }
+  .md-footer__legal-row { font-size: 0.7rem; flex-direction: column; gap: 2px; }
+  .md-footer__legal-row dt { min-width: 0; }
+  .md-footer__policy-links { justify-content: center; }
+  .md-footer__bottom { font-size: 0.7rem; }
 }
 
 /* =============================================================

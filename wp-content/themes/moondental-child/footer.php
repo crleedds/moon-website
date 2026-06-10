@@ -8,11 +8,6 @@ $info       = moondental_get_info();
 $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'] );
 $place_url  = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' );
 
-/**
- * /오시는-길/, /상담예약/ 페이지에서는 footer 위 위치 섹션을 중복 출력하지 않음.
- *  (각 페이지 자체에 오시는 길 안내가 더 자세하게 포함되어 있음)
- *  템플릿 메타가 누락된 경우를 대비해 페이지 슬러그로도 감지.
- */
 $md_skip_flocation = false;
 if ( is_page() ) {
 	$_pid  = get_queried_object_id();
@@ -28,6 +23,17 @@ if ( is_page() ) {
 		$md_skip_flocation = true;
 	}
 }
+
+// Customizer helpers
+$mc = function ( $k, $d = '' ) { return function_exists( 'md_content' ) ? md_content( $k, $d ) : $d; };
+
+$tagline   = $mc( 'footer_brand_tagline', '' ); // 사용자 요청: 비우면 미표시
+$col_hours = $mc( 'footer_col_hours_title', '진료시간' );
+$col_svc   = $mc( 'footer_col_services_title', '진료안내' );
+$col_about = $mc( 'footer_col_about_title', '병원안내' );
+$copyright = $mc( 'footer_copyright', 'All rights reserved.' );
+
+$legal_show = $mc( 'footer_legal_show', 'yes' );
 ?>
 </main><?php /* /#md-main */ ?>
 
@@ -51,7 +57,10 @@ if ( is_page() ) {
 				<?php else : ?>
 					<h3><?php echo esc_html( $info['name_full'] ); ?></h3>
 				<?php endif; ?>
-				<p><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'footer_brand_tagline', $info['tagline'] ) : $info['tagline'] ); ?></p>
+
+				<?php if ( $tagline ) : ?>
+					<p class="md-footer__tag"><?php echo esc_html( $tagline ); ?></p>
+				<?php endif; ?>
 
 				<?php if ( ! empty( $info['phone'] ) ) : ?>
 					<p class="md-footer__phone">
@@ -74,56 +83,20 @@ if ( is_page() ) {
 				<?php endif; ?>
 
 				<?php
-				/* ── 소셜 아이콘 행 (전화·네이버예약·카카오톡은 CTA 버튼 영역으로 분리) ── */
 				$socials = array();
-				if ( ! empty( $info['instagram'] ) ) {
-					$socials[] = array(
-						'href'  => $info['instagram'],
-						'label' => '인스타그램',
-						'track' => 'cta-footer-instagram',
-						'cls'   => 'md-fsoc--insta',
-						'svg'   => '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="url(#md-insta-grad)"/><defs><linearGradient id="md-insta-grad" x1="0" y1="0" x2="24" y2="24"><stop offset="0%" stop-color="#F58529"/><stop offset="50%" stop-color="#DD2A7B"/><stop offset="100%" stop-color="#8134AF"/></linearGradient></defs><rect x="6" y="6" width="12" height="12" rx="3.5" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="2.6" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="15.6" cy="8.4" r="0.9" fill="#fff"/></svg>',
-					);
-				}
-				if ( ! empty( $info['blog_url'] ) ) {
-					$socials[] = array(
-						'href'  => $info['blog_url'],
-						'label' => '네이버 블로그',
-						'track' => 'cta-footer-blog',
-						'cls'   => 'md-fsoc--blog',
-						'svg'   => '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#03C75A"/><path d="M8 7.5h3.5c1.4 0 2.3.7 2.3 1.9 0 .8-.5 1.4-1.2 1.6.9.2 1.5.9 1.5 1.9 0 1.4-1 2.1-2.6 2.1H8V7.5zm1.7 3.1h1.5c.7 0 1.1-.3 1.1-.9 0-.5-.4-.8-1.1-.8H9.7v1.7zm0 3.1h1.7c.8 0 1.2-.3 1.2-.9s-.4-.9-1.2-.9H9.7v1.8z" fill="#fff"/></svg>',
-					);
-				}
-				if ( ! empty( $info['facebook_url'] ) ) {
-					$socials[] = array(
-						'href'  => $info['facebook_url'],
-						'label' => '페이스북',
-						'track' => 'cta-footer-facebook',
-						'cls'   => 'md-fsoc--fb',
-						'svg'   => '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#1877F2"/><path d="M14.5 12.7h-1.7V18h-2.2v-5.3H9.4v-2h1.2V9.2c0-1.5 1-2.6 2.5-2.6h1.5v2.1h-1c-.5 0-.8.3-.8.8v1.3h1.8l-.1 2z" fill="#fff"/></svg>',
-					);
-				}
-				if ( ! empty( $info['youtube_url'] ) ) {
-					$socials[] = array(
-						'href'  => $info['youtube_url'],
-						'label' => '유튜브',
-						'track' => 'cta-footer-youtube',
-						'cls'   => 'md-fsoc--yt',
-						'svg'   => '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#FF0000"/><path d="M16.8 8.4c-.1-.5-.5-.9-1-1C14.9 7.2 12 7.2 12 7.2s-2.9 0-3.8.2c-.5.1-.9.5-1 1C7 9.3 7 12 7 12s0 2.7.2 3.6c.1.5.5.9 1 1 .9.2 3.8.2 3.8.2s2.9 0 3.8-.2c.5-.1.9-.5 1-1 .2-.9.2-3.6.2-3.6s0-2.7-.2-3.6zM10.8 13.9V10.1l3.3 1.9-3.3 1.9z" fill="#fff"/></svg>',
-					);
-				}
-				if ( ! empty( $socials ) ) :
-				?>
+				if ( ! empty( $info['instagram'] ) ) $socials[] = array( 'href'=>$info['instagram'], 'label'=>'인스타그램', 'cls'=>'md-fsoc--insta', 'svg'=>'<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="url(#md-insta-grad)"/><defs><linearGradient id="md-insta-grad" x1="0" y1="0" x2="24" y2="24"><stop offset="0%" stop-color="#F58529"/><stop offset="50%" stop-color="#DD2A7B"/><stop offset="100%" stop-color="#8134AF"/></linearGradient></defs><rect x="6" y="6" width="12" height="12" rx="3.5" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="2.6" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="15.6" cy="8.4" r="0.9" fill="#fff"/></svg>' );
+				if ( ! empty( $info['blog_url'] ) ) $socials[] = array( 'href'=>$info['blog_url'], 'label'=>'네이버 블로그', 'cls'=>'md-fsoc--blog', 'svg'=>'<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#03C75A"/><path d="M8 7.5h3.5c1.4 0 2.3.7 2.3 1.9 0 .8-.5 1.4-1.2 1.6.9.2 1.5.9 1.5 1.9 0 1.4-1 2.1-2.6 2.1H8V7.5zm1.7 3.1h1.5c.7 0 1.1-.3 1.1-.9 0-.5-.4-.8-1.1-.8H9.7v1.7zm0 3.1h1.7c.8 0 1.2-.3 1.2-.9s-.4-.9-1.2-.9H9.7v1.8z" fill="#fff"/></svg>' );
+				if ( ! empty( $info['facebook_url'] ) ) $socials[] = array( 'href'=>$info['facebook_url'], 'label'=>'페이스북', 'cls'=>'md-fsoc--fb', 'svg'=>'<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#1877F2"/><path d="M14.5 12.7h-1.7V18h-2.2v-5.3H9.4v-2h1.2V9.2c0-1.5 1-2.6 2.5-2.6h1.5v2.1h-1c-.5 0-.8.3-.8.8v1.3h1.8l-.1 2z" fill="#fff"/></svg>' );
+				if ( ! empty( $info['youtube_url'] ) ) $socials[] = array( 'href'=>$info['youtube_url'], 'label'=>'유튜브', 'cls'=>'md-fsoc--yt', 'svg'=>'<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#FF0000"/><path d="M16.8 8.4c-.1-.5-.5-.9-1-1C14.9 7.2 12 7.2 12 7.2s-2.9 0-3.8.2c-.5.1-.9.5-1 1C7 9.3 7 12 7 12s0 2.7.2 3.6c.1.5.5.9 1 1 .9.2 3.8.2 3.8.2s2.9 0 3.8-.2c.5-.1.9-.5 1-1 .2-.9.2-3.6.2-3.6s0-2.7-.2-3.6zM10.8 13.9V10.1l3.3 1.9-3.3 1.9z" fill="#fff"/></svg>' );
+				if ( $socials ) : ?>
 					<ul class="md-footer__social" aria-label="문치과 채널">
 						<?php foreach ( $socials as $s ) : ?>
 							<li>
-								<a href="<?php echo esc_url( $s['href'] ); ?>"
-								   <?php echo ( isset( $s['target'] ) && $s['target'] === '' ) ? '' : 'target="_blank" rel="noopener"'; ?>
-								   data-track="<?php echo esc_attr( $s['track'] ); ?>"
+								<a href="<?php echo esc_url( $s['href'] ); ?>" target="_blank" rel="noopener"
 								   class="md-fsoc <?php echo esc_attr( $s['cls'] ); ?>"
 								   aria-label="<?php echo esc_attr( $s['label'] ); ?>"
 								   title="<?php echo esc_attr( $s['label'] ); ?>">
-									<?php echo $s['svg']; // safe — hardcoded SVG ?>
+									<?php echo $s['svg']; ?>
 								</a>
 							</li>
 						<?php endforeach; ?>
@@ -132,14 +105,14 @@ if ( is_page() ) {
 			</div>
 
 			<div class="md-footer__col">
-				<h4><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'footer_col_hours_title', '진료시간' ) : '진료시간' ); ?></h4>
+				<h4><?php echo esc_html( $col_hours ); ?></h4>
 				<ul>
 					<?php
 					$hour_rows = array(
-						array( '평일',    $info['hours_wd']    ?? '' ),
-						array( '목요일',  $info['hours_thu']   ?? '' ),
-						array( '토요일',  $info['hours_sat']   ?? '' ),
-						array( '점심',    $info['hours_lunch'] ?? '' ),
+						array( '평일',   $info['hours_wd']    ?? '' ),
+						array( '목요일', $info['hours_thu']   ?? '' ),
+						array( '토요일', $info['hours_sat']   ?? '' ),
+						array( '점심',   $info['hours_lunch'] ?? '' ),
 					);
 					foreach ( $hour_rows as $row ) :
 						list( $label, $value ) = $row;
@@ -149,13 +122,13 @@ if ( is_page() ) {
 						<li class="md-footer__hours"><strong><?php echo esc_html( $label ); ?></strong><span><?php echo esc_html( $value_clean ); ?></span></li>
 					<?php endforeach; ?>
 					<?php if ( $info['hours_off'] ) : ?>
-						<li style="margin-top:8px; color:rgba(255,255,255,0.55);"><?php echo esc_html( $info['hours_off'] ); ?></li>
+						<li class="md-footer__hours-off"><?php echo esc_html( $info['hours_off'] ); ?></li>
 					<?php endif; ?>
 				</ul>
 			</div>
 
 			<div class="md-footer__col">
-				<h4><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'footer_col_services_title', '진료안내' ) : '진료안내' ); ?></h4>
+				<h4><?php echo esc_html( $col_svc ); ?></h4>
 				<ul>
 					<?php foreach ( moondental_get_services() as $svc ) :
 						$page    = get_page_by_path( $svc['slug'] );
@@ -167,7 +140,7 @@ if ( is_page() ) {
 			</div>
 
 			<div class="md-footer__col">
-				<h4><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'footer_col_about_title', '병원안내' ) : '병원안내' ); ?></h4>
+				<h4><?php echo esc_html( $col_about ); ?></h4>
 				<?php
 				if ( has_nav_menu( 'footer' ) ) {
 					wp_nav_menu( array(
@@ -185,9 +158,82 @@ if ( is_page() ) {
 
 		</div>
 
+		<?php if ( $legal_show !== 'no' ) :
+			$inst_name = $mc( 'footer_legal_inst_name', '한아의료재단 문치과병원' );
+			$inst_type = $mc( 'footer_legal_inst_type', '치과병원 (의료법인·병원급)' );
+			$rep       = $mc( 'footer_legal_rep',       '대표자: 문은수 이사장' );
+			$biz_no    = $mc( 'footer_legal_biz_no',    '사업자등록번호: 312-82-00000' );
+			$med_no    = $mc( 'footer_legal_med_no',    '의료기관 고유번호: 34400117' );
+			$ad_no     = $mc( 'footer_legal_ad_no',     '' );
+			$privacy_o = $mc( 'footer_legal_privacy_officer', '개인정보 보호책임자: 문은수' );
+			$extra     = $mc( 'footer_legal_extra',     '' );
+		?>
+		<aside class="md-footer__legal" aria-label="의료기관 법적 표시">
+			<dl class="md-footer__legal-grid">
+				<?php
+				$rows = array(
+					array( '의료기관',     $inst_name ),
+					array( '종별',         $inst_type ),
+					array( '대표자',       $rep ),
+					array( '사업자등록',   $biz_no ),
+					array( '의료기관번호', $med_no ),
+				);
+				if ( $ad_no )     $rows[] = array( '광고심의', $ad_no );
+				if ( $privacy_o ) $rows[] = array( '개인정보', $privacy_o );
+
+				foreach ( $rows as $r ) :
+					if ( empty( $r[1] ) ) continue;
+				?>
+					<div class="md-footer__legal-row">
+						<dt><?php echo esc_html( $r[0] ); ?></dt>
+						<dd><?php echo esc_html( $r[1] ); ?></dd>
+					</div>
+				<?php endforeach; ?>
+			</dl>
+
+			<?php if ( $extra ) : ?>
+				<p class="md-footer__legal-extra"><?php echo esc_html( $extra ); ?></p>
+			<?php endif; ?>
+
+			<?php
+			// 정책 링크 (Customizer에서 "라벨|URL" 형식)
+			$policy_keys = array(
+				'footer_link_privacy' => '개인정보처리방침|/개인정보처리방침/',
+				'footer_link_terms'   => '이용약관|/이용약관/',
+				'footer_link_pricing' => '비급여 진료비|/비용-안내/',
+				'footer_link_email'   => '이메일 무단수집거부|',
+				'footer_link_sitemap' => '',
+			);
+			$policy_items = array();
+			foreach ( $policy_keys as $k => $d ) {
+				$raw = trim( $mc( $k, $d ) );
+				if ( ! $raw ) continue;
+				$parts = explode( '|', $raw, 2 );
+				$label = trim( $parts[0] );
+				$url   = isset( $parts[1] ) ? trim( $parts[1] ) : '';
+				if ( ! $label ) continue;
+				if ( $url && $url[0] === '/' ) $url = home_url( $url );
+				$policy_items[] = array( 'label' => $label, 'url' => $url );
+			}
+			if ( $policy_items ) : ?>
+				<ul class="md-footer__policy-links">
+					<?php foreach ( $policy_items as $p ) : ?>
+						<li>
+							<?php if ( $p['url'] ) : ?>
+								<a href="<?php echo esc_url( $p['url'] ); ?>"><?php echo esc_html( $p['label'] ); ?></a>
+							<?php else : ?>
+								<span><?php echo esc_html( $p['label'] ); ?></span>
+							<?php endif; ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</aside>
+		<?php endif; ?>
+
 		<div class="md-footer__bottom">
 			<div><?php echo esc_html( $info['name_full'] ); ?></div>
-			<div>&copy; <?php echo esc_html( date_i18n( 'Y' ) ); ?> <?php echo esc_html( $info['name_short'] ); ?>. <?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'footer_copyright', 'All rights reserved.' ) : 'All rights reserved.' ); ?></div>
+			<div>&copy; <?php echo esc_html( date_i18n( 'Y' ) ); ?> <?php echo esc_html( $info['name_short'] ); ?>. <?php echo esc_html( $copyright ); ?></div>
 		</div>
 
 	</div>

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.19.0' );
+define( 'MOONDENTAL_VERSION', '3.20.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -784,6 +784,8 @@ function moondental_default_pages() {
 		array( 'slug' => '상담예약',         'title' => '상담 예약',     'template' => 'page-templates/page-reservation.php', 'order' => 5, 'parent' => '' ),
 		array( 'slug' => '비용-안내',        'title' => '비용 안내',     'template' => 'page-templates/page-pricing.php',     'order' => 6, 'parent' => '' ),
 		array( 'slug' => '기술력-시설',       'title' => '기술력/시설',   'template' => 'page-templates/page-facility.php',    'order' => 7, 'parent' => '병원소개' ),
+		array( 'slug' => '개인정보처리방침', 'title' => '개인정보처리방침', 'template' => '', 'order' => 90, 'parent' => '' ),
+		array( 'slug' => '이용약관',         'title' => '이용약관',       'template' => '', 'order' => 91, 'parent' => '' ),
 	);
 }
 
@@ -1558,7 +1560,7 @@ add_action( 'admin_init', 'moondental_auto_setup_menu_once' );
  */
 function moondental_auto_create_pages_once() {
 	// 옵션 키 v317로 변경 — 비용-안내·기술력-시설 등 신규 추가 페이지 재시드 유도
-	if ( get_option( 'moondental_pages_v317_seeded' ) === '1' ) return;
+	if ( get_option( 'moondental_pages_v319_seeded' ) === '1' ) return;
 	// 페이지 정의를 가져와서 빠진 것만 만들기 (권한 체크 우회 — 1회용 시드)
 	if ( ! function_exists( 'moondental_default_pages' ) ) return;
 	$pages = moondental_default_pages();
@@ -1594,7 +1596,7 @@ function moondental_auto_create_pages_once() {
 			'page_template' => $page['template'] ?: 'default',
 		) );
 	}
-	update_option( 'moondental_pages_v317_seeded', '1' );
+	update_option( 'moondental_pages_v319_seeded', '1' );
 }
 // wp_loaded — WP 핵심이 로드된 후, 출력 전. 프론트엔드 방문 시에도 한 번 실행.
 add_action( 'wp_loaded', 'moondental_auto_create_pages_once' );
@@ -1814,12 +1816,14 @@ add_filter( 'pre_wp_nav_menu', 'moondental_force_primary_menu', 10, 2 );
  */
 function moondental_footer_menu_fallback() {
 	$items = array(
-		'병원소개'  => '/about/',
-		'의료진'    => '/doctors/',
-		'시설'      => '/facility/',
-		'오시는 길' => '/location/',
-		'공지사항'  => '/notices/',
-		'개인정보처리방침' => '/privacy/',
+		'병원소개'         => '/병원소개/',
+		'의료진'           => '/의료진/',
+		'30여년의 발자취'  => '/역사/',
+		'기술력/시설'      => '/기술력-시설/',
+		'오시는 길'        => '/오시는-길/',
+		'병원소식'         => '/소식/',
+		'상시채용'         => '/상시채용/',
+		'개인정보처리방침' => '/개인정보처리방침/',
 	);
 	echo '<ul>';
 	foreach ( $items as $label => $path ) {

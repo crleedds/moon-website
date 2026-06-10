@@ -763,11 +763,39 @@ function moondental_chrome_content_fields() {
 		'footer' => array(
 			'title'  => '푸터 — 텍스트',
 			'fields' => array(
-				'footer_brand_tagline' => array( 'default' => '실력과 품격있는 진료', 'label' => '브랜드 슬로건 (로고 아래)', 'type' => 'text' ),
+				'footer_brand_tagline'      => array( 'default' => '', 'label' => '브랜드 슬로건 (로고 아래) — 비우면 미표시', 'type' => 'text' ),
 				'footer_col_hours_title'    => array( 'default' => '진료시간', 'label' => '컬럼 ①번 제목', 'type' => 'text' ),
 				'footer_col_services_title' => array( 'default' => '진료안내', 'label' => '컬럼 ②번 제목', 'type' => 'text' ),
 				'footer_col_about_title'    => array( 'default' => '병원안내', 'label' => '컬럼 ③번 제목', 'type' => 'text' ),
-				'footer_copyright'    => array( 'default' => 'All rights reserved.', 'label' => '저작권 문구 (© 연도 회사명 뒤 텍스트)', 'type' => 'text' ),
+				'footer_copyright'          => array( 'default' => 'All rights reserved.', 'label' => '저작권 문구', 'type' => 'text' ),
+			),
+		),
+		'footer_legal' => array(
+			'title'  => '푸터 — 의료기관 법적 표시 (필수)',
+			'fields' => array(
+				'footer_legal_show'      => array( 'default' => 'yes', 'label' => '법적 정보 섹션 표시 (yes/no)', 'type' => 'text' ),
+				'footer_legal_inst_name' => array( 'default' => '한아의료재단 문치과병원', 'label' => '의료기관 명칭', 'type' => 'text' ),
+				'footer_legal_inst_type' => array( 'default' => '치과병원 (의료법인·병원급)', 'label' => '의료기관 종별', 'type' => 'text' ),
+				'footer_legal_rep'       => array( 'default' => '대표자: 문은수 이사장', 'label' => '대표자', 'type' => 'text' ),
+				'footer_legal_biz_no'    => array( 'default' => '사업자등록번호: 312-82-00000', 'label' => '사업자등록번호', 'type' => 'text' ),
+				'footer_legal_med_no'    => array( 'default' => '의료기관 고유번호: 34400117', 'label' => '의료기관 고유번호', 'type' => 'text' ),
+				'footer_legal_ad_no'     => array( 'default' => '의료광고심의필: 신청 중', 'label' => '의료광고심의 번호 (비우면 미표시)', 'type' => 'text' ),
+				'footer_legal_privacy_officer' => array( 'default' => '개인정보 보호책임자: 문은수 (moondental1995@naver.com)', 'label' => '개인정보 보호책임자', 'type' => 'text' ),
+				'footer_legal_extra' => array(
+					'default' => '본 사이트의 모든 의료 정보는 환자분의 이해를 돕기 위한 참고용이며, 진단·치료는 반드시 의료진의 상담을 통해 결정됩니다. 의료광고법에 따라 환자의 치료 경험담·전후 사진 등은 별도 동의 하에만 게시됩니다.',
+					'label' => '추가 안내문 (의료광고법·면책 문구)',
+					'type' => 'textarea',
+				),
+			),
+		),
+		'footer_links' => array(
+			'title'  => '푸터 — 하단 정책 링크',
+			'fields' => array(
+				'footer_link_privacy'    => array( 'default' => '개인정보처리방침|/개인정보처리방침/', 'label' => '링크 ①  (형식: 라벨|URL — 비우면 숨김)', 'type' => 'text' ),
+				'footer_link_terms'      => array( 'default' => '이용약관|/이용약관/',           'label' => '링크 ②', 'type' => 'text' ),
+				'footer_link_pricing'    => array( 'default' => '비급여 진료비|/비용-안내/',     'label' => '링크 ③', 'type' => 'text' ),
+				'footer_link_email'      => array( 'default' => '이메일 무단수집거부|',           'label' => '링크 ④ (URL 비우면 클릭 불가)', 'type' => 'text' ),
+				'footer_link_sitemap'    => array( 'default' => '',                                 'label' => '링크 ⑤ (선택)', 'type' => 'text' ),
 			),
 		),
 		'cta_buttons' => array(
