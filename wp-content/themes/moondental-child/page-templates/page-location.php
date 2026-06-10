@@ -204,7 +204,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 		<?php foreach ( moondental_get_regions_by_province() as $prov => $list ) :
 			if ( empty( $list ) ) continue;
 			$prov_emoji = array(
-				'천안 시내' => '🏙️',
+				'천안·아산 시내' => '🏙️',
 				'충남' => '🌊', '충북' => '🏔️', '세종' => '🏛️',
 				'대전' => '🌆', '경기' => '🌇',
 			);

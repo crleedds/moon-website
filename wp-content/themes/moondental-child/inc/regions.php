@@ -22,9 +22,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 function moondental_get_regions() {
 	return array(
 
-		/* ───────── 천안 시내 (12) ─ 동·읍 단위 ───────── */
+		/* ───────── 천안·아산 시내 (12) ─ 동·읍 단위 ───────── */
 		'sinbu' => array(
-			'slug' => 'sinbu', 'name' => '천안 신부동', 'name_long' => '천안 동남구 신부동', 'province' => '천안 시내',
+			'slug' => 'sinbu', 'name' => '천안 신부동', 'name_long' => '천안 동남구 신부동', 'province' => '천안·아산 시내',
 			'distance_km' => 0.5, 'duration_min' => 5, 'duration_label' => '도보 5분', 'icon' => '🚶',
 			'highway' => '도보 — 신부동 일대 어디서든 5~10분 이내',
 			'ktx' => '천안종합·고속버스터미널에서 도보 5분',
@@ -32,7 +32,7 @@ function moondental_get_regions() {
 			'note' => '신부동 일대 도보 5분 — 문치과병원이 자리한 동네',
 		),
 		'bongmyeong' => array(
-			'slug' => 'bongmyeong', 'name' => '천안 봉명동', 'name_long' => '천안 동남구 봉명동', 'province' => '천안 시내',
+			'slug' => 'bongmyeong', 'name' => '천안 봉명동', 'name_long' => '천안 동남구 봉명동', 'province' => '천안·아산 시내',
 			'distance_km' => 1.5, 'duration_min' => 5,
 			'highway' => '시내 도로 — 신부동 인접',
 			'ktx' => '천안역에서 시내버스·택시 5분',
@@ -40,7 +40,7 @@ function moondental_get_regions() {
 			'note' => '봉명동에서 차로 5분 — 신부동과 인접한 천안 시내',
 		),
 		'wonseong' => array(
-			'slug' => 'wonseong', 'name' => '천안 원성동', 'name_long' => '천안 동남구 원성동', 'province' => '천안 시내',
+			'slug' => 'wonseong', 'name' => '천안 원성동', 'name_long' => '천안 동남구 원성동', 'province' => '천안·아산 시내',
 			'distance_km' => 1.0, 'duration_min' => 5,
 			'highway' => '시내 도로 — 매우 가까움',
 			'ktx' => '천안역에서 시내버스 5분',
@@ -48,7 +48,7 @@ function moondental_get_regions() {
 			'note' => '원성동에서 차로 5분 — 천안역 인근',
 		),
 		'daga' => array(
-			'slug' => 'daga', 'name' => '천안 다가동', 'name_long' => '천안 동남구 다가동', 'province' => '천안 시내',
+			'slug' => 'daga', 'name' => '천안 다가동', 'name_long' => '천안 동남구 다가동', 'province' => '천안·아산 시내',
 			'distance_km' => 1.5, 'duration_min' => 5,
 			'highway' => '시내 도로',
 			'ktx' => '천안역 인근',
@@ -56,7 +56,7 @@ function moondental_get_regions() {
 			'note' => '다가동에서 차로 5분 — 천안역 권역',
 		),
 		'cheongsu' => array(
-			'slug' => 'cheongsu', 'name' => '천안 청수동', 'name_long' => '천안 동남구 청수동', 'province' => '천안 시내',
+			'slug' => 'cheongsu', 'name' => '천안 청수동', 'name_long' => '천안 동남구 청수동', 'province' => '천안·아산 시내',
 			'distance_km' => 2.5, 'duration_min' => 8,
 			'highway' => '시내 도로',
 			'ktx' => '천안역까지 차로 5분',
@@ -64,7 +64,7 @@ function moondental_get_regions() {
 			'note' => '청수동에서 차로 8분 — 동남구 신도시 권역',
 		),
 		'ssangyong' => array(
-			'slug' => 'ssangyong', 'name' => '천안 쌍용동', 'name_long' => '천안 서북구 쌍용동', 'province' => '천안 시내',
+			'slug' => 'ssangyong', 'name' => '천안 쌍용동', 'name_long' => '천안 서북구 쌍용동', 'province' => '천안·아산 시내',
 			'distance_km' => 3.5, 'duration_min' => 10,
 			'highway' => '시내 도로 (만남로 → 백석로)',
 			'ktx' => '천안역에서 차로 10분',
@@ -72,7 +72,7 @@ function moondental_get_regions() {
 			'note' => '쌍용동에서 차로 10분 — 서북구 주거 권역',
 		),
 		'seongjeong' => array(
-			'slug' => 'seongjeong', 'name' => '천안 성정동', 'name_long' => '천안 서북구 성정동', 'province' => '천안 시내',
+			'slug' => 'seongjeong', 'name' => '천안 성정동', 'name_long' => '천안 서북구 성정동', 'province' => '천안·아산 시내',
 			'distance_km' => 3.0, 'duration_min' => 10,
 			'highway' => '시내 도로',
 			'ktx' => '천안역에서 차로 7분',
@@ -80,7 +80,7 @@ function moondental_get_regions() {
 			'note' => '성정동에서 차로 10분 — 천안역 서북 권역',
 		),
 		'dujeong' => array(
-			'slug' => 'dujeong', 'name' => '천안 두정동', 'name_long' => '천안 서북구 두정동', 'province' => '천안 시내',
+			'slug' => 'dujeong', 'name' => '천안 두정동', 'name_long' => '천안 서북구 두정동', 'province' => '천안·아산 시내',
 			'distance_km' => 4.5, 'duration_min' => 13,
 			'highway' => '시내 도로 (백석로 → 만남로)',
 			'ktx' => '두정역에서 천안역까지 1정거장 → 도보 5분',
@@ -88,7 +88,7 @@ function moondental_get_regions() {
 			'note' => '두정동에서 차로 13분 — 서북구 신도시 권역',
 		),
 		'baekseok' => array(
-			'slug' => 'baekseok', 'name' => '천안 백석동', 'name_long' => '천안 서북구 백석동', 'province' => '천안 시내',
+			'slug' => 'baekseok', 'name' => '천안 백석동', 'name_long' => '천안 서북구 백석동', 'province' => '천안·아산 시내',
 			'distance_km' => 6.0, 'duration_min' => 17,
 			'highway' => '백석로 → 만남로',
 			'ktx' => '천안역에서 차로 15분',
@@ -96,7 +96,7 @@ function moondental_get_regions() {
 			'note' => '백석동에서 차로 17분 — 서북구 주거 권역',
 		),
 		'buldang' => array(
-			'slug' => 'buldang', 'name' => '천안 불당동', 'name_long' => '천안 서북구 불당동', 'province' => '천안 시내',
+			'slug' => 'buldang', 'name' => '천안 불당동', 'name_long' => '천안 서북구 불당동', 'province' => '천안·아산 시내',
 			'distance_km' => 7.0, 'duration_min' => 18,
 			'highway' => '백석로 → 만남로',
 			'ktx' => '천안아산역에서 시내버스 10분',
@@ -104,7 +104,7 @@ function moondental_get_regions() {
 			'note' => '불당동에서 차로 18분 — 천안 서북구 신도시',
 		),
 		'baebang' => array(
-			'slug' => 'baebang', 'name' => '아산 배방읍', 'name_long' => '아산시 배방읍', 'province' => '천안 시내',
+			'slug' => 'baebang', 'name' => '아산 배방읍', 'name_long' => '아산시 배방읍', 'province' => '천안·아산 시내',
 			'distance_km' => 8.0, 'duration_min' => 20,
 			'highway' => '국도 21호선 (배방 → 천안 만남로)',
 			'ktx' => '천안아산역(배방)에서 시내버스 15분',
@@ -112,7 +112,7 @@ function moondental_get_regions() {
 			'note' => '배방읍에서 차로 20분 — 아산 동부·천안아산역 인근',
 		),
 		'tangjeong' => array(
-			'slug' => 'tangjeong', 'name' => '아산 탕정면', 'name_long' => '아산시 탕정면', 'province' => '천안 시내',
+			'slug' => 'tangjeong', 'name' => '아산 탕정면', 'name_long' => '아산시 탕정면', 'province' => '천안·아산 시내',
 			'distance_km' => 10.0, 'duration_min' => 22,
 			'highway' => '국도 21호선 → 천안',
 			'ktx' => '천안아산역(배방)에서 시내버스·택시 15분',
@@ -120,14 +120,7 @@ function moondental_get_regions() {
 			'note' => '탕정면에서 차로 22분 — 삼성디스플레이 인근',
 		),
 
-		/* ───────── 충청남도 (15) ─ 시·군 단위 ───────── */
-		'asan' => array(
-			'slug' => 'asan', 'name' => '아산', 'name_long' => '아산시', 'province' => '충남',
-			'distance_km' => 15, 'duration_min' => 25, 'highway' => '국도 21호선·39호선',
-			'ktx' => '천안아산역에서 천안종합터미널까지 시내버스 15분',
-			'bus' => '아산시외버스터미널 → 천안종합버스터미널 30분 간격 운행',
-			'note' => '아산 시민에게 가장 가까운 천안 종합 치과병원',
-		),
+		/* ───────── 충청남도 (14) ─ 시·군 단위 (아산은 천안·아산 시내 그룹으로 이동) ───────── */
 		'yesan' => array(
 			'slug' => 'yesan', 'name' => '예산', 'name_long' => '예산군', 'province' => '충남',
 			'distance_km' => 35, 'duration_min' => 35, 'highway' => '국도 21호선 (천안-예산 직결)',
@@ -340,12 +333,12 @@ function moondental_get_region_by_slug( $slug ) {
  */
 function moondental_get_regions_by_province() {
 	$groups = array(
-		'천안 시내' => array(),
-		'충남'      => array(),
-		'충북'      => array(),
-		'세종'      => array(),
-		'대전'      => array(),
-		'경기'      => array(),
+		'천안·아산 시내' => array(),
+		'충남'            => array(),
+		'충북'            => array(),
+		'세종'            => array(),
+		'대전'            => array(),
+		'경기'            => array(),
 	);
 	foreach ( moondental_get_regions() as $r ) {
 		if ( isset( $groups[ $r['province'] ] ) ) {
