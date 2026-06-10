@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.18.1' );
+define( 'MOONDENTAL_VERSION', '3.18.2' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -394,7 +394,7 @@ function md_render_reservation_ctas( $args = array() ) {
 
 	// SVG 로고 (Naver, Kakao, Phone)
 	$svg_naver = '<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">'
-		. '<rect width="24" height="24" rx="4" fill="#ffffff"/>'
+		. '<circle cx="12" cy="12" r="12" fill="#ffffff"/>'
 		. '<path d="M9 8h2.2l3.6 5.1V8H17v8h-2.2l-3.6-5.1V16H9V8z" fill="#03C75A"/>'
 		. '</svg>';
 	$svg_kakao = '<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">'
