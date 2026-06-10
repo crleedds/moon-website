@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.18.2' );
+define( 'MOONDENTAL_VERSION', '3.19.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -898,6 +898,11 @@ function moondental_admin_tools_page() {
 		$menu_result = moondental_setup_primary_menu( true );
 		$menu_ran    = true;
 	}
+	$recat_ran = false; $recat_result = null;
+	if ( isset( $_POST['moondental_recategorize'] ) && check_admin_referer( 'moondental_recat' ) ) {
+		$recat_result = moondental_recategorize_posts();
+		$recat_ran    = true;
+	}
 	$sync_ran = false; $sync_result = null;
 	if ( isset( $_POST['moondental_sync_naver'] ) && check_admin_referer( 'moondental_sync' ) ) {
 		$sync_result = moondental_naver_import_all( 20 );
@@ -923,6 +928,33 @@ function moondental_admin_tools_page() {
 				생성·갱신된 항목 <?php echo (int) $menu_result['count']; ?>개. 메뉴는 외모 → 메뉴에서 추가 편집 가능.
 			</p></div>
 		<?php endif; ?>
+
+		<?php if ( $recat_ran && $recat_result ) : ?>
+			<div class="notice notice-success"><p>
+				<strong>글 자동 분류 완료.</strong>
+				🦷 치아이야기 <strong><?php echo (int) $recat_result['story']; ?>건</strong> ·
+				📢 공지사항 <strong><?php echo (int) $recat_result['notice']; ?>건</strong>
+				<?php if ( ! empty( $recat_result['skipped'] ) ) : ?>
+					· 건너뜀 <strong><?php echo (int) $recat_result['skipped']; ?>건</strong>
+				<?php endif; ?>
+			</p></div>
+		<?php endif; ?>
+
+		<div class="card" style="max-width:720px; padding:24px; margin-bottom:16px;">
+			<h2>글 자동 분류 — 치아이야기 / 공지사항</h2>
+			<p>모든 글을 본문·제목 키워드로 자동 분류합니다.</p>
+			<ul style="margin-left:18px; font-size:13px; color:#555;">
+				<li><strong>🦷 치아이야기</strong>로 분류 (임상·치료 관련):
+					임상·임플란트·교정·라미네이트·미백·발치·신경치료·잇몸·충치·보철·크라운·사랑니·턱관절·CBCT·환자·증례·진단·검진·자연치아·예방·스케일링·에어플로우·불소·실란트·치료·시술·수술·디지털·가이드·내원·통증·잇몸염·치주염</li>
+				<li><strong>📢 공지사항</strong>으로 분류 (그 외):
+					휴진·진료시간 변경·이벤트·캠페인·봉사·채용·수상·명절·새해·추석·협력·인증·지정 등 운영·행정 글</li>
+			</ul>
+			<p style="font-size:13px; color:#a00;">⚠️ 카테고리가 모두 재할당됩니다. 기존 다른 카테고리는 해제됩니다.</p>
+			<form method="post">
+				<?php wp_nonce_field( 'moondental_recat' ); ?>
+				<p><button type="submit" name="moondental_recategorize" class="button button-primary button-large">글 자동 분류 실행</button></p>
+			</form>
+		</div>
 
 		<div class="card" style="max-width:720px; padding:24px; margin-bottom:16px;">
 			<h2>주 메뉴 자동 설정 (헤더 메뉴)</h2>
@@ -1566,6 +1598,111 @@ function moondental_auto_create_pages_once() {
 }
 // wp_loaded — WP 핵심이 로드된 후, 출력 전. 프론트엔드 방문 시에도 한 번 실행.
 add_action( 'wp_loaded', 'moondental_auto_create_pages_once' );
+
+/**
+ * 글 자동 분류 — 본문/제목 키워드로 '치아이야기' 또는 '공지사항'으로 재할당.
+ *  치료·임상 키워드가 포함되면 → 치아이야기 (slug 'dental-stories')
+ *  그 외 → 공지사항 (slug 'notice')
+ *
+ * @return array ['story'=>int, 'notice'=>int, 'skipped'=>int]
+ */
+function moondental_recategorize_posts() {
+	// 임상·치료 관련 키워드 — 하나라도 매칭되면 '치아이야기'
+	$clinical_keywords = array(
+		'임상', '치료', '시술', '수술', '진료',
+		'임플란트', '교정', '투명교정', '슈어스마일', '브라켓',
+		'라미네이트', '미백', '치아미백', '잇몸미백',
+		'발치', '사랑니', '매복',
+		'신경치료', '근관', '재근관',
+		'잇몸', '치주', '치주염', '치주치료', '치은염', '잇몸염',
+		'충치', '레진', '인레이', '온레이',
+		'보철', '크라운', '브릿지', '틀니',
+		'턱관절', '이갈이', '이악물기',
+		'CBCT', '디지털', '가이드', '구강스캐너', '스캐너',
+		'환자', '케이스', '증례', '사례',
+		'진단', '검진', '정기검진',
+		'자연치아', '보존',
+		'예방', '스케일링', '에어플로우', '불소', '실란트',
+		'통증', '시린', '시린이',
+		'내원', '상담', '예약 진료',
+		'덴탈SPA', '덴탈스파', 'SPA',
+		'PDRN', '골이식', '뼈이식', '상악동',
+		'심미', '거미스마일', '반점치', '왜소치',
+		'문은수', '문지현', '이수연', '이승주', '권혜진', '이창률', '이영일', '김세일', '정석형', // 의료진 이름
+	);
+
+	// 공지사항 카테고리 (slug 'notice' 우선, 없으면 한글 '공지사항' 시도)
+	$notice_cat = get_term_by( 'slug', 'notice', 'category' );
+	if ( ! $notice_cat ) {
+		$notice_cat = get_term_by( 'name', '공지사항', 'category' );
+	}
+	if ( ! $notice_cat ) {
+		$id = wp_insert_term( '공지사항', 'category', array( 'slug' => 'notice' ) );
+		if ( ! is_wp_error( $id ) ) $notice_cat = get_term( $id['term_id'], 'category' );
+	}
+
+	// 치아이야기 카테고리
+	$story_cat = get_term_by( 'slug', 'dental-stories', 'category' );
+	if ( ! $story_cat ) {
+		$story_cat = get_term_by( 'name', '치아이야기', 'category' );
+	}
+	if ( ! $story_cat ) {
+		// 기존 '치과이야기'도 시도
+		$story_cat = get_term_by( 'name', '치과이야기', 'category' );
+		if ( $story_cat ) {
+			wp_update_term( $story_cat->term_id, 'category', array( 'name' => '치아이야기' ) );
+			$story_cat = get_term( $story_cat->term_id, 'category' );
+		}
+	}
+	if ( ! $story_cat ) {
+		$id = wp_insert_term( '치아이야기', 'category', array( 'slug' => 'dental-stories' ) );
+		if ( ! is_wp_error( $id ) ) $story_cat = get_term( $id['term_id'], 'category' );
+	}
+
+	if ( ! $notice_cat || ! $story_cat ) {
+		return array( 'story' => 0, 'notice' => 0, 'skipped' => 0 );
+	}
+
+	$posts = get_posts( array(
+		'post_type'      => 'post',
+		'post_status'    => array( 'publish', 'draft', 'pending' ),
+		'numberposts'    => -1,
+		'orderby'        => 'date',
+		'order'          => 'DESC',
+	) );
+
+	$story_count  = 0;
+	$notice_count = 0;
+	$skipped      = 0;
+
+	foreach ( $posts as $post ) {
+		$haystack = $post->post_title . "\n" . wp_strip_all_tags( $post->post_content );
+		$is_clinical = false;
+		foreach ( $clinical_keywords as $kw ) {
+			if ( mb_stripos( $haystack, $kw ) !== false ) {
+				$is_clinical = true;
+				break;
+			}
+		}
+
+		$target_cat = $is_clinical ? $story_cat->term_id : $notice_cat->term_id;
+		$result = wp_set_post_categories( $post->ID, array( (int) $target_cat ), false );
+
+		if ( is_wp_error( $result ) ) {
+			$skipped++;
+		} elseif ( $is_clinical ) {
+			$story_count++;
+		} else {
+			$notice_count++;
+		}
+	}
+
+	return array(
+		'story'   => $story_count,
+		'notice'  => $notice_count,
+		'skipped' => $skipped,
+	);
+}
 
 /**
  * 헤더 주 메뉴 구조 데이터 — 사용자 스크린샷 기준 (수정은 여기서)

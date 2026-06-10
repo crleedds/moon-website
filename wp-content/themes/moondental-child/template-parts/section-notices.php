@@ -1,8 +1,8 @@
 <?php
 /**
- * Section: 홈 — 공지사항 + 치과이야기 스니펫
+ * Section: 홈 — 공지사항 + 치아이야기 스니펫
  *
- *  공지사항(notice 카테고리) 2개 + 치과이야기(나머지) 3개 표시.
+ *  공지사항(notice 카테고리) 2개 + 치아이야기(나머지) 3개 표시.
  *  사용자 요청: 홈에서 병원 소식이 보이도록.
  *
  * @package moondental-child
@@ -25,7 +25,7 @@ $notice_q = new WP_Query( array(
 	'no_found_rows'  => true,
 ) );
 
-// 치과이야기 (공지사항 제외, 최대 3개)
+// 치아이야기 (공지사항 제외, 최대 3개)
 $story_args = array(
 	'post_type'           => 'post',
 	'posts_per_page'      => 3,
@@ -79,10 +79,10 @@ $news_page_url = get_post_type_archive_link( 'post' ) ?: home_url( '/소식/' );
 			</ul>
 		<?php endif; ?>
 
-		<!-- 치과이야기 (최대 3개) -->
+		<!-- 치아이야기 (최대 3개) -->
 		<?php if ( $story_q->have_posts() ) : ?>
 			<h3 style="font-size: 1.0625rem; font-weight: 800; margin: 0 0 14px; color: var(--color-text);">
-				🦷 치과이야기
+				🦷 치아이야기
 			</h3>
 			<div class="md-home-news-grid">
 				<?php while ( $story_q->have_posts() ) : $story_q->the_post();

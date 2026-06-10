@@ -1,11 +1,11 @@
 <?php
 /**
- * Template Name: 병원소식 (공지사항 + 치과이야기)
+ * Template Name: 병원소식 (공지사항 + 치아이야기)
  * Template Post Type: page
  *
- * 사용자 요청: 공지사항이 먼저 나오고 그 아래 '치과이야기'로 구강 관련 정보.
+ * 사용자 요청: 공지사항이 먼저 나오고 그 아래 '치아이야기'로 구강 관련 정보.
  *  공지사항 카테고리(slug: notice / 공지사항) 글 우선 노출
- *  그 외 글은 치과이야기 섹션에 표시.
+ *  그 외 글은 치아이야기 섹션에 표시.
  *
  * @package moondental-child
  */
@@ -26,7 +26,7 @@ $notice_q = new WP_Query( array(
 	'no_found_rows'  => true,
 ) );
 
-// 치과이야기 글 (페이지네이션 포함, 공지사항 제외)
+// 치아이야기 글 (페이지네이션 포함, 공지사항 제외)
 $story_args = array(
 	'post_type'      => 'post',
 	'post_status'    => 'publish',
@@ -93,12 +93,12 @@ $story_q = new WP_Query( $story_args );
 	</div>
 </section>
 
-<!-- ============ 2. 치과이야기 ============ -->
+<!-- ============ 2. 치아이야기 ============ -->
 <section class="md-section" id="dental-stories">
 	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">🦷 DENTAL STORIES · 치과이야기</span>
-			<h2 class="md-section-head__title">치과이야기</h2>
+			<span class="md-section-head__eyebrow">🦷 DENTAL STORIES · 치아이야기</span>
+			<h2 class="md-section-head__title">치아이야기</h2>
 			<p class="md-section-head__lead">
 				임플란트·교정·자연치아 살리기·라미네이트·예방 등<br>
 				환자분께 도움이 되는 구강 건강 정보를 모았습니다.
@@ -112,7 +112,7 @@ $story_q = new WP_Query( $story_args );
 					$category  = get_post_meta( get_the_ID(), 'moondental_naver_category',  true );
 					if ( ! $category ) {
 						$cats = get_the_category();
-						$category = $cats ? $cats[0]->name : '치과이야기';
+						$category = $cats ? $cats[0]->name : '치아이야기';
 					}
 				?>
 					<article class="md-news-card">
@@ -192,7 +192,7 @@ $story_q = new WP_Query( $story_args );
 				</div>
 			<?php else : ?>
 				<div class="md-news-empty" style="text-align:center; padding: clamp(24px, 3vw, 40px); background: var(--color-surface); border-radius: var(--radius-md);">
-					<p style="margin:0; color: var(--color-text-sub);">아직 등록된 치과이야기가 없습니다.</p>
+					<p style="margin:0; color: var(--color-text-sub);">아직 등록된 치아이야기가 없습니다.</p>
 					<p style="margin: 8px 0 0; font-size: var(--fs-small); color: var(--color-text-mute);">
 						관리자: <code>wp-admin → 글 → 새 글</code>에서 치과 관련 정보를 게시해주세요.
 					</p>
