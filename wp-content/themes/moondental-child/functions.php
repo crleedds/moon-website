@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.20.0' );
+define( 'MOONDENTAL_VERSION', '3.20.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1275,9 +1275,30 @@ add_action( 'template_redirect', 'moondental_doctor_intercept', 1 );
  */
 function moondental_intercept_setup_post( $base_slug ) {
 	$base = get_page_by_path( $base_slug );
+	// Fallback 1: 한글 슬러그 URL-decode 변형
+	if ( ! $base ) {
+		$base = get_page_by_path( urldecode( $base_slug ) );
+	}
+	// Fallback 2: 아무 publish 페이지든 사용 — $post null 방지가 핵심 목적
+	if ( ! $base ) {
+		$any = get_pages( array(
+			'number'      => 1,
+			'post_status' => 'publish',
+			'sort_order'  => 'ASC',
+			'sort_column' => 'menu_order',
+		) );
+		if ( $any ) $base = $any[0];
+	}
+	// Fallback 3: 홈페이지 객체 사용
+	if ( ! $base ) {
+		$front_id = (int) get_option( 'page_on_front' );
+		if ( $front_id ) $base = get_post( $front_id );
+	}
 	if ( ! $base ) return;
+
 	global $wp_query, $post;
 	$post = $base;
+	setup_postdata( $post );
 	$wp_query->post              = $base;
 	$wp_query->posts             = array( $base );
 	$wp_query->queried_object    = $base;

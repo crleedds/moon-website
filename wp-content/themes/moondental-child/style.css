@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.20.0
+Version:      3.20.1
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -3305,6 +3305,39 @@ a.md-team-card:hover .md-team-card__more {
 .md-channel-card__icon {
   font-size: 2.25rem;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+/* SVG 브랜드 아이콘 (전화·카카오·네이버) */
+.md-channel-card__icon svg {
+  display: block;
+  flex-shrink: 0;
+}
+.md-channel-card__icon--phone {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(216, 128, 98, 0.10);
+  color: var(--color-primary);
+}
+.md-channel-card__icon--kakao,
+.md-channel-card__icon--naver {
+  width: 56px;
+  height: 56px;
+}
+
+/* 카카오톡 상담 카드 — 노란 강조 */
+.md-channel-card--kakao { border-color: rgba(254, 229, 0, 0.4); }
+.md-channel-card--kakao:hover {
+  border-color: #FEE500;
+  box-shadow: 0 14px 32px rgba(254, 229, 0, 0.28);
+}
+/* 네이버 예약 카드 — 그린 강조 (기존 .md-channel-card--primary 활용) */
+.md-channel-card--naver { border-color: rgba(3, 199, 90, 0.4); }
+.md-channel-card--naver:hover {
+  border-color: #03C75A;
+  box-shadow: 0 14px 32px rgba(3, 199, 90, 0.28);
 }
 .md-channel-card__title {
   font-size: var(--fs-h4);
@@ -6963,6 +6996,62 @@ html { scroll-behavior: smooth; }
    ============================================================= */
 .md-dentalbot {
   /* surface 배경은 .md-section--surface가 처리 */
+}
+/* 봇 + 우측 CTA 2-col 레이아웃 */
+.md-dentalbot__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: clamp(20px, 2.5vw, 32px);
+  align-items: start;
+}
+@media (max-width: 880px) {
+  .md-dentalbot__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 우측 CTA 사이드 */
+.md-dentalbot__cta {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: clamp(16px, 1.6vw, 22px);
+  padding: clamp(20px, 2.5vw, 28px);
+  box-shadow: 0 8px 24px rgba(61, 47, 38, 0.06);
+  position: sticky;
+  top: 110px;
+}
+@media (max-width: 880px) {
+  .md-dentalbot__cta { position: static; }
+}
+.md-dentalbot__cta-title {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  margin: 0 0 6px;
+  color: var(--color-text);
+}
+.md-dentalbot__cta-lead {
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  margin: 0 0 16px;
+  line-height: 1.55;
+}
+.md-dentalbot__cta-btn {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+.md-dentalbot__cta-btn:last-of-type { margin-bottom: 0; }
+.md-dentalbot__cta-hint {
+  margin: 16px 0 0;
+  font-size: 0.7rem;
+  color: var(--color-text-mute);
+  line-height: 1.55;
+  word-break: keep-all;
 }
 .md-bot {
   background: var(--color-white);

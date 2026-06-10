@@ -130,14 +130,23 @@ $bot_lead     = function_exists( 'md_content' ) ? md_content( 'bot_lead',     "�
 $bot_start    = function_exists( 'md_content' ) ? md_content( 'bot_start_label', '진단 시작 →' ) : '진단 시작 →';
 $bot_count_label = sprintf( '%d개의 Yes/No 질문 · 약 2-3분 소요 · 모든 진료영역 망라', count( $questions ) );
 ?>
+<?php
+// 사이드 예약 버튼용 데이터
+$info       = moondental_get_info();
+$phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'] );
+$kakao_url  = $info['kakao_url'] ?? '';
+$naver_book = $info['naver_place'] ?? '';
+?>
 <section class="md-section md-section--surface md-dentalbot" id="dental-bot" aria-label="구강 자가진단">
-	<div class="md-container md-container--narrow">
+	<div class="md-container">
 
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( $bot_eyebrow ); ?></span>
 			<h2 class="md-section-head__title"><?php echo esc_html( $bot_title ); ?></h2>
 			<p class="md-section-head__lead"><?php echo nl2br( esc_html( $bot_lead ) ); ?></p>
 		</header>
+
+		<div class="md-dentalbot__layout">
 
 		<div class="md-bot" data-md-bot data-md-bot-json="<?php echo esc_attr( wp_json_encode( $bot_data ) ); ?>">
 
@@ -196,5 +205,49 @@ $bot_count_label = sprintf( '%d개의 Yes/No 질문 · 약 2-3분 소요 · 모�
 			</div>
 
 		</div>
+
+		<!-- 우측 예약·상담 3 버튼 (모바일에선 하단 스택) -->
+		<aside class="md-dentalbot__cta" aria-label="예약·상담 채널">
+			<h3 class="md-dentalbot__cta-title">진단 안 받고 바로 상담</h3>
+			<p class="md-dentalbot__cta-lead">증상이 명확하다면 곧장 예약·상담하세요.</p>
+
+			<?php if ( $naver_book ) : ?>
+				<a class="md-btn md-btn--naver md-btn--lg md-dentalbot__cta-btn"
+				   href="<?php echo esc_url( $naver_book ); ?>"
+				   target="_blank" rel="noopener"
+				   data-track="cta-dentalbot-naver">
+					<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">
+						<circle cx="12" cy="12" r="12" fill="#ffffff"/>
+						<path d="M9 8h2.2l3.6 5.1V8H17v8h-2.2l-3.6-5.1V16H9V8z" fill="#03C75A"/>
+					</svg>
+					<span class="md-rcta__label">네이버 예약</span>
+				</a>
+			<?php endif; ?>
+
+			<?php if ( $kakao_url ) : ?>
+				<a class="md-btn md-btn--kakao md-btn--lg md-dentalbot__cta-btn"
+				   href="<?php echo esc_url( $kakao_url ); ?>"
+				   target="_blank" rel="noopener"
+				   data-track="cta-dentalbot-kakao">
+					<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M12 6c-3.7 0-6.7 2.4-6.7 5.4 0 1.9 1.3 3.6 3.2 4.5l-.7 2.6c-.06.23.18.4.38.27l3.05-2c.25.03.51.04.78.04 3.7 0 6.7-2.4 6.7-5.4S15.7 6 12 6z" fill="#3C1E1E"/>
+					</svg>
+					<span class="md-rcta__label">카카오톡 상담</span>
+				</a>
+			<?php endif; ?>
+
+			<a class="md-btn md-btn-ghost md-btn--lg md-dentalbot__cta-btn"
+			   href="tel:<?php echo esc_attr( $phone_link ); ?>"
+			   data-track="cta-dentalbot-call">
+				<svg class="md-rcta__icon md-rcta__icon--stroke" viewBox="0 0 24 24" aria-hidden="true">
+					<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg>
+				<span class="md-rcta__label">전화 상담 <?php echo esc_html( $info['phone'] ); ?></span>
+			</a>
+
+			<p class="md-dentalbot__cta-hint">진료시간: 월·화·수·금 09:00–20:30 · 목 09:00–18:00 · 토 09:00–14:00</p>
+		</aside>
+
+		</div><!-- /.md-dentalbot__layout -->
 	</div>
 </section>

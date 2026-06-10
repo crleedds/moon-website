@@ -244,16 +244,23 @@ $off_text = $info['hours_off'] ?: '휴진';
 		</header>
 
 		<div class="md-channel-grid">
-			<a class="md-channel-card" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-location-call">
-				<span class="md-channel-card__icon" aria-hidden="true">📞</span>
+			<a class="md-channel-card md-channel-card--phone" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-location-call">
+				<span class="md-channel-card__icon md-channel-card__icon--phone" aria-hidden="true">
+					<svg viewBox="0 0 24 24" width="28" height="28"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				</span>
 				<span class="md-channel-card__title">전화 상담</span>
 				<span class="md-channel-card__desc"><?php echo esc_html( $info['phone'] ); ?> · 진료시간 내 응답</span>
 				<span class="md-channel-card__cta">바로 전화 →</span>
 			</a>
 
 			<?php if ( $kakao_url ) : ?>
-			<a class="md-channel-card" href="<?php echo esc_url( $kakao_url ); ?>" target="_blank" rel="noopener" data-track="cta-location-kakao">
-				<span class="md-channel-card__icon" aria-hidden="true">💬</span>
+			<a class="md-channel-card md-channel-card--kakao" href="<?php echo esc_url( $kakao_url ); ?>" target="_blank" rel="noopener" data-track="cta-location-kakao">
+				<span class="md-channel-card__icon md-channel-card__icon--kakao" aria-hidden="true">
+					<svg viewBox="0 0 36 36" width="32" height="32">
+						<circle cx="18" cy="18" r="18" fill="#FEE500"/>
+						<path d="M18 9.6c-5.55 0-10.05 3.6-10.05 8.1 0 2.85 1.95 5.4 4.8 6.75l-1.05 3.9c-.09.345.27.6.57.405l4.575-3c.375.045.765.06 1.17.06 5.55 0 10.05-3.6 10.05-8.1S23.55 9.6 18 9.6z" fill="#3C1E1E"/>
+					</svg>
+				</span>
 				<span class="md-channel-card__title">카카오톡 상담</span>
 				<span class="md-channel-card__desc">24시간 메시지 · 진료시간 내 답변</span>
 				<span class="md-channel-card__cta">카카오톡 채널 →</span>
@@ -261,8 +268,13 @@ $off_text = $info['hours_off'] ?: '휴진';
 			<?php endif; ?>
 
 			<?php if ( $naver_book ) : ?>
-			<a class="md-channel-card md-channel-card--primary" href="<?php echo esc_url( $naver_book ); ?>" target="_blank" rel="noopener" data-track="cta-location-naver-book">
-				<span class="md-channel-card__icon" aria-hidden="true">🟢</span>
+			<a class="md-channel-card md-channel-card--naver" href="<?php echo esc_url( $naver_book ); ?>" target="_blank" rel="noopener" data-track="cta-location-naver-book">
+				<span class="md-channel-card__icon md-channel-card__icon--naver" aria-hidden="true">
+					<svg viewBox="0 0 36 36" width="32" height="32">
+						<circle cx="18" cy="18" r="18" fill="#03C75A"/>
+						<path d="M13.5 12h3.3l5.4 7.65V12H25.5v12h-3.3l-5.4-7.65V24H13.5V12z" fill="#fff"/>
+					</svg>
+				</span>
 				<span class="md-channel-card__title">네이버 예약</span>
 				<span class="md-channel-card__desc">24시간 자동 예약 · 일정 즉시 확정</span>
 				<span class="md-channel-card__cta">예약하러 가기 →</span>
