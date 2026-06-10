@@ -204,8 +204,9 @@ $off_text = $info['hours_off'] ?: '휴진';
 		<?php foreach ( moondental_get_regions_by_province() as $prov => $list ) :
 			if ( empty( $list ) ) continue;
 			$prov_emoji = array(
+				'천안 시내' => '🏙️',
 				'충남' => '🌊', '충북' => '🏔️', '세종' => '🏛️',
-				'대전' => '🏙️', '경기' => '🌆',
+				'대전' => '🌆', '경기' => '🌇',
 			);
 			$emoji = $prov_emoji[ $prov ] ?? '📍'; ?>
 			<div class="md-region-province">
@@ -215,9 +216,10 @@ $off_text = $info['hours_off'] ?: '휴진';
 					<small>(<?php echo count( $list ); ?>개 지역)</small>
 				</h3>
 				<div class="md-region-grid">
-					<?php foreach ( $list as $r ) : ?>
+					<?php foreach ( $list as $r ) :
+						$icon = ! empty( $r['icon'] ) ? $r['icon'] : '🚗'; ?>
 						<a class="md-region-pill" href="<?php echo esc_url( home_url( '/오시는-길/' . $r['slug'] . '/' ) ); ?>" data-track="cta-region-<?php echo esc_attr( $r['slug'] ); ?>">
-							<span class="md-region-pill__icon" aria-hidden="true">🚗</span>
+							<span class="md-region-pill__icon" aria-hidden="true"><?php echo $icon; ?></span>
 							<span class="md-region-pill__name"><?php echo esc_html( $r['name'] ); ?></span>
 							<span class="md-region-pill__time"><?php echo esc_html( ! empty( $r['duration_label'] ) ? $r['duration_label'] : ( $r['duration_min'] . '분' ) ); ?></span>
 						</a>

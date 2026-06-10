@@ -297,7 +297,7 @@ $is_walking     = ! empty( $region['duration_label'] ) && strpos( $region['durat
 				foreach ( $list as $r ) :
 					if ( $r['slug'] === $slug ) continue; ?>
 					<a class="md-region-pill" href="<?php echo esc_url( home_url( '/오시는-길/' . $r['slug'] . '/' ) ); ?>">
-						<span class="md-region-pill__icon" aria-hidden="true">🚗</span>
+						<span class="md-region-pill__icon" aria-hidden="true"><?php echo ! empty( $r["icon"] ) ? $r["icon"] : "🚗"; ?></span>
 						<span class="md-region-pill__name"><?php echo esc_html( $r['name'] ); ?></span>
 						<span class="md-region-pill__time"><?php echo esc_html( ! empty( $r['duration_label'] ) ? $r['duration_label'] : ( $r['duration_min'] . '분' ) ); ?></span>
 					</a>
