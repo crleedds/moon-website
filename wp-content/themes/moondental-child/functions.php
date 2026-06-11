@@ -13,19 +13,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.21.2' );
+define( 'MOONDENTAL_VERSION', '3.21.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
-/* 일회성 마이그레이션: 옛 Google Maps URL 정리 (v3.21.2)
- * 사용자가 커스터마이저에서 따로 안 만진 경우, 옛 단축 링크가 theme_mod에 저장돼 있으면 제거 → 새 기본값 적용. */
+/* 일회성 마이그레이션: Google Maps URL 강제 적용 (v3.21.3)
+ * 사용자가 어떤 값을 저장했든 새 단축 링크로 강제 설정.
+ * (theme_mod / 옛 maps/search 형식 모두 W9NGrJERFEVTJQj97로 통일) */
 add_action( 'after_setup_theme', function() {
-	if ( get_option( 'moondental_gmap_url_migration_v3212' ) === 'done' ) return;
-	$old = 'https://maps.app.goo.gl/9MEzn5ESfZTZinhq7';
-	if ( get_theme_mod( 'moondental_google_map_url' ) === $old ) {
-		remove_theme_mod( 'moondental_google_map_url' );
-	}
-	update_option( 'moondental_gmap_url_migration_v3212', 'done' );
+	if ( get_option( 'moondental_gmap_url_migration_v3213' ) === 'done' ) return;
+	set_theme_mod( 'moondental_google_map_url', 'https://maps.app.goo.gl/W9NGrJERFEVTJQj97' );
+	update_option( 'moondental_gmap_url_migration_v3213', 'done' );
 }, 30 );
 
 /* 일회성 마이그레이션: 옛 길어진 CTA 라벨 → 짧은 라벨로 정리 (v3.20.2) */
