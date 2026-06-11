@@ -59,13 +59,30 @@ $story_q = new WP_Query( $story_args );
 	</div>
 </section>
 
-<!-- ============ 1. 공지사항 ============ -->
+<?php
+// 관리자 빠른 글쓰기 URL
+$notice_cat_obj = get_category_by_slug( 'notice' );
+$story_cat_obj  = get_category_by_slug( 'dental-stories' );
+$notice_new_url = $notice_cat_obj ? add_query_arg( array( 'post_category' => array( $notice_cat_obj->term_id ) ), admin_url( 'post-new.php' ) ) : admin_url( 'post-new.php' );
+$story_new_url  = $story_cat_obj  ? add_query_arg( array( 'post_category' => array( $story_cat_obj->term_id ) ),  admin_url( 'post-new.php' ) ) : admin_url( 'post-new.php' );
+$is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
+?>
+
+<!-- ============ 1. 문치과병원 소식 ============ -->
 <section class="md-section md-section--surface" id="notice">
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">📢 NOTICE</span>
 			<h2 class="md-section-head__title">문치과병원 소식</h2>
 			<p class="md-section-head__lead">진료시간 변경·휴진 안내·이벤트·운영 소식을 가장 먼저 안내드립니다.</p>
+			<?php if ( $is_editor ) : ?>
+				<div class="md-admin-quickpost">
+					<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( $notice_new_url ); ?>">＋ 새 소식 글쓰기</a>
+					<?php if ( $notice_cat_obj ) : ?>
+						<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( admin_url( 'edit.php?category_name=notice' ) ); ?>">소식 글 관리</a>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
 		</header>
 
 		<?php if ( $notice_q->have_posts() ) : ?>
@@ -84,16 +101,20 @@ $story_q = new WP_Query( $story_args );
 			</ul>
 		<?php else : ?>
 			<div class="md-news-empty" style="text-align:center; padding: clamp(24px, 3vw, 40px); background: var(--color-white); border-radius: var(--radius-md);">
-				<p style="margin:0; color: var(--color-text-sub);">아직 등록된 공지사항이 없습니다.</p>
-				<p style="margin: 8px 0 0; font-size: var(--fs-small); color: var(--color-text-mute);">
-					관리자: <code>wp-admin → 글 → 카테고리</code>에서 '문치과병원 소식' 카테고리를 만들고 글을 작성해주세요.
-				</p>
+				<p style="margin:0; color: var(--color-text-sub);">아직 등록된 소식이 없습니다.</p>
+				<?php if ( $is_editor ) : ?>
+					<p style="margin: 16px 0 0;">
+						<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( $notice_new_url ); ?>">＋ 첫 소식 작성하기</a>
+					</p>
+				<?php else : ?>
+					<p style="margin: 8px 0 0; font-size: var(--fs-small); color: var(--color-text-mute);">곧 새로운 소식으로 찾아뵙겠습니다.</p>
+				<?php endif; ?>
 			</div>
 		<?php endif; ?>
 	</div>
 </section>
 
-<!-- ============ 2. 치아이야기 ============ -->
+<!-- ============ 2. 문치과병원 치아이야기 ============ -->
 <section class="md-section" id="dental-stories">
 	<div class="md-container">
 		<header class="md-section-head">
@@ -103,6 +124,14 @@ $story_q = new WP_Query( $story_args );
 				임플란트·교정·자연치아 살리기·라미네이트·예방 등<br>
 				환자분께 도움이 되는 구강 건강 정보를 모았습니다.
 			</p>
+			<?php if ( $is_editor ) : ?>
+				<div class="md-admin-quickpost">
+					<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( $story_new_url ); ?>">＋ 새 치아이야기 글쓰기</a>
+					<?php if ( $story_cat_obj ) : ?>
+						<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( admin_url( 'edit.php?category_name=dental-stories' ) ); ?>">치아이야기 글 관리</a>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
 		</header>
 
 		<?php if ( $story_q->have_posts() ) : ?>

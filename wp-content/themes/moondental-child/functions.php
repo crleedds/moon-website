@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.20.3' );
+define( 'MOONDENTAL_VERSION', '3.20.4' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -52,6 +52,66 @@ add_action( 'after_setup_theme', function() {
 
 	update_option( 'moondental_cat_rename_migration_v3203', 'done' );
 }, 31 );
+
+/* 일회성 마이그레이션: 별칭 카테고리(소식/뉴스/공지/치과이야기 등) 글을 정식 카테고리로 이전 후
+ * 키워드 재분류 강제 실행 (v3.20.4)
+ */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_cat_consolidate_migration_v3204' ) === 'done' ) return;
+
+	// 정식 카테고리 확인
+	$notice_cat = get_term_by( 'slug', 'notice', 'category' );
+	$story_cat  = get_term_by( 'slug', 'dental-stories', 'category' );
+	if ( ! $notice_cat || ! $story_cat ) return; // 정식 cat이 아직 없으면 다음 요청에서 재시도
+
+	// 별칭으로 만들어진 카테고리들을 정식 카테고리로 합치기.
+	// 별칭 → 어느 정식 카테고리로 보낼지.
+	$aliases = array(
+		// 소식 별칭들
+		'소식'        => $notice_cat->term_id,
+		'뉴스'        => $notice_cat->term_id,
+		'공지'        => $notice_cat->term_id,
+		'announcement'=> $notice_cat->term_id,
+		'news'        => $notice_cat->term_id,
+		// 치아이야기 별칭들
+		'치아이야기'  => $story_cat->term_id,
+		'치과이야기'  => $story_cat->term_id,
+		'치아 이야기' => $story_cat->term_id,
+		'치과 이야기' => $story_cat->term_id,
+		'dental story'=> $story_cat->term_id,
+		'dental stories'=> $story_cat->term_id,
+	);
+
+	foreach ( $aliases as $alias_name => $target_id ) {
+		$alias = get_term_by( 'name', $alias_name, 'category' );
+		if ( ! $alias ) $alias = get_term_by( 'slug', sanitize_title( $alias_name ), 'category' );
+		if ( ! $alias ) continue;
+		if ( (int) $alias->term_id === (int) $target_id ) continue;
+
+		// 해당 별칭 cat의 모든 글을 정식 cat으로 옮기기
+		$ids = get_posts( array(
+			'post_type'   => 'post',
+			'post_status' => array( 'publish', 'draft', 'pending', 'future' ),
+			'numberposts' => -1,
+			'fields'      => 'ids',
+			'tax_query'   => array(
+				array( 'taxonomy' => 'category', 'field' => 'term_id', 'terms' => $alias->term_id ),
+			),
+		) );
+		foreach ( $ids as $pid ) {
+			wp_set_post_categories( $pid, array( (int) $target_id ), false );
+		}
+		// 별칭 카테고리 삭제 (uncategorized로 강등하지 않음 — 글이 이미 옮겨졌으므로)
+		wp_delete_term( $alias->term_id, 'category' );
+	}
+
+	// 키워드 기반 재분류 한 번 실행 — 잘못 분류된 글 정리
+	if ( function_exists( 'moondental_recategorize_posts' ) ) {
+		moondental_recategorize_posts();
+	}
+
+	update_option( 'moondental_cat_consolidate_migration_v3204', 'done' );
+}, 32 );
 
 require_once MOONDENTAL_DIR . '/inc/content-defaults.php';
 require_once MOONDENTAL_DIR . '/inc/naver-importer.php';
@@ -1666,7 +1726,24 @@ add_action( 'wp_loaded', 'moondental_auto_create_pages_once' );
  * @return array ['story'=>int, 'notice'=>int, 'skipped'=>int]
  */
 function moondental_recategorize_posts() {
-	// 임상·치료 관련 키워드 — 하나라도 매칭되면 '치아이야기'
+	// ▶ 소식·운영 키워드 — 최우선. 하나라도 매칭되면 '문치과병원 소식'.
+	//   임상 키워드가 함께 있어도 소식이 이깁니다 (MOU·연합회·협약 등은 임상글 아님).
+	$news_keywords = array(
+		'MOU', 'mou', '협약', '체결', '협력',
+		'연합회', '협회', '협의회', '간담회', '이통장', '소상공인', '교총', '연합',
+		'어린이집', '대학교 ', '학교', '교회',
+		'봉사', '후원', '기부', '나눔', '캠페인', '이벤트', '행사', '축제', '걷기',
+		'채용', '모집', '구인',
+		'수상', '선정', '인증', '지정', '인정', '등재', '협력병원', '지정병원',
+		'명절', '새해', '신년', '설날', '추석', '한가위', '연말', '연시', '크리스마스',
+		'휴진', '진료시간 변경', '운영시간', '시간 변경', '시간변경', '공지', '안내드립니다', '안내드립니다',
+		'개원', '리뉴얼', '확장', '이전', '오픈',
+		'특별진료', '연장진료', '야간진료 안내',
+		'증명서', '제증명',
+		'코로나', '백신', '방역',
+	);
+
+	// 임상·치료 관련 키워드 — 소식 키워드가 없을 때만 '치아이야기'로 분류
 	$clinical_keywords = array(
 		'임상', '치료', '시술', '수술', '진료',
 		'임플란트', '교정', '투명교정', '슈어스마일', '브라켓',
@@ -1737,20 +1814,34 @@ function moondental_recategorize_posts() {
 
 	foreach ( $posts as $post ) {
 		$haystack = $post->post_title . "\n" . wp_strip_all_tags( $post->post_content );
+
+		// 1순위: 소식·운영 키워드 → 소식
+		$is_news = false;
+		foreach ( $news_keywords as $kw ) {
+			if ( mb_stripos( $haystack, $kw ) !== false ) { $is_news = true; break; }
+		}
+
+		// 2순위: 임상 키워드 → 치아이야기 (소식 키워드가 없을 때만)
 		$is_clinical = false;
-		foreach ( $clinical_keywords as $kw ) {
-			if ( mb_stripos( $haystack, $kw ) !== false ) {
-				$is_clinical = true;
-				break;
+		if ( ! $is_news ) {
+			foreach ( $clinical_keywords as $kw ) {
+				if ( mb_stripos( $haystack, $kw ) !== false ) { $is_clinical = true; break; }
 			}
 		}
 
-		$target_cat = $is_clinical ? $story_cat->term_id : $notice_cat->term_id;
+		if ( $is_news ) {
+			$target_cat = $notice_cat->term_id;
+		} elseif ( $is_clinical ) {
+			$target_cat = $story_cat->term_id;
+		} else {
+			$target_cat = $notice_cat->term_id; // 기본값: 소식
+		}
+
 		$result = wp_set_post_categories( $post->ID, array( (int) $target_cat ), false );
 
 		if ( is_wp_error( $result ) ) {
 			$skipped++;
-		} elseif ( $is_clinical ) {
+		} elseif ( $target_cat === $story_cat->term_id ) {
 			$story_count++;
 		} else {
 			$notice_count++;
