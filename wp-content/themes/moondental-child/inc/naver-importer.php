@@ -252,3 +252,159 @@ function moondental_naver_import_all( $limit = 20 ) {
 
 	return $result;
 }
+
+
+/* ========================================================================
+ * v3.21.7 — 로컬 이미지 다운로드 임포터
+ * 기존 임포터는 네이버 CDN URL을 본문에 그대로 유지 → referer 차단으로 사진 안 보임.
+ * 이 함수는 본문 내 <img>를 모두 WP 미디어로 sideload 한 뒤 src를 로컬 URL로 교체.
+ * 결과: 네이버 의존성 없이 자체 서빙되는 콘텐츠.
+ * ======================================================================== */
+
+const MOONDENTAL_LOCAL_IMPORT_META = 'moondental_local_import_v2';
+
+/**
+ * 본문 내 원격 <img>를 WP 미디어로 sideload 후 로컬 URL로 교체.
+ *
+ * @param string $body    본문 HTML
+ * @param int    $post_id 첨부할 글 ID
+ * @return array ['body' => string, 'first_attachment_id' => int, 'count' => int]
+ */
+function moondental_sideload_images_in_body( $body, $post_id ) {
+	if ( ! preg_match_all( '#<img[^>]+src=["\']([^"\']+)["\']#i', $body, $matches ) ) {
+		return array( 'body' => $body, 'first_attachment_id' => 0, 'count' => 0 );
+	}
+
+	// admin 함수 로드
+	if ( ! function_exists( 'media_sideload_image' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+	}
+
+	$urls = array_unique( $matches[1] );
+	$first_id = 0;
+	$count = 0;
+
+	foreach ( $urls as $url ) {
+		// 네이버 CDN 패턴만 (이미 로컬 호스트는 건너뜀)
+		$is_naver = preg_match( '#(pstatic\.net|naver\.com|phinf|blogfiles)#i', $url );
+		$is_local = strpos( $url, home_url() ) === 0 || $url[0] === '/';
+		if ( ! $is_naver || $is_local ) continue;
+
+		// 쿼리 파라미터 정리 (네이버 URL에 ?type=... 붙어 있는 경우 큰 사이즈로)
+		$clean_url = preg_replace( '#\?type=w\d+#i', '?type=w1200', $url );
+
+		$id = media_sideload_image( $clean_url, $post_id, '', 'id' );
+		if ( is_wp_error( $id ) || ! $id ) continue;
+
+		$local_url = wp_get_attachment_image_url( (int) $id, 'full' );
+		if ( ! $local_url ) continue;
+
+		$body = str_replace( $url, $local_url, $body );
+		$count++;
+		if ( ! $first_id ) $first_id = (int) $id;
+	}
+
+	return array( 'body' => $body, 'first_attachment_id' => $first_id, 'count' => $count );
+}
+
+
+/**
+ * 1회용 — 네이버 블로그 본문 + 사진을 모두 로컬로 가져오기.
+ *
+ * @param int $limit
+ * @return array ['created' => [..ids..], 'skipped' => N, 'images' => N, 'errors' => [..]]
+ */
+function moondental_naver_import_local( $limit = 15 ) {
+	@set_time_limit( 600 );
+	$result = array( 'created' => array(), 'skipped' => 0, 'images' => 0, 'errors' => array() );
+
+	$info = moondental_get_info();
+	if ( empty( $info['blog_url'] ) ) {
+		$result['errors'][] = '블로그 URL이 설정되지 않음';
+		return $result;
+	}
+	if ( ! preg_match( '#blog\.naver\.com/([A-Za-z0-9_-]+)#', $info['blog_url'], $m ) ) {
+		$result['errors'][] = '블로그 URL 형식 인식 실패';
+		return $result;
+	}
+	$blog_id = $m[1];
+
+	$items = moondental_fetch_naver_blog( $limit, true );
+	if ( empty( $items ) ) {
+		$result['errors'][] = 'RSS 피드를 가져오지 못함';
+		return $result;
+	}
+
+	foreach ( $items as $item ) {
+		// 이미 가져왔는지 source URL로 중복 체크
+		$existing = get_posts( array(
+			'post_type'      => 'post',
+			'post_status'    => array( 'publish', 'draft', 'pending', 'future', 'private', 'trash' ),
+			'meta_query'     => array( array( 'key' => MOONDENTAL_LOCAL_IMPORT_META, 'value' => $item['link'] ) ),
+			'fields'         => 'ids',
+			'numberposts'    => 1,
+			'no_found_rows'  => true,
+		) );
+		if ( $existing ) { $result['skipped']++; continue; }
+
+		if ( ! preg_match( '#/(\d{12,})#', $item['link'], $m2 ) ) {
+			$result['errors'][] = 'logNo 파싱 실패: ' . $item['link'];
+			continue;
+		}
+		$log_no = $m2[1];
+
+		$html = moondental_naver_fetch_post_html( $blog_id, $log_no );
+		if ( is_wp_error( $html ) ) { $result['errors'][] = $html->get_error_message(); continue; }
+
+		$body = moondental_naver_extract_content( $html );
+		if ( ! $body ) { $result['errors'][] = '본문 추출 실패: ' . $log_no; continue; }
+		$body = moondental_naver_sanitize_content( $body );
+
+		// 1단계: 임시로 글 생성 (post_id가 있어야 media_sideload 가능)
+		$post_id = wp_insert_post( array(
+			'post_title'   => wp_strip_all_tags( $item['title'] ),
+			'post_content' => $body,
+			'post_excerpt' => $item['excerpt'],
+			'post_status'  => 'publish',
+			'post_type'    => 'post',
+			'post_date'    => date_i18n( 'Y-m-d H:i:s', $item['date'] ),
+			'post_date_gmt'=> gmdate( 'Y-m-d H:i:s', $item['date'] ),
+			'meta_input'   => array(
+				MOONDENTAL_LOCAL_IMPORT_META . '_at' => current_time( 'mysql' ),
+			),
+		), true );
+		if ( is_wp_error( $post_id ) ) { $result['errors'][] = $post_id->get_error_message(); continue; }
+
+		// 2단계: 본문 내 모든 네이버 이미지를 로컬로 sideload + src 교체
+		$side = moondental_sideload_images_in_body( $body, $post_id );
+		$result['images'] += (int) $side['count'];
+
+		// 3단계: 본문 업데이트 + 대표 이미지 설정
+		wp_update_post( array( 'ID' => $post_id, 'post_content' => $side['body'] ) );
+		if ( $side['first_attachment_id'] ) {
+			set_post_thumbnail( $post_id, $side['first_attachment_id'] );
+		}
+
+		// source URL 메타 + 외부 추적용
+		update_post_meta( $post_id, MOONDENTAL_LOCAL_IMPORT_META, $item['link'] );
+
+		// 카테고리 자동 분류
+		if ( function_exists( 'moondental_recategorize_posts' ) ) {
+			$haystack = wp_strip_all_tags( $item['title'] . "\n" . $side['body'] );
+			// 단일 글 분류 — 키워드 매칭
+			$news_kws = array( 'MOU', '협약', '체결', '연합회', '협회', '협의회', '봉사', '이벤트', '채용', '명절', '새해', '휴진', '진료 안내', '진료시간', '(월)', '(화)', '(수)', '(목)', '(금)', '(토)', '(일)' );
+			$is_news = false;
+			foreach ( $news_kws as $kw ) { if ( mb_stripos( $haystack, $kw ) !== false ) { $is_news = true; break; } }
+			$slug = $is_news ? 'notice' : 'dental-stories';
+			$cat  = get_category_by_slug( $slug );
+			if ( $cat ) wp_set_post_categories( $post_id, array( (int) $cat->term_id ), false );
+		}
+
+		$result['created'][] = $post_id;
+		usleep( 500000 ); // 0.5s 간격
+	}
+
+	return $result;
+}

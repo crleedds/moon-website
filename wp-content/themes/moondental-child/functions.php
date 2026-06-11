@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.21.6' );
+define( 'MOONDENTAL_VERSION', '3.21.7' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1116,6 +1116,16 @@ function moondental_admin_tools_page() {
 	// 현재 네이버 임포트 글 카운트
 	$naver_live_ids  = get_posts( array( 'post_type'=>'post','post_status'=>array('publish','draft','pending','future','private'),'numberposts'=>-1,'fields'=>'ids','meta_query'=>array(array('key'=>'moondental_naver_log_no','compare'=>'EXISTS')) ) );
 	$naver_trash_ids = get_posts( array( 'post_type'=>'post','post_status'=>'trash','numberposts'=>-1,'fields'=>'ids','meta_query'=>array(array('key'=>'moondental_naver_log_no','compare'=>'EXISTS')) ) );
+
+	// 1회용 로컬 임포터 (v3.21.7)
+	$local_import_ran = false; $local_import_result = null;
+	if ( isset( $_POST['moondental_local_import'] ) && check_admin_referer( 'moondental_local_import' ) ) {
+		$limit = max( 1, min( 30, (int) ( $_POST['moondental_local_import_limit'] ?? 15 ) ) );
+		if ( function_exists( 'moondental_naver_import_local' ) ) {
+			$local_import_result = moondental_naver_import_local( $limit );
+			$local_import_ran    = true;
+		}
+	}
 	?>
 	<div class="wrap">
 		<h1>문치과 사이트 도구</h1>
@@ -1193,6 +1203,55 @@ function moondental_admin_tools_page() {
 		<?php /* 네이버 블로그 연동 도구는 v3.21.0에서 제거됨. 라이브 RSS·자동 동기화 모두 OFF.
 		     관리자는 wp-admin → 글 → 새 글 작성 + 카테고리(문치과병원 소식 / 치아이야기) 직접 선택,
 		     또는 /병원소식/ 페이지 헤더의 [＋ 새 소식 글쓰기] 버튼으로 글을 추가하세요. */ ?>
+
+		<div class="card" style="max-width:720px; padding:24px; margin-top:16px; background:#f0f7f4;">
+			<h2>네이버 블로그 → 워드프레스 1회 복사 (본문 + 사진 로컬 저장)</h2>
+			<p>네이버 블로그(<code><?php echo esc_html( moondental_get_info( 'blog_url' ) ); ?></code>)의
+			   최신 글 본문을 가져오고, 본문 내 모든 사진을 워드프레스 미디어 라이브러리로 다운로드합니다.
+			   결과: 네이버 의존성 0 — 사진이 자체 서버에서 서빙되어 referer 차단 문제 없음.</p>
+			<p style="font-size:13px; color:#666;">
+				· 1회용 — 자동 동기화 X, 사용자가 버튼을 누를 때만 동작<br>
+				· 글 1개당 3~10초 소요 (사진 다운로드 포함) — 15개 가져오면 1~3분<br>
+				· 같은 글은 다시 가져오지 않음 (source URL로 중복 체크)<br>
+				· 키워드 자동 분류 — MOU·연합회 등은 소식, 임상 글은 치아이야기로 자동 배정<br>
+				· 첫 번째 사진은 대표 이미지(썸네일)로 자동 설정
+			</p>
+
+			<?php if ( $local_import_ran && $local_import_result ) : ?>
+				<div class="notice notice-info" style="margin:12px 0; padding:12px;">
+					<p>
+						새로 가져온 글: <strong><?php echo count( $local_import_result['created'] ); ?>개</strong> ·
+						로컬 다운로드된 사진: <strong><?php echo (int) $local_import_result['images']; ?>장</strong> ·
+						이미 있어서 건너뜀: <strong><?php echo (int) $local_import_result['skipped']; ?>개</strong>
+						<?php if ( ! empty( $local_import_result['errors'] ) ) : ?>
+							· 오류: <strong><?php echo count( $local_import_result['errors'] ); ?>건</strong>
+						<?php endif; ?>
+					</p>
+					<?php if ( ! empty( $local_import_result['errors'] ) ) : ?>
+						<details style="margin-top:8px;"><summary>오류 상세</summary>
+							<ul style="margin:8px 0 0 16px;">
+								<?php foreach ( $local_import_result['errors'] as $e ) : ?>
+									<li style="font-size:12px; color:#a00;"><?php echo esc_html( $e ); ?></li>
+								<?php endforeach; ?>
+							</ul>
+						</details>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
+
+			<form method="post">
+				<?php wp_nonce_field( 'moondental_local_import' ); ?>
+				<p>
+					<label>가져올 글 수:
+						<input type="number" name="moondental_local_import_limit" min="1" max="30" value="15" style="width:70px;">
+					</label>
+					<button type="submit" name="moondental_local_import" class="button button-primary button-large" style="margin-left:8px;"
+						onclick="return confirm('네이버 블로그 글과 사진을 가져옵니다. 진행 중 페이지를 닫지 마세요. 계속하시겠습니까?');">
+						네이버 블로그 1회 복사 실행
+					</button>
+				</p>
+			</form>
+		</div>
 
 		<div class="card" style="max-width:720px; padding:24px; margin-top:16px; background:#fff8f3;">
 			<h2>네이버 임포트 글 정리</h2>
