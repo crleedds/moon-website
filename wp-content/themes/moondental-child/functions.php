@@ -13,9 +13,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.21.4' );
+define( 'MOONDENTAL_VERSION', '3.21.5' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
+
+/* 일회성 마이그레이션: 네이버 임포트 글 일괄 휴지통 (v3.21.5)
+ * 네이버 CDN 이미지 referer 블록으로 본문 사진이 안 보이고, 분류도 어긋나서
+ * 깔끔하게 정리. 휴지통에 보내므로 워드프레스에서 언제든 복원 가능.
+ */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_naver_purge_v3215' ) === 'done' ) return;
+	$ids = get_posts( array(
+		'post_type'      => 'post',
+		'post_status'    => array( 'publish', 'draft', 'pending', 'future', 'private' ),
+		'numberposts'    => -1,
+		'fields'         => 'ids',
+		'meta_query'     => array(
+			array( 'key' => 'moondental_naver_log_no', 'compare' => 'EXISTS' ),
+		),
+	) );
+	foreach ( $ids as $pid ) {
+		wp_trash_post( $pid );
+	}
+	update_option( 'moondental_naver_purge_v3215', 'done' );
+	update_option( 'moondental_naver_purge_count_v3215', count( $ids ) );
+}, 28 );
 
 /* 일회성 마이그레이션: Google Maps URL 강제 적용 (v3.21.3)
  * 사용자가 어떤 값을 저장했든 새 단축 링크로 강제 설정.
@@ -1068,6 +1090,32 @@ function moondental_admin_tools_page() {
 		$recat_ran    = true;
 	}
 	// 네이버 동기화 핸들러는 v3.21.0에서 제거됨 (연동 해제).
+
+	// 네이버 임포트 글 액션 핸들러 (v3.21.5)
+	$naver_action = '';
+	$naver_count  = 0;
+	if ( isset( $_POST['moondental_naver_trash'] ) && check_admin_referer( 'moondental_naver' ) ) {
+		$ids = get_posts( array( 'post_type'=>'post','post_status'=>array('publish','draft','pending','future','private'),'numberposts'=>-1,'fields'=>'ids','meta_query'=>array(array('key'=>'moondental_naver_log_no','compare'=>'EXISTS')) ) );
+		foreach ( $ids as $pid ) wp_trash_post( $pid );
+		$naver_action = 'trashed';
+		$naver_count  = count( $ids );
+	}
+	if ( isset( $_POST['moondental_naver_restore'] ) && check_admin_referer( 'moondental_naver' ) ) {
+		$ids = get_posts( array( 'post_type'=>'post','post_status'=>'trash','numberposts'=>-1,'fields'=>'ids','meta_query'=>array(array('key'=>'moondental_naver_log_no','compare'=>'EXISTS')) ) );
+		foreach ( $ids as $pid ) wp_untrash_post( $pid );
+		$naver_action = 'restored';
+		$naver_count  = count( $ids );
+	}
+	if ( isset( $_POST['moondental_naver_delete'] ) && check_admin_referer( 'moondental_naver' ) ) {
+		$ids = get_posts( array( 'post_type'=>'post','post_status'=>'trash','numberposts'=>-1,'fields'=>'ids','meta_query'=>array(array('key'=>'moondental_naver_log_no','compare'=>'EXISTS')) ) );
+		foreach ( $ids as $pid ) wp_delete_post( $pid, true );
+		$naver_action = 'deleted';
+		$naver_count  = count( $ids );
+	}
+
+	// 현재 네이버 임포트 글 카운트
+	$naver_live_ids  = get_posts( array( 'post_type'=>'post','post_status'=>array('publish','draft','pending','future','private'),'numberposts'=>-1,'fields'=>'ids','meta_query'=>array(array('key'=>'moondental_naver_log_no','compare'=>'EXISTS')) ) );
+	$naver_trash_ids = get_posts( array( 'post_type'=>'post','post_status'=>'trash','numberposts'=>-1,'fields'=>'ids','meta_query'=>array(array('key'=>'moondental_naver_log_no','compare'=>'EXISTS')) ) );
 	?>
 	<div class="wrap">
 		<h1>문치과 사이트 도구</h1>
@@ -1145,6 +1193,49 @@ function moondental_admin_tools_page() {
 		<?php /* 네이버 블로그 연동 도구는 v3.21.0에서 제거됨. 라이브 RSS·자동 동기화 모두 OFF.
 		     관리자는 wp-admin → 글 → 새 글 작성 + 카테고리(문치과병원 소식 / 치아이야기) 직접 선택,
 		     또는 /병원소식/ 페이지 헤더의 [＋ 새 소식 글쓰기] 버튼으로 글을 추가하세요. */ ?>
+
+		<div class="card" style="max-width:720px; padding:24px; margin-top:16px; background:#fff8f3;">
+			<h2>네이버 임포트 글 정리</h2>
+			<p>네이버 블로그에서 가져온 글들은 본문 이미지가 네이버 CDN의 referer 차단으로 보이지 않습니다.
+			   깔끔하게 정리한 뒤 직접 새 글로 작성하세요. (휴지통으로 보내므로 언제든 복원 가능)</p>
+
+			<?php if ( $naver_action === 'trashed' ) : ?>
+				<div class="notice notice-success"><p><strong><?php echo (int) $naver_count; ?>건</strong>을 휴지통으로 보냈습니다.</p></div>
+			<?php elseif ( $naver_action === 'restored' ) : ?>
+				<div class="notice notice-success"><p><strong><?php echo (int) $naver_count; ?>건</strong>을 휴지통에서 복원했습니다.</p></div>
+			<?php elseif ( $naver_action === 'deleted' ) : ?>
+				<div class="notice notice-success"><p><strong><?php echo (int) $naver_count; ?>건</strong>을 완전 삭제했습니다.</p></div>
+			<?php endif; ?>
+
+			<p style="font-size:13px; color:#555;">
+				· 활성 네이버 글: <strong><?php echo count( $naver_live_ids ); ?>건</strong><br>
+				· 휴지통의 네이버 글: <strong><?php echo count( $naver_trash_ids ); ?>건</strong>
+			</p>
+
+			<form method="post" style="display:inline-block; margin-right:8px;">
+				<?php wp_nonce_field( 'moondental_naver' ); ?>
+				<button type="submit" name="moondental_naver_trash" class="button button-primary"
+					<?php echo count( $naver_live_ids ) === 0 ? 'disabled' : ''; ?>
+					onclick="return confirm('네이버에서 가져온 모든 글(<?php echo count( $naver_live_ids ); ?>건)을 휴지통으로 보냅니다. 계속하시겠습니까?');">
+					네이버 임포트 글 휴지통 보내기
+				</button>
+			</form>
+			<form method="post" style="display:inline-block; margin-right:8px;">
+				<?php wp_nonce_field( 'moondental_naver' ); ?>
+				<button type="submit" name="moondental_naver_restore" class="button"
+					<?php echo count( $naver_trash_ids ) === 0 ? 'disabled' : ''; ?>>
+					휴지통에서 복원
+				</button>
+			</form>
+			<form method="post" style="display:inline-block;">
+				<?php wp_nonce_field( 'moondental_naver' ); ?>
+				<button type="submit" name="moondental_naver_delete" class="button button-link-delete"
+					<?php echo count( $naver_trash_ids ) === 0 ? 'disabled' : ''; ?>
+					onclick="return confirm('휴지통의 네이버 글(<?php echo count( $naver_trash_ids ); ?>건)을 완전 삭제합니다. 복구 불가. 계속하시겠습니까?');">
+					휴지통 완전 비우기
+				</button>
+			</form>
+		</div>
 
 		<div class="card" style="max-width:720px; padding:24px; margin-top:16px;">
 			<h2>의료진 사진 업로드 위치</h2>
