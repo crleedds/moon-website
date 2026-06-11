@@ -801,9 +801,9 @@ function moondental_chrome_content_fields() {
 		'cta_buttons' => array(
 			'title'  => '전역 예약 CTA 버튼 (네이버·카카오·전화)',
 			'fields' => array(
-				'cta_btn_naver_label' => array( 'default' => '📅 네이버 예약하기', 'label' => '네이버 예약 버튼 라벨 (비우면 해당 버튼 숨김)', 'type' => 'text' ),
+				'cta_btn_naver_label' => array( 'default' => '📅 네이버 예약', 'label' => '네이버 예약 버튼 라벨 (비우면 해당 버튼 숨김)', 'type' => 'text' ),
 				'cta_btn_naver_url'   => array( 'default' => '', 'label' => '네이버 예약 URL (비우면 SNS 섹션의 네이버 예약 URL 사용)', 'type' => 'text' ),
-				'cta_btn_kakao_label' => array( 'default' => '💬 카카오톡 상담하기', 'label' => '카카오톡 상담 버튼 라벨 (비우면 해당 버튼 숨김)', 'type' => 'text' ),
+				'cta_btn_kakao_label' => array( 'default' => '💬 카카오톡 상담', 'label' => '카카오톡 상담 버튼 라벨 (비우면 해당 버튼 숨김)', 'type' => 'text' ),
 				'cta_btn_kakao_url'   => array( 'default' => '', 'label' => '카카오톡 채널 URL (비우면 SNS 섹션의 카카오톡 URL 사용)', 'type' => 'text' ),
 				'cta_btn_call_label'  => array( 'default' => '📞 전화 상담', 'label' => '전화 버튼 라벨 (비우면 버튼 숨김. 전화번호는 자동 표시)', 'type' => 'text' ),
 				'cta_btn_show_phone'  => array( 'default' => 'yes', 'label' => '전화 버튼에 전화번호 같이 표시 (yes/no)', 'type' => 'text' ),

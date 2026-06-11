@@ -13,9 +13,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.20.1' );
+define( 'MOONDENTAL_VERSION', '3.20.2' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
+
+/* 일회성 마이그레이션: 옛 길어진 CTA 라벨 → 짧은 라벨로 정리 (v3.20.2) */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_cta_label_migration_v3202' ) === 'done' ) return;
+	$old_naver = '📅 네이버 예약하기';
+	$old_kakao = '💬 카카오톡 상담하기';
+	if ( get_theme_mod( 'cta_btn_naver_label' ) === $old_naver ) remove_theme_mod( 'cta_btn_naver_label' );
+	if ( get_theme_mod( 'cta_btn_kakao_label' ) === $old_kakao ) remove_theme_mod( 'cta_btn_kakao_label' );
+	update_option( 'moondental_cta_label_migration_v3202', 'done' );
+}, 30 );
 
 require_once MOONDENTAL_DIR . '/inc/content-defaults.php';
 require_once MOONDENTAL_DIR . '/inc/naver-importer.php';
@@ -372,8 +382,8 @@ function md_render_reservation_ctas( $args = array() ) {
 	$kakao_url = function_exists( 'md_content' ) ? md_content( 'cta_btn_kakao_url', '' ) : '';
 	if ( empty( $kakao_url ) ) $kakao_url = $info['kakao_url'] ?? '';
 
-	$naver_label = function_exists( 'md_content' ) ? md_content( 'cta_btn_naver_label', '📅 네이버 예약하기' ) : '📅 네이버 예약하기';
-	$kakao_label = function_exists( 'md_content' ) ? md_content( 'cta_btn_kakao_label', '💬 카카오톡 상담하기' ) : '💬 카카오톡 상담하기';
+	$naver_label = function_exists( 'md_content' ) ? md_content( 'cta_btn_naver_label', '📅 네이버 예약' ) : '📅 네이버 예약';
+	$kakao_label = function_exists( 'md_content' ) ? md_content( 'cta_btn_kakao_label', '💬 카카오톡 상담' ) : '💬 카카오톡 상담';
 	$call_label  = function_exists( 'md_content' ) ? md_content( 'cta_btn_call_label',  '📞 전화 상담' )       : '📞 전화 상담';
 	$show_phone  = function_exists( 'md_content' ) ? md_content( 'cta_btn_show_phone',  'yes' )              : 'yes';
 
