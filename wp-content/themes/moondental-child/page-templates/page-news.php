@@ -193,41 +193,18 @@ $is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
 			endif;
 			?>
 
-		<?php else :
-			$items = function_exists( 'moondental_fetch_naver_blog' ) ? moondental_fetch_naver_blog( 9 ) : array();
-			if ( ! empty( $items ) ) : ?>
-				<div class="md-news-empty">
-					<p>아직 사이트에 가져온 글이 없습니다. 네이버 블로그 최신 글 미리보기:</p>
-				</div>
-				<div class="md-news-grid" style="margin-top:24px;">
-					<?php foreach ( $items as $item ) : ?>
-						<article class="md-news-card">
-							<a class="md-news-card__link" href="<?php echo esc_url( $item['link'] ); ?>" target="_blank" rel="noopener">
-								<div class="md-news-card__media">
-									<?php if ( $item['thumb'] ) : ?>
-										<img src="<?php echo esc_url( $item['thumb'] ); ?>" alt="" loading="lazy" referrerpolicy="no-referrer">
-									<?php else : ?>
-										<span class="md-news-card__media-fallback">🦷</span>
-									<?php endif; ?>
-								</div>
-								<div class="md-news-card__body">
-									<time class="md-news-card__date"><?php echo esc_html( date_i18n( 'Y년 n월 j일', $item['date'] ) ); ?></time>
-									<h3 class="md-news-card__title"><?php echo esc_html( $item['title'] ); ?></h3>
-									<p class="md-news-card__excerpt"><?php echo esc_html( $item['excerpt'] ); ?></p>
-								</div>
-							</a>
-						</article>
-					<?php endforeach; ?>
-				</div>
-			<?php else : ?>
-				<div class="md-news-empty" style="text-align:center; padding: clamp(24px, 3vw, 40px); background: var(--color-surface); border-radius: var(--radius-md);">
-					<p style="margin:0; color: var(--color-text-sub);">아직 등록된 치아이야기가 없습니다.</p>
-					<p style="margin: 8px 0 0; font-size: var(--fs-small); color: var(--color-text-mute);">
-						관리자: <code>wp-admin → 글 → 새 글</code>에서 치과 관련 정보를 게시해주세요.
+		<?php else : ?>
+			<div class="md-news-empty" style="text-align:center; padding: clamp(24px, 3vw, 40px); background: var(--color-surface); border-radius: var(--radius-md);">
+				<p style="margin:0; color: var(--color-text-sub);">아직 등록된 치아이야기가 없습니다.</p>
+				<?php if ( $is_editor ) : ?>
+					<p style="margin: 16px 0 0;">
+						<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( $story_new_url ); ?>">＋ 첫 치아이야기 작성하기</a>
 					</p>
-				</div>
-			<?php endif;
-		endif; ?>
+				<?php else : ?>
+					<p style="margin: 8px 0 0; font-size: var(--fs-small); color: var(--color-text-mute);">곧 환자분께 도움이 되는 정보로 찾아뵙겠습니다.</p>
+				<?php endif; ?>
+			</div>
+		<?php endif; ?>
 
 	</div>
 </section>

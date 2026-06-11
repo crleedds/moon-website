@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.20.4' );
+define( 'MOONDENTAL_VERSION', '3.20.5' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -54,10 +54,10 @@ add_action( 'after_setup_theme', function() {
 }, 31 );
 
 /* 일회성 마이그레이션: 별칭 카테고리(소식/뉴스/공지/치과이야기 등) 글을 정식 카테고리로 이전 후
- * 키워드 재분류 강제 실행 (v3.20.4)
+ * 키워드 재분류 강제 실행 (v3.20.5 — 옵션키 갱신, MOU·연합회 글 누락 케이스 보강)
  */
 add_action( 'after_setup_theme', function() {
-	if ( get_option( 'moondental_cat_consolidate_migration_v3204' ) === 'done' ) return;
+	if ( get_option( 'moondental_cat_consolidate_migration_v3205' ) === 'done' ) return;
 
 	// 정식 카테고리 확인
 	$notice_cat = get_term_by( 'slug', 'notice', 'category' );
@@ -110,8 +110,14 @@ add_action( 'after_setup_theme', function() {
 		moondental_recategorize_posts();
 	}
 
-	update_option( 'moondental_cat_consolidate_migration_v3204', 'done' );
+	update_option( 'moondental_cat_consolidate_migration_v3205', 'done' );
 }, 32 );
+
+/* 네이버 블로그 연동 OFF — page-news.php empty-state 라이브 RSS는 제거됨.
+ * 이미 가져온 글은 그대로 두고, 추가 자동 동기화는 안 함.
+ * 어드민 도구의 '네이버 가져오기' 버튼은 일회성 복사 도구로만 사용.
+ */
+add_filter( 'moondental_naver_live_enabled', '__return_false' );
 
 require_once MOONDENTAL_DIR . '/inc/content-defaults.php';
 require_once MOONDENTAL_DIR . '/inc/naver-importer.php';
