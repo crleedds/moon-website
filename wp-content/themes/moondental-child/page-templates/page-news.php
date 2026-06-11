@@ -64,7 +64,7 @@ $story_q = new WP_Query( $story_args );
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">📢 NOTICE</span>
-			<h2 class="md-section-head__title">공지사항</h2>
+			<h2 class="md-section-head__title">문치과병원 소식</h2>
 			<p class="md-section-head__lead">진료시간 변경·휴진 안내·이벤트·운영 소식을 가장 먼저 안내드립니다.</p>
 		</header>
 
@@ -86,7 +86,7 @@ $story_q = new WP_Query( $story_args );
 			<div class="md-news-empty" style="text-align:center; padding: clamp(24px, 3vw, 40px); background: var(--color-white); border-radius: var(--radius-md);">
 				<p style="margin:0; color: var(--color-text-sub);">아직 등록된 공지사항이 없습니다.</p>
 				<p style="margin: 8px 0 0; font-size: var(--fs-small); color: var(--color-text-mute);">
-					관리자: <code>wp-admin → 글 → 카테고리</code>에서 '공지사항' 카테고리를 만들고 글을 작성해주세요.
+					관리자: <code>wp-admin → 글 → 카테고리</code>에서 '문치과병원 소식' 카테고리를 만들고 글을 작성해주세요.
 				</p>
 			</div>
 		<?php endif; ?>
@@ -98,7 +98,7 @@ $story_q = new WP_Query( $story_args );
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">🦷 DENTAL STORIES · 치아이야기</span>
-			<h2 class="md-section-head__title">치아이야기</h2>
+			<h2 class="md-section-head__title">문치과병원 치아이야기</h2>
 			<p class="md-section-head__lead">
 				임플란트·교정·자연치아 살리기·라미네이트·예방 등<br>
 				환자분께 도움이 되는 구강 건강 정보를 모았습니다.

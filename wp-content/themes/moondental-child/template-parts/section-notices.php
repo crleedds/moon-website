@@ -62,7 +62,7 @@ $news_page_url = get_post_type_archive_link( 'post' ) ?: home_url( '/소식/' );
 		<!-- 공지사항 (최대 2개) -->
 		<?php if ( $notice_q->have_posts() ) : ?>
 			<h3 style="font-size: 1.0625rem; font-weight: 800; margin: 0 0 14px; color: var(--color-text);">
-				📢 공지사항
+				📢 문치과병원 소식
 			</h3>
 			<ul class="md-notice-list" style="margin-bottom: clamp(24px, 3vw, 36px);">
 				<?php while ( $notice_q->have_posts() ) : $notice_q->the_post(); ?>
@@ -82,7 +82,7 @@ $news_page_url = get_post_type_archive_link( 'post' ) ?: home_url( '/소식/' );
 		<!-- 치아이야기 (최대 3개) -->
 		<?php if ( $story_q->have_posts() ) : ?>
 			<h3 style="font-size: 1.0625rem; font-weight: 800; margin: 0 0 14px; color: var(--color-text);">
-				🦷 치아이야기
+				🦷 문치과병원 치아이야기
 			</h3>
 			<div class="md-home-news-grid">
 				<?php while ( $story_q->have_posts() ) : $story_q->the_post();

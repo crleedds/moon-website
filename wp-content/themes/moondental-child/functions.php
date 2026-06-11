@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.20.2' );
+define( 'MOONDENTAL_VERSION', '3.20.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -26,6 +26,32 @@ add_action( 'after_setup_theme', function() {
 	if ( get_theme_mod( 'cta_btn_kakao_label' ) === $old_kakao ) remove_theme_mod( 'cta_btn_kakao_label' );
 	update_option( 'moondental_cta_label_migration_v3202', 'done' );
 }, 30 );
+
+/* 일회성 마이그레이션: 카테고리 이름 한글 통일 (v3.20.3)
+ * 공지사항 → 문치과병원 소식
+ * 치아이야기 → 문치과병원 치아이야기
+ * slug(notice, dental-stories)는 그대로 유지 → URL 변동 없음.
+ */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_cat_rename_migration_v3203' ) === 'done' ) return;
+	$notice_target = '문치과병원 소식';
+	$story_target  = '문치과병원 치아이야기';
+
+	$notice = get_term_by( 'slug', 'notice', 'category' );
+	if ( ! $notice ) $notice = get_term_by( 'name', '공지사항', 'category' );
+	if ( $notice && $notice->name !== $notice_target ) {
+		wp_update_term( $notice->term_id, 'category', array( 'name' => $notice_target ) );
+	}
+
+	$story = get_term_by( 'slug', 'dental-stories', 'category' );
+	if ( ! $story ) $story = get_term_by( 'name', '치아이야기', 'category' );
+	if ( ! $story ) $story = get_term_by( 'name', '치과이야기', 'category' );
+	if ( $story && $story->name !== $story_target ) {
+		wp_update_term( $story->term_id, 'category', array( 'name' => $story_target ) );
+	}
+
+	update_option( 'moondental_cat_rename_migration_v3203', 'done' );
+}, 31 );
 
 require_once MOONDENTAL_DIR . '/inc/content-defaults.php';
 require_once MOONDENTAL_DIR . '/inc/naver-importer.php';
@@ -1664,31 +1690,32 @@ function moondental_recategorize_posts() {
 		'문은수', '문지현', '이수연', '이승주', '권혜진', '이창률', '이영일', '김세일', '정석형', // 의료진 이름
 	);
 
-	// 공지사항 카테고리 (slug 'notice' 우선, 없으면 한글 '공지사항' 시도)
+	// 공지사항 카테고리 (slug 'notice' 우선, 없으면 한글 이름 시도)
 	$notice_cat = get_term_by( 'slug', 'notice', 'category' );
+	if ( ! $notice_cat ) {
+		$notice_cat = get_term_by( 'name', '문치과병원 소식', 'category' );
+	}
 	if ( ! $notice_cat ) {
 		$notice_cat = get_term_by( 'name', '공지사항', 'category' );
 	}
 	if ( ! $notice_cat ) {
-		$id = wp_insert_term( '공지사항', 'category', array( 'slug' => 'notice' ) );
+		$id = wp_insert_term( '문치과병원 소식', 'category', array( 'slug' => 'notice' ) );
 		if ( ! is_wp_error( $id ) ) $notice_cat = get_term( $id['term_id'], 'category' );
 	}
 
 	// 치아이야기 카테고리
 	$story_cat = get_term_by( 'slug', 'dental-stories', 'category' );
 	if ( ! $story_cat ) {
+		$story_cat = get_term_by( 'name', '문치과병원 치아이야기', 'category' );
+	}
+	if ( ! $story_cat ) {
 		$story_cat = get_term_by( 'name', '치아이야기', 'category' );
 	}
 	if ( ! $story_cat ) {
-		// 기존 '치과이야기'도 시도
 		$story_cat = get_term_by( 'name', '치과이야기', 'category' );
-		if ( $story_cat ) {
-			wp_update_term( $story_cat->term_id, 'category', array( 'name' => '치아이야기' ) );
-			$story_cat = get_term( $story_cat->term_id, 'category' );
-		}
 	}
 	if ( ! $story_cat ) {
-		$id = wp_insert_term( '치아이야기', 'category', array( 'slug' => 'dental-stories' ) );
+		$id = wp_insert_term( '문치과병원 치아이야기', 'category', array( 'slug' => 'dental-stories' ) );
 		if ( ! is_wp_error( $id ) ) $story_cat = get_term( $id['term_id'], 'category' );
 	}
 
