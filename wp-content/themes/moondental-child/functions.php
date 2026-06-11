@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.21.0' );
+define( 'MOONDENTAL_VERSION', '3.21.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -69,7 +69,7 @@ add_action( 'after_setup_theme', function() {
  *  4) recategorize_posts() 호출 → 키워드 기반 재분류
  */
 add_action( 'after_setup_theme', function() {
-	if ( get_option( 'moondental_cat_consolidate_v3210' ) === 'done' ) return;
+	if ( get_option( 'moondental_cat_consolidate_v3211' ) === 'done' ) return;
 	// recategorize_posts() 정의가 아직 로드되지 않았을 수 있어 functions.php 끝까지 기다림
 	if ( ! function_exists( 'moondental_recategorize_posts' ) ) return;
 
@@ -159,7 +159,7 @@ add_action( 'after_setup_theme', function() {
 	// ── 4) 키워드 기반 재분류 강제 실행 ────────
 	moondental_recategorize_posts();
 
-	update_option( 'moondental_cat_consolidate_v3210', 'done' );
+	update_option( 'moondental_cat_consolidate_v3211', 'done' );
 }, 99 );
 
 /* 네이버 블로그 연동 OFF — page-news.php empty-state 라이브 RSS는 제거됨.
@@ -1760,9 +1760,13 @@ function moondental_recategorize_posts() {
 		'명절', '새해', '신년', '설날', '추석', '한가위', '연말', '연시', '크리스마스',
 		'휴진', '진료시간 변경', '운영시간', '시간 변경', '시간변경', '공지', '안내드립니다', '안내드립니다',
 		'개원', '리뉴얼', '확장', '이전', '오픈',
-		'특별진료', '연장진료', '야간진료 안내',
+		'특별진료', '연장진료',
+		'야간 진료', '야간진료', '진료 안내', '진료안내', '진료시간 안내',
+		'진료 없습니다', '진료가 없습니다', '진료 없음', '쉽니다',
 		'증명서', '제증명',
 		'코로나', '백신', '방역',
+		// 날짜 안내 패턴 — 'X월 X일 (요일)' 형식이면 99% 휴진/진료 안내
+		'(월)', '(화)', '(수)', '(목)', '(금)', '(토)', '(일)',
 	);
 
 	// 임상·치료 관련 키워드 — 소식 키워드가 없을 때만 '치아이야기'로 분류
