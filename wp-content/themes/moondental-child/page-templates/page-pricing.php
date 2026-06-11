@@ -21,7 +21,7 @@ $naver_map  = $info['naver_map_url'] ?? '';
 // 3-Map URLs
 $q_full  = rawurlencode( '한아의료재단 문치과병원 천안 만남로 52' );
 $q_short = rawurlencode( '한아의료재단 문치과병원' );
-$map_google = 'https://www.google.com/maps/search/?api=1&query=' . $q_full;
+$map_google = $info['google_map_url'] ?: 'https://maps.app.goo.gl/MNt59kcxeKL92nCU9';
 $map_naver  = $naver_map ?: 'https://map.naver.com/p/search/' . $q_short;
 $map_kakao  = 'https://map.kakao.com/?q=' . $q_short;
 
