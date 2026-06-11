@@ -13,9 +13,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.21.1' );
+define( 'MOONDENTAL_VERSION', '3.21.2' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
+
+/* 일회성 마이그레이션: 옛 Google Maps URL 정리 (v3.21.2)
+ * 사용자가 커스터마이저에서 따로 안 만진 경우, 옛 단축 링크가 theme_mod에 저장돼 있으면 제거 → 새 기본값 적용. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_gmap_url_migration_v3212' ) === 'done' ) return;
+	$old = 'https://maps.app.goo.gl/9MEzn5ESfZTZinhq7';
+	if ( get_theme_mod( 'moondental_google_map_url' ) === $old ) {
+		remove_theme_mod( 'moondental_google_map_url' );
+	}
+	update_option( 'moondental_gmap_url_migration_v3212', 'done' );
+}, 30 );
 
 /* 일회성 마이그레이션: 옛 길어진 CTA 라벨 → 짧은 라벨로 정리 (v3.20.2) */
 add_action( 'after_setup_theme', function() {
@@ -297,7 +308,7 @@ function moondental_get_info( $key = '' ) {
 		'youtube_url'  => 'https://www.youtube.com/@%EC%B2%9C%EC%95%88%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90',
 		'naver_place'  => 'https://booking.naver.com/booking/13/bizes/485314',
 		'naver_map_url'=> 'https://map.naver.com/p/search/%ED%95%9C%EC%95%84%EC%9D%98%EB%A3%8C%EC%9E%AC%EB%8B%A8%20%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90',
-		'google_map_url'=> 'https://maps.app.goo.gl/9MEzn5ESfZTZinhq7',
+		'google_map_url'=> 'https://maps.app.goo.gl/W9NGrJERFEVTJQj97',
 		'map_embed'    => '',
 	);
 
