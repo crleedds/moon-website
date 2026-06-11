@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.20.5' );
+define( 'MOONDENTAL_VERSION', '3.21.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -53,45 +53,97 @@ add_action( 'after_setup_theme', function() {
 	update_option( 'moondental_cat_rename_migration_v3203', 'done' );
 }, 31 );
 
-/* 일회성 마이그레이션: 별칭 카테고리(소식/뉴스/공지/치과이야기 등) 글을 정식 카테고리로 이전 후
- * 키워드 재분류 강제 실행 (v3.20.5 — 옵션키 갱신, MOU·연합회 글 누락 케이스 보강)
+/* 일회성 마이그레이션 v3.21.0 — bulletproof 카테고리 통합 + 재분류 강제.
+ *
+ * 이전 v3.20.5 마이그레이션 버그: 정식 cat(slug 'notice'/'dental-stories')이 DB에 없으면
+ * 일찍 return 해서 별칭 cat 통합이 안 됨. → 정식 cat이 항상 존재하도록 보장 후 진행.
+ *
+ * 동작 순서:
+ *  1) 'notice' 정식 cat 확보:
+ *     a) slug='notice' term이 있으면 사용
+ *     b) 없으면 name in [문치과병원 소식/공지사항/소식/뉴스/공지/announcement/news] 중
+ *        가장 먼저 찾은 term의 slug를 'notice'로 변경하고 이름을 '문치과병원 소식'으로 통일
+ *     c) 그래도 없으면 새로 생성 (name='문치과병원 소식', slug='notice')
+ *  2) 'dental-stories' 정식 cat 동일 로직
+ *  3) 남은 별칭 cat들의 글을 정식 cat으로 이전 후 별칭 cat 삭제
+ *  4) recategorize_posts() 호출 → 키워드 기반 재분류
  */
 add_action( 'after_setup_theme', function() {
-	if ( get_option( 'moondental_cat_consolidate_migration_v3205' ) === 'done' ) return;
+	if ( get_option( 'moondental_cat_consolidate_v3210' ) === 'done' ) return;
+	// recategorize_posts() 정의가 아직 로드되지 않았을 수 있어 functions.php 끝까지 기다림
+	if ( ! function_exists( 'moondental_recategorize_posts' ) ) return;
 
-	// 정식 카테고리 확인
+	$notice_target_name = '문치과병원 소식';
+	$story_target_name  = '문치과병원 치아이야기';
+
+	$notice_aliases = array( '문치과병원 소식', '공지사항', '소식', '뉴스', '공지', 'announcement', 'news' );
+	$story_aliases  = array( '문치과병원 치아이야기', '치아이야기', '치과이야기', '치아 이야기', '치과 이야기', 'dental story', 'dental stories' );
+
+	// ── 1) notice 정식 cat 확보 ─────────────────
 	$notice_cat = get_term_by( 'slug', 'notice', 'category' );
-	$story_cat  = get_term_by( 'slug', 'dental-stories', 'category' );
-	if ( ! $notice_cat || ! $story_cat ) return; // 정식 cat이 아직 없으면 다음 요청에서 재시도
+	if ( ! $notice_cat ) {
+		foreach ( $notice_aliases as $alias_name ) {
+			$t = get_term_by( 'name', $alias_name, 'category' );
+			if ( $t ) {
+				wp_update_term( $t->term_id, 'category', array(
+					'name' => $notice_target_name,
+					'slug' => 'notice',
+				) );
+				$notice_cat = get_term( $t->term_id, 'category' );
+				break;
+			}
+		}
+	}
+	if ( ! $notice_cat ) {
+		$r = wp_insert_term( $notice_target_name, 'category', array( 'slug' => 'notice' ) );
+		if ( ! is_wp_error( $r ) ) $notice_cat = get_term( $r['term_id'], 'category' );
+	}
+	if ( $notice_cat && $notice_cat->name !== $notice_target_name ) {
+		wp_update_term( $notice_cat->term_id, 'category', array( 'name' => $notice_target_name ) );
+	}
 
-	// 별칭으로 만들어진 카테고리들을 정식 카테고리로 합치기.
-	// 별칭 → 어느 정식 카테고리로 보낼지.
-	$aliases = array(
-		// 소식 별칭들
-		'소식'        => $notice_cat->term_id,
-		'뉴스'        => $notice_cat->term_id,
-		'공지'        => $notice_cat->term_id,
-		'announcement'=> $notice_cat->term_id,
-		'news'        => $notice_cat->term_id,
-		// 치아이야기 별칭들
-		'치아이야기'  => $story_cat->term_id,
-		'치과이야기'  => $story_cat->term_id,
-		'치아 이야기' => $story_cat->term_id,
-		'치과 이야기' => $story_cat->term_id,
-		'dental story'=> $story_cat->term_id,
-		'dental stories'=> $story_cat->term_id,
-	);
+	// ── 2) dental-stories 정식 cat 확보 ─────────
+	$story_cat = get_term_by( 'slug', 'dental-stories', 'category' );
+	if ( ! $story_cat ) {
+		foreach ( $story_aliases as $alias_name ) {
+			$t = get_term_by( 'name', $alias_name, 'category' );
+			if ( $t ) {
+				wp_update_term( $t->term_id, 'category', array(
+					'name' => $story_target_name,
+					'slug' => 'dental-stories',
+				) );
+				$story_cat = get_term( $t->term_id, 'category' );
+				break;
+			}
+		}
+	}
+	if ( ! $story_cat ) {
+		$r = wp_insert_term( $story_target_name, 'category', array( 'slug' => 'dental-stories' ) );
+		if ( ! is_wp_error( $r ) ) $story_cat = get_term( $r['term_id'], 'category' );
+	}
+	if ( $story_cat && $story_cat->name !== $story_target_name ) {
+		wp_update_term( $story_cat->term_id, 'category', array( 'name' => $story_target_name ) );
+	}
 
-	foreach ( $aliases as $alias_name => $target_id ) {
+	if ( ! $notice_cat || ! $story_cat ) {
+		// 어떤 이유로든 확보 실패 — 다음 요청에서 재시도 (옵션 저장 안 함)
+		return;
+	}
+
+	// ── 3) 남은 별칭 cat 모두 정식으로 흡수 ─────
+	$alias_to_target = array();
+	foreach ( $notice_aliases as $n ) { $alias_to_target[ $n ] = $notice_cat->term_id; }
+	foreach ( $story_aliases  as $s ) { $alias_to_target[ $s ] = $story_cat->term_id; }
+
+	foreach ( $alias_to_target as $alias_name => $target_id ) {
 		$alias = get_term_by( 'name', $alias_name, 'category' );
-		if ( ! $alias ) $alias = get_term_by( 'slug', sanitize_title( $alias_name ), 'category' );
 		if ( ! $alias ) continue;
 		if ( (int) $alias->term_id === (int) $target_id ) continue;
 
-		// 해당 별칭 cat의 모든 글을 정식 cat으로 옮기기
+		// 해당 별칭 cat의 모든 글을 정식 cat으로 이전
 		$ids = get_posts( array(
 			'post_type'   => 'post',
-			'post_status' => array( 'publish', 'draft', 'pending', 'future' ),
+			'post_status' => array( 'publish', 'draft', 'pending', 'future', 'private' ),
 			'numberposts' => -1,
 			'fields'      => 'ids',
 			'tax_query'   => array(
@@ -101,17 +153,14 @@ add_action( 'after_setup_theme', function() {
 		foreach ( $ids as $pid ) {
 			wp_set_post_categories( $pid, array( (int) $target_id ), false );
 		}
-		// 별칭 카테고리 삭제 (uncategorized로 강등하지 않음 — 글이 이미 옮겨졌으므로)
 		wp_delete_term( $alias->term_id, 'category' );
 	}
 
-	// 키워드 기반 재분류 한 번 실행 — 잘못 분류된 글 정리
-	if ( function_exists( 'moondental_recategorize_posts' ) ) {
-		moondental_recategorize_posts();
-	}
+	// ── 4) 키워드 기반 재분류 강제 실행 ────────
+	moondental_recategorize_posts();
 
-	update_option( 'moondental_cat_consolidate_migration_v3205', 'done' );
-}, 32 );
+	update_option( 'moondental_cat_consolidate_v3210', 'done' );
+}, 99 );
 
 /* 네이버 블로그 연동 OFF — page-news.php empty-state 라이브 RSS는 제거됨.
  * 이미 가져온 글은 그대로 두고, 추가 자동 동기화는 안 함.
@@ -248,6 +297,7 @@ function moondental_get_info( $key = '' ) {
 		'youtube_url'  => 'https://www.youtube.com/@%EC%B2%9C%EC%95%88%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90',
 		'naver_place'  => 'https://booking.naver.com/booking/13/bizes/485314',
 		'naver_map_url'=> 'https://map.naver.com/p/search/%ED%95%9C%EC%95%84%EC%9D%98%EB%A3%8C%EC%9E%AC%EB%8B%A8%20%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90',
+		'google_map_url'=> 'https://maps.app.goo.gl/9MEzn5ESfZTZinhq7',
 		'map_embed'    => '',
 	);
 
@@ -616,6 +666,7 @@ function moondental_customize_register( $wp_customize ) {
 		array( 'key' => 'kakao_url',    'label' => '카카오톡 채널 URL',         'section' => 'moondental_section_sns' ),
 		array( 'key' => 'naver_place',  'label' => '네이버 예약 URL',          'section' => 'moondental_section_sns' ),
 		array( 'key' => 'naver_map_url','label' => '네이버 지도·플레이스 URL', 'section' => 'moondental_section_sns' ),
+		array( 'key' => 'google_map_url','label' => 'Google Maps URL (단축 링크 가능)', 'section' => 'moondental_section_sns' ),
 		array( 'key' => 'instagram',    'label' => '인스타그램 URL',          'section' => 'moondental_section_sns' ),
 		array( 'key' => 'blog_url',     'label' => '네이버 블로그 URL',        'section' => 'moondental_section_sns' ),
 		array( 'key' => 'facebook_url', 'label' => '페이스북 URL',            'section' => 'moondental_section_sns' ),
@@ -1007,11 +1058,7 @@ function moondental_admin_tools_page() {
 		$recat_result = moondental_recategorize_posts();
 		$recat_ran    = true;
 	}
-	$sync_ran = false; $sync_result = null;
-	if ( isset( $_POST['moondental_sync_naver'] ) && check_admin_referer( 'moondental_sync' ) ) {
-		$sync_result = moondental_naver_import_all( 20 );
-		$sync_ran    = true;
-	}
+	// 네이버 동기화 핸들러는 v3.21.0에서 제거됨 (연동 해제).
 	?>
 	<div class="wrap">
 		<h1>문치과 사이트 도구</h1>
@@ -1086,40 +1133,9 @@ function moondental_admin_tools_page() {
 			</form>
 		</div>
 
-		<div class="card" style="max-width:720px; padding:24px; margin-top:16px;">
-			<h2>네이버 블로그 글 가져오기</h2>
-			<p>네이버 블로그(<code><?php echo esc_html( moondental_get_info( 'blog_url' ) ); ?></code>)의
-			   <strong>최신 20개 글의 본문 전체</strong>를 사이트로 가져옵니다.
-			   가져온 글은 <code>/소식/</code>에 카드로 나열되고, 카드 클릭 시 사이트 내 페이지로 열립니다.
-			   같은 글은 다시 가져오지 않으므로 안전하게 여러 번 눌러도 됩니다.</p>
-			<p style="font-size:13px; color:#666;">처음 실행 시 1~2분 정도 걸릴 수 있습니다 (글 사이 0.4초 간격, 네이버 부담 방지).</p>
-
-			<?php if ( $sync_ran && $sync_result ) : ?>
-				<div class="notice notice-info" style="margin:12px 0; padding:12px;">
-					<p>
-						새로 가져온 글: <strong><?php echo count( $sync_result['created'] ); ?>개</strong> ·
-						이미 있어서 건너뜀: <strong><?php echo (int) $sync_result['skipped']; ?>개</strong>
-						<?php if ( ! empty( $sync_result['errors'] ) ) : ?>
-							· 오류: <strong><?php echo count( $sync_result['errors'] ); ?>건</strong>
-						<?php endif; ?>
-					</p>
-					<?php if ( ! empty( $sync_result['errors'] ) ) : ?>
-						<details style="margin-top:8px;"><summary>오류 상세</summary>
-							<ul style="margin:8px 0 0 16px;">
-								<?php foreach ( $sync_result['errors'] as $e ) : ?>
-									<li style="font-size:12px; color:#a00;"><?php echo esc_html( $e ); ?></li>
-								<?php endforeach; ?>
-							</ul>
-						</details>
-					<?php endif; ?>
-				</div>
-			<?php endif; ?>
-
-			<form method="post">
-				<?php wp_nonce_field( 'moondental_sync' ); ?>
-				<p><button type="submit" name="moondental_sync_naver" class="button button-primary button-large">네이버 블로그 동기화</button></p>
-			</form>
-		</div>
+		<?php /* 네이버 블로그 연동 도구는 v3.21.0에서 제거됨. 라이브 RSS·자동 동기화 모두 OFF.
+		     관리자는 wp-admin → 글 → 새 글 작성 + 카테고리(문치과병원 소식 / 치아이야기) 직접 선택,
+		     또는 /병원소식/ 페이지 헤더의 [＋ 새 소식 글쓰기] 버튼으로 글을 추가하세요. */ ?>
 
 		<div class="card" style="max-width:720px; padding:24px; margin-top:16px;">
 			<h2>의료진 사진 업로드 위치</h2>
