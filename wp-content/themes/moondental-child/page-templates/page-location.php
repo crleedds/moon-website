@@ -104,7 +104,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 </section>
 
 <!-- ============ 2. 진료시간 + 주차 안내 (2-col 그리드) ============ -->
-<section class="md-section">
+<section class="md-section" id="hours">
 	<div class="md-container">
 		<div class="md-info-pair">
 
