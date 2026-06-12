@@ -13,9 +13,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.22.1' );
+define( 'MOONDENTAL_VERSION', '3.22.2' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
+
+/* 일회성 마이그레이션: 직원 명단 오타 정정 — 게롤레 → 게를레 (v3.22.2) */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_staff_typo_fix_v3222' ) === 'done' ) return;
+	$saved = get_theme_mod( 'md_content_staff_list', '' );
+	if ( $saved && strpos( $saved, '게롤레' ) !== false ) {
+		set_theme_mod( 'md_content_staff_list', str_replace( '게롤레', '게를레', $saved ) );
+	}
+	update_option( 'moondental_staff_typo_fix_v3222', 'done' );
+}, 30 );
 
 /* 일회성 마이그레이션: 시드 글 자동 생성 (v3.21.8)
  * /병원소식/ 페이지가 비어 있는 상태 해결 — 실제 병원 정보 기반 글을 자동 생성.
