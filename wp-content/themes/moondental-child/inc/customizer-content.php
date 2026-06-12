@@ -720,7 +720,7 @@ function moondental_subpage_content_fields() {
 			'fields' => array(
 				'doctors_chip'       => array( 'default' => 'MOON DENTAL HOSPITAL · OUR DOCTORS', 'label' => 'Hero — chip', 'type' => 'text' ),
 				'doctors_title_a'    => array( 'default' => '30여년 임상,', 'label' => 'Hero — 제목 1행', 'type' => 'text' ),
-				'doctors_title_b'    => array( 'default' => '인 의료진 협진', 'label' => 'Hero — 제목 2행 (앞에 의료진 수 자동)', 'type' => 'text' ),
+				'doctors_title_b'    => array( 'default' => '전 분야 의료진 협진', 'label' => 'Hero — 제목 2행', 'type' => 'text' ),
 				'doctors_lead'       => array( 'default' => "보철·교정·보존·외과 — 각 분야 전문 의료진이 한 자리에서\n환자 한 분의 치아를 함께 봅니다.", 'label' => 'Hero — 설명 (줄바꿈 가능)', 'type' => 'textarea' ),
 
 				'doctors_stat_1_label' => array( 'default' => '전문 의료진', 'label' => 'stat ①번 라벨', 'type' => 'text' ),
@@ -741,7 +741,7 @@ function moondental_subpage_content_fields() {
 				/* ── 전체 직원 섹션 (의료진 외 스태프) ── */
 				'staff_section_eyebrow' => array( 'default' => 'Our Staff', 'label' => '전체 직원 섹션 — eyebrow', 'type' => 'text' ),
 				'staff_section_title'   => array( 'default' => '전체 직원', 'label' => '전체 직원 섹션 — 제목', 'type' => 'text' ),
-				'staff_section_lead'    => array( 'default' => '의료진과 함께 환자분의 편안한 진료를 위해 일하는 전체 스태프입니다.', 'label' => '전체 직원 섹션 — 설명', 'type' => 'textarea' ),
+				'staff_section_lead'    => array( 'default' => '한아의료재단 문치과병원에서 환자분과 함께하는 모든 의료진입니다.', 'label' => '전체 직원 섹션 — 설명', 'type' => 'textarea' ),
 				'staff_list' => array(
 					'default' => "진료실|이사|이순민\n진료실|팀장|박지선\n진료실|실장|이희남\n진료실|실장|임은혜\n진료실|실장|한경순\n진료실|책임|주경심\n진료실|책임|윤경옥\n진료실|책임|노금란\n진료실|책임|김정애\n진료실|과장|남소영\n진료실|선임|김인애\n진료실|선임|박미선\n진료실|선임|김윤미\n진료실|선임|유현영\n진료실|주임|서채빈\n진료실|주임|박명자\n진료실|주임|금민주\n진료실|주임|전서혜\n진료실|주임|유혜정\n진료실|주임|서소리\n진료실|주임|장유정\n진료실|주임|이아연\n진료실|주임|김경하\n진료실|주임|이다윤\n진료실|주임|이하은\n진료실|주임|김하늘\n진료실|주임|김우정\n진료실|주임|최로미\n진료실|주임|권민지\n기공실|이사|조항수\n기공실|차장|명의재\n기공실|과장|장순복\n기공실|기사|박진옥\n기공실|기사|노재형\n서비스지원실|이사|강미해\n서비스지원실|실장|이선양\n서비스지원실|책임코디|김다경\n서비스지원실|책임코디|공미희\n서비스지원실|선임코디|정소리\n서비스지원실|선임코디|황진아\n서비스지원실|선임코디|박혜령\n경영지원실|행정원장|양병욱\n경영지원실|과장|이중현\n경영지원실|사원|김하진\n경영지원실|사원|카밀라\n경영지원실|사원|게를레\n관리사무소|소장|강성하\n비서실|과장|김동현\n비서실|과장|민종기\n비서실|대리|이슬기",
 					'label' => '전체 직원 명단 (한 줄에 한 명, "부서|직책|이름" 형식)',

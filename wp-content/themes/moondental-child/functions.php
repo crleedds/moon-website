@@ -13,9 +13,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.22.3' );
+define( 'MOONDENTAL_VERSION', '3.22.4' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
+
+/* 일회성 마이그레이션: 의료진 페이지 카운트·층 표기 제거 — 옛 기본값만 정리 (v3.22.4) */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_doctors_strip_v3224' ) === 'done' ) return;
+	$cleanups = array(
+		'md_content_doctors_title_b'    => '인 의료진 협진',
+		'md_content_staff_section_lead' => '의료진과 함께 환자분의 편안한 진료를 위해 일하는 전체 스태프입니다.',
+	);
+	foreach ( $cleanups as $mod_key => $old_default ) {
+		if ( get_theme_mod( $mod_key ) === $old_default ) {
+			remove_theme_mod( $mod_key );
+		}
+	}
+	update_option( 'moondental_doctors_strip_v3224', 'done' );
+}, 32 );
 
 /* 일회성 마이그레이션: 직원 명단 오타 정정 — 게롤레 → 게를레 (v3.22.2) */
 add_action( 'after_setup_theme', function() {

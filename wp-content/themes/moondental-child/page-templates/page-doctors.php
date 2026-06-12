@@ -82,14 +82,12 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 		<span class="md-docs-hero__chip"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_chip', 'MOON DENTAL HOSPITAL · OUR DOCTORS' ) : 'MOON DENTAL HOSPITAL · OUR DOCTORS' ); ?></span>
 		<h1 class="md-docs-hero__title">
 			<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_title_a', '30여년 임상,' ) : '30여년 임상,' ); ?><br>
-			<em><?php echo (int) $total_doctors; ?><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_title_b', '인 의료진 협진' ) : '인 의료진 협진' ); ?></em>
+			<em><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_title_b', '전 분야 의료진 협진' ) : '전 분야 의료진 협진' ); ?></em>
 		</h1>
 		<p class="md-docs-hero__lead">
 			<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_lead', "보철·교정·보존·외과 — 각 분야 전문 의료진이 한 자리에서\n환자 한 분의 치아를 함께 봅니다." ) : "보철·교정·보존·외과 — 각 분야 전문 의료진이 한 자리에서\n환자 한 분의 치아를 함께 봅니다." ) ); ?>
 		</p>
 		<ul class="md-docs-hero__stats">
-			<li><strong><?php echo (int) $total_doctors; ?>인</strong><span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_1_label', '전문 의료진' ) : '전문 의료진' ); ?></span></li>
-			<li><strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_2_value', '3개층' ) : '3개층' ); ?></strong><span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_2_label', '9F · 10F · 11F' ) : '9F · 10F · 11F' ); ?></span></li>
 			<li><strong><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_3_value', '30여년' ) : '30여년' ); ?></strong><span><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_stat_3_label', '1995년 개원' ) : '1995년 개원' ); ?></span></li>
 		</ul>
 <?php /* Hero CTA 버튼 제거 (요청: 의료진 페이지에서 상담예약/전화 버튼 없앰) */ ?>
@@ -107,18 +105,15 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 			</p>
 		</header>
 
-		<!-- 층별 필터 -->
+		<!-- 진료센터 필터 (층 표기 제거) -->
 		<div class="md-docs-filter" role="tablist" aria-label="진료센터 필터">
-			<button class="md-docs-filter__btn is-active" type="button" data-doc-filter="all">
-				전체 <span class="md-docs-filter__count"><?php echo (int) $total_doctors; ?></span>
-			</button>
+			<button class="md-docs-filter__btn is-active" type="button" data-doc-filter="all">전체</button>
 			<?php foreach ( $groups as $g ) :
-				$key = $group_keys[ $g['group'] ];
-				$n   = count( $g['members'] );
+				$key   = $group_keys[ $g['group'] ];
+				$label = trim( preg_replace( '/\b\d+F\s*/u', '', $g['group'] ) );
 			?>
 				<button class="md-docs-filter__btn" type="button" data-doc-filter="<?php echo esc_attr( $key ); ?>">
-					<?php echo esc_html( $g['group'] ); ?>
-					<span class="md-docs-filter__count"><?php echo (int) $n; ?></span>
+					<?php echo esc_html( $label ); ?>
 				</button>
 			<?php endforeach; ?>
 		</div>
@@ -150,7 +145,7 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 						<?php else : ?>
 							<span class="md-doccard__initial"><?php echo esc_html( mb_substr( $doc['name'], -2 ) ); ?></span>
 						<?php endif; ?>
-						<span class="md-doccard__role"><?php echo esc_html( $doc['role'] ); ?></span>
+						<span class="md-doccard__role"><?php echo esc_html( trim( preg_replace( '/\b\d+F\s*/u', '', $doc['role'] ) ) ); ?></span>
 					</div>
 					<div class="md-doccard__body">
 						<h3 class="md-doccard__name"><?php echo esc_html( $doc['name'] ); ?></h3>
@@ -178,23 +173,20 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'staff_section_eyebrow', 'Our Staff' ) : 'Our Staff' ); ?></span>
-			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'staff_section_title', '전체 직원' ) : '전체 직원' ); ?> <span class="md-staff-total">총 <?php echo (int) $staff_total; ?>명</span></h2>
+			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'staff_section_title', '전체 직원' ) : '전체 직원' ); ?></h2>
 			<p class="md-section-head__lead">
-				<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'staff_section_lead', '의료진과 함께 환자분의 편안한 진료를 위해 일하는 전체 스태프입니다.' ) : '의료진과 함께 환자분의 편안한 진료를 위해 일하는 전체 스태프입니다.' ); ?>
+				<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'staff_section_lead', '한아의료재단 문치과병원에서 환자분과 함께하는 모든 의료진입니다.' ) : '한아의료재단 문치과병원에서 환자분과 함께하는 모든 의료진입니다.' ); ?>
 			</p>
 		</header>
 
 		<div class="md-staff-grid">
 			<?php foreach ( $staff_by_dept as $dept => $roles ) :
-				$dept_count = 0;
-				foreach ( $roles as $names ) $dept_count += count( $names );
 				$icon = $dept_icons[ $dept ] ?? '👥';
 			?>
 				<article class="md-staff-dept">
 					<header class="md-staff-dept__head">
 						<span class="md-staff-dept__icon" aria-hidden="true"><?php echo $icon; ?></span>
 						<h3 class="md-staff-dept__name"><?php echo esc_html( $dept ); ?></h3>
-						<span class="md-staff-dept__count"><?php echo (int) $dept_count; ?>명</span>
 					</header>
 					<dl class="md-staff-dept__roles">
 						<?php foreach ( $roles as $role => $names ) : ?>
