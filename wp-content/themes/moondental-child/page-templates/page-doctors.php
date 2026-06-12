@@ -34,6 +34,41 @@ $specialties = array(
 	array( 'icon' => '🧒', 'title' => '소아치과',     'desc' => '아이의 첫 치과 진료부터 청소년 교정까지' ),
 	array( 'icon' => '🦴', 'title' => '구강악안면외과', 'desc' => '사랑니 · 매복치 · 임플란트 외과 진료' ),
 );
+
+/* 전체 직원 명단 파싱 — 커스터마이저 staff_list 텍스트영역에서 한 줄에 한 명 "부서|직책|이름"
+ * 반환: [ '진료실' => [ '이사' => ['이순민'], '팀장' => ['박지선'], ... ], ... ] */
+$staff_raw = function_exists( 'md_content' ) ? md_content( 'staff_list', '' ) : '';
+$staff_by_dept = array();
+$staff_total = 0;
+$dept_icons = array(
+	'진료실'       => '🦷',
+	'기공실'       => '🛠️',
+	'서비스지원실' => '💬',
+	'경영지원실'   => '📋',
+	'비서실'       => '✉️',
+);
+// 직책 정렬 우선순위 (높은 직급 먼저)
+$role_rank = array(
+	'행정원장'=>1, '이사'=>2, '실장'=>3, '팀장'=>4, '차장'=>5, '과장'=>6,
+	'책임'=>7, '책임코디'=>7, '선임'=>8, '선임코디'=>8, '주임'=>9, '대리'=>10,
+	'기사'=>11, '사원'=>12,
+);
+foreach ( explode( "\n", $staff_raw ) as $line ) {
+	$line = trim( $line );
+	if ( $line === '' || strpos( $line, '|' ) === false ) continue;
+	$parts = array_map( 'trim', explode( '|', $line ) );
+	if ( count( $parts ) < 3 || $parts[2] === '' ) continue;
+	$staff_by_dept[ $parts[0] ][ $parts[1] ][] = $parts[2];
+	$staff_total++;
+}
+// 부서 내 직책을 우선순위순으로 정렬
+foreach ( $staff_by_dept as $dept => $roles ) {
+	uksort( $staff_by_dept[ $dept ], function( $a, $b ) use ( $role_rank ) {
+		$ra = $role_rank[ $a ] ?? 99;
+		$rb = $role_rank[ $b ] ?? 99;
+		return $ra - $rb;
+	} );
+}
 ?>
 
 <!-- ============ Hero ============ -->
@@ -157,6 +192,49 @@ $specialties = array(
 		</div>
 	</div>
 </section>
+
+<!-- ============ 전체 직원 (의료진 외 스태프) ============ -->
+<?php if ( ! empty( $staff_by_dept ) ) : ?>
+<section class="md-section md-section--surface" id="staff">
+	<div class="md-container">
+		<header class="md-section-head">
+			<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'staff_section_eyebrow', 'Our Staff' ) : 'Our Staff' ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'staff_section_title', '전체 직원' ) : '전체 직원' ); ?> <span class="md-staff-total">총 <?php echo (int) $staff_total; ?>명</span></h2>
+			<p class="md-section-head__lead">
+				<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'staff_section_lead', '의료진과 함께 환자분의 편안한 진료를 위해 일하는 전체 스태프입니다.' ) : '의료진과 함께 환자분의 편안한 진료를 위해 일하는 전체 스태프입니다.' ); ?>
+			</p>
+		</header>
+
+		<div class="md-staff-grid">
+			<?php foreach ( $staff_by_dept as $dept => $roles ) :
+				$dept_count = 0;
+				foreach ( $roles as $names ) $dept_count += count( $names );
+				$icon = $dept_icons[ $dept ] ?? '👥';
+			?>
+				<article class="md-staff-dept">
+					<header class="md-staff-dept__head">
+						<span class="md-staff-dept__icon" aria-hidden="true"><?php echo $icon; ?></span>
+						<h3 class="md-staff-dept__name"><?php echo esc_html( $dept ); ?></h3>
+						<span class="md-staff-dept__count"><?php echo (int) $dept_count; ?>명</span>
+					</header>
+					<dl class="md-staff-dept__roles">
+						<?php foreach ( $roles as $role => $names ) : ?>
+							<div class="md-staff-role">
+								<dt class="md-staff-role__title"><?php echo esc_html( $role ); ?></dt>
+								<dd class="md-staff-role__names">
+									<?php foreach ( $names as $i => $name ) : ?>
+										<span class="md-staff-name"><?php echo esc_html( $name ); ?></span><?php if ( $i < count( $names ) - 1 ) echo '<span class="md-staff-sep" aria-hidden="true">·</span>'; ?>
+									<?php endforeach; ?>
+								</dd>
+							</div>
+						<?php endforeach; ?>
+					</dl>
+				</article>
+			<?php endforeach; ?>
+		</div>
+	</div>
+</section>
+<?php endif; ?>
 
 <!-- ============ CTA 배너 ============ -->
 <section class="md-section md-section--sm">
