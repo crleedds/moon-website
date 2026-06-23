@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.22.4' );
+define( 'MOONDENTAL_VERSION', '3.22.5' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -41,6 +41,29 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_typo_fix_v3222', 'done' );
 }, 30 );
+
+/* 일회성 마이그레이션: 직원 명단 갱신 (v3.22.5)
+ *  - 명의재 → 맹의재 (기공실 차장)
+ *  - 이중현 → 이충현 (경영지원실 과장)
+ *  - 진료실 실장 지선미 복귀 (실장 임은혜 뒤에 삽입) */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_staff_update_v3225' ) === 'done' ) return;
+	$saved = get_theme_mod( 'md_content_staff_list', '' );
+	if ( $saved ) {
+		$saved = str_replace( '기공실|차장|명의재', '기공실|차장|맹의재', $saved );
+		$saved = str_replace( '경영지원실|과장|이중현', '경영지원실|과장|이충현', $saved );
+		// 지선미 복귀 — 이미 있으면 skip
+		if ( strpos( $saved, '진료실|실장|지선미' ) === false ) {
+			$saved = str_replace(
+				'진료실|실장|임은혜',
+				"진료실|실장|임은혜\n진료실|실장|지선미",
+				$saved
+			);
+		}
+		set_theme_mod( 'md_content_staff_list', $saved );
+	}
+	update_option( 'moondental_staff_update_v3225', 'done' );
+}, 32 );
 
 /* 일회성 마이그레이션: 직원 명단 갱신 (v3.22.3)
  *  - 박진욱 → 박진옥
