@@ -130,10 +130,14 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 		</div>
 
 		<?php if ( $legal_show !== 'no' ) :
+			// v3.23.2 — 법적 필수 항목만 남김:
+			// 의료법 시행규칙 §42 (개설자·종별·대표자·의료기관 고유번호),
+			// 개인정보보호법 §31 (개인정보 보호책임자), §30 (개인정보처리방침 링크),
+			// 의료법 §45 (비급여 진료비 게시).
+			// 사업자등록·이용약관·이메일 무단수집거부는 의료기관 웹사이트 법적 필수가 아니므로 제외.
 			$inst_name = $mc( 'footer_legal_inst_name', '한아의료재단 문치과병원' );
 			$inst_type = $mc( 'footer_legal_inst_type', '치과병원 (의료법인·병원급)' );
 			$rep       = $mc( 'footer_legal_rep',       '대표자: 문은수 이사장' );
-			$biz_no    = $mc( 'footer_legal_biz_no',    '사업자등록번호: 312-82-00000' );
 			$med_no    = $mc( 'footer_legal_med_no',    '의료기관 고유번호: 34400117' );
 			$ad_no     = $mc( 'footer_legal_ad_no',     '' );
 			$privacy_o = $mc( 'footer_legal_privacy_officer', '개인정보 보호책임자: 문은수' );
@@ -146,7 +150,6 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 					array( '의료기관',     $inst_name ),
 					array( '종별',         $inst_type ),
 					array( '대표자',       $rep ),
-					array( '사업자등록',   $biz_no ),
 					array( '의료기관번호', $med_no ),
 				);
 				if ( $ad_no )     $rows[] = array( '광고심의', $ad_no );
@@ -170,10 +173,7 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			// 정책 링크 (Customizer에서 "라벨|URL" 형식)
 			$policy_keys = array(
 				'footer_link_privacy' => '개인정보처리방침|/개인정보처리방침/',
-				'footer_link_terms'   => '이용약관|/이용약관/',
 				'footer_link_pricing' => '비급여 진료비|/비용-안내/',
-				'footer_link_email'   => '이메일 무단수집거부|',
-				'footer_link_sitemap' => '',
 			);
 			$policy_items = array();
 			foreach ( $policy_keys as $k => $d ) {
