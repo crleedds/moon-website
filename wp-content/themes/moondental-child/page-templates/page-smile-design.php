@@ -20,9 +20,9 @@ get_header();
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>스마일디자인센터</span>
 		</nav>
-		<span class="md-page-hero__eyebrow">SMILE DESIGN CENTER · 천안 심미치과</span>
+		<span class="md-page-hero__eyebrow">SMILE DESIGN CENTER · 천안·아산 심미치과</span>
 		<h1 class="md-page-hero__title">
-			천안 스마일디자인센터<br>
+			천안·아산 스마일디자인센터<br>
 			<em>자연스러운 미소를 디자인합니다</em>
 		</h1>
 		<p class="md-page-hero__lead">

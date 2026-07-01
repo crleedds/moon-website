@@ -13,9 +13,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.22.5' );
+define( 'MOONDENTAL_VERSION', '3.23.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
+
+/* 일회성 마이그레이션: 천안 → 천안·아산 포지셔닝 — 옛 기본값만 정리 (v3.23.0)
+ * 사용자가 커스터마이저에서 안 만진 옛 기본값만 remove_theme_mod → 새 기본값 자동 적용
+ * 사용자가 직접 다른 값을 입력해둔 경우는 보존 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_cheonan_asan_v3230' ) === 'done' ) return;
+	$cleanups = array(
+		'moondental_hero_title_a'  => '천안에서 30여년,',
+		'moondental_hero_lead'     => "천안 임플란트·천안 투명교정·천안 라미네이트·천안 자연치아 살리기까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다.",
+		'moondental_doctor_lead'   => '1995년부터 천안에서, 한 분의 환자를 가족처럼 오래 보아왔습니다. 진료실 밖에서도 지역사회와 함께 가는 치과를 꿈꿉니다.',
+		'md_content_why_title'         => '천안에서 왜 문치과병원을 찾으시나요?',
+		'md_content_services_title'    => '천안에서 한 곳에서, 평생 치아 건강을',
+		'md_content_services_eyebrow'  => 'CLINICAL SERVICES · 천안 진료항목',
+		'md_content_services_lead'     => '천안 임플란트·천안 투명교정·천안 라미네이트·천안 자연치아 살리기·천안 사랑니 발치까지 — 한 분의 환자를 오래 보는 천안 만남로 치과의 마음으로 진료합니다.',
+	);
+	foreach ( $cleanups as $mod_key => $old_default ) {
+		if ( get_theme_mod( $mod_key ) === $old_default ) {
+			remove_theme_mod( $mod_key );
+		}
+	}
+	update_option( 'moondental_cheonan_asan_v3230', 'done' );
+}, 33 );
 
 /* 일회성 마이그레이션: 의료진 페이지 카운트·층 표기 제거 — 옛 기본값만 정리 (v3.22.4) */
 add_action( 'after_setup_theme', function() {
@@ -131,7 +153,7 @@ add_action( 'after_setup_theme', function() {
 <p>대중교통: 천안종합고속버스터미널에서 도보 약 5분, 천안역에서 버스로 약 10분.</p>" ),
 
 		array( 'cat'=>'notice', 'title'=>'한아의료재단 문치과병원 — 천안 만남로 30여년의 진료',
-			'body'=>"<p>문치과병원은 1995년 천안에서 시작해 한아의료재단 산하 치과병원으로 자리잡았습니다.</p>
+			'body'=>"<p>문치과병원은 1995년 천안에서 시작해 한아의료재단 산하 치과병원으로 자리잡아, 천안·아산 지역의 대표 치과병원으로 성장했습니다.</p>
 <p>현재는 동남구 만남로 52 문타워 9·10·11·13층의 병원급 시설에서 임플란트·교정·자연치아 살리기·턱관절·소아치과 등 전 진료과 협진 체계로 운영하고 있습니다.</p>
 <p>오랜 진료 경험과 디지털 진단 장비(CBCT·구강스캐너)를 바탕으로 환자분께 꼭 필요한 치료만 권해드립니다.</p>" ),
 
@@ -983,9 +1005,9 @@ function moondental_customize_register( $wp_customize ) {
 	/* ── Home Hero section content ─────────────────────────────── */
 	$hero_fields = array(
 		'hero_eyebrow' => array( 'label' => '상단 작은 태그',     'type' => 'text',     'default' => '천안 만남로 · 1995년부터 한자리에서' ),
-		'hero_title_a' => array( 'label' => '메인 카피 1행',       'type' => 'text',     'default' => '천안에서 30여년,' ),
+		'hero_title_a' => array( 'label' => '메인 카피 1행',       'type' => 'text',     'default' => '천안·아산에서 30여년,' ),
 		'hero_title_b' => array( 'label' => '메인 카피 2행 (강조)', 'type' => 'text',     'default' => '환자 한 분의 평생 치아를' ),
-		'hero_lead'    => array( 'label' => '서브 카피',            'type' => 'textarea', 'default' => "천안 임플란트·천안 투명교정·천안 라미네이트·천안 자연치아 살리기까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다." ),
+		'hero_lead'    => array( 'label' => '서브 카피',            'type' => 'textarea', 'default' => "천안·아산 임플란트·투명교정·라미네이트·자연치아 살리기까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다." ),
 	);
 	foreach ( $hero_fields as $key => $f ) {
 		$id = 'moondental_' . $key;
@@ -1041,7 +1063,7 @@ function moondental_customize_register( $wp_customize ) {
 	/* ── Home Doctor section content ───────────────────────────── */
 	$doctor_fields = array(
 		'doctor_role' => array( 'label' => '직책',                 'type' => 'text',     'default' => '대표 병원장 · 한아의료재단 이사장' ),
-		'doctor_lead' => array( 'label' => '한 줄 진료 철학',         'type' => 'textarea', 'default' => '1995년부터 천안에서, 한 분의 환자를 가족처럼 오래 보아왔습니다. 진료실 밖에서도 지역사회와 함께 가는 치과를 꿈꿉니다.' ),
+		'doctor_lead' => array( 'label' => '한 줄 진료 철학',         'type' => 'textarea', 'default' => '1995년부터 천안·아산에서, 한 분의 환자를 가족처럼 오래 보아왔습니다. 진료실 밖에서도 지역사회와 함께 가는 치과를 꿈꿉니다.' ),
 		'doctor_bio'  => array( 'label' => '약력 (줄바꿈으로 구분)', 'type' => 'textarea', 'default' => "한아임플란트 보철연구소장\n단국대학교 치과대학 총동창회 학술이사\n대한 구강악안면 임플란트 학회 이사\n충남 치과의사회 학술이사\n단국치대 겸임교수\n이화여대 의과대학 외래교수" ),
 	);
 	foreach ( $doctor_fields as $key => $f ) {
@@ -2444,45 +2466,45 @@ function moondental_get_services() {
 	return array(
 		array(
 			'slug'  => '임플란트-센터',
-			'title' => '천안 임플란트',
+			'title' => '천안·아산 임플란트',
 			'icon'  => '🦷',
 			'desc'  => '천안 만남로 10F 임플란트센터 — 단일·다수·전악 임플란트까지, CBCT 디지털 가이드 수술과 보철 전문의 협진.',
 		),
 		array(
 			'slug'  => '투명교정-센터',
-			'title' => '천안 투명교정',
+			'title' => '천안·아산 투명교정',
 			'icon'  => '✨',
 			'desc'  => '천안 만남로 11F 교정과 — 슈어스마일(SureSmile) AI 투명교정 + 치과교정과 전문의·인정의 라이프스타일 맞춤 진료.',
 		),
 		array(
 			'slug'  => '자연치아-살리기',
-			'title' => '천안 자연치아 살리기',
+			'title' => '천안·아산 자연치아 살리기',
 			'icon'  => '🌿',
-			'desc'  => '천안 신경치료·재근관치료·치주치료. 보존과 전문의의 정밀 진료 — 발치보다 보존을 먼저 고민합니다.',
+			'desc'  => '천안·아산 신경치료·재근관치료·치주치료. 보존과 전문의의 정밀 진료 — 발치보다 보존을 먼저 고민합니다.',
 		),
 		array(
 			'slug'  => '턱관절-클리닉',
-			'title' => '천안 턱관절 클리닉',
+			'title' => '천안·아산 턱관절 클리닉',
 			'icon'  => '🔄',
-			'desc'  => '천안 턱관절 통증·소리·개구장애 — 대한턱관절교합학회 이사진의 전문 진료. 보존적 치료 우선.',
+			'desc'  => '천안·아산 턱관절 통증·소리·개구장애 — 대한턱관절교합학회 이사진의 전문 진료. 보존적 치료 우선.',
 		),
 		array(
 			'slug'  => '사랑니-발치',
-			'title' => '천안 사랑니 발치',
+			'title' => '천안·아산 사랑니 발치',
 			'icon'  => '🦴',
-			'desc'  => '천안 매복 사랑니까지 — CBCT 3D 정밀 진단으로 구강악안면외과 전문 의료진이 안전하게 발치합니다.',
+			'desc'  => '천안·아산 매복 사랑니까지 — CBCT 3D 정밀 진단으로 구강악안면외과 전문 의료진이 안전하게 발치합니다.',
 		),
 		array(
 			'slug'  => '심미치료',
-			'title' => '천안 라미네이트·미백',
+			'title' => '천안·아산 라미네이트·미백',
 			'icon'  => '💎',
-			'desc'  => '천안 라미네이트·치아미백·올세라믹 — 최소 삭제 보존적 접근으로 자연스러운 미소를 디자인합니다.',
+			'desc'  => '천안·아산 라미네이트·치아미백·올세라믹 — 최소 삭제 보존적 접근으로 자연스러운 미소를 디자인합니다.',
 		),
 		array(
 			'slug'  => '소아치과',
-			'title' => '천안 소아치과',
+			'title' => '천안·아산 소아치과',
 			'icon'  => '🧒',
-			'desc'  => '천안 어린이 첫 치과 경험부터 정기 검진·예방·1차 교정까지. 평생 구강 건강의 시작.',
+			'desc'  => '천안·아산 어린이 첫 치과 경험부터 정기 검진·예방·1차 교정까지. 평생 구강 건강의 시작.',
 		),
 	);
 }

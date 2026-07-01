@@ -39,7 +39,7 @@ for ( $i = 1; $i <= 4; $i++ ) {
 		</nav>
 		<h1 class="md-page-hero__title"><?php echo esc_html( $display_title ); ?></h1>
 		<p class="md-page-hero__lead">
-			1995년부터 천안에서 — 환자 한 분의 평생 치아 건강을 책임지는 마음으로 진료해온 30여년의 기록.
+			1995년부터 천안·아산에서 — 환자 한 분의 평생 치아 건강을 책임지는 마음으로 진료해온 30여년의 기록.
 		</p>
 	</div>
 </section>

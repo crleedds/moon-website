@@ -24,7 +24,7 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 		</nav>
 		<span class="md-page-hero__eyebrow">PRESERVATION · 자연치아 살리기</span>
 		<h1 class="md-page-hero__title">
-			천안 자연치아 살리기<br>
+			천안·아산 자연치아 살리기<br>
 			<em>발치보다 보존이 먼저입니다</em>
 		</h1>
 		<p class="md-page-hero__lead">

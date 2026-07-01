@@ -10,7 +10,7 @@ $info       = moondental_get_info();
 $role       = get_theme_mod( 'moondental_doctor_role',   '대표 병원장 · 한아의료재단 이사장' );
 $rep        = $info['rep'] ?: '문은수';
 $lead       = get_theme_mod( 'moondental_doctor_lead',
-	'1995년부터 천안에서, 한 분의 환자를 가족처럼 오래 보아왔습니다. 진료실 밖에서도 지역사회와 함께 가는 치과를 꿈꿉니다.'
+	'1995년부터 천안·아산에서, 한 분의 환자를 가족처럼 오래 보아왔습니다. 진료실 밖에서도 지역사회와 함께 가는 치과를 꿈꿉니다.'
 );
 
 // 약력 — Customizer 'moondental_doctor_bio' 줄바꿈 입력 → 줄 단위 <li>로 렌더

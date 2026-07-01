@@ -18,9 +18,9 @@ get_header();
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>예방클리닉</span>
 		</nav>
-		<span class="md-page-hero__eyebrow">PREVENTION · 천안 예방클리닉</span>
+		<span class="md-page-hero__eyebrow">PREVENTION · 천안·아산 예방클리닉</span>
 		<h1 class="md-page-hero__title">
-			천안 예방클리닉 · 덴탈 SPA<br>
+			천안·아산 예방클리닉 · 덴탈 SPA<br>
 			<em>치료보다 예방이 먼저입니다</em>
 		</h1>
 		<p class="md-page-hero__lead">

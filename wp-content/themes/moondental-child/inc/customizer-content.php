@@ -95,7 +95,7 @@ function moondental_home_content_fields() {
 			'title'  => '홈 — Why 차별점 4 카드',
 			'fields' => array(
 				'why_eyebrow' => array( 'default' => 'Why Moon Dental', 'label' => '섹션 — eyebrow', 'type' => 'text' ),
-				'why_title'   => array( 'default' => '천안에서 왜 문치과병원을 찾으시나요?', 'label' => '섹션 — 제목', 'type' => 'text' ),
+				'why_title'   => array( 'default' => '천안·아산에서 왜 문치과병원을 찾으시나요?', 'label' => '섹션 — 제목', 'type' => 'text' ),
 				'why_lead'    => array( 'default' => '천안 만남로에서 30여년 — 환자분들이 선택해온 이유 4가지로 정리해드립니다.', 'label' => '섹션 — 설명', 'type' => 'textarea' ),
 
 				'why_1_icon'  => array( 'default' => '🏥', 'label' => '①번 — 아이콘(이모지)', 'type' => 'text' ),
@@ -121,8 +121,8 @@ function moondental_home_content_fields() {
 			'title'  => '홈 — 진료안내 섹션 head',
 			'fields' => array(
 				'services_eyebrow' => array( 'default' => 'CLINICAL SERVICES · 천안 진료항목', 'label' => 'eyebrow', 'type' => 'text' ),
-				'services_title'   => array( 'default' => '천안에서 한 곳에서, 평생 치아 건강을', 'label' => '제목', 'type' => 'text' ),
-				'services_lead'    => array( 'default' => '천안 임플란트·천안 투명교정·천안 라미네이트·천안 자연치아 살리기·천안 사랑니 발치까지 — 한 분의 환자를 오래 보는 천안 만남로 치과의 마음으로 진료합니다.', 'label' => '설명', 'type' => 'textarea' ),
+				'services_title'   => array( 'default' => '천안·아산에서 한 곳에서, 평생 치아 건강을', 'label' => '제목', 'type' => 'text' ),
+				'services_lead'    => array( 'default' => '천안·아산 임플란트·투명교정·라미네이트·자연치아 살리기·사랑니 발치까지 — 한 분의 환자를 오래 보는 천안 만남로 치과의 마음으로 진료합니다.', 'label' => '설명', 'type' => 'textarea' ),
 			),
 		),
 

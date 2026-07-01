@@ -9,10 +9,10 @@
 $info = moondental_get_info();
 
 $eyebrow = get_theme_mod( 'moondental_hero_eyebrow', '천안 만남로 · 1995년부터 한자리에서' );
-$title_a = get_theme_mod( 'moondental_hero_title_a', '천안에서 30여년,' );
+$title_a = get_theme_mod( 'moondental_hero_title_a', '천안·아산에서 30여년,' );
 $title_b = get_theme_mod( 'moondental_hero_title_b', '환자 한 분의 평생 치아를' );
 $lead    = get_theme_mod( 'moondental_hero_lead',
-	"천안 임플란트·천안 투명교정·천안 라미네이트·천안 자연치아 살리기까지.\n" .
+	"천안·아산 임플란트·투명교정·라미네이트·자연치아 살리기까지.\n" .
 	"분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다."
 );
 
