@@ -197,7 +197,7 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 			<span class="md-region-cta__chip">🦷 자연치아 살리기 상담</span>
 			<h2 class="md-region-cta__title">
 				발치 권유받으셨나요?<br>
-				천안 문치과병원에서 한 번 더 살펴보세요
+				천안·아산 문치과병원에서 한 번 더 살펴보세요
 			</h2>
 			<p class="md-region-cta__lead">
 				보존과·치주과 전문 의료진의 정밀 진단으로 자연치아를 살릴 수 있는지 검토해드립니다.

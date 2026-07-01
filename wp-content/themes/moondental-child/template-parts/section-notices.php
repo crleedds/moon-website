@@ -52,7 +52,7 @@ $news_page_url = get_post_type_archive_link( 'post' ) ?: home_url( '/소식/' );
 		<header class="md-section-head" style="text-align:left; max-width:none; display:flex; justify-content:space-between; align-items:end; gap:16px; flex-wrap:wrap;">
 			<div>
 				<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'notices_eyebrow', 'NEWS · 병원 소식' ) : 'NEWS · 병원 소식' ); ?></span>
-				<h2 class="md-section-head__title" style="margin:0;"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'notices_title', '천안 문치과병원 소식' ) : '천안 문치과병원 소식' ); ?></h2>
+				<h2 class="md-section-head__title" style="margin:0;"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'notices_title', '천안·아산 문치과병원 소식' ) : '천안·아산 문치과병원 소식' ); ?></h2>
 			</div>
 			<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( $news_page_url ); ?>">
 				전체 보기 →

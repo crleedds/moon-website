@@ -13,9 +13,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.23.2' );
+define( 'MOONDENTAL_VERSION', '3.23.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
+
+/* 일회성 마이그레이션: '천안 문치과병원' → '천안·아산 문치과병원' notices_title 정리 (v3.23.3) */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_cheonan_asan_brand_v3233' ) === 'done' ) return;
+	if ( get_theme_mod( 'md_content_notices_title' ) === '천안 문치과병원 소식' ) {
+		remove_theme_mod( 'md_content_notices_title' );
+	}
+	update_option( 'moondental_cheonan_asan_brand_v3233', 'done' );
+}, 34 );
 
 /* 일회성 마이그레이션: 천안 → 천안·아산 포지셔닝 — 옛 기본값만 정리 (v3.23.0)
  * 사용자가 커스터마이저에서 안 만진 옛 기본값만 remove_theme_mod → 새 기본값 자동 적용

@@ -219,7 +219,7 @@ get_header();
 			<span class="md-region-cta__chip">💆 덴탈 SPA 예약</span>
 			<h2 class="md-region-cta__title">
 				치료 전에 예방을 시작하세요<br>
-				천안 문치과병원 덴탈 SPA
+				천안·아산 문치과병원 덴탈 SPA
 			</h2>
 			<p class="md-region-cta__lead">
 				6개월 주기 정기 SPA로 자연치아를 평생 건강하게 — 가장 경제적인 투자입니다.

@@ -232,7 +232,7 @@ $is_walking     = ! empty( $region['duration_label'] ) && strpos( $region['durat
 		<div class="md-region-cta">
 			<span class="md-region-cta__chip">📅 365일 24시간 온라인 예약 가능</span>
 			<h2 class="md-region-cta__title">
-				<?php echo esc_html( $region_name ); ?>에서 천안 문치과병원까지<br>
+				<?php echo esc_html( $region_name ); ?>에서 천안·아산 문치과병원까지<br>
 				지금 바로 상담 받아보세요
 			</h2>
 			<p class="md-region-cta__lead">
@@ -255,7 +255,7 @@ $is_walking     = ! empty( $region['duration_label'] ) && strpos( $region['durat
 
 		<div class="md-faq">
 			<details class="md-faq__item" open>
-				<summary><?php echo esc_html( $region_name ); ?>에서 천안 문치과병원까지 얼마나 걸리나요?</summary>
+				<summary><?php echo esc_html( $region_name ); ?>에서 천안·아산 문치과병원까지 얼마나 걸리나요?</summary>
 				<p>자동차로 약 <strong><?php echo esc_html( $duration ); ?>분</strong>, 거리 약 <?php echo esc_html( $distance ); ?>km입니다. 주요 경로는 <?php echo esc_html( $region['highway'] ); ?> 이용. 시외버스·KTX로도 천안종합터미널 또는 천안역 도착 후 도보 5분 거리입니다.</p>
 			</details>
 
@@ -288,7 +288,7 @@ $is_walking     = ! empty( $region['duration_label'] ) && strpos( $region['durat
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">🌐 다른 지역에서 오시는 길</span>
-			<h2 class="md-section-head__title">다른 지역에서 천안 문치과병원까지</h2>
+			<h2 class="md-section-head__title">다른 지역에서 천안·아산 문치과병원까지</h2>
 		</header>
 		<div class="md-region-grid">
 			<?php

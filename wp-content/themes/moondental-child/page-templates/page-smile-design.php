@@ -243,7 +243,7 @@ get_header();
 			<span class="md-region-cta__chip">✨ 스마일디자인 무료 상담</span>
 			<h2 class="md-region-cta__title">
 				지금 내 미소,<br>
-				천안 문치과병원에서 디자인해보세요
+				천안·아산 문치과병원에서 디자인해보세요
 			</h2>
 			<p class="md-region-cta__lead">
 				디지털 스마일 시뮬레이션으로 결과를 미리 확인하고 시작할 수 있습니다.
