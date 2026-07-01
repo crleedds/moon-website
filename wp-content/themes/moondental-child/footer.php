@@ -29,8 +29,6 @@ $mc = function ( $k, $d = '' ) { return function_exists( 'md_content' ) ? md_con
 
 $tagline   = $mc( 'footer_brand_tagline', '' ); // 사용자 요청: 비우면 미표시
 $col_hours = $mc( 'footer_col_hours_title', '진료시간' );
-$col_svc   = $mc( 'footer_col_services_title', '진료안내' );
-$col_about = $mc( 'footer_col_about_title', '병원안내' );
 $copyright = $mc( 'footer_copyright', 'All rights reserved.' );
 
 $legal_show = $mc( 'footer_legal_show', 'yes' );
@@ -127,34 +125,7 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				</ul>
 			</div>
 
-			<div class="md-footer__col">
-				<h4><?php echo esc_html( $col_svc ); ?></h4>
-				<ul>
-					<?php foreach ( moondental_get_services() as $svc ) :
-						$page    = get_page_by_path( $svc['slug'] );
-						$svc_url = $page ? get_permalink( $page ) : home_url( '/' . rawurlencode( $svc['slug'] ) . '/' );
-						?>
-						<li><a href="<?php echo esc_url( $svc_url ); ?>"><?php echo esc_html( $svc['title'] ); ?></a></li>
-					<?php endforeach; ?>
-				</ul>
-			</div>
-
-			<div class="md-footer__col">
-				<h4><?php echo esc_html( $col_about ); ?></h4>
-				<?php
-				if ( has_nav_menu( 'footer' ) ) {
-					wp_nav_menu( array(
-						'theme_location' => 'footer',
-						'container'      => false,
-						'menu_class'     => '',
-						'depth'          => 1,
-						'fallback_cb'    => 'moondental_footer_menu_fallback',
-					) );
-				} else {
-					moondental_footer_menu_fallback();
-				}
-				?>
-			</div>
+			<?php /* 진료안내·병원안내 컬럼은 사용자 요청으로 v3.23.1에서 제거 */ ?>
 
 		</div>
 
