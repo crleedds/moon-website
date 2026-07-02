@@ -37,7 +37,7 @@ function moondental_default_service_content( $slug ) {
 <li><strong>네비게이션(가이드) 임플란트</strong> — 디지털 장비로 미리 시뮬레이션 후 정밀 수술</li>
 </ul>
 
-<h3>★ 문치과만의 시그니처 — Moon Magic Implant (MMI)</h3>
+<h3>당일 임플란트</h3>
 <p><strong>발치 + 뼈이식 + 임플란트 식립을 단 하루에 동시에 진행하는</strong> 고난이도 시술법입니다. 여러 번의 마취·수술에 대한 부담을 줄이고 치료 기간을 획기적으로 단축합니다.</p>
 <ul>
 <li>30여년 이상 경력의 숙련된 전문의 직접 시술</li>
@@ -46,10 +46,10 @@ function moondental_default_service_content( $slug ) {
 <li>수술 횟수 최소화 → 회복 부담 감소</li>
 </ul>
 
-<h4>전통적 1·2차 수술 vs 당일 임플란트 (MMI)</h4>
+<h4>전통적 1·2차 수술 vs 당일 임플란트</h4>
 <ul>
 <li><strong>전통 방식</strong> — 발치 → 회복 3~6개월 → 1차 식립 → 회복 3~6개월 → 2차 잇몸 수술 → 최종 보철. <em>치료 기간 8~12개월, 치아 없는 공백 길어 심리적 부담 큼.</em></li>
-<li><strong>MMI 당일 임플란트</strong> — 발치·뼈이식·식립을 하루에 동시 진행. <em>치료 기간·수술 횟수 최소화.</em></li>
+<li><strong>당일 임플란트</strong> — 발치·뼈이식·식립을 하루에 동시 진행. <em>치료 기간·수술 횟수 최소화.</em></li>
 </ul>
 
 <h4>당일 임플란트가 어려운 경우</h4>
@@ -1368,7 +1368,7 @@ function moondental_default_pricing_content() {
 <tr><td>일반 임플란트</td><td>스테리오스 BL</td><td>120만~150만 원</td></tr>
 <tr><td>프리미엄 임플란트</td><td>메가젠 블루다이아몬드</td><td>180만~230만 원</td></tr>
 <tr><td>UV 활성 임플란트</td><td>포인트 UV</td><td>160만~200만 원</td></tr>
-<tr><td>당일 임플란트 (MMI)</td><td>발치+뼈이식+식립 동시</td><td>200만~280만 원</td></tr>
+<tr><td>당일 임플란트</td><td>발치+뼈이식+식립 동시</td><td>200만~280만 원</td></tr>
 <tr><td>뼈이식 (골이식재)</td><td>MegaOss Bovine</td><td>20만~80만 원 (양에 따라)</td></tr>
 <tr><td>상악동 거상술</td><td>치조정·측방 접근법</td><td>50만~150만 원</td></tr>
 <tr><td>네비게이션 가이드</td><td>3D 시뮬레이션</td><td>30만~60만 원 (1악 기준)</td></tr>
