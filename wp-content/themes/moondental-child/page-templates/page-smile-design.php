@@ -84,7 +84,7 @@ get_header();
 
 		<aside class="md-preservation-callout">
 			<strong>💎 라미네이트 비용</strong>
-			<p>앞니 1개당 66만원부터 (부가세 포함) — 보통 6~8개 진행. 정확한 견적은 진단 후 산정. <a href="<?php echo esc_url( home_url( '/비용-안내/' ) ); ?>">비용 안내 →</a></p>
+			<p>앞니 1개당 66만원 (부가세 포함) — 보통 6~8개 진행. 정확한 견적은 진단 후 산정. <a href="<?php echo esc_url( home_url( '/비용-안내/' ) ); ?>">비용 안내 →</a></p>
 		</aside>
 	</div>
 </section>
@@ -137,7 +137,7 @@ get_header();
 			<article class="md-preservation-card">
 				<span class="md-preservation-card__stage">자가</span>
 				<h3>홈 화이트닝 (4주 키트)</h3>
-				<p>맞춤 트레이 + 미백제를 받아 집에서 매일 1시간씩 4주 진행. 점진적이라 시린 증상 적음. <strong>33만원부터</strong>.</p>
+				<p>맞춤 트레이 + 미백제를 받아 집에서 매일 1시간씩 4주 진행. 점진적이라 시린 증상 적음. <strong>33만원</strong>.</p>
 			</article>
 			<article class="md-preservation-card">
 				<span class="md-preservation-card__stage">1일</span>
@@ -190,7 +190,7 @@ get_header();
 			</article>
 			<article class="md-preservation-card">
 				<h3>💰 비용 안내</h3>
-				<p><strong>악당(상악·하악) 20만원부터</strong>. 잇몸 색소 정도에 따라 차이. 사전 무료 상담 가능.</p>
+				<p><strong>악당(상악·하악) 20만원</strong>. 잇몸 색소 정도에 따라 차이. 사전 무료 상담 가능.</p>
 			</article>
 		</div>
 	</div>
@@ -210,7 +210,7 @@ get_header();
 			<article class="md-preservation-card">
 				<span class="md-preservation-card__stage">원인 1</span>
 				<h3>잇몸 라인이 낮음</h3>
-				<p>치아 길이는 정상이지만 잇몸이 치아를 많이 덮고 있음. <strong>잇몸 성형술(레이저)</strong>로 잇몸 라인 조정 — 치아당 20만원부터.</p>
+				<p>치아 길이는 정상이지만 잇몸이 치아를 많이 덮고 있음. <strong>잇몸 성형술(레이저)</strong>로 잇몸 라인 조정 — 치아당 20만원.</p>
 			</article>
 			<article class="md-preservation-card">
 				<span class="md-preservation-card__stage">원인 2</span>

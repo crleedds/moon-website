@@ -13,9 +13,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.24.0' );
+define( 'MOONDENTAL_VERSION', '3.24.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
+
+/* 일회성 마이그레이션: 비용안내 가격표에서 '원부터' → '원' (v3.24.1)
+ * 사용자가 커스터마이저에서 편집·저장한 가격표에도 옛 '부터' 표기가 남을 수 있으므로 정정. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_price_from_v3241' ) === 'done' ) return;
+	$keys = array(
+		'md_content_price_tab_implant_rows',
+		'md_content_price_tab_ortho_rows',
+		'md_content_price_tab_crown_rows',
+		'md_content_price_tab_decay_rows',
+		'md_content_price_tab_gum_rows',
+		'md_content_price_tab_aesthetic_rows',
+		'md_content_price_tab_kids_rows',
+		'md_content_price_tab_tmj_rows',
+	);
+	foreach ( $keys as $k ) {
+		$saved = get_theme_mod( $k, '' );
+		if ( $saved && strpos( $saved, '원부터' ) !== false ) {
+			set_theme_mod( $k, str_replace( '원부터', '원', $saved ) );
+		}
+	}
+	update_option( 'moondental_price_from_v3241', 'done' );
+}, 35 );
 
 /* 일회성 마이그레이션: '천안 문치과병원' → '천안·아산 문치과병원' notices_title 정리 (v3.23.3) */
 add_action( 'after_setup_theme', function() {

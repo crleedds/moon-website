@@ -89,7 +89,7 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 
 		<aside class="md-preservation-callout">
 			<strong>💡 충치치료 비용 안내</strong>
-			<p>레진 충전 10만원부터 / 세라믹 인레이 35만원부터 / 지르코니아 크라운 55만원부터 — 정확한 견적은 진단 후 산정. <a href="<?php echo esc_url( home_url( '/비용-안내/' ) ); ?>">비용 안내 자세히 보기 →</a></p>
+			<p>레진 충전 10만원 / 세라믹 인레이 35만원 / 지르코니아 크라운 55만원 — 정확한 견적은 진단 후 산정. <a href="<?php echo esc_url( home_url( '/비용-안내/' ) ); ?>">비용 안내 자세히 보기 →</a></p>
 		</aside>
 	</div>
 </section>
