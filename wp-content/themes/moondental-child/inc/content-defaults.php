@@ -91,7 +91,7 @@ function moondental_default_service_content( $slug ) {
 </ul>
 <p>소요 시간 약 30~60분, 회복 기간 2~3주. <strong>골소실이 있어도 임플란트를 뽑지 않고 살릴 수 있습니다.</strong></p>
 
-<h4>3. M-GBR (Moon\'s Guided Bone Regeneration)</h4>
+<h4>3. GBR (골유도재생술, Guided Bone Regeneration)</h4>
 <p>발치와 동시에 뼈이식을 진행해 추가 수술을 줄이는 술식. 자가혈 <strong>PRF·PRP·PDRN</strong>을 함께 활용해 골재생을 가속화합니다.</p>
 <ul>
 <li><strong>PRF (자가혈 응고막)</strong> — 뼈 재생 촉진, 상처 치유 속도 향상, 이식재 고정·보호</li>

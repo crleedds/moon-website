@@ -163,16 +163,18 @@ if ( function_exists( 'moondental_get_faqs_by_service' ) ) {
 			<h2 class="md-section-head__title" style="font-size:var(--fs-h3);">다른 진료 영역 보기</h2>
 		</header>
 		<div class="md-service-grid">
-			<?php foreach ( $services as $svc ) :
-				if ( $svc['slug'] === $slug ) continue;
-				$page = get_page_by_path( $svc['slug'] );
-				$url  = $page ? get_permalink( $page ) : home_url( '/services/#' . $svc['slug'] );
+			<?php
+			// 주 메뉴 구조 기반 5개 상위 카테고리 (임플란트/교정/스마일디자인/자연치아/진료과)
+			$service_areas   = function_exists( 'moondental_get_service_areas' ) ? moondental_get_service_areas() : array();
+			$current_area    = function_exists( 'moondental_service_slug_to_area' ) ? moondental_service_slug_to_area( $slug ) : $slug;
+			foreach ( $service_areas as $area ) :
+				if ( $area['slug'] === $current_area ) continue;
 			?>
 				<article class="md-service-card">
-					<div class="md-service-card__icon" aria-hidden="true"><?php echo $svc['icon']; ?></div>
-					<h3 class="md-service-card__title"><?php echo esc_html( $svc['title'] ); ?></h3>
-					<p class="md-service-card__desc"><?php echo esc_html( $svc['desc'] ); ?></p>
-					<a class="md-service-card__link" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $svc['title'] ); ?></a>
+					<div class="md-service-card__icon" aria-hidden="true"><?php echo $area['icon']; ?></div>
+					<h3 class="md-service-card__title"><?php echo esc_html( $area['title'] ); ?></h3>
+					<p class="md-service-card__desc"><?php echo esc_html( $area['desc'] ); ?></p>
+					<a class="md-service-card__link" href="<?php echo esc_url( $area['url'] ); ?>"><?php echo esc_html( $area['title'] ); ?></a>
 				</article>
 			<?php endforeach; ?>
 		</div>
