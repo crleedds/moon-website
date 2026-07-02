@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.25.0' );
+define( 'MOONDENTAL_VERSION', '3.25.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -598,7 +598,7 @@ function moondental_enqueue_styles() {
 		);
 	}
 
-	// 5. 언어 전환 (Google Translate + 커스텀 드롭다운)
+	// 5. 언어 전환 (Google Translate + 커스텀 드롭다운) — 우측 하단 플로팅
 	$lang_js_path = MOONDENTAL_DIR . '/assets/js/language-switcher.js';
 	if ( file_exists( $lang_js_path ) ) {
 		wp_enqueue_script(
@@ -619,6 +619,14 @@ function moondental_enqueue_styles() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'moondental_enqueue_styles', 15 );
+
+/**
+ * 언어 스위처를 body 끝에 렌더 — position:fixed로 우측 하단 플로팅 (스크롤 시 함께 이동).
+ */
+function moondental_render_floating_lang_switcher() {
+	get_template_part( 'template-parts/language-switcher' );
+}
+add_action( 'wp_footer', 'moondental_render_floating_lang_switcher', 5 );
 
 
 /* ============================================================

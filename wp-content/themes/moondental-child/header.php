@@ -77,8 +77,6 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 				</nav>
 
 				<div class="md-header__aside">
-					<?php get_template_part( 'template-parts/language-switcher' ); ?>
-
 					<div class="md-header__info" aria-label="진료시간 및 전화">
 						<?php if ( $phone ) : ?>
 							<a class="md-header__phone" href="tel:<?php echo esc_attr( $phone_link ?: preg_replace( '/[^0-9]/', '', $phone ) ); ?>" data-track="cta-header-call">
