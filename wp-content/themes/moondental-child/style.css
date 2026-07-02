@@ -5,32 +5,25 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.24.1
+Version:      3.25.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
 */
 
 /* =============================================================
-   0. Color Scheme — Light theme only
-        브라우저/OS 다크모드·인버트 모드가 강제 적용되지 않도록 명시.
+   0. Color Scheme — Light + Dark (auto via OS preference)
+        v3.25.0: OS 다크모드에 자동 대응. 브랜드 코럴/세이지는 유지하되
+        배경·텍스트·서피스만 어두운 톤으로 스와프.
    ============================================================= */
 :root,
 html {
-  color-scheme: light only;
-  supported-color-schemes: light;
-  forced-color-adjust: none;
+  color-scheme: light dark;
 }
-/* 페이지 기본 배경·텍스트를 명시적으로 고정 — OS 다크모드 시에도 유지 */
 html,
 body {
-  background-color: #FFFAF4;
-  color: #3D2F26;
-}
-/* prefers-color-scheme: dark 환경에서도 같은 배경 유지 (color-scheme로도 처리되지만 이중 안전) */
-@media (prefers-color-scheme: dark) {
-  html, body { background-color: #FFFAF4 !important; color: #3D2F26 !important; }
-  .md-site-header { background-color: #FFFAF4 !important; }
+  background-color: var(--color-bg);
+  color: var(--color-text);
 }
 
 /* =============================================================
@@ -94,6 +87,153 @@ body {
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+/* =============================================================
+   1b. Dark Mode Palette (자동: OS 다크모드 감지)
+        브랜드 코럴/세이지는 유지, 배경·서피스·텍스트만 다크로 스와프.
+   ============================================================= */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1A140E;
+    --color-surface: #241C15;
+    --color-surface-alt: #2F251C;
+    --color-white: #2A211A;
+    --color-border: #3A2E24;
+
+    --color-text: #F0E6DA;
+    --color-text-sub: #C6B7A6;
+    --color-text-mute: #8F7F6E;
+
+    /* 브랜드 컬러는 그대로 유지하되 살짝 밝게 조정 */
+    --color-primary-light: #F4B195;
+
+    /* 그림자 — 다크에서는 더 진하고 채도 낮게 */
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.35);
+    --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.5);
+    --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.4);
+  }
+  /* 이미지·로고 살짝 톤 다운 */
+  .md-doccard__photo img,
+  .md-news-card__media img,
+  .md-hero__media img,
+  .md-facility-card__img img { filter: brightness(0.9); }
+
+  /* 라이트 배경을 가정한 흰색 컨테이너들 조정 */
+  .md-doccard,
+  .md-news-card,
+  .md-service-card,
+  .md-spec,
+  .md-staff-dept,
+  .md-hours,
+  .md-faq__item,
+  .md-info-card,
+  .md-region-pill,
+  .md-mapbtn,
+  .md-channel-card,
+  .md-price-table { background: var(--color-white); border-color: var(--color-border); }
+
+  /* rgba(255,255,255,…) 반투명 표기가 있던 곳들 */
+  .md-doccard__role,
+  .md-news-card__category,
+  .md-nav-hero__crumbs { background: rgba(42, 33, 26, 0.94); color: var(--color-text); }
+
+  /* 헤더 다크 배경 */
+  .md-site-header { background: rgba(26, 20, 14, 0.92); backdrop-filter: blur(10px); }
+}
+
+/* =============================================================
+   1c. Language Switcher (Google Translate 기반 6개국어 드롭다운)
+   ============================================================= */
+.md-lang-switcher {
+  position: relative;
+  display: inline-flex;
+  margin-right: 10px;
+}
+.md-lang-switcher__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-sub);
+  cursor: pointer;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+  white-space: nowrap;
+}
+.md-lang-switcher__btn:hover,
+.md-lang-switcher.is-open .md-lang-switcher__btn {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+  background: rgba(216, 128, 98, 0.05);
+}
+.md-lang-switcher__globe { flex-shrink: 0; }
+.md-lang-switcher__caret {
+  font-size: 0.7rem;
+  transition: transform .15s ease;
+}
+.md-lang-switcher.is-open .md-lang-switcher__caret { transform: rotate(180deg); }
+
+.md-lang-switcher__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 160px;
+  padding: 6px;
+  margin: 0;
+  list-style: none;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(61, 47, 38, 0.12);
+  z-index: 100;
+}
+.md-lang-switcher__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .12s ease;
+}
+.md-lang-switcher__item:hover,
+.md-lang-switcher__item:focus-visible {
+  background: rgba(216, 128, 98, 0.08);
+  outline: none;
+}
+.md-lang-switcher__flag { font-size: 1.1rem; line-height: 1; }
+.md-lang-switcher__label { flex: 1; font-weight: 500; }
+
+@media (max-width: 620px) {
+  .md-lang-switcher { margin-right: 6px; }
+  .md-lang-switcher__btn { padding: 5px 8px; font-size: 0.75rem; }
+  .md-lang-switcher__current { display: none; }
+  .md-lang-switcher__caret { display: none; }
+  .md-lang-switcher__menu { min-width: 150px; }
+}
+
+/* Google Translate — 기본 UI 감춤 */
+#google_translate_element {
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate { display: none !important; }
+body { top: 0 !important; position: static !important; }
+.goog-tooltip,
+.goog-tooltip:hover,
+.goog-text-highlight { background: none !important; box-shadow: none !important; }
+/* Google Translate가 body에 붙이는 iframe 무시 */
+iframe.goog-te-menu-frame { box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important; }
 
 /* =============================================================
    2. Global Reset & Typography

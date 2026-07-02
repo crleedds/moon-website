@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.24.1' );
+define( 'MOONDENTAL_VERSION', '3.25.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -594,6 +594,26 @@ function moondental_enqueue_styles() {
 			MOONDENTAL_URI . '/assets/js/main.js',
 			array(),
 			filemtime( $js_path ),
+			true
+		);
+	}
+
+	// 5. 언어 전환 (Google Translate + 커스텀 드롭다운)
+	$lang_js_path = MOONDENTAL_DIR . '/assets/js/language-switcher.js';
+	if ( file_exists( $lang_js_path ) ) {
+		wp_enqueue_script(
+			'moondental-lang-switcher',
+			MOONDENTAL_URI . '/assets/js/language-switcher.js',
+			array(),
+			filemtime( $lang_js_path ),
+			true
+		);
+		// Google Translate CDN (defer로 콜백 등록 후 로드)
+		wp_enqueue_script(
+			'moondental-google-translate',
+			'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit',
+			array( 'moondental-lang-switcher' ),
+			null,
 			true
 		);
 	}
