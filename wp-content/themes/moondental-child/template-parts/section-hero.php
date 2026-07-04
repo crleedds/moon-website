@@ -32,7 +32,7 @@ $hero_image_id = get_theme_mod( 'moondental_hero_image', 0 );
 				</h1>
 				<p class="md-hero__lead"><?php echo nl2br( esc_html( $lead ) ); ?></p>
 
-				<?php echo md_render_reservation_ctas( array( 'track' => 'cta-hero', 'size' => 'lg', 'align' => 'start' ) ); ?>
+				<?php /* v3.25.4 — Hero의 네이버·카톡·전화 CTA 3버튼 제거. 우측 하단 플로팅 FAB로 상시 접근 가능. */ ?>
 
 				<ul class="md-hero__badges" aria-label="천안 만남로 문치과병원의 특징">
 					<li><span aria-hidden="true">✓</span> 천안 만남로 1995년 개원 · 30여년 임상</li>
