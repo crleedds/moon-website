@@ -1,6 +1,7 @@
 /*!
  * moondental language switcher — Google Translate 기반 6개국어 드롭다운
  * 지원: ko(기본) / en / zh-CN / vi / ru / mn
+ * v3.25.3 — 진단 로그 + 재시도 + 폴백 CDN 추가
  */
 (function () {
 	'use strict';
@@ -14,18 +15,51 @@
 		'mn':    'Монгол'
 	};
 	var STORAGE_KEY = 'md_lang';
-	var GT_LOAD_TIMEOUT_MS = 15000;
+	var GT_LOAD_TIMEOUT_MS = 20000;
+	var LOG_PREFIX = '[MD-LangSwitch]';
+	var pendingLang = null; // 사용자가 선택했는데 GT가 아직 안 로드된 경우 저장
 
-	// ── 1) Google Translate 초기화 콜백 ──────────
+	function log() {
+		if (window.console && console.log) {
+			var args = Array.prototype.slice.call(arguments);
+			args.unshift(LOG_PREFIX);
+			console.log.apply(console, args);
+		}
+	}
+	function warn() {
+		if (window.console && console.warn) {
+			var args = Array.prototype.slice.call(arguments);
+			args.unshift(LOG_PREFIX);
+			console.warn.apply(console, args);
+		}
+	}
+
+	log('스크립트 로드됨. Google Translate CDN 대기 중...');
+
+	// ── 1) Google Translate 초기화 콜백 (전역) ──────────
 	window.googleTranslateElementInit = function () {
+		log('googleTranslateElementInit 콜백 실행');
 		try {
+			if (!window.google || !window.google.translate) {
+				warn('window.google.translate 객체 없음');
+				return;
+			}
 			new google.translate.TranslateElement({
 				pageLanguage: 'ko',
 				includedLanguages: 'ko,en,zh-CN,vi,ru,mn',
 				autoDisplay: false,
 				layout: google.translate.TranslateElement.InlineLayout.SIMPLE
 			}, 'google_translate_element');
-		} catch (e) { /* Google Translate 로드 실패 시 조용히 무시 */ }
+			log('TranslateElement 인스턴스 생성 완료');
+
+			// 초기화 완료 후 pending 언어가 있으면 즉시 적용
+			if (pendingLang) {
+				log('pendingLang 적용 시도: ' + pendingLang);
+				applyLanguageToCombo(pendingLang);
+			}
+		} catch (e) {
+			warn('TranslateElement 생성 실패:', e && e.message);
+		}
 	};
 
 	// ── 2) Google Translate 상단 배너 강제 숨김 ──
@@ -37,17 +71,88 @@
 		var iframe = document.querySelector('iframe.goog-te-banner-frame');
 		if (iframe) iframe.style.display = 'none';
 	}
-	// 페이지 로드 후 반복 억제 (Google이 다시 삽입할 수 있어서)
 	setInterval(suppressGoogleBar, 1000);
 
-	// ── 3) 드롭다운 동작 ────────────────────────
+	// ── 3) 콤보에 언어 적용 ──────────────────────
+	function applyLanguageToCombo(lang) {
+		var combo = document.querySelector('.goog-te-combo');
+		if (!combo) {
+			log('.goog-te-combo 아직 없음. 폴링 시작...');
+			pendingLang = lang;
+			waitForGoogleTranslate(function (c) {
+				log('.goog-te-combo 발견. 언어 적용: ' + lang);
+				c.value = (lang === 'ko') ? '' : lang;
+				fireChange(c);
+			});
+			return;
+		}
+		log('.goog-te-combo 즉시 발견. 언어 적용: ' + lang);
+		combo.value = (lang === 'ko') ? '' : lang;
+		fireChange(combo);
+	}
+
+	function fireChange(el) {
+		var ev;
+		try { ev = new Event('change', { bubbles: true }); }
+		catch (e) { ev = document.createEvent('HTMLEvents'); ev.initEvent('change', true, true); }
+		el.dispatchEvent(ev);
+	}
+
+	function waitForGoogleTranslate(cb) {
+		var start = Date.now();
+		var iv = setInterval(function () {
+			var combo = document.querySelector('.goog-te-combo');
+			if (combo) {
+				clearInterval(iv);
+				cb(combo);
+			} else if (Date.now() - start > GT_LOAD_TIMEOUT_MS) {
+				clearInterval(iv);
+				warn('Google Translate 로드 타임아웃(' + GT_LOAD_TIMEOUT_MS + 'ms). ' +
+					'가능 원인: 네트워크 차단·광고차단 확장·CSP·CDN 문제');
+			}
+		}, 200);
+	}
+
+	// ── 4) 폴백 CDN 로드 (main CDN 실패 대비) ────
+	function ensureGoogleTranslateScript() {
+		var t = setTimeout(function () {
+			if (!window.google || !window.google.translate) {
+				warn('20초 후에도 window.google.translate 없음. 폴백 CDN 시도...');
+				var script = document.createElement('script');
+				script.src = 'https://translate.googleapis.com/translate_a/element.js?cb=googleTranslateElementInit';
+				script.async = true;
+				script.onerror = function () { warn('폴백 CDN(googleapis)도 로드 실패'); };
+				document.head.appendChild(script);
+			}
+		}, 5000);
+		// 로드되면 타이머 취소
+		var iv = setInterval(function () {
+			if (window.google && window.google.translate) {
+				clearTimeout(t);
+				clearInterval(iv);
+				log('메인 CDN(translate.google.com) 로드 성공');
+			}
+		}, 500);
+	}
+
+	// ── 5) 드롭다운 UI 동작 ────────────────────
 	document.addEventListener('DOMContentLoaded', function () {
+		log('DOMContentLoaded');
+		ensureGoogleTranslateScript();
+
 		var switcher = document.getElementById('md-lang-switcher');
-		if (!switcher) return;
+		if (!switcher) {
+			warn('#md-lang-switcher DOM 요소 없음');
+			return;
+		}
 		var btn     = switcher.querySelector('.md-lang-switcher__btn');
 		var menu    = switcher.querySelector('.md-lang-switcher__menu');
 		var current = switcher.querySelector('.md-lang-switcher__current');
-		if (!btn || !menu || !current) return;
+		if (!btn || !menu || !current) {
+			warn('스위처 내부 요소 누락 (btn/menu/current)');
+			return;
+		}
+		log('스위처 DOM 요소 확인 완료');
 
 		function openMenu() {
 			btn.setAttribute('aria-expanded', 'true');
@@ -76,30 +181,13 @@
 
 		function selectLanguage(lang) {
 			if (!LANG_LABELS[lang]) return;
+			log('언어 선택: ' + lang);
 			current.textContent = LANG_LABELS[lang];
 			closeMenu();
 
-			// localStorage 저장 (다음 방문 시 복원)
 			try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
 
-			// Google Translate 콤보에 값 세팅 + change 이벤트 발생
-			var combo = document.querySelector('.goog-te-combo');
-			if (combo) {
-				combo.value = (lang === 'ko') ? '' : lang;
-				var ev;
-				try { ev = new Event('change', { bubbles: true }); }
-				catch (e) { ev = document.createEvent('HTMLEvents'); ev.initEvent('change', true, true); }
-				combo.dispatchEvent(ev);
-			} else {
-				// 아직 로드 안 됐으면 폴링해서 재시도
-				waitForGoogleTranslate(function (c) {
-					c.value = (lang === 'ko') ? '' : lang;
-					var ev2;
-					try { ev2 = new Event('change', { bubbles: true }); }
-					catch (e) { ev2 = document.createEvent('HTMLEvents'); ev2.initEvent('change', true, true); }
-					c.dispatchEvent(ev2);
-				});
-			}
+			applyLanguageToCombo(lang);
 		}
 
 		menu.addEventListener('click', function (e) {
@@ -115,27 +203,13 @@
 			selectLanguage(li.getAttribute('data-lang'));
 		});
 
-		// ── 4) 저장된 언어 복원 ─────────────────
+		// ── 6) 저장된 언어 자동 복원 ────────────
 		var saved = null;
 		try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) {}
 		if (saved && saved !== 'ko' && LANG_LABELS[saved]) {
+			log('저장된 언어 복원: ' + saved);
 			current.textContent = LANG_LABELS[saved];
-			waitForGoogleTranslate(function (combo) {
-				combo.value = saved;
-				var ev;
-				try { ev = new Event('change', { bubbles: true }); }
-				catch (e) { ev = document.createEvent('HTMLEvents'); ev.initEvent('change', true, true); }
-				combo.dispatchEvent(ev);
-			});
+			applyLanguageToCombo(saved);
 		}
 	});
-
-	function waitForGoogleTranslate(cb) {
-		var start = Date.now();
-		var iv = setInterval(function () {
-			var combo = document.querySelector('.goog-te-combo');
-			if (combo) { clearInterval(iv); cb(combo); }
-			else if (Date.now() - start > GT_LOAD_TIMEOUT_MS) clearInterval(iv);
-		}, 200);
-	}
 })();

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.25.2' );
+define( 'MOONDENTAL_VERSION', '3.25.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -608,17 +608,19 @@ function moondental_enqueue_styles() {
 			filemtime( $lang_js_path ),
 			true
 		);
-		// Google Translate CDN (defer로 콜백 등록 후 로드)
-		wp_enqueue_script(
-			'moondental-google-translate',
-			'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit',
-			array( 'moondental-lang-switcher' ),
-			null,
-			true
-		);
 	}
 }
 add_action( 'wp_enqueue_scripts', 'moondental_enqueue_styles', 15 );
+
+/**
+ * Google Translate CDN을 head에 직접 삽입 — wp_enqueue_script가 카페24 캐시/CSP와
+ * 충돌하는 경우 대비. v3.25.3에서 head 직접 주입으로 변경 (콜백 등록 후 CDN 로드).
+ */
+function moondental_inject_google_translate_cdn() {
+	if ( is_admin() ) return;
+	echo "\n" . '<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>' . "\n";
+}
+add_action( 'wp_footer', 'moondental_inject_google_translate_cdn', 20 );
 
 /**
  * 언어 스위처를 body 끝에 렌더 — position:fixed로 우측 하단 플로팅 (스크롤 시 함께 이동).
