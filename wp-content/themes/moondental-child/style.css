@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.25.5
+Version:      3.25.6
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -248,22 +248,30 @@ body { top: 0 !important; position: static !important; }
 /* Google Translate가 body에 붙이는 iframe 무시 */
 iframe.goog-te-menu-frame { box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important; }
 
-/* v3.25.5 · 번역 시 상단 메뉴 오버플로 방지 ─────────────
-   한국어 짧은 라벨이 영어·중국어·러시아어로 번역되면 길어져
-   우측 CTA·전화·언어 스위처가 밀리는 문제 대응.
-   → 메뉴 컨테이너를 다음 줄로 랩 허용 + 폰트 살짝 축소. */
+/* v3.25.6 · 번역 시 상단 메뉴 — 1열 유지, 개별 버튼만 세로로 확장 */
 .ast-primary-menu,
 .main-header-menu,
 .main-navigation .menu,
 nav.site-navigation ul,
 .md-nav {
-  flex-wrap: wrap !important;
-  row-gap: 4px !important;
+  flex-wrap: nowrap !important;
   min-width: 0 !important;
 }
 .ast-primary-menu > li,
 .main-header-menu > li,
-.md-nav > li { white-space: nowrap; }
+.md-nav > li {
+  white-space: normal !important;
+  word-break: keep-all;
+  max-width: 140px;
+}
+.ast-primary-menu > li > a,
+.main-header-menu > li > a,
+.md-nav > li > a {
+  white-space: normal !important;
+  line-height: 1.25 !important;
+  display: inline-block;
+  text-align: center;
+}
 
 @media (min-width: 992px) and (max-width: 1400px) {
   .ast-primary-menu > li > a,
@@ -275,10 +283,10 @@ nav.site-navigation ul,
   }
 }
 
-/* 헤더 컨테이너도 랩 허용 + 우측 요소 항상 유지 */
+/* 헤더 컨테이너도 1열 유지 (랩 X) */
 .ast-container,
 .site-header .ast-container,
-.md-site-header .md-container { flex-wrap: wrap !important; }
+.md-site-header .md-container { flex-wrap: nowrap !important; }
 
 .md-header__aside,
 .ast-header-button,
