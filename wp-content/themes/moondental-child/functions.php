@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.25.6' );
+define( 'MOONDENTAL_VERSION', '3.25.7' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -598,37 +598,17 @@ function moondental_enqueue_styles() {
 		);
 	}
 
-	// 5. 언어 전환 (Google Translate + 커스텀 드롭다운) — 우측 하단 플로팅
-	$lang_js_path = MOONDENTAL_DIR . '/assets/js/language-switcher.js';
-	if ( file_exists( $lang_js_path ) ) {
-		wp_enqueue_script(
-			'moondental-lang-switcher',
-			MOONDENTAL_URI . '/assets/js/language-switcher.js',
-			array(),
-			filemtime( $lang_js_path ),
-			true
-		);
-	}
+	// 5. 언어 전환 — v3.25.7에서 커스텀 스위처 완전 제거. GTranslate 플러그인이 담당.
 }
 add_action( 'wp_enqueue_scripts', 'moondental_enqueue_styles', 15 );
 
-/**
- * Google Translate CDN을 head에 직접 삽입 — wp_enqueue_script가 카페24 캐시/CSP와
- * 충돌하는 경우 대비. v3.25.3에서 head 직접 주입으로 변경 (콜백 등록 후 CDN 로드).
+/*
+ * v3.25.7 — 언어 스위처 관련 훅 3개 완전 제거:
+ *   1) wp_enqueue_script('moondental-lang-switcher') — JS 로드 안 함
+ *   2) Google Translate CDN 직접 삽입 — GTranslate 플러그인이 처리
+ *   3) wp_footer 커스텀 스위처 렌더 — 우측 하단 GTranslate 위젯과 겹치던 문제 해소
+ * 이로써 GTranslate 플러그인의 플로팅 위젯만 우측 하단에 남고, 커스텀 UI는 DOM 자체에서 사라짐.
  */
-function moondental_inject_google_translate_cdn() {
-	if ( is_admin() ) return;
-	echo "\n" . '<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>' . "\n";
-}
-add_action( 'wp_footer', 'moondental_inject_google_translate_cdn', 20 );
-
-/**
- * 언어 스위처를 body 끝에 렌더 — position:fixed로 우측 하단 플로팅 (스크롤 시 함께 이동).
- */
-function moondental_render_floating_lang_switcher() {
-	get_template_part( 'template-parts/language-switcher' );
-}
-add_action( 'wp_footer', 'moondental_render_floating_lang_switcher', 5 );
 
 
 /* ============================================================
