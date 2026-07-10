@@ -23,13 +23,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: List local theme folder
-        run: |
-          echo "=== Local theme folder contents ==="
-          ls -la wp-content/themes/moondental-child/ | head -30
-          echo "=== assets folder ==="
-          ls -la wp-content/themes/moondental-child/assets/ || echo "assets folder not found locally"
-
       - name: Deploy theme via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -47,7 +40,7 @@ jobs:
             **/.DS_Store
             **/README.md
             **/.github/**
-            **/.ftp-deploy-sync-state.json
-          log-level: verbose
+          log-level: standard
           dangerous-clean-slate: false
+          state-name: .ftp-deploy-sync-state.json
           dry-run: ${{ github.event.inputs.dry_run == 'true' }}
