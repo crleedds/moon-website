@@ -51,7 +51,7 @@ jobs:
             set net:reconnect-interval-base 5;
             set mirror:parallel-transfer-count 3;
             open -u '$FTP_USER','$FTP_PASS' -p $FTP_PORT ftp://$FTP_HOST;
-            mirror --reverse --delete --verbose $DRY_FLAG \
+            mirror --reverse --delete --verbose --no-perms $DRY_FLAG \
               --exclude-glob '.git*' \
               --exclude-glob '.github/**' \
               --exclude-glob 'node_modules/**' \
@@ -59,7 +59,7 @@ jobs:
               --exclude-glob 'README.md' \
               --exclude-glob '.ftp-deploy-sync-state.json' \
               wp-content/themes/moondental-child/ \
-              /wp-content/themes/moondental-child/;
+              wp-content/themes/moondental-child/;
             bye;
           "
           echo "★ Deploy complete."
