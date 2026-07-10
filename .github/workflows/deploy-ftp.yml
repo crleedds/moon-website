@@ -3,6 +3,8 @@ name: Deploy theme to Cafe24 via FTP
 on:
   push:
     branches: [main]
+    paths:
+      - 'wp-content/themes/moondental-child/**'
   workflow_dispatch:
 
 jobs:
@@ -20,7 +22,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT }}
           protocol: ftp
-          local-dir: ./
+          local-dir: ./wp-content/themes/moondental-child/
           server-dir: /www/wp-content/themes/moondental-child/
           exclude: |
             **/.git*
