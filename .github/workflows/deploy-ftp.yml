@@ -23,24 +23,43 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy theme via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: ${{ secrets.FTP_PORT }}
-          protocol: ftp
-          local-dir: ./wp-content/themes/moondental-child/
-          server-dir: /www/wp-content/themes/moondental-child/
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/.DS_Store
-            **/README.md
-            **/.github/**
-          log-level: standard
-          dangerous-clean-slate: false
-          state-name: .ftp-deploy-sync-state.json
-          dry-run: ${{ github.event.inputs.dry_run == 'true' }}
+      - name: Install lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+      - name: Deploy theme via lftp mirror
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+        run: |
+          DRY_FLAG=""
+          if [ "$DRY_RUN" = "true" ]; then
+            DRY_FLAG="--dry-run"
+            echo "★ Dry run mode — 파일 실제 변경 없이 미리보기만 수행"
+          fi
+
+          echo "★ Deploying theme to Cafe24..."
+          lftp -c "
+            set ftp:ssl-allow no;
+            set ftp:passive-mode true;
+            set net:timeout 20;
+            set net:max-retries 3;
+            set net:reconnect-interval-base 5;
+            set mirror:parallel-transfer-count 3;
+            open -u '$FTP_USER','$FTP_PASS' -p $FTP_PORT ftp://$FTP_HOST;
+            mirror --reverse --delete --verbose $DRY_FLAG \
+              --exclude-glob '.git*' \
+              --exclude-glob '.github/**' \
+              --exclude-glob 'node_modules/**' \
+              --exclude-glob '.DS_Store' \
+              --exclude-glob 'README.md' \
+              --exclude-glob '.ftp-deploy-sync-state.json' \
+              wp-content/themes/moondental-child/ \
+              /www/wp-content/themes/moondental-child/;
+            bye;
+          "
+          echo "★ Deploy complete."
