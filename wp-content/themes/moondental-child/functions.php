@@ -13,9 +13,38 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.25.7' );
+define( 'MOONDENTAL_VERSION', '3.26.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
+
+/* 일회성 마이그레이션: 2026 진료비 표 기반 가격표 전면 갱신 (v3.26.0)
+ * PDF의 실제 진료비 기준으로 8개 탭 defaults 전면 교체.
+ * 사용자가 커스터마이저에서 편집·저장한 값이 옛 defaults와 일치하면 remove_theme_mod
+ * 하여 새 기본값이 적용되도록 함. 다른 값으로 저장돼 있으면 보존. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_pricing_v3260' ) === 'done' ) return;
+	// 옛 v3.24.x defaults의 시작 부분을 시그니처로 사용 — 정확히 일치하면 옛 default라고 판단
+	$old_signatures = array(
+		'md_content_price_tab_implant_rows'   => '일반 임플란트 (식립 1개) | 85만 원',
+		'md_content_price_tab_ortho_rows'     => '소아 교정 (1차) | 150만 원',
+		'md_content_price_tab_crown_rows'     => '도자기 + 금속 크라운 (PFM) | 45만 원',
+		'md_content_price_tab_decay_rows'     => '레진 충전 (작은 충치, 1면) | 10만 원',
+		'md_content_price_tab_gum_rows'       => '스케일링 (보험, 연 1회) | 25,100 원',
+		'md_content_price_tab_aesthetic_rows' => '라미네이트 (앞니 심미) | 치아당 66만 원 | 부가세 포함
+치아 미백',
+		'md_content_price_tab_kids_rows'      => '실란트 (보험, 어금니) | 본인부담 21,700원~',
+		'md_content_price_tab_tmj_rows'       => '턱관절 보톡스 | 20만 원 | 이갈이·교근 통증
+턱관절 PDRN 주사 | 20만 원 | 관절 염증 완화
+턱관절 보호 장치 (하드 스플린트) | 100만 원',
+	);
+	foreach ( $old_signatures as $mod_key => $signature ) {
+		$saved = get_theme_mod( $mod_key );
+		if ( is_string( $saved ) && $saved !== '' && strpos( $saved, $signature ) === 0 ) {
+			remove_theme_mod( $mod_key );
+		}
+	}
+	update_option( 'moondental_pricing_v3260', 'done' );
+}, 36 );
 
 /* 일회성 마이그레이션: 비용안내 가격표에서 '원부터' → '원' (v3.24.1)
  * 사용자가 커스터마이저에서 편집·저장한 가격표에도 옛 '부터' 표기가 남을 수 있으므로 정정. */
