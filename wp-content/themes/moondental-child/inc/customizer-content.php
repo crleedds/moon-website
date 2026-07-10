@@ -45,6 +45,60 @@ function md_parse_price_rows( $text ) {
 }
 
 /**
+ * 텍스트 영역 → 탭별 가격표 배열 파싱 (자유 편집 형식).
+ *
+ *  형식:
+ *    == 탭 이름 ==
+ *    항목 이름 | 가격 | 비고
+ *    항목 이름 | 가격 | 비고
+ *
+ *    == 다른 탭 이름 ==
+ *    항목 이름 | 가격 | 비고
+ *
+ *  규칙:
+ *    - '== ... ==' 로 시작하는 줄은 새 탭 시작
+ *    - '|' 로 나눈 3열 (이름·가격·비고)
+ *    - 빈 줄 무시
+ *    - '#' 시작 줄은 주석 (무시)
+ *
+ *  사용자가 텍스트영역에서 탭 추가·삭제·순서 변경 자유롭게 가능.
+ *
+ * @param string $text
+ * @return array [ 'tab_slug' => [ 'label' => '탭 이름', 'rows' => [ [name, price, note], ... ] ], ... ]
+ */
+function md_parse_price_tabs( $text ) {
+	$tabs = array();
+	$current_key = null;
+	$idx = 0;
+	$lines = preg_split( "/\r\n|\r|\n/", trim( (string) $text ) );
+	foreach ( $lines as $line ) {
+		$line = trim( $line );
+		if ( ! $line || strpos( $line, '#' ) === 0 ) continue;
+
+		// 탭 헤더: == 탭 이름 ==
+		if ( preg_match( '/^==\s*(.+?)\s*==$/u', $line, $m ) ) {
+			$current_key = 'tab_' . $idx++;
+			$tabs[ $current_key ] = array( 'label' => $m[1], 'rows' => array() );
+			continue;
+		}
+
+		// 탭 헤더 전 항목은 무시
+		if ( ! $current_key ) continue;
+
+		// 항목: 이름 | 가격 | 비고
+		$parts = array_map( 'trim', explode( '|', $line ) );
+		if ( count( $parts ) >= 2 ) {
+			$tabs[ $current_key ]['rows'][] = array(
+				$parts[0],
+				$parts[1],
+				isset( $parts[2] ) ? $parts[2] : '',
+			);
+		}
+	}
+	return $tabs;
+}
+
+/**
  * 텍스트 영역 → 라인별 항목 배열 파싱.
  */
 function md_parse_lines( $text ) {
@@ -381,35 +435,32 @@ function moondental_pricing_content_fields() {
 			),
 		),
 
-		/* ─── 치료별 예상 비용 — 7 카테고리 텍스트 ─── */
+		/* ─── 치료별 예상 비용 — 자유 편집 (v3.27.0) ─── */
 		'pricing_tables' => array(
-			'title'  => '비용 페이지 — 치료별 비용 표 (7 카테고리)',
+			'title'  => '비용 페이지 — 전체 가격표 (탭별 · 자유 편집)',
 			'fields' => array(
 				'price_tables_eyebrow' => array( 'default' => 'Estimated Cost', 'label' => '섹션 — eyebrow', 'type' => 'text' ),
 				'price_tables_title'   => array( 'default' => '치료별 예상 비용', 'label' => '섹션 — 제목', 'type' => 'text' ),
 				'price_tables_lead'    => array( 'default' => '아래 표는 표준 기준입니다. 정확한 비용은 정밀 진단 후 견적서로 안내드립니다.', 'label' => '섹션 — 설명', 'type' => 'textarea' ),
 				'price_tables_hint'    => array( 'default' => '환자분의 구강 상태·재료 선택·치료 난이도에 따라 조정될 수 있습니다. 최종 비용은 정밀 진단 후 견적서로 확정해드립니다.', 'label' => '하단 안내문구', 'type' => 'textarea' ),
 
-				'price_tab_implant_label' => array( 'default' => '임플란트', 'label' => '탭 1 — 라벨', 'type' => 'text' ),
-				'price_tab_implant_rows'  => array( 'default' => $default_implant, 'label' => '탭 1 — 항목 (한 줄당 1개, "이름 | 가격 | 비고" 파이프 구분)', 'type' => 'textarea' ),
-
-				'price_tab_ortho_label' => array( 'default' => '교정', 'label' => '탭 2 — 라벨', 'type' => 'text' ),
-				'price_tab_ortho_rows'  => array( 'default' => $default_ortho, 'label' => '탭 2 — 항목', 'type' => 'textarea' ),
-
-				'price_tab_crown_label' => array( 'default' => '크라운·틀니', 'label' => '탭 3 — 라벨', 'type' => 'text' ),
-				'price_tab_crown_rows'  => array( 'default' => $default_crown, 'label' => '탭 3 — 항목', 'type' => 'textarea' ),
-
-				'price_tab_decay_label' => array( 'default' => '충치·레진', 'label' => '탭 4 — 라벨', 'type' => 'text' ),
-				'price_tab_decay_rows'  => array( 'default' => $default_decay, 'label' => '탭 4 — 항목', 'type' => 'textarea' ),
-
-				'price_tab_aesthetic_label' => array( 'default' => '심미·미백', 'label' => '탭 5 — 라벨', 'type' => 'text' ),
-				'price_tab_aesthetic_rows'  => array( 'default' => $default_aesthetic, 'label' => '탭 5 — 항목', 'type' => 'textarea' ),
-
-				'price_tab_kids_label' => array( 'default' => '소아·예방', 'label' => '탭 6 — 라벨', 'type' => 'text' ),
-				'price_tab_kids_rows'  => array( 'default' => $default_kids, 'label' => '탭 6 — 항목', 'type' => 'textarea' ),
-
-				'price_tab_tmj_label' => array( 'default' => '턱관절', 'label' => '탭 7 — 라벨', 'type' => 'text' ),
-				'price_tab_tmj_rows'  => array( 'default' => $default_tmj, 'label' => '탭 7 — 항목', 'type' => 'textarea' ),
+				'price_tabs_all' => array(
+					'default' => "== 임플란트 ==\n" . $default_implant . "\n\n" .
+						"== 교정 ==\n" . $default_ortho . "\n\n" .
+						"== 크라운·틀니 ==\n" . $default_crown . "\n\n" .
+						"== 충치·레진 ==\n" . $default_decay . "\n\n" .
+						"== 심미·미백 ==\n" . $default_aesthetic . "\n\n" .
+						"== 소아·예방 ==\n" . $default_kids . "\n\n" .
+						"== 턱관절 ==\n" . $default_tmj,
+					'label' => "전체 가격표 (탭별 자유 편집)\n\n" .
+						"편집 방법:\n" .
+						"  • 탭 시작: == 탭 이름 == (== 로 감싼 줄)\n" .
+						"  • 항목:    이름 | 가격 | 비고 (파이프 3열)\n" .
+						"  • 빈 줄:   무시\n" .
+						"  • 주석:    # 로 시작하는 줄은 안 보임\n\n" .
+						"탭 추가·삭제·순서 변경: 그냥 텍스트에서 자유롭게",
+					'type'  => 'textarea',
+				),
 			),
 		),
 

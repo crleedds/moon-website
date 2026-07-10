@@ -13,9 +13,42 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.26.1' );
+define( 'MOONDENTAL_VERSION', '3.27.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
+
+/* 일회성 마이그레이션: 가격표 자유 편집 형식으로 통합 (v3.27.0)
+ * 옛 필드 14개 (탭 7개 × label/rows) → 새 필드 1개 (price_tabs_all)
+ * 사용자가 편집한 값이 있으면 새 형식으로 자동 변환. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_pricing_v3270' ) === 'done' ) return;
+	// 이미 새 필드 값 있으면 스킵
+	if ( get_theme_mod( 'md_content_price_tabs_all' ) ) {
+		update_option( 'moondental_pricing_v3270', 'done' );
+		return;
+	}
+	$tab_slugs = array(
+		'implant'   => '임플란트',
+		'ortho'     => '교정',
+		'crown'     => '크라운·틀니',
+		'decay'     => '충치·레진',
+		'aesthetic' => '심미·미백',
+		'kids'      => '소아·예방',
+		'tmj'       => '턱관절',
+	);
+	$parts = array();
+	$has_any_custom = false;
+	foreach ( $tab_slugs as $slug => $default_label ) {
+		$label = get_theme_mod( 'md_content_price_tab_' . $slug . '_label' );
+		$rows  = get_theme_mod( 'md_content_price_tab_' . $slug . '_rows' );
+		if ( $label !== false || $rows !== false ) $has_any_custom = true;
+		$parts[] = '== ' . ( $label ?: $default_label ) . " ==\n" . ( $rows ?: '' );
+	}
+	if ( $has_any_custom ) {
+		set_theme_mod( 'md_content_price_tabs_all', implode( "\n\n", $parts ) );
+	}
+	update_option( 'moondental_pricing_v3270', 'done' );
+}, 41 );
 
 /* 일회성 마이그레이션: 2026 진료비 표 기반 가격표 전면 갱신 (v3.26.0)
  * PDF의 실제 진료비 기준으로 8개 탭 defaults 전면 교체.
