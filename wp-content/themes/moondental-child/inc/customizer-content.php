@@ -290,8 +290,6 @@ function moondental_pricing_content_fields() {
 
 	$default_decay = "레진 (1면) | 치아당 10만 원 | 교두당 5만 가산\n레진 (1면·광범위) | 치아당 15만 원 | 교두당 5만 가산\n레진 (2면) | 치아당 15만 원 | 교두당 5만 가산\n레진 (2면·MO/DO 포함) | 치아당 30만 원 | 교두당 5만 가산\n레진 (3면 이상) | 치아당 30만 원 | 교두당 5만 가산\n레진 (3면 이상·MO/DO 포함) | 치아당 35만 원 | 교두당 5만 가산\n레진 (3면 이상·MOD 포함) | 치아당 50만 원 | 최대 범위\n레진 (앞니 사이 틈 메우기) | 치아당 25만 원 | 정중이개\n레진 (반점치) | 치아당 20만 원 | 심미 보완\n레진 (치경부 마모증) | 치아당 8만 원 | 잇몸 경계\n레진 비니어 (앞니 심미) | 치아당 35만 원 | 변색 보완\n레진 코어 (크라운 토대) | 치아당 8만 원 | 보철 전 기둥\n신경치료 후 레진 충전 | 8만 원 | 신경치료 마감\n신경치료 후 럭사코어 | 8만 원 | 신경치료 마감\n유치 레진 (1면) | 치아당 8만 원 | 소아용\n유치 레진 (2면 이상) | 치아당 10만 원 | 소아용";
 
-	$default_gum = "스케일링 (보험·연 1회) | 25,100 원 | 만 19세 이상\n스케일링 (비급여·추가) | 6만 원 | \n잇몸 간단치료 (보험) | 21,300~22,300 원 | 치주염 초기\n잇몸 복잡치료 (보험) | 25,000~26,000 원 | 치주염 진행\n잇몸 수술 + 뼈이식 | 치아당 30만 원 | 잇몸뼈 회복\n치주 PDRN 주사 | 5만 원 | 잇몸 염증 완화\n신경치료 (전치·구치) | 보험 적용 | 건강보험";
-
 	$default_aesthetic = "라미네이트 (앞니 심미) | 치아당 66만 원 | 부가세 포함\n자가 치아미백 · Omnivac 4주분 | 33만 원 | 집에서 사용, 부가세 포함\n자가미백 · Omnivac 장치 추가 | 5만 원 | \n자가미백 · 약제 (1주치) | 5만 원 | \n자가미백 · 약제 (4주치) | 15만 원 | \n전문가 치아미백 · 1-day (2회) | 33만 원 | 부가세 포함\n전문가 치아미백 · 1-day (3회) | 44만 원 | 부가세 포함\n전문가 치아미백 · 2-day (총 3회) | 44만 원 | 부가세 포함\n전문가 치아미백 · 2-day (총 4회) | 55만 원 | 부가세 포함\n잇몸 미백 | 악당 20만 원 | 잇몸 색 개선·부가세 별도\n거미스마일 (레이저 잇몸 성형) | 치아당 20만 원 | 잇몸 라인 조정";
 
 	$default_kids = "실란트 (보험·만 18세 이하 대구치) | 본인부담 21,700 원~ | 우식 없는 제1,2 대구치\n실란트 (비급여·작은어금니) | 치아당 3만 원 | 예방 시술\n불소 도포 (전악) | 3만 원 | 치아 강화·충치 예방\n지각과민 처치 (6치당) | 본인부담 8,700~13,500 원 | 시린 이 완화\n덴탈스파 (전문가 칫솔질·잇몸마사지) | 5만 원 | \n공간유지장치 Crown&loop | 공간당 20만 원 | 유치 조기 상실 시\n공간유지장치 Band&loop | 공간당 15만 원 | \nSS 크라운 · 유치 (본떠서 제작) | 치아당 20만 원 | \nSS 크라운 · 영구치 (본떠서 제작) | 치아당 25만 원 | \nSP 크라운 · 유치 (기성) | 치아당 15만 원 | \nSP 크라운 · 영구치 (기성) | 치아당 20만 원 | ";
@@ -404,17 +402,14 @@ function moondental_pricing_content_fields() {
 				'price_tab_decay_label' => array( 'default' => '충치·레진', 'label' => '탭 4 — 라벨', 'type' => 'text' ),
 				'price_tab_decay_rows'  => array( 'default' => $default_decay, 'label' => '탭 4 — 항목', 'type' => 'textarea' ),
 
-				'price_tab_gum_label' => array( 'default' => '잇몸·자연치아', 'label' => '탭 5 — 라벨', 'type' => 'text' ),
-				'price_tab_gum_rows'  => array( 'default' => $default_gum, 'label' => '탭 5 — 항목', 'type' => 'textarea' ),
+				'price_tab_aesthetic_label' => array( 'default' => '심미·미백', 'label' => '탭 5 — 라벨', 'type' => 'text' ),
+				'price_tab_aesthetic_rows'  => array( 'default' => $default_aesthetic, 'label' => '탭 5 — 항목', 'type' => 'textarea' ),
 
-				'price_tab_aesthetic_label' => array( 'default' => '심미·미백', 'label' => '탭 6 — 라벨', 'type' => 'text' ),
-				'price_tab_aesthetic_rows'  => array( 'default' => $default_aesthetic, 'label' => '탭 6 — 항목', 'type' => 'textarea' ),
+				'price_tab_kids_label' => array( 'default' => '소아·예방', 'label' => '탭 6 — 라벨', 'type' => 'text' ),
+				'price_tab_kids_rows'  => array( 'default' => $default_kids, 'label' => '탭 6 — 항목', 'type' => 'textarea' ),
 
-				'price_tab_kids_label' => array( 'default' => '소아·예방', 'label' => '탭 7 — 라벨', 'type' => 'text' ),
-				'price_tab_kids_rows'  => array( 'default' => $default_kids, 'label' => '탭 7 — 항목', 'type' => 'textarea' ),
-
-				'price_tab_tmj_label' => array( 'default' => '턱관절', 'label' => '탭 8 — 라벨', 'type' => 'text' ),
-				'price_tab_tmj_rows'  => array( 'default' => $default_tmj, 'label' => '탭 8 — 항목', 'type' => 'textarea' ),
+				'price_tab_tmj_label' => array( 'default' => '턱관절', 'label' => '탭 7 — 라벨', 'type' => 'text' ),
+				'price_tab_tmj_rows'  => array( 'default' => $default_tmj, 'label' => '탭 7 — 항목', 'type' => 'textarea' ),
 			),
 		),
 
