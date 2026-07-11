@@ -28,6 +28,30 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lftp
 
+      - name: Test FTP connection (verbose)
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+        run: |
+          echo "★ 접속 정보 확인 (마스킹됨)"
+          echo "HOST 길이: ${#FTP_HOST}"
+          echo "USER 길이: ${#FTP_USER}"
+          echo "PASS 길이: ${#FTP_PASS}"
+          echo "PORT: $FTP_PORT (secret이 아니면 여기 보임)"
+          echo ""
+          echo "★ 접속 시도 (에러 상세 표시)"
+          lftp -d -c "
+            set ftp:ssl-allow no;
+            set ftp:passive-mode true;
+            set net:timeout 15;
+            open -u '$FTP_USER','$FTP_PASS' -p $FTP_PORT ftp://$FTP_HOST;
+            pwd;
+            ls;
+            bye;
+          " || echo "★ 접속 자체가 실패했습니다"
+
       - name: Try multiple CD strategies and deploy
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
@@ -62,19 +86,23 @@ jobs:
               set ftp:ssl-allow no;
               set ftp:passive-mode true;
               set net:timeout 15;
-              set cmd:fail-exit yes;
               open -u '$FTP_USER','$FTP_PASS' -p $FTP_PORT ftp://$FTP_HOST;
               cd $TARGET;
               pwd;
               bye;
-            " 2>&1) || echo "실패"
+            " 2>&1) || true
 
-            if echo "$RESULT" | grep -qE 'Access failed|550|No such file'; then
-              echo "✗ 실패: 이 경로 사용 불가"
-            else
+            echo "$RESULT"
+            echo "--- 판정 ---"
+
+            if echo "$RESULT" | grep -qE 'Access failed|550|No such file|Login failed|Fatal error'; then
+              echo "✗ 실패"
+            elif echo "$RESULT" | grep -qE '^/'; then
               echo "✓ 성공! 이 경로로 접근 가능"
               WORKING_PATH="$TARGET"
               break
+            else
+              echo "? 불명확 (건너뜀)"
             fi
           done
 
