@@ -70,6 +70,8 @@ function md_parse_price_tabs( $text ) {
 	$tabs = array();
 	$current_key = null;
 	$idx = 0;
+	// v3.28.7: 같은 이름 탭이 여러 번 나와도 하나로 합치기 (중복 탭 방지)
+	$label_to_key = array();
 	$lines = preg_split( "/\r\n|\r|\n/", trim( (string) $text ) );
 	foreach ( $lines as $line ) {
 		$line = trim( $line );
@@ -77,8 +79,15 @@ function md_parse_price_tabs( $text ) {
 
 		// 탭 헤더: == 탭 이름 ==
 		if ( preg_match( '/^==\s*(.+?)\s*==$/u', $line, $m ) ) {
-			$current_key = 'tab_' . $idx++;
-			$tabs[ $current_key ] = array( 'label' => $m[1], 'rows' => array() );
+			$label = $m[1];
+			// 같은 이름 탭이 이미 있으면 그 탭에 이어서 항목 추가
+			if ( isset( $label_to_key[ $label ] ) ) {
+				$current_key = $label_to_key[ $label ];
+			} else {
+				$current_key = 'tab_' . $idx++;
+				$tabs[ $current_key ] = array( 'label' => $label, 'rows' => array() );
+				$label_to_key[ $label ] = $current_key;
+			}
 			continue;
 		}
 
