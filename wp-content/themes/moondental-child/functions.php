@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.27.7' );
+define( 'MOONDENTAL_VERSION', '3.27.8' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -89,6 +89,19 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_hours_thu_v3272', 'done' );
 }, 37 );
+
+/* 일회성 마이그레이션: 목요일 진료시간에서 '(야간진료 없음)' 부기 제거 (v3.27.8)
+ * 사용자 요청 — 사이드바 표시가 너무 길어 삭제. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_hours_thu_v3278' ) === 'done' ) return;
+	$saved = get_theme_mod( 'moondental_hours_thu' );
+	if ( is_string( $saved ) && strpos( $saved, '(야간진료 없음)' ) !== false ) {
+		$new = trim( str_replace( '(야간진료 없음)', '', $saved ) );
+		$new = preg_replace( '/\s+/', ' ', $new );
+		set_theme_mod( 'moondental_hours_thu', $new );
+	}
+	update_option( 'moondental_hours_thu_v3278', 'done' );
+}, 38 );
 
 /* 일회성 마이그레이션: 비용안내 가격표에서 '원부터' → '원' (v3.24.1)
  * 사용자가 커스터마이저에서 편집·저장한 가격표에도 옛 '부터' 표기가 남을 수 있으므로 정정. */
@@ -710,7 +723,7 @@ function moondental_get_info( $key = '' ) {
 		'address'      => '충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층 (신부동)',
 		'address_road' => '충남 천안시 동남구 만남로 52, 문타워 9·10·11·13층',
 		'hours_wd'     => '평일 09:00 – 20:30 (점심시간 없음)',
-		'hours_thu'    => '목요일 09:00 – 18:30 (야간진료 없음)',
+		'hours_thu'    => '목요일 09:00 – 18:30',
 		'hours_sat'    => '토요일 09:00 – 14:00',
 		'hours_lunch'  => '',
 		'hours_off'    => '일요일·공휴일 휴진',
