@@ -110,8 +110,7 @@ foreach ( $all_groups as $g ) {
 				"<?php echo esc_html( $intro ); ?>"
 			</p>
 		<?php endif; ?>
-
-		<?php echo md_render_reservation_ctas( array( 'track' => 'cta-docsingle-hero', 'size' => 'lg', 'align' => 'center' ) ); ?>
+		<?php // v3.30.9 · Hero 예약 CTA (전화·네이버·카톡) 제거 (사용자 요청) ?>
 	</div>
 </section>
 
@@ -230,21 +229,7 @@ foreach ( $all_groups as $g ) {
 </section>
 <?php endif; ?>
 
-<!-- ============ CTA 배너 ============ -->
-<section class="md-section md-section--sm">
-	<div class="md-container">
-		<div class="md-docs-cta">
-			<span class="md-docs-cta__chip"><?php echo esc_html( md_content( 'doc_single_cta_chip', '상담 예약' ) ); ?></span>
-			<h2 class="md-docs-cta__title">
-				<?php echo esc_html( $doctor['name'] ); ?> <?php echo esc_html( md_content( 'doc_single_cta_title', '원장님께 진료받고 싶으시면' ) ); ?>
-			</h2>
-			<p class="md-docs-cta__lead">
-				<?php echo nl2br( esc_html( md_content( 'doc_single_cta_lead', '원하시는 일정에 맞춰 진료 예약을 도와드립니다.' ) ) ); ?>
-			</p>
-			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-docsingle-banner', 'size' => 'lg', 'align' => 'center' ) ); ?>
-		</div>
-	</div>
-</section>
+<?php // v3.30.9 · 하단 예약 CTA 배너 완전 제거 (사용자 요청) ?>
 
 <?php
 get_footer();
