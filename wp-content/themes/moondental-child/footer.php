@@ -111,17 +111,6 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 					</ul>
 				<?php endif; ?>
 
-				<?php
-				// v3.30.0 · 브랜드 컬럼 · 네이버 예약 CTA (선택적)
-				$naver_book = $info['naver_place'] ?? '';
-				if ( $naver_book ) : ?>
-					<a class="md-btn md-btn-secondary md-btn--sm md-footer__brand-cta"
-					   href="<?php echo esc_url( $naver_book ); ?>"
-					   target="_blank" rel="noopener"
-					   data-track="cta-footer-naver">
-						📅 네이버 예약
-					</a>
-				<?php endif; ?>
 			</div>
 
 			<div class="md-footer__col">
