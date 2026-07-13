@@ -170,6 +170,65 @@ function moondental_home_content_fields() {
 			),
 		),
 
+		/* ─── 진료 시스템 소개 (6 카드) v3.27.7 ─────────────── */
+		'clinic_intro' => array(
+			'title'  => '홈 — 진료 시스템 소개 (6 카드)',
+			'fields' => array(
+				'clinic_intro_eyebrow' => array( 'default' => 'CLINIC SYSTEM · 진료 시스템', 'label' => '섹션 eyebrow', 'type' => 'text' ),
+				'clinic_intro_title'   => array( 'default' => '30년 이상 한자리에서, 문치과병원', 'label' => '섹션 제목', 'type' => 'text' ),
+				'clinic_intro_lead'    => array( 'default' => "문치과병원은 각 분과의 원장님들이 다양한 임상경험을 바탕으로\n대학병원식 협진 시스템을 통해 30년 이상 한자리에서 전문적이고 정직하게 진료합니다.", 'label' => '섹션 설명 (줄바꿈으로 두 줄)', 'type' => 'textarea' ),
+
+				/* 01 임플란트센터 */
+				'clinic_intro_implant_icon'  => array( 'default' => '🦷', 'label' => '① 임플란트센터 · 아이콘', 'type' => 'text' ),
+				'clinic_intro_implant_title' => array( 'default' => '임플란트센터', 'label' => '① 임플란트센터 · 제목', 'type' => 'text' ),
+				'clinic_intro_implant_lead'  => array( 'default' => '정밀한 임플란트 시술은 물론, 정기 검진을 통한 사후관리까지 철저히 진행합니다.', 'label' => '① 임플란트센터 · 리드', 'type' => 'textarea' ),
+				'clinic_intro_implant_list'  => array( 'default' => "고난도 임플란트\n앞니 상실로 불편을 겪는 분들을 위한 즉시 치아 회복\n실패한 임플란트 재수술\n통증을 줄이는 비절개 임플란트\n상악동 거상술\n전악 임플란트\n디지털 장비를 활용한 정밀 네비게이션 임플란트", 'label' => '① 임플란트센터 · 리스트 (한 줄에 한 항목)', 'type' => 'textarea' ),
+				'clinic_intro_implant_more'  => array( 'default' => '자세히 보기 →', 'label' => '① 임플란트센터 · 링크 라벨', 'type' => 'text' ),
+
+				/* 02 교정센터 */
+				'clinic_intro_ortho_icon'  => array( 'default' => '✨', 'label' => '② 교정센터 · 아이콘', 'type' => 'text' ),
+				'clinic_intro_ortho_title' => array( 'default' => '교정센터', 'label' => '② 교정센터 · 제목', 'type' => 'text' ),
+				'clinic_intro_ortho_lead'  => array( 'default' => 'AI 기반 투명교정 진단 시스템을 도입해 정밀 분석이 가능하며, 환자별 최적의 교정 계획을 제안합니다.', 'label' => '② 교정센터 · 리드', 'type' => 'textarea' ),
+				'clinic_intro_ortho_list'  => array( 'default' => "고난도 교정\n투명교정 (슈어스마일)\n소아 교정\n재교정\n앞니 부분 교정", 'label' => '② 교정센터 · 리스트', 'type' => 'textarea' ),
+				'clinic_intro_ortho_more'  => array( 'default' => '자세히 보기 →', 'label' => '② 교정센터 · 링크 라벨', 'type' => 'text' ),
+
+				/* 03 스마일디자인센터 */
+				'clinic_intro_smile_icon'  => array( 'default' => '💎', 'label' => '③ 스마일디자인 · 아이콘', 'type' => 'text' ),
+				'clinic_intro_smile_title' => array( 'default' => '스마일디자인센터', 'label' => '③ 스마일디자인 · 제목', 'type' => 'text' ),
+				'clinic_intro_smile_lead'  => array( 'default' => '반점치(화이트스팟) 제거·치아 성형·잇몸 미백·최소침습 라미네이트·벌어진 앞니 레진 수복·왜소치 치료 등 다양한 심미적 고민에 맞춤 진단으로 개인별 최적 치료를 제안합니다.', 'label' => '③ 스마일디자인 · 리드', 'type' => 'textarea' ),
+				'clinic_intro_smile_list'  => array( 'default' => "반점치(화이트스팟) 제거\n치아 성형 · 잇몸 미백\n최소침습 라미네이트\n벌어진 앞니 레진 수복\n왜소치 치료\n최소 침습 치료 원칙 — 불필요한 치아 삭제 최소화", 'label' => '③ 스마일디자인 · 리스트', 'type' => 'textarea' ),
+				'clinic_intro_smile_more'  => array( 'default' => '자세히 보기 →', 'label' => '③ 스마일디자인 · 링크 라벨', 'type' => 'text' ),
+
+				/* 04 자연치아 살리기 */
+				'clinic_intro_preserve_icon'  => array( 'default' => '🌿', 'label' => '④ 자연치아 살리기 · 아이콘', 'type' => 'text' ),
+				'clinic_intro_preserve_title' => array( 'default' => '자연치아 살리기', 'label' => '④ 자연치아 살리기 · 제목', 'type' => 'text' ),
+				'clinic_intro_preserve_lead'  => array( 'default' => '문치과병원은 발치 대신 자연치아를 최대한 보존하는 치료를 우선합니다.', 'label' => '④ 자연치아 살리기 · 리드', 'type' => 'textarea' ),
+				'clinic_intro_preserve_list'  => array( 'default' => "충치치료 — 초기 충치부터 정밀하게 진단·치료\n신경치료 — 손상된 치수를 살려 자연치아 보존\n잇몸치료 — 치주 질환 관리로 치아 수명 연장", 'label' => '④ 자연치아 살리기 · 리스트', 'type' => 'textarea' ),
+				'clinic_intro_preserve_more'  => array( 'default' => '자세히 보기 →', 'label' => '④ 자연치아 살리기 · 링크 라벨', 'type' => 'text' ),
+
+				/* 05 진료과 */
+				'clinic_intro_dept_icon'  => array( 'default' => '🏥', 'label' => '⑤ 진료과 · 아이콘', 'type' => 'text' ),
+				'clinic_intro_dept_title' => array( 'default' => '진료과', 'label' => '⑤ 진료과 · 제목', 'type' => 'text' ),
+				'clinic_intro_dept_lead'  => array( 'default' => '전 분과 전문 의료진이 분야별 진료를 한 자리에서 협진합니다.', 'label' => '⑤ 진료과 · 리드', 'type' => 'textarea' ),
+				'clinic_intro_dept_list'  => array( 'default' => "턱관절 — 통증·기능 장애 진료\n이갈이 · 이악물기\n매복 사랑니 발치\n소아치과\n예방클리닉 — 전문예방치료실 · 덴탈 스파 프로그램", 'label' => '⑤ 진료과 · 리스트', 'type' => 'textarea' ),
+				'clinic_intro_dept_more'  => array( 'default' => '예방클리닉 자세히 →', 'label' => '⑤ 진료과 · 링크 라벨', 'type' => 'text' ),
+
+				/* 06 기술력/시설 */
+				'clinic_intro_facility_icon'  => array( 'default' => '🔬', 'label' => '⑥ 기술력/시설 · 아이콘', 'type' => 'text' ),
+				'clinic_intro_facility_title' => array( 'default' => '기술력 / 시설', 'label' => '⑥ 기술력/시설 · 제목', 'type' => 'text' ),
+				'clinic_intro_facility_lead'  => array( 'default' => '자체 디지털센터·기공소 운영. 물방울 레이저 5대 보유 — 통증·출혈 적고 빠른 회복.', 'label' => '⑥ 기술력/시설 · 리드', 'type' => 'textarea' ),
+				'clinic_intro_facility_list'  => array( 'default' => "One Day 보철 치료까지 가능 (구강 정밀 스캔)\n의료진·기공사 긴밀 소통으로 맞춤형 보철\n오차 최소화 — 높은 정확도 · 내원 횟수 단축\n원내 기공소 신속 수정·A/S\n물방울 레이저 — 임플란트 주위염·잇몸 성형·시린이·신경치료·구내염·점액낭종", 'label' => '⑥ 기술력/시설 · 리스트', 'type' => 'textarea' ),
+				'clinic_intro_facility_more'  => array( 'default' => '자세히 보기 →', 'label' => '⑥ 기술력/시설 · 링크 라벨', 'type' => 'text' ),
+
+				/* 야간진료 강조 박스 */
+				'clinic_intro_night_title' => array( 'default' => '야간 진료 운영', 'label' => '야간진료 박스 · 제목', 'type' => 'text' ),
+				'clinic_intro_night_desc'  => array( 'default' => '천안시 신부동에 위치한 문치과병원은 바쁜 일상 속에서도 원하는 시간에 진료받으실 수 있도록 월·화·수·금요일 저녁 8시 30분(20:30)까지 야간진료를 운영합니다.', 'label' => '야간진료 박스 · 설명', 'type' => 'textarea' ),
+
+				/* 마무리 문구 */
+				'clinic_intro_closer' => array( 'default' => '앞으로도 문치과병원은 봉사와 지역의료의 책임을 감당해 나가겠습니다.', 'label' => '섹션 마무리 문구', 'type' => 'textarea' ),
+			),
+		),
+
 		/* ─── Services 섹션 head ───────────────────────────── */
 		'services' => array(
 			'title'  => '홈 — 진료안내 섹션 head',

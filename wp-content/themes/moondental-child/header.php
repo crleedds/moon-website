@@ -36,7 +36,7 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 		<div class="md-container">
 			<div class="md-header__inner">
 
-				<a class="md-header__brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php echo esc_attr( moondental_get_info( 'name_full' ) ); ?>">
+				<a class="md-header__brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php echo esc_attr( moondental_get_info( 'name_short' ) ?: moondental_get_info( 'name_full' ) ); ?>">
 					<?php if ( has_custom_logo() ) : ?>
 						<?php the_custom_logo(); ?>
 					<?php else :
