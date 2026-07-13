@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.28.0' );
+define( 'MOONDENTAL_VERSION', '3.28.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -111,6 +111,44 @@ add_action( 'after_setup_theme', function() {
 	remove_theme_mod( 'md_content_footer_legal_biz_cert_url' );
 	update_option( 'moondental_footer_v3280', 'done' );
 }, 39 );
+
+/* 일회성 마이그레이션: 푸터 법적표시 · 깨진 옛 값(라벨만 있고 실제 값 없는 케이스) 정리 (v3.28.1)
+ * 옛 default가 "라벨: 값" 형태였다가 v3.27.3에서 "값만" 형태로 바뀌면서
+ * 사용자 저장값에서 접두어 제거 후 빈 문자열이 남는 케이스 방어. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_footer_v3281' ) === 'done' ) return;
+
+	$strip_prefixes = array(
+		'md_content_footer_legal_rep' => array( '대표자:', '대표자' ),
+		'md_content_footer_legal_med_no' => array( '요양기관번호:', '요양기관번호', '의료기관 고유번호:', '의료기관 고유번호', '의료기관번호:', '의료기관번호' ),
+		'md_content_footer_legal_privacy_officer' => array( '개인정보 보호책임자:', '개인정보 보호책임자', '개인정보:', '개인정보' ),
+		'md_content_footer_legal_biz_no' => array( '사업자등록번호:', '사업자등록번호' ),
+		'md_content_footer_legal_inst_name' => array( '상호:', '상호', '의료기관:', '의료기관' ),
+		'md_content_footer_legal_inst_type' => array( '종별:', '종별' ),
+		'md_content_footer_legal_open_date' => array( '개업일:', '개업일' ),
+	);
+
+	foreach ( $strip_prefixes as $key => $prefixes ) {
+		$saved = get_theme_mod( $key );
+		if ( ! is_string( $saved ) ) continue;
+		$stripped = trim( $saved );
+		foreach ( $prefixes as $p ) {
+			if ( stripos( $stripped, $p ) === 0 ) {
+				$stripped = trim( ltrim( substr( $stripped, strlen( $p ) ), " :·" ) );
+				break;
+			}
+		}
+		if ( $stripped === '' ) {
+			// 깨진 값 (접두어만 있고 실제 값 없음) — 새 default 사용하도록 삭제
+			remove_theme_mod( $key );
+		} elseif ( $stripped !== $saved ) {
+			// 접두어가 붙어있던 값 — 접두어 제거해서 재저장
+			set_theme_mod( $key, $stripped );
+		}
+	}
+
+	update_option( 'moondental_footer_v3281', 'done' );
+}, 40 );
 
 /* 일회성 마이그레이션: 비용안내 가격표에서 '원부터' → '원' (v3.24.1)
  * 사용자가 커스터마이저에서 편집·저장한 가격표에도 옛 '부터' 표기가 남을 수 있으므로 정정. */

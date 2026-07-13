@@ -894,7 +894,7 @@ function moondental_chrome_content_fields() {
 				'footer_legal_rep'       => array( 'default' => '문은수 이사장', 'label' => '대표자 (값만, "대표자:" 라벨은 자동)', 'type' => 'text' ),
 				'footer_legal_biz_no'    => array( 'default' => '', 'label' => '사업자등록번호 (값만, 예: 312-82-00000)', 'type' => 'text' ),
 				'footer_legal_open_date' => array( 'default' => '1995.04', 'label' => '개업일 (예: 1995.04)', 'type' => 'text' ),
-				'footer_legal_med_no'    => array( 'default' => '34400117', 'label' => '의료기관 고유번호 (값만)', 'type' => 'text' ),
+				'footer_legal_med_no'    => array( 'default' => '34400117', 'label' => '요양기관번호 (값만, 예: 34400117)', 'type' => 'text' ),
 				'footer_legal_ad_no'     => array( 'default' => '', 'label' => '의료광고심의 번호 (비우면 미표시)', 'type' => 'text' ),
 				'footer_legal_privacy_officer' => array( 'default' => '문은수', 'label' => '개인정보 보호책임자 (이름만)', 'type' => 'text' ),
 				'footer_legal_disclaimer' => array(

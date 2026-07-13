@@ -155,9 +155,17 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				return $val;
 			};
 			$rep       = $strip_prefix( $rep,       array( '대표자:', '대표자' ) );
-			$med_no    = $strip_prefix( $med_no,    array( '의료기관 고유번호:', '의료기관 고유번호', '의료기관번호:', '의료기관번호' ) );
+			$med_no    = $strip_prefix( $med_no,    array( '요양기관번호:', '요양기관번호', '의료기관 고유번호:', '의료기관 고유번호', '의료기관번호:', '의료기관번호' ) );
 			$privacy_o = $strip_prefix( $privacy_o, array( '개인정보 보호책임자:', '개인정보 보호책임자', '개인정보:' ) );
 			$biz_no    = $strip_prefix( $biz_no,    array( '사업자등록번호:', '사업자등록번호' ) );
+
+			// v3.28.1: 값이 없거나 라벨만 있는 경우 안전한 기본값으로 fallback (사용자 요청 반영)
+			if ( ! trim( (string) $rep ) )       $rep       = '문은수 이사장';
+			if ( ! trim( (string) $med_no ) )    $med_no    = '34400117';
+			if ( ! trim( (string) $privacy_o ) ) $privacy_o = '문은수';
+			if ( ! trim( (string) $inst_name ) ) $inst_name = '한아의료재단 문치과병원';
+			if ( ! trim( (string) $inst_type ) ) $inst_type = '치과병원 (의료법인·병원급)';
+			if ( ! trim( (string) $open_date ) ) $open_date = '1995.04';
 
 			// 정책 링크 (Customizer에서 "라벨|URL" 형식)
 			$policy_keys = array(
@@ -198,7 +206,7 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			if ( ! empty( $info['phone'] ) ) {
 				$row3[] = '전화: <a href="tel:' . esc_attr( $phone_link ) . '">' . esc_html( $info['phone'] ) . '</a>';
 			}
-			if ( $med_no )    $row3[] = '의료기관 고유번호: ' . esc_html( $med_no );
+			if ( $med_no )    $row3[] = '요양기관번호: ' . esc_html( $med_no );
 			if ( $privacy_o ) $row3[] = '개인정보 보호책임자: ' . esc_html( $privacy_o );
 			if ( $ad_no )     $row3[] = '광고심의: ' . esc_html( $ad_no );
 		?>
