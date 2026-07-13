@@ -1622,7 +1622,7 @@ function moondental_default_location_content() {
 <h3>진료시간 안내</h3>
 <ul>
 <li><strong>평일</strong> 09:00 – 20:30 (점심시간 없음, 야간진료 운영)</li>
-<li><strong>목요일</strong> 09:00 – 18:30</li>
+<li><strong>목요일</strong> 9:00 – 18:30</li>
 <li><strong>토요일</strong> 09:00 – 14:00</li>
 <li><strong>일요일·공휴일</strong> 휴진</li>
 </ul>';

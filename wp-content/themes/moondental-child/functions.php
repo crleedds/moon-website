@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.28.2' );
+define( 'MOONDENTAL_VERSION', '3.28.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -149,6 +149,18 @@ add_action( 'after_setup_theme', function() {
 
 	update_option( 'moondental_footer_v3281', 'done' );
 }, 40 );
+
+/* 일회성 마이그레이션: 목요일 진료시간 '09:00' → '9:00' 앞 0 제거 (v3.28.3)
+ * 사용자 요청 — 평일/토요일 표기와 일관성 통일. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_hours_thu_v3283' ) === 'done' ) return;
+	$saved = get_theme_mod( 'moondental_hours_thu' );
+	if ( is_string( $saved ) && preg_match( '/\b09:00\b/', $saved ) ) {
+		$new = preg_replace( '/\b09:00\b/', '9:00', $saved );
+		set_theme_mod( 'moondental_hours_thu', $new );
+	}
+	update_option( 'moondental_hours_thu_v3283', 'done' );
+}, 42 );
 
 /* 일회성 마이그레이션: 푸터 · 사용자 요청으로 제거된 필드들 DB에서 정리 (v3.28.2)
  * 주소·전화는 원래 info 배열에서 오므로 여기선 표시 로직만 제거함.
@@ -787,7 +799,7 @@ function moondental_get_info( $key = '' ) {
 		'address'      => '충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층 (신부동)',
 		'address_road' => '충남 천안시 동남구 만남로 52, 문타워 9·10·11·13층',
 		'hours_wd'     => '평일 09:00 – 20:30 (점심시간 없음)',
-		'hours_thu'    => '목요일 09:00 – 18:30',
+		'hours_thu'    => '목요일 9:00 – 18:30',
 		'hours_sat'    => '토요일 09:00 – 14:00',
 		'hours_lunch'  => '',
 		'hours_off'    => '일요일·공휴일 휴진',
