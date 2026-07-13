@@ -50,7 +50,7 @@ get_header();
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">01 · LAMINATE</span>
-			<h2 class="md-section-head__title">천안 최소침습 라미네이트</h2>
+			<h2 class="md-section-head__title">천안·아산 최소침습 라미네이트</h2>
 			<p class="md-section-head__lead">자연치아 삭제를 최소화하면서 앞니의 색·모양·길이를 자연스럽게 개선합니다.</p>
 		</header>
 
@@ -94,7 +94,7 @@ get_header();
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">02 · AESTHETIC RESIN</span>
-			<h2 class="md-section-head__title">천안 심미레진 — 자연치아 손상 없이 모양 개선</h2>
+			<h2 class="md-section-head__title">천안·아산 심미레진 — 자연치아 손상 없이 모양 개선</h2>
 			<p class="md-section-head__lead">치아를 거의 깎지 않고 레진(복합 재료)을 직접 쌓아 모양·색을 다듬는 시술. 1회 내원으로 완료.</p>
 		</header>
 
@@ -129,7 +129,7 @@ get_header();
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">03 · WHITENING</span>
-			<h2 class="md-section-head__title">천안 전문가 치아미백</h2>
+			<h2 class="md-section-head__title">천안·아산 전문가 치아미백</h2>
 			<p class="md-section-head__lead">자연치아를 손상 없이 밝게 — 환자 상태에 맞춘 자가·전문가·복합 미백 프로그램.</p>
 		</header>
 
@@ -201,7 +201,7 @@ get_header();
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">05 · GUMMY SMILE</span>
-			<h2 class="md-section-head__title">천안 거미스마일 치료</h2>
+			<h2 class="md-section-head__title">천안·아산 거미스마일 치료</h2>
 			<p class="md-section-head__lead">웃을 때 잇몸이 많이 보이는 거미스마일 — 원인별 맞춤 치료로 자연스러운 미소 디자인.</p>
 		</header>
 

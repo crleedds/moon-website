@@ -48,7 +48,7 @@ get_header();
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">01 · DENTAL SPA</span>
-			<h2 class="md-section-head__title">천안 덴탈 SPA — 종합 예방 프로그램</h2>
+			<h2 class="md-section-head__title">천안·아산 덴탈 SPA — 종합 예방 프로그램</h2>
 			<p class="md-section-head__lead">스케일링 + 에어플로우 + 불소도포를 하나의 코스로 — 한 번 방문으로 구강 전체를 깨끗하게.</p>
 		</header>
 
@@ -122,7 +122,7 @@ get_header();
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">03 · AIR FLOW</span>
-			<h2 class="md-section-head__title">천안 에어플로우 — 색소·바이오필름 정밀 제거</h2>
+			<h2 class="md-section-head__title">천안·아산 에어플로우 — 색소·바이오필름 정밀 제거</h2>
 			<p class="md-section-head__lead">고운 미세 분말과 물을 동시 분사해 치아 표면·잇몸 라인의 색소 침착과 바이오필름을 깔끔히 제거.</p>
 		</header>
 
@@ -157,7 +157,7 @@ get_header();
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">04 · FLUORIDE</span>
-			<h2 class="md-section-head__title">천안 불소도포 — 충치 예방의 핵심</h2>
+			<h2 class="md-section-head__title">천안·아산 불소도포 — 충치 예방의 핵심</h2>
 			<p class="md-section-head__lead">고농도 불소를 치아 표면에 도포해 법랑질 강화·재광화·충치균 억제.</p>
 		</header>
 
@@ -187,7 +187,7 @@ get_header();
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">05 · SEALANT</span>
-			<h2 class="md-section-head__title">천안 실란트 (홈메우기)</h2>
+			<h2 class="md-section-head__title">천안·아산 실란트 (홈메우기)</h2>
 			<p class="md-section-head__lead">어금니 씹는 면의 깊은 홈을 메워 음식물 끼임·충치 시작을 차단하는 보존적 예방 시술.</p>
 		</header>
 
