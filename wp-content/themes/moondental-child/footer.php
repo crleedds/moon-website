@@ -110,6 +110,18 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 						<?php endforeach; ?>
 					</ul>
 				<?php endif; ?>
+
+				<?php
+				// v3.30.0 · 브랜드 컬럼 · 네이버 예약 CTA (선택적)
+				$naver_book = $info['naver_place'] ?? '';
+				if ( $naver_book ) : ?>
+					<a class="md-btn md-btn-secondary md-btn--sm md-footer__brand-cta"
+					   href="<?php echo esc_url( $naver_book ); ?>"
+					   target="_blank" rel="noopener"
+					   data-track="cta-footer-naver">
+						📅 네이버 예약
+					</a>
+				<?php endif; ?>
 			</div>
 
 			<div class="md-footer__col">
@@ -179,11 +191,36 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 						</li>
 					<?php endforeach; ?>
 				</ul>
-				<?php // v3.29.2: 대표자는 li가 아니라 별도 문단으로 (semantic 개선) ?>
-				<p class="md-footer__rep">대표자: <?php echo esc_html( $col_rep_raw ); ?></p>
 			</div>
 
 		</div>
+
+		<?php
+		// v3.30.0 — 법적 표시 라인 (저작권 바 위) · 대표자·개업일·요양기관번호
+		$legal_open_date = $mc( 'footer_legal_open_date', '1995.04' );
+		$legal_med_no    = $mc( 'footer_legal_med_no',    '34400117' );
+		$legal_ad_no     = $mc( 'footer_legal_ad_no',     '' );
+		// v3.28.1 fallback + prefix strip
+		foreach ( array( '요양기관번호:', '요양기관번호', '의료기관 고유번호:', '의료기관 고유번호' ) as $p ) {
+			if ( stripos( $legal_med_no, $p ) === 0 ) {
+				$legal_med_no = ltrim( substr( $legal_med_no, strlen( $p ) ), " :·" );
+				break;
+			}
+		}
+		if ( ! $legal_med_no )    $legal_med_no    = '34400117';
+		if ( ! $legal_open_date ) $legal_open_date = '1995.04';
+
+		$legal_items = array();
+		if ( $col_rep_raw )    $legal_items[] = '대표자: ' . esc_html( $col_rep_raw );
+		if ( $legal_open_date ) $legal_items[] = '개업일: ' . esc_html( $legal_open_date );
+		if ( $legal_med_no )    $legal_items[] = '요양기관번호: ' . esc_html( $legal_med_no );
+		if ( $legal_ad_no )     $legal_items[] = '광고심의: ' . esc_html( $legal_ad_no );
+		?>
+		<?php if ( $legal_items ) : ?>
+			<div class="md-footer__legal-line">
+				<p><?php echo implode( ' <span class="md-footer__sep">|</span> ', $legal_items ); ?></p>
+			</div>
+		<?php endif; ?>
 
 		<?php
 		// v3.28.4 — 하단 저작권 바 (중앙 정렬, 단일 라인)
@@ -195,7 +232,7 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 		) );
 		?>
 		<div class="md-footer__copyright-bar">
-			<p><?php echo esc_html( $copyright_text ); ?></p>
+			<small><?php echo esc_html( $copyright_text ); ?></small>
 		</div>
 
 	</div>

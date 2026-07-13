@@ -294,7 +294,51 @@ function moondental_jsonld_schema() {
 			'Periodontics',
 		),
 		'sameAs'          => array_values( array_unique( array_filter( $sns ) ) ),
+		'areaServed'      => array(
+			array( '@type' => 'City', 'name' => '천안시' ),
+			array( '@type' => 'City', 'name' => '아산시' ),
+			array( '@type' => 'AdministrativeArea', 'name' => '충청남도' ),
+		),
 	);
+
+	/* v3.30.0 · aggregateRating + review (홈 후기 데이터 machine-readable 노출) */
+	if ( function_exists( 'moondental_get_testimonials' ) ) {
+		$testimonials = moondental_get_testimonials();
+		if ( ! empty( $testimonials ) ) {
+			$count = 0;
+			$sum   = 0;
+			$reviews = array();
+			foreach ( $testimonials as $t ) {
+				$r = isset( $t['rating'] ) ? (int) $t['rating'] : 0;
+				if ( $r < 1 || $r > 5 ) continue;
+				$count++;
+				$sum += $r;
+				$reviews[] = array(
+					'@type'         => 'Review',
+					'reviewRating'  => array(
+						'@type'       => 'Rating',
+						'ratingValue' => $r,
+						'bestRating'  => 5,
+					),
+					'author'        => array(
+						'@type' => 'Person',
+						'name'  => isset( $t['name'] ) ? $t['name'] : '',
+					),
+					'reviewBody'    => isset( $t['text'] ) ? wp_strip_all_tags( $t['text'] ) : '',
+				);
+			}
+			if ( $count > 0 ) {
+				$schema['aggregateRating'] = array(
+					'@type'       => 'AggregateRating',
+					'ratingValue' => round( $sum / $count, 1 ),
+					'reviewCount' => $count,
+					'bestRating'  => 5,
+					'worstRating' => 1,
+				);
+				$schema['review'] = $reviews;
+			}
+		}
+	}
 
 	echo "\n<script type=\"application/ld+json\">\n";
 	echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
@@ -410,6 +454,124 @@ function moondental_jsonld_faq() {
 	echo "\n</script>\n";
 }
 add_action( 'wp_head', 'moondental_jsonld_faq', 60 );
+
+
+/**
+ * v3.30.0 · Person/Physician JSON-LD · 원장 상세 페이지에서 개별 의료진 스키마 방출.
+ * page-doctor-single 템플릿에서 $doctor 변수를 통해 접근.
+ */
+function moondental_jsonld_doctor() {
+	if ( ! is_page_template( 'page-templates/page-doctor-single.php' ) ) return;
+	if ( ! function_exists( 'moondental_get_team' ) ) return;
+
+	$slug = get_query_var( 'name' ) ?: get_post_field( 'post_name', get_queried_object_id() );
+	if ( ! $slug ) return;
+
+	$found = null;
+	foreach ( moondental_get_team() as $group ) {
+		foreach ( ( $group['members'] ?? array() ) as $doc ) {
+			if ( function_exists( 'moondental_doctor_name_to_slug' )
+				&& moondental_doctor_name_to_slug( $doc['name'] ) === $slug ) {
+				$found = $doc;
+				$found['_group'] = $group['group'] ?? '';
+				break 2;
+			}
+		}
+	}
+	if ( ! $found ) return;
+
+	$info = moondental_get_info();
+	$hospital_url = home_url( '/' );
+
+	$schema = array(
+		'@context'  => 'https://schema.org',
+		'@type'     => 'Physician',
+		'name'      => $found['name'],
+		'jobTitle'  => isset( $found['role'] ) ? $found['role'] : '원장',
+		'worksFor'  => array(
+			'@type' => 'MedicalOrganization',
+			'name'  => $info['name_full'],
+			'url'   => $hospital_url,
+		),
+		'medicalSpecialty' => 'Dentistry',
+		'url'       => get_permalink(),
+	);
+
+	if ( ! empty( $found['bio'] ) && is_array( $found['bio'] ) ) {
+		$schema['description'] = implode( ' · ', array_slice( $found['bio'], 0, 5 ) );
+	}
+
+	echo "\n<script type=\"application/ld+json\">\n";
+	echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+	echo "\n</script>\n";
+}
+add_action( 'wp_head', 'moondental_jsonld_doctor', 65 );
+
+
+/**
+ * v3.30.0 · 지역 페이지 areaServed 스키마 · /오시는-길/{지역}/ 랜딩용
+ */
+function moondental_jsonld_region() {
+	$region_slug = get_query_var( 'region_slug' );
+	if ( ! $region_slug || ! function_exists( 'moondental_get_region_by_slug' ) ) return;
+	$region = moondental_get_region_by_slug( $region_slug );
+	if ( ! $region ) return;
+
+	$info = moondental_get_info();
+	$schema = array(
+		'@context'   => 'https://schema.org',
+		'@type'      => array( 'Dentist', 'LocalBusiness' ),
+		'name'       => $info['name_full'],
+		'url'        => home_url( '/' ),
+		'areaServed' => array(
+			'@type' => 'City',
+			'name'  => $region['name'],
+		),
+	);
+
+	echo "\n<script type=\"application/ld+json\">\n";
+	echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+	echo "\n</script>\n";
+}
+add_action( 'wp_head', 'moondental_jsonld_region', 66 );
+
+
+/**
+ * v3.30.0 · 서비스 페이지 FAQPage 스키마 · 슬러그별 FAQ 방출
+ * page-templates/page-service.php 에서만 노출.
+ */
+function moondental_jsonld_service_faq() {
+	if ( ! is_page_template( 'page-templates/page-service.php' ) ) return;
+	if ( ! function_exists( 'moondental_get_faqs_by_service' ) ) return;
+
+	$slug = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
+	$all_faqs = moondental_get_faqs_by_service();
+	if ( empty( $all_faqs[ $slug ] ) ) return;
+
+	$questions = array();
+	foreach ( $all_faqs[ $slug ] as $item ) {
+		$q = isset( $item['q'] ) ? trim( wp_strip_all_tags( $item['q'] ) ) : '';
+		$a = isset( $item['a'] ) ? trim( wp_strip_all_tags( $item['a'] ) ) : '';
+		if ( ! $q || ! $a ) continue;
+		$questions[] = array(
+			'@type'          => 'Question',
+			'name'           => $q,
+			'acceptedAnswer' => array( '@type' => 'Answer', 'text' => $a ),
+		);
+	}
+	if ( empty( $questions ) ) return;
+
+	$schema = array(
+		'@context'   => 'https://schema.org',
+		'@type'      => 'FAQPage',
+		'mainEntity' => $questions,
+	);
+
+	echo "\n<script type=\"application/ld+json\">\n";
+	echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+	echo "\n</script>\n";
+}
+add_action( 'wp_head', 'moondental_jsonld_service_faq', 67 );
 
 
 /* ============================================================
@@ -532,8 +694,8 @@ function moondental_filter_nav_items( $items, $args ) {
 		'doctors' => array(
 			'title'           => '의료진',
 			'titles'          => array( '의료진', 'doctors', 'Doctors' ),
-			'url_substrings'  => array( '/doctors/', '/의료진/' ),
-			'fallback_url'    => home_url( '/doctors/' ),
+			'url_substrings'  => array( '/의료진/', '/doctors/' ),
+			'fallback_url'    => home_url( '/의료진/' ),
 			'class_suffix'    => 'doctors',
 			'menu_order'      => 999,
 		),

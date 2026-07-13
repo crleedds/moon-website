@@ -159,7 +159,7 @@ if ( function_exists( 'moondental_get_faqs_by_service' ) ) {
 <section class="md-section md-section--surface md-section--sm" aria-label="다른 진료 영역">
 	<div class="md-container">
 		<header class="md-section-head">
-			<h2 class="md-section-head__title" style="font-size:var(--fs-h3);">다른 진료 영역 보기</h2>
+			<h2 class="md-section-head__title md-section-head__title--sm">다른 진료 영역 보기</h2>
 		</header>
 		<div class="md-service-grid">
 			<?php

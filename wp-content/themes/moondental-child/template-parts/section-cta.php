@@ -13,7 +13,7 @@ $info = moondental_get_info();
 	<div class="md-container">
 		<div class="md-cta-banner md-reveal">
 			<span class="md-cta-banner__eyebrow"><?php echo esc_html( md_content( 'cta_eyebrow', '상담 예약' ) ); ?></span>
-			<h2 class="md-cta-banner__title"><?php echo esc_html( md_content( 'cta_title', '치아 때문에 망설이고 계신가요?' ) ); ?></h2>
+			<h2 class="md-cta-banner__title"><?php echo esc_html( md_content( 'cta_title', '30년 임상 · 정직한 견적을 지금 확인하세요' ) ); ?></h2>
 			<p class="md-cta-banner__lead">
 				<?php echo nl2br( esc_html( md_content( 'cta_lead', "환자분의 상황을 먼저 듣고, 꼭 필요한 치료만 권합니다.\n지금 상담을 신청하시면 진료시간 내 빠르게 연락드릴게요." ) ) ); ?>
 			</p>

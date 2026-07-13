@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.29.4' );
+define( 'MOONDENTAL_VERSION', '3.30.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1484,14 +1484,14 @@ function moondental_team_zoom_defaults() {
 	 */
 	return array(
 		sanitize_title( '문은수' ) => array( 'name' => '문은수', 'role' => '대표 병원장',          'default' => 1.00, 'ty' =>  0 ),
-		sanitize_title( '이승주' ) => array( 'name' => '이승주', 'role' => '9F 종합진료센터',      'default' => 1.00, 'ty' =>  5 ),
-		sanitize_title( '이수연' ) => array( 'name' => '이수연', 'role' => '9F 종합진료센터',      'default' => 1.00, 'ty' =>  3 ),
-		sanitize_title( '권혜진' ) => array( 'name' => '권혜진', 'role' => '9F 종합진료센터',      'default' => 1.00, 'ty' =>  4 ),
-		sanitize_title( '문지현' ) => array( 'name' => '문지현', 'role' => '10F 임플란트센터',     'default' => 1.00, 'ty' =>  2 ),
-		sanitize_title( '이창률' ) => array( 'name' => '이창률', 'role' => '10F 임플란트센터',     'default' => 1.00, 'ty' =>  5 ),
-		sanitize_title( '이영일' ) => array( 'name' => '이영일', 'role' => '11F 교정과',           'default' => 1.00, 'ty' =>  2 ),
-		sanitize_title( '김세일' ) => array( 'name' => '김세일', 'role' => '11F 종합진료센터',     'default' => 1.00, 'ty' => -2 ),
-		sanitize_title( '정석형' ) => array( 'name' => '정석형', 'role' => '11F 종합진료센터',     'default' => 1.00, 'ty' =>  2 ),
+		sanitize_title( '이승주' ) => array( 'name' => '이승주', 'role' => '원장',                  'default' => 1.00, 'ty' =>  5 ),
+		sanitize_title( '이수연' ) => array( 'name' => '이수연', 'role' => '원장',                  'default' => 1.00, 'ty' =>  3 ),
+		sanitize_title( '권혜진' ) => array( 'name' => '권혜진', 'role' => '원장',                  'default' => 1.00, 'ty' =>  4 ),
+		sanitize_title( '문지현' ) => array( 'name' => '문지현', 'role' => '원장',                  'default' => 1.00, 'ty' =>  2 ),
+		sanitize_title( '이창률' ) => array( 'name' => '이창률', 'role' => '원장',                  'default' => 1.00, 'ty' =>  5 ),
+		sanitize_title( '이영일' ) => array( 'name' => '이영일', 'role' => '원장',                  'default' => 1.00, 'ty' =>  2 ),
+		sanitize_title( '김세일' ) => array( 'name' => '김세일', 'role' => '원장',                  'default' => 1.00, 'ty' => -2 ),
+		sanitize_title( '정석형' ) => array( 'name' => '정석형', 'role' => '원장',                  'default' => 1.00, 'ty' =>  2 ),
 	);
 }
 
@@ -2943,9 +2943,9 @@ function moondental_get_team() {
 			),
 		),
 
-		/* ─── 종합진료센터 ─── */
+		/* ─── 보철·보존 ─── */
 		array(
-			'group'   => '종합진료센터',
+			'group'   => '보철·보존',
 			'members' => array(
 				array(
 					'name'       => '이승주',
@@ -2996,9 +2996,9 @@ function moondental_get_team() {
 			),
 		),
 
-		/* ─── 임플란트센터 ─── */
+		/* ─── 임플란트·외과 ─── */
 		array(
-			'group'   => '임플란트센터',
+			'group'   => '임플란트·외과',
 			'members' => array(
 				array(
 					'name'       => '문지현',
@@ -3051,9 +3051,9 @@ function moondental_get_team() {
 			),
 		),
 
-		/* ─── 교정과 · 종합진료센터 ─── */
+		/* ─── 교정·치주 ─── */
 		array(
-			'group'   => '교정과 · 종합진료센터',
+			'group'   => '교정·치주',
 			'members' => array(
 				array(
 					'name'       => '이영일',

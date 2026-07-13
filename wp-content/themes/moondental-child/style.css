@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.29.4
+Version:      3.30.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -2133,6 +2133,20 @@ button.elementor-button {
 .md-info-block__cta--row { display: flex; gap: 8px; flex-wrap: wrap; }
 .md-btn-group--mt-lg { margin-top: 32px; }
 .md-news-empty__msg { margin: 0; color: var(--color-text-sub); }
+/* v3.30.0 · 반복되는 인라인 스타일 유틸 */
+.md-section-head__title--sm { font-size: var(--fs-h3); }
+.md-region-cta__hint--sub { opacity: 0.85; margin-top: 6px; }
+.md-btn-group--center { justify-content: center; gap: 12px; }
+.md-footer__brand-cta { margin-top: 16px; align-self: flex-start; }
+@media (max-width: 720px) { .md-footer__brand-cta { align-self: center; } }
+/* v3.30.0 · 의료진 페이지 · 필터 위 미니 CTA (모바일 예약 진입) */
+.md-docs-mini-cta {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0 0 24px;
+}
 /* v3.29.2 · 역사 페이지 하단 '더 알아보기' 3 카드 (예약 CTA 대체) */
 .md-history-explore {
   display: grid;
@@ -3209,13 +3223,44 @@ button.elementor-button {
   transition: color 0.2s var(--ease);
 }
 .md-footer__policy-item a:hover { color: var(--color-primary-light); }
-/* v3.29.2 · 대표자 · ul 밖 별도 문단 (시맨틱 개선) */
+/* v3.29.2 · 대표자 · ul 밖 별도 문단 (v3.30.0에서 legal 라인으로 이동) */
 .md-footer__rep {
   font-size: 0.8125rem;
   color: rgba(255, 255, 255, 0.7);
   margin: 8px 0 0;
   padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+/* v3.30.0 · 법적 표시 라인 (저작권 위 · 대표자·개업일·요양기관번호) */
+.md-footer__legal-line {
+  margin-top: clamp(20px, 2.5vw, 28px);
+  padding: clamp(14px, 1.8vw, 16px) 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+.md-footer__legal-line p {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.9;
+  color: rgba(255, 255, 255, 0.6);
+  word-break: keep-all;
+}
+.md-footer__legal-line .md-footer__sep {
+  color: rgba(255, 255, 255, 0.25);
+  margin: 0 4px;
+  font-weight: 300;
+}
+.md-footer__copyright-bar small {
+  display: block;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.68);
+  letter-spacing: 0.02em;
+  font-feature-settings: 'tnum';
+}
+.md-footer__copyright-bar { margin-top: clamp(14px, 1.8vw, 20px); border-top: none; padding-top: 0; }
+@media (max-width: 720px) {
+  .md-footer__legal-line p { font-size: 0.7rem; line-height: 1.85; }
+  .md-footer__legal-line .md-footer__sep { display: inline-block; opacity: 0.5; }
 }
 
 /* v3.28.4 — 하단 저작권 바 (중앙 정렬) */
@@ -4224,6 +4269,10 @@ body { overflow-x: clip; }
   .md-hero__badges {
     gap: 6px 14px;
     margin-top: 20px;
+  }
+  /* v3.30.0 · 좁은 뷰포트에서 3번째 배지 숨겨 CTA 밀어냄 방지 */
+  @media (max-width: 480px) {
+    .md-hero__badges li:nth-child(n+3) { display: none; }
   }
 
   /* Hero CTA group — 전체 폭 사용 */

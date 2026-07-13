@@ -88,6 +88,7 @@ $phone_note     = $hr_phone_display ? '인사팀 직접 통화' : ( '인사팀 �
 					<ul>
 						<li>주 5일 근무 (평일 + 토요일 격주)</li>
 						<li>평일 9:00~19:30 (점심시간 1시간 포함)</li>
+						<li>월·화·수·금 야간진료는 오후 시프트 로테이션 (~20:30)</li>
 						<li>목요일 9:00~18:30 · 토요일 9:00~14:00</li>
 						<li>일요일·공휴일 휴무</li>
 						<li>4대 보험 · 퇴직금 · 연차 (법정 필수)</li>
@@ -110,7 +111,7 @@ $phone_note     = $hr_phone_display ? '인사팀 직접 통화' : ( '인사팀 �
 			<div class="md-recruit-card__head">
 				<span class="md-recruit-card__badge">상시채용</span>
 				<h3>치과위생사 (신입 · 경력)</h3>
-				<p class="md-recruit-card__lead">9F 종합진료센터 · 10F 임플란트센터 · 11F 교정과 — 부서 선택 가능</p>
+				<p class="md-recruit-card__lead">9F 보철·보존·예방 · 10F 임플란트·외과·턱관절 · 11F 교정·소아·치주·디지털 · 13F 기공 — 부서 선택 가능</p>
 			</div>
 
 			<div class="md-recruit-grid">
@@ -181,7 +182,7 @@ $phone_note     = $hr_phone_display ? '인사팀 직접 통화' : ( '인사팀 �
 			</article>
 			<article class="md-preservation-card">
 				<h3>🏥 통합 진료센터 (4개 층)</h3>
-				<p>9F 종합·10F 임플란트·11F 교정·13F 기공실 — 모든 진료를 한 건물에서 경험.</p>
+				<p>9F 보철·보존·예방 · 10F 임플란트·외과·턱관절 · 11F 교정·소아·치주·디지털 · 13F 기공 — 모든 진료를 한 건물에서 경험.</p>
 			</article>
 			<article class="md-preservation-card">
 				<h3>🔬 디지털 진료 시스템</h3>
@@ -248,7 +249,7 @@ $phone_note     = $hr_phone_display ? '인사팀 직접 통화' : ( '인사팀 �
 			<p class="md-region-cta__lead">
 				궁금한 점이 있으시면 전화·카카오톡으로 부담 없이 문의 주세요. 비밀 보장.
 			</p>
-			<div class="md-btn-group md-rcta" style="justify-content:center; gap:12px;">
+			<div class="md-btn-group md-btn-group--center md-rcta">
 				<a class="md-btn md-btn-primary md-btn--lg" href="tel:<?php echo esc_attr( $show_phone_lnk ); ?>" data-track="cta-recruit-final-call">
 					📞 <?php echo esc_html( $show_phone ); ?>
 				</a>

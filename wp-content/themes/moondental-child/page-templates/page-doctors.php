@@ -116,6 +116,23 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 			</p>
 		</header>
 
+		<?php // v3.30.0 · 필터 위에 예약 mini-CTA (모바일에서 특히 유용) ?>
+		<div class="md-docs-mini-cta">
+			<a class="md-btn md-btn-primary md-btn--sm" href="tel:<?php echo esc_attr( $phone_link ); ?>">
+				📞 <?php echo esc_html( $info['phone'] ); ?>
+			</a>
+			<?php if ( ! empty( $info['naver_place'] ) ) : ?>
+				<a class="md-btn md-btn-secondary md-btn--sm" href="<?php echo esc_url( $info['naver_place'] ); ?>" target="_blank" rel="noopener">
+					📅 네이버 예약
+				</a>
+			<?php endif; ?>
+			<?php if ( ! empty( $info['kakao_url'] ) ) : ?>
+				<a class="md-btn md-btn--kakao md-btn--sm" href="<?php echo esc_url( $info['kakao_url'] ); ?>" target="_blank" rel="noopener">
+					💬 카카오톡
+				</a>
+			<?php endif; ?>
+		</div>
+
 		<!-- 진료센터 필터 (진료 분야별) -->
 		<div class="md-docs-filter" role="tablist" aria-label="진료센터 필터">
 			<button class="md-docs-filter__btn is-active" type="button" data-doc-filter="all">전체</button>

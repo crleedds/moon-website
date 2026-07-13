@@ -165,7 +165,8 @@ $naver_book = $info['naver_place'] ?? '';
 			<div class="md-bot__panel md-bot__panel--quiz" data-md-bot-screen="quiz" hidden>
 				<div class="md-bot__progress">
 					<div class="md-bot__progress-bar"><div class="md-bot__progress-fill" data-md-bot-fill style="width:0%"></div></div>
-					<div class="md-bot__progress-text">
+					<div class="md-bot__progress-text" aria-live="polite" aria-atomic="true">
+						<span class="md-sr-only">진행:</span>
 						<span data-md-bot-idx>1</span> <span aria-hidden="true">/</span> <span data-md-bot-total><?php echo count( $questions ); ?></span>
 					</div>
 				</div>

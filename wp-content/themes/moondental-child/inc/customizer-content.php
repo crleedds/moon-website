@@ -238,6 +238,23 @@ function moondental_home_content_fields() {
 			),
 		),
 
+		/* ─── Hero 배지 & 사명 협력기관 (v3.30.0) ──────────── */
+		'hero_and_mission' => array(
+			'title'  => '홈 — Hero 배지 · 사명 협력기관',
+			'fields' => array(
+				'hero_badges'   => array(
+					'default' => "천안 만남로 1995년 개원 · 30여년 임상\n분야별 전문 의료진 협진\n요양기관번호 34400117 · 한아의료재단",
+					'label' => 'Hero 배지 (한 줄에 하나 · 3개 권장)',
+					'type' => 'textarea',
+				),
+				'mission_certs' => array(
+					'default' => "🏥|국가지정 구강검진 치과\n🌐|외국인환자 유치 의료기관\n🪖|미군 및 가족 치료기관\n🦷|천안시 치아사랑사업 협력병원\n🔗|삼성서울병원 협력병원\n➕|대한적십자사 협력병원",
+					'label' => '사명 · 협력·지정 의료기관 (한 줄에 "이모지|라벨")',
+					'type' => 'textarea',
+				),
+			),
+		),
+
 		/* ─── Services 섹션 head ───────────────────────────── */
 		'services' => array(
 			'title'  => '홈 — 진료안내 섹션 head',
@@ -838,8 +855,6 @@ function moondental_subpage_content_fields() {
 				'doctors_lead'       => array( 'default' => "보철·교정·보존·외과 — 각 분야 전문 의료진이 한 자리에서\n환자 한 분의 치아를 함께 봅니다.", 'label' => 'Hero — 설명 (줄바꿈 가능)', 'type' => 'textarea' ),
 
 				'doctors_stat_1_label' => array( 'default' => '전문 의료진', 'label' => 'stat ①번 라벨', 'type' => 'text' ),
-				'doctors_stat_2_value' => array( 'default' => '3개층', 'label' => 'stat ②번 숫자', 'type' => 'text' ),
-				'doctors_stat_2_label' => array( 'default' => '9F · 10F · 11F · 13F', 'label' => 'stat ②번 라벨', 'type' => 'text' ),
 				'doctors_stat_3_value' => array( 'default' => '30여년', 'label' => 'stat ③번 숫자', 'type' => 'text' ),
 				'doctors_stat_3_label' => array( 'default' => '1995년 개원', 'label' => 'stat ③번 라벨', 'type' => 'text' ),
 
@@ -1099,9 +1114,9 @@ function moondental_doctor_meta_content_fields() {
 			'title'  => '의료진 — 진료센터 그룹명 (4개)',
 			'fields' => array(
 				'doctor_group_1' => array( 'default' => '대표 병원장',                       'label' => '그룹 1 — 라벨', 'type' => 'text' ),
-				'doctor_group_2' => array( 'default' => '종합진료센터',                        'label' => '그룹 2 — 라벨', 'type' => 'text' ),
-				'doctor_group_3' => array( 'default' => '임플란트센터',                       'label' => '그룹 3 — 라벨', 'type' => 'text' ),
-				'doctor_group_4' => array( 'default' => '교정과 · 종합진료센터',              'label' => '그룹 4 — 라벨', 'type' => 'text' ),
+				'doctor_group_2' => array( 'default' => '보철·보존',                            'label' => '그룹 2 — 라벨', 'type' => 'text' ),
+				'doctor_group_3' => array( 'default' => '임플란트·외과',                       'label' => '그룹 3 — 라벨', 'type' => 'text' ),
+				'doctor_group_4' => array( 'default' => '교정·치주',                            'label' => '그룹 4 — 라벨', 'type' => 'text' ),
 			),
 		),
 		'doctor_roles' => array(

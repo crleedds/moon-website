@@ -57,6 +57,15 @@
         var ctaLastIdx = 0;
         var ctaTicking = false;
         var ctaReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        // v3.30.0 · 감소 모션 사용자는 첫 variant로 고정 (scroll cycle 미노출)
+        if (ctaReduced) {
+          var v0 = ctaVariants[0];
+          if (v0.bg)     cta.style.setProperty('--cta-bg',     v0.bg);
+          if (v0.fg)     cta.style.setProperty('--cta-fg',     v0.fg);
+          if (v0.shadow) cta.style.setProperty('--cta-shadow', v0.shadow);
+          if (v0.label && ctaLabel) ctaLabel.textContent = v0.label;
+          return;
+        }
 
         var ctaPickIdx = function () {
           var docH = document.documentElement.scrollHeight - window.innerHeight;

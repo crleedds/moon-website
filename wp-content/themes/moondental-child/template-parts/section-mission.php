@@ -11,14 +11,18 @@ $mission_text    = function_exists( 'md_content' ) ? md_content( 'mission_band_t
 	'한아의료재단 문치과병원의 사명은 품격 있는 진료와 서비스로 환자의 신뢰를 받으며, 나눔과 봉사를 통해 사회에 공헌하는 가장 인정받는 병원이 되는 것입니다.'
 ) : '한아의료재단 문치과병원의 사명은 품격 있는 진료와 서비스로 환자의 신뢰를 받으며, 나눔과 봉사를 통해 사회에 공헌하는 가장 인정받는 병원이 되는 것입니다.';
 
-$certifications = array(
-	array( 'icon' => '🏥', 'label' => '국가지정 구강검진 치과' ),
-	array( 'icon' => '🌐', 'label' => '외국인환자 유치 의료기관' ),
-	array( 'icon' => '🪖', 'label' => '미군 및 가족 치료기관' ),
-	array( 'icon' => '🦷', 'label' => '천안시 치아사랑사업 협력병원' ),
-	array( 'icon' => '🔗', 'label' => '삼성서울병원 협력병원' ),
-	array( 'icon' => '➕', 'label' => '대한적십자사 협력병원' ),
-);
+// v3.30.0 · 협력·지정 의료기관 · Customizer 텍스트영역 (한 줄에 하나 "이모지|라벨")
+$certs_raw = function_exists( 'md_content' )
+	? md_content( 'mission_certs', "🏥|국가지정 구강검진 치과\n🌐|외국인환자 유치 의료기관\n🪖|미군 및 가족 치료기관\n🦷|천안시 치아사랑사업 협력병원\n🔗|삼성서울병원 협력병원\n➕|대한적십자사 협력병원" )
+	: "🏥|국가지정 구강검진 치과\n🌐|외국인환자 유치 의료기관\n🪖|미군 및 가족 치료기관\n🦷|천안시 치아사랑사업 협력병원\n🔗|삼성서울병원 협력병원\n➕|대한적십자사 협력병원";
+$certifications = array();
+foreach ( preg_split( "/\r\n|\r|\n/", (string) $certs_raw ) as $line ) {
+	$line = trim( $line );
+	if ( $line === '' || strpos( $line, '#' ) === 0 ) continue;
+	$parts = array_map( 'trim', explode( '|', $line, 2 ) );
+	if ( count( $parts ) < 2 || $parts[1] === '' ) continue;
+	$certifications[] = array( 'icon' => $parts[0], 'label' => $parts[1] );
+}
 ?>
 
 <section class="md-section md-mission-band" aria-label="병원 사명 · 협력 기관">

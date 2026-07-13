@@ -207,7 +207,7 @@ foreach ( $all_groups as $g ) {
 <section class="md-section md-section--surface">
 	<div class="md-container">
 		<header class="md-section-head">
-			<h2 class="md-section-head__title" style="font-size:var(--fs-h3);"><?php echo esc_html( md_content( 'doc_single_others_title', '다른 의료진' ) ); ?></h2>
+			<h2 class="md-section-head__title md-section-head__title--sm"><?php echo esc_html( md_content( 'doc_single_others_title', '다른 의료진' ) ); ?></h2>
 		</header>
 
 		<div class="md-docsingle-others">

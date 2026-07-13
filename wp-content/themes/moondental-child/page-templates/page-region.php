@@ -240,7 +240,7 @@ $is_walking     = ! empty( $region['duration_label'] ) && strpos( $region['durat
 			</p>
 			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-region-' . $slug, 'size' => 'lg', 'align' => 'center' ) ); ?>
 			<p class="md-region-cta__hint">진료시간: 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진</p>
-			<p class="md-region-cta__hint" style="opacity:0.85; margin-top:6px;">📍 천안 만남로 52 문타워 9·10·11·13층</p>
+			<p class="md-region-cta__hint md-region-cta__hint--sub">📍 천안 만남로 52 문타워 9·10·11·13층</p>
 		</div>
 	</div>
 </section>

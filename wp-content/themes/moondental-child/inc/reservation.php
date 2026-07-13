@@ -22,6 +22,9 @@ function moondental_reservation_enqueue() {
 	$slug = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
 	if ( ! in_array( $slug, array( '상담예약', 'reservation' ), true ) ) return;
 
+	// v3.30.0 · 예약 폼 HTML이 실제 렌더되는 페이지에서만 script 로드 (dead-code 방지)
+	if ( ! moondental_page_has_reservation_form() ) return;
+
 	$js_path = MOONDENTAL_DIR . '/assets/js/reservation.js';
 	if ( file_exists( $js_path ) ) {
 		wp_enqueue_script(
@@ -38,6 +41,15 @@ function moondental_reservation_enqueue() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'moondental_reservation_enqueue', 20 );
+
+/**
+ * v3.30.0 · 페이지 콘텐츠에 실제 예약 폼 마커가 있는지 확인.
+ * 폼 없이 스크립트만 로드되는 상황 방지.
+ */
+function moondental_page_has_reservation_form() {
+	$content = get_the_content();
+	return $content && strpos( $content, 'md-reservation-form' ) !== false;
+}
 
 
 /**

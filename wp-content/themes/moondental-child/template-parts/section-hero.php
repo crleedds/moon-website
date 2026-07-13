@@ -34,11 +34,20 @@ $hero_image_id = get_theme_mod( 'moondental_hero_image', 0 );
 
 				<?php /* v3.25.4 — Hero의 네이버·카톡·전화 CTA 3버튼 제거. 우측 하단 플로팅 FAB로 상시 접근 가능. */ ?>
 
-				<ul class="md-hero__badges" aria-label="천안 만남로 문치과병원의 특징">
-					<li><span aria-hidden="true">✓</span> 천안 만남로 1995년 개원 · 30여년 임상</li>
-					<li><span aria-hidden="true">✓</span> 분야별 전문 의료진 협진</li>
-					<li><span aria-hidden="true">✓</span> 의료기관번호 34400117 · 한아의료재단</li>
-				</ul>
+				<?php
+				// v3.30.0 · Hero 배지를 Customizer 텍스트영역으로 이동 (한 줄에 하나)
+				$hero_badges_raw = function_exists( 'md_content' )
+					? md_content( 'hero_badges', "천안 만남로 1995년 개원 · 30여년 임상\n분야별 전문 의료진 협진\n요양기관번호 34400117 · 한아의료재단" )
+					: "천안 만남로 1995년 개원 · 30여년 임상\n분야별 전문 의료진 협진\n요양기관번호 34400117 · 한아의료재단";
+				$hero_badges = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", (string) $hero_badges_raw ) ) );
+				?>
+				<?php if ( $hero_badges ) : ?>
+					<ul class="md-hero__badges" aria-label="천안 만남로 문치과병원의 특징">
+						<?php foreach ( $hero_badges as $badge ) : ?>
+							<li><span aria-hidden="true">✓</span> <?php echo esc_html( $badge ); ?></li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
 			</div>
 
 			<div class="md-hero__media">
