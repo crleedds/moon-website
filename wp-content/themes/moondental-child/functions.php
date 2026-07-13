@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.27.9' );
+define( 'MOONDENTAL_VERSION', '3.28.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -102,6 +102,15 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_hours_thu_v3278', 'done' );
 }, 38 );
+
+/* 일회성 마이그레이션: 푸터 의료 면책 문구·사업자등록증 URL 제거 (v3.28.0)
+ * 사용자 요청 — 두 항목 표시 안 함. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_footer_v3280' ) === 'done' ) return;
+	remove_theme_mod( 'md_content_footer_legal_disclaimer' );
+	remove_theme_mod( 'md_content_footer_legal_biz_cert_url' );
+	update_option( 'moondental_footer_v3280', 'done' );
+}, 39 );
 
 /* 일회성 마이그레이션: 비용안내 가격표에서 '원부터' → '원' (v3.24.1)
  * 사용자가 커스터마이저에서 편집·저장한 가격표에도 옛 '부터' 표기가 남을 수 있으므로 정정. */

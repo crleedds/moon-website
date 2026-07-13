@@ -897,9 +897,8 @@ function moondental_chrome_content_fields() {
 				'footer_legal_med_no'    => array( 'default' => '34400117', 'label' => '의료기관 고유번호 (값만)', 'type' => 'text' ),
 				'footer_legal_ad_no'     => array( 'default' => '', 'label' => '의료광고심의 번호 (비우면 미표시)', 'type' => 'text' ),
 				'footer_legal_privacy_officer' => array( 'default' => '문은수', 'label' => '개인정보 보호책임자 (이름만)', 'type' => 'text' ),
-				'footer_legal_biz_cert_url' => array( 'default' => '', 'label' => '사업자등록증 이미지/PDF URL (비우면 링크 안 뜸)', 'type' => 'text' ),
 				'footer_legal_disclaimer' => array(
-					'default' => '* 본 홈페이지의 모든 의료 정보는 의료법 및 보건복지부 의료광고 가이드라인을 준수하여 제공하고 있으며, 특정 개인의 결과는 개인에 따라 달라질 수 있습니다.',
+					'default' => '',
 					'label' => '의료 정보 면책 문구 (저작권 위 안내 문장, 비우면 숨김)',
 					'type' => 'textarea',
 				),

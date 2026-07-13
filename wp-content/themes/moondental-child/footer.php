@@ -140,9 +140,7 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			$privacy_o = $mc( 'footer_legal_privacy_officer', '문은수' );
 			$biz_no    = $mc( 'footer_legal_biz_no',    '' ); // v3.27.9 사업자등록번호
 			$open_date = $mc( 'footer_legal_open_date', '' ); // v3.27.9 개업일 (예: 1995.04)
-			$biz_cert_url = $mc( 'footer_legal_biz_cert_url', '' ); // v3.27.9 사업자등록증 파일/링크
-			$disclaimer = $mc( 'footer_legal_disclaimer',
-				'* 본 홈페이지의 모든 의료 정보는 의료법 및 보건복지부 의료광고 가이드라인을 준수하여 제공하고 있으며, 특정 개인의 결과는 개인에 따라 달라질 수 있습니다.' );
+			$disclaimer = $mc( 'footer_legal_disclaimer', '' ); // v3.28.0 default 비움 (사용자 요청)
 			$copyright_start = $mc( 'footer_legal_copyright_start', '2018' ); // v3.27.9 저작권 시작 연도
 
 			// v3.27.3: 라벨(dt)과 값(dd)에서 접두어 중복 제거를 위한 정리
@@ -232,9 +230,6 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				<?php if ( $row1 ) : ?><p><?php echo implode( ' <span class="md-footer__sep">|</span> ', $row1 ); ?></p><?php endif; ?>
 				<?php if ( $row2 ) : ?><p><?php echo implode( ' <span class="md-footer__sep">|</span> ', $row2 ); ?></p><?php endif; ?>
 				<?php if ( $row3 ) : ?><p><?php echo implode( ' <span class="md-footer__sep">|</span> ', $row3 ); ?></p><?php endif; ?>
-				<?php if ( $biz_cert_url ) : ?>
-					<p><a class="md-footer__biz-cert" href="<?php echo esc_url( $biz_cert_url ); ?>" target="_blank" rel="noopener">사업자등록증 보기</a></p>
-				<?php endif; ?>
 			</div>
 
 			<?php $extra = $mc( 'footer_legal_extra', '' ); ?>
