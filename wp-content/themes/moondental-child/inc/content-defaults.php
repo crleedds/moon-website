@@ -997,16 +997,16 @@ function moondental_get_history() {
 		array( 'year' => '2014', 'month' => '04', 'title' => '필리핀 치과의사 연수', 'desc' => '국제로타리 직업연수단 방문 및 임플란트 연수 진행.', 'photo' => 'history-slide-14.png' ),
 
 		/* ─── 2013 ─── */
-		array( 'year' => '2013', 'month' => '11', 'title' => '대표병원장, 범죄예방 유공 대통령 표창 수상', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2013', 'month' => '11', 'title' => '대표병원장 법무부봉사활동 대통령상 수상', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2013', 'month' => '10', 'title' => 'T-broad 방송 〈힐링코치〉', 'desc' => '치아 관련 환자 정보를 알기 쉽게 전달하는 구강코치 역할.', 'photo' => 'history-slide-13.png' ),
 		array( 'year' => '2013', 'month' => '06', 'title' => '기공실 CAD-CAM 장비 도입', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2013', 'month' => '03', 'title' => '충청남도 사회복지함정사 협약 체결', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2013', 'month' => '02', 'title' => '치과의사 보수교육 기관 지정', 'desc' => '몽골·중국 해외연수 의료원.', 'photo' => '' ),
+		array( 'year' => '2013', 'month' => '03', 'title' => '충남사회복지협의회 협약식 체결', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2013', 'month' => '02', 'title' => '치과의사 보수교육 기관 선정', 'desc' => '몽골·중국 해외연수생 수료식.', 'photo' => '' ),
 
 		/* ─── 2012 ─── */
 		array( 'year' => '2012', 'month' => '11', 'title' => '일본 고바타 치과병원 자매결연', 'desc' => '한아의료재단 문치과병원과 일본 의료법인 소반치과의원 MOU 체결 (2012.10.27).', 'photo' => 'history-slide-12.png' ),
-		array( 'year' => '2012', 'month' => '09', 'title' => '새사랑 어린이집 정직 건강증진 협약체결', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2012', 'month' => '07', 'title' => '한국로타리 천안서지부 자매결연', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2012', 'month' => '09', 'title' => '예사랑 어린이집 영·유아 건강증진 협약 체결', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2012', 'month' => '07', 'title' => '한국노총 천안시지부 자매결연', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2012', 'month' => '06', 'title' => '예방치과 개설', 'desc' => '문치과병원과 단국대학교가 공동 개발한 환자 구강관리 시스템.', 'photo' => 'history-slide-11.png' ),
 		array( 'year' => '2012', 'month' => '05', 'title' => '충청대학교·선문대학교 산학협력 협약', 'desc' => '', 'photo' => '' ),
 
@@ -1015,74 +1015,75 @@ function moondental_get_history() {
 		array( 'year' => '2011', 'month' => '03', 'title' => '마취통증의학과 개설', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2010 ─── */
-		array( 'year' => '2010', 'month' => '12', 'title' => '문치과병원 병관 신년 카드 가수 청, 충원종합관리 자매결연 체결', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2010', 'month' => '09', 'title' => '자역시 점핑풀그리/롭스 자매결연 협약', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2010', 'month' => '08', 'title' => '치과의사 전공의 인턴·레지던트 수련병원 지정', 'desc' => '자전왈량증세 의사장·일성알 자매결연 체결.', 'photo' => '' ),
-		array( 'year' => '2010', 'month' => '06', 'title' => '(주)글로벌 자매결연', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2010', 'month' => '12', 'title' => '문치과병원 별관 신세계점 개설 · 신협, 충원종합관리 자매결연 체결', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2010', 'month' => '09', 'title' => '적십자 명패달기·로스원 자매결연 협약', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2010', 'month' => '08', 'title' => '2010년 치과의사전공의 인턴·레지던트 수련병원 지정', 'desc' => '지산장학증서 수여식 · 삼성코닝 자매결연 체결.', 'photo' => '' ),
+		array( 'year' => '2010', 'month' => '06', 'title' => '(주)글로텍 자매결연', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2009 ─── */
-		array( 'year' => '2009', 'month' => '12', 'title' => '동서대학교 자매결연 체결', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2009', 'month' => '09', 'title' => '단국대학교 정치경영대학원 고위관리자과정 이둥창학 자매결연', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2009', 'month' => '08', 'title' => '치과의사 전공의 인턴·레지던트 수련병원 지정', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2009', 'month' => '02', 'title' => '단국대학교 천안한방병원 한방 자문의사 위촉', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2009', 'month' => '12', 'title' => '대원대학교 자매결연 체결', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2009', 'month' => '09', 'title' => '단국대학교 정책 경영대학원 고위관리자과정 총동창회 자매결연', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2009', 'month' => '08', 'title' => '2009년 치과의사전공의 인턴·레지던트 수련병원 지정', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2009', 'month' => '02', 'title' => '대전대학교 천안한방병원 학술자문위원 위촉', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2009', 'month' => '01', 'title' => '열린성애병원 자문의사 위촉', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2008 ─── */
-		array( 'year' => '2008', 'month' => '11', 'title' => '문치과병원 & 삼성서울병원 치과부 학술세미나 주최', 'desc' => '한양대 문화의료실에서 진행.', 'photo' => '' ),
+		array( 'year' => '2008', 'month' => '11', 'title' => '문치과병원 & 삼성서울병원 치과부 임상 학술 세미나 실시', 'desc' => '한아문화센터에서 진행.', 'photo' => '' ),
 		array( 'year' => '2008', 'month' => '10', 'title' => '2009 치과의사 전공의 인턴·레지던트 수련병원 지정 (보건복지부)', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2008', 'month' => '08', 'title' => '해양경찰학교 자매결연 체결', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2008', 'month' => '07', 'title' => '대표병원장 국제로타리 3620지구 총재 취임', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2008', 'month' => '04', 'title' => '인사정 자매결연 체결', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2008', 'month' => '03', 'title' => '장애인 의료봉사 (사랑의 집) 시작', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2008', 'month' => '04', 'title' => '㈜세라젬 자매결연 체결', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2008', 'month' => '03', 'title' => '장애우 의료봉사 실시 (사랑의 집)', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2007 ─── */
 		array( 'year' => '2007', 'month' => '10', 'title' => '2008 치과의사 전공의 인턴 수련기관 지정 (보건복지부)', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2007', 'month' => '09', 'title' => '의료봉사 이동진료 차량 도입 (25인승 버스)', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2007', 'month' => '06', 'title' => '외국인 노동자 무료 진료 시작 · 공주대학교 자매결연 체결', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2007', 'month' => '01', 'title' => '문치과 사기 화재 이전', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2007', 'month' => '09', 'title' => '의료봉사 차량 운행 (25인승 버스)', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2007', 'month' => '06', 'title' => '외국인 노동자 무료 진료 실시 · 공주대학교 산학협정 체결', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2007', 'month' => '01', 'title' => '문치과 응급전화 운영', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2006 ─── */
-		array( 'year' => '2006', 'month' => '05', 'title' => '남서울대 자매결연 체결', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2006', 'month' => '04', 'title' => '서울 삼성서울병원 협진병원 지정', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2006', 'month' => '05', 'title' => '남서울대학 산학협정 체결', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2006', 'month' => '04', 'title' => '서울삼성병원 협진병원 지정', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2006', 'month' => '01', 'title' => '치과의사 전공의 인턴 수련기관 지정 (보건복지부)', 'desc' => '치과의사 전공의 및 인턴 수련기관 인증.', 'photo' => 'history-slide-10.png' ),
 
 		/* ─── 2005 ─── */
-		array( 'year' => '2005', 'month' => '11', 'title' => '갤러리아 백화점 천안점과 전략적 제휴 체결', 'desc' => '〈한방의 통〉 갤러리아 백화점 천안점 전략 제휴.', 'photo' => '' ),
-		array( 'year' => '2005', 'month' => '05', 'title' => '호서대학교·청양대학교·백석대학 산학협력 체결', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2005', 'month' => '04', 'title' => '단원 보건대학 산학협력 체결', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2005', 'month' => '11', 'title' => '㈜한화유통 갤러리아 백화점 천안점과 전략적 제휴 체결', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2005', 'month' => '05', 'title' => '호서대학교·신성대학·천안대학교·백석대학 산학협정 체결', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2005', 'month' => '04', 'title' => '대전보건대학 산학협정 체결', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2004 ─── */
 		array( 'year' => '2004', 'month' => '11', 'title' => '의료법인 한아의료재단 문치과병원 본원 신축사옥 준공·이전', 'desc' => '신부동 문타워 5개 층, UNIT CHAIR 42대 규모.', 'photo' => 'history-slide-09.png' ),
-		array( 'year' => '2004', 'month' => '09', 'title' => '연암대 비서학과 산학협력 체결', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2004', 'month' => '08', 'title' => '한양대학교 치위생과 산학협력 체결', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2004', 'month' => '04', 'title' => '중국 연길 의사 치과의사 2차 연수교육 (1명)', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2004', 'month' => '09', 'title' => '우송대학 비서학과 산학협정 체결', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2004', 'month' => '08', 'title' => '혜전대학 치위생과 산학협정 체결', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2004', 'month' => '04', 'title' => '중국 연길 소재 치과의사 2차 연수교육 (1명)', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2003 ─── */
-		array( 'year' => '2003', 'month' => '07', 'title' => '연길 도문 구강병원 및 정공치과 병원 자매결연', 'desc' => '무료 진료 및 무료 임플란트 식립.', 'photo' => '' ),
-		array( 'year' => '2003', 'month' => '05', 'title' => '중국 연길 의사 치과의사 1차 연수교육 (6명)', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2003', 'month' => '07', 'title' => '중국 도문 구강병원 및 정공치과 병원 자매결연', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2003', 'month' => '07', 'title' => '중국 연길 도문 구강병원 및 정공치과 병원 무료 진료 실시', 'desc' => '임플란트 매식 1차 46개, 2차 30개.', 'photo' => '' ),
+		array( 'year' => '2003', 'month' => '05', 'title' => '중국 연길 소재 치과의사 1차 연수교육 (6명)', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2002 ─── */
 		array( 'year' => '2002', 'month' => '11', 'title' => '의료법인 한아의료재단 설립 · 제2분원 양용문치과 개원', 'desc' => 'UNIT CHAIR 15대 의사 12명, 직원 50명.', 'photo' => '' ),
-		array( 'year' => '2002', 'month' => '08', 'title' => '성정 정신 병원 무료 진료 시작', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2002', 'month' => '08', 'title' => '성애 정신 병원 무료 진료', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2001 ─── */
 		array( 'year' => '2001', 'month' => '10', 'title' => '문치과 병원으로 승급', 'desc' => 'UNIT CHAIR 9대 의사 6명, 직원 33명.', 'photo' => '' ),
 
 		/* ─── 2000 ─── */
 		array( 'year' => '2000', 'month' => '08', 'title' => '단국대학교 몽골 의료봉사 체어 기증', 'desc' => '몽골 의료봉사 기반 마련을 위한 진료체어 기증. Dental Service in Mongolia / Dental College of Dankook University.', 'photo' => 'history-slide-07.png' ),
-		array( 'year' => '2000', 'month' => '07', 'title' => '연길 둔문 구강병원·정공치과 병원 자매결연', 'desc' => '무료 진료 및 무료 임플란트 시술.', 'photo' => 'history-slide-08.png' ),
+		array( 'year' => '2000', 'month' => '07', 'title' => '연길 도문 구강병원·정공치과 병원 자매결연', 'desc' => '무료 진료 및 무료 임플란트 시술.', 'photo' => 'history-slide-08.png' ),
 		array( 'year' => '2000', 'month' => '03', 'title' => '제2기 한아임플란트·보철연구소 수료식', 'desc' => '전문 임상 역량 토대를 구축한 연구과정.', 'photo' => 'history-slide-06.png' ),
 		array( 'year' => '2000', 'month' => '02', 'title' => '임플란트 심포지엄 개최 및 제2기 연수회', 'desc' => 'John Beumer, Thomas J. Han 교수 초청 · 800명 참석. Intercontinental Hotel Grand Ballroom.', 'photo' => 'history-slide-05.png' ),
 
 		/* ─── 1999 ─── */
 		array( 'year' => '1999', 'month' => '10', 'title' => '제2기 한아임플란트·보철연구소 연수생 15명', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '1999', 'month' => '08', 'title' => 'NEW MILLENIUM 심포지엄 개최', 'desc' => '고려인사 기념관, 600명 참석.', 'photo' => '' ),
+		array( 'year' => '1999', 'month' => '08', 'title' => 'NEW MILLENIUM 심포지엄 개최', 'desc' => '고대 인촌 기념관, 600명 참석.', 'photo' => '' ),
 		array( 'year' => '1999', 'month' => '08', 'title' => '미국 LA, WPDI 자매결연', 'desc' => 'Thomas J. Han 교수 참석.', 'photo' => 'history-slide-04.png' ),
-		array( 'year' => '1999', 'month' => '02', 'title' => '임플란트 임상 세미나 개최 및 제1기 연수생 수료식', 'desc' => '대전과 서울에서 진행.', 'photo' => '' ),
+		array( 'year' => '1999', 'month' => '02', 'title' => '임플란트 학술 세미나 개최 및 제1기 연수회원 수료식', 'desc' => '대전과 서울에서 진행.', 'photo' => '' ),
 
 		/* ─── 1998 ─── */
-		array( 'year' => '1998', 'month' => '04', 'title' => '한아 임플란트 보철 연구소 설립', 'desc' => '연구소 설립 및 임플란트 임상 세미나 개최 (300명 참석). 제1기 사미·보철 연수 16명, 임플란트 보철 연수 16명.', 'photo' => 'history-slide-03.png' ),
-		array( 'year' => '1998', 'month' => '04', 'title' => '성정 정신 병원 무료 진료 시작', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '1998', 'month' => '04', 'title' => '한아 임플란트 보철 연구소 설립', 'desc' => '연구소 설립 및 임플란트 학술 세미나 개최 (300명 참석). 제1기 심미·보철 연수 16명, 임플란트 보철 연수 16명.', 'photo' => 'history-slide-03.png' ),
+		array( 'year' => '1998', 'month' => '04', 'title' => '성애 정신 병원 무료 진료 시작', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '1998', 'month' => '01', 'title' => '문은수 치과의원 확장', 'desc' => 'UNIT CHAIR 9대, 의사 3명, 직원 10명.', 'photo' => 'history-slide-02.png' ),
 
 		/* ─── 1997 ─── */
