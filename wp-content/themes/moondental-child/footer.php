@@ -130,18 +130,20 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 		</div>
 
 		<?php if ( $legal_show !== 'no' ) :
-			// v3.23.2 — 법적 필수 항목만 남김:
-			// 의료법 시행규칙 §42 (개설자·종별·대표자·의료기관 고유번호),
-			// 개인정보보호법 §31 (개인정보 보호책임자), §30 (개인정보처리방침 링크),
-			// 의료법 §45 (비급여 진료비 게시).
-			// 사업자등록·이용약관·이메일 무단수집거부는 의료기관 웹사이트 법적 필수가 아니므로 제외.
+			// v3.27.9 — 비디치과의원 스타일 참고 · 중앙 정렬 컴팩트 구조.
+			// 정책 링크(위) → 의료 면책 → 저작권 → 사업자 정보 3줄 → 사업자등록증 링크(아래).
 			$inst_name = $mc( 'footer_legal_inst_name', '한아의료재단 문치과병원' );
 			$inst_type = $mc( 'footer_legal_inst_type', '치과병원 (의료법인·병원급)' );
 			$rep       = $mc( 'footer_legal_rep',       '문은수 이사장' );
 			$med_no    = $mc( 'footer_legal_med_no',    '34400117' );
 			$ad_no     = $mc( 'footer_legal_ad_no',     '' );
 			$privacy_o = $mc( 'footer_legal_privacy_officer', '문은수' );
-			$extra     = $mc( 'footer_legal_extra',     '' );
+			$biz_no    = $mc( 'footer_legal_biz_no',    '' ); // v3.27.9 사업자등록번호
+			$open_date = $mc( 'footer_legal_open_date', '' ); // v3.27.9 개업일 (예: 1995.04)
+			$biz_cert_url = $mc( 'footer_legal_biz_cert_url', '' ); // v3.27.9 사업자등록증 파일/링크
+			$disclaimer = $mc( 'footer_legal_disclaimer',
+				'* 본 홈페이지의 모든 의료 정보는 의료법 및 보건복지부 의료광고 가이드라인을 준수하여 제공하고 있으며, 특정 개인의 결과는 개인에 따라 달라질 수 있습니다.' );
+			$copyright_start = $mc( 'footer_legal_copyright_start', '2018' ); // v3.27.9 저작권 시작 연도
 
 			// v3.27.3: 라벨(dt)과 값(dd)에서 접두어 중복 제거를 위한 정리
 			$strip_prefix = function( $val, $prefixes ) {
@@ -157,38 +159,14 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			$rep       = $strip_prefix( $rep,       array( '대표자:', '대표자' ) );
 			$med_no    = $strip_prefix( $med_no,    array( '의료기관 고유번호:', '의료기관 고유번호', '의료기관번호:', '의료기관번호' ) );
 			$privacy_o = $strip_prefix( $privacy_o, array( '개인정보 보호책임자:', '개인정보 보호책임자', '개인정보:' ) );
-		?>
-		<aside class="md-footer__legal" aria-label="의료기관 법적 표시">
-			<dl class="md-footer__legal-grid">
-				<?php
-				$rows = array(
-					array( '의료기관',           $inst_name ),
-					array( '종별',               $inst_type ),
-					array( '대표자',             $rep ),
-					array( '의료기관 고유번호', $med_no ),
-				);
-				if ( $ad_no )     $rows[] = array( '광고심의',            $ad_no );
-				if ( $privacy_o ) $rows[] = array( '개인정보 보호책임자', $privacy_o );
+			$biz_no    = $strip_prefix( $biz_no,    array( '사업자등록번호:', '사업자등록번호' ) );
 
-				foreach ( $rows as $r ) :
-					if ( empty( $r[1] ) ) continue;
-				?>
-					<div class="md-footer__legal-row">
-						<dt><?php echo esc_html( $r[0] ); ?></dt>
-						<dd><?php echo esc_html( $r[1] ); ?></dd>
-					</div>
-				<?php endforeach; ?>
-			</dl>
-
-			<?php if ( $extra ) : ?>
-				<p class="md-footer__legal-extra"><?php echo esc_html( $extra ); ?></p>
-			<?php endif; ?>
-
-			<?php
 			// 정책 링크 (Customizer에서 "라벨|URL" 형식)
 			$policy_keys = array(
 				'footer_link_privacy' => '개인정보처리방침|/개인정보처리방침/',
+				'footer_link_terms'   => '이용약관|/이용약관/',
 				'footer_link_pricing' => '비급여 진료비|/비용-안내/',
+				'footer_link_sitemap' => '',
 			);
 			$policy_items = array();
 			foreach ( $policy_keys as $k => $d ) {
@@ -201,7 +179,34 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				if ( $url && $url[0] === '/' ) $url = home_url( $url );
 				$policy_items[] = array( 'label' => $label, 'url' => $url );
 			}
-			if ( $policy_items ) : ?>
+
+			$curr_year   = date_i18n( 'Y' );
+			$year_range  = ( $copyright_start && $copyright_start !== $curr_year )
+				? esc_html( $copyright_start ) . '-' . esc_html( $curr_year )
+				: esc_html( $curr_year );
+
+			// 사업자 정보 행 · 파이프로 자연스럽게 연결
+			$row1 = array();
+			if ( $inst_name ) $row1[] = '상호: <strong>' . esc_html( $inst_name ) . '</strong>';
+			if ( $rep )       $row1[] = '대표자: ' . esc_html( $rep );
+			if ( $biz_no )    $row1[] = '사업자등록번호: ' . esc_html( $biz_no );
+
+			$row2 = array();
+			$addr = $info['address_road'] ?: $info['address'];
+			if ( $addr )      $row2[] = '주소: ' . esc_html( $addr );
+			if ( $open_date ) $row2[] = '개업일: ' . esc_html( $open_date );
+
+			$row3 = array();
+			if ( ! empty( $info['phone'] ) ) {
+				$row3[] = '전화: <a href="tel:' . esc_attr( $phone_link ) . '">' . esc_html( $info['phone'] ) . '</a>';
+			}
+			if ( $med_no )    $row3[] = '의료기관 고유번호: ' . esc_html( $med_no );
+			if ( $privacy_o ) $row3[] = '개인정보 보호책임자: ' . esc_html( $privacy_o );
+			if ( $ad_no )     $row3[] = '광고심의: ' . esc_html( $ad_no );
+		?>
+		<aside class="md-footer__legal md-footer__legal--v2" aria-label="의료기관 법적 표시">
+
+			<?php if ( $policy_items ) : ?>
 				<ul class="md-footer__policy-links">
 					<?php foreach ( $policy_items as $p ) : ?>
 						<li>
@@ -214,13 +219,30 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 					<?php endforeach; ?>
 				</ul>
 			<?php endif; ?>
+
+			<?php if ( $disclaimer ) : ?>
+				<p class="md-footer__disclaimer"><?php echo esc_html( $disclaimer ); ?></p>
+			<?php endif; ?>
+
+			<p class="md-footer__copyright">
+				&copy; <?php echo $year_range; ?> <?php echo esc_html( $info['name_short'] ?: $inst_name ); ?>. All rights reserved.
+			</p>
+
+			<div class="md-footer__biz-info">
+				<?php if ( $row1 ) : ?><p><?php echo implode( ' <span class="md-footer__sep">|</span> ', $row1 ); ?></p><?php endif; ?>
+				<?php if ( $row2 ) : ?><p><?php echo implode( ' <span class="md-footer__sep">|</span> ', $row2 ); ?></p><?php endif; ?>
+				<?php if ( $row3 ) : ?><p><?php echo implode( ' <span class="md-footer__sep">|</span> ', $row3 ); ?></p><?php endif; ?>
+				<?php if ( $biz_cert_url ) : ?>
+					<p><a class="md-footer__biz-cert" href="<?php echo esc_url( $biz_cert_url ); ?>" target="_blank" rel="noopener">사업자등록증 보기</a></p>
+				<?php endif; ?>
+			</div>
+
+			<?php $extra = $mc( 'footer_legal_extra', '' ); ?>
+			<?php if ( $extra ) : ?>
+				<p class="md-footer__legal-extra"><?php echo esc_html( $extra ); ?></p>
+			<?php endif; ?>
 		</aside>
 		<?php endif; ?>
-
-		<div class="md-footer__bottom">
-			<div><?php echo esc_html( $info['name_full'] ); ?></div>
-			<div>&copy; <?php echo esc_html( date_i18n( 'Y' ) ); ?> <?php echo esc_html( $info['name_short'] ); ?>. <?php echo esc_html( $copyright ); ?></div>
-		</div>
 
 	</div>
 </footer>
