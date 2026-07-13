@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.30.5' );
+define( 'MOONDENTAL_VERSION', '3.30.6' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -954,6 +954,7 @@ function moondental_get_info( $key = '' ) {
 		'facebook_url' => 'https://www.facebook.com/moondentist',
 		'youtube_url'  => 'https://www.youtube.com/@%EC%B2%9C%EC%95%88%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90',
 		'naver_place'  => 'https://booking.naver.com/booking/13/bizes/485314',
+		'naver_review_url' => '', // v3.30.6 · 리뷰 전용 URL (예: https://m.place.naver.com/place/{id}/review)
 		'naver_map_url'=> 'https://map.naver.com/p/search/%ED%95%9C%EC%95%84%EC%9D%98%EB%A3%8C%EC%9E%AC%EB%8B%A8%20%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90',
 		'google_map_url'=> 'https://maps.app.goo.gl/MNt59kcxeKL92nCU9',
 		'map_embed'    => '',
@@ -1323,6 +1324,7 @@ function moondental_customize_register( $wp_customize ) {
 		// section_sns
 		array( 'key' => 'kakao_url',    'label' => '카카오톡 채널 URL',         'section' => 'moondental_section_sns' ),
 		array( 'key' => 'naver_place',  'label' => '네이버 예약 URL',          'section' => 'moondental_section_sns' ),
+		array( 'key' => 'naver_review_url', 'label' => '네이버 리뷰 URL (플레이스 리뷰 페이지 · 비우면 예약 URL 사용)', 'section' => 'moondental_section_sns' ),
 		array( 'key' => 'naver_map_url','label' => '네이버 지도·플레이스 URL', 'section' => 'moondental_section_sns' ),
 		array( 'key' => 'google_map_url','label' => 'Google Maps URL (단축 링크 가능)', 'section' => 'moondental_section_sns' ),
 		array( 'key' => 'instagram',    'label' => '인스타그램 URL',          'section' => 'moondental_section_sns' ),

@@ -41,9 +41,13 @@ $info = moondental_get_info();
 			<?php endforeach; ?>
 		</div>
 
-		<?php if ( ! empty( $info['naver_place'] ) ) : ?>
+		<?php
+		// v3.30.6 · 리뷰 전용 URL (없으면 naver_place로 fallback)
+		$naver_review = ! empty( $info['naver_review_url'] ) ? $info['naver_review_url'] : ( $info['naver_map_url'] ?? '' );
+		if ( ! $naver_review && ! empty( $info['naver_place'] ) ) $naver_review = $info['naver_place'];
+		if ( $naver_review ) : ?>
 		<div class="md-testimonials__more">
-			<a class="md-btn md-btn-ghost" href="<?php echo esc_url( $info['naver_place'] ); ?>" target="_blank" rel="noopener" data-track="cta-naver-reviews">
+			<a class="md-btn md-btn-ghost" href="<?php echo esc_url( $naver_review ); ?>" target="_blank" rel="noopener" data-track="cta-naver-reviews">
 				네이버 플레이스에서 더 많은 후기 보기 →
 			</a>
 		</div>

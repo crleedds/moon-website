@@ -205,24 +205,26 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 		if ( $legal_med_no )    $legal_items[] = '요양기관번호: ' . esc_html( $legal_med_no );
 		if ( $legal_ad_no )     $legal_items[] = '광고심의: ' . esc_html( $legal_ad_no );
 		?>
-		<?php if ( $legal_items ) : ?>
-			<div class="md-footer__legal-line">
-				<p><?php echo implode( ' <span class="md-footer__sep">|</span> ', $legal_items ); ?></p>
-			</div>
-		<?php endif; ?>
-
 		<?php
-		// v3.28.4 — 하단 저작권 바 (중앙 정렬, 단일 라인)
-		// Customizer에서 {year} 토큰과 {name} 토큰을 자동 치환.
+		// v3.28.4 · v3.30.6 — 법적 표시 + 저작권 · 단일 문단으로 통합
 		$copyright_tpl = $mc( 'footer_copyright_bar', 'Copyright {year} {name}  All Rights Reserved.' );
 		$copyright_text = strtr( $copyright_tpl, array(
 			'{year}' => date_i18n( 'Y' ),
 			'{name}' => '한아의료재단 문치과병원',
 		) );
 		?>
-		<div class="md-footer__copyright-bar">
-			<small><?php echo esc_html( $copyright_text ); ?></small>
-		</div>
+		<?php if ( $legal_items || $copyright_text ) : ?>
+			<div class="md-footer__legal-line">
+				<p>
+					<?php if ( $legal_items ) : ?>
+						<?php echo implode( ' <span class="md-footer__sep">|</span> ', $legal_items ); ?>
+					<?php endif; ?>
+					<?php if ( $copyright_text ) : ?>
+						<br><small><?php echo esc_html( $copyright_text ); ?></small>
+					<?php endif; ?>
+				</p>
+			</div>
+		<?php endif; ?>
 
 	</div>
 </footer>
