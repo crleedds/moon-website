@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.29.2' );
+define( 'MOONDENTAL_VERSION', '3.29.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -238,6 +238,31 @@ add_action( 'after_setup_theme', function() {
 	set_theme_mod( 'md_content_staff_list', $new_roster );
 	update_option( 'moondental_staff_v3292', 'done' );
 }, 45 );
+
+/* 일회성 마이그레이션 v3.29.3 · 사용자 요청 · 비서실 복원.
+ * 김동현(실장)·이슬기(대리)를 경영지원본부 → 비서실로 이동. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_staff_v3293' ) === 'done' ) return;
+	$saved = get_theme_mod( 'md_content_staff_list' );
+	if ( is_string( $saved ) && $saved !== '' ) {
+		// 경영지원본부의 김동현·이슬기를 비서실로 이관
+		$new = str_replace(
+			array(
+				'경영지원본부|실장|김동현',
+				'경영지원본부|대리|이슬기',
+			),
+			array(
+				'비서실|실장|김동현',
+				'비서실|대리|이슬기',
+			),
+			$saved
+		);
+		if ( $new !== $saved ) {
+			set_theme_mod( 'md_content_staff_list', $new );
+		}
+	}
+	update_option( 'moondental_staff_v3293', 'done' );
+}, 46 );
 
 /* 일회성 마이그레이션 v3.29.0 · 여러 진료시간 안내 텍스트 (cta_hint, price_cta_meta_1_value)
  * 옛 default를 저장했으면 → 목 18:00 → 18:30 자동 갱신 · 앞 0 제거. */
