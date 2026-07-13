@@ -50,7 +50,7 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">01 · CAVITY TREATMENT</span>
-			<h2 class="md-section-head__title">천안 충치치료 — 보존적 접근으로 자연치아 최대한 살리기</h2>
+			<h2 class="md-section-head__title">천안·아산 충치치료 — 보존적 접근으로 자연치아 최대한 살리기</h2>
 			<p class="md-section-head__lead">충치는 조기 발견·조기 치료가 핵심입니다. 진행 단계에 따라 가장 보존적인 방법을 선택합니다.</p>
 		</header>
 
@@ -99,7 +99,7 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">02 · ENDODONTICS</span>
-			<h2 class="md-section-head__title">천안 신경치료 — 치아 보존의 마지막 기회</h2>
+			<h2 class="md-section-head__title">천안·아산 신경치료 — 치아 보존의 마지막 기회</h2>
 			<p class="md-section-head__lead">충치가 신경까지 도달한 경우, 신경치료로 발치를 막고 자연치아를 살립니다. 보존과 전문의의 정밀 근관치료.</p>
 		</header>
 
@@ -145,7 +145,7 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">03 · PERIODONTICS</span>
-			<h2 class="md-section-head__title">천안 잇몸치료 — 치주염 진행 막기</h2>
+			<h2 class="md-section-head__title">천안·아산 잇몸치료 — 치주염 진행 막기</h2>
 			<p class="md-section-head__lead">잇몸 출혈·붓기·입냄새는 치주염의 신호. 자연치아 평생 건강의 핵심은 잇몸 관리입니다.</p>
 		</header>
 

@@ -62,7 +62,7 @@ $is_walking     = ! empty( $region['duration_label'] ) && strpos( $region['durat
 		<span class="md-region-hero__eyebrow">📍 <?php echo esc_html( $province ); ?> · <?php echo esc_html( $region_long ); ?>에서 오시는 길</span>
 		<h1 class="md-region-hero__title">
 			<?php echo esc_html( $region_name ); ?>에서 찾는<br>
-			<em>임플란트·교정 잘하는 천안 치과</em>
+			<em>임플란트·교정 잘하는 천안·아산 치과</em>
 		</h1>
 		<p class="md-region-hero__lead">
 			<?php if ( $is_walking ) : ?>

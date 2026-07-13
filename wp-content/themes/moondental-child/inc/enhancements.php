@@ -44,8 +44,8 @@ function moondental_seo_meta_tags() {
 		$region = moondental_get_region_by_slug( $region_slug );
 		if ( $region ) {
 			$rn = $region['name'];
-			$meta_title    = $rn . '에서 천안 치과 | ' . $rn . ' 임플란트·' . $rn . ' 교정 — ' . $site_name;
-			$meta_desc     = $rn . '에서 천안 만남로 문치과병원까지 자동차 약 ' . $region['duration_min'] . '분 (' . $region['distance_km'] . 'km). ' . $rn . ' 환자분께 천안 임플란트·천안 투명교정·천안 라미네이트 진료. 1995년부터 30여년 한자리.';
+			$meta_title    = $rn . '에서 천안·아산 치과 | ' . $rn . ' 임플란트·' . $rn . ' 교정 — ' . $site_name;
+			$meta_desc     = $rn . '에서 천안 만남로 문치과병원까지 자동차 약 ' . $region['duration_min'] . '분 (' . $region['distance_km'] . 'km). ' . $rn . ' 환자분께 천안·아산 임플란트·투명교정·라미네이트 진료. 1995년부터 30여년 한자리.';
 			$meta_keywords = $rn . ' 치과, ' . $rn . ' 임플란트, ' . $rn . ' 교정, ' . $rn . ' 투명교정, ' . $rn . ' 라미네이트, ' . $rn . ' 사랑니 발치, ' . $rn . ' 신경치료, ' . $rn . ' 치과 추천, 천안 치과, 천안 임플란트, 문치과병원';
 			$og_type = 'article';
 		}
@@ -215,7 +215,7 @@ add_action( 'wp_head', 'moondental_seo_meta_tags', 5 );
  */
 function moondental_document_title_parts( $parts ) {
 	if ( is_front_page() ) {
-		$parts['title'] = '천안 치과 | 천안 임플란트·천안 투명교정·천안 라미네이트';
+		$parts['title'] = '천안·아산 치과 | 임플란트·투명교정·라미네이트';
 		$parts['tagline'] = '한아의료재단 문치과병원 (천안 만남로)';
 	}
 	return $parts;

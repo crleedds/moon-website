@@ -92,7 +92,7 @@ get_header();
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">02 · SCALING</span>
-			<h2 class="md-section-head__title">천안 스케일링 — 치주염 예방의 시작</h2>
+			<h2 class="md-section-head__title">천안·아산 스케일링 — 치주염 예방의 시작</h2>
 			<p class="md-section-head__lead">치석은 양치만으로 제거되지 않습니다. 6~12개월 주기 정기 스케일링이 자연치아 평생 보존의 핵심.</p>
 		</header>
 

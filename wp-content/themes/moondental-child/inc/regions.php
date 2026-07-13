@@ -154,7 +154,7 @@ function moondental_get_regions() {
 			'distance_km' => 50, 'duration_min' => 55, 'highway' => '서해안고속도로 (당진IC → 천안IC)',
 			'ktx' => '직행 KTX 없음 — 시외버스 권장',
 			'bus' => '당진공용터미널 → 천안종합터미널 1시간',
-			'note' => '당진에서 55분 — 통합 진료 원하시는 분들이 자주 찾는 천안 치과',
+			'note' => '당진에서 55분 — 통합 진료 원하시는 분들이 자주 찾는 천안·아산 치과',
 		),
 		'gongju' => array(
 			'slug' => 'gongju', 'name' => '공주', 'name_long' => '공주시', 'province' => '충남',

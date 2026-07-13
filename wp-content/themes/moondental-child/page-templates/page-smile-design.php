@@ -171,7 +171,7 @@ get_header();
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">04 · GUM WHITENING</span>
-			<h2 class="md-section-head__title">천안 잇몸미백 (레이저)</h2>
+			<h2 class="md-section-head__title">천안·아산 잇몸미백 (레이저)</h2>
 			<p class="md-section-head__lead">검거나 어두운 잇몸을 자연스러운 핑크 톤으로 — 레이저로 안전하게.</p>
 		</header>
 

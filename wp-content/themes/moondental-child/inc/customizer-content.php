@@ -259,7 +259,7 @@ function moondental_home_content_fields() {
 		'services' => array(
 			'title'  => '홈 — 진료안내 섹션 head',
 			'fields' => array(
-				'services_eyebrow' => array( 'default' => 'CLINICAL SERVICES · 천안 진료항목', 'label' => 'eyebrow', 'type' => 'text' ),
+				'services_eyebrow' => array( 'default' => 'CLINICAL SERVICES · 천안·아산 진료항목', 'label' => 'eyebrow', 'type' => 'text' ),
 				'services_title'   => array( 'default' => '천안·아산에서 한 곳에서, 평생 치아 건강을', 'label' => '제목', 'type' => 'text' ),
 				'services_lead'    => array( 'default' => '천안·아산 임플란트·투명교정·라미네이트·자연치아 살리기·사랑니 발치까지 — 한 분의 환자를 오래 보는 천안 만남로 치과의 마음으로 진료합니다.', 'label' => '설명', 'type' => 'textarea' ),
 			),
