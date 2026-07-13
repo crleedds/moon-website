@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.28.5
+Version:      3.28.6
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -2931,12 +2931,13 @@ button.elementor-button {
   color: rgba(255, 255, 255, 0.6);
   margin: 0 0 16px;
 }
+/* v3.28.6 · 컬럼 제목·항목 간격 통일 */
 .md-footer__col h4 {
   color: #fff;
   font-size: var(--fs-small);
   font-weight: 700;
   letter-spacing: 0.05em;
-  margin: 0 0 16px;
+  margin: 0 0 12px;
 }
 .md-footer__col ul {
   list-style: none;
@@ -2945,14 +2946,15 @@ button.elementor-button {
 }
 .md-footer__col li {
   font-size: var(--fs-small);
-  padding: 4px 0;
-  line-height: 1.6;
+  padding: 6px 0;
+  line-height: 1.5;
 }
 .md-footer__hours {
   display: flex;
   justify-content: space-between;
   font-size: var(--fs-small);
-  padding: 4px 0;
+  padding: 6px 0;
+  line-height: 1.5;
 }
 .md-footer__hours strong {
   color: rgba(255, 255, 255, 0.95);
@@ -3054,8 +3056,8 @@ button.elementor-button {
 }
 .md-footer__copyright-bar p {
   margin: 0;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.68);
   letter-spacing: 0.02em;
   font-feature-settings: 'tnum';
 }
@@ -7748,34 +7750,38 @@ html { scroll-behavior: smooth; }
   line-height: 1.6;
   word-break: keep-all;
 }
+/* v3.28.6 · 주소 지역별 자동 링크 점선 밑줄 제거 · 시각적 정리 */
 .md-footer__addr a {
-  color: rgba(255, 255, 255, 0.82);
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.25);
-  transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+  color: inherit;
+  text-decoration: none;
+  border-bottom: none;
+  transition: color 0.2s var(--ease);
 }
 .md-footer__addr a:hover {
   color: var(--color-primary-light);
-  border-bottom-color: var(--color-primary-light);
 }
 
+/* v3.28.6 · 소셜 아이콘 · 데스크탑에서 크기·강도 살짝 낮춤 */
 .md-footer__social {
   list-style: none;
   padding: 0;
-  margin: 18px 0 0;
+  margin: 20px 0 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 .md-footer__social li { list-style: none; }
 .md-fsoc {
   display: inline-flex;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   overflow: hidden;
-  transition: transform 0.2s var(--ease), filter 0.2s var(--ease);
+  opacity: 0.9;
+  transition: transform 0.2s var(--ease), filter 0.2s var(--ease), opacity 0.2s var(--ease);
   text-decoration: none;
 }
+.md-fsoc:hover { opacity: 1; }
 .md-fsoc:hover {
   transform: translateY(-2px);
   filter: brightness(1.08);
