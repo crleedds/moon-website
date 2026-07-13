@@ -222,8 +222,10 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 			<?php foreach ( $specialties as $sp ) : ?>
 				<article class="md-spec">
 					<div class="md-spec__icon" aria-hidden="true"><?php echo $sp['icon']; ?></div>
-					<h3 class="md-spec__title"><?php echo esc_html( $sp['title'] ); ?></h3>
-					<p class="md-spec__desc"><?php echo esc_html( $sp['desc'] ); ?></p>
+					<div class="md-spec__body">
+						<h3 class="md-spec__title"><?php echo esc_html( $sp['title'] ); ?></h3>
+						<p class="md-spec__desc"><?php echo esc_html( $sp['desc'] ); ?></p>
+					</div>
 				</article>
 			<?php endforeach; ?>
 		</div>
@@ -241,7 +243,7 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 			</p>
 			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-docs-banner', 'size' => 'lg', 'align' => 'center' ) ); ?>
 			<p class="md-docs-cta__hours">
-				🕐 월·화·수·금 09:00–20:30 · 목 09:00–18:00 · 토 09:00–14:00 · 일/공휴일 휴진
+				🕐 월·화·수·금 09:00–20:30 · 목 09:00–18:30 · 토 09:00–14:00 · 일/공휴일 휴진
 			</p>
 		</div>
 	</div>

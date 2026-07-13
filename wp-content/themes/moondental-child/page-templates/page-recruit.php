@@ -12,6 +12,17 @@ get_header();
 $info       = moondental_get_info();
 $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'] );
 $kakao      = $info['kakao_url'] ?? '';
+
+// v3.27.3: 인사팀 전용 연락처 (설정 없으면 대표 연락처 사용)
+$hr_phone_display = function_exists( 'md_content' ) ? md_content( 'recruit_hr_phone',   '' ) : '';
+$hr_phone_link    = function_exists( 'md_content' ) ? md_content( 'recruit_hr_phone_link', '' ) : '';
+$hr_email         = function_exists( 'md_content' ) ? md_content( 'recruit_hr_email',   '' ) : '';
+$hr_contact_name  = function_exists( 'md_content' ) ? md_content( 'recruit_hr_contact_name', '' ) : '';
+
+$show_phone     = $hr_phone_display ?: $info['phone'];
+$show_phone_lnk = $hr_phone_link    ?: $phone_link;
+$show_email     = $hr_email         ?: ( $info['email'] ?: 'moondental1995@naver.com' );
+$phone_note     = $hr_phone_display ? '인사팀 직접 통화' : ( '인사팀 직접 통화 (대표번호 · 인사팀 연결 요청)' );
 ?>
 
 <!-- ============ Hero ============ -->
@@ -30,8 +41,8 @@ $kakao      = $info['kakao_url'] ?? '';
 			환자 한 분을 가족처럼 보는 마음으로 함께해 주실 분을 모십니다.
 		</p>
 		<div style="margin-top: 24px;">
-			<a class="md-btn md-btn-primary md-btn--lg" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-recruit-call">
-				📞 인사팀 직접 통화 <?php echo esc_html( $info['phone'] ); ?>
+			<a class="md-btn md-btn-primary md-btn--lg" href="tel:<?php echo esc_attr( $show_phone_lnk ); ?>" data-track="cta-recruit-call">
+				📞 <?php echo esc_html( $phone_note ); ?> <?php echo esc_html( $show_phone ); ?>
 			</a>
 			<?php if ( $kakao ) : ?>
 				<a class="md-btn md-btn--kakao md-btn--lg" href="<?php echo esc_url( $kakao ); ?>" target="_blank" rel="noopener" data-track="cta-recruit-kakao">
@@ -39,6 +50,14 @@ $kakao      = $info['kakao_url'] ?? '';
 				</a>
 			<?php endif; ?>
 		</div>
+		<?php if ( $hr_contact_name ) : ?>
+			<p class="md-page-hero__note" style="margin-top:14px;font-size:0.9rem;opacity:0.9;">
+				· 인사 담당: <strong><?php echo esc_html( $hr_contact_name ); ?></strong>
+				<?php if ( $hr_email ) : ?>
+					· <a href="mailto:<?php echo esc_attr( $hr_email ); ?>" style="text-decoration:underline;"><?php echo esc_html( $hr_email ); ?></a>
+				<?php endif; ?>
+			</p>
+		<?php endif; ?>
 	</div>
 </section>
 
@@ -50,7 +69,38 @@ $kakao      = $info['kakao_url'] ?? '';
 			<h2 class="md-section-head__title">치과위생사 · 진료 코디네이터</h2>
 		</header>
 
-		<article class="md-recruit-card">
+		<!-- v3.27.3: 공통 근무 조건·복리후생 (모든 직군 공통) -->
+		<article class="md-recruit-card md-recruit-card--common">
+			<div class="md-recruit-card__head">
+				<span class="md-recruit-card__badge md-recruit-card__badge--common">모든 직군 공통</span>
+				<h3>💼 공통 근무 조건 · 복리후생</h3>
+				<p class="md-recruit-card__lead">아래 조건·복리후생은 치과위생사·진료 코디네이터 모든 채용에 동일하게 적용됩니다.</p>
+			</div>
+			<div class="md-recruit-grid">
+				<div class="md-recruit-block">
+					<h4>💼 근무 조건</h4>
+					<ul>
+						<li>주 5일 근무 (평일 + 토요일 격주)</li>
+						<li>평일 09:00~19:30 (점심시간 1시간 포함)</li>
+						<li>목요일 09:00~18:30 · 토요일 09:00~14:00</li>
+						<li>일요일·공휴일 휴무</li>
+						<li>4대 보험 · 퇴직금 · 연차</li>
+					</ul>
+				</div>
+				<div class="md-recruit-block">
+					<h4>🎁 복리후생</h4>
+					<ul>
+						<li>인센티브 · 명절 상여 · 우수사원 포상</li>
+						<li>본인·가족 치과 진료 할인</li>
+						<li>학회·세미나 참여 지원 (교육비)</li>
+						<li>유니폼·식대·간식 제공</li>
+						<li>경조사 휴가·경조금 · 장기근속 포상</li>
+					</ul>
+				</div>
+			</div>
+		</article>
+
+		<article class="md-recruit-card" style="margin-top: clamp(24px, 3vw, 36px);">
 			<div class="md-recruit-card__head">
 				<span class="md-recruit-card__badge">상시채용</span>
 				<h3>치과위생사 (신입 · 경력)</h3>
@@ -74,26 +124,6 @@ $kakao      = $info['kakao_url'] ?? '';
 						<li>스케일링 · 불소도포 · 실란트 등 예방 진료</li>
 						<li>임플란트·교정 보조 (희망 부서 배치)</li>
 						<li>환자 상담 · 사후 관리 케어</li>
-					</ul>
-				</div>
-				<div class="md-recruit-block">
-					<h4>💼 근무 조건</h4>
-					<ul>
-						<li>주 5일 근무 (평일 + 토요일 격주)</li>
-						<li>평일 09:00~19:30 (점심시간 1시간 포함)</li>
-						<li>목요일 09:00~18:00 · 토요일 09:00~14:00</li>
-						<li>일요일·공휴일 휴무</li>
-						<li>4대 보험 · 퇴직금 · 연차</li>
-					</ul>
-				</div>
-				<div class="md-recruit-block">
-					<h4>🎁 복리후생</h4>
-					<ul>
-						<li>인센티브 · 명절 상여 · 우수사원 포상</li>
-						<li>본인·가족 치과 진료 할인</li>
-						<li>학회·세미나 참여 지원 (교육비)</li>
-						<li>유니폼·식대·간식 제공</li>
-						<li>경조사 휴가·경조금 · 장기근속 포상</li>
 					</ul>
 				</div>
 			</div>
@@ -178,7 +208,7 @@ $kakao      = $info['kakao_url'] ?? '';
 		<ol class="md-preservation-steps">
 			<li>
 				<strong>1단계 · 서류 지원</strong>
-				<p>이력서·자기소개서를 이메일(<a href="mailto:<?php echo esc_attr( $info['email'] ?: 'moondental1995@naver.com' ); ?>"><?php echo esc_html( $info['email'] ?: 'moondental1995@naver.com' ); ?></a>) 또는 카카오톡 채널로 제출.</p>
+				<p>이력서·자기소개서를 이메일(<a href="mailto:<?php echo esc_attr( $show_email ); ?>"><?php echo esc_html( $show_email ); ?></a>) 또는 카카오톡 채널로 제출.</p>
 			</li>
 			<li>
 				<strong>2단계 · 서류 심사</strong>
@@ -213,18 +243,23 @@ $kakao      = $info['kakao_url'] ?? '';
 				궁금한 점이 있으시면 전화·카카오톡으로 부담 없이 문의 주세요. 비밀 보장.
 			</p>
 			<div class="md-btn-group md-rcta" style="justify-content:center; gap:12px;">
-				<a class="md-btn md-btn-primary md-btn--lg" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-recruit-final-call">
-					📞 <?php echo esc_html( $info['phone'] ); ?>
+				<a class="md-btn md-btn-primary md-btn--lg" href="tel:<?php echo esc_attr( $show_phone_lnk ); ?>" data-track="cta-recruit-final-call">
+					📞 <?php echo esc_html( $show_phone ); ?>
 				</a>
 				<?php if ( $kakao ) : ?>
 					<a class="md-btn md-btn--kakao md-btn--lg" href="<?php echo esc_url( $kakao ); ?>" target="_blank" rel="noopener" data-track="cta-recruit-final-kakao">
 						💬 카카오톡 채널
 					</a>
 				<?php endif; ?>
-				<a class="md-btn md-btn-ghost md-btn--lg" href="mailto:<?php echo esc_attr( $info['email'] ?: 'moondental1995@naver.com' ); ?>">
+				<a class="md-btn md-btn-ghost md-btn--lg" href="mailto:<?php echo esc_attr( $show_email ); ?>">
 					📧 이메일 지원
 				</a>
 			</div>
+			<?php if ( ! $hr_phone_display ) : ?>
+				<p style="margin-top:14px;font-size:0.85rem;opacity:0.85;text-align:center;">
+					※ 대표번호로 문의하실 때는 <strong>"인사팀 담당자 연결 부탁드립니다"</strong>라고 말씀해주세요.
+				</p>
+			<?php endif; ?>
 		</div>
 	</div>
 </section>

@@ -137,23 +137,38 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			// 사업자등록·이용약관·이메일 무단수집거부는 의료기관 웹사이트 법적 필수가 아니므로 제외.
 			$inst_name = $mc( 'footer_legal_inst_name', '한아의료재단 문치과병원' );
 			$inst_type = $mc( 'footer_legal_inst_type', '치과병원 (의료법인·병원급)' );
-			$rep       = $mc( 'footer_legal_rep',       '대표자: 문은수 이사장' );
-			$med_no    = $mc( 'footer_legal_med_no',    '의료기관 고유번호: 34400117' );
+			$rep       = $mc( 'footer_legal_rep',       '문은수 이사장' );
+			$med_no    = $mc( 'footer_legal_med_no',    '34400117' );
 			$ad_no     = $mc( 'footer_legal_ad_no',     '' );
-			$privacy_o = $mc( 'footer_legal_privacy_officer', '개인정보 보호책임자: 문은수' );
+			$privacy_o = $mc( 'footer_legal_privacy_officer', '문은수' );
 			$extra     = $mc( 'footer_legal_extra',     '' );
+
+			// v3.27.3: 라벨(dt)과 값(dd)에서 접두어 중복 제거를 위한 정리
+			$strip_prefix = function( $val, $prefixes ) {
+				$val = trim( (string) $val );
+				foreach ( $prefixes as $p ) {
+					if ( stripos( $val, $p ) === 0 ) {
+						$val = ltrim( substr( $val, strlen( $p ) ), " :·" );
+						break;
+					}
+				}
+				return $val;
+			};
+			$rep       = $strip_prefix( $rep,       array( '대표자:', '대표자' ) );
+			$med_no    = $strip_prefix( $med_no,    array( '의료기관 고유번호:', '의료기관 고유번호', '의료기관번호:', '의료기관번호' ) );
+			$privacy_o = $strip_prefix( $privacy_o, array( '개인정보 보호책임자:', '개인정보 보호책임자', '개인정보:' ) );
 		?>
 		<aside class="md-footer__legal" aria-label="의료기관 법적 표시">
 			<dl class="md-footer__legal-grid">
 				<?php
 				$rows = array(
-					array( '의료기관',     $inst_name ),
-					array( '종별',         $inst_type ),
-					array( '대표자',       $rep ),
-					array( '의료기관번호', $med_no ),
+					array( '의료기관',           $inst_name ),
+					array( '종별',               $inst_type ),
+					array( '대표자',             $rep ),
+					array( '의료기관 고유번호', $med_no ),
 				);
-				if ( $ad_no )     $rows[] = array( '광고심의', $ad_no );
-				if ( $privacy_o ) $rows[] = array( '개인정보', $privacy_o );
+				if ( $ad_no )     $rows[] = array( '광고심의',            $ad_no );
+				if ( $privacy_o ) $rows[] = array( '개인정보 보호책임자', $privacy_o );
 
 				foreach ( $rows as $r ) :
 					if ( empty( $r[1] ) ) continue;

@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.27.1
+Version:      3.27.3
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -5140,6 +5140,13 @@ html { scroll-behavior: smooth; }
   margin-bottom: 12px;
 }
 .md-recruit-card__badge--alt { background: #5C8B82; }
+/* v3.27.3: 공통 근무 조건·복리후생 카드 */
+.md-recruit-card__badge--common { background: #7A6B5D; }
+.md-recruit-card--common {
+  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-alt));
+  border: 1.5px solid var(--color-primary-light);
+  margin-bottom: clamp(24px, 3vw, 36px);
+}
 .md-recruit-card h3 {
   font-size: clamp(1.25rem, 2vw, 1.5rem);
   font-weight: 800;
@@ -8109,19 +8116,20 @@ html { scroll-behavior: smooth; }
   background: var(--color-accent);
 }
 
+/* v3.27.3: 의료진 필터 탭 아래 안내 바 — 필터 탭 폭과 정렬. */
 .md-docs-grid__hint {
+  display: block;
   text-align: center;
-  margin: clamp(20px, 2.5vw, 28px) 0 0;
-  padding: 12px 18px;
+  margin: clamp(20px, 2.5vw, 28px) auto 0;
+  padding: 14px 20px;
   font-size: var(--fs-caption);
-  color: var(--color-text-mute);
+  color: var(--color-text-sub);
   background: var(--color-white);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  display: inline-block;
   width: 100%;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: none;
+  line-height: 1.6;
 }
 
 /* ── 전체 직원 (의료진 외 스태프) ── */
@@ -8240,15 +8248,20 @@ html { scroll-behavior: smooth; }
 }
 @media (max-width: 880px) { .md-spec-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { .md-spec-grid { grid-template-columns: 1fr; } }
+/* v3.27.3: 카드 내 아이콘·텍스트 세로 중앙 정렬, 텍스트 영역 flex-grow로 균일 */
 .md-spec {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
   background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: clamp(20px, 2.5vw, 26px);
   transition: all 0.3s var(--ease);
+}
+.md-spec__body {
+  flex: 1;
+  min-width: 0;
 }
 .md-spec:hover {
   border-color: var(--color-primary-light);
@@ -8268,9 +8281,11 @@ html { scroll-behavior: smooth; }
 .md-spec__title {
   font-size: 1rem;
   font-weight: 800;
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   color: var(--color-text);
   letter-spacing: -0.015em;
+  word-break: keep-all;
+  line-height: 1.35;
 }
 .md-spec__desc {
   font-size: var(--fs-caption);

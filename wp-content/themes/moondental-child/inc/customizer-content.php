@@ -878,6 +878,15 @@ function moondental_chrome_content_fields() {
 				'flocation_btn_google_sub'=> array( 'default' => 'Directions · Street View', 'label' => '버튼 3 — 부제', 'type' => 'text' ),
 			),
 		),
+		'recruit_hr' => array(
+			'title'  => '상시채용 — 인사팀 전용 연락처',
+			'fields' => array(
+				'recruit_hr_phone'        => array( 'default' => '', 'label' => '인사팀 전용 전화 (표시용, 예: 041-563-2876) — 비우면 대표번호 사용', 'type' => 'text' ),
+				'recruit_hr_phone_link'   => array( 'default' => '', 'label' => '인사팀 전용 전화 링크 (tel: 용 숫자만, 예: 0415632876)', 'type' => 'text' ),
+				'recruit_hr_email'        => array( 'default' => '', 'label' => '인사팀 전용 이메일 — 비우면 대표 이메일 사용', 'type' => 'text' ),
+				'recruit_hr_contact_name' => array( 'default' => '', 'label' => '인사 담당자 이름 (선택, 채용 히어로에 표시)', 'type' => 'text' ),
+			),
+		),
 	);
 }
 

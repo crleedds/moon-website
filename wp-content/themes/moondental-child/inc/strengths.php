@@ -334,7 +334,7 @@ function moondental_get_strengths() {
 <thead><tr><th>요일</th><th>진료 시간</th><th>비고</th></tr></thead>
 <tbody>
 <tr><td><strong>평일 (월·화·수·금)</strong></td><td>09:00 – 20:30</td><td>점심시간 없이 진료 · 야간진료 운영</td></tr>
-<tr><td><strong>목요일</strong></td><td>09:00 – 18:00</td><td>야간진료 없음</td></tr>
+<tr><td><strong>목요일</strong></td><td>09:00 – 18:30</td><td>야간진료 없음</td></tr>
 <tr><td><strong>토요일</strong></td><td>09:00 – 14:00</td><td>점심시간 없이 진료</td></tr>
 <tr><td><strong>일요일·공휴일</strong></td><td>휴진</td><td>—</td></tr>
 </tbody>

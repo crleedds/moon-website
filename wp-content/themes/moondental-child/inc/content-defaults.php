@@ -994,10 +994,10 @@ function moondental_get_history() {
 		/* ─── 2014 ─── */
 		array( 'year' => '2014', 'month' => '10', 'title' => 'T-broad 방송 〈힐링코치〉', 'desc' => '임플란트에 대한 정확한 이해와 전달을 돕는 치과 멘토 역할.', 'photo' => 'history-slide-16.png' ),
 		array( 'year' => '2014', 'month' => '07', 'title' => '대전 MBC 의료포커스 〈닥터인〉 자문병원 선정', 'desc' => '', 'photo' => 'history-slide-15.png' ),
-		array( 'year' => '2014', 'month' => '04', 'title' => '필리핀 치과의사 연수', 'desc' => '국제로타리 지원연수회 방문 및 임플란트 연수 진행.', 'photo' => 'history-slide-14.png' ),
+		array( 'year' => '2014', 'month' => '04', 'title' => '필리핀 치과의사 연수', 'desc' => '국제로타리 직업연수단 방문 및 임플란트 연수 진행.', 'photo' => 'history-slide-14.png' ),
 
 		/* ─── 2013 ─── */
-		array( 'year' => '2013', 'month' => '11', 'title' => '대한병원장 법무부담임자협회 대통령상 수상', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2013', 'month' => '11', 'title' => '대표병원장, 범죄예방 유공 대통령 표창 수상', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2013', 'month' => '10', 'title' => 'T-broad 방송 〈힐링코치〉', 'desc' => '치아 관련 환자 정보를 알기 쉽게 전달하는 구강코치 역할.', 'photo' => 'history-slide-13.png' ),
 		array( 'year' => '2013', 'month' => '06', 'title' => '기공실 CAD-CAM 장비 도입', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2013', 'month' => '03', 'title' => '충청남도 사회복지함정사 협약 체결', 'desc' => '', 'photo' => '' ),
@@ -1011,7 +1011,7 @@ function moondental_get_history() {
 		array( 'year' => '2012', 'month' => '05', 'title' => '충청대학교·선문대학교 산학협력 협약', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2011 ─── */
-		array( 'year' => '2011', 'month' => '11', 'title' => '천안 초등학생 자매결연', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2011', 'month' => '11', 'title' => '천안초등학교 자매결연', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2011', 'month' => '03', 'title' => '마취통증의학과 개설', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2010 ─── */
@@ -1025,19 +1025,19 @@ function moondental_get_history() {
 		array( 'year' => '2009', 'month' => '09', 'title' => '단국대학교 정치경영대학원 고위관리자과정 이둥창학 자매결연', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2009', 'month' => '08', 'title' => '치과의사 전공의 인턴·레지던트 수련병원 지정', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2009', 'month' => '02', 'title' => '단국대학교 천안한방병원 한방 자문의사 위촉', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2009', 'month' => '01', 'title' => '어린성지병원 자문의사 위촉', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2009', 'month' => '01', 'title' => '열린성애병원 자문의사 위촉', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2008 ─── */
-		array( 'year' => '2008', 'month' => '11', 'title' => '문치과병원 & 삼성서울병원 치과부 위장 학술세미나 주최', 'desc' => '한양대 문화의료실에서 진행.', 'photo' => '' ),
+		array( 'year' => '2008', 'month' => '11', 'title' => '문치과병원 & 삼성서울병원 치과부 학술세미나 주최', 'desc' => '한양대 문화의료실에서 진행.', 'photo' => '' ),
 		array( 'year' => '2008', 'month' => '10', 'title' => '2009 치과의사 전공의 인턴·레지던트 수련병원 지정 (보건복지부)', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2008', 'month' => '08', 'title' => '해양경찰학교 자매결연 체결', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2008', 'month' => '07', 'title' => '대표병원장 국제로타리 3620지구 이사 취임', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2008', 'month' => '07', 'title' => '대표병원장 국제로타리 3620지구 총재 취임', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2008', 'month' => '04', 'title' => '인사정 자매결연 체결', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2008', 'month' => '03', 'title' => '장애인 의료봉사 (사랑의 집) 시작', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2007 ─── */
 		array( 'year' => '2007', 'month' => '10', 'title' => '2008 치과의사 전공의 인턴 수련기관 지정 (보건복지부)', 'desc' => '', 'photo' => '' ),
-		array( 'year' => '2007', 'month' => '09', 'title' => '의료봉사 차량 이행 (25인치 버스)', 'desc' => '', 'photo' => '' ),
+		array( 'year' => '2007', 'month' => '09', 'title' => '의료봉사 이동진료 차량 도입 (25인승 버스)', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2007', 'month' => '06', 'title' => '외국인 노동자 무료 진료 시작 · 공주대학교 자매결연 체결', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '2007', 'month' => '01', 'title' => '문치과 사기 화재 이전', 'desc' => '', 'photo' => '' ),
 
@@ -1621,7 +1621,7 @@ function moondental_default_location_content() {
 <h3>진료시간 안내</h3>
 <ul>
 <li><strong>평일</strong> 09:00 – 20:30 (점심시간 없음, 야간진료 운영)</li>
-<li><strong>목요일</strong> 09:00 – 18:00 (야간진료 없음)</li>
+<li><strong>목요일</strong> 09:00 – 18:30 (야간진료 없음)</li>
 <li><strong>토요일</strong> 09:00 – 14:00</li>
 <li><strong>일요일·공휴일</strong> 휴진</li>
 </ul>';

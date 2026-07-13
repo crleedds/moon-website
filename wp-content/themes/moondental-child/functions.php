@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.27.1' );
+define( 'MOONDENTAL_VERSION', '3.27.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -78,6 +78,17 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_pricing_v3260', 'done' );
 }, 36 );
+
+/* 일회성 마이그레이션: 목요일 진료시간 18:00 → 18:30 (v3.27.2)
+ * 옛 default를 저장했던 사용자의 커스터마이저 값도 새 시간으로 갱신. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_hours_thu_v3272' ) === 'done' ) return;
+	$saved = get_theme_mod( 'moondental_hours_thu' );
+	if ( is_string( $saved ) && strpos( $saved, '18:00' ) !== false && strpos( $saved, '목요일' ) !== false ) {
+		remove_theme_mod( 'moondental_hours_thu' );
+	}
+	update_option( 'moondental_hours_thu_v3272', 'done' );
+}, 37 );
 
 /* 일회성 마이그레이션: 비용안내 가격표에서 '원부터' → '원' (v3.24.1)
  * 사용자가 커스터마이저에서 편집·저장한 가격표에도 옛 '부터' 표기가 남을 수 있으므로 정정. */
@@ -232,7 +243,7 @@ add_action( 'after_setup_theme', function() {
 			'body'=>"<p>천안 만남로 문치과병원은 직장인·학생 환자분들을 위해 평일 야간 진료를 운영하고 있습니다.</p>
 <ul>
 <li>월·화·수·금: <strong>09:00 ~ 20:30</strong> (점심시간 없음)</li>
-<li>목요일: 09:00 ~ 18:00 (야간 진료 없음)</li>
+<li>목요일: 09:00 ~ 18:30 (야간 진료 없음)</li>
 <li>토요일: 09:00 ~ 14:00</li>
 <li>일요일·공휴일: 휴진</li>
 </ul>
@@ -699,7 +710,7 @@ function moondental_get_info( $key = '' ) {
 		'address'      => '충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층 (신부동)',
 		'address_road' => '충남 천안시 동남구 만남로 52, 문타워 9·10·11·13층',
 		'hours_wd'     => '평일 09:00 – 20:30 (점심시간 없음)',
-		'hours_thu'    => '목요일 09:00 – 18:00 (야간진료 없음)',
+		'hours_thu'    => '목요일 09:00 – 18:30 (야간진료 없음)',
 		'hours_sat'    => '토요일 09:00 – 14:00',
 		'hours_lunch'  => '',
 		'hours_off'    => '일요일·공휴일 휴진',
@@ -2595,7 +2606,7 @@ function moondental_get_services() {
 		array(
 			'slug'  => '사랑니-발치',
 			'title' => '천안·아산 사랑니 발치',
-			'icon'  => '🦴',
+			'icon'  => '🩻',
 			'desc'  => '천안·아산 매복 사랑니까지 — CBCT 3D 정밀 진단으로 구강악안면외과 전문 의료진이 안전하게 발치합니다.',
 		),
 		array(
