@@ -21,9 +21,9 @@ $region = function_exists( 'moondental_get_region_by_slug' ) ? moondental_get_re
 if ( ! $region ) {
 	?>
 	<section class="md-section">
-		<div class="md-container md-container--narrow" style="text-align:center;">
+		<div class="md-container md-container--narrow md-u-center">
 			<h1>지역 정보를 찾을 수 없습니다</h1>
-			<p style="margin-top:24px;">
+			<p class="md-u-mt-24">
 				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>">
 					← 오시는 길로 돌아가기
 				</a>

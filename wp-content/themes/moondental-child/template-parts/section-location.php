@@ -99,6 +99,7 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 			   <?php echo $map_image ? 'style="background-image:url(' . esc_url( $map_image ) . ');"' : ''; ?>>
 				<?php if ( ! $map_image ) : ?>
 					<div class="md-locmap__pattern" aria-hidden="true"></div>
+					<span class="md-locmap__fallback-label">🗺️ 지도 이미지 열기 →</span>
 				<?php endif; ?>
 			</a>
 		<?php endif; ?>

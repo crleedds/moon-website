@@ -50,7 +50,7 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 			'align' => 'center',
 		) ); ?>
 
-		<p class="md-channel-grid__hint" style="text-align:center; margin-top:18px;">
+		<p class="md-channel-grid__hint md-u-center md-u-mt-18">
 			진료시간: 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진
 		</p>
 	</div>

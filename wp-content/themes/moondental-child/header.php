@@ -86,7 +86,7 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 							</a>
 						<?php endif; ?>
 						<?php if ( $hours_wd ) : ?>
-							<a class="md-header__hours" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>#hours" data-track="cta-header-hours" aria-label="오시는 길과 진료시간 보기">
+							<a class="md-header__hours" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>#hours" data-track="cta-header-hours" aria-label="오시는 길과 진료시간 보기" title="오시는 길·전체 진료시간 보기">
 								<?php echo esc_html( $hours_wd ); ?>
 							</a>
 						<?php endif; ?>

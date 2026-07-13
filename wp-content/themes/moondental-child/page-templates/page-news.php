@@ -153,8 +153,8 @@ $is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
 				<?php endwhile; wp_reset_postdata(); ?>
 			</div>
 		<?php else : ?>
-			<div class="md-news-empty" style="text-align:center; padding: clamp(24px, 3vw, 40px); background: var(--color-white); border-radius: var(--radius-md);">
-				<p style="margin:0; color: var(--color-text-sub);">아직 등록된 소식이 없습니다.</p>
+			<div class="md-news-empty">
+				<p class="md-news-empty__msg">아직 등록된 소식이 없습니다.</p>
 				<?php if ( $is_editor ) : ?>
 					<p style="margin: 16px 0 0;">
 						<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( $notice_new_url ); ?>">＋ 첫 소식 작성하기</a>
@@ -238,8 +238,8 @@ $is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
 			?>
 
 		<?php else : ?>
-			<div class="md-news-empty" style="text-align:center; padding: clamp(24px, 3vw, 40px); background: var(--color-surface); border-radius: var(--radius-md);">
-				<p style="margin:0; color: var(--color-text-sub);">아직 등록된 치아이야기가 없습니다.</p>
+			<div class="md-news-empty md-news-empty--surface">
+				<p class="md-news-empty__msg">아직 등록된 치아이야기가 없습니다.</p>
 				<?php if ( $is_editor ) : ?>
 					<p style="margin: 16px 0 0;">
 						<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( $story_new_url ); ?>">＋ 첫 치아이야기 작성하기</a>

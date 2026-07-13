@@ -32,12 +32,16 @@ for ( $i = 1; $i <= 6; $i++ ) {
 						<span class="md-home-faq__q"><?php echo esc_html( $faq['q'] ); ?></span>
 						<span class="md-home-faq__chev" aria-hidden="true">+</span>
 					</summary>
-					<div class="md-home-faq__a"><?php echo wp_kses_post( wpautop( md_autolink_addresses( $faq['a'] ) ) ); ?></div>
+					<div class="md-home-faq__a"><?php
+						// v3.29.1: md_autolink_addresses가 이미 &lt;a&gt; 링크를 삽입하므로 wpautop은 텍스트 원본에만 적용
+						$_faq_a = wpautop( $faq['a'] );
+						echo wp_kses_post( md_autolink_addresses( $_faq_a ) );
+					?></div>
 				</details>
 			<?php endforeach; ?>
 		</div>
 
-		<div style="text-align:center; margin-top: clamp(24px, 3vw, 32px);">
+		<div class="md-section-tail md-section-tail--sm">
 			<a class="md-btn md-btn-ghost" href="<?php echo esc_url( home_url( '/faq/' ) ); ?>">
 				전체 FAQ 보기 →
 			</a>

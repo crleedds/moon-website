@@ -40,7 +40,7 @@ for ( $i = 1; $i <= 6; $i++ ) {
 			<?php endforeach; ?>
 		</ol>
 
-		<div style="text-align:center; margin-top: clamp(28px, 3.5vw, 40px);">
+		<div class="md-section-tail">
 			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-process', 'size' => 'lg', 'align' => 'center' ) ); ?>
 		</div>
 	</div>

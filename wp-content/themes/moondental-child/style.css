@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.29.0
+Version:      3.29.1
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -2106,6 +2106,48 @@ button.elementor-button {
   letter-spacing: -0.005em;
 }
 .md-faq-intro { margin-bottom: clamp(40px, 5vw, 64px); }
+/* v3.29.1 · 섹션 하단 CTA 컨테이너 · 인라인 style 대체 */
+.md-section-tail {
+  text-align: center;
+  margin-top: clamp(28px, 3.5vw, 40px);
+}
+.md-section-tail--sm { margin-top: clamp(24px, 3vw, 32px); }
+/* v3.29.1 · 소형 유틸리티 (인라인 style 대체) */
+.md-u-center { text-align: center; }
+.md-u-mt-14 { margin-top: 14px; }
+.md-u-mt-18 { margin-top: 18px; }
+.md-u-mt-24 { margin-top: 24px; }
+.md-u-mt-cards { margin-top: clamp(24px, 3vw, 36px); }
+.md-u-fs-caption { font-size: 0.85rem; opacity: 0.85; }
+.md-news-empty {
+  text-align: center;
+  padding: clamp(24px, 3vw, 40px);
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+}
+.md-news-empty--surface { background: var(--color-surface); }
+.md-mapbtn-grid--top { margin-top: clamp(14px, 1.8vw, 20px); }
+.md-doc-single-cta { text-align: center; margin-top: clamp(24px, 3vw, 32px); }
+.md-info-block__sub--sep { margin-top: 12px; }
+.md-info-block__cta { margin-top: 16px; }
+.md-info-block__cta--row { display: flex; gap: 8px; flex-wrap: wrap; }
+.md-btn-group--mt-lg { margin-top: 32px; }
+.md-news-empty__msg { margin: 0; color: var(--color-text-sub); }
+
+/* v3.29.1 · 지도 이미지 없을 때 fallback 라벨 */
+.md-locmap__fallback-label {
+  position: absolute;
+  bottom: 16px; left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 18px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 2;
+  pointer-events: none;
+}
 /* v3.29.0 · Hero 관리자 안내 · 다크모드 토큰 사용 */
 .md-hero__admin-note {
   background: var(--color-surface);
@@ -4472,6 +4514,10 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
 .md-docsingle-qa__item.is-alt {
   border-left-color: var(--color-accent);
 }
+/* v3.29.1 · 좁은 화면에서 짝수/홀수 교차색 무의미 · 통일 처리 */
+@media (max-width: 720px) {
+  .md-docsingle-qa__item.is-alt { border-left-color: var(--color-primary); }
+}
 .md-docsingle-qa__item:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-soft);
@@ -5354,6 +5400,15 @@ html { scroll-behavior: smooth; }
 }
 
 /* 앵커 네비 — 페이지 상단 sticky */
+/* v3.29.1 · 이모지 렌더링 브라우저별 편차 방지 */
+.md-preservation-nav [aria-hidden="true"],
+.md-clinic-card__icon,
+.md-trust__icon,
+.md-mission-band__certs [aria-hidden="true"],
+.md-clinic-night [aria-hidden="true"],
+.md-service-card__icon {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif;
+}
 .md-preservation-nav {
   background: var(--color-white);
   border-bottom: 1px solid var(--color-border);

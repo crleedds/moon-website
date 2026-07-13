@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.29.0' );
+define( 'MOONDENTAL_VERSION', '3.29.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -161,6 +161,19 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_hours_thu_v3283', 'done' );
 }, 42 );
+
+/* 일회성 마이그레이션 v3.29.1 · 옛 default 실명 명단이 Customizer에 없으면 seed로 저장.
+ * GitHub 공개 리포에 노출됐던 명단을 default에서 제거하기 위한 안전장치. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_staff_v3291' ) === 'done' ) return;
+	$saved = get_theme_mod( 'md_content_staff_list' );
+	// Customizer에 값이 없으면 옛 default를 이관 (실사이트 명단 유지)
+	if ( empty( $saved ) || ! is_string( $saved ) ) {
+		$seed = "진료실|이사|이순민\n진료실|팀장|박지선\n진료실|실장|이희남\n진료실|실장|임은혜\n진료실|실장|지선미\n진료실|실장|한경순\n진료실|책임|주경심\n진료실|책임|윤경옥\n진료실|책임|노금란\n진료실|책임|김정애\n진료실|과장|남소영\n진료실|선임|김인애\n진료실|선임|박미선\n진료실|선임|김윤미\n진료실|선임|유현영\n진료실|주임|서채빈\n진료실|주임|박명자\n진료실|주임|금민주\n진료실|주임|전서혜\n진료실|주임|유혜정\n진료실|주임|서소리\n진료실|주임|장유정\n진료실|주임|이아연\n진료실|주임|김경하\n진료실|주임|이다윤\n진료실|주임|이하은\n진료실|주임|김하늘\n진료실|주임|김우정\n진료실|주임|최로미\n진료실|주임|권민지\n기공실|이사|조항수\n기공실|차장|맹의재\n기공실|과장|장순복\n기공실|기사|박진옥\n기공실|기사|노재형\n서비스지원실|이사|강미해\n서비스지원실|실장|이선양\n서비스지원실|책임코디|김다경\n서비스지원실|책임코디|공미희\n서비스지원실|선임코디|정소리\n서비스지원실|선임코디|황진아\n서비스지원실|선임코디|박혜령\n경영지원실|행정원장|양병욱\n경영지원실|과장|이충현\n경영지원실|사원|김하진\n경영지원실|사원|카밀라\n경영지원실|사원|게를레\n관리사무소|소장|강성하\n비서실|과장|김동현\n비서실|과장|민종기\n비서실|대리|이슬기";
+		set_theme_mod( 'md_content_staff_list', $seed );
+	}
+	update_option( 'moondental_staff_v3291', 'done' );
+}, 44 );
 
 /* 일회성 마이그레이션 v3.29.0 · 여러 진료시간 안내 텍스트 (cta_hint, price_cta_meta_1_value)
  * 옛 default를 저장했으면 → 목 18:00 → 18:30 자동 갱신 · 앞 0 제거. */

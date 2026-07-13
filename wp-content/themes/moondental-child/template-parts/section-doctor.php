@@ -60,7 +60,7 @@ $doctor_fallback = moondental_doctor_photo_url( 'doctor-04.png' );
 					</div>
 				<?php endif; ?>
 
-				<div class="md-btn-group" style="margin-top: 32px;">
+				<div class="md-btn-group md-btn-group--mt-lg">
 					<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/doctors/' ) ); ?>">
 						의료진 자세히 보기 →
 					</a>

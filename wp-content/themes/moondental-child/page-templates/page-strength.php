@@ -22,10 +22,10 @@ if ( ! $data ) {
 	// 잘못된 슬러그 — 강점 목록 페이지로 안내
 	?>
 	<section class="md-section">
-		<div class="md-container md-container--narrow" style="text-align:center;">
-			<h1>강점 상세 정보를 찾을 수 없습니다</h1>
-			<p>요청하신 강점 항목이 존재하지 않습니다.</p>
-			<p style="margin-top:24px;">
+		<div class="md-container md-container--narrow md-u-center">
+			<h1><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'strength_404_title', '강점 상세 정보를 찾을 수 없습니다' ) : '강점 상세 정보를 찾을 수 없습니다' ); ?></h1>
+			<p><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'strength_404_desc', '요청하신 강점 항목이 존재하지 않습니다.' ) : '요청하신 강점 항목이 존재하지 않습니다.' ); ?></p>
+			<p class="md-u-mt-24">
 				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/기술력-시설/' ) ); ?>">
 					← 강점 목록으로
 				</a>

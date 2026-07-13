@@ -74,7 +74,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 			<?php endif; ?>
 		</a>
 
-		<div class="md-mapbtn-grid" style="margin-top: clamp(14px, 1.8vw, 20px);">
+		<div class="md-mapbtn-grid md-mapbtn-grid--top">
 			<a class="md-mapbtn md-mapbtn--naver" href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener" data-track="cta-location-map-naver">
 				<span class="md-mapbtn__logo" aria-hidden="true">N</span>
 				<span class="md-mapbtn__body">

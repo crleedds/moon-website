@@ -106,7 +106,7 @@ $phone_note     = $hr_phone_display ? '인사팀 직접 통화' : ( '인사팀 �
 			</div>
 		</article>
 
-		<article class="md-recruit-card" style="margin-top: clamp(24px, 3vw, 36px);">
+		<article class="md-recruit-card md-u-mt-cards">
 			<div class="md-recruit-card__head">
 				<span class="md-recruit-card__badge">상시채용</span>
 				<h3>치과위생사 (신입 · 경력)</h3>
@@ -135,7 +135,7 @@ $phone_note     = $hr_phone_display ? '인사팀 직접 통화' : ( '인사팀 �
 			</div>
 		</article>
 
-		<article class="md-recruit-card" style="margin-top: clamp(24px, 3vw, 36px);">
+		<article class="md-recruit-card md-u-mt-cards">
 			<div class="md-recruit-card__head">
 				<span class="md-recruit-card__badge md-recruit-card__badge--alt">상시채용</span>
 				<h3>진료 코디네이터 (상담 실장)</h3>
@@ -262,7 +262,7 @@ $phone_note     = $hr_phone_display ? '인사팀 직접 통화' : ( '인사팀 �
 				</a>
 			</div>
 			<?php if ( ! $hr_phone_display ) : ?>
-				<p style="margin-top:14px;font-size:0.85rem;opacity:0.85;text-align:center;">
+				<p class="md-u-mt-14 md-u-fs-caption md-u-center">
 					※ 대표번호로 문의하실 때는 <strong>"인사팀 담당자 연결 부탁드립니다"</strong>라고 말씀해주세요.
 				</p>
 			<?php endif; ?>

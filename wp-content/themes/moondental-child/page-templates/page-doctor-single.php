@@ -234,7 +234,7 @@ foreach ( $all_groups as $g ) {
 			<?php endforeach; ?>
 		</div>
 
-		<div style="text-align:center; margin-top:clamp(24px, 3vw, 32px);">
+		<div class="md-doc-single-cta">
 			<a class="md-btn md-btn-ghost" href="<?php echo esc_url( home_url( '/의료진/' ) ); ?>">
 				<?php echo esc_html( md_content( 'doc_single_back_label', '← 의료진 전체 보기' ) ); ?>
 			</a>

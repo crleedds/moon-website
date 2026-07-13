@@ -36,7 +36,7 @@ $info = moondental_get_info();
 					<?php endforeach; ?>
 				</ul>
 				<?php if ( $info['hours_off'] ) : ?>
-					<p class="md-info-block__sub" style="margin-top:12px;"><?php echo esc_html( $info['hours_off'] ); ?></p>
+					<p class="md-info-block__sub md-info-block__sub--sep"><?php echo esc_html( $info['hours_off'] ); ?></p>
 				<?php endif; ?>
 			</div>
 
@@ -51,7 +51,7 @@ $info = moondental_get_info();
 					<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'info_block_phone_sub', "전화 예약 / 진료 문의\n진료시간 내에만 응답 가능합니다." ) : "전화 예약 / 진료 문의\n진료시간 내에만 응답 가능합니다." ) ); ?>
 				</p>
 				<?php if ( $info['kakao_url'] ) : ?>
-					<div style="margin-top:16px;">
+					<div class="md-info-block__cta">
 						<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( $info['kakao_url'] ); ?>" target="_blank" rel="noopener">
 							<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'info_block_phone_btn', '카카오톡 상담' ) : '카카오톡 상담' ); ?>
 						</a>
@@ -68,7 +68,7 @@ $info = moondental_get_info();
 							<?php echo esc_html( $info['address_road'] ?: $info['address'] ); ?>
 						</a>
 					</p>
-					<div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+					<div class="md-info-block__cta md-info-block__cta--row">
 						<a class="md-btn md-btn-secondary md-btn--sm" href="<?php echo esc_url( $place_url ); ?>" target="_blank" rel="noopener" data-track="cta-info-naver-map">
 							<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'info_block_location_btn1', '🟢 네이버 플레이스' ) : '🟢 네이버 플레이스' ); ?>
 						</a>
@@ -81,7 +81,7 @@ $info = moondental_get_info();
 						<?php echo md_address_link( $info['address_road'] ?: $info['address'] ); ?>
 					</p>
 				<?php endif; ?>
-				<p class="md-info-block__sub" style="margin-top:12px;">
+				<p class="md-info-block__sub md-info-block__sub--sep">
 					<?php echo nl2br( wp_kses_post( function_exists( 'md_content' ) ? md_content( 'info_block_location_sub', '주차·대중교통 안내는 <a href="' . esc_url( home_url( '/오시는-길/' ) ) . '">예약·상담 페이지</a>에서 확인하실 수 있습니다.' ) : '주차·대중교통 안내는 <a href="' . esc_url( home_url( '/오시는-길/' ) ) . '">예약·상담 페이지</a>에서 확인하실 수 있습니다.' ) ); ?>
 				</p>
 			</div>
