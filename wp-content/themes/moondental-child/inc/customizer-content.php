@@ -879,10 +879,13 @@ function moondental_chrome_content_fields() {
 			'title'  => '푸터 — 텍스트',
 			'fields' => array(
 				'footer_brand_tagline'      => array( 'default' => '', 'label' => '브랜드 슬로건 (로고 아래) — 비우면 미표시', 'type' => 'text' ),
-				'footer_col_hours_title'    => array( 'default' => '진료시간', 'label' => '컬럼 ①번 제목', 'type' => 'text' ),
-				'footer_col_services_title' => array( 'default' => '진료안내', 'label' => '컬럼 ②번 제목', 'type' => 'text' ),
-				'footer_col_about_title'    => array( 'default' => '병원안내', 'label' => '컬럼 ③번 제목', 'type' => 'text' ),
-				'footer_copyright'          => array( 'default' => 'All rights reserved.', 'label' => '저작권 문구', 'type' => 'text' ),
+				'footer_col_hours_title'    => array( 'default' => '진료시간', 'label' => '진료시간 컬럼 제목', 'type' => 'text' ),
+				'footer_col_policy_title'   => array( 'default' => '이용안내', 'label' => '이용안내 컬럼 제목 (v3.28.4)', 'type' => 'text' ),
+				'footer_copyright_bar'      => array(
+					'default' => 'Copyright {year} {name}  All Rights Reserved.',
+					'label' => '하단 저작권 바 (사용 가능 토큰: {year}, {name})',
+					'type' => 'text',
+				),
 			),
 		),
 		'footer_legal' => array(
@@ -902,13 +905,11 @@ function moondental_chrome_content_fields() {
 			),
 		),
 		'footer_links' => array(
-			'title'  => '푸터 — 하단 정책 링크',
+			'title'  => '푸터 — 이용안내 컬럼 링크 (진료시간 우측)',
 			'fields' => array(
-				'footer_link_privacy'    => array( 'default' => '개인정보처리방침|/개인정보처리방침/', 'label' => '링크 ①  (형식: 라벨|URL — 비우면 숨김)', 'type' => 'text' ),
-				'footer_link_terms'      => array( 'default' => '이용약관|/이용약관/',           'label' => '링크 ②', 'type' => 'text' ),
-				'footer_link_pricing'    => array( 'default' => '비급여 진료비|/비용-안내/',     'label' => '링크 ③', 'type' => 'text' ),
-				'footer_link_email'      => array( 'default' => '이메일 무단수집거부|',           'label' => '링크 ④ (URL 비우면 클릭 불가)', 'type' => 'text' ),
-				'footer_link_sitemap'    => array( 'default' => '',                                 'label' => '링크 ⑤ (선택)', 'type' => 'text' ),
+				'footer_link_privacy'    => array( 'default' => '개인정보취급방침|/개인정보처리방침/', 'label' => '개인정보취급방침 (형식: 라벨|URL — 비우면 숨김)', 'type' => 'text' ),
+				'footer_link_terms'      => array( 'default' => '이용약관|/이용약관/',                 'label' => '이용약관', 'type' => 'text' ),
+				'footer_link_email'      => array( 'default' => '이메일 무단수집거부|/이메일-무단수집거부/', 'label' => '이메일 무단수집거부', 'type' => 'text' ),
 			),
 		),
 		'cta_buttons' => array(

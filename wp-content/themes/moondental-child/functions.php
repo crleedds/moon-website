@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.28.3' );
+define( 'MOONDENTAL_VERSION', '3.28.4' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -806,7 +806,7 @@ function moondental_get_info( $key = '' ) {
 		'biz_no'       => '',
 		'med_inst_no'  => '34400117',
 		'rep'          => '문은수',
-		'email'        => '',
+		'email'        => 'moondental1995@naver.com',
 		'kakao_url'    => 'http://pf.kakao.com/_VTcgE/chat',
 		'instagram'    => 'https://www.instagram.com/moondentalhospital_official/',
 		'blog_url'     => 'https://blog.naver.com/moondental1995',

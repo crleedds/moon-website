@@ -68,6 +68,16 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 					</p>
 				<?php endif; ?>
 
+				<?php
+				$footer_email = $info['email'] ?: 'moondental1995@naver.com';
+				if ( $footer_email ) : ?>
+					<p class="md-footer__email">
+						<a href="mailto:<?php echo esc_attr( $footer_email ); ?>" data-track="cta-footer-email">
+							✉️ <?php echo esc_html( $footer_email ); ?>
+						</a>
+					</p>
+				<?php endif; ?>
+
 				<?php if ( ! empty( $info['address'] ) ) : ?>
 					<p class="md-footer__addr">
 						<?php if ( $place_url ) : ?>
@@ -125,49 +135,17 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				</ul>
 			</div>
 
-			<?php /* 진료안내·병원안내 컬럼은 사용자 요청으로 v3.23.1에서 제거 */ ?>
+			<?php
+			// v3.28.4 — 이용안내 컬럼 (정책 링크 + 대표자)
+			$policy_col_title = $mc( 'footer_col_policy_title', '이용안내' );
+			$policy_col_items = array();
 
-		</div>
-
-		<?php if ( $legal_show !== 'no' ) :
-			// v3.28.2 — 최소 정보만 표시:
-			//   정책 링크 → 병원명 → (대표자 | 개업일 | 요양기관번호)
-			//   주소/전화/개인정보 보호책임자/사업자등록번호/저작권 제거 (사용자 요청)
-			$inst_name = $mc( 'footer_legal_inst_name', '한아의료재단 문치과병원' );
-			$rep       = $mc( 'footer_legal_rep',       '문은수 이사장' );
-			$med_no    = $mc( 'footer_legal_med_no',    '34400117' );
-			$open_date = $mc( 'footer_legal_open_date', '1995.04' );
-			$ad_no     = $mc( 'footer_legal_ad_no',     '' );
-
-			// v3.27.3: 접두어 중복 제거 정리
-			$strip_prefix = function( $val, $prefixes ) {
-				$val = trim( (string) $val );
-				foreach ( $prefixes as $p ) {
-					if ( stripos( $val, $p ) === 0 ) {
-						$val = ltrim( substr( $val, strlen( $p ) ), " :·" );
-						break;
-					}
-				}
-				return $val;
-			};
-			$rep    = $strip_prefix( $rep,    array( '대표자:', '대표자' ) );
-			$med_no = $strip_prefix( $med_no, array( '요양기관번호:', '요양기관번호', '의료기관 고유번호:', '의료기관 고유번호', '의료기관번호:', '의료기관번호' ) );
-
-			// v3.28.1: 값이 없거나 라벨만 있는 경우 안전한 기본값으로 fallback
-			if ( ! trim( (string) $rep ) )       $rep       = '문은수 이사장';
-			if ( ! trim( (string) $med_no ) )    $med_no    = '34400117';
-			if ( ! trim( (string) $inst_name ) ) $inst_name = '한아의료재단 문치과병원';
-			if ( ! trim( (string) $open_date ) ) $open_date = '1995.04';
-
-			// 정책 링크 (Customizer에서 "라벨|URL" 형식)
-			$policy_keys = array(
-				'footer_link_privacy' => '개인정보처리방침|/개인정보처리방침/',
+			$policy_col_keys = array(
+				'footer_link_privacy' => '개인정보취급방침|/개인정보처리방침/',
 				'footer_link_terms'   => '이용약관|/이용약관/',
-				'footer_link_pricing' => '비급여 진료비|/비용-안내/',
-				'footer_link_sitemap' => '',
+				'footer_link_email'   => '이메일 무단수집거부|/이메일-무단수집거부/',
 			);
-			$policy_items = array();
-			foreach ( $policy_keys as $k => $d ) {
+			foreach ( $policy_col_keys as $k => $d ) {
 				$raw = trim( $mc( $k, $d ) );
 				if ( ! $raw ) continue;
 				$parts = explode( '|', $raw, 2 );
@@ -175,22 +153,24 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				$url   = isset( $parts[1] ) ? trim( $parts[1] ) : '';
 				if ( ! $label ) continue;
 				if ( $url && $url[0] === '/' ) $url = home_url( $url );
-				$policy_items[] = array( 'label' => $label, 'url' => $url );
+				$policy_col_items[] = array( 'label' => $label, 'url' => $url );
 			}
 
-			// 사업자 정보 · 대표자 · 개업일 · 요양기관번호 · (선택) 광고심의
-			$biz_items = array();
-			if ( $rep )       $biz_items[] = '대표자: ' . esc_html( $rep );
-			if ( $open_date ) $biz_items[] = '개업일: ' . esc_html( $open_date );
-			if ( $med_no )    $biz_items[] = '요양기관번호: ' . esc_html( $med_no );
-			if ( $ad_no )     $biz_items[] = '광고심의: ' . esc_html( $ad_no );
-		?>
-		<aside class="md-footer__legal md-footer__legal--v2" aria-label="의료기관 법적 표시">
-
-			<?php if ( $policy_items ) : ?>
-				<ul class="md-footer__policy-links">
-					<?php foreach ( $policy_items as $p ) : ?>
-						<li>
+			$col_rep_raw = trim( (string) $mc( 'footer_legal_rep', '문은수 이사장' ) );
+			// 접두어 정리 후 fallback
+			foreach ( array( '대표자:', '대표자' ) as $p ) {
+				if ( stripos( $col_rep_raw, $p ) === 0 ) {
+					$col_rep_raw = ltrim( substr( $col_rep_raw, strlen( $p ) ), " :·" );
+					break;
+				}
+			}
+			if ( ! $col_rep_raw ) $col_rep_raw = '문은수 이사장';
+			?>
+			<div class="md-footer__col">
+				<h4><?php echo esc_html( $policy_col_title ); ?></h4>
+				<ul>
+					<?php foreach ( $policy_col_items as $p ) : ?>
+						<li class="md-footer__policy-item">
 							<?php if ( $p['url'] ) : ?>
 								<a href="<?php echo esc_url( $p['url'] ); ?>"><?php echo esc_html( $p['label'] ); ?></a>
 							<?php else : ?>
@@ -198,25 +178,24 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 							<?php endif; ?>
 						</li>
 					<?php endforeach; ?>
+					<li class="md-footer__rep">대표자: <?php echo esc_html( $col_rep_raw ); ?></li>
 				</ul>
-			<?php endif; ?>
+			</div>
 
-			<?php if ( $inst_name ) : ?>
-				<p class="md-footer__inst-name"><strong><?php echo esc_html( $inst_name ); ?></strong></p>
-			<?php endif; ?>
+		</div>
 
-			<?php if ( $biz_items ) : ?>
-				<div class="md-footer__biz-info">
-					<p><?php echo implode( ' <span class="md-footer__sep">|</span> ', $biz_items ); ?></p>
-				</div>
-			<?php endif; ?>
-
-			<?php $extra = $mc( 'footer_legal_extra', '' ); ?>
-			<?php if ( $extra ) : ?>
-				<p class="md-footer__legal-extra"><?php echo esc_html( $extra ); ?></p>
-			<?php endif; ?>
-		</aside>
-		<?php endif; ?>
+		<?php
+		// v3.28.4 — 하단 저작권 바 (중앙 정렬, 단일 라인)
+		// Customizer에서 {year} 토큰과 {name} 토큰을 자동 치환.
+		$copyright_tpl = $mc( 'footer_copyright_bar', 'Copyright {year} {name}  All Rights Reserved.' );
+		$copyright_text = strtr( $copyright_tpl, array(
+			'{year}' => date_i18n( 'Y' ),
+			'{name}' => '한아의료재단 문치과병원',
+		) );
+		?>
+		<div class="md-footer__copyright-bar">
+			<p><?php echo esc_html( $copyright_text ); ?></p>
+		</div>
 
 	</div>
 </footer>

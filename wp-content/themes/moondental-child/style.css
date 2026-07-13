@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.28.3
+Version:      3.28.4
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -3027,39 +3027,33 @@ button.elementor-button {
 }
 .md-footer__policy-links a:hover { color: var(--color-primary-light); }
 
-/* v3.28.2 — 푸터 법적표시 컴팩트 (병원명 + 3개 항목만) */
-.md-footer__legal--v2 {
+/* v3.28.4 — 이용안내 컬럼 (정책 링크 + 대표자) */
+.md-footer__policy-item a {
+  color: rgba(255, 255, 255, 0.75);
+  transition: color 0.2s var(--ease);
+}
+.md-footer__policy-item a:hover { color: var(--color-primary-light); }
+.md-footer__rep {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 8px !important;
+  padding-top: 8px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* v3.28.4 — 하단 저작권 바 (중앙 정렬) */
+.md-footer__copyright-bar {
+  margin-top: clamp(24px, 3vw, 36px);
+  padding: clamp(16px, 2vw, 20px) 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
   text-align: center;
-  border-bottom: none;
-  padding: clamp(20px, 2.4vw, 28px) 0 clamp(8px, 1vw, 12px);
 }
-.md-footer__legal--v2 .md-footer__policy-links {
-  justify-content: center;
-  gap: 8px 18px;
-  margin: 0 0 18px;
-}
-.md-footer__inst-name {
-  margin: 0 0 14px;
-  font-size: 0.95rem;
-  letter-spacing: -0.005em;
-  color: rgba(255, 255, 255, 0.92);
-}
-.md-footer__inst-name strong {
-  font-weight: 700;
-}
-.md-footer__biz-info {
-  font-size: 0.75rem;
-  line-height: 1.9;
-  color: rgba(255, 255, 255, 0.55);
-  word-break: keep-all;
-}
-.md-footer__biz-info p {
+.md-footer__copyright-bar p {
   margin: 0;
-}
-.md-footer__sep {
-  color: rgba(255, 255, 255, 0.28);
-  margin: 0 4px;
-  font-weight: 300;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.02em;
+  font-feature-settings: 'tnum';
 }
 
 /* 푸터 모바일 — 컬럼별 자연 정렬 */
@@ -7731,6 +7725,17 @@ html { scroll-behavior: smooth; }
   font-feature-settings: 'tnum';
 }
 .md-footer__phone a:hover { color: var(--color-primary-light); }
+
+/* v3.28.4 — 이메일 (전화번호 밑) */
+.md-footer__email {
+  font-size: 0.875rem;
+  margin: 0 0 6px;
+}
+.md-footer__email a {
+  color: rgba(255, 255, 255, 0.82);
+  transition: color 0.2s var(--ease);
+}
+.md-footer__email a:hover { color: var(--color-primary-light); }
 
 .md-footer__addr {
   font-size: 0.8125rem;
