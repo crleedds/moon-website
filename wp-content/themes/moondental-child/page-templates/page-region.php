@@ -160,7 +160,7 @@ $is_walking     = ! empty( $region['duration_label'] ) && strpos( $region['durat
 			<article class="md-region-reason">
 				<div class="md-region-reason__num">02</div>
 				<h3>👨‍⚕️ 분야별 전문 의료진 협진</h3>
-				<p>보철·교정·보존·치주·소아·외과 전 분야 의료진이 한 케이스를 함께 보는 협진 시스템. <?php echo esc_html( $region_name ); ?>에서 따로따로 다닐 필요 없습니다.</p>
+				<p>보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 전 분야 의료진이 한 케이스를 함께 보는 협진 시스템. <?php echo esc_html( $region_name ); ?>에서 따로따로 다닐 필요 없습니다.</p>
 			</article>
 			<article class="md-region-reason">
 				<div class="md-region-reason__num">03</div>

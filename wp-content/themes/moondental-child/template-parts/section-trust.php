@@ -15,10 +15,10 @@ $stats = array(
 		'icon'  => '🏥',
 	),
 	array(
-		'value' => md_content( 'trust_2_value', '6' ),
-		'unit'  => md_content( 'trust_2_unit',  '과' ),
-		'label' => md_content( 'trust_2_label', '전문 진료과' ),
-		'sub'   => md_content( 'trust_2_sub',   '보철·교정·보존·치주·소아·외과' ),
+		'value' => md_content( 'trust_2_value', '11' ),
+		'unit'  => md_content( 'trust_2_unit',  '개' ),
+		'label' => md_content( 'trust_2_label', '전문 진료 영역' ),
+		'sub'   => md_content( 'trust_2_sub',   '보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주' ),
 		'icon'  => '🦷',
 	),
 	array(

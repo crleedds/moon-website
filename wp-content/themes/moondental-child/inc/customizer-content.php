@@ -136,10 +136,10 @@ function moondental_home_content_fields() {
 				'trust_1_label' => array( 'default' => '1995년 개원', 'label' => '①번 — 라벨', 'type' => 'text' ),
 				'trust_1_sub'   => array( 'default' => '한자리에서 이어온 신뢰', 'label' => '①번 — 부제', 'type' => 'text' ),
 
-				'trust_2_value' => array( 'default' => '6',     'label' => '②번 — 숫자',     'type' => 'text' ),
-				'trust_2_unit'  => array( 'default' => '과',    'label' => '②번 — 단위',     'type' => 'text' ),
-				'trust_2_label' => array( 'default' => '전문 진료과', 'label' => '②번 — 라벨', 'type' => 'text' ),
-				'trust_2_sub'   => array( 'default' => '보철·교정·보존·치주·소아·외과', 'label' => '②번 — 부제', 'type' => 'text' ),
+				'trust_2_value' => array( 'default' => '11',    'label' => '②번 — 숫자',     'type' => 'text' ),
+				'trust_2_unit'  => array( 'default' => '개',    'label' => '②번 — 단위',     'type' => 'text' ),
+				'trust_2_label' => array( 'default' => '전문 진료 영역', 'label' => '②번 — 라벨', 'type' => 'text' ),
+				'trust_2_sub'   => array( 'default' => '보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주', 'label' => '②번 — 부제', 'type' => 'text' ),
 
 				'trust_3_value' => array( 'default' => '4',     'label' => '③번 — 숫자',     'type' => 'text' ),
 				'trust_3_unit'  => array( 'default' => '개층',   'label' => '③번 — 단위',     'type' => 'text' ),
@@ -1020,7 +1020,7 @@ function moondental_compare_content_fields() {
 	$defaults = array(
 		1 => array( 'label' => '의료기관 종별',     'value' => '치과병원 (병원급)',                            'icon' => '🏥' ),
 		2 => array( 'label' => '의료진 협진',       'value' => '분야별 전문 의료진 협진',                       'icon' => '👨‍⚕️' ),
-		3 => array( 'label' => '전문 진료과 6과',   'value' => '보철·교정·보존·치주·소아·외과',                'icon' => '🦷' ),
+		3 => array( 'label' => '전문 진료 영역',   'value' => '보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주',                'icon' => '🦷' ),
 		4 => array( 'label' => '통합 진료센터',     'value' => '9·10·11·13F 4개 층 운영',                      'icon' => '🏢' ),
 		5 => array( 'label' => '디지털 진단 장비',  'value' => 'CBCT · 디지털 가이드 · 구강스캐너',            'icon' => '🔬' ),
 		6 => array( 'label' => '자체 보철 제작',    'value' => '한아 임플란트 보철연구소 · 원내 기공실 (13F)', 'icon' => '⚙️' ),

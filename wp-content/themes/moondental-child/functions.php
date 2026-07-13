@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.30.3' );
+define( 'MOONDENTAL_VERSION', '3.30.4' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -238,6 +238,26 @@ add_action( 'after_setup_theme', function() {
 	set_theme_mod( 'md_content_staff_list', $new_roster );
 	update_option( 'moondental_staff_v3292', 'done' );
 }, 45 );
+
+/* 일회성 마이그레이션 v3.30.4 · 전문 진료 영역 확장 (6과 → 11개)
+ * 사용자 요청 · 구강외과·구강내과·턱관절·스마일디자인·임플란트·예방·교정센터 포함.
+ * Customizer에 옛 6과 값 저장돼있으면 새 11개로 갱신. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_specialties_v3304' ) === 'done' ) return;
+	$old_new = array(
+		'md_content_trust_2_value' => array( '6', '11' ),
+		'md_content_trust_2_unit'  => array( '과', '개' ),
+		'md_content_trust_2_label' => array( '전문 진료과', '전문 진료 영역' ),
+		'md_content_trust_2_sub'   => array( '보철·교정·보존·치주·소아·외과', '보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주' ),
+	);
+	foreach ( $old_new as $key => $pair ) {
+		$saved = get_theme_mod( $key );
+		if ( is_string( $saved ) && $saved === $pair[0] ) {
+			set_theme_mod( $key, $pair[1] );
+		}
+	}
+	update_option( 'moondental_specialties_v3304', 'done' );
+}, 47 );
 
 /* 일회성 마이그레이션 v3.29.3 · 사용자 요청 · 비서실 복원.
  * 김동현(실장)·이슬기(대리)를 경영지원본부 → 비서실로 이동. */

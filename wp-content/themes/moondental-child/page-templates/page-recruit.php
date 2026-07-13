@@ -190,7 +190,7 @@ $phone_note     = $hr_phone_display ? '인사팀 직접 통화' : ( '인사팀 �
 			</article>
 			<article class="md-preservation-card">
 				<h3>👨‍⚕️ 분야별 전문 의료진 협진</h3>
-				<p>보철·교정·보존·치주·소아·외과 전문 의료진과 함께 — 다각도로 배울 수 있는 환경.</p>
+				<p>보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 전문 의료진과 함께 — 다각도로 배울 수 있는 환경.</p>
 			</article>
 			<article class="md-preservation-card">
 				<h3>📚 교육·세미나 지원</h3>
