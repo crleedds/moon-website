@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.30.4
+Version:      3.30.5
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -2137,6 +2137,58 @@ button.elementor-button {
 .md-section-head__title--sm { font-size: var(--fs-h3); }
 .md-region-cta__hint--sub { opacity: 0.85; margin-top: 6px; }
 .md-btn-group--center { justify-content: center; gap: 12px; }
+/* v3.30.5 · 채용 페이지 · '이렇게 보내주세요' 콜아웃 */
+.md-recruit-callout {
+  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-alt));
+  border: 1.5px solid var(--color-primary-light);
+  border-radius: var(--radius-lg);
+  padding: clamp(24px, 3vw, 32px);
+}
+.md-recruit-callout h3 {
+  margin: 0 0 16px;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.015em;
+}
+.md-recruit-callout__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: grid;
+  gap: 12px;
+}
+.md-recruit-callout__list li {
+  position: relative;
+  padding-left: 26px;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+}
+.md-recruit-callout__list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0; top: 0;
+  color: var(--color-primary);
+  font-weight: 800;
+}
+.md-recruit-callout__list strong { color: var(--color-text); }
+.md-recruit-callout__list a {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.md-recruit-callout__hint {
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px dashed var(--color-border);
+  font-size: 0.875rem;
+  color: var(--color-text-mute);
+  line-height: 1.65;
+}
+
 /* v3.30.0 · 의료진 페이지 · 필터 위 미니 CTA (모바일 예약 진입) */
 .md-docs-mini-cta {
   display: flex;
