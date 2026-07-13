@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.30.2
+Version:      3.30.3
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -3237,10 +3237,10 @@ button.elementor-button {
   padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
-/* v3.30.0 · 법적 표시 라인 (저작권 위 · 대표자·개업일·요양기관번호) */
+/* v3.30.3 · 법적 표시 + 저작권 · 단일 하단 블록 (구분선 제거) */
 .md-footer__legal-line {
   margin-top: clamp(20px, 2.5vw, 28px);
-  padding: clamp(14px, 1.8vw, 16px) 0 0;
+  padding: clamp(14px, 1.8vw, 16px) 0 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   text-align: center;
 }
@@ -3256,17 +3256,23 @@ button.elementor-button {
   margin: 0 4px;
   font-weight: 300;
 }
+.md-footer__copyright-bar {
+  margin-top: 0;
+  padding: 4px 0 0;
+  border-top: none;
+  text-align: center;
+}
 .md-footer__copyright-bar small {
   display: block;
-  font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
   letter-spacing: 0.02em;
   font-feature-settings: 'tnum';
 }
-.md-footer__copyright-bar { margin-top: clamp(14px, 1.8vw, 20px); border-top: none; padding-top: 0; }
 @media (max-width: 720px) {
   .md-footer__legal-line p { font-size: 0.7rem; line-height: 1.85; }
   .md-footer__legal-line .md-footer__sep { display: inline-block; opacity: 0.5; }
+  .md-footer__copyright-bar small { font-size: 0.7rem; }
 }
 
 /* v3.28.4 — 하단 저작권 바 (중앙 정렬) */
