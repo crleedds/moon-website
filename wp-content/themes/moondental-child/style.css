@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.28.7
+Version:      3.29.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -860,6 +860,9 @@ button.elementor-button {
 }
 
 .md-header__cta { display: flex; align-items: center; }
+/* v3.29.0 · CTA cycle 라벨 길이 편차로 인한 layout shift 방지 */
+.md-header__cta-btn--cycle { min-width: 168px; text-align: center; justify-content: center; }
+@media (max-width: 1080px) { .md-header__cta-btn--cycle { min-width: 140px; } }
 
 /* 부모 테마(Astra)·플러그인이 끼워 넣을 수 있는 모바일 메뉴 버튼 강제 숨김
    — 테마 자체 .md-header__nav-toggle 한 개만 노출. */
@@ -2039,6 +2042,78 @@ button.elementor-button {
   border-color: var(--color-primary-light);
   box-shadow: var(--shadow-soft);
   transform: translateY(-3px);
+}
+/* v3.29.0 · 후기 섹션 하단 유틸 */
+.md-testimonials__more { text-align: center; margin-top: 32px; }
+.md-testimonials__disclaimer {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.8125rem;
+  color: var(--color-text-mute);
+}
+/* v3.29.0 · 소식 섹션 · 좌측 정렬 헤더 + subhead */
+.md-section-head--split {
+  text-align: left;
+  max-width: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.md-section-head__title--flush { margin: 0; }
+.md-notice-subhead {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  margin: 0 0 14px;
+  color: var(--color-text);
+}
+.md-notice-list--spaced { margin-bottom: clamp(24px, 3vw, 36px); }
+.md-team__cta { text-align: center; margin-top: 32px; }
+/* v3.29.0 · 서비스 페이지 hero 아이콘 · 인라인 style 대체 */
+.md-page-hero__icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  line-height: 1;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif;
+}
+/* v3.29.0 · 버튼 내 부제 (전화번호 등) — 모바일 wrap 방지 */
+.md-btn__sub {
+  display: block;
+  font-size: 0.8em;
+  font-weight: 600;
+  opacity: 0.9;
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+}
+.md-page-hero__actions { margin-top: 24px; }
+.md-page-hero__note {
+  margin-top: 14px;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+.md-page-hero__note--caption {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+.md-page-hero__note a { text-decoration: underline; }
+.md-recruit-block__caption {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-mute);
+  margin-top: 3px;
+  letter-spacing: -0.005em;
+}
+.md-faq-intro { margin-bottom: clamp(40px, 5vw, 64px); }
+/* v3.29.0 · Hero 관리자 안내 · 다크모드 토큰 사용 */
+.md-hero__admin-note {
+  background: var(--color-surface);
+  color: var(--color-text-sub);
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 0.85rem;
+  border: 1px solid var(--color-border);
 }
 .md-testimonial__stars {
   color: var(--color-warning);
@@ -4213,20 +4288,27 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
   text-decoration: none;
   /* 카드 전체 클릭 — 시각 표시 없음 */
 }
+/* v3.29.0 · '상세 프로필 보기' 시각 강도 낮춤 (카드 자체가 링크임을 hover로 알림) */
 .md-doccard__view {
   display: block;
   margin-top: 10px;
   padding-top: 10px;
   border-top: 1px dashed var(--color-border);
   font-size: var(--fs-caption);
-  font-weight: 700;
-  color: var(--color-primary-dark);
+  font-weight: 600;
+  color: var(--color-text-mute);
   letter-spacing: 0.02em;
   transition: color 0.2s var(--ease), gap 0.2s var(--ease);
 }
 .md-doccard--linked:hover .md-doccard__view {
   color: var(--color-primary);
 }
+/* v3.29.0 · 카드 내부 링크 focus-visible 시 부모 카드에 outline */
+.md-doccard--linked:has(.md-doccard__link-wrap:focus-visible) {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+.md-doccard__link-wrap:focus { outline: none; }
 
 /* =============================================================
    의료진 상세 페이지 (page-doctor-single.php)
@@ -7794,6 +7876,7 @@ html { scroll-behavior: smooth; }
   opacity: 0.9;
   transition: transform 0.2s var(--ease), filter 0.2s var(--ease), opacity 0.2s var(--ease);
   text-decoration: none;
+  background: rgba(255, 255, 255, 0.04);
 }
 .md-fsoc:hover { opacity: 1; }
 .md-fsoc:hover {

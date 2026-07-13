@@ -40,9 +40,10 @@ $phone_note     = $hr_phone_display ? '인사팀 직접 통화' : ( '인사팀 �
 			천안 만남로 30여년 임상, 분야별 전문 의료진 협진 시스템 — <br>
 			환자 한 분을 가족처럼 보는 마음으로 함께해 주실 분을 모십니다.
 		</p>
-		<div style="margin-top: 24px;">
+		<div class="md-btn-group md-page-hero__actions">
 			<a class="md-btn md-btn-primary md-btn--lg" href="tel:<?php echo esc_attr( $show_phone_lnk ); ?>" data-track="cta-recruit-call">
-				📞 <?php echo esc_html( $phone_note ); ?> <?php echo esc_html( $show_phone ); ?>
+				📞 인사팀 문의
+				<span class="md-btn__sub"><?php echo esc_html( $show_phone ); ?></span>
 			</a>
 			<?php if ( $kakao ) : ?>
 				<a class="md-btn md-btn--kakao md-btn--lg" href="<?php echo esc_url( $kakao ); ?>" target="_blank" rel="noopener" data-track="cta-recruit-kakao">
@@ -50,11 +51,16 @@ $phone_note     = $hr_phone_display ? '인사팀 직접 통화' : ( '인사팀 �
 				</a>
 			<?php endif; ?>
 		</div>
+		<?php if ( ! $hr_phone_display ) : ?>
+			<p class="md-page-hero__note md-page-hero__note--caption">
+				※ 대표번호로 전화 시 "<strong>인사팀 담당자 연결 부탁드립니다</strong>"라고 말씀해주세요.
+			</p>
+		<?php endif; ?>
 		<?php if ( $hr_contact_name ) : ?>
-			<p class="md-page-hero__note" style="margin-top:14px;font-size:0.9rem;opacity:0.9;">
+			<p class="md-page-hero__note">
 				· 인사 담당: <strong><?php echo esc_html( $hr_contact_name ); ?></strong>
 				<?php if ( $hr_email ) : ?>
-					· <a href="mailto:<?php echo esc_attr( $hr_email ); ?>" style="text-decoration:underline;"><?php echo esc_html( $hr_email ); ?></a>
+					· <a href="mailto:<?php echo esc_attr( $hr_email ); ?>"><?php echo esc_html( $hr_email ); ?></a>
 				<?php endif; ?>
 			</p>
 		<?php endif; ?>
@@ -78,13 +84,13 @@ $phone_note     = $hr_phone_display ? '인사팀 직접 통화' : ( '인사팀 �
 			</div>
 			<div class="md-recruit-grid">
 				<div class="md-recruit-block">
-					<h4>💼 근무 조건</h4>
+					<h4>💼 근무 조건 <span class="md-recruit-block__caption">(직원 시프트 · 병원 진료시간과 다름)</span></h4>
 					<ul>
 						<li>주 5일 근무 (평일 + 토요일 격주)</li>
-						<li>평일 09:00~19:30 (점심시간 1시간 포함)</li>
-						<li>목요일 09:00~18:30 · 토요일 09:00~14:00</li>
+						<li>평일 9:00~19:30 (점심시간 1시간 포함)</li>
+						<li>목요일 9:00~18:30 · 토요일 9:00~14:00</li>
 						<li>일요일·공휴일 휴무</li>
-						<li>4대 보험 · 퇴직금 · 연차</li>
+						<li>4대 보험 · 퇴직금 · 연차 (법정 필수)</li>
 					</ul>
 				</div>
 				<div class="md-recruit-block">

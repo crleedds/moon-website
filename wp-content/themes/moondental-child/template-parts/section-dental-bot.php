@@ -245,7 +245,7 @@ $naver_book = $info['naver_place'] ?? '';
 				<span class="md-rcta__label">전화 상담 <?php echo esc_html( $info['phone'] ); ?></span>
 			</a>
 
-			<p class="md-dentalbot__cta-hint">진료시간: 월·화·수·금 09:00–20:30 · 목 09:00–18:00 · 토 09:00–14:00</p>
+			<p class="md-dentalbot__cta-hint">진료시간: 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00</p>
 		</aside>
 
 		</div><!-- /.md-dentalbot__layout -->

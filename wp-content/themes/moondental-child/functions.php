@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.28.7' );
+define( 'MOONDENTAL_VERSION', '3.29.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -161,6 +161,25 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_hours_thu_v3283', 'done' );
 }, 42 );
+
+/* 일회성 마이그레이션 v3.29.0 · 여러 진료시간 안내 텍스트 (cta_hint, price_cta_meta_1_value)
+ * 옛 default를 저장했으면 → 목 18:00 → 18:30 자동 갱신 · 앞 0 제거. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_hours_v3290' ) === 'done' ) return;
+	$keys = array(
+		'md_content_cta_hint',
+		'md_content_price_cta_meta_1_value',
+	);
+	foreach ( $keys as $key ) {
+		$saved = get_theme_mod( $key );
+		if ( ! is_string( $saved ) ) continue;
+		$new = str_replace( '목 09:00–18:00', '목 9:00–18:30', $saved );
+		$new = str_replace( '목 ~18:00', '목 ~18:30', $new );
+		$new = preg_replace( '/\b09:00\b/', '9:00', $new );
+		if ( $new !== $saved ) set_theme_mod( $key, $new );
+	}
+	update_option( 'moondental_hours_v3290', 'done' );
+}, 43 );
 
 /* 일회성 마이그레이션: 푸터 · 사용자 요청으로 제거된 필드들 DB에서 정리 (v3.28.2)
  * 주소·전화는 원래 info 배열에서 오므로 여기선 표시 로직만 제거함.
@@ -2822,13 +2841,13 @@ function moondental_get_team() {
 			),
 		),
 
-		/* ─── 9F 종합진료센터 ─── */
+		/* ─── 종합진료센터 ─── */
 		array(
-			'group'   => '9F 종합진료센터',
+			'group'   => '종합진료센터',
 			'members' => array(
 				array(
 					'name'       => '이승주',
-					'role'       => '원장 · 9F 종합진료센터',
+					'role'       => '원장',
 					'photo'      => 'doctor-07.png',
 					'photo_zoom' => 1.00,
 					'photo_ty'   => 5,
@@ -2842,7 +2861,7 @@ function moondental_get_team() {
 				),
 				array(
 					'name'       => '이수연',
-					'role'       => '원장 · 9F 종합진료센터',
+					'role'       => '원장',
 					'photo'      => 'doctor-08.png',
 					'photo_zoom' => 1.00,
 					'photo_ty'   => 3,
@@ -2858,7 +2877,7 @@ function moondental_get_team() {
 				),
 				array(
 					'name'       => '권혜진',
-					'role'       => '원장 · 9F 종합진료센터',
+					'role'       => '원장',
 					'photo'      => 'doctor-02.png',
 					'photo_zoom' => 1.00,
 					'photo_ty'   => 4,
@@ -2875,13 +2894,13 @@ function moondental_get_team() {
 			),
 		),
 
-		/* ─── 10F 임플란트센터 ─── */
+		/* ─── 임플란트센터 ─── */
 		array(
-			'group'   => '10F 임플란트센터',
+			'group'   => '임플란트센터',
 			'members' => array(
 				array(
 					'name'       => '문지현',
-					'role'       => '원장 · 10F 임플란트센터',
+					'role'       => '원장',
 					'photo'      => 'doctor-05.png',
 					'photo_zoom' => 1.00,
 					'photo_ty'   => 2,
@@ -2905,7 +2924,7 @@ function moondental_get_team() {
 				),
 				array(
 					'name'       => '이창률',
-					'role'       => '원장 · 10F 임플란트센터',
+					'role'       => '원장',
 					'photo'      => 'doctor-01.png',
 					'photo_zoom' => 1.00,
 					'photo_ty'   => 5,
@@ -2930,13 +2949,13 @@ function moondental_get_team() {
 			),
 		),
 
-		/* ─── 11F 교정과 / 종합진료센터 ─── */
+		/* ─── 교정과 · 종합진료센터 ─── */
 		array(
-			'group'   => '11F 교정과 · 종합진료센터',
+			'group'   => '교정과 · 종합진료센터',
 			'members' => array(
 				array(
 					'name'       => '이영일',
-					'role'       => '원장 · 11F 교정과',
+					'role'       => '원장',
 					'photo'      => 'doctor-09.png',
 					'photo_zoom' => 1.00,
 					'photo_ty'   => 2,
@@ -2953,7 +2972,7 @@ function moondental_get_team() {
 				),
 				array(
 					'name'       => '김세일',
-					'role'       => '원장 · 11F 종합진료센터',
+					'role'       => '원장',
 					'photo'      => 'doctor-03.png',
 					'photo_zoom' => 1.00,
 					'photo_ty'   => -2,
@@ -2966,7 +2985,7 @@ function moondental_get_team() {
 				),
 				array(
 					'name'       => '정석형',
-					'role'       => '원장 · 11F 종합진료센터',
+					'role'       => '원장',
 					'photo'      => 'doctor-06.png',
 					'photo_zoom' => 1.00,
 					'photo_ty'   => 2,

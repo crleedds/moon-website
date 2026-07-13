@@ -15,7 +15,7 @@ $groups = moondental_get_team();
 			<span class="md-section-head__eyebrow">Our Team</span>
 			<h2 class="md-section-head__title">분야별 전문 의료진이 함께합니다</h2>
 			<p class="md-section-head__lead">
-				9F 종합진료센터 · 10F 임플란트센터 · 11F 교정과 — 각 분야 전문 의료진이<br>
+				보철·보존·임플란트·교정·외과·소아·예방 — 각 분야 전문 의료진이<br>
 				환자 한 분의 평생 치아 건강을 책임집니다.
 			</p>
 		</header>
@@ -53,7 +53,7 @@ $groups = moondental_get_team();
 			</div>
 		<?php endforeach; ?>
 
-		<div style="text-align:center; margin-top:32px;">
+		<div class="md-team__cta">
 			<a class="md-btn md-btn-ghost" href="<?php echo esc_url( home_url( '/doctors/' ) ); ?>">
 				의료진 약력 자세히 보기 →
 			</a>

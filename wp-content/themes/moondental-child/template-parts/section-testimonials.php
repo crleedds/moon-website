@@ -28,21 +28,28 @@ $info = moondental_get_info();
 					<p class="md-testimonial__text">"<?php echo esc_html( $t['text'] ); ?>"</p>
 					<footer class="md-testimonial__meta">
 						<span class="md-testimonial__name"><?php echo esc_html( $t['name'] ); ?></span>
-						<span class="md-testimonial__sub"><?php echo esc_html( $t['age'] ); ?> · <?php echo esc_html( $t['service'] ); ?></span>
+						<?php
+						// v3.29.0: age가 없으면 " · " 구분점 남지 않게 필터로 합침
+						$_age = trim( (string) ( $t['age']     ?? '' ) );
+						$_svc = trim( (string) ( $t['service'] ?? '' ) );
+						$_sub = implode( ' · ', array_filter( array( $_age, $_svc ) ) );
+						if ( $_sub ) : ?>
+							<span class="md-testimonial__sub"><?php echo esc_html( $_sub ); ?></span>
+						<?php endif; ?>
 					</footer>
 				</article>
 			<?php endforeach; ?>
 		</div>
 
 		<?php if ( ! empty( $info['naver_place'] ) ) : ?>
-		<div style="text-align:center; margin-top:32px;">
+		<div class="md-testimonials__more">
 			<a class="md-btn md-btn-ghost" href="<?php echo esc_url( $info['naver_place'] ); ?>" target="_blank" rel="noopener" data-track="cta-naver-reviews">
 				네이버 플레이스에서 더 많은 후기 보기 →
 			</a>
 		</div>
 		<?php endif; ?>
 
-		<p style="text-align:center; margin-top:16px; font-size:0.8125rem; color:var(--color-text-mute);">
+		<p class="md-testimonials__disclaimer">
 			※ 후기는 환자분 동의 하에 게재되었으며, 진료 결과는 개인차가 있을 수 있습니다.
 		</p>
 	</div>

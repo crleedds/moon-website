@@ -96,7 +96,7 @@ $section_title   = $mc( 'clinic_intro_title',   '30년 이상 한자리에서, �
 $section_lead    = $mc( 'clinic_intro_lead',    "문치과병원은 각 분과의 원장님들이 다양한 임상경험을 바탕으로\n대학병원식 협진 시스템을 통해 30년 이상 한자리에서 전문적이고 정직하게 진료합니다." );
 
 $night_title = $mc( 'clinic_intro_night_title', '야간 진료 운영' );
-$night_desc  = $mc( 'clinic_intro_night_desc',  '천안시 신부동에 위치한 문치과병원은 바쁜 일상 속에서도 원하는 시간에 진료받으실 수 있도록 월·화·수·금요일 저녁 8시 30분(20:30)까지 야간진료를 운영합니다.' );
+$night_desc  = $mc( 'clinic_intro_night_desc',  '천안시 신부동에 위치한 문치과병원은 바쁜 일상 속에서도 원하는 시간에 진료받으실 수 있도록 월·화·수·금요일 저녁 8시 30분까지 야간진료를 운영합니다.' );
 
 $closer = $mc( 'clinic_intro_closer', '앞으로도 문치과병원은 봉사와 지역의료의 책임을 감당해 나가겠습니다.' );
 ?>

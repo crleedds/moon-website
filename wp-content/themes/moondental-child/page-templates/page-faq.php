@@ -25,12 +25,16 @@ $faqs = moondental_get_faqs();
 <section class="md-section">
 	<div class="md-container md-container--narrow">
 
-		<article class="md-page-content" style="margin-bottom:clamp(40px,5vw,64px);">
+		<article class="md-page-content md-faq-intro">
 			<?php
 			while ( have_posts() ) :
 				the_post();
 				$body = trim( get_the_content() );
-				echo $body ? apply_filters( 'the_content', $body ) : moondental_default_faq_intro();
+				if ( $body ) {
+					echo apply_filters( 'the_content', $body );
+				} elseif ( function_exists( 'moondental_default_faq_intro' ) ) {
+					echo moondental_default_faq_intro();
+				}
 			endwhile;
 			?>
 		</article>
@@ -39,12 +43,13 @@ $faqs = moondental_get_faqs();
 			<section class="md-faq-group">
 				<h2 class="md-faq-group__title"><?php echo esc_html( $category ); ?></h2>
 				<div class="md-faq">
-					<?php foreach ( $items as $item ) : ?>
-						<details class="md-faq__item">
+					<?php $_faq_idx = 0; foreach ( $items as $item ) :
+						$_is_first = ( $_faq_idx === 0 ); ?>
+						<details class="md-faq__item"<?php echo $_is_first ? ' open' : ''; ?>>
 							<summary><?php echo esc_html( $item['q'] ); ?></summary>
 							<p><?php echo wp_kses_post( md_autolink_addresses( $item['a'] ) ); ?></p>
 						</details>
-					<?php endforeach; ?>
+					<?php $_faq_idx++; endforeach; ?>
 				</div>
 			</section>
 		<?php endforeach; ?>

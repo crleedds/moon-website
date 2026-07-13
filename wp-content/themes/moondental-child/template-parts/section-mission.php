@@ -16,7 +16,7 @@ $certifications = array(
 	array( 'icon' => '🌐', 'label' => '외국인환자 유치 의료기관' ),
 	array( 'icon' => '🪖', 'label' => '미군 및 가족 치료기관' ),
 	array( 'icon' => '🦷', 'label' => '천안시 치아사랑사업 협력병원' ),
-	array( 'icon' => '🏥', 'label' => '삼성서울병원 협력병원' ),
+	array( 'icon' => '🔗', 'label' => '삼성서울병원 협력병원' ),
 	array( 'icon' => '➕', 'label' => '대한적십자사 협력병원' ),
 );
 ?>

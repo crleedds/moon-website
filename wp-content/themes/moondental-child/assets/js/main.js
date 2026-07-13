@@ -285,7 +285,7 @@
       });
     });
 
-    // 9. 의료진 페이지 — 층별 필터 (전체/9F/10F/11F)
+    // 9. 의료진 페이지 — 진료 분야별 필터
     var docFilterBtns = document.querySelectorAll('[data-doc-filter]');
     var docCards      = document.querySelectorAll('[data-doc-group]');
     if (docFilterBtns.length && docCards.length) {

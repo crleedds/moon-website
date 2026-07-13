@@ -72,8 +72,8 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 			</article>
 			<article class="md-preservation-card">
 				<span class="md-preservation-card__stage">심부</span>
-				<h3>심부 충치 — 신경 보존 직접복강</h3>
-				<p>충치가 신경에 근접했지만 살아있는 경우 <strong>직접복강(direct pulp capping)</strong>으로 신경을 살리는 시도. 신경치료 없이 자연치아 보존 가능성.</p>
+				<h3>심부 충치 — 신경 보존 직접치수복조</h3>
+				<p>충치가 신경에 근접했지만 살아있는 경우 <strong>직접치수복조(direct pulp capping)</strong>으로 신경을 살리는 시도. 신경치료 없이 자연치아 보존 가능성.</p>
 			</article>
 			<article class="md-preservation-card">
 				<span class="md-preservation-card__stage">광범위</span>
@@ -89,7 +89,7 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 
 		<aside class="md-preservation-callout">
 			<strong>💡 충치치료 비용 안내</strong>
-			<p>레진 충전 10만원 / 세라믹 인레이 35만원 / 지르코니아 크라운 55만원 — 정확한 견적은 진단 후 산정. <a href="<?php echo esc_url( home_url( '/비용-안내/' ) ); ?>">비용 안내 자세히 보기 →</a></p>
+			<p>레진 충전·세라믹 인레이·지르코니아 크라운 등 재료별 비용은 정확한 진단 후 산정합니다. <a href="<?php echo esc_url( home_url( '/비용-안내/' ) ); ?>">비용 안내 자세히 보기 →</a></p>
 		</aside>
 	</div>
 </section>

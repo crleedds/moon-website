@@ -27,11 +27,11 @@ foreach ( $services as $svc ) {
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a>
-			 ▸ <a href="<?php echo esc_url( home_url( '/services/' ) ); ?>">진료안내</a>
+			 ▸ <a href="<?php echo esc_url( home_url( '/진료항목/' ) ); ?>">진료안내</a>
 			 ▸ <span><?php the_title(); ?></span>
 		</nav>
 		<?php if ( $current_svc ) : ?>
-			<div style="font-size:3rem; margin-bottom:12px;" aria-hidden="true"><?php echo $current_svc['icon']; ?></div>
+			<div class="md-page-hero__icon" aria-hidden="true"><?php echo $current_svc['icon']; ?></div>
 		<?php endif; ?>
 		<h1 class="md-page-hero__title"><?php the_title(); ?></h1>
 		<?php if ( $current_svc ) : ?>
@@ -97,7 +97,6 @@ if ( function_exists( 'moondental_service_pain_points' ) ) {
 ?>
 
 <?php /* 강점 카드 섹션은 /기술력-시설/ 페이지로 이동됨 (v3.12.0) */ ?>
-?>
 
 <?php
 /* === 이런 분께 추천합니다 === */

@@ -130,7 +130,7 @@ $is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
 						<a class="md-news-card__link" href="<?php the_permalink(); ?>">
 							<div class="md-news-card__media">
 								<?php if ( $thumb_url ) : ?>
-									<img src="<?php echo esc_url( $thumb_url ); ?>" alt="" loading="lazy" referrerpolicy="no-referrer">
+									<img src="<?php echo esc_url( $thumb_url ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" loading="lazy" referrerpolicy="no-referrer">
 								<?php else : ?>
 									<span class="md-news-card__media-fallback" aria-hidden="true">📢</span>
 								<?php endif; ?>
@@ -196,7 +196,7 @@ $is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
 						<a class="md-news-card__link" href="<?php the_permalink(); ?>">
 							<div class="md-news-card__media">
 								<?php if ( $thumb_url ) : ?>
-									<img src="<?php echo esc_url( $thumb_url ); ?>" alt="" loading="lazy" referrerpolicy="no-referrer">
+									<img src="<?php echo esc_url( $thumb_url ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" loading="lazy" referrerpolicy="no-referrer">
 								<?php else : ?>
 									<span class="md-news-card__media-fallback" aria-hidden="true">🦷</span>
 								<?php endif; ?>

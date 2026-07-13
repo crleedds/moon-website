@@ -22,10 +22,10 @@ $stats = array(
 		'icon'  => '🦷',
 	),
 	array(
-		'value' => md_content( 'trust_3_value', '3' ),
+		'value' => md_content( 'trust_3_value', '4' ),
 		'unit'  => md_content( 'trust_3_unit',  '개층' ),
 		'label' => md_content( 'trust_3_label', '통합 진료센터' ),
-		'sub'   => md_content( 'trust_3_sub',   '9F 종합 · 10F 임플란트 · 11F 교정' ),
+		'sub'   => md_content( 'trust_3_sub',   '9F 보철·보존 · 10F 임플란트·외과 · 11F 교정·소아 · 13F 기공' ),
 		'icon'  => '🏢',
 	),
 	array(
@@ -45,7 +45,12 @@ $stats = array(
 				<div class="md-trust__item md-reveal">
 					<span class="md-trust__icon" aria-hidden="true"><?php echo $stat['icon']; ?></span>
 					<div class="md-trust__num">
-						<span class="md-trust__value" data-count-to="<?php echo esc_attr( $stat['value'] ); ?>"><?php echo esc_html( $stat['value'] ); ?></span>
+						<?php
+						// v3.29.0: 값이 순수 숫자일 때만 count-to 애니메이션 적용 (예: 30, 6). '1:1' 같은 값은 정적 표시.
+						$_val = $stat['value'];
+						$_count_attr = is_numeric( $_val ) ? ' data-count-to="' . esc_attr( $_val ) . '"' : '';
+						?>
+						<span class="md-trust__value"<?php echo $_count_attr; ?>><?php echo esc_html( $_val ); ?></span>
 						<?php if ( $stat['unit'] ) : ?>
 							<span class="md-trust__unit"><?php echo esc_html( $stat['unit'] ); ?></span>
 						<?php endif; ?>

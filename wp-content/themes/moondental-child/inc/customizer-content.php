@@ -141,10 +141,10 @@ function moondental_home_content_fields() {
 				'trust_2_label' => array( 'default' => '전문 진료과', 'label' => '②번 — 라벨', 'type' => 'text' ),
 				'trust_2_sub'   => array( 'default' => '보철·교정·보존·치주·소아·외과', 'label' => '②번 — 부제', 'type' => 'text' ),
 
-				'trust_3_value' => array( 'default' => '3',     'label' => '③번 — 숫자',     'type' => 'text' ),
+				'trust_3_value' => array( 'default' => '4',     'label' => '③번 — 숫자',     'type' => 'text' ),
 				'trust_3_unit'  => array( 'default' => '개층',   'label' => '③번 — 단위',     'type' => 'text' ),
 				'trust_3_label' => array( 'default' => '통합 진료센터', 'label' => '③번 — 라벨', 'type' => 'text' ),
-				'trust_3_sub'   => array( 'default' => '9F 종합 · 10F 임플란트 · 11F 교정', 'label' => '③번 — 부제', 'type' => 'text' ),
+				'trust_3_sub'   => array( 'default' => '9F 보철·보존 · 10F 임플란트·외과 · 11F 교정·소아 · 13F 기공', 'label' => '③번 — 부제', 'type' => 'text' ),
 
 				'trust_4_value' => array( 'default' => '1:1',   'label' => '④번 — 숫자',     'type' => 'text' ),
 				'trust_4_unit'  => array( 'default' => '',       'label' => '④번 — 단위',     'type' => 'text' ),
@@ -167,7 +167,7 @@ function moondental_home_content_fields() {
 
 				'why_2_icon'  => array( 'default' => '🏢', 'label' => '②번 — 아이콘', 'type' => 'text' ),
 				'why_2_title' => array( 'default' => '통합 진료센터', 'label' => '②번 — 제목', 'type' => 'text' ),
-				'why_2_desc'  => array( 'default' => '9F 종합·10F 임플란트·11F 교정 — 분야별 전문 의료진의 협진을 한 곳에서 받으실 수 있습니다.', 'label' => '②번 — 설명', 'type' => 'textarea' ),
+				'why_2_desc'  => array( 'default' => '9F 보철·보존 · 10F 임플란트·외과 · 11F 교정·소아 · 13F 기공 — 분야별 전문 의료진의 협진을 한 곳에서 받으실 수 있습니다.', 'label' => '②번 — 설명', 'type' => 'textarea' ),
 
 				'why_3_icon'  => array( 'default' => '❤️', 'label' => '③번 — 아이콘', 'type' => 'text' ),
 				'why_3_title' => array( 'default' => '전신질환 안심 진료', 'label' => '③번 — 제목', 'type' => 'text' ),
@@ -231,7 +231,7 @@ function moondental_home_content_fields() {
 
 				/* 야간진료 강조 박스 */
 				'clinic_intro_night_title' => array( 'default' => '야간 진료 운영', 'label' => '야간진료 박스 · 제목', 'type' => 'text' ),
-				'clinic_intro_night_desc'  => array( 'default' => '천안시 신부동에 위치한 문치과병원은 바쁜 일상 속에서도 원하는 시간에 진료받으실 수 있도록 월·화·수·금요일 저녁 8시 30분(20:30)까지 야간진료를 운영합니다.', 'label' => '야간진료 박스 · 설명', 'type' => 'textarea' ),
+				'clinic_intro_night_desc'  => array( 'default' => '천안시 신부동에 위치한 문치과병원은 바쁜 일상 속에서도 원하는 시간에 진료받으실 수 있도록 월·화·수·금요일 저녁 8시 30분까지 야간진료를 운영합니다.', 'label' => '야간진료 박스 · 설명', 'type' => 'textarea' ),
 
 				/* 마무리 문구 */
 				'clinic_intro_closer' => array( 'default' => '앞으로도 문치과병원은 봉사와 지역의료의 책임을 감당해 나가겠습니다.', 'label' => '섹션 마무리 문구', 'type' => 'textarea' ),
@@ -393,7 +393,7 @@ function moondental_home_content_fields() {
 				'cta_lead'    => array( 'default' => "환자분의 상황을 먼저 듣고, 꼭 필요한 치료만 권합니다.\n지금 상담을 신청하시면 진료시간 내 빠르게 연락드릴게요.", 'label' => '설명 (줄바꿈 가능)', 'type' => 'textarea' ),
 				'cta_btn1'    => array( 'default' => '📅 상담 예약하기', 'label' => '버튼 1 라벨', 'type' => 'text' ),
 				'cta_btn2'    => array( 'default' => '카카오톡', 'label' => '버튼 2 라벨', 'type' => 'text' ),
-				'cta_hint'    => array( 'default' => '진료시간: 월·화·수·금 09:00–20:30 · 목 09:00–18:00 · 토 09:00–14:00 · 일/공휴일 휴진', 'label' => '하단 진료시간 안내', 'type' => 'text' ),
+				'cta_hint'    => array( 'default' => '진료시간: 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진', 'label' => '하단 진료시간 안내', 'type' => 'text' ),
 			),
 		),
 
@@ -585,7 +585,7 @@ function moondental_pricing_content_fields() {
 				'price_cta_lead'  => array( 'default' => '정확한 진단 후 맞춤 견적서를 안내드립니다. 부담 없이 먼저 들어보세요.', 'label' => '설명', 'type' => 'textarea' ),
 
 				'price_cta_meta_1_label' => array( 'default' => '진료시간', 'label' => '메타 ①번 — 라벨', 'type' => 'text' ),
-				'price_cta_meta_1_value' => array( 'default' => '월·화·수·금 09:00–20:30 · 목 ~18:00 · 토 ~14:00', 'label' => '메타 ①번 — 값', 'type' => 'text' ),
+				'price_cta_meta_1_value' => array( 'default' => '월·화·수·금 9:00–20:30 · 목 ~18:30 · 토 ~14:00', 'label' => '메타 ①번 — 값', 'type' => 'text' ),
 
 				'price_cta_meta_2_label' => array( 'default' => '예약 채널', 'label' => '메타 ②번 — 라벨', 'type' => 'text' ),
 				'price_cta_meta_2_value' => array( 'default' => '전화 · 카카오톡 · 네이버 예약 (24시간)', 'label' => '메타 ②번 — 값', 'type' => 'text' ),
@@ -695,14 +695,14 @@ function moondental_service_content_fields() {
 function moondental_doctor_content_fields() {
 	$doctors = array(
 		'munes'  => array( 'name' => '문은수', 'role' => '대표 병원장' ),
-		'leesj'  => array( 'name' => '이승주', 'role' => '9F 종합진료센터' ),
-		'leesu'  => array( 'name' => '이수연', 'role' => '9F 종합진료센터' ),
-		'kwon'   => array( 'name' => '권혜진', 'role' => '9F 종합진료센터' ),
-		'munji'  => array( 'name' => '문지현', 'role' => '10F 임플란트센터' ),
-		'leech'  => array( 'name' => '이창률', 'role' => '10F 임플란트센터' ),
-		'leeyi'  => array( 'name' => '이영일', 'role' => '11F 교정과' ),
-		'kimsi'  => array( 'name' => '김세일', 'role' => '11F 종합진료센터' ),
-		'jeong'  => array( 'name' => '정석형', 'role' => '11F 종합진료센터' ),
+		'leesj'  => array( 'name' => '이승주', 'role' => '종합진료센터' ),
+		'leesu'  => array( 'name' => '이수연', 'role' => '종합진료센터' ),
+		'kwon'   => array( 'name' => '권혜진', 'role' => '종합진료센터' ),
+		'munji'  => array( 'name' => '문지현', 'role' => '임플란트센터' ),
+		'leech'  => array( 'name' => '이창률', 'role' => '임플란트센터' ),
+		'leeyi'  => array( 'name' => '이영일', 'role' => '교정과' ),
+		'kimsi'  => array( 'name' => '김세일', 'role' => '종합진료센터' ),
+		'jeong'  => array( 'name' => '정석형', 'role' => '종합진료센터' ),
 	);
 
 	$groups = array();
@@ -839,7 +839,7 @@ function moondental_subpage_content_fields() {
 
 				'doctors_stat_1_label' => array( 'default' => '전문 의료진', 'label' => 'stat ①번 라벨', 'type' => 'text' ),
 				'doctors_stat_2_value' => array( 'default' => '3개층', 'label' => 'stat ②번 숫자', 'type' => 'text' ),
-				'doctors_stat_2_label' => array( 'default' => '9F · 10F · 11F', 'label' => 'stat ②번 라벨', 'type' => 'text' ),
+				'doctors_stat_2_label' => array( 'default' => '9F · 10F · 11F · 13F', 'label' => 'stat ②번 라벨', 'type' => 'text' ),
 				'doctors_stat_3_value' => array( 'default' => '30여년', 'label' => 'stat ③번 숫자', 'type' => 'text' ),
 				'doctors_stat_3_label' => array( 'default' => '1995년 개원', 'label' => 'stat ③번 라벨', 'type' => 'text' ),
 
@@ -972,7 +972,7 @@ function moondental_testimonials_content_fields() {
 	$defaults = array(
 		1 => array( 'name' => '김○○', 'gender' => '여성', 'age' => '40대', 'service' => '임플란트', 'rating' => '5', 'text' => '오랫동안 미루던 임플란트를 30여년 경력 원장님께 받았습니다. 수술 당일 통증이 거의 없었고, 자가혈을 함께 사용한다는 점이 안심됐어요. 평일 야간 진료가 있어 직장인에게 정말 편합니다.' ),
 		2 => array( 'name' => '박○○', 'gender' => '남성', 'age' => '50대', 'service' => '전악 보철', 'rating' => '5', 'text' => '여러 치과를 다녀봤지만 이렇게 충분히 설명해주시는 곳은 처음입니다. 전악 보철까지 진행했는데 의료진 협진이 정말 체계적이에요. 비용도 시작 전에 명확히 알려주셔서 신뢰가 갔습니다.' ),
-		3 => array( 'name' => '이○○', 'gender' => '여성', 'age' => '30대', 'service' => '투명교정', 'rating' => '5', 'text' => '슈어스마일 투명교정 받았는데 처음에 걱정했던 것보다 훨씬 편했어요. 11F 교정과 원장님이 사진 시뮬레이션으로 결과를 미리 보여주셨고, 6개월 만에 만족스러운 결과를 얻었습니다.' ),
+		3 => array( 'name' => '이○○', 'gender' => '여성', 'age' => '30대', 'service' => '투명교정', 'rating' => '5', 'text' => '슈어스마일 투명교정 받았는데 처음에 걱정했던 것보다 훨씬 편했어요. 교정과 원장님이 사진 시뮬레이션으로 결과를 미리 보여주셨고, 6개월 만에 만족스러운 결과를 얻었습니다.' ),
 		4 => array( 'name' => '최○○', 'gender' => '남성', 'age' => '60대', 'service' => '임플란트 + 보철', 'rating' => '5', 'text' => '고혈압이 있어서 다른 곳에서는 거절당했는데, 여기는 혈압 체크부터 약물까지 세심하게 봐주셨습니다. 수술 후 귀가 서비스까지 챙겨주셔서 감동이었어요.' ),
 		5 => array( 'name' => '정○○', 'gender' => '여성', 'age' => '40대', 'service' => '자연치아 살리기', 'rating' => '5', 'text' => '발치하고 임플란트 하라던 치아를 보존과 전문의 원장님이 살려주셨어요. 재근관치료로 자연치를 지킬 수 있어서 정말 감사합니다.' ),
 		6 => array( 'name' => '한○○', 'gender' => '여성', 'age' => '50대', 'service' => '심미 라미네이트', 'rating' => '5', 'text' => '앞니 라미네이트를 했는데 자연스럽게 잘 나왔어요. 무리한 치아 삭제 없이 보존적으로 해주신다는 점이 마음에 들었고, 결과도 만족합니다.' ),
@@ -1079,19 +1079,19 @@ function moondental_service_faq_content_fields() {
 /**
  * 의료진 그룹명·직책 콘텐츠 필드.
  *  - 4 그룹 라벨
- *  - 9 의료진 직책 (예: "원장 · 9F 종합진료센터")
+ *  - 9 의료진 직책 (예: "원장")
  */
 function moondental_doctor_meta_content_fields() {
 	$role_defaults = array(
 		'munes' => array( 'name' => '문은수', 'role' => '대표 병원장' ),
-		'leesj' => array( 'name' => '이승주', 'role' => '원장 · 9F 종합진료센터' ),
-		'leesu' => array( 'name' => '이수연', 'role' => '원장 · 9F 종합진료센터' ),
-		'kwon'  => array( 'name' => '권혜진', 'role' => '원장 · 9F 종합진료센터' ),
-		'munji' => array( 'name' => '문지현', 'role' => '원장 · 10F 임플란트센터' ),
-		'leech' => array( 'name' => '이창률', 'role' => '원장 · 10F 임플란트센터' ),
-		'leeyi' => array( 'name' => '이영일', 'role' => '원장 · 11F 교정과' ),
-		'kimsi' => array( 'name' => '김세일', 'role' => '원장 · 11F 종합진료센터' ),
-		'jeong' => array( 'name' => '정석형', 'role' => '원장 · 11F 종합진료센터' ),
+		'leesj' => array( 'name' => '이승주', 'role' => '원장' ),
+		'leesu' => array( 'name' => '이수연', 'role' => '원장' ),
+		'kwon'  => array( 'name' => '권혜진', 'role' => '원장' ),
+		'munji' => array( 'name' => '문지현', 'role' => '원장' ),
+		'leech' => array( 'name' => '이창률', 'role' => '원장' ),
+		'leeyi' => array( 'name' => '이영일', 'role' => '원장' ),
+		'kimsi' => array( 'name' => '김세일', 'role' => '원장' ),
+		'jeong' => array( 'name' => '정석형', 'role' => '원장' ),
 	);
 
 	$groups = array(
@@ -1099,9 +1099,9 @@ function moondental_doctor_meta_content_fields() {
 			'title'  => '의료진 — 진료센터 그룹명 (4개)',
 			'fields' => array(
 				'doctor_group_1' => array( 'default' => '대표 병원장',                       'label' => '그룹 1 — 라벨', 'type' => 'text' ),
-				'doctor_group_2' => array( 'default' => '9F 종합진료센터',                   'label' => '그룹 2 — 라벨', 'type' => 'text' ),
-				'doctor_group_3' => array( 'default' => '10F 임플란트센터',                  'label' => '그룹 3 — 라벨', 'type' => 'text' ),
-				'doctor_group_4' => array( 'default' => '11F 교정과 · 종합진료센터',         'label' => '그룹 4 — 라벨', 'type' => 'text' ),
+				'doctor_group_2' => array( 'default' => '종합진료센터',                        'label' => '그룹 2 — 라벨', 'type' => 'text' ),
+				'doctor_group_3' => array( 'default' => '임플란트센터',                       'label' => '그룹 3 — 라벨', 'type' => 'text' ),
+				'doctor_group_4' => array( 'default' => '교정과 · 종합진료센터',              'label' => '그룹 4 — 라벨', 'type' => 'text' ),
 			),
 		),
 		'doctor_roles' => array(

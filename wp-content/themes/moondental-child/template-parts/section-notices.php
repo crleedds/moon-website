@@ -49,10 +49,10 @@ $news_page_url = get_post_type_archive_link( 'post' ) ?: home_url( '/소식/' );
 
 <section class="md-section md-section--surface" id="notices" aria-label="병원 소식">
 	<div class="md-container">
-		<header class="md-section-head" style="text-align:left; max-width:none; display:flex; justify-content:space-between; align-items:end; gap:16px; flex-wrap:wrap;">
+		<header class="md-section-head md-section-head--split">
 			<div>
 				<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'notices_eyebrow', 'NEWS · 병원 소식' ) : 'NEWS · 병원 소식' ); ?></span>
-				<h2 class="md-section-head__title" style="margin:0;"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'notices_title', '천안·아산 문치과병원 소식' ) : '천안·아산 문치과병원 소식' ); ?></h2>
+				<h2 class="md-section-head__title md-section-head__title--flush"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'notices_title', '천안·아산 문치과병원 소식' ) : '천안·아산 문치과병원 소식' ); ?></h2>
 			</div>
 			<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( $news_page_url ); ?>">
 				전체 보기 →
@@ -61,10 +61,10 @@ $news_page_url = get_post_type_archive_link( 'post' ) ?: home_url( '/소식/' );
 
 		<!-- 공지사항 (최대 2개) -->
 		<?php if ( $notice_q->have_posts() ) : ?>
-			<h3 style="font-size: 1.0625rem; font-weight: 800; margin: 0 0 14px; color: var(--color-text);">
+			<h3 class="md-notice-subhead">
 				📢 문치과병원 소식
 			</h3>
-			<ul class="md-notice-list" style="margin-bottom: clamp(24px, 3vw, 36px);">
+			<ul class="md-notice-list md-notice-list--spaced">
 				<?php while ( $notice_q->have_posts() ) : $notice_q->the_post(); ?>
 					<li class="md-notice-item">
 						<a href="<?php the_permalink(); ?>">
@@ -81,7 +81,7 @@ $news_page_url = get_post_type_archive_link( 'post' ) ?: home_url( '/소식/' );
 
 		<!-- 치아이야기 (최대 3개) -->
 		<?php if ( $story_q->have_posts() ) : ?>
-			<h3 style="font-size: 1.0625rem; font-weight: 800; margin: 0 0 14px; color: var(--color-text);">
+			<h3 class="md-notice-subhead">
 				🦷 문치과병원 치아이야기
 			</h3>
 			<div class="md-home-news-grid">
@@ -91,7 +91,7 @@ $news_page_url = get_post_type_archive_link( 'post' ) ?: home_url( '/소식/' );
 						<a class="md-news-card__link" href="<?php the_permalink(); ?>">
 							<div class="md-news-card__media">
 								<?php if ( $thumb_url ) : ?>
-									<img src="<?php echo esc_url( $thumb_url ); ?>" alt="" loading="lazy" referrerpolicy="no-referrer">
+									<img src="<?php echo esc_url( $thumb_url ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" loading="lazy" referrerpolicy="no-referrer">
 								<?php elseif ( has_post_thumbnail() ) : ?>
 									<?php the_post_thumbnail( 'medium_large', array( 'loading' => 'lazy' ) ); ?>
 								<?php else : ?>
@@ -102,7 +102,7 @@ $news_page_url = get_post_type_archive_link( 'post' ) ?: home_url( '/소식/' );
 								<time class="md-news-card__date"><?php echo esc_html( get_the_date( 'Y.m.d' ) ); ?></time>
 								<h3 class="md-news-card__title"><?php the_title(); ?></h3>
 								<p class="md-news-card__excerpt">
-									<?php echo esc_html( wp_trim_words( get_the_excerpt(), 20, '…' ) ); ?>
+									<?php echo esc_html( wp_trim_words( get_the_excerpt(), 30, '…' ) ); ?>
 								</p>
 							</div>
 						</a>

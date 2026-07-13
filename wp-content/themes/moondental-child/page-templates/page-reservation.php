@@ -51,7 +51,7 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 		) ); ?>
 
 		<p class="md-channel-grid__hint" style="text-align:center; margin-top:18px;">
-			진료시간: 월·화·수·금 09:00–20:30 · 목 09:00–18:00 · 토 09:00–14:00 · 일/공휴일 휴진
+			진료시간: 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진
 		</p>
 	</div>
 </section>

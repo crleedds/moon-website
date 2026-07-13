@@ -105,15 +105,14 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 			</p>
 		</header>
 
-		<!-- 진료센터 필터 (층 표기 제거) -->
+		<!-- 진료센터 필터 (진료 분야별) -->
 		<div class="md-docs-filter" role="tablist" aria-label="진료센터 필터">
 			<button class="md-docs-filter__btn is-active" type="button" data-doc-filter="all">전체</button>
 			<?php foreach ( $groups as $g ) :
-				$key   = $group_keys[ $g['group'] ];
-				$label = trim( preg_replace( '/\b\d+F\s*/u', '', $g['group'] ) );
+				$key = $group_keys[ $g['group'] ];
 			?>
 				<button class="md-docs-filter__btn" type="button" data-doc-filter="<?php echo esc_attr( $key ); ?>">
-					<?php echo esc_html( $label ); ?>
+					<?php echo esc_html( $g['group'] ); ?>
 				</button>
 			<?php endforeach; ?>
 		</div>
@@ -145,7 +144,7 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 						<?php else : ?>
 							<span class="md-doccard__initial"><?php echo esc_html( mb_substr( $doc['name'], -2 ) ); ?></span>
 						<?php endif; ?>
-						<span class="md-doccard__role"><?php echo esc_html( trim( preg_replace( '/\b\d+F\s*/u', '', $doc['role'] ) ) ); ?></span>
+						<span class="md-doccard__role"><?php echo esc_html( $doc['role'] ); ?></span>
 					</div>
 					<div class="md-doccard__body">
 						<h3 class="md-doccard__name"><?php echo esc_html( $doc['name'] ); ?></h3>
@@ -243,7 +242,7 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 			</p>
 			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-docs-banner', 'size' => 'lg', 'align' => 'center' ) ); ?>
 			<p class="md-docs-cta__hours">
-				🕐 월·화·수·금 09:00–20:30 · 목 09:00–18:30 · 토 09:00–14:00 · 일/공휴일 휴진
+				🕐 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진
 			</p>
 		</div>
 	</div>
