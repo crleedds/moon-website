@@ -48,15 +48,14 @@ if ( ! $intro ) {
 	$intro = $doctor['philosophy'] ?? '';
 }
 
-/* 자격 체크리스트 — Customizer 우선, 없으면 약력 앞 4개
- * v3.30.7 · Customizer 미설정 시 자동 발췌한 4개는 '학력·경력' 리스트에서 제외해 중복 방지. */
+/* 사진 옆 자격·약력 리스트
+ * v3.30.8 · 사용자 요청 · 대표 4개만 발췌하지 않고 전체 약력을 사진 옆에 표시.
+ * Customizer에 별도 자격 리스트가 있으면 그것을, 없으면 전체 bio 사용. */
 $creds_text = md_content( "doc_{$doc_key}_credentials", '' );
 if ( $creds_text ) {
 	$credentials = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", $creds_text ) ) );
 } else {
-	$credentials = array_slice( $bio_lines, 0, 4 );
-	// 카드 상단에 이미 보여지는 항목은 아래 학력·경력 섹션에서 제외
-	$bio_lines = array_slice( $bio_lines, 4 );
+	$credentials = $bio_lines;
 }
 
 /* Q&A — "질문 | 답변" 라인 파싱 */
@@ -171,37 +170,20 @@ foreach ( $all_groups as $g ) {
 </section>
 <?php endif; ?>
 
-<!-- ============ Education / Bio + Interests ============ -->
-<?php if ( ! empty( $bio_lines ) || ! empty( $interests ) ) : ?>
+<!-- ============ 관심 분야 (선택 · 별도 섹션) ============ -->
+<?php /* v3.30.8 · 학력·경력은 이미 사진 옆에 전체 표시 · 관심 분야만 별도 유지 */ ?>
+<?php if ( ! empty( $interests ) ) : ?>
 <section class="md-section">
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'doc_single_edu_eyebrow', 'Education & Career' ) ); ?></span>
-			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'doc_single_edu_title', '학력 · 경력' ) ); ?></h2>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'doc_single_edu_eyebrow', 'Focus' ) ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'doc_single_interests_title', '관심 분야' ) ); ?></h2>
 		</header>
 
-		<div class="md-docsingle-edu">
-			<?php if ( ! empty( $bio_lines ) ) : ?>
-				<div class="md-docsingle-edu__col">
-					<h3 class="md-docsingle-edu__col-title">📚 학력 · 경력</h3>
-					<ul class="md-docsingle-edu__list">
-						<?php foreach ( $bio_lines as $b ) : ?>
-							<li><?php echo esc_html( $b ); ?></li>
-						<?php endforeach; ?>
-					</ul>
-				</div>
-			<?php endif; ?>
-
-			<?php if ( ! empty( $interests ) ) : ?>
-				<div class="md-docsingle-edu__col">
-					<h3 class="md-docsingle-edu__col-title">🎯 관심 분야</h3>
-					<div class="md-docsingle-tags">
-						<?php foreach ( $interests as $tag ) : ?>
-							<span class="md-docsingle-tag"><?php echo esc_html( $tag ); ?></span>
-						<?php endforeach; ?>
-					</div>
-				</div>
-			<?php endif; ?>
+		<div class="md-docsingle-tags md-docsingle-tags--center">
+			<?php foreach ( $interests as $tag ) : ?>
+				<span class="md-docsingle-tag"><?php echo esc_html( $tag ); ?></span>
+			<?php endforeach; ?>
 		</div>
 	</div>
 </section>
