@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.28.1
+Version:      3.28.2
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -3027,7 +3027,7 @@ button.elementor-button {
 }
 .md-footer__policy-links a:hover { color: var(--color-primary-light); }
 
-/* v3.27.9 — 푸터 법적표시 재디자인 (비디치과 스타일 참고 · 중앙 정렬) */
+/* v3.28.2 — 푸터 법적표시 컴팩트 (병원명 + 3개 항목만) */
 .md-footer__legal--v2 {
   text-align: center;
   border-bottom: none;
@@ -3036,23 +3036,16 @@ button.elementor-button {
 .md-footer__legal--v2 .md-footer__policy-links {
   justify-content: center;
   gap: 8px 18px;
-  margin: 0 0 16px;
-}
-.md-footer__disclaimer {
   margin: 0 0 18px;
-  font-size: 0.75rem;
-  line-height: 1.65;
-  color: rgba(255, 255, 255, 0.55);
-  word-break: keep-all;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
 }
-.md-footer__copyright {
-  margin: 0 0 18px;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.65);
-  letter-spacing: 0.01em;
+.md-footer__inst-name {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  letter-spacing: -0.005em;
+  color: rgba(255, 255, 255, 0.92);
+}
+.md-footer__inst-name strong {
+  font-weight: 700;
 }
 .md-footer__biz-info {
   font-size: 0.75rem;
@@ -3063,36 +3056,10 @@ button.elementor-button {
 .md-footer__biz-info p {
   margin: 0;
 }
-.md-footer__biz-info strong {
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 700;
-}
-.md-footer__biz-info a {
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-}
-.md-footer__biz-info a:hover {
-  color: var(--color-primary-light);
-  text-decoration: underline;
-}
 .md-footer__sep {
   color: rgba(255, 255, 255, 0.28);
   margin: 0 4px;
   font-weight: 300;
-}
-.md-footer__biz-cert {
-  display: inline-block;
-  margin-top: 6px;
-  padding: 4px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 999px;
-  font-size: 0.72rem !important;
-  color: rgba(255, 255, 255, 0.8) !important;
-}
-.md-footer__biz-cert:hover {
-  border-color: var(--color-primary-light);
-  color: var(--color-primary-light) !important;
-  text-decoration: none !important;
 }
 
 /* 푸터 모바일 — 컬럼별 자연 정렬 */

@@ -130,20 +130,16 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 		</div>
 
 		<?php if ( $legal_show !== 'no' ) :
-			// v3.27.9 — 비디치과의원 스타일 참고 · 중앙 정렬 컴팩트 구조.
-			// 정책 링크(위) → 의료 면책 → 저작권 → 사업자 정보 3줄 → 사업자등록증 링크(아래).
+			// v3.28.2 — 최소 정보만 표시:
+			//   정책 링크 → 병원명 → (대표자 | 개업일 | 요양기관번호)
+			//   주소/전화/개인정보 보호책임자/사업자등록번호/저작권 제거 (사용자 요청)
 			$inst_name = $mc( 'footer_legal_inst_name', '한아의료재단 문치과병원' );
-			$inst_type = $mc( 'footer_legal_inst_type', '치과병원 (의료법인·병원급)' );
 			$rep       = $mc( 'footer_legal_rep',       '문은수 이사장' );
 			$med_no    = $mc( 'footer_legal_med_no',    '34400117' );
+			$open_date = $mc( 'footer_legal_open_date', '1995.04' );
 			$ad_no     = $mc( 'footer_legal_ad_no',     '' );
-			$privacy_o = $mc( 'footer_legal_privacy_officer', '문은수' );
-			$biz_no    = $mc( 'footer_legal_biz_no',    '' ); // v3.27.9 사업자등록번호
-			$open_date = $mc( 'footer_legal_open_date', '' ); // v3.27.9 개업일 (예: 1995.04)
-			$disclaimer = $mc( 'footer_legal_disclaimer', '' ); // v3.28.0 default 비움 (사용자 요청)
-			$copyright_start = $mc( 'footer_legal_copyright_start', '2018' ); // v3.27.9 저작권 시작 연도
 
-			// v3.27.3: 라벨(dt)과 값(dd)에서 접두어 중복 제거를 위한 정리
+			// v3.27.3: 접두어 중복 제거 정리
 			$strip_prefix = function( $val, $prefixes ) {
 				$val = trim( (string) $val );
 				foreach ( $prefixes as $p ) {
@@ -154,17 +150,13 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				}
 				return $val;
 			};
-			$rep       = $strip_prefix( $rep,       array( '대표자:', '대표자' ) );
-			$med_no    = $strip_prefix( $med_no,    array( '요양기관번호:', '요양기관번호', '의료기관 고유번호:', '의료기관 고유번호', '의료기관번호:', '의료기관번호' ) );
-			$privacy_o = $strip_prefix( $privacy_o, array( '개인정보 보호책임자:', '개인정보 보호책임자', '개인정보:' ) );
-			$biz_no    = $strip_prefix( $biz_no,    array( '사업자등록번호:', '사업자등록번호' ) );
+			$rep    = $strip_prefix( $rep,    array( '대표자:', '대표자' ) );
+			$med_no = $strip_prefix( $med_no, array( '요양기관번호:', '요양기관번호', '의료기관 고유번호:', '의료기관 고유번호', '의료기관번호:', '의료기관번호' ) );
 
-			// v3.28.1: 값이 없거나 라벨만 있는 경우 안전한 기본값으로 fallback (사용자 요청 반영)
+			// v3.28.1: 값이 없거나 라벨만 있는 경우 안전한 기본값으로 fallback
 			if ( ! trim( (string) $rep ) )       $rep       = '문은수 이사장';
 			if ( ! trim( (string) $med_no ) )    $med_no    = '34400117';
-			if ( ! trim( (string) $privacy_o ) ) $privacy_o = '문은수';
 			if ( ! trim( (string) $inst_name ) ) $inst_name = '한아의료재단 문치과병원';
-			if ( ! trim( (string) $inst_type ) ) $inst_type = '치과병원 (의료법인·병원급)';
 			if ( ! trim( (string) $open_date ) ) $open_date = '1995.04';
 
 			// 정책 링크 (Customizer에서 "라벨|URL" 형식)
@@ -186,29 +178,12 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				$policy_items[] = array( 'label' => $label, 'url' => $url );
 			}
 
-			$curr_year   = date_i18n( 'Y' );
-			$year_range  = ( $copyright_start && $copyright_start !== $curr_year )
-				? esc_html( $copyright_start ) . '-' . esc_html( $curr_year )
-				: esc_html( $curr_year );
-
-			// 사업자 정보 행 · 파이프로 자연스럽게 연결
-			$row1 = array();
-			if ( $inst_name ) $row1[] = '상호: <strong>' . esc_html( $inst_name ) . '</strong>';
-			if ( $rep )       $row1[] = '대표자: ' . esc_html( $rep );
-			if ( $biz_no )    $row1[] = '사업자등록번호: ' . esc_html( $biz_no );
-
-			$row2 = array();
-			$addr = $info['address_road'] ?: $info['address'];
-			if ( $addr )      $row2[] = '주소: ' . esc_html( $addr );
-			if ( $open_date ) $row2[] = '개업일: ' . esc_html( $open_date );
-
-			$row3 = array();
-			if ( ! empty( $info['phone'] ) ) {
-				$row3[] = '전화: <a href="tel:' . esc_attr( $phone_link ) . '">' . esc_html( $info['phone'] ) . '</a>';
-			}
-			if ( $med_no )    $row3[] = '요양기관번호: ' . esc_html( $med_no );
-			if ( $privacy_o ) $row3[] = '개인정보 보호책임자: ' . esc_html( $privacy_o );
-			if ( $ad_no )     $row3[] = '광고심의: ' . esc_html( $ad_no );
+			// 사업자 정보 · 대표자 · 개업일 · 요양기관번호 · (선택) 광고심의
+			$biz_items = array();
+			if ( $rep )       $biz_items[] = '대표자: ' . esc_html( $rep );
+			if ( $open_date ) $biz_items[] = '개업일: ' . esc_html( $open_date );
+			if ( $med_no )    $biz_items[] = '요양기관번호: ' . esc_html( $med_no );
+			if ( $ad_no )     $biz_items[] = '광고심의: ' . esc_html( $ad_no );
 		?>
 		<aside class="md-footer__legal md-footer__legal--v2" aria-label="의료기관 법적 표시">
 
@@ -226,19 +201,15 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				</ul>
 			<?php endif; ?>
 
-			<?php if ( $disclaimer ) : ?>
-				<p class="md-footer__disclaimer"><?php echo esc_html( $disclaimer ); ?></p>
+			<?php if ( $inst_name ) : ?>
+				<p class="md-footer__inst-name"><strong><?php echo esc_html( $inst_name ); ?></strong></p>
 			<?php endif; ?>
 
-			<p class="md-footer__copyright">
-				&copy; <?php echo $year_range; ?> <?php echo esc_html( $info['name_short'] ?: $inst_name ); ?>. All rights reserved.
-			</p>
-
-			<div class="md-footer__biz-info">
-				<?php if ( $row1 ) : ?><p><?php echo implode( ' <span class="md-footer__sep">|</span> ', $row1 ); ?></p><?php endif; ?>
-				<?php if ( $row2 ) : ?><p><?php echo implode( ' <span class="md-footer__sep">|</span> ', $row2 ); ?></p><?php endif; ?>
-				<?php if ( $row3 ) : ?><p><?php echo implode( ' <span class="md-footer__sep">|</span> ', $row3 ); ?></p><?php endif; ?>
-			</div>
+			<?php if ( $biz_items ) : ?>
+				<div class="md-footer__biz-info">
+					<p><?php echo implode( ' <span class="md-footer__sep">|</span> ', $biz_items ); ?></p>
+				</div>
+			<?php endif; ?>
 
 			<?php $extra = $mc( 'footer_legal_extra', '' ); ?>
 			<?php if ( $extra ) : ?>

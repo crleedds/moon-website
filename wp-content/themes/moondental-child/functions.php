@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.28.1' );
+define( 'MOONDENTAL_VERSION', '3.28.2' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -149,6 +149,23 @@ add_action( 'after_setup_theme', function() {
 
 	update_option( 'moondental_footer_v3281', 'done' );
 }, 40 );
+
+/* 일회성 마이그레이션: 푸터 · 사용자 요청으로 제거된 필드들 DB에서 정리 (v3.28.2)
+ * 주소·전화는 원래 info 배열에서 오므로 여기선 표시 로직만 제거함.
+ * 필드 자체가 없어진 것들: privacy_officer, biz_no, disclaimer, copyright_start, inst_type, biz_cert_url. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_footer_v3282' ) === 'done' ) return;
+	$to_remove = array(
+		'md_content_footer_legal_privacy_officer',
+		'md_content_footer_legal_biz_no',
+		'md_content_footer_legal_disclaimer',
+		'md_content_footer_legal_copyright_start',
+		'md_content_footer_legal_inst_type',
+		'md_content_footer_legal_biz_cert_url',
+	);
+	foreach ( $to_remove as $key ) remove_theme_mod( $key );
+	update_option( 'moondental_footer_v3282', 'done' );
+}, 41 );
 
 /* 일회성 마이그레이션: 비용안내 가격표에서 '원부터' → '원' (v3.24.1)
  * 사용자가 커스터마이저에서 편집·저장한 가격표에도 옛 '부터' 표기가 남을 수 있으므로 정정. */
