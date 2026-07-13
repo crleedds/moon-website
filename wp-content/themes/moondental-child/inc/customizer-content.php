@@ -860,7 +860,7 @@ function moondental_subpage_content_fields() {
 
 				'doctors_list_eyebrow' => array( 'default' => 'Our Doctors', 'label' => '의료진 그리드 — eyebrow', 'type' => 'text' ),
 				'doctors_list_title'   => array( 'default' => '전체 의료진', 'label' => '의료진 그리드 — 제목', 'type' => 'text' ),
-				'doctors_list_lead'    => array( 'default' => '각 분야 전문의의 정성스러운 진료를 받으실 수 있습니다.', 'label' => '의료진 그리드 — 설명', 'type' => 'textarea' ),
+				'doctors_list_lead'    => array( 'default' => '각 분야 전문 의료진의 진료를 받으실 수 있습니다.', 'label' => '의료진 그리드 — 설명', 'type' => 'textarea' ),
 				'doctors_grid_hint'    => array( 'default' => '진료 예약 시 원하시는 의료진을 지정하실 수 있습니다.', 'label' => '의료진 그리드 — 하단 안내', 'type' => 'text' ),
 
 				'doctors_cta_chip'  => array( 'default' => '상담 예약', 'label' => 'CTA 배너 — chip', 'type' => 'text' ),

@@ -112,60 +112,53 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 			<span class="md-section-head__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_list_eyebrow', 'Our Doctors' ) : 'Our Doctors' ); ?></span>
 			<h2 class="md-section-head__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_list_title', '전체 의료진' ) : '전체 의료진' ); ?></h2>
 			<p class="md-section-head__lead">
-				<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_list_lead', '각 분야 전문의의 정성스러운 진료를 받으실 수 있습니다.' ) : '각 분야 전문의의 정성스러운 진료를 받으실 수 있습니다.' ) ); ?>
+				<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_list_lead', '각 분야 전문 의료진의 진료를 받으실 수 있습니다.' ) : '각 분야 전문 의료진의 진료를 받으실 수 있습니다.' ) ); ?>
 			</p>
 		</header>
 
-		<?php // v3.30.0 · 필터 위에 예약 mini-CTA (모바일에서 특히 유용) ?>
-		<div class="md-docs-mini-cta">
-			<a class="md-btn md-btn-primary md-btn--sm" href="tel:<?php echo esc_attr( $phone_link ); ?>">
-				📞 <?php echo esc_html( $info['phone'] ); ?>
-			</a>
-			<?php if ( ! empty( $info['naver_place'] ) ) : ?>
-				<a class="md-btn md-btn-secondary md-btn--sm" href="<?php echo esc_url( $info['naver_place'] ); ?>" target="_blank" rel="noopener">
-					📅 네이버 예약
-				</a>
-			<?php endif; ?>
-			<?php if ( ! empty( $info['kakao_url'] ) ) : ?>
-				<a class="md-btn md-btn--kakao md-btn--sm" href="<?php echo esc_url( $info['kakao_url'] ); ?>" target="_blank" rel="noopener">
-					💬 카카오톡
-				</a>
-			<?php endif; ?>
-		</div>
+		<?php
+		// v3.30.7 · 그룹 해제 · 사용자 지정 순서로 단일 리스트 렌더
+		// 순서: 대표 병원장 문은수 → 정석형 → 이승주 → 김세일 → 이수연 → 권혜진 → 문지현 → 이창률 → 이영일
+		$doctor_order = array( '문은수', '정석형', '이승주', '김세일', '이수연', '권혜진', '문지현', '이창률', '이영일' );
 
-		<!-- 진료센터 필터 (진료 분야별) -->
-		<div class="md-docs-filter" role="tablist" aria-label="진료센터 필터">
-			<button class="md-docs-filter__btn is-active" type="button" data-doc-filter="all">전체</button>
-			<?php foreach ( $groups as $g ) :
-				$key = $group_keys[ $g['group'] ];
-			?>
-				<button class="md-docs-filter__btn" type="button" data-doc-filter="<?php echo esc_attr( $key ); ?>">
-					<?php echo esc_html( $g['group'] ); ?>
-				</button>
-			<?php endforeach; ?>
-		</div>
+		// 모든 그룹에서 의료진 flatten
+		$doctors_by_name = array();
+		foreach ( $groups as $g ) {
+			foreach ( $g['members'] as $m ) {
+				$doctors_by_name[ $m['name'] ] = $m;
+			}
+		}
 
-		<!-- 의료진 카드 그리드 -->
+		// 사용자 지정 순서로 정렬 · 순서 목록에 없는 의료진은 뒤에 append
+		$ordered_doctors = array();
+		foreach ( $doctor_order as $name ) {
+			if ( isset( $doctors_by_name[ $name ] ) ) {
+				$ordered_doctors[] = $doctors_by_name[ $name ];
+				unset( $doctors_by_name[ $name ] );
+			}
+		}
+		foreach ( $doctors_by_name as $m ) $ordered_doctors[] = $m;
+		?>
+
+		<!-- 의료진 카드 그리드 · 그룹 없이 단일 리스트 -->
 		<div class="md-docs-grid">
-			<?php foreach ( $groups as $g ) :
-				$key = $group_keys[ $g['group'] ];
-				foreach ( $g['members'] as $doc ) :
-					$photo_url   = moondental_doctor_photo_url( $doc['photo'] ?? '' );
-					$anchor      = 'doctor-' . sanitize_title( $doc['name'] );
-					$doctor_link = home_url( '/의료진/' . moondental_doctor_name_to_slug( $doc['name'] ) . '/' );
-					$bio         = $doc['bio'] ?? array();
-					if ( is_string( $bio ) ) { $bio = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", $bio ) ) ); }
+			<?php foreach ( $ordered_doctors as $doc ) :
+				$photo_url   = moondental_doctor_photo_url( $doc['photo'] ?? '' );
+				$anchor      = 'doctor-' . sanitize_title( $doc['name'] );
+				$doctor_link = home_url( '/의료진/' . moondental_doctor_name_to_slug( $doc['name'] ) . '/' );
+				$bio         = $doc['bio'] ?? array();
+				if ( is_string( $bio ) ) { $bio = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", $bio ) ) ); }
 
-					// 사진 머리 크기·위치 통일 — 의료진별 zoom + translateY 적용
-					$photo_zoom = isset( $doc['photo_zoom'] ) ? (float) $doc['photo_zoom'] : 1.0;
-					$photo_ty   = isset( $doc['photo_ty'] )   ? (float) $doc['photo_ty']   : 0.0;
-					$photo_style = sprintf(
-						'transform: translateY(%s%%) scale(%s); transform-origin: center top; object-position: center top;',
-						esc_attr( number_format( $photo_ty,   1 ) ),
-						esc_attr( number_format( $photo_zoom, 2 ) )
-					);
+				// 사진 머리 크기·위치 통일 — 의료진별 zoom + translateY 적용
+				$photo_zoom = isset( $doc['photo_zoom'] ) ? (float) $doc['photo_zoom'] : 1.0;
+				$photo_ty   = isset( $doc['photo_ty'] )   ? (float) $doc['photo_ty']   : 0.0;
+				$photo_style = sprintf(
+					'transform: translateY(%s%%) scale(%s); transform-origin: center top; object-position: center top;',
+					esc_attr( number_format( $photo_ty,   1 ) ),
+					esc_attr( number_format( $photo_zoom, 2 ) )
+				);
 			?>
-				<article class="md-doccard md-doccard--linked" data-doc-group="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $anchor ); ?>"><a class="md-doccard__link-wrap" href="<?php echo esc_url( $doctor_link ); ?>" aria-label="<?php echo esc_attr( $doc['name'] . ' ' . $doc['role'] . ' 상세 페이지' ); ?>"></a>
+				<article class="md-doccard md-doccard--linked" id="<?php echo esc_attr( $anchor ); ?>"><a class="md-doccard__link-wrap" href="<?php echo esc_url( $doctor_link ); ?>" aria-label="<?php echo esc_attr( $doc['name'] . ' ' . $doc['role'] . ' 상세 페이지' ); ?>"></a>
 					<div class="md-doccard__photo">
 						<?php if ( $photo_url ) : ?>
 							<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $doc['name'] ); ?>" loading="lazy" style="<?php echo esc_attr( $photo_style ); ?>">
@@ -185,7 +178,7 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 						<span class="md-doccard__view">상세 프로필 보기 <span aria-hidden="true">→</span></span>
 					</div>
 				</article>
-			<?php endforeach; endforeach; ?>
+			<?php endforeach; ?>
 		</div>
 
 		<p class="md-docs-grid__hint">

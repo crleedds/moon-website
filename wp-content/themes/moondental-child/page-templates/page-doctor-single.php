@@ -48,11 +48,16 @@ if ( ! $intro ) {
 	$intro = $doctor['philosophy'] ?? '';
 }
 
-/* 자격 체크리스트 — Customizer 우선, 없으면 약력 앞 4개 */
+/* 자격 체크리스트 — Customizer 우선, 없으면 약력 앞 4개
+ * v3.30.7 · Customizer 미설정 시 자동 발췌한 4개는 '학력·경력' 리스트에서 제외해 중복 방지. */
 $creds_text = md_content( "doc_{$doc_key}_credentials", '' );
-$credentials = $creds_text
-	? array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", $creds_text ) ) )
-	: array_slice( $bio_lines, 0, 4 );
+if ( $creds_text ) {
+	$credentials = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", $creds_text ) ) );
+} else {
+	$credentials = array_slice( $bio_lines, 0, 4 );
+	// 카드 상단에 이미 보여지는 항목은 아래 학력·경력 섹션에서 제외
+	$bio_lines = array_slice( $bio_lines, 4 );
+}
 
 /* Q&A — "질문 | 답변" 라인 파싱 */
 $qa_text = md_content( "doc_{$doc_key}_qa", '' );
