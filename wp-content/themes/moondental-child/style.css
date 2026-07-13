@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.29.1
+Version:      3.29.2
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -2133,6 +2133,59 @@ button.elementor-button {
 .md-info-block__cta--row { display: flex; gap: 8px; flex-wrap: wrap; }
 .md-btn-group--mt-lg { margin-top: 32px; }
 .md-news-empty__msg { margin: 0; color: var(--color-text-sub); }
+/* v3.29.2 · 역사 페이지 하단 '더 알아보기' 3 카드 (예약 CTA 대체) */
+.md-history-explore {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(16px, 2vw, 24px);
+  max-width: 1040px;
+  margin: 0 auto;
+}
+@media (max-width: 720px) { .md-history-explore { grid-template-columns: 1fr; } }
+.md-history-explore__card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(22px, 2.6vw, 30px);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.md-history-explore__card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-soft);
+}
+.md-history-explore__icon {
+  font-size: 2rem;
+  line-height: 1;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif;
+}
+.md-history-explore__card h3 {
+  font-size: 1.125rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.015em;
+  color: var(--color-text);
+}
+.md-history-explore__card p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+  flex: 1;
+}
+.md-history-explore__more {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  margin-top: auto;
+}
+.md-history-explore__card:hover .md-history-explore__more { color: var(--color-primary); }
 
 /* v3.29.1 · 지도 이미지 없을 때 fallback 라벨 */
 .md-locmap__fallback-label {
@@ -3156,11 +3209,12 @@ button.elementor-button {
   transition: color 0.2s var(--ease);
 }
 .md-footer__policy-item a:hover { color: var(--color-primary-light); }
+/* v3.29.2 · 대표자 · ul 밖 별도 문단 (시맨틱 개선) */
 .md-footer__rep {
   font-size: 0.8125rem;
   color: rgba(255, 255, 255, 0.7);
-  margin-top: 8px !important;
-  padding-top: 8px !important;
+  margin: 8px 0 0;
+  padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 

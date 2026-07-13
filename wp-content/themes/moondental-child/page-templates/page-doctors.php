@@ -46,23 +46,25 @@ $staff_default = "# '부서|직책|이름' 형식으로 한 줄에 한 명씩 (�
 	. "진료실|주임|OOO\n"
 	. "기공실|과장|OOO\n"
 	. "서비스지원실|실장|OOO\n"
-	. "경영지원실|행정원장|OOO";
+	. "경영지원본부|행정원장|OOO";
 $staff_raw = function_exists( 'md_content' ) ? md_content( 'staff_list', $staff_default ) : $staff_default;
 $staff_by_dept = array();
 $staff_total = 0;
+// v3.29.2: 부서 아이콘 · 경영지원본부(옛 경영지원실) · 비서실 흡수
 $dept_icons = array(
 	'진료실'       => '🦷',
 	'기공실'       => '🛠️',
 	'서비스지원실' => '💬',
-	'경영지원실'   => '📋',
+	'경영지원본부' => '📋',
+	'경영지원실'   => '📋', // legacy 호환
 	'관리사무소'   => '🏢',
-	'비서실'       => '✉️',
+	'비서실'       => '✉️', // legacy 호환
 );
-// 직책 정렬 우선순위 (높은 직급 먼저)
+// 직책 정렬 우선순위 (높은 직급 먼저) · v3.29.2: 수석코디 신설
 $role_rank = array(
 	'행정원장'=>1, '소장'=>1, '이사'=>2, '실장'=>3, '팀장'=>4, '차장'=>5, '과장'=>6,
-	'책임'=>7, '책임코디'=>7, '선임'=>8, '선임코디'=>8, '주임'=>9, '대리'=>10,
-	'기사'=>11, '사원'=>12,
+	'수석코디'=>7, '책임'=>8, '책임코디'=>8, '선임'=>9, '선임코디'=>9,
+	'주임'=>10, '대리'=>11, '기사'=>12, '사원'=>13,
 );
 foreach ( explode( "\n", $staff_raw ) as $line ) {
 	$line = trim( $line );
@@ -219,10 +221,10 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 <section class="md-section md-section--surface">
 	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">전문 분야</span>
-			<h2 class="md-section-head__title">진료 전문과 안내</h2>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'doctors_spec_eyebrow', '전문 분야' ) ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'doctors_spec_title', '진료 전문과 안내' ) ); ?></h2>
 			<p class="md-section-head__lead">
-				문치과병원은 6개 전문 진료과의 협진 체계를 운영합니다.
+				<?php echo esc_html( md_content( 'doctors_spec_lead', '문치과병원은 6개 전문 진료과의 협진 체계를 운영합니다.' ) ); ?>
 			</p>
 		</header>
 

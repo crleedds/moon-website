@@ -178,8 +178,9 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 							<?php endif; ?>
 						</li>
 					<?php endforeach; ?>
-					<li class="md-footer__rep">대표자: <?php echo esc_html( $col_rep_raw ); ?></li>
 				</ul>
+				<?php // v3.29.2: 대표자는 li가 아니라 별도 문단으로 (semantic 개선) ?>
+				<p class="md-footer__rep">대표자: <?php echo esc_html( $col_rep_raw ); ?></p>
 			</div>
 
 		</div>

@@ -139,7 +139,53 @@ for ( $i = 1; $i <= 4; $i++ ) {
 	</div>
 </section>
 
-<?php get_template_part( 'template-parts/section', 'cta' ); ?>
+<?php
+// v3.29.2 · 예약 CTA 대신 병원 둘러보기 성격 · 3개 카드
+$explore_cards = array(
+	array(
+		'icon'  => '👨‍⚕️',
+		'title' => md_content( 'history_explore_1_title', '의료진 소개' ),
+		'desc'  => md_content( 'history_explore_1_desc',  '30여년 임상 · 각 분야 전문 의료진의 프로필과 진료 철학을 확인하세요.' ),
+		'url'   => home_url( '/의료진/' ),
+		'label' => md_content( 'history_explore_1_label', '의료진 만나기 →' ),
+	),
+	array(
+		'icon'  => '🔬',
+		'title' => md_content( 'history_explore_2_title', '기술력·시설' ),
+		'desc'  => md_content( 'history_explore_2_desc',  '문타워 9·10·11·13층 통합 진료센터 · 디지털 진단·수술 시스템 소개.' ),
+		'url'   => home_url( '/기술력-시설/' ),
+		'label' => md_content( 'history_explore_2_label', '시설 둘러보기 →' ),
+	),
+	array(
+		'icon'  => '📰',
+		'title' => md_content( 'history_explore_3_title', '병원 소식' ),
+		'desc'  => md_content( 'history_explore_3_desc',  '언론 보도 · 봉사활동 · 대외 협력 · 지역사회 소식을 모아둡니다.' ),
+		'url'   => home_url( '/소식/' ),
+		'label' => md_content( 'history_explore_3_label', '소식 보기 →' ),
+	),
+);
+?>
+<section class="md-section md-section--surface">
+	<div class="md-container">
+		<header class="md-section-head">
+			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'history_explore_eyebrow', 'Explore' ) ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'history_explore_title', '병원을 더 알아보시겠어요?' ) ); ?></h2>
+			<p class="md-section-head__lead">
+				<?php echo esc_html( md_content( 'history_explore_lead', '의료진·시설·소식 — 30여년 이어온 문치과병원의 오늘을 살펴보세요.' ) ); ?>
+			</p>
+		</header>
+		<div class="md-history-explore">
+			<?php foreach ( $explore_cards as $card ) : ?>
+				<a class="md-history-explore__card" href="<?php echo esc_url( $card['url'] ); ?>">
+					<span class="md-history-explore__icon" aria-hidden="true"><?php echo esc_html( $card['icon'] ); ?></span>
+					<h3><?php echo esc_html( $card['title'] ); ?></h3>
+					<p><?php echo esc_html( $card['desc'] ); ?></p>
+					<span class="md-history-explore__more"><?php echo esc_html( $card['label'] ); ?></span>
+				</a>
+			<?php endforeach; ?>
+		</div>
+	</div>
+</section>
 
 <?php
 get_footer();
