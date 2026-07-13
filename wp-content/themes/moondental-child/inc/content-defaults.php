@@ -965,7 +965,7 @@ function moondental_get_history() {
 		array( 'year' => '2025', 'month' => '08', 'title' => '몽골 의료봉사 (IN INEED BAYSAL DENTAL CLINIC)', 'desc' => '국제 의료봉사의 가치를 되살리는 현장의 시간. 2025.08.12 – 08.15.', 'photo' => 'history-slide-28.png' ),
 
 		/* ─── 2024 ─── */
-		array( 'year' => '2024', 'month' => '09', 'title' => '실리콘밸리 직무체험단 미팅', 'desc' => '청년들의 글로벌 도전과 미래 디지털 리더 성장의 발판. 제2기 천안형 스타 디지털 인재육성 프로그램.', 'photo' => 'history-slide-27.png' ),
+		array( 'year' => '2024', 'month' => '09', 'title' => '실리콘밸리 직무체험자 미팅', 'desc' => '청년들의 글로벌 도전과 미래 디지털 리더 성장의 발판. 제2기 천안형 스타 디지털 인재육성 프로그램.', 'photo' => 'history-slide-27.png' ),
 
 		/* ─── 2023 ─── */
 		array( 'year' => '2023', 'month' => '10', 'title' => '제21차 세계한인비즈니스대회', 'desc' => '미국 애너하임 컨벤션센터, 한인 경제인들과 네트워킹 및 교류 활동.', 'photo' => 'history-slide-26.png' ),
@@ -978,22 +978,22 @@ function moondental_get_history() {
 		array( 'year' => '2020', 'month' => '03', 'title' => '(사)블루문드림 청년희망의 출발점', 'desc' => '시카고 국제로타리 이사회를 마친 귀국길, 오순 UN대사·한국글로벌포스 윤상현 이사장과 함께 블루문드림 결성.', 'photo' => 'history-slide-23.png' ),
 
 		/* ─── 2019 ─── */
-		array( 'year' => '2019', 'month' => '08', 'title' => 'KBS 아침마당 출연', 'desc' => '나눔의 추억을 시작하며 시민들과 소통한 시간.', 'photo' => 'history-slide-22.png' ),
-		array( 'year' => '2019', 'month' => '05', 'title' => '중국 치과의사 3개월 연수', 'desc' => '정직 임플란트 기술 실습 및 교육 — 중국 치과의사 방문.', 'photo' => 'history-slide-21.png' ),
+		array( 'year' => '2019', 'month' => '08', 'title' => 'KBS 아침마당 출연', 'desc' => '나눔의 삶을 소개하며 시민들과 소통한 시간.', 'photo' => 'history-slide-22.png' ),
+		array( 'year' => '2019', 'month' => '05', 'title' => '중국 치과의사 방문 3개월 연수', 'desc' => '선진 임플란트 기술 실습 및 교육.', 'photo' => 'history-slide-21.png' ),
 
 		/* ─── 2017 ─── */
 		array( 'year' => '2017', 'month' => '12', 'title' => 'TJB 열린토론 출연', 'desc' => '기부문화·나눔문화 활성화를 위한 열린토론 패널 참여.', 'photo' => 'history-slide-20.png' ),
 
 		/* ─── 2016 ─── */
-		array( 'year' => '2016', 'month' => '02', 'title' => '몽골 의료봉사활동', 'desc' => '치과 임플란트 정직기술 전수.', 'photo' => 'history-slide-19.png' ),
+		array( 'year' => '2016', 'month' => '02', 'title' => '몽골 의료봉사활동', 'desc' => '치과 임플란트 선진기술 전수.', 'photo' => 'history-slide-19.png' ),
 
 		/* ─── 2015 ─── */
-		array( 'year' => '2015', 'month' => '05', 'title' => '몽골 대통령 우호 훈장 수상', 'desc' => '30여 년간 몽골 의료봉사 공헌으로 몽골 "나이르달 메달" 훈장 수상. 2015년 5월 4일 대통령령 제63호 명령.', 'photo' => 'history-slide-18.png' ),
+		array( 'year' => '2015', 'month' => '05', 'title' => '몽골대통령 우호 훈장 수훈', 'desc' => '30여 년간 몽골 의료봉사의 공헌으로 몽골 "나이람달 메달" 우호훈장 수훈. 2015년 5월 4일 대통령령 제63호 명령.', 'photo' => 'history-slide-18.png' ),
 		array( 'year' => '2015', 'month' => '05', 'title' => '몽골 의료봉사활동', 'desc' => '오지마을 어린이 구강진료 및 치료.', 'photo' => 'history-slide-17.png' ),
 
 		/* ─── 2014 ─── */
 		array( 'year' => '2014', 'month' => '10', 'title' => 'T-broad 방송 〈힐링코치〉', 'desc' => '임플란트에 대한 정확한 이해와 전달을 돕는 치과 멘토 역할.', 'photo' => 'history-slide-16.png' ),
-		array( 'year' => '2014', 'month' => '07', 'title' => '대전 MBC 의료포커스 〈닥터인〉 자문병원 선정', 'desc' => '', 'photo' => 'history-slide-15.png' ),
+		array( 'year' => '2014', 'month' => '07', 'title' => '대전MBC 의료포털 〈닥터인〉 자문병원 선정', 'desc' => '2014년부터 현재까지 닥터 건강 캠페인 출연.', 'photo' => 'history-slide-15.png' ),
 		array( 'year' => '2014', 'month' => '04', 'title' => '필리핀 치과의사 연수', 'desc' => '국제로타리 직업연수단 방문 및 임플란트 연수 진행.', 'photo' => 'history-slide-14.png' ),
 
 		/* ─── 2013 ─── */
@@ -1058,7 +1058,7 @@ function moondental_get_history() {
 		array( 'year' => '2004', 'month' => '04', 'title' => '중국 연길 의사 치과의사 2차 연수교육 (1명)', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2003 ─── */
-		array( 'year' => '2003', 'month' => '07', 'title' => '중국 두만 구강병원·정공치과 병원 자매결연', 'desc' => '무료 진료 실시 — 임플란트 매식 1차 46개, 2차 30개.', 'photo' => '' ),
+		array( 'year' => '2003', 'month' => '07', 'title' => '연길 도문 구강병원 및 정공치과 병원 자매결연', 'desc' => '무료 진료 및 무료 임플란트 식립.', 'photo' => '' ),
 		array( 'year' => '2003', 'month' => '05', 'title' => '중국 연길 의사 치과의사 1차 연수교육 (6명)', 'desc' => '', 'photo' => '' ),
 
 		/* ─── 2002 ─── */
@@ -1077,7 +1077,7 @@ function moondental_get_history() {
 		/* ─── 1999 ─── */
 		array( 'year' => '1999', 'month' => '10', 'title' => '제2기 한아임플란트·보철연구소 연수생 15명', 'desc' => '', 'photo' => '' ),
 		array( 'year' => '1999', 'month' => '08', 'title' => 'NEW MILLENIUM 심포지엄 개최', 'desc' => '고려인사 기념관, 600명 참석.', 'photo' => '' ),
-		array( 'year' => '1999', 'month' => '08', 'title' => '미국 LA, WPDI 자매결연', 'desc' => '대표 THOMAS J. HAN. Thomas J. Han 교수 참석.', 'photo' => 'history-slide-04.png' ),
+		array( 'year' => '1999', 'month' => '08', 'title' => '미국 LA, WPDI 자매결연', 'desc' => 'Thomas J. Han 교수 참석.', 'photo' => 'history-slide-04.png' ),
 		array( 'year' => '1999', 'month' => '02', 'title' => '임플란트 임상 세미나 개최 및 제1기 연수생 수료식', 'desc' => '대전과 서울에서 진행.', 'photo' => '' ),
 
 		/* ─── 1998 ─── */
