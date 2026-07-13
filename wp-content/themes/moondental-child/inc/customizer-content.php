@@ -887,6 +887,13 @@ function moondental_chrome_content_fields() {
 				'recruit_hr_contact_name' => array( 'default' => '', 'label' => '인사 담당자 이름 (선택, 채용 히어로에 표시)', 'type' => 'text' ),
 			),
 		),
+		'seo_verification' => array(
+			'title'  => 'SEO — 검색엔진 등록 인증',
+			'fields' => array(
+				'seo_naver_verify'  => array( 'default' => '', 'label' => '네이버 웹마스터도구 인증 코드 (content 값만)', 'type' => 'text' ),
+				'seo_google_verify' => array( 'default' => '', 'label' => 'Google Search Console 인증 코드 (content 값만)', 'type' => 'text' ),
+			),
+		),
 	);
 }
 

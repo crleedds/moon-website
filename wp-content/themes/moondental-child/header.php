@@ -18,9 +18,10 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-	<meta name="color-scheme" content="light only">
-	<meta name="supported-color-schemes" content="light">
-	<meta name="theme-color" content="#FFFAF4">
+	<meta name="color-scheme" content="light dark">
+	<meta name="supported-color-schemes" content="light dark">
+	<meta name="theme-color" content="#FFFAF4" media="(prefers-color-scheme: light)">
+	<meta name="theme-color" content="#1B1310" media="(prefers-color-scheme: dark)">
 	<link rel="profile" href="https://gmpg.org/xfn/11">
 	<?php wp_head(); ?>
 </head>
@@ -39,7 +40,7 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 					<?php if ( has_custom_logo() ) : ?>
 						<?php the_custom_logo(); ?>
 					<?php else :
-						// 페이지가 항상 라이트 테마(color-scheme: light only)이므로 컬러 로고 하나만 사용
+						// 컬러 로고 (다크모드에서도 브랜드 코럴 그대로 보이도록 유지)
 						$theme_logo = '';
 						foreach ( array( 'logo-wide-noreg.png', 'logo-wide.png' ) as $cand ) {
 							if ( file_exists( MOONDENTAL_DIR . '/assets/images/logo/' . $cand ) ) {

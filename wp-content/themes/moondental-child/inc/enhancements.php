@@ -13,9 +13,18 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  *    네이버·구글 검색 결과에 평점·주소·시간·전화 풍부 표시
  * ========================================================== */
 /**
+ * v3.27.6: Yoast SEO 활성화 감지 — Yoast가 title/OG/Twitter/description을 처리하면 중복 방지 위해 스킵.
+ * 지역 SEO(geo)와 verification 태그만 계속 출력 (Yoast가 다루지 않는 영역).
+ */
+function moondental_yoast_active() {
+	return defined( 'WPSEO_VERSION' );
+}
+
+/**
  * SEO 메타 태그 — description / keywords / Open Graph / Twitter Card.
  *  네이버·구글·카카오·SNS 공유 시 풍부한 정보 노출.
  *  '천안' 지역 키워드를 모든 페이지에 자동 삽입.
+ *  Yoast SEO가 활성이면 중복 방지를 위해 title/desc/OG/Twitter는 스킵, geo/verification만 출력.
  */
 function moondental_seo_meta_tags() {
 	$info = moondental_get_info();
@@ -152,31 +161,47 @@ function moondental_seo_meta_tags() {
 	}
 
 	$current_url = is_singular() ? get_permalink() : home_url( add_query_arg( null, null ) );
+	$yoast       = moondental_yoast_active();
+
+	// v3.27.6: verification 코드 Customizer에서 편집 가능
+	$naver_verify  = function_exists( 'md_content' ) ? md_content( 'seo_naver_verify', '' )  : '';
+	$google_verify = function_exists( 'md_content' ) ? md_content( 'seo_google_verify', '' ) : '';
 
 	echo "\n<!-- moondental SEO meta -->\n";
-	echo '<meta name="description" content="' . esc_attr( $meta_desc ) . '">' . "\n";
-	if ( $meta_keywords ) {
-		echo '<meta name="keywords" content="' . esc_attr( $meta_keywords ) . '">' . "\n";
+
+	if ( ! $yoast ) {
+		echo '<meta name="description" content="' . esc_attr( $meta_desc ) . '">' . "\n";
+		if ( $meta_keywords ) {
+			echo '<meta name="keywords" content="' . esc_attr( $meta_keywords ) . '">' . "\n";
+		}
 	}
-	echo '<meta name="naver-site-verification" content="">' . "\n";
-	echo '<meta name="google-site-verification" content="">' . "\n";
 
-	// Open Graph
-	echo '<meta property="og:type" content="' . esc_attr( $og_type ) . '">' . "\n";
-	echo '<meta property="og:site_name" content="' . esc_attr( $site_name ) . '">' . "\n";
-	echo '<meta property="og:title" content="' . esc_attr( $meta_title ) . '">' . "\n";
-	echo '<meta property="og:description" content="' . esc_attr( $meta_desc ) . '">' . "\n";
-	echo '<meta property="og:url" content="' . esc_url( $current_url ) . '">' . "\n";
-	echo '<meta property="og:image" content="' . esc_url( $og_image ) . '">' . "\n";
-	echo '<meta property="og:locale" content="ko_KR">' . "\n";
+	// Verification 코드 (Yoast와 무관 · 각각 등록됨)
+	if ( $naver_verify ) {
+		echo '<meta name="naver-site-verification" content="' . esc_attr( $naver_verify ) . '">' . "\n";
+	}
+	if ( $google_verify ) {
+		echo '<meta name="google-site-verification" content="' . esc_attr( $google_verify ) . '">' . "\n";
+	}
 
-	// Twitter Card
-	echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
-	echo '<meta name="twitter:title" content="' . esc_attr( $meta_title ) . '">' . "\n";
-	echo '<meta name="twitter:description" content="' . esc_attr( $meta_desc ) . '">' . "\n";
-	echo '<meta name="twitter:image" content="' . esc_url( $og_image ) . '">' . "\n";
+	if ( ! $yoast ) {
+		// Open Graph
+		echo '<meta property="og:type" content="' . esc_attr( $og_type ) . '">' . "\n";
+		echo '<meta property="og:site_name" content="' . esc_attr( $site_name ) . '">' . "\n";
+		echo '<meta property="og:title" content="' . esc_attr( $meta_title ) . '">' . "\n";
+		echo '<meta property="og:description" content="' . esc_attr( $meta_desc ) . '">' . "\n";
+		echo '<meta property="og:url" content="' . esc_url( $current_url ) . '">' . "\n";
+		echo '<meta property="og:image" content="' . esc_url( $og_image ) . '">' . "\n";
+		echo '<meta property="og:locale" content="ko_KR">' . "\n";
 
-	// 지역 SEO
+		// Twitter Card
+		echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
+		echo '<meta name="twitter:title" content="' . esc_attr( $meta_title ) . '">' . "\n";
+		echo '<meta name="twitter:description" content="' . esc_attr( $meta_desc ) . '">' . "\n";
+		echo '<meta name="twitter:image" content="' . esc_url( $og_image ) . '">' . "\n";
+	}
+
+	// 지역 SEO (Yoast Local이 없으면 항상 출력 — 무해)
 	echo '<meta name="geo.region" content="KR-44">' . "\n"; // 충청남도
 	echo '<meta name="geo.placename" content="천안시 동남구 신부동">' . "\n";
 	echo '<meta name="geo.position" content="36.8210;127.1572">' . "\n";
@@ -213,7 +238,7 @@ function moondental_jsonld_schema() {
 			'@type'      => 'OpeningHoursSpecification',
 			'dayOfWeek'  => 'Thursday',
 			'opens'      => '09:00',
-			'closes'     => '18:00',
+			'closes'     => '18:30',
 		),
 		array(
 			'@type'      => 'OpeningHoursSpecification',
@@ -276,6 +301,115 @@ function moondental_jsonld_schema() {
 	echo "\n</script>\n";
 }
 add_action( 'wp_head', 'moondental_jsonld_schema', 50 );
+
+
+/**
+ * v3.27.6: BreadcrumbList JSON-LD — 각 페이지의 계층 구조를 검색엔진에 알림.
+ * 홈에서는 출력 안 함. 페이지 부모/조상까지 추적해서 계층 생성.
+ */
+function moondental_jsonld_breadcrumb() {
+	if ( is_front_page() || is_admin() ) return;
+
+	$home = home_url( '/' );
+	$items = array(
+		array(
+			'@type'    => 'ListItem',
+			'position' => 1,
+			'name'     => '홈',
+			'item'     => $home,
+		),
+	);
+
+	if ( is_page() ) {
+		$page_id = get_queried_object_id();
+		$ancestors = array_reverse( get_post_ancestors( $page_id ) );
+		$pos = 2;
+		foreach ( $ancestors as $ancestor_id ) {
+			$items[] = array(
+				'@type'    => 'ListItem',
+				'position' => $pos++,
+				'name'     => wp_strip_all_tags( get_the_title( $ancestor_id ) ),
+				'item'     => get_permalink( $ancestor_id ),
+			);
+		}
+		$items[] = array(
+			'@type'    => 'ListItem',
+			'position' => $pos,
+			'name'     => wp_strip_all_tags( get_the_title( $page_id ) ),
+			'item'     => get_permalink( $page_id ),
+		);
+	} elseif ( is_singular( 'post' ) ) {
+		$items[] = array(
+			'@type'    => 'ListItem',
+			'position' => 2,
+			'name'     => '소식',
+			'item'     => $home . '소식/',
+		);
+		$items[] = array(
+			'@type'    => 'ListItem',
+			'position' => 3,
+			'name'     => wp_strip_all_tags( get_the_title() ),
+			'item'     => get_permalink(),
+		);
+	} else {
+		return; // 카테고리·검색·404 등은 스킵
+	}
+
+	$schema = array(
+		'@context'        => 'https://schema.org',
+		'@type'           => 'BreadcrumbList',
+		'itemListElement' => $items,
+	);
+
+	echo "\n<script type=\"application/ld+json\">\n";
+	echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+	echo "\n</script>\n";
+}
+add_action( 'wp_head', 'moondental_jsonld_breadcrumb', 55 );
+
+
+/**
+ * v3.27.6: FAQPage JSON-LD — /자주-묻는-질문/ 페이지에서만 출력.
+ * moondental_get_faqs() 데이터를 스키마화 → 구글 리치 결과 (아코디언).
+ */
+function moondental_jsonld_faq() {
+	if ( ! is_page_template( 'page-templates/page-faq.php' ) ) return;
+	if ( ! function_exists( 'moondental_get_faqs' ) ) return;
+
+	$faqs = moondental_get_faqs();
+	if ( empty( $faqs ) ) return;
+
+	$questions = array();
+	foreach ( $faqs as $items ) {
+		if ( ! is_array( $items ) ) continue;
+		foreach ( $items as $item ) {
+			$q = isset( $item['q'] ) ? trim( wp_strip_all_tags( $item['q'] ) ) : '';
+			$a = isset( $item['a'] ) ? trim( wp_strip_all_tags( $item['a'] ) ) : '';
+			if ( ! $q || ! $a ) continue;
+			$questions[] = array(
+				'@type'          => 'Question',
+				'name'           => $q,
+				'acceptedAnswer' => array(
+					'@type' => 'Answer',
+					'text'  => $a,
+				),
+			);
+		}
+	}
+
+	if ( empty( $questions ) ) return;
+
+	$schema = array(
+		'@context'   => 'https://schema.org',
+		'@type'      => 'FAQPage',
+		'mainEntity' => $questions,
+	);
+
+	echo "\n<script type=\"application/ld+json\">\n";
+	echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+	echo "\n</script>\n";
+}
+add_action( 'wp_head', 'moondental_jsonld_faq', 60 );
 
 
 /* ============================================================
