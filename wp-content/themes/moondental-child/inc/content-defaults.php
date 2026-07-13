@@ -1282,9 +1282,10 @@ function moondental_default_doctors_content() {
 
 <h3>층별 전문 센터</h3>
 <ul>
-<li><strong>9F 종합진료센터</strong> — 보존과 전문의, 보철과·통합치의학 전문의, 치주·보철 진료</li>
-<li><strong>10F 임플란트센터</strong> — UCSF/UPENN 연수, 디지털 임플란트 식립과 보철 통합 진료</li>
-<li><strong>11F 교정과·종합진료센터</strong> — 치과교정과 전문의·인정의, 투명교정 전담</li>
+<li><strong>9F</strong> — 보철과 · 보존과 · 예방클리닉</li>
+<li><strong>10F</strong> — 임플란트센터 · 스마일디자인센터 · 구강외과 · 구강내과 · 턱관절클리닉</li>
+<li><strong>11F</strong> — 교정센터 · 소아치과 · 치주과 · 디지털센터</li>
+<li><strong>13F</strong> — 한아문화센터 · 기공실</li>
 </ul>
 
 <h3>주요 학위·자격</h3>
@@ -1310,10 +1311,10 @@ function moondental_default_facility_content() {
 
 <h3>층별 전문 센터</h3>
 <ul>
-<li><strong>9F 종합진료센터</strong> — 보존·치주·보철 통합 진료, 상담실</li>
-<li><strong>10F 임플란트센터</strong> — CT·디지털 가이드 식립 수술실, 멸균실</li>
-<li><strong>11F 교정과 · 종합진료센터</strong> — 투명교정 전담, 일반 교정, 상담실</li>
-<li><strong>13F</strong> — 한아문화센터 · 원내 기공실 (보철 자체 제작)</li>
+<li><strong>9F</strong> — 보철과 · 보존과 · 예방클리닉</li>
+<li><strong>10F</strong> — 임플란트센터 · 스마일디자인센터 · 구강외과 · 구강내과 · 턱관절클리닉</li>
+<li><strong>11F</strong> — 교정센터 · 소아치과 · 치주과 · 디지털센터</li>
+<li><strong>13F</strong> — 한아문화센터 · 기공실 (보철 자체 제작)</li>
 </ul>
 
 <h3>디지털 진단 장비</h3>
@@ -1523,9 +1524,10 @@ function moondental_default_services_overview_content() {
 
 	$html .= '<h3>층별 전문 센터</h3>';
 	$html .= '<ul>
-<li><strong>9F 종합진료센터</strong> — 일반진료·자연치아 살리기·심미 통합 진료</li>
-<li><strong>10F 임플란트센터</strong> — 단일·다수·전악 임플란트, 디지털 가이드 식립</li>
-<li><strong>11F 교정과 · 종합진료센터</strong> — 투명교정 전담, 사랑니 발치, 턱관절 클리닉</li>
+<li><strong>9F</strong> — 보철과 · 보존과 · 예방클리닉</li>
+<li><strong>10F</strong> — 임플란트센터 · 스마일디자인센터 · 구강외과 · 구강내과 · 턱관절클리닉</li>
+<li><strong>11F</strong> — 교정센터 · 소아치과 · 치주과 · 디지털센터</li>
+<li><strong>13F</strong> — 한아문화센터 · 기공실</li>
 </ul>';
 
 	$html .= '<h3>저희가 가장 신경 쓰는 것</h3>';

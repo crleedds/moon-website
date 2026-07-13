@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.29.3' );
+define( 'MOONDENTAL_VERSION', '3.29.4' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -2383,7 +2383,7 @@ function moondental_setup_primary_menu( $force = false ) {
 			array( 'title'=>'잇몸치료', 'url'=>$home.'자연치아-살리기/#perio' ),
 		)),
 		array( 'title'=>'진료과', 'url'=>$home.'진료항목/', 'children'=>array(
-			array( 'title'=>'턱관절',           'url'=>$home.'턱관절-클리닉/' ),
+			array( 'title'=>'턱관절클리닉',      'url'=>$home.'턱관절-클리닉/' ),
 			array( 'title'=>'이갈이·이악물기', 'url'=>$home.'턱관절-클리닉/' ),
 			array( 'title'=>'사랑니',           'url'=>$home.'사랑니-발치/' ),
 			array( 'title'=>'소아치과',         'url'=>$home.'소아치과/' ),
@@ -2662,7 +2662,7 @@ function moondental_primary_menu_data() {
 			array( 'label' => '잇몸치료', 'url' => $home . '자연치아-살리기/#perio' ),
 		) ),
 		array( 'label' => '진료과',           'url' => $home . '진료항목/',           'children' => array(
-			array( 'label' => '턱관절',          'url' => $home . '턱관절-클리닉/' ),
+			array( 'label' => '턱관절클리닉',    'url' => $home . '턱관절-클리닉/' ),
 			array( 'label' => '이갈이·이악물기','url' => $home . '턱관절-클리닉/' ),
 			array( 'label' => '사랑니',          'url' => $home . '사랑니-발치/' ),
 			array( 'label' => '소아치과',        'url' => $home . '소아치과/' ),
