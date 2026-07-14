@@ -1561,6 +1561,20 @@ function moondental_register_smile_content_customizer( $wp_customize ) {
 add_action( 'customize_register', 'moondental_register_smile_content_customizer', 43 );
 
 /**
+ * 예방클리닉 페이지 콘텐츠 등록.
+ */
+function moondental_register_prevention_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_prevention_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '예방클리닉 · 콘텐츠',
+		'description' => '/예방클리닉/ 페이지의 히어로·5개 섹션(덴탈SPA·스케일링·에어플로우·불소·실란트)·CTA를 편집합니다.',
+		'priority'    => 44,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_prevention_content_fields(), 'md_section_prevention_' );
+}
+add_action( 'customize_register', 'moondental_register_prevention_content_customizer', 44 );
+
+/**
  * 자연치아 살리기 페이지 (충치·신경·잇몸 3섹션) 콘텐츠.
  */
 function moondental_preservation_content_fields() {
@@ -1744,6 +1758,102 @@ function moondental_smile_content_fields() {
 				'smile_cta_chip'  => array( 'default' => '✨ 스마일디자인 무료 상담', 'label' => 'CTA 칩', 'type' => 'text' ),
 				'smile_cta_title' => array( 'default' => "지금 내 미소,\n천안·아산 문치과병원에서 디자인해보세요", 'label' => 'CTA 제목 (줄바꿈 유지)', 'type' => 'textarea' ),
 				'smile_cta_lead'  => array( 'default' => '디지털 스마일 시뮬레이션으로 결과를 미리 확인하고 시작할 수 있습니다.', 'label' => 'CTA 리드', 'type' => 'textarea' ),
+			),
+		),
+	);
+}
+
+/**
+ * 예방클리닉 페이지 (덴탈SPA·스케일링·에어플로우·불소·실란트) 콘텐츠.
+ */
+function moondental_prevention_content_fields() {
+	return array(
+		'hero' => array(
+			'title'  => '예방클리닉 · 히어로',
+			'fields' => array(
+				'prevention_hero_eyebrow' => array( 'default' => 'PREVENTION · 천안·아산 예방클리닉', 'label' => '히어로 · eyebrow', 'type' => 'text' ),
+				'prevention_hero_title_a' => array( 'default' => '천안·아산 예방클리닉 · 덴탈 SPA', 'label' => '히어로 · 제목 첫 줄', 'type' => 'text' ),
+				'prevention_hero_title_b' => array( 'default' => '치료보다 예방이 먼저입니다', 'label' => '히어로 · 제목 강조 (em)', 'type' => 'text' ),
+				'prevention_hero_lead'    => array( 'default' => "충치·치주염이 시작되기 전에 막는 것이 가장 경제적이고 보존적인 치료입니다.\n천안 만남로 문치과병원 예방클리닉의 덴탈 SPA·에어플로우·불소도포·실란트.", 'label' => '히어로 · 리드', 'type' => 'textarea' ),
+				'prevention_nav_items'    => array( 'default' => "💆 | 덴탈 SPA | #dental-spa\n🦷 | 스케일링 | #scaling\n💨 | 에어플로우 | #airflow\n✨ | 불소도포 | #fluoride\n🛡️ | 실란트 | #sealant", 'label' => '앵커 네비 (아이콘 | 라벨 | 앵커)', 'type' => 'textarea' ),
+			),
+		),
+		'spa' => array(
+			'title'  => '01 · 덴탈 SPA',
+			'fields' => array(
+				'prevention_spa_eyebrow' => array( 'default' => '01 · DENTAL SPA', 'label' => 'eyebrow', 'type' => 'text' ),
+				'prevention_spa_title'   => array( 'default' => '천안·아산 덴탈 SPA — 종합 예방 프로그램', 'label' => '섹션 제목', 'type' => 'text' ),
+				'prevention_spa_lead'    => array( 'default' => '스케일링 + 에어플로우 + 불소도포를 하나의 코스로 — 한 번 방문으로 구강 전체를 깨끗하게.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'prevention_spa_steps_title' => array( 'default' => '덴탈 SPA 진행 순서 (약 60~90분)', 'label' => '단계 · 소제목', 'type' => 'text' ),
+				'prevention_spa_steps'   => array(
+					'default' => "1단계 · 구강 진단 | 치아·잇몸 상태 점검 + 사진·X-ray 촬영. 충치 초기·치주 상태·치석 정도 파악.\n2단계 · 정밀 스케일링 | 초음파 스케일러로 치석·치태 제거. 보험 적용(연 1회) 가능.\n3단계 · 에어플로우 (Air Flow) | 고운 미세 분말을 분사해 색소 침착·잔여 치태를 깔끔하게 제거. 커피·홍차·담배 착색 효과적.\n4단계 · 잇몸 마사지·관리 | 잇몸 라인 정리, PDRN·콜라겐 부스터 등 옵션. 잇몸 혈류 개선·재생 촉진.\n5단계 · 불소도포 | 고농도 불소로 치아 재광화·충치 예방. 시린 증상 완화에도 도움.\n6단계 · 맞춤 양치 코칭 | 환자별 양치 습관·도구 추천. 치실·치간칫솔 사용법 안내.",
+					'label' => '단계 (한 줄에 1개, 형식: 제목 | 본문)',
+					'type'  => 'textarea',
+				),
+				'prevention_spa_callout_title' => array( 'default' => '💆 누구에게 추천?', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
+				'prevention_spa_callout_body'  => array( 'default' => '✓ 잇몸 출혈·붓기가 자주 있는 분 / ✓ 커피·차·담배 착색이 신경 쓰이는 분 / ✓ 정기 검진을 더 깊이 받고 싶은 분 / ✓ 임플란트·교정·라미네이트 시작 전 구강 환경 정비 / ✓ 양치 후에도 입냄새가 신경 쓰이는 분.', 'label' => '콜아웃 · 본문', 'type' => 'textarea' ),
+			),
+		),
+		'scaling' => array(
+			'title'  => '02 · 스케일링',
+			'fields' => array(
+				'prevention_scaling_eyebrow' => array( 'default' => '02 · SCALING', 'label' => 'eyebrow', 'type' => 'text' ),
+				'prevention_scaling_title'   => array( 'default' => '천안·아산 스케일링 — 치주염 예방의 시작', 'label' => '섹션 제목', 'type' => 'text' ),
+				'prevention_scaling_lead'    => array( 'default' => '치석은 양치만으로 제거되지 않습니다. 6~12개월 주기 정기 스케일링이 자연치아 평생 보존의 핵심.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'prevention_scaling_cards'   => array(
+					'default' => "💰 보험 스케일링 (연 1회) | 만 19세 이상 누구나 <strong>연 1회 보험 적용</strong>. 1월 1일 갱신.\n💰 비급여 스케일링 (추가) | 연 1회를 초과하거나 비급여 정밀 스케일링 원하시는 경우. 6개월 주기 권장.\n⏱️ 시술 시간 | 일반 스케일링 약 <strong>30~40분</strong>. 치석이 많은 경우 2회로 나누어 진행. 임산부도 안전.\n🦷 시술 후 관리 | 시술 후 1~2일 시린 증상 가능 — 자연스러운 회복. 양치 시 부드러운 칫솔 사용 권장.",
+					'label' => '카드 (제목 | 본문)',
+					'type'  => 'textarea',
+				),
+			),
+		),
+		'airflow' => array(
+			'title'  => '03 · 에어플로우',
+			'fields' => array(
+				'prevention_airflow_eyebrow' => array( 'default' => '03 · AIR FLOW', 'label' => 'eyebrow', 'type' => 'text' ),
+				'prevention_airflow_title'   => array( 'default' => '천안·아산 에어플로우 — 색소·바이오필름 정밀 제거', 'label' => '섹션 제목', 'type' => 'text' ),
+				'prevention_airflow_lead'    => array( 'default' => '고운 미세 분말과 물을 동시 분사해 치아 표면·잇몸 라인의 색소 침착과 바이오필름을 깔끔히 제거.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'prevention_airflow_cards'   => array(
+					'default' => "커피·홍차·와인 착색 | 일반 스케일링으로 안 빠지는 색소 침착을 부드럽게 제거. 자연치아 톤 회복.\n담배·니코틴 착색 | 흡연자분들에게 특히 추천 — 누런 착색 제거 효과 큼.\n치아 사이·잇몸 라인 정밀 청소 | 스케일러가 닿기 어려운 부위까지 미세 분말로 정밀 청소. 치주 포켓 내부에도 효과.\n임플란트 주변 관리 | 임플란트 주변 청소에 특화된 글리신 분말 사용 — 임플란트 표면 손상 없이 안전.",
+					'label' => '카드 (제목 | 본문)',
+					'type'  => 'textarea',
+				),
+				'prevention_airflow_callout_title' => array( 'default' => '💨 에어플로우 vs 스케일링', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
+				'prevention_airflow_callout_body'  => array( 'default' => '<strong>스케일링</strong>은 치석(딱딱한 침착물) 제거, <strong>에어플로우</strong>는 색소·바이오필름(부드러운 침착물) 제거. 둘을 함께 받으시면 효과가 극대화 — 덴탈 SPA 프로그램 추천.', 'label' => '콜아웃 · 본문', 'type' => 'textarea' ),
+			),
+		),
+		'fluoride' => array(
+			'title'  => '04 · 불소도포',
+			'fields' => array(
+				'prevention_fluoride_eyebrow' => array( 'default' => '04 · FLUORIDE', 'label' => 'eyebrow', 'type' => 'text' ),
+				'prevention_fluoride_title'   => array( 'default' => '천안·아산 불소도포 — 충치 예방의 핵심', 'label' => '섹션 제목', 'type' => 'text' ),
+				'prevention_fluoride_lead'    => array( 'default' => '고농도 불소를 치아 표면에 도포해 법랑질 강화·재광화·충치균 억제.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'prevention_fluoride_cards'   => array(
+					'default' => "🧒 어린이 불소도포 | 유치·영구치 모두에 효과적. 3개월~1년 주기 정기 도포 권장. 충치 발생률 30~40% 감소.\n🦷 성인 불소도포 | 잇몸 퇴축·치경부 마모로 시린 증상 있는 분, 충치 재발이 잦은 분에게 권장. 시린 증상 완화.\n👵 노인 불소도포 | 구강 건조·잇몸 퇴축으로 치근 노출된 분에게 치근 충치 예방 효과 큼. 보철 주변 관리에도 도움.\n💰 비용 · 시간 | 약 10분 시술. 도포 후 30분간 음식·음수 자제. 정기 검진과 함께 받으시면 효율적.",
+					'label' => '카드 (제목 | 본문)',
+					'type'  => 'textarea',
+				),
+			),
+		),
+		'sealant' => array(
+			'title'  => '05 · 실란트',
+			'fields' => array(
+				'prevention_sealant_eyebrow' => array( 'default' => '05 · SEALANT', 'label' => 'eyebrow', 'type' => 'text' ),
+				'prevention_sealant_title'   => array( 'default' => '천안·아산 실란트 (홈메우기)', 'label' => '섹션 제목', 'type' => 'text' ),
+				'prevention_sealant_lead'    => array( 'default' => '어금니 씹는 면의 깊은 홈을 메워 음식물 끼임·충치 시작을 차단하는 보존적 예방 시술.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'prevention_sealant_cards'   => array(
+					'default' => "🛡️ 실란트가 필요한 이유 | 어금니 씹는 면에는 미세한 홈(fissure)이 있어 칫솔모가 닿지 않습니다. 그 안에 음식물·치태가 쌓여 충치가 시작 — 실란트로 미리 메우면 차단.\n🧒 만 18세 이하 보험 적용 | 제1·제2 큰어금니에 보험 적용. 부모님들이 자녀에게 꼭 챙겨주시면 좋은 시술.\n💎 성인·작은 어금니 (비급여) | 작은 어금니까지 보호 가능. 충치 재발이 잦은 성인에게 추천.\n⏱️ 시술 시간 · 지속 | 치아당 약 <strong>10분</strong>. 통증 없음. 3~5년 지속 — 마모되면 재시술.",
+					'label' => '카드 (제목 | 본문)',
+					'type'  => 'textarea',
+				),
+			),
+		),
+		'cta' => array(
+			'title'  => '예방클리닉 · CTA',
+			'fields' => array(
+				'prevention_cta_chip'  => array( 'default' => '💆 덴탈 SPA 예약', 'label' => 'CTA 칩', 'type' => 'text' ),
+				'prevention_cta_title' => array( 'default' => "치료 전에 예방을 시작하세요\n천안·아산 문치과병원 덴탈 SPA", 'label' => 'CTA 제목', 'type' => 'textarea' ),
+				'prevention_cta_lead'  => array( 'default' => '6개월 주기 정기 SPA로 자연치아를 평생 건강하게 — 가장 경제적인 투자입니다.', 'label' => 'CTA 리드', 'type' => 'textarea' ),
 			),
 		),
 	);
