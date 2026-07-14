@@ -497,8 +497,35 @@ function moondental_jsonld_doctor() {
 		'url'       => get_permalink(),
 	);
 
+	// v3.31.1 · 사진 URL을 image 필드에 · 구글 지식 패널 대응
+	if ( function_exists( 'moondental_doctor_photo_url' ) && ! empty( $found['photo'] ) ) {
+		$photo_url = moondental_doctor_photo_url( $found['photo'] );
+		if ( $photo_url ) {
+			// 상대경로면 도메인 붙임
+			if ( strpos( $photo_url, 'http' ) !== 0 ) {
+				$photo_url = home_url( $photo_url );
+			}
+			$schema['image'] = $photo_url;
+		}
+	}
+
 	if ( ! empty( $found['bio'] ) && is_array( $found['bio'] ) ) {
 		$schema['description'] = implode( ' · ', array_slice( $found['bio'], 0, 5 ) );
+		// 학력·자격을 hasCredential로도 표현
+		$creds = array();
+		foreach ( array_slice( $found['bio'], 0, 8 ) as $line ) {
+			$creds[] = array(
+				'@type'                    => 'EducationalOccupationalCredential',
+				'credentialCategory'       => 'certification',
+				'name'                     => $line,
+			);
+		}
+		if ( $creds ) $schema['hasCredential'] = $creds;
+	}
+
+	// 진료 철학이 있으면 knowsAbout·seeks 등으로 활용
+	if ( ! empty( $found['philosophy'] ) ) {
+		$schema['knowsAbout'] = wp_strip_all_tags( $found['philosophy'] );
 	}
 
 	echo "\n<script type=\"application/ld+json\">\n";

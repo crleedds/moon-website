@@ -78,6 +78,18 @@ get_header();
 						case '개인정보처리방침':
 							echo moondental_default_privacy_content();
 							break;
+						case 'terms':
+						case '이용약관':
+							if ( function_exists( 'moondental_default_terms_content' ) ) {
+								echo moondental_default_terms_content();
+							}
+							break;
+						case 'email-refusal':
+						case '이메일-무단수집거부':
+							if ( function_exists( 'moondental_default_email_refusal_content' ) ) {
+								echo moondental_default_email_refusal_content();
+							}
+							break;
 						case 'pricing':
 						case '비급여-진료비':
 						case '진료비안내':

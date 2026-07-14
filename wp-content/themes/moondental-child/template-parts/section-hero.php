@@ -52,7 +52,13 @@ $hero_image_id = get_theme_mod( 'moondental_hero_image', 0 );
 
 			<div class="md-hero__media">
 				<?php if ( $hero_image_id ) : ?>
-					<?php echo wp_get_attachment_image( $hero_image_id, 'moondental-hero', false, array( 'alt' => esc_attr( $info['name_short'] . ' 메인 이미지' ) ) ); ?>
+					<?php // v3.31.1 · Hero 이미지는 LCP 요소 · lazy 대신 즉시 로드 + fetchpriority high ?>
+					<?php echo wp_get_attachment_image( $hero_image_id, 'moondental-hero', false, array(
+						'alt' => esc_attr( $info['name_short'] . ' 메인 이미지' ),
+						'loading' => 'eager',
+						'fetchpriority' => 'high',
+						'decoding' => 'async',
+					) ); ?>
 				<?php else : ?>
 					<div class="md-hero__media-placeholder" aria-hidden="true">
 						<?php if ( current_user_can( 'edit_theme_options' ) ) : ?>
