@@ -55,20 +55,20 @@ $news_page_url = get_post_type_archive_link( 'post' ) ?: home_url( '/소식/' );
 				<h2 class="md-section-head__title md-section-head__title--flush"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'notices_title', '천안·아산 문치과병원 소식' ) : '천안·아산 문치과병원 소식' ); ?></h2>
 			</div>
 			<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( $news_page_url ); ?>">
-				전체 보기 →
+				<?php echo esc_html( md_content( 'notices_all_label', '전체 보기 →' ) ); ?>
 			</a>
 		</header>
 
 		<!-- 공지사항 (최대 2개) -->
 		<?php if ( $notice_q->have_posts() ) : ?>
 			<h3 class="md-notice-subhead">
-				📢 문치과병원 소식
+				<?php echo esc_html( md_content( 'notices_notice_subhead', '📢 문치과병원 소식' ) ); ?>
 			</h3>
 			<ul class="md-notice-list md-notice-list--spaced">
 				<?php while ( $notice_q->have_posts() ) : $notice_q->the_post(); ?>
 					<li class="md-notice-item">
 						<a href="<?php the_permalink(); ?>">
-							<span class="md-notice-item__tag">공지</span>
+							<span class="md-notice-item__tag"><?php echo esc_html( md_content( 'notices_notice_tag', '공지' ) ); ?></span>
 							<span class="md-notice-item__title"><?php the_title(); ?></span>
 							<time class="md-notice-item__date" datetime="<?php echo esc_attr( get_the_date( 'Y-m-d' ) ); ?>">
 								<?php echo esc_html( get_the_date( 'Y.m.d' ) ); ?>
@@ -82,7 +82,7 @@ $news_page_url = get_post_type_archive_link( 'post' ) ?: home_url( '/소식/' );
 		<!-- 치아이야기 (최대 3개) -->
 		<?php if ( $story_q->have_posts() ) : ?>
 			<h3 class="md-notice-subhead">
-				🦷 문치과병원 치아이야기
+				<?php echo esc_html( md_content( 'notices_story_subhead', '🦷 문치과병원 치아이야기' ) ); ?>
 			</h3>
 			<div class="md-home-news-grid">
 				<?php while ( $story_q->have_posts() ) : $story_q->the_post();

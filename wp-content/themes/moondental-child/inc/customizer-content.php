@@ -1631,6 +1631,20 @@ function moondental_register_bot_content_customizer( $wp_customize ) {
 add_action( 'customize_register', 'moondental_register_bot_content_customizer', 48 );
 
 /**
+ * 마무리 · 잔여 콘텐츠 등록.
+ */
+function moondental_register_finish_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_finish_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '나머지 · 의료진·오시는길·홈소식',
+		'description' => '의료진 페이지 진료과·마이크로카피, 오시는 길 페이지 히어로·지역·채널 카드, 홈 소식 섹션 서브 헤딩·라벨.',
+		'priority'    => 49,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_finish_content_fields(), 'md_section_finish_' );
+}
+add_action( 'customize_register', 'moondental_register_finish_content_customizer', 49 );
+
+/**
  * 자연치아 살리기 페이지 (충치·신경·잇몸 3섹션) 콘텐츠.
  */
 function moondental_preservation_content_fields() {
@@ -2255,6 +2269,57 @@ function moondental_bot_content_fields() {
 					'label' => '8개 진료과 (한 줄에 1개, 형식: 슬러그(질문에서 참조하는 키) | 이름 | 부제 | URL 경로 | 요약)',
 					'type'  => 'textarea',
 				),
+			),
+		),
+	);
+}
+
+/**
+ * 마무리 · 잔여 하드코딩 편집 가능화.
+ *  - 의료진 페이지: 6개 진료과 + 상세보기 라벨 + CTA 진료시간
+ *  - 오시는 길 페이지: 히어로·요일 라벨·지역 안내·3개 채널 카드
+ *  - 홈 소식 섹션: 부제목·전체 보기·공지 태그
+ */
+function moondental_finish_content_fields() {
+	return array(
+		'doctors_more' => array(
+			'title'  => '의료진 페이지 · 진료과·마무리',
+			'fields' => array(
+				'doctors_view_label' => array( 'default' => '상세 프로필 보기 →', 'label' => '카드 · 상세 프로필 링크 라벨', 'type' => 'text' ),
+				'doctors_cta_hint'   => array( 'default' => '🕐 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진', 'label' => 'CTA 하단 진료시간 힌트', 'type' => 'text' ),
+				'doctors_specialties' => array(
+					'default' => "🦷 | 치과보철과 | 임플란트·크라운·틀니 등 손상된 치아 복원 전문\n✨ | 치과교정과 | 부정교합 · 투명교정 · 부분교정 등 치아 배열 전문\n🌿 | 치과보존과 | 신경치료 · 충치 치료 등 자연치 보존 전문\n🩺 | 치주과 | 잇몸 질환 · 잇몸 수술 · 치주 관리 전문\n🧒 | 소아치과 | 아이의 첫 치과 진료부터 청소년 교정까지\n🦴 | 구강악안면외과 | 사랑니 · 매복치 · 임플란트 외과 진료",
+					'label' => '진료과 카드 (한 줄에 1개, 형식: 아이콘 | 제목 | 설명)',
+					'type'  => 'textarea',
+				),
+			),
+		),
+		'location_page' => array(
+			'title'  => '오시는 길 페이지 · 히어로·지역·채널',
+			'fields' => array(
+				'locpage_hero_title' => array( 'default' => '오시는 길', 'label' => '히어로 · 제목', 'type' => 'text' ),
+				'locpage_region_eyebrow' => array( 'default' => '🌐 지역별 오시는 길', 'label' => '지역 그리드 · eyebrow', 'type' => 'text' ),
+				'locpage_region_title'   => array( 'default' => '각 지역에서 문치과병원까지', 'label' => '지역 그리드 · 제목', 'type' => 'text' ),
+				'locpage_region_lead'    => array( 'default' => "충남·충북·세종·대전·경기 중부권 28개 지역별 상세 교통 안내.\n지역명을 클릭하시면 해당 지역에서 천안 만남로까지의 상세 경로와 진료 안내를 보실 수 있습니다.", 'label' => '지역 그리드 · 리드 (줄바꿈 유지)', 'type' => 'textarea' ),
+				'locpage_region_note'    => array( 'default' => 'ⓘ 이동 시간은 자동차 기준 대략적인 값입니다. 실제 교통 상황에 따라 달라질 수 있습니다.', 'label' => '지역 그리드 · 하단 안내', 'type' => 'textarea' ),
+				'locpage_ch_phone_title' => array( 'default' => '전화 상담', 'label' => '전화 카드 · 제목', 'type' => 'text' ),
+				'locpage_ch_phone_desc'  => array( 'default' => '{phone} · 진료시간 내 응답', 'label' => '전화 카드 · 설명 (토큰 {phone})', 'type' => 'text' ),
+				'locpage_ch_phone_cta'   => array( 'default' => '바로 전화 →', 'label' => '전화 카드 · CTA', 'type' => 'text' ),
+				'locpage_ch_kakao_title' => array( 'default' => '카카오톡 상담', 'label' => '카카오 카드 · 제목', 'type' => 'text' ),
+				'locpage_ch_kakao_desc'  => array( 'default' => '24시간 메시지 · 진료시간 내 답변', 'label' => '카카오 카드 · 설명', 'type' => 'text' ),
+				'locpage_ch_kakao_cta'   => array( 'default' => '카카오톡 채널 →', 'label' => '카카오 카드 · CTA', 'type' => 'text' ),
+				'locpage_ch_naver_title' => array( 'default' => '네이버 예약', 'label' => '네이버 카드 · 제목', 'type' => 'text' ),
+				'locpage_ch_naver_desc'  => array( 'default' => '24시간 자동 예약 · 일정 즉시 확정', 'label' => '네이버 카드 · 설명', 'type' => 'text' ),
+				'locpage_ch_naver_cta'   => array( 'default' => '예약하러 가기 →', 'label' => '네이버 카드 · CTA', 'type' => 'text' ),
+			),
+		),
+		'home_notices' => array(
+			'title'  => '홈 · 소식 섹션 마이크로카피',
+			'fields' => array(
+				'notices_all_label'     => array( 'default' => '전체 보기 →', 'label' => '전체 보기 링크 라벨', 'type' => 'text' ),
+				'notices_notice_subhead' => array( 'default' => '📢 문치과병원 소식', 'label' => '소식 서브 헤딩', 'type' => 'text' ),
+				'notices_story_subhead'  => array( 'default' => '🦷 문치과병원 치아이야기', 'label' => '치아이야기 서브 헤딩', 'type' => 'text' ),
+				'notices_notice_tag'    => array( 'default' => '공지', 'label' => '공지 태그 라벨', 'type' => 'text' ),
 			),
 		),
 	);

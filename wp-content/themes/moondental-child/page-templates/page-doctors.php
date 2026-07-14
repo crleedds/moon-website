@@ -25,15 +25,14 @@ foreach ( $groups as $g ) {
 $total_doctors = 0;
 foreach ( $groups as $g ) $total_doctors += count( $g['members'] );
 
-// 진료 전문과 안내
-$specialties = array(
-	array( 'icon' => '🦷', 'title' => '치과보철과',   'desc' => '임플란트·크라운·틀니 등 손상된 치아 복원 전문' ),
-	array( 'icon' => '✨', 'title' => '치과교정과',   'desc' => '부정교합 · 투명교정 · 부분교정 등 치아 배열 전문' ),
-	array( 'icon' => '🌿', 'title' => '치과보존과',   'desc' => '신경치료 · 충치 치료 등 자연치 보존 전문' ),
-	array( 'icon' => '🩺', 'title' => '치주과',       'desc' => '잇몸 질환 · 잇몸 수술 · 치주 관리 전문' ),
-	array( 'icon' => '🧒', 'title' => '소아치과',     'desc' => '아이의 첫 치과 진료부터 청소년 교정까지' ),
-	array( 'icon' => '🦴', 'title' => '구강악안면외과', 'desc' => '사랑니 · 매복치 · 임플란트 외과 진료' ),
-);
+// 진료 전문과 안내 — v3.32.7: Customizer 편집 가능
+$specialties = array();
+foreach ( md_parse_lines( md_content( 'doctors_specialties', '' ) ) as $line ) {
+	$parts = array_map( 'trim', explode( '|', $line ) );
+	if ( count( $parts ) >= 3 ) {
+		$specialties[] = array( 'icon' => $parts[0], 'title' => $parts[1], 'desc' => $parts[2] );
+	}
+}
 
 /* 전체 직원 명단 파싱 — 커스터마이저 staff_list 텍스트영역에서 한 줄에 한 명 "부서|직책|이름"
  * 반환: [ '진료실' => [ '이사' => ['이순민'], '팀장' => ['박지선'], ... ], ... ]
@@ -175,7 +174,7 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 							</p>
 						<?php endif; ?>
 
-						<span class="md-doccard__view">상세 프로필 보기 <span aria-hidden="true">→</span></span>
+						<span class="md-doccard__view"><?php echo esc_html( md_content( 'doctors_view_label', '상세 프로필 보기 →' ) ); ?></span>
 					</div>
 				</article>
 			<?php endforeach; ?>
@@ -263,7 +262,7 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 			</p>
 			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-docs-banner', 'size' => 'lg', 'align' => 'center' ) ); ?>
 			<p class="md-docs-cta__hours">
-				🕐 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진
+				<?php echo esc_html( md_content( 'doctors_cta_hint', '🕐 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진' ) ); ?>
 			</p>
 		</div>
 	</div>

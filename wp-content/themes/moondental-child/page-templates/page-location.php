@@ -48,10 +48,11 @@ $off_text = $info['hours_off'] ?: '휴진';
 
 <section class="md-page-hero md-page-hero--location">
 	<div class="md-container">
+		<?php $locpage_title = md_content( 'locpage_hero_title', '오시는 길' ); ?>
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>오시는 길</span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span><?php echo esc_html( $locpage_title ); ?></span>
 		</nav>
-		<h1 class="md-page-hero__title">오시는 길</h1>
+		<h1 class="md-page-hero__title"><?php echo esc_html( $locpage_title ); ?></h1>
 		<p class="md-page-hero__lead md-page-hero__lead--big">
 			<a href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener" style="color:inherit; border-bottom:1px dashed var(--color-border);">
 				<?php echo esc_html( $info['address'] ); ?>
@@ -116,20 +117,20 @@ $off_text = $info['hours_off'] ?: '휴진';
 				</header>
 				<ul class="md-hours__list">
 					<li<?php echo in_array( $today_dow, array(1,2,3,5), true ) ? ' class="is-today"' : ''; ?>>
-						<span class="md-hours__day">평일 <small>(월·화·수·금)</small></span>
+						<span class="md-hours__day"><?php echo esc_html( md_content( 'loc_day_weekday', '평일 (월·화·수·금)' ) ); ?></span>
 						<span class="md-hours__time"><?php echo esc_html( $time_wd ); ?></span>
 					</li>
 					<li<?php echo $today_dow === 4 ? ' class="is-today"' : ''; ?>>
-						<span class="md-hours__day">목요일</span>
+						<span class="md-hours__day"><?php echo esc_html( md_content( 'loc_day_thu', '목요일' ) ); ?></span>
 						<span class="md-hours__time"><?php echo esc_html( $time_thu ); ?></span>
 					</li>
 					<li<?php echo $today_dow === 6 ? ' class="is-today"' : ''; ?>>
-						<span class="md-hours__day">토요일</span>
+						<span class="md-hours__day"><?php echo esc_html( md_content( 'loc_day_sat', '토요일' ) ); ?></span>
 						<span class="md-hours__time"><?php echo esc_html( $time_sat ); ?></span>
 					</li>
 					<li class="md-hours__off<?php echo $today_dow === 0 ? ' is-today' : ''; ?>">
-						<span class="md-hours__day">일요일 · 공휴일</span>
-						<span class="md-hours__time">휴진</span>
+						<span class="md-hours__day"><?php echo esc_html( md_content( 'loc_day_sun', '일요일 · 공휴일' ) ); ?></span>
+						<span class="md-hours__time"><?php echo esc_html( md_content( 'loc_day_closed', '휴진' ) ); ?></span>
 					</li>
 				</ul>
 				<p class="md-hours__note">
@@ -193,12 +194,9 @@ $off_text = $info['hours_off'] ?: '휴진';
 <section class="md-section md-section--surface" aria-label="지역별 오시는 길">
 	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">🌐 지역별 오시는 길</span>
-			<h2 class="md-section-head__title">각 지역에서 문치과병원까지</h2>
-			<p class="md-section-head__lead">
-				충남·충북·세종·대전·경기 중부권 28개 지역별 상세 교통 안내.<br>
-				지역명을 클릭하시면 해당 지역에서 천안 만남로까지의 상세 경로와 진료 안내를 보실 수 있습니다.
-			</p>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'locpage_region_eyebrow', '🌐 지역별 오시는 길' ) ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'locpage_region_title', '각 지역에서 문치과병원까지' ) ); ?></h2>
+			<p class="md-section-head__lead"><?php echo nl2br( esc_html( md_content( 'locpage_region_lead', "충남·충북·세종·대전·경기 중부권 28개 지역별 상세 교통 안내.\n지역명을 클릭하시면 해당 지역에서 천안 만남로까지의 상세 경로와 진료 안내를 보실 수 있습니다." ) ) ); ?></p>
 		</header>
 
 		<?php foreach ( moondental_get_regions_by_province() as $prov => $list ) :
@@ -229,7 +227,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 		<?php endforeach; ?>
 
 		<p class="md-region-note">
-			ⓘ 이동 시간은 자동차 기준 대략적인 값입니다. 실제 교통 상황에 따라 달라질 수 있습니다.
+			<?php echo esc_html( md_content( 'locpage_region_note', 'ⓘ 이동 시간은 자동차 기준 대략적인 값입니다. 실제 교통 상황에 따라 달라질 수 있습니다.' ) ); ?>
 		</p>
 	</div>
 </section>
@@ -248,9 +246,9 @@ $off_text = $info['hours_off'] ?: '휴진';
 				<span class="md-channel-card__icon md-channel-card__icon--phone" aria-hidden="true">
 					<svg viewBox="0 0 24 24" width="28" height="28"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 				</span>
-				<span class="md-channel-card__title">전화 상담</span>
-				<span class="md-channel-card__desc"><?php echo esc_html( $info['phone'] ); ?> · 진료시간 내 응답</span>
-				<span class="md-channel-card__cta">바로 전화 →</span>
+				<span class="md-channel-card__title"><?php echo esc_html( md_content( 'locpage_ch_phone_title', '전화 상담' ) ); ?></span>
+				<span class="md-channel-card__desc"><?php echo esc_html( str_replace( '{phone}', $info['phone'], md_content( 'locpage_ch_phone_desc', '{phone} · 진료시간 내 응답' ) ) ); ?></span>
+				<span class="md-channel-card__cta"><?php echo esc_html( md_content( 'locpage_ch_phone_cta', '바로 전화 →' ) ); ?></span>
 			</a>
 
 			<?php if ( $kakao_url ) : ?>
@@ -261,9 +259,9 @@ $off_text = $info['hours_off'] ?: '휴진';
 						<path d="M18 9.6c-5.55 0-10.05 3.6-10.05 8.1 0 2.85 1.95 5.4 4.8 6.75l-1.05 3.9c-.09.345.27.6.57.405l4.575-3c.375.045.765.06 1.17.06 5.55 0 10.05-3.6 10.05-8.1S23.55 9.6 18 9.6z" fill="#3C1E1E"/>
 					</svg>
 				</span>
-				<span class="md-channel-card__title">카카오톡 상담</span>
-				<span class="md-channel-card__desc">24시간 메시지 · 진료시간 내 답변</span>
-				<span class="md-channel-card__cta">카카오톡 채널 →</span>
+				<span class="md-channel-card__title"><?php echo esc_html( md_content( 'locpage_ch_kakao_title', '카카오톡 상담' ) ); ?></span>
+				<span class="md-channel-card__desc"><?php echo esc_html( md_content( 'locpage_ch_kakao_desc', '24시간 메시지 · 진료시간 내 답변' ) ); ?></span>
+				<span class="md-channel-card__cta"><?php echo esc_html( md_content( 'locpage_ch_kakao_cta', '카카오톡 채널 →' ) ); ?></span>
 			</a>
 			<?php endif; ?>
 
@@ -275,9 +273,9 @@ $off_text = $info['hours_off'] ?: '휴진';
 						<path d="M13.5 12h3.3l5.4 7.65V12H25.5v12h-3.3l-5.4-7.65V24H13.5V12z" fill="#fff"/>
 					</svg>
 				</span>
-				<span class="md-channel-card__title">네이버 예약</span>
-				<span class="md-channel-card__desc">24시간 자동 예약 · 일정 즉시 확정</span>
-				<span class="md-channel-card__cta">예약하러 가기 →</span>
+				<span class="md-channel-card__title"><?php echo esc_html( md_content( 'locpage_ch_naver_title', '네이버 예약' ) ); ?></span>
+				<span class="md-channel-card__desc"><?php echo esc_html( md_content( 'locpage_ch_naver_desc', '24시간 자동 예약 · 일정 즉시 확정' ) ); ?></span>
+				<span class="md-channel-card__cta"><?php echo esc_html( md_content( 'locpage_ch_naver_cta', '예약하러 가기 →' ) ); ?></span>
 			</a>
 			<?php endif; ?>
 		</div>
