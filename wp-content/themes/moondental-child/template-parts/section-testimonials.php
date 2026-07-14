@@ -48,13 +48,13 @@ $info = moondental_get_info();
 		if ( $naver_review ) : ?>
 		<div class="md-testimonials__more">
 			<a class="md-btn md-btn-ghost" href="<?php echo esc_url( $naver_review ); ?>" target="_blank" rel="noopener" data-track="cta-naver-reviews">
-				네이버 플레이스에서 더 많은 후기 보기 →
+				<?php echo esc_html( md_content( 'testimonials_more_label', '네이버 플레이스에서 더 많은 후기 보기 →' ) ); ?>
 			</a>
 		</div>
 		<?php endif; ?>
 
 		<p class="md-testimonials__disclaimer">
-			※ 후기는 환자분 동의 하에 게재되었으며, 진료 결과는 개인차가 있을 수 있습니다.
+			<?php echo esc_html( md_content( 'testimonials_disclaimer', '※ 후기는 환자분 동의 하에 게재되었으며, 진료 결과는 개인차가 있을 수 있습니다.' ) ); ?>
 		</p>
 	</div>
 </section>

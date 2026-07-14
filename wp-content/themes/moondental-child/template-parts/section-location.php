@@ -99,7 +99,7 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 			   <?php echo $map_image ? 'style="background-image:url(' . esc_url( $map_image ) . ');"' : ''; ?>>
 				<?php if ( ! $map_image ) : ?>
 					<div class="md-locmap__pattern" aria-hidden="true"></div>
-					<span class="md-locmap__fallback-label">🗺️ 지도 이미지 열기 →</span>
+					<span class="md-locmap__fallback-label"><?php echo esc_html( md_content( 'loc_map_fallback', '🗺️ 지도 이미지 열기 →' ) ); ?></span>
 				<?php endif; ?>
 			</a>
 		<?php endif; ?>
@@ -141,20 +141,20 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 				</header>
 				<ul class="md-hours__list">
 					<li<?php echo in_array( $today_dow, array(1,2,3,5), true ) ? ' class="is-today"' : ''; ?>>
-						<span class="md-hours__day">평일 <small>(월·화·수·금)</small></span>
+						<span class="md-hours__day"><?php echo esc_html( md_content( 'loc_day_weekday', '평일 (월·화·수·금)' ) ); ?></span>
 						<span class="md-hours__time"><?php echo esc_html( $time_wd ); ?></span>
 					</li>
 					<li<?php echo $today_dow === 4 ? ' class="is-today"' : ''; ?>>
-						<span class="md-hours__day">목요일</span>
+						<span class="md-hours__day"><?php echo esc_html( md_content( 'loc_day_thu', '목요일' ) ); ?></span>
 						<span class="md-hours__time"><?php echo esc_html( $time_thu ); ?></span>
 					</li>
 					<li<?php echo $today_dow === 6 ? ' class="is-today"' : ''; ?>>
-						<span class="md-hours__day">토요일</span>
+						<span class="md-hours__day"><?php echo esc_html( md_content( 'loc_day_sat', '토요일' ) ); ?></span>
 						<span class="md-hours__time"><?php echo esc_html( $time_sat ); ?></span>
 					</li>
 					<li class="md-hours__off<?php echo $today_dow === 0 ? ' is-today' : ''; ?>">
-						<span class="md-hours__day">일요일 · 공휴일</span>
-						<span class="md-hours__time">휴진</span>
+						<span class="md-hours__day"><?php echo esc_html( md_content( 'loc_day_sun', '일요일 · 공휴일' ) ); ?></span>
+						<span class="md-hours__time"><?php echo esc_html( md_content( 'loc_day_closed', '휴진' ) ); ?></span>
 					</li>
 				</ul>
 			</aside>

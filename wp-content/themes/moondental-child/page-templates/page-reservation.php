@@ -51,7 +51,7 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 		) ); ?>
 
 		<p class="md-channel-grid__hint md-u-center md-u-mt-18">
-			진료시간: 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진
+			<?php echo esc_html( md_content( 'res_hint', '진료시간: 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진' ) ); ?>
 		</p>
 	</div>
 </section>
@@ -60,46 +60,33 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 <?php get_template_part( 'template-parts/section-location' ); ?>
 
 <!-- ============ 4. 예약 FAQ ============ -->
+<?php
+$res_faq_items = array();
+foreach ( md_parse_lines( md_content( 'res_faq_items', '' ) ) as $line ) {
+	$parts = array_map( 'trim', explode( '|', $line, 2 ) );
+	if ( count( $parts ) >= 2 ) {
+		$res_faq_items[] = array( 'q' => $parts[0], 'a' => $parts[1] );
+	}
+}
+if ( $res_faq_items ) : ?>
 <section class="md-section" id="reservation-faq">
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">FAQ</span>
-			<h2 class="md-section-head__title">예약 관련 자주 묻는 질문</h2>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'res_faq_eyebrow', 'FAQ' ) ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'res_faq_title', '예약 관련 자주 묻는 질문' ) ); ?></h2>
 		</header>
 
 		<div class="md-faq">
-			<details class="md-faq__item" open>
-				<summary>당일 예약도 가능한가요?</summary>
-				<p>네, 당일 예약도 가능합니다. 다만 예약 상황에 따라 대기 시간이 발생할 수 있으니 가급적 전화(<?php echo md_phone_link(); ?>)로 먼저 확인 후 방문해주시기 바랍니다.</p>
+			<?php $first = true; foreach ( $res_faq_items as $q ) : ?>
+			<details class="md-faq__item"<?php echo $first ? ' open' : ''; ?>>
+				<summary><?php echo esc_html( $q['q'] ); ?></summary>
+				<p><?php echo wp_kses_post( $q['a'] ); ?></p>
 			</details>
-
-			<details class="md-faq__item">
-				<summary>예약 변경이나 취소는 어떻게 하나요?</summary>
-				<p>네이버 예약은 예약 페이지에서 직접 변경·취소가 가능하며, 그 외에는 전화 또는 카카오톡 채널로 문의해주세요. 예약일 전날까지 변경·취소가 가능합니다.</p>
-			</details>
-
-			<details class="md-faq__item">
-				<summary>초진 시 준비물이 있나요?</summary>
-				<p>신분증(또는 건강보험증)을 지참해주세요. 복용 중인 약이 있다면 약 정보를 함께 알려주시면 진료에 도움이 됩니다. 타원 X-ray 파일(USB·이메일)이 있으면 진단 시간이 단축됩니다.</p>
-			</details>
-
-			<details class="md-faq__item">
-				<summary>전신질환(고혈압·당뇨·심장질환)이 있어도 진료 가능한가요?</summary>
-				<p>네, 안심하셔도 됩니다. 문치과병원은 혈압기·당검사·심전도·산소포화도 측정 장비를 상시 보유하고 있으며, 복용 중인 약(혈전용해제·골다공증 주사 등)을 사전에 체크해 안전하게 진료합니다.</p>
-			</details>
-
-			<details class="md-faq__item">
-				<summary>비용·견적은 미리 알 수 있나요?</summary>
-				<p>임플란트·교정·심미치료 등 비급여 진료는 환자분의 구강 상태(CT·X-ray)를 보고 정확한 견적을 산정합니다. 초진 상담 시 옵션별 비용·기간을 모두 안내드리며, 시작 전에 충분히 검토하실 수 있도록 합니다.</p>
-			</details>
-
-			<details class="md-faq__item">
-				<summary>자가진단 결과만 보고 와도 되나요?</summary>
-				<p>자가진단은 참고용으로 도움이 됩니다. 하지만 정확한 진단·치료 계획은 의료진의 직접 진료(시진·X-ray·구강검사)가 필요합니다. 자가진단 결과를 보여주시면 상담이 더 빨라집니다.</p>
-			</details>
+			<?php $first = false; endforeach; ?>
 		</div>
 	</div>
 </section>
+<?php endif; ?>
 
 <?php
 get_footer();

@@ -1603,6 +1603,20 @@ function moondental_register_region_content_customizer( $wp_customize ) {
 add_action( 'customize_register', 'moondental_register_region_content_customizer', 46 );
 
 /**
+ * 예약·소식·오시는 길·후기 나머지 텍스트 등록.
+ */
+function moondental_register_misc_pages_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_misc_pages_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '예약·소식·오시는 길 · 나머지 문구',
+		'description' => '예약 페이지 FAQ, 소식 페이지 히어로·섹션, 오시는 길 요일 라벨, 홈 후기 하단 문구 등을 편집합니다.',
+		'priority'    => 47,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_misc_pages_content_fields(), 'md_section_misc_' );
+}
+add_action( 'customize_register', 'moondental_register_misc_pages_content_customizer', 47 );
+
+/**
  * 자연치아 살리기 페이지 (충치·신경·잇몸 3섹션) 콘텐츠.
  */
 function moondental_preservation_content_fields() {
@@ -2078,6 +2092,62 @@ function moondental_region_content_fields() {
 			'fields' => array(
 				'region_other_eyebrow' => array( 'default' => '🌐 다른 지역에서 오시는 길', 'label' => 'eyebrow', 'type' => 'text' ),
 				'region_other_title'   => array( 'default' => '다른 지역에서 천안·아산 문치과병원까지', 'label' => '섹션 제목', 'type' => 'text' ),
+			),
+		),
+	);
+}
+
+/**
+ * 예약 페이지 · 소식 페이지 · 오시는 길 섹션 나머지 텍스트.
+ */
+function moondental_misc_pages_content_fields() {
+	return array(
+		'reservation_extra' => array(
+			'title'  => '예약 페이지 · 진료시간 힌트·FAQ',
+			'fields' => array(
+				'res_hint'         => array( 'default' => '진료시간: 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진', 'label' => 'CTA 하단 진료시간 힌트', 'type' => 'text' ),
+				'res_faq_eyebrow'  => array( 'default' => 'FAQ', 'label' => 'FAQ 섹션 · eyebrow', 'type' => 'text' ),
+				'res_faq_title'    => array( 'default' => '예약 관련 자주 묻는 질문', 'label' => 'FAQ 섹션 · 제목', 'type' => 'text' ),
+				'res_faq_items'    => array(
+					'default' => "당일 예약도 가능한가요? | 네, 당일 예약도 가능합니다. 다만 예약 상황에 따라 대기 시간이 발생할 수 있으니 가급적 전화로 먼저 확인 후 방문해주시기 바랍니다.\n예약 변경이나 취소는 어떻게 하나요? | 네이버 예약은 예약 페이지에서 직접 변경·취소가 가능하며, 그 외에는 전화 또는 카카오톡 채널로 문의해주세요. 예약일 전날까지 변경·취소가 가능합니다.\n초진 시 준비물이 있나요? | 신분증(또는 건강보험증)을 지참해주세요. 복용 중인 약이 있다면 약 정보를 함께 알려주시면 진료에 도움이 됩니다. 타원 X-ray 파일(USB·이메일)이 있으면 진단 시간이 단축됩니다.\n전신질환(고혈압·당뇨·심장질환)이 있어도 진료 가능한가요? | 네, 안심하셔도 됩니다. 문치과병원은 혈압기·당검사·심전도·산소포화도 측정 장비를 상시 보유하고 있으며, 복용 중인 약(혈전용해제·골다공증 주사 등)을 사전에 체크해 안전하게 진료합니다.\n비용·견적은 미리 알 수 있나요? | 임플란트·교정·심미치료 등 비급여 진료는 환자분의 구강 상태(CT·X-ray)를 보고 정확한 견적을 산정합니다. 초진 상담 시 옵션별 비용·기간을 모두 안내드리며, 시작 전에 충분히 검토하실 수 있도록 합니다.\n자가진단 결과만 보고 와도 되나요? | 자가진단은 참고용으로 도움이 됩니다. 하지만 정확한 진단·치료 계획은 의료진의 직접 진료(시진·X-ray·구강검사)가 필요합니다. 자가진단 결과를 보여주시면 상담이 더 빨라집니다.",
+					'label' => 'FAQ 항목 (한 줄에 1개, 형식: 질문 | 답변)',
+					'type'  => 'textarea',
+				),
+			),
+		),
+		'news' => array(
+			'title'  => '소식 페이지 · 히어로·섹션',
+			'fields' => array(
+				'news_hero_title'    => array( 'default' => '병원 소식', 'label' => '히어로 · 제목', 'type' => 'text' ),
+				'news_hero_lead'     => array( 'default' => '천안 만남로 문치과병원의 공지사항과 치과 정보를 모았습니다.', 'label' => '히어로 · 리드', 'type' => 'textarea' ),
+				'news_notice_eyebrow' => array( 'default' => '📢 NOTICE', 'label' => '소식 섹션 · eyebrow', 'type' => 'text' ),
+				'news_notice_title'   => array( 'default' => '문치과병원 소식', 'label' => '소식 섹션 · 제목', 'type' => 'text' ),
+				'news_notice_lead'    => array( 'default' => '진료시간 변경·휴진 안내·이벤트·운영 소식을 가장 먼저 안내드립니다.', 'label' => '소식 섹션 · 리드', 'type' => 'textarea' ),
+				'news_notice_empty'   => array( 'default' => '아직 등록된 소식이 없습니다.', 'label' => '소식 · 빈 상태 메시지', 'type' => 'text' ),
+				'news_notice_empty_sub' => array( 'default' => '곧 새로운 소식으로 찾아뵙겠습니다.', 'label' => '소식 · 빈 상태 부제', 'type' => 'text' ),
+				'news_stories_eyebrow' => array( 'default' => '🦷 DENTAL STORIES · 치아이야기', 'label' => '치아이야기 섹션 · eyebrow', 'type' => 'text' ),
+				'news_stories_title'   => array( 'default' => '문치과병원 치아이야기', 'label' => '치아이야기 섹션 · 제목', 'type' => 'text' ),
+				'news_stories_lead'    => array( 'default' => "임플란트·교정·자연치아 살리기·라미네이트·예방 등\n환자분께 도움이 되는 구강 건강 정보를 모았습니다.", 'label' => '치아이야기 섹션 · 리드 (줄바꿈 유지)', 'type' => 'textarea' ),
+				'news_stories_empty'   => array( 'default' => '아직 등록된 치아이야기가 없습니다.', 'label' => '치아이야기 · 빈 상태 메시지', 'type' => 'text' ),
+				'news_stories_empty_sub' => array( 'default' => '곧 환자분께 도움이 되는 정보로 찾아뵙겠습니다.', 'label' => '치아이야기 · 빈 상태 부제', 'type' => 'text' ),
+			),
+		),
+		'section_labels' => array(
+			'title'  => '섹션 라벨 · 오시는 길 요일',
+			'fields' => array(
+				'loc_day_weekday' => array( 'default' => '평일 (월·화·수·금)', 'label' => '오시는 길 · 요일 라벨 (평일)', 'type' => 'text' ),
+				'loc_day_thu'     => array( 'default' => '목요일', 'label' => '오시는 길 · 요일 라벨 (목)', 'type' => 'text' ),
+				'loc_day_sat'     => array( 'default' => '토요일', 'label' => '오시는 길 · 요일 라벨 (토)', 'type' => 'text' ),
+				'loc_day_sun'     => array( 'default' => '일요일 · 공휴일', 'label' => '오시는 길 · 요일 라벨 (일/공휴일)', 'type' => 'text' ),
+				'loc_day_closed'  => array( 'default' => '휴진', 'label' => '오시는 길 · 휴진 표시', 'type' => 'text' ),
+				'loc_map_fallback' => array( 'default' => '🗺️ 지도 이미지 열기 →', 'label' => '오시는 길 · 지도 대체 라벨', 'type' => 'text' ),
+			),
+		),
+		'testimonials_extra' => array(
+			'title'  => '홈 후기 섹션 · 추가 문구',
+			'fields' => array(
+				'testimonials_more_label' => array( 'default' => '네이버 플레이스에서 더 많은 후기 보기 →', 'label' => '더 보기 링크 라벨', 'type' => 'text' ),
+				'testimonials_disclaimer' => array( 'default' => '※ 후기는 환자분 동의 하에 게재되었으며 케이스별로 결과와 소요기간이 다를 수 있습니다.', 'label' => '하단 면책 문구', 'type' => 'textarea' ),
 			),
 		),
 	);

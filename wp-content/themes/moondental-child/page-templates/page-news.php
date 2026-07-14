@@ -84,15 +84,17 @@ if ( ! function_exists( 'md_post_card_thumb' ) ) {
 }
 ?>
 
+<?php
+$news_hero_title = md_content( 'news_hero_title', '병원 소식' );
+$news_hero_lead  = md_content( 'news_hero_lead', '천안 만남로 문치과병원의 공지사항과 치과 정보를 모았습니다.' );
+?>
 <section class="md-page-hero">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>병원 소식</span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span><?php echo esc_html( $news_hero_title ); ?></span>
 		</nav>
-		<h1 class="md-page-hero__title">병원 소식</h1>
-		<p class="md-page-hero__lead">
-			천안 만남로 문치과병원의 공지사항과 치과 정보를 모았습니다.
-		</p>
+		<h1 class="md-page-hero__title"><?php echo esc_html( $news_hero_title ); ?></h1>
+		<p class="md-page-hero__lead"><?php echo esc_html( $news_hero_lead ); ?></p>
 	</div>
 </section>
 
@@ -109,9 +111,9 @@ $is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
 <section class="md-section md-section--surface" id="notice">
 	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">📢 NOTICE</span>
-			<h2 class="md-section-head__title">문치과병원 소식</h2>
-			<p class="md-section-head__lead">진료시간 변경·휴진 안내·이벤트·운영 소식을 가장 먼저 안내드립니다.</p>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'news_notice_eyebrow', '📢 NOTICE' ) ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'news_notice_title', '문치과병원 소식' ) ); ?></h2>
+			<p class="md-section-head__lead"><?php echo esc_html( md_content( 'news_notice_lead', '진료시간 변경·휴진 안내·이벤트·운영 소식을 가장 먼저 안내드립니다.' ) ); ?></p>
 			<?php if ( $is_editor ) : ?>
 				<div class="md-admin-quickpost">
 					<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( $notice_new_url ); ?>">＋ 새 소식 글쓰기</a>
@@ -154,13 +156,13 @@ $is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
 			</div>
 		<?php else : ?>
 			<div class="md-news-empty">
-				<p class="md-news-empty__msg">아직 등록된 소식이 없습니다.</p>
+				<p class="md-news-empty__msg"><?php echo esc_html( md_content( 'news_notice_empty', '아직 등록된 소식이 없습니다.' ) ); ?></p>
 				<?php if ( $is_editor ) : ?>
 					<p style="margin: 16px 0 0;">
 						<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( $notice_new_url ); ?>">＋ 첫 소식 작성하기</a>
 					</p>
 				<?php else : ?>
-					<p style="margin: 8px 0 0; font-size: var(--fs-small); color: var(--color-text-mute);">곧 새로운 소식으로 찾아뵙겠습니다.</p>
+					<p style="margin: 8px 0 0; font-size: var(--fs-small); color: var(--color-text-mute);"><?php echo esc_html( md_content( 'news_notice_empty_sub', '곧 새로운 소식으로 찾아뵙겠습니다.' ) ); ?></p>
 				<?php endif; ?>
 			</div>
 		<?php endif; ?>
@@ -171,12 +173,9 @@ $is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
 <section class="md-section" id="dental-stories">
 	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">🦷 DENTAL STORIES · 치아이야기</span>
-			<h2 class="md-section-head__title">문치과병원 치아이야기</h2>
-			<p class="md-section-head__lead">
-				임플란트·교정·자연치아 살리기·라미네이트·예방 등<br>
-				환자분께 도움이 되는 구강 건강 정보를 모았습니다.
-			</p>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'news_stories_eyebrow', '🦷 DENTAL STORIES · 치아이야기' ) ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'news_stories_title', '문치과병원 치아이야기' ) ); ?></h2>
+			<p class="md-section-head__lead"><?php echo nl2br( esc_html( md_content( 'news_stories_lead', "임플란트·교정·자연치아 살리기·라미네이트·예방 등\n환자분께 도움이 되는 구강 건강 정보를 모았습니다." ) ) ); ?></p>
 			<?php if ( $is_editor ) : ?>
 				<div class="md-admin-quickpost">
 					<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( $story_new_url ); ?>">＋ 새 치아이야기 글쓰기</a>
@@ -239,13 +238,13 @@ $is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
 
 		<?php else : ?>
 			<div class="md-news-empty md-news-empty--surface">
-				<p class="md-news-empty__msg">아직 등록된 치아이야기가 없습니다.</p>
+				<p class="md-news-empty__msg"><?php echo esc_html( md_content( 'news_stories_empty', '아직 등록된 치아이야기가 없습니다.' ) ); ?></p>
 				<?php if ( $is_editor ) : ?>
 					<p style="margin: 16px 0 0;">
 						<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( $story_new_url ); ?>">＋ 첫 치아이야기 작성하기</a>
 					</p>
 				<?php else : ?>
-					<p style="margin: 8px 0 0; font-size: var(--fs-small); color: var(--color-text-mute);">곧 환자분께 도움이 되는 정보로 찾아뵙겠습니다.</p>
+					<p style="margin: 8px 0 0; font-size: var(--fs-small); color: var(--color-text-mute);"><?php echo esc_html( md_content( 'news_stories_empty_sub', '곧 환자분께 도움이 되는 정보로 찾아뵙겠습니다.' ) ); ?></p>
 				<?php endif; ?>
 			</div>
 		<?php endif; ?>
