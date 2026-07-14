@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.31.5' );
+define( 'MOONDENTAL_VERSION', '3.31.6' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -283,6 +283,44 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3293', 'done' );
 }, 46 );
+
+/* 일회성 마이그레이션 v3.31.6 · 사용자 요청 · 비서실 → 경영지원본부 최종 통합.
+ * PDF 26년 승급 공고 기준으로 경영지원본부 재구성:
+ *   행정원장 → 실장 → 차장 → 과장 → 대리 → 주임 순 (대리가 주임보다 상급).
+ *   비서실 인원(김동현 실장·민종기 과장·이슬기 대리)을 경영지원본부로 흡수하고
+ *   김하진·카밀라 대리 승급, 게레레·오혜정 주임 (게를레 → 게레레 표기 정정).
+ *   비서실은 완전히 제거. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_staff_v3316' ) === 'done' ) return;
+	$saved = get_theme_mod( 'md_content_staff_list' );
+	if ( is_string( $saved ) && $saved !== '' ) {
+		$lines = preg_split( "/\r\n|\r|\n/", $saved );
+		// 경영지원본부·비서실 라인 전부 제거 (다른 부서는 보존)
+		$lines = array_values( array_filter( $lines, function( $l ) {
+			$l = trim( $l );
+			if ( $l === '' ) return false;
+			if ( strpos( $l, '경영지원본부|' ) === 0 ) return false;
+			if ( strpos( $l, '경영지원실|' )   === 0 ) return false;
+			if ( strpos( $l, '비서실|' )        === 0 ) return false;
+			return true;
+		} ) );
+		// 경영지원본부 최종 명단 (직급 순: 행정원장 → 실장 → 차장 → 과장 → 대리 → 주임)
+		$mgmt = array(
+			'경영지원본부|행정원장|양병욱',
+			'경영지원본부|실장|김동현',
+			'경영지원본부|차장|이충현',
+			'경영지원본부|과장|민종기',
+			'경영지원본부|대리|이슬기',
+			'경영지원본부|대리|김하진',
+			'경영지원본부|대리|카밀라',
+			'경영지원본부|주임|게레레',
+			'경영지원본부|주임|오혜정',
+		);
+		$new = implode( "\n", array_merge( $lines, $mgmt ) );
+		set_theme_mod( 'md_content_staff_list', $new );
+	}
+	update_option( 'moondental_staff_v3316', 'done' );
+}, 48 );
 
 /* 일회성 마이그레이션 v3.29.0 · 여러 진료시간 안내 텍스트 (cta_hint, price_cta_meta_1_value)
  * 옛 default를 저장했으면 → 목 18:00 → 18:30 자동 갱신 · 앞 0 제거. */
