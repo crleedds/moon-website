@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.31.6
+Version:      3.31.7
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -987,14 +987,17 @@ button.elementor-button {
 @media (max-width: 880px) {
   .md-header__nav-toggle { display: flex; }
   .md-header__nav {
-    position: absolute;
-    top: 100%; left: 0; right: 0;
+    position: fixed;
+    top: 72px; left: 0; right: 0;
+    bottom: 0;                                             /* v3.31.7 · 전체 화면 · 스크롤 가능 */
     background: var(--color-bg);
     border-bottom: 1px solid var(--color-border);
     box-shadow: var(--shadow-soft);
-    padding: 16px 24px 24px;
+    padding: 16px 20px calc(120px + env(safe-area-inset-bottom, 0px));  /* v3.31.7 · 하단 CTA 바(60px) + FAB(24px) 여백 확보 */
     display: none;
     z-index: 200;
+    overflow-y: auto;                                      /* v3.31.7 · 긴 메뉴 스크롤 */
+    -webkit-overflow-scrolling: touch;
   }
   .md-header__nav.is-open { display: block; }
 
@@ -1004,13 +1007,21 @@ button.elementor-button {
     flex-direction: column;
     align-items: stretch;
     gap: 0;
+    padding: 0;                                            /* v3.31.7 · UL 기본 40px padding 제거 (좌측 쏠림 해결) */
+    margin: 0;
+    list-style: none;
   }
+  .md-nav > li,
+  .md-header__nav > ul > li,
+  .md-header__nav > div > ul > li { list-style: none; }
   .md-nav > li > a,
   .md-header__nav > ul > li > a {
     display: block;
     padding: 14px 4px;
     border-bottom: 1px solid var(--color-border);
     white-space: normal;
+    color: var(--color-text);                              /* v3.31.7 · 다크에서도 명확 */
+    font-weight: 700;
   }
   /* 모바일: sub-menu 인라인 들여쓰기 (드롭다운 X) */
   .md-header__nav .sub-menu {
@@ -1022,10 +1033,13 @@ button.elementor-button {
     background: transparent;
     border: none;
     box-shadow: none;
-    padding: 0 0 8px 16px;
+    padding: 0 0 8px 16px;                                  /* v3.31.7 · UL 기본 40px padding 제거 */
+    margin: 0;
+    list-style: none;
     min-width: 0;
     border-radius: 0;
   }
+  .md-header__nav .sub-menu > li { list-style: none; }
   .md-header__nav .menu-item-has-children > a::after { display: none; }
   .md-header__nav .sub-menu > li > a {
     padding: 10px 8px;
@@ -1034,6 +1048,19 @@ button.elementor-button {
   }
 
   .md-header__cta { display: none; }
+}
+
+/* v3.31.7 · 모바일 메뉴 열림 시 body 스크롤 잠금 (선택적 · JS 없이 CSS만) */
+@media (max-width: 880px) {
+  body:has(.md-header__nav.is-open) { overflow: hidden; }
+}
+
+/* v3.31.7 · 다크모드 모바일 메뉴 · 서브 메뉴 항목 대비 확보 */
+@media (prefers-color-scheme: dark) and (max-width: 880px) {
+  .md-header__nav { background: #1F1810; border-bottom-color: rgba(244, 177, 149, 0.15); }
+  .md-header__nav > ul > li > a,
+  .md-nav > li > a { border-bottom-color: rgba(244, 177, 149, 0.12); }
+  .md-header__nav .sub-menu > li > a { color: #C9BAA8; }
 }
 
 /* =============================================================

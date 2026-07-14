@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.31.6' );
+define( 'MOONDENTAL_VERSION', '3.31.7' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -288,7 +288,7 @@ add_action( 'after_setup_theme', function() {
  * PDF 26년 승급 공고 기준으로 경영지원본부 재구성:
  *   행정원장 → 실장 → 차장 → 과장 → 대리 → 주임 순 (대리가 주임보다 상급).
  *   비서실 인원(김동현 실장·민종기 과장·이슬기 대리)을 경영지원본부로 흡수하고
- *   김하진·카밀라 대리 승급, 게레레·오혜정 주임 (게를레 → 게레레 표기 정정).
+ *   김하진·카밀라 대리 승급, 오혜정 주임 신규 추가. 게를레 표기 유지.
  *   비서실은 완전히 제거. */
 add_action( 'after_setup_theme', function() {
 	if ( get_option( 'moondental_staff_v3316' ) === 'done' ) return;
@@ -313,7 +313,7 @@ add_action( 'after_setup_theme', function() {
 			'경영지원본부|대리|이슬기',
 			'경영지원본부|대리|김하진',
 			'경영지원본부|대리|카밀라',
-			'경영지원본부|주임|게레레',
+			'경영지원본부|주임|게를레',
 			'경영지원본부|주임|오혜정',
 		);
 		$new = implode( "\n", array_merge( $lines, $mgmt ) );
@@ -321,6 +321,17 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3316', 'done' );
 }, 48 );
+
+/* 일회성 마이그레이션 v3.31.7 · 사용자 정정 · 게레레 → 게를레 복구.
+ * v3.31.6에서 PDF 표기를 따라 게레레로 저장했으나 실제 이름은 게를레. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_staff_v3317' ) === 'done' ) return;
+	$saved = get_theme_mod( 'md_content_staff_list' );
+	if ( is_string( $saved ) && strpos( $saved, '게레레' ) !== false ) {
+		set_theme_mod( 'md_content_staff_list', str_replace( '게레레', '게를레', $saved ) );
+	}
+	update_option( 'moondental_staff_v3317', 'done' );
+}, 49 );
 
 /* 일회성 마이그레이션 v3.29.0 · 여러 진료시간 안내 텍스트 (cta_hint, price_cta_meta_1_value)
  * 옛 default를 저장했으면 → 목 18:00 → 18:30 자동 갱신 · 앞 0 제거. */
