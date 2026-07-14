@@ -1547,6 +1547,20 @@ function moondental_register_preservation_content_customizer( $wp_customize ) {
 add_action( 'customize_register', 'moondental_register_preservation_content_customizer', 42 );
 
 /**
+ * 스마일디자인 페이지 콘텐츠 등록.
+ */
+function moondental_register_smile_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_smile_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '스마일디자인 · 콘텐츠',
+		'description' => '/스마일디자인센터/ 페이지의 히어로·5개 섹션(라미네이트·심미레진·미백·잇몸미백·거미스마일)·CTA를 편집합니다.',
+		'priority'    => 43,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_smile_content_fields(), 'md_section_smile_' );
+}
+add_action( 'customize_register', 'moondental_register_smile_content_customizer', 43 );
+
+/**
  * 자연치아 살리기 페이지 (충치·신경·잇몸 3섹션) 콘텐츠.
  */
 function moondental_preservation_content_fields() {
@@ -1620,6 +1634,116 @@ function moondental_preservation_content_fields() {
 				'preservation_cta_chip'  => array( 'default' => '🦷 자연치아 살리기 상담', 'label' => 'CTA 칩', 'type' => 'text' ),
 				'preservation_cta_title' => array( 'default' => "발치 권유받으셨나요?\n천안·아산 문치과병원에서 한 번 더 살펴보세요", 'label' => 'CTA 제목 (줄바꿈 유지)', 'type' => 'textarea' ),
 				'preservation_cta_lead'  => array( 'default' => '보존과·치주과 전문 의료진의 정밀 진단으로 자연치아를 살릴 수 있는지 검토해드립니다.', 'label' => 'CTA 리드', 'type' => 'textarea' ),
+			),
+		),
+	);
+}
+
+/**
+ * 스마일디자인센터 페이지 (라미네이트·심미레진·미백·잇몸미백·거미스마일) 콘텐츠.
+ */
+function moondental_smile_content_fields() {
+	return array(
+		'hero' => array(
+			'title'  => '스마일디자인 · 히어로',
+			'fields' => array(
+				'smile_hero_eyebrow' => array( 'default' => 'SMILE DESIGN CENTER · 천안·아산 심미치과', 'label' => '히어로 · eyebrow', 'type' => 'text' ),
+				'smile_hero_title_a' => array( 'default' => '천안·아산 스마일디자인센터', 'label' => '히어로 · 제목 첫 줄', 'type' => 'text' ),
+				'smile_hero_title_b' => array( 'default' => '자연스러운 미소를 디자인합니다', 'label' => '히어로 · 제목 강조 (em)', 'type' => 'text' ),
+				'smile_hero_lead'    => array( 'default' => "최소 침습 라미네이트·심미 레진·전문가 치아미백·잇몸미백·거미스마일 —\n환자분의 얼굴·치아·잇몸 라인을 종합적으로 분석해 맞춤 스마일을 설계합니다.", 'label' => '히어로 · 리드 (줄바꿈 유지)', 'type' => 'textarea' ),
+				'smile_nav_items'    => array( 'default' => "💎 | 라미네이트 | #laminate\n🎨 | 심미레진 | #aesthetic-resin\n✨ | 치아미백 | #whitening\n🌸 | 잇몸미백 | #gum-whitening\n😊 | 거미스마일 | #gummy", 'label' => '앵커 네비 (한 줄에 1개, 형식: 아이콘 | 라벨 | 앵커)', 'type' => 'textarea' ),
+			),
+		),
+		'laminate' => array(
+			'title'  => '01 · 라미네이트',
+			'fields' => array(
+				'smile_laminate_eyebrow' => array( 'default' => '01 · LAMINATE', 'label' => 'eyebrow', 'type' => 'text' ),
+				'smile_laminate_title'   => array( 'default' => '천안·아산 최소침습 라미네이트', 'label' => '섹션 제목', 'type' => 'text' ),
+				'smile_laminate_lead'    => array( 'default' => '자연치아 삭제를 최소화하면서 앞니의 색·모양·길이를 자연스럽게 개선합니다.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'smile_laminate_cards'   => array(
+					'default' => "🔬 최소 삭제 (No-prep/Minimal) | 전통 라미네이트 대비 치아 삭제량을 최소화. 얇은 세라믹 쉘(0.3~0.5mm)을 자연치아 표면에 부착해 변색·균열·작은 틈을 자연스럽게 가립니다.\n🎨 디지털 스마일 디자인 | 구강 스캐너로 정밀 본을 뜨고, 환자 얼굴·잇몸·치아 비율을 분석해 <strong>맞춤 시뮬레이션</strong>. 시작 전 결과를 미리 확인.\n⚙️ 원내 기공실 직접 제작 | 13층 한아 임플란트 보철연구소에서 <strong>자체 제작</strong>. 시적 시 미세 수정 즉시 가능, 색·형태 정확도 우수.\n🦷 e.max·Empress 세라믹 | 심미성·강도 균형이 우수한 e.max·Empress 등 글로벌 세라믹 사용. 자연치아와 구분이 어려운 투명도.",
+					'label' => '강점 카드 (한 줄에 1개, 형식: 아이콘 + 제목 | 본문)',
+					'type'  => 'textarea',
+				),
+				'smile_laminate_reco_title' => array( 'default' => '이런 분께 라미네이트를 권합니다', 'label' => '추천 대상 · 소제목', 'type' => 'text' ),
+				'smile_laminate_reco_list'  => array(
+					'default' => "앞니가 변색되어 미백만으론 한계가 있는 경우\n앞니 길이·모양·잇몸 라인을 동시에 개선하고 싶은 경우\n앞니 사이가 약간 벌어져 있는 경우 (디아스테마)\n외상으로 앞니가 살짝 깨지거나 마모된 경우\n결혼·면접·중요 행사를 앞두고 단기간에 미소를 개선하고 싶은 경우",
+					'label' => '추천 대상 리스트 (한 줄에 1개)',
+					'type'  => 'textarea',
+				),
+				'smile_laminate_callout_title' => array( 'default' => '💎 라미네이트 비용', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
+				'smile_laminate_callout_body'  => array( 'default' => '정확한 견적은 진단 후 산정. <a href="/비용-안내/">비용 안내 →</a>', 'label' => '콜아웃 · 본문 (HTML 허용)', 'type' => 'textarea' ),
+			),
+		),
+		'aesthetic_resin' => array(
+			'title'  => '02 · 심미레진',
+			'fields' => array(
+				'smile_resin_eyebrow' => array( 'default' => '02 · AESTHETIC RESIN', 'label' => 'eyebrow', 'type' => 'text' ),
+				'smile_resin_title'   => array( 'default' => '천안·아산 심미레진 — 자연치아 손상 없이 모양 개선', 'label' => '섹션 제목', 'type' => 'text' ),
+				'smile_resin_lead'    => array( 'default' => '치아를 거의 깎지 않고 레진(복합 재료)을 직접 쌓아 모양·색을 다듬는 시술. 1회 내원으로 완료.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'smile_resin_cards'   => array(
+					'default' => "치아 사이 틈 메우기 (디아스테마) | 앞니 사이 벌어진 틈을 자연스러운 색의 레진으로 메워 균형 잡힌 치열 만들기. 치아 삭제 없음.\n치아 끝 마모·결손 복원 | 앞니 끝이 닳거나 작게 깨진 부분을 레진으로 자연스럽게 복원. 발치·신경치료 불필요.\n치경부 마모증 (잇몸 라인) | 잘못된 양치질로 잇몸 경계가 패인 경우, 시린 증상도 함께 해결하는 보존적 치료.\n레진 비니어 (앞니 심미) | 변색·작은 형태 개선에 적합. 라미네이트보다 보존적·저렴하지만 내구성·심미성은 낮음.",
+					'label' => '카드 (한 줄에 1개, 형식: 제목 | 본문)',
+					'type'  => 'textarea',
+				),
+				'smile_resin_callout_title' => array( 'default' => '🎨 심미레진 vs 라미네이트', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
+				'smile_resin_callout_body'  => array( 'default' => '심미레진은 <strong>1회 내원·저렴·자연치아 보존</strong>이 강점. 라미네이트는 <strong>심미성·내구성·색 안정성</strong>이 우수. 환자분의 케이스와 예산에 맞춰 추천드립니다.', 'label' => '콜아웃 · 본문', 'type' => 'textarea' ),
+			),
+		),
+		'whitening' => array(
+			'title'  => '03 · 치아미백',
+			'fields' => array(
+				'smile_white_eyebrow' => array( 'default' => '03 · WHITENING', 'label' => 'eyebrow', 'type' => 'text' ),
+				'smile_white_title'   => array( 'default' => '천안·아산 전문가 치아미백', 'label' => '섹션 제목', 'type' => 'text' ),
+				'smile_white_lead'    => array( 'default' => '자연치아를 손상 없이 밝게 — 환자 상태에 맞춘 자가·전문가·복합 미백 프로그램.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'smile_white_cards'   => array(
+					'default' => "자가 | 홈 화이트닝 (4주 키트) | 맞춤 트레이 + 미백제를 받아 집에서 매일 1시간씩 4주 진행. 점진적이라 시린 증상 적음.\n1일 | 1-Day 전문가 미백 | 병원에서 1회 방문(약 60~90분)으로 미백 완료. 빠른 결과 원하시는 분 추천.\n2일 | 2-Day 전문가 미백 | 이틀에 걸쳐 두 번 시술로 효과·지속성 강화. 변색이 심하거나 더 밝은 톤 원하시는 분.\n복합 | 전문가 + 홈 복합 미백 | 병원 전문가 미백 + 홈 화이트닝 병행으로 효과 극대화·지속성 강화. 보철물 색에 맞춘 자연치아 미백에 추천.",
+					'label' => '카드 (한 줄에 1개, 형식: 스테이지 | 제목 | 본문)',
+					'type'  => 'textarea',
+				),
+				'smile_white_note_title' => array( 'default' => '미백 시 주의사항', 'label' => '주의사항 · 소제목', 'type' => 'text' ),
+				'smile_white_note_list'  => array(
+					'default' => "미백 후 1주일 색소 음식(커피·홍차·와인·카레 등) 피하기\n임신·수유 중에는 미백 권장하지 않음 (안전성 미확인)\n크라운·보철물·라미네이트는 미백 안 됨 — 자연치아 톤 맞춰 보철 재제작 검토\n심한 시린 증상이 있는 경우 시술 전 알려주세요",
+					'label' => '주의사항 리스트 (한 줄에 1개)',
+					'type'  => 'textarea',
+				),
+			),
+		),
+		'gum_whitening' => array(
+			'title'  => '04 · 잇몸미백',
+			'fields' => array(
+				'smile_gum_eyebrow' => array( 'default' => '04 · GUM WHITENING', 'label' => 'eyebrow', 'type' => 'text' ),
+				'smile_gum_title'   => array( 'default' => '천안·아산 잇몸미백 (레이저)', 'label' => '섹션 제목', 'type' => 'text' ),
+				'smile_gum_lead'    => array( 'default' => '검거나 어두운 잇몸을 자연스러운 핑크 톤으로 — 레이저로 안전하게.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'smile_gum_cards'   => array(
+					'default' => "🔆 레이저 잇몸 미백 원리 | 잇몸 표면의 멜라닌 색소를 <strong>레이저로 제거</strong>해 자연스러운 핑크 톤 회복. 절개 없이 표면 처리로 통증·출혈 최소.\n⏱️ 시술 시간 · 회복 | 1회 시술 약 30~60분. 시술 후 1~2주 색소 음식 피하기. 새 잇몸이 자라면서 점진적으로 밝아짐.\n이런 분께 추천 | 웃을 때 잇몸이 어둡게 보여 신경 쓰이는 분 / 라미네이트·미백 후 잇몸 색과 부조화 해결 / 멜라닌 색소가 강한 분.\n💰 비용 안내 | 잇몸 색소 정도에 따라 차이. 사전 무료 상담 가능.",
+					'label' => '카드 (한 줄에 1개, 형식: 제목 | 본문)',
+					'type'  => 'textarea',
+				),
+			),
+		),
+		'gummy' => array(
+			'title'  => '05 · 거미스마일',
+			'fields' => array(
+				'smile_gummy_eyebrow' => array( 'default' => '05 · GUMMY SMILE', 'label' => 'eyebrow', 'type' => 'text' ),
+				'smile_gummy_title'   => array( 'default' => '천안·아산 거미스마일 치료', 'label' => '섹션 제목', 'type' => 'text' ),
+				'smile_gummy_lead'    => array( 'default' => '웃을 때 잇몸이 많이 보이는 거미스마일 — 원인별 맞춤 치료로 자연스러운 미소 디자인.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'smile_gummy_h3'      => array( 'default' => '거미스마일의 4가지 원인', 'label' => '카드 · 소제목', 'type' => 'text' ),
+				'smile_gummy_cards'   => array(
+					'default' => "원인 1 | 잇몸 라인이 낮음 | 치아 길이는 정상이지만 잇몸이 치아를 많이 덮고 있음. <strong>잇몸 성형술(레이저)</strong>로 잇몸 라인 조정.\n원인 2 | 치아 길이가 짧음 | 자연치아가 짧아 잇몸 비중이 큼. <strong>크라운 연장술 + 라미네이트</strong>로 치아 길이 회복 + 비율 조정.\n원인 3 | 윗입술 근육 과활동 | 입술 거상근이 과도하게 작용해 입술이 많이 올라감. <strong>보톡스</strong>로 근육 활동 조절 — 3~6개월 효과.\n원인 4 | 상악골 과성장 | 위턱 자체가 과성장한 골격성 원인. <strong>교정 + 양악 수술 협진</strong> 필요. 11F 교정과 + 외부 외과 협진.",
+					'label' => '카드 (한 줄에 1개, 형식: 스테이지 | 제목 | 본문)',
+					'type'  => 'textarea',
+				),
+				'smile_gummy_callout_title' => array( 'default' => '📐 거미스마일 진단 흐름', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
+				'smile_gummy_callout_body'  => array( 'default' => '① 안모 분석 — 사진·동영상으로 미소선 측정 / ② CBCT로 잇몸·치아 비율 확인 / ③ 4가지 원인 중 어디에 해당하는지 진단 / ④ 환자에게 맞는 단일·복합 치료 계획 제시.', 'label' => '콜아웃 · 본문', 'type' => 'textarea' ),
+			),
+		),
+		'cta' => array(
+			'title'  => '스마일디자인 · CTA',
+			'fields' => array(
+				'smile_cta_chip'  => array( 'default' => '✨ 스마일디자인 무료 상담', 'label' => 'CTA 칩', 'type' => 'text' ),
+				'smile_cta_title' => array( 'default' => "지금 내 미소,\n천안·아산 문치과병원에서 디자인해보세요", 'label' => 'CTA 제목 (줄바꿈 유지)', 'type' => 'textarea' ),
+				'smile_cta_lead'  => array( 'default' => '디지털 스마일 시뮬레이션으로 결과를 미리 확인하고 시작할 수 있습니다.', 'label' => 'CTA 리드', 'type' => 'textarea' ),
 			),
 		),
 	);
