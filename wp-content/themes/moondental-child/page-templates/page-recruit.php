@@ -205,34 +205,50 @@ $show_email = $hr_email ?: ( $info['email'] ?: 'moondental1995@naver.com' );
 			<h2 class="md-section-head__title">이메일 한 통이면 충분합니다</h2>
 		</header>
 
-		<article class="md-recruit-callout">
-			<h3>이렇게 보내주세요</h3>
-			<ul class="md-recruit-callout__list">
-				<li><strong>이력서가 완벽하지 않아도 괜찮습니다.</strong> 형식보다 함께 오래 갈 마음이 더 중요합니다.</li>
-				<li><strong>자기소개서가 길지 않아도 괜찮습니다.</strong> "문치과병원에서 일하는 것에 관심 있습니다"라는 한 줄만으로도 충분합니다.</li>
-				<li>가지고 계신 이력서와 간단한 소개를 <a href="mailto:<?php echo esc_attr( $show_email ); ?>?subject=<?php echo rawurlencode( '문치과병원 채용 지원' ); ?>"><?php echo esc_html( $show_email ); ?></a>로 보내주시면 저희가 확인 후 연락드립니다.</li>
-			</ul>
-			<p class="md-recruit-callout__hint">서류 검토는 보통 3~5일 소요됩니다. 지원자분의 상황·경력에 맞춰 이후 면접 일정을 개별 안내드립니다.</p>
-		</article>
+		<article class="md-apply-card">
+			<div class="md-apply-card__body">
+				<h3 class="md-apply-card__title">이렇게 보내주세요</h3>
+				<ul class="md-apply-card__list">
+					<li><strong>이력서가 완벽하지 않아도 괜찮습니다.</strong> 형식보다 함께 오래 갈 마음이 더 중요합니다.</li>
+					<li><strong>자기소개서가 길지 않아도 괜찮습니다.</strong> "문치과병원에서 일하는 것에 관심 있습니다"라는 한 줄만으로도 충분합니다.</li>
+					<li>가지고 계신 이력서와 간단한 소개를 아래 이메일로 보내주시면 저희가 확인 후 연락드립니다.</li>
+				</ul>
+				<a class="md-apply-card__mail" href="mailto:<?php echo esc_attr( $show_email ); ?>?subject=<?php echo rawurlencode( '문치과병원 채용 지원' ); ?>">
+					<span class="md-apply-card__mail-ic" aria-hidden="true">📧</span>
+					<span class="md-apply-card__mail-txt">
+						<span class="md-apply-card__mail-label">이력서 보내기</span>
+						<span class="md-apply-card__mail-addr"><?php echo esc_html( $show_email ); ?></span>
+					</span>
+				</a>
+			</div>
 
-		<ol class="md-preservation-steps md-u-mt-cards">
-			<li>
-				<strong>1단계 · 이메일 접수</strong>
-				<p>이력서와 간단한 소개를 <a href="mailto:<?php echo esc_attr( $show_email ); ?>"><?php echo esc_html( $show_email ); ?></a>로 보내주세요.</p>
-			</li>
-			<li>
-				<strong>2단계 · 서류 검토</strong>
-				<p>3~5일 이내 검토 후 면접 대상자에게 개별 연락드립니다.</p>
-			</li>
-			<li>
-				<strong>3단계 · 면접</strong>
-				<p>인사 담당자·실장 면접, 이후 대표 원장님 면접. 근무 환경·업무 내용을 자세히 안내드립니다.</p>
-			</li>
-			<li>
-				<strong>4단계 · 채용 확정 · 입사</strong>
-				<p>합격 통보 후 상호 협의된 입사일에 출근. 3개월 수습 후 정규직 전환.</p>
-			</li>
-		</ol>
+			<div class="md-apply-card__flow" aria-label="지원 후 진행 과정">
+				<h4 class="md-apply-card__flow-title">지원 후 진행 과정</h4>
+				<ol class="md-apply-flow">
+					<li>
+						<span class="md-apply-flow__num">1</span>
+						<div>
+							<strong>서류 검토</strong>
+							<p>3~5일 이내</p>
+						</div>
+					</li>
+					<li>
+						<span class="md-apply-flow__num">2</span>
+						<div>
+							<strong>면접</strong>
+							<p>실장 · 대표원장</p>
+						</div>
+					</li>
+					<li>
+						<span class="md-apply-flow__num">3</span>
+						<div>
+							<strong>채용 확정 · 입사</strong>
+							<p>3개월 수습 후 정규직</p>
+						</div>
+					</li>
+				</ol>
+			</div>
+		</article>
 	</div>
 </section>
 
