@@ -1533,6 +1533,99 @@ function moondental_register_history_content_customizer( $wp_customize ) {
 add_action( 'customize_register', 'moondental_register_history_content_customizer', 40 );
 
 /**
+ * 자연치아 살리기 페이지 콘텐츠 등록.
+ */
+function moondental_register_preservation_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_preservation_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '자연치아 살리기 · 콘텐츠',
+		'description' => '/자연치아-살리기/ 페이지의 히어로·앵커 네비·3개 섹션(충치·신경·잇몸)·CTA 텍스트를 편집합니다. 카드/리스트는 한 줄당 1항목, 파이프(|)로 필드를 구분합니다.',
+		'priority'    => 42,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_preservation_content_fields(), 'md_section_preservation_' );
+}
+add_action( 'customize_register', 'moondental_register_preservation_content_customizer', 42 );
+
+/**
+ * 자연치아 살리기 페이지 (충치·신경·잇몸 3섹션) 콘텐츠.
+ */
+function moondental_preservation_content_fields() {
+	return array(
+		'hero' => array(
+			'title'  => '자연치아 살리기 · 히어로',
+			'fields' => array(
+				'preservation_hero_eyebrow' => array( 'default' => 'PRESERVATION · 자연치아 살리기', 'label' => '히어로 · eyebrow', 'type' => 'text' ),
+				'preservation_hero_title_a' => array( 'default' => '천안·아산 자연치아 살리기', 'label' => '히어로 · 제목 첫 줄', 'type' => 'text' ),
+				'preservation_hero_title_b' => array( 'default' => '발치보다 보존이 먼저입니다', 'label' => '히어로 · 제목 강조 (em)', 'type' => 'text' ),
+				'preservation_hero_lead'    => array( 'default' => "충치치료·신경치료·잇몸치료 — 보존과·치주과 전문 진료로 환자분의 자연치아를 최대한 살립니다.\n천안 만남로 1995년 개원 30여년 임상.", 'label' => '히어로 · 리드 (줄바꿈 유지)', 'type' => 'textarea' ),
+				'preservation_nav_items'    => array( 'default' => "🦷 | 충치치료 | #cavity\n⚡ | 신경치료 | #endo\n🌿 | 잇몸치료 | #perio", 'label' => '앵커 네비 항목 (한 줄에 1개, 형식: 아이콘 | 라벨 | 앵커)', 'type' => 'textarea' ),
+			),
+		),
+		'cavity' => array(
+			'title'  => '01 · 충치치료',
+			'fields' => array(
+				'preservation_cavity_eyebrow' => array( 'default' => '01 · CAVITY TREATMENT', 'label' => 'eyebrow', 'type' => 'text' ),
+				'preservation_cavity_title'   => array( 'default' => '천안·아산 충치치료 — 보존적 접근으로 자연치아 최대한 살리기', 'label' => '섹션 제목', 'type' => 'text' ),
+				'preservation_cavity_lead'    => array( 'default' => '충치는 조기 발견·조기 치료가 핵심입니다. 진행 단계에 따라 가장 보존적인 방법을 선택합니다.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'preservation_cavity_cards'   => array(
+					'default' => "초기 | 충치 초기 — 불소도포 · 실란트 | 치아 표면에 미세한 변색·법랑질 손상이 시작된 단계. 삭제 없이 <strong>고농도 불소도포</strong>로 재광화를 유도합니다. 어금니는 <strong>실란트(홈메우기)</strong>로 추가 충치를 예방.\n중기 | 중기 충치 — 심미 레진 충전 | 법랑질을 지나 상아질에 충치가 진행된 단계. <strong>최소 삭제 + 심미 레진 충전</strong>으로 자연치아 형태와 색을 그대로 복원. 1~2회 내원으로 완료.\n진행 | 진행 충치 — 세라믹 인레이·온레이 | 충치 범위가 넓어 레진만으로 부족한 경우 <strong>세라믹 인레이/온레이</strong>로 정밀 복원. 강도·심미·내구성 모두 우수. 13층 자체 기공실 직접 제작.\n심부 | 심부 충치 — 신경 보존 직접치수복조 | 충치가 신경에 근접했지만 살아있는 경우 <strong>직접치수복조(direct pulp capping)</strong>으로 신경을 살리는 시도. 신경치료 없이 자연치아 보존 가능성.\n광범위 | 광범위 충치 — 크라운 (지르코니아·금) | 충치로 치아 구조가 크게 손상된 경우 신경치료 후 <strong>크라운(지르코니아·금)</strong>으로 강도 회복. 자체 기공실 보철로 정밀한 적합도.\n예방 | 충치 재발 예방 | 치료 후 6개월~1년 정기 검진, 스케일링, 에어플로우, 불소도포로 재발 예방. 양치 습관과 식이 관리도 함께 안내.",
+					'label' => '카드 (한 줄에 1개, 형식: 스테이지 | 제목 | 본문)',
+					'type'  => 'textarea',
+				),
+				'preservation_cavity_callout_title' => array( 'default' => '💡 충치치료 비용 안내', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
+				'preservation_cavity_callout_body'  => array( 'default' => '레진 충전·세라믹 인레이·지르코니아 크라운 등 재료별 비용은 정확한 진단 후 산정합니다. <a href="/비용-안내/">비용 안내 자세히 보기 →</a>', 'label' => '콜아웃 · 본문 (HTML 허용)', 'type' => 'textarea' ),
+			),
+		),
+		'endo' => array(
+			'title'  => '02 · 신경치료',
+			'fields' => array(
+				'preservation_endo_eyebrow' => array( 'default' => '02 · ENDODONTICS', 'label' => 'eyebrow', 'type' => 'text' ),
+				'preservation_endo_title'   => array( 'default' => '천안·아산 신경치료 — 치아 보존의 마지막 기회', 'label' => '섹션 제목', 'type' => 'text' ),
+				'preservation_endo_lead'    => array( 'default' => '충치가 신경까지 도달한 경우, 신경치료로 발치를 막고 자연치아를 살립니다. 보존과 전문의의 정밀 근관치료.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'preservation_endo_when_title' => array( 'default' => '언제 신경치료가 필요한가요?', 'label' => '증상 리스트 · 소제목', 'type' => 'text' ),
+				'preservation_endo_when_list'  => array(
+					'default' => "<strong>가만히 있어도 욱신거리는 통증</strong> — 신경 염증의 대표 증상\n<strong>잠을 못 잘 정도의 야간 통증</strong> — 화농성 염증 의심\n<strong>차거나 뜨거운 자극에 통증이 오래 지속</strong>\n<strong>치아 색이 어둡게 변색</strong> — 신경 괴사 가능성\n<strong>잇몸에 고름·물집 (치근단 농양)</strong> — 신경 손상 후 염증 확산\n<strong>외상으로 치아가 파절</strong> — 신경 노출",
+					'label' => '증상 리스트 (한 줄에 1개, HTML 허용)',
+					'type'  => 'textarea',
+				),
+				'preservation_endo_strength_title' => array( 'default' => '문치과병원 신경치료의 강점', 'label' => '강점 카드 · 소제목', 'type' => 'text' ),
+				'preservation_endo_strength_cards' => array(
+					'default' => "🔬 CBCT 3D 진단 | 일반 X-ray로 보이지 않는 신경관의 분지·곡률·세부 구조를 3D로 정확히 파악. 누락 없는 근관치료.\n⚡ NiTi 회전 파일 | 최신 NiTi 회전 파일 시스템으로 신경관 내부를 정밀 세척·확대. 천공·분리 위험 최소화.\n🔄 재근관치료 가능 | 다른 곳에서 신경치료가 실패한 케이스도 재근관치료로 발치 없이 살리는 시도. 30여년 임상 경력.\n🦷 치근단수술 (Apicoectomy) | 일반 근관치료로 해결 안 되는 치근단 염증을 외과적으로 제거. 구강악안면외과 협진.",
+					'label' => '강점 카드 (한 줄에 1개, 형식: 아이콘 + 제목 | 본문)',
+					'type'  => 'textarea',
+				),
+				'preservation_endo_callout_title' => array( 'default' => '⏱️ 신경치료 진행 흐름', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
+				'preservation_endo_callout_body'  => array( 'default' => '1차 — 신경 제거 + 임시 충전 / 2차 — 신경관 세척·소독 / 3차 — 영구 충전 + 코어 / 4차 — 크라운 마무리. 통상 2~4회 내원, 케이스에 따라 다름.', 'label' => '콜아웃 · 본문', 'type' => 'textarea' ),
+			),
+		),
+		'perio' => array(
+			'title'  => '03 · 잇몸치료',
+			'fields' => array(
+				'preservation_perio_eyebrow' => array( 'default' => '03 · PERIODONTICS', 'label' => 'eyebrow', 'type' => 'text' ),
+				'preservation_perio_title'   => array( 'default' => '천안·아산 잇몸치료 — 치주염 진행 막기', 'label' => '섹션 제목', 'type' => 'text' ),
+				'preservation_perio_lead'    => array( 'default' => '잇몸 출혈·붓기·입냄새는 치주염의 신호. 자연치아 평생 건강의 핵심은 잇몸 관리입니다.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'preservation_perio_h3'      => array( 'default' => '치주질환 단계별 치료', 'label' => '단계별 치료 · 소제목', 'type' => 'text' ),
+				'preservation_perio_cards'   => array(
+					'default' => "단계 1 | 치은염 — 스케일링 | 잇몸이 붉고 잘 붓는 단계. <strong>스케일링(보험 적용, 연 1회)</strong>으로 치석·치태 제거. 양치 습관 교정으로 회복 가능.\n단계 2 | 경증 치주염 — 치근활택술 | 치주 포켓이 깊어지기 시작. <strong>치근활택술(SRP)</strong>로 치근 표면을 매끄럽게 다듬어 치태 부착 방지. 보험 적용.\n단계 3 | 중등도 치주염 — 치주소파술 | 치주 포켓 5mm 이상. <strong>치주소파술</strong>로 깊이 있는 염증 조직 제거. 보험 적용.\n단계 4 | 중증 치주염 — 치주 수술 | 치조골 손실 진행. <strong>치주 판막 수술 + 골 이식</strong>으로 골 재생 시도. 치아를 살리는 마지막 시도.\n유지 | 치주 유지관리 (SPT) | 치료 후 3~6개월 간격 정기 점검·스케일링. <strong>치주 유지관리 프로그램</strong>으로 재발 방지.\n보조 | 잇몸 PDRN 주사 | 잇몸 염증 완화·재생 촉진을 위한 <strong>PDRN(DNA 단편) 주사</strong>. 시술당 비급여.",
+					'label' => '카드 (한 줄에 1개, 형식: 스테이지 | 제목 | 본문)',
+					'type'  => 'textarea',
+				),
+				'preservation_perio_callout_title' => array( 'default' => '📌 잇몸 건강 자가 체크', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
+				'preservation_perio_callout_body'  => array( 'default' => '✓ 양치 시 자주 피가 난다 / ✓ 잇몸이 부어 보인다 / ✓ 치아가 길어 보인다 / ✓ 입냄새가 심해졌다 / ✓ 음식 끼임이 잦아졌다 → 2가지 이상 해당되면 천안 만남로 문치과병원 잇몸 검진을 권해드립니다.', 'label' => '콜아웃 · 본문', 'type' => 'textarea' ),
+			),
+		),
+		'cta' => array(
+			'title'  => '자연치아 살리기 · CTA',
+			'fields' => array(
+				'preservation_cta_chip'  => array( 'default' => '🦷 자연치아 살리기 상담', 'label' => 'CTA 칩', 'type' => 'text' ),
+				'preservation_cta_title' => array( 'default' => "발치 권유받으셨나요?\n천안·아산 문치과병원에서 한 번 더 살펴보세요", 'label' => 'CTA 제목 (줄바꿈 유지)', 'type' => 'textarea' ),
+				'preservation_cta_lead'  => array( 'default' => '보존과·치주과 전문 의료진의 정밀 진단으로 자연치아를 살릴 수 있는지 검토해드립니다.', 'label' => 'CTA 리드', 'type' => 'textarea' ),
+			),
+		),
+	);
+}
+
+/**
  * 공통 헬퍼 — 그룹 정의를 받아 섹션·세팅·컨트롤을 등록.
  */
 function moondental_register_panel_groups( $wp_customize, $panel_id, $groups, $section_id_prefix ) {
