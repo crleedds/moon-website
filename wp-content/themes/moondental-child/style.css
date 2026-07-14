@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.31.4
+Version:      3.31.5
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -139,7 +139,63 @@ body {
 
   /* 헤더 다크 배경 */
   .md-site-header { background: rgba(26, 20, 14, 0.92); backdrop-filter: blur(10px); }
+
+  /* v3.31.5 · 다크모드 모바일·히어로 콘트라스트 개선 */
+
+  /* 히어로 미디어 · 다크모드에서 갈색 blob 대신 부드러운 라디얼 + 명확한 이빨 */
+  .md-hero__media {
+    background:
+      radial-gradient(circle at 30% 20%, rgba(244, 177, 149, 0.22), transparent 60%),
+      radial-gradient(circle at 70% 80%, rgba(182, 206, 183, 0.18), transparent 60%),
+      linear-gradient(160deg, #3A2C22, #241C15);
+    border: 1px solid rgba(244, 177, 149, 0.15);
+  }
+  .md-hero__media-placeholder { color: var(--color-text); opacity: 0.9; }
+  .md-hero__media-placeholder::before {
+    opacity: 1;
+    filter: drop-shadow(0 6px 24px rgba(244, 177, 149, 0.35)) saturate(1.05);
+  }
+
+  /* 히어로 배경 · 살짝 더 밝게 */
+  .md-hero {
+    background:
+      radial-gradient(ellipse at 90% 0%, rgba(244, 177, 149, 0.10), transparent 55%),
+      radial-gradient(ellipse at 10% 100%, rgba(143, 174, 146, 0.09), transparent 55%),
+      var(--color-bg);
+  }
+
+  /* 모바일 하단 CTA 바 — 전화 예약 아이콘·텍스트 밝게 */
+  .md-mobile-cta { background: #221A13; border-top-color: rgba(244, 177, 149, 0.18); }
+  .md-mobile-cta__item--call { color: var(--color-primary-light); border-right-color: rgba(244, 177, 149, 0.15); }
+  .md-mobile-cta__item--kakao { border-right-color: rgba(0,0,0,0.2); }
+  .md-mobile-cta__item:active { background: #2E2318; }
+
+  /* 헤더 CTA 버튼 · 다크에서 살짝 밝게 + 링 강조 (JS로 설정된 bg 유지, 대비만 보정) */
+  .md-header__cta-btn {
+    filter: brightness(1.12);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 8px 20px rgba(0, 0, 0, 0.45);
+  }
+  .md-header__cta-btn:hover { filter: brightness(1.18); }
+
+  /* 언어 스위처 · 모바일에서 CTA 바와 간격 확보 */
+  .md-lang-switcher__btn {
+    background: #2A211A;
+    color: var(--color-text);
+    border-color: rgba(244, 177, 149, 0.22);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  }
+  .md-lang-switcher__menu {
+    background: #2A211A;
+    border-color: rgba(244, 177, 149, 0.18);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  }
+  .md-lang-switcher__item { color: var(--color-text); }
+  .md-lang-switcher__item:hover,
+  .md-lang-switcher__item:focus-visible { background: rgba(244, 177, 149, 0.12); color: var(--color-primary-light); }
 }
+
 
 /* =============================================================
    1c. Language Switcher — 우측 하단 플로팅 (스크롤 시 함께 이동)
@@ -216,11 +272,11 @@ body {
 .md-lang-switcher__flag { font-size: 1.15rem; line-height: 1; }
 .md-lang-switcher__label { flex: 1; font-weight: 500; }
 
-/* 모바일 — 하단 CTA 바(60px) 위에 배치, 크기·간격 축소 */
+/* 모바일 — 하단 CTA 바(60px) + iOS 홈바 안전영역 위에 배치, 크기·간격 축소 */
 @media (max-width: 768px) {
   .md-lang-switcher {
     right: 12px;
-    bottom: 76px;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
   }
   .md-lang-switcher__btn { padding: 8px 12px; font-size: 0.75rem; }
   .md-lang-switcher__menu { min-width: 160px; }
