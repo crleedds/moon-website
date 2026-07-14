@@ -1589,6 +1589,20 @@ function moondental_register_recruit_page_content_customizer( $wp_customize ) {
 add_action( 'customize_register', 'moondental_register_recruit_page_content_customizer', 45 );
 
 /**
+ * 지역별 페이지 콘텐츠 등록 (28개 URL 공통 템플릿).
+ */
+function moondental_register_region_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_region_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '지역 페이지 · 공통 콘텐츠',
+		'description' => '/오시는-길/{지역}/ URL에서 사용되는 공통 템플릿. 아래 필드에서 {region}·{province}·{duration}·{distance}·{highway} 등의 토큰이 각 지역 값으로 자동 치환됩니다.',
+		'priority'    => 46,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_region_content_fields(), 'md_section_region_' );
+}
+add_action( 'customize_register', 'moondental_register_region_content_customizer', 46 );
+
+/**
  * 자연치아 살리기 페이지 (충치·신경·잇몸 3섹션) 콘텐츠.
  */
 function moondental_preservation_content_fields() {
@@ -1959,6 +1973,111 @@ function moondental_recruit_page_content_fields() {
 				'recruit_page_cta_chip'  => array( 'default' => '📧 지원 접수', 'label' => 'CTA 칩', 'type' => 'text' ),
 				'recruit_page_cta_title' => array( 'default' => "지금 이메일로\n편하게 보내주세요", 'label' => 'CTA 제목 (줄바꿈 유지)', 'type' => 'textarea' ),
 				'recruit_page_cta_lead'  => array( 'default' => '길지 않아도, 완벽하지 않아도 괜찮습니다. 함께 오래 갈 분을 기다리고 있습니다.', 'label' => 'CTA 리드', 'type' => 'textarea' ),
+			),
+		),
+	);
+}
+
+/**
+ * 지역별 오시는 길 페이지 콘텐츠 — 28개 URL 공통 템플릿.
+ * {region}·{region_long}·{province}·{duration}·{distance}·{duration_label}·{highway}·{ktx}·{bus}·{note} 토큰이
+ * 페이지 로딩 시 각 지역 값으로 자동 치환됩니다.
+ */
+function moondental_region_content_fields() {
+	return array(
+		'hero' => array(
+			'title'  => '지역 페이지 · 히어로',
+			'fields' => array(
+				'region_hero_eyebrow'      => array( 'default' => '📍 {province} · {region_long}에서 오시는 길', 'label' => 'eyebrow (토큰: {province}, {region_long})', 'type' => 'text' ),
+				'region_hero_title_a'      => array( 'default' => '{region}에서 찾는', 'label' => '제목 첫 줄 (토큰: {region})', 'type' => 'text' ),
+				'region_hero_title_b'      => array( 'default' => '임플란트·교정 잘하는 천안·아산 치과', 'label' => '제목 강조 (em)', 'type' => 'text' ),
+				'region_hero_lead_walking' => array(
+					'default' => "{region}에서 천안 만남로 <strong>한아의료재단 문치과병원</strong>까지 <strong>{duration_label}</strong> 거리.\n1995년부터 30여년 한자리 진료 — 분야별 전문 의료진 협진으로 통합 진료해드립니다.",
+					'label'   => '리드 (도보 지역용)',
+					'type'    => 'textarea',
+				),
+				'region_hero_lead_drive'   => array(
+					'default' => "{region}에서 천안 만남로 <strong>한아의료재단 문치과병원</strong>까지 자동차로 약 <strong>{duration}분</strong> ({distance}km).\n1995년부터 30여년 한자리 진료 — 분야별 전문 의료진 협진으로 통합 진료해드립니다.",
+					'label'   => '리드 (자동차 지역용)',
+					'type'    => 'textarea',
+				),
+				'region_hero_badge_walk'   => array( 'default' => '🚶 {duration_label}', 'label' => '배지 (도보) — 예: 🚶 도보 15분', 'type' => 'text' ),
+				'region_hero_badge_drive'  => array( 'default' => '🚗 자동차 {duration}분', 'label' => '배지 (자동차)', 'type' => 'text' ),
+				'region_hero_badge_bus'    => array( 'default' => '🚌 시외버스 가능', 'label' => '배지 (버스, 자동차 지역용)', 'type' => 'text' ),
+				'region_hero_badge_walk_bus' => array( 'default' => '🚌 시내버스·터미널 근접', 'label' => '배지 (버스, 도보 지역용)', 'type' => 'text' ),
+				'region_hero_badge_night'  => array( 'default' => '🌙 월·화·수·금 야간진료 20:30까지', 'label' => '배지 (야간진료)', 'type' => 'text' ),
+			),
+		),
+		'traffic' => array(
+			'title'  => '교통 안내 (자가용·KTX·버스)',
+			'fields' => array(
+				'region_traffic_eyebrow' => array( 'default' => '🗺️ 교통 안내', 'label' => 'eyebrow', 'type' => 'text' ),
+				'region_traffic_title'   => array( 'default' => '{region}에서 천안 만남로 문치과병원까지', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
+				'region_traffic_lead'    => array( 'default' => '자동차·시외버스·KTX 중 가장 편한 방법으로 오실 수 있습니다.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'region_traffic_car_title'  => array( 'default' => '자가용으로 오시는 길', 'label' => '자가용 카드 · 제목', 'type' => 'text' ),
+				'region_traffic_car_body'   => array( 'default' => '<strong>{region}</strong>에서 천안 만남로 문치과병원까지 자동차로 약 <strong>{duration}분</strong>, 거리 약 {distance}km.', 'label' => '자가용 카드 · 본문', 'type' => 'textarea' ),
+				'region_traffic_car_route'  => array( 'default' => '<strong>주요 경로</strong>: {highway} 이용', 'label' => '자가용 카드 · 경로 라인', 'type' => 'text' ),
+				'region_traffic_car_park'   => array( 'default' => '<strong>주차</strong>: 본원 지하 기계식 주차장 무료 / SUV·대형차는 신부 제5공영주차장(동남구 먹거리1길 10) 무료 등록', 'label' => '자가용 카드 · 주차 라인', 'type' => 'textarea' ),
+				'region_traffic_ktx_title'  => array( 'default' => 'KTX·기차로 오시는 길', 'label' => 'KTX 카드 · 제목', 'type' => 'text' ),
+				'region_traffic_ktx_detail' => array( 'default' => '천안역 또는 천안아산역 도착 후 시내버스 또는 택시로 신부동 문타워까지 약 10~15분.', 'label' => 'KTX 카드 · 부가 안내', 'type' => 'textarea' ),
+				'region_traffic_bus_title'  => array( 'default' => '시외버스로 오시는 길', 'label' => '버스 카드 · 제목', 'type' => 'text' ),
+				'region_traffic_bus_detail' => array( 'default' => '천안종합·고속버스터미널에서 문치과병원까지 도보 약 5분.', 'label' => '버스 카드 · 부가 안내', 'type' => 'textarea' ),
+				'region_callout_title'  => array( 'default' => '📍 {region} 환자분께', 'label' => '지역 콜아웃 · 제목 (토큰: {region})', 'type' => 'text' ),
+				'region_callout_body'   => array( 'default' => '{note}. 천안 만남로 문타워 9·10·11·13층, 4개 층 통합 진료센터에서 분야별 전문 의료진의 협진을 받으실 수 있습니다.', 'label' => '지역 콜아웃 · 본문 (토큰: {note})', 'type' => 'textarea' ),
+			),
+		),
+		'reasons' => array(
+			'title'  => '선택 이유 6가지',
+			'fields' => array(
+				'region_reasons_eyebrow' => array( 'default' => '✨ 우리 병원을 선택하는 이유', 'label' => 'eyebrow', 'type' => 'text' ),
+				'region_reasons_title'   => array( 'default' => '{region}에서 문치과병원을 선택하시는 이유', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
+				'region_reasons_cards'   => array(
+					'default' => "🦷 30여년 임상 경험 | {region}에서 천안까지 오시는 데는 이유가 있습니다. 1995년 개원부터 30여년 한자리 진료로 누적된 임상 경험.\n👨‍⚕️ 분야별 전문 의료진 협진 | 보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 전 분야 의료진이 한 케이스를 함께 보는 협진 시스템. {region}에서 따로따로 다닐 필요 없습니다.\n🔬 CBCT 디지털 진단 | 3D CBCT·디지털 가이드 수술·구강 스캐너 — 정확한 진단과 안전한 수술. {region}에서 정밀 진단이 필요한 케이스에 추천.\n⚙️ 자체 보철 제작 | 13층 한아 임플란트 보철연구소 원내 직접 제작. 빠른 수정·정확한 의사소통·품질 일관성 — {region}에서 오신 분들도 한 번에 끝.\n❤️ 전신질환 안심 진료 | 혈압·당검사·심전도·산소포화도 상시 측정. 고혈압·당뇨·심장질환자도 {region}에서 오셔서 안심하고 진료받으실 수 있습니다.\n🌙 평일 야간진료 | 월·화·수·금 9:00~20:30 점심시간 없이 진료 · 목 9:00~18:30 · 토 9:00~14:00. {region}에서 퇴근 후 출발하셔도 충분한 진료 시간.",
+					'label' => '이유 카드 (한 줄에 1개, 형식: 아이콘+제목 | 본문) · 토큰: {region}',
+					'type'  => 'textarea',
+				),
+			),
+		),
+		'popular' => array(
+			'title'  => '인기 진료 5개',
+			'fields' => array(
+				'region_popular_eyebrow' => array( 'default' => '🦷 인기 진료', 'label' => 'eyebrow', 'type' => 'text' ),
+				'region_popular_title'   => array( 'default' => '{region}에서 오시는 환자분들의 인기 진료', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
+				'region_popular_lead'    => array( 'default' => '{region}에서 천안까지 오시는 분들이 자주 받으시는 진료입니다.', 'label' => '섹션 리드 (토큰: {region})', 'type' => 'textarea' ),
+				'region_popular_items'   => array(
+					'default' => "임플란트-센터 | 🦷 | {region} 임플란트 | {region}에서 정밀 임플란트 — CBCT 디지털 가이드·자체 보철 제작·30여년 임상.\n투명교정-센터 | ✨ | {region} 투명교정 | {region}에서 슈어스마일 SureSmile 투명교정 — Dentsply Sirona AI 시뮬레이션.\n심미치료 | 💎 | {region} 라미네이트 | {region}에서 자연스러운 미소 — 최소 삭제 라미네이트·미백·심미 보철.\n자연치아-살리기 | 🌿 | {region} 자연치아 살리기 | {region}에서 신경치료·재근관치료 — 발치보다 보존 우선.\n사랑니-발치 | 🦴 | {region} 사랑니 발치 | {region}에서 매복 사랑니까지 — CBCT 안전 진단 + 진정요법.",
+					'label' => '인기 진료 (한 줄에 1개, 형식: 페이지 슬러그 | 아이콘 | 제목 | 설명) · 토큰: {region}',
+					'type'  => 'textarea',
+				),
+			),
+		),
+		'cta' => array(
+			'title'  => '지역 페이지 · CTA',
+			'fields' => array(
+				'region_cta_chip'      => array( 'default' => '📅 365일 24시간 온라인 예약 가능', 'label' => 'CTA 칩', 'type' => 'text' ),
+				'region_cta_title'     => array( 'default' => "{region}에서 천안·아산 문치과병원까지\n지금 바로 상담 받아보세요", 'label' => 'CTA 제목 (토큰: {region})', 'type' => 'textarea' ),
+				'region_cta_lead'      => array( 'default' => '네이버 예약 24시간 자동 / 전화·카카오톡 상담', 'label' => 'CTA 리드', 'type' => 'textarea' ),
+				'region_cta_hint'      => array( 'default' => '진료시간: 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진', 'label' => 'CTA 힌트 (진료시간)', 'type' => 'text' ),
+				'region_cta_hint_addr' => array( 'default' => '📍 천안 만남로 52 문타워 9·10·11·13층', 'label' => 'CTA 힌트 (주소)', 'type' => 'text' ),
+			),
+		),
+		'faq' => array(
+			'title'  => '지역 FAQ 5개',
+			'fields' => array(
+				'region_faq_eyebrow' => array( 'default' => '❓ 자주 묻는 질문', 'label' => 'eyebrow', 'type' => 'text' ),
+				'region_faq_title'   => array( 'default' => '{region} 환자분들이 자주 물어보시는 질문', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
+				'region_faq_items'   => array(
+					'default' => "{region}에서 천안·아산 문치과병원까지 얼마나 걸리나요? | 자동차로 약 <strong>{duration}분</strong>, 거리 약 {distance}km입니다. 주요 경로는 {highway} 이용. 시외버스·KTX로도 천안종합터미널 또는 천안역 도착 후 도보 5분 거리입니다.\n{region}에서 갈 만한 임플란트 잘하는 치과인가요? | 네, {region}에서 임플란트 진료받으러 오시는 환자분이 많습니다. 1995년 개원 30여년 임상, CBCT 디지털 가이드 수술, 13층 자체 한아 임플란트 보철연구소에서 보철 직접 제작 — 다른 지역에서 오셔도 한 번 방문으로 진단부터 보철까지 진행할 수 있도록 시스템이 갖춰져 있습니다.\n{region}에서 주차가 가능한가요? | 네, 본원 지하 기계식 주차장을 <strong>무료</strong>로 이용하실 수 있습니다. SUV·대형차는 인근 신부 제5공영주차장(동남구 먹거리1길 10)에 주차하시고 데스크에 접수하시면 무료 등록을 도와드립니다.\n{region}에서 야간이나 주말에도 진료 가능한가요? | 네, 평일(월·화·수·금)은 <strong>9:00~20:30</strong>까지 점심시간 없이 진료합니다. {region}에서 퇴근 후 출발하셔도 충분한 시간입니다. 토요일은 9:00~14:00, 일요일·공휴일은 휴진입니다.\n{region}에서 첫 진료 시 무엇이 필요한가요? | 신분증(또는 건강보험증)을 지참해주세요. 복용 중인 약이 있다면 약 정보, 타원 X-ray 파일(USB·이메일)이 있으면 진단 시간이 단축됩니다. 사전 예약은 네이버 예약, 전화, 카카오톡 채널로 가능합니다.",
+					'label' => 'FAQ (한 줄에 1개, 형식: 질문 | 답변) · 토큰 다 사용 가능',
+					'type'  => 'textarea',
+				),
+			),
+		),
+		'other' => array(
+			'title'  => '다른 지역 안내',
+			'fields' => array(
+				'region_other_eyebrow' => array( 'default' => '🌐 다른 지역에서 오시는 길', 'label' => 'eyebrow', 'type' => 'text' ),
+				'region_other_title'   => array( 'default' => '다른 지역에서 천안·아산 문치과병원까지', 'label' => '섹션 제목', 'type' => 'text' ),
 			),
 		),
 	);
