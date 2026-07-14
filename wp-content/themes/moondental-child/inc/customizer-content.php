@@ -1575,6 +1575,20 @@ function moondental_register_prevention_content_customizer( $wp_customize ) {
 add_action( 'customize_register', 'moondental_register_prevention_content_customizer', 44 );
 
 /**
+ * 상시채용 페이지 콘텐츠 등록.
+ */
+function moondental_register_recruit_page_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_recruit_page_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '상시채용 · 콘텐츠',
+		'description' => '/상시채용/ 페이지의 히어로·모집 대상·복리후생 6카테고리·WHY 카드·지원 방법·CTA를 편집합니다. (인사팀 이메일 설정은 별도 "채용 · HR 연락처" 패널에)',
+		'priority'    => 45,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_recruit_page_content_fields(), 'md_section_recruit_page_' );
+}
+add_action( 'customize_register', 'moondental_register_recruit_page_content_customizer', 45 );
+
+/**
  * 자연치아 살리기 페이지 (충치·신경·잇몸 3섹션) 콘텐츠.
  */
 function moondental_preservation_content_fields() {
@@ -1854,6 +1868,97 @@ function moondental_prevention_content_fields() {
 				'prevention_cta_chip'  => array( 'default' => '💆 덴탈 SPA 예약', 'label' => 'CTA 칩', 'type' => 'text' ),
 				'prevention_cta_title' => array( 'default' => "치료 전에 예방을 시작하세요\n천안·아산 문치과병원 덴탈 SPA", 'label' => 'CTA 제목', 'type' => 'textarea' ),
 				'prevention_cta_lead'  => array( 'default' => '6개월 주기 정기 SPA로 자연치아를 평생 건강하게 — 가장 경제적인 투자입니다.', 'label' => 'CTA 리드', 'type' => 'textarea' ),
+			),
+		),
+	);
+}
+
+/**
+ * 상시채용 페이지 콘텐츠 (복리후생·WHY·apply flow).
+ */
+function moondental_recruit_page_content_fields() {
+	return array(
+		'hero' => array(
+			'title'  => '상시채용 · 히어로',
+			'fields' => array(
+				'recruit_hero_eyebrow' => array( 'default' => 'RECRUIT · 한아의료재단 문치과병원', 'label' => '히어로 · eyebrow', 'type' => 'text' ),
+				'recruit_hero_email_btn' => array( 'default' => '📧 이메일로 지원하기', 'label' => '히어로 이메일 버튼 라벨', 'type' => 'text' ),
+			),
+		),
+		'target' => array(
+			'title'  => '모집 대상 · 근무 조건',
+			'fields' => array(
+				'recruit_target_eyebrow' => array( 'default' => '📋 모집 대상', 'label' => '섹션 eyebrow', 'type' => 'text' ),
+				'recruit_target_title'   => array( 'default' => '진료실 · 상담실 치과위생사', 'label' => '섹션 제목', 'type' => 'text' ),
+				'recruit_cond_badge'    => array( 'default' => '근무 조건', 'label' => '카드 배지', 'type' => 'text' ),
+				'recruit_cond_title'    => array( 'default' => '💼 진료실 · 상담실 공통 근무 조건', 'label' => '카드 제목', 'type' => 'text' ),
+				'recruit_cond_lead'     => array( 'default' => '직원 시프트 · 병원 진료시간과 다릅니다.', 'label' => '카드 리드', 'type' => 'text' ),
+				'recruit_cond_hours_title' => array( 'default' => '🕐 근무 시간', 'label' => '왼쪽 블록 · 제목', 'type' => 'text' ),
+				'recruit_cond_hours_list'  => array(
+					'default' => "주 5일 근무 (평일 + 토요일 격주)\n평일 9:00~19:30 (점심시간 1시간 포함)\n월·화·수·금 야간진료는 오후 시프트 로테이션 (~20:30)\n목요일 9:00~18:30 · 토요일 9:00~14:00\n일요일·공휴일 휴무",
+					'label' => '왼쪽 블록 · 리스트 (한 줄에 1개)',
+					'type'  => 'textarea',
+				),
+				'recruit_cond_leg_title' => array( 'default' => '📅 연차 · 법정 보장', 'label' => '오른쪽 블록 · 제목', 'type' => 'text' ),
+				'recruit_cond_leg_list'  => array(
+					'default' => "4대 보험 (건강·국민연금·고용·산재)\n퇴직연금 운영\n연차 (1년차 · 2년차 이상 확대 적용)\n출산·육아휴가 (법정 + 확장 운영)",
+					'label' => '오른쪽 블록 · 리스트 (한 줄에 1개)',
+					'type'  => 'textarea',
+				),
+			),
+		),
+		'benefits' => array(
+			'title'  => '복리후생 · 6개 카테고리',
+			'fields' => array(
+				'recruit_benefits_badge' => array( 'default' => '복리후생', 'label' => '카드 배지', 'type' => 'text' ),
+				'recruit_benefits_title' => array( 'default' => '🎁 함께 성장하고 오래 일할 수 있도록', 'label' => '카드 제목', 'type' => 'text' ),
+				'recruit_benefits_lead'  => array( 'default' => '문치과병원은 20여년 함께한 선생님들이 계신 이유가 있습니다. 아래는 병원이 운영 중인 복리후생 프로그램입니다.', 'label' => '카드 리드', 'type' => 'textarea' ),
+				'recruit_benefits_items' => array(
+					'default' => "💰 급여 · 인센티브 | 급여테이블 기준 월 급여 · 다양한 인센티브 (매출·소개·근태 등) · 명절·여름휴가 상여금 · 진료 관련 자격증 보유자 자격수당\n📚 교육 · 성장 지원 | 보수교육·세미나 등록비 지원 · 법정교육 + 사내 직무교육 프로그램 · 학회 참여 지원\n👨‍👩‍👧 가족 · 생활 지원 | 자녀 학자금 지원 (유아~대학) · 본인·가족 의료비 지원 · 본인·가족 치과 진료 할인 · 결혼축하금 · 생일 수당 · 명절 선물\n🏠 근무 환경 | 기숙사 지원 (원거리 신규 직원) · 중식·석식 제공 · 유니폼 지급\n🌳 문화 · 복지 | 직원 리조트 회원가 지원 (리솜·한화) · 동아리 활동 지원 · 봄·가을 체육대회 (상반기 1회 · 하반기 1회) · 주말농장 운영 (희망자) · 워크샵·회식비 지원\n🕰️ 장기근속 · 경조사 | 상조회 운영 (경사·애사 지원) · 근속 연수별 결혼축하금 확대 · 장기근속 포상",
+					'label' => '카테고리 (한 줄에 1개, 형식: 아이콘+제목 | 항목1 · 항목2 · 항목3 · ...) — 항목은 " · "로 구분',
+					'type'  => 'textarea',
+				),
+				'recruit_benefits_hint'  => array( 'default' => '※ 구체적인 금액·요건은 입사 후 안내드립니다. 세부 내용은 면접 시 궁금하신 부분 언제든 질문해주세요.', 'label' => '카드 하단 힌트', 'type' => 'textarea' ),
+			),
+		),
+		'why' => array(
+			'title'  => 'WHY MOON DENTAL · 강점 카드',
+			'fields' => array(
+				'recruit_why_eyebrow' => array( 'default' => '✨ WHY MOON DENTAL', 'label' => '섹션 eyebrow', 'type' => 'text' ),
+				'recruit_why_title'   => array( 'default' => '문치과병원에서 일하면 좋은 점', 'label' => '섹션 제목', 'type' => 'text' ),
+				'recruit_why_cards'   => array(
+					'default' => "🕰️ 20년 넘게 함께한 동료들 | 1995년 개원 후 20년 넘게 근무하고 계신 선생님들이 여러 분 계십니다. 신뢰가 쌓인 동료와 오래 함께 일할 수 있는 환경입니다.\n🦷 30여년 임상 노하우 | 다양한 케이스를 직접 경험하며 임상 실력을 키울 수 있습니다.\n🏥 통합 진료센터 (4개 층) | 9F 보철·보존·예방 · 10F 임플란트·외과·턱관절 · 11F 교정·소아·치주·디지털 · 13F 기공 — 모든 진료를 한 건물에서 경험.\n🔬 디지털 진료 시스템 | CBCT·디지털 가이드·구강 스캐너 등 최신 장비. 디지털 치과 실무 경험 축적.\n👨‍⚕️ 분야별 전문 의료진 협진 | 보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 전문 의료진과 함께 — 다각도로 배울 수 있는 환경.\n📚 교육·세미나 지원 | 학회·세미나 참석 지원, 사내 임상 교육 — 성장하고 싶은 분께 적극 추천.",
+					'label' => '강점 카드 (한 줄에 1개, 형식: 아이콘+제목 | 본문)',
+					'type'  => 'textarea',
+				),
+			),
+		),
+		'apply' => array(
+			'title'  => '지원 방법 · 이메일 카드',
+			'fields' => array(
+				'recruit_apply_eyebrow' => array( 'default' => '📩 지원 방법', 'label' => '섹션 eyebrow', 'type' => 'text' ),
+				'recruit_apply_title'   => array( 'default' => '이메일 한 통이면 충분합니다', 'label' => '섹션 제목', 'type' => 'text' ),
+				'recruit_apply_card_title' => array( 'default' => '이렇게 보내주세요', 'label' => '카드 제목', 'type' => 'text' ),
+				'recruit_apply_bullets' => array(
+					'default' => "<strong>이력서가 완벽하지 않아도 괜찮습니다.</strong> 형식보다 함께 오래 갈 마음이 더 중요합니다.\n<strong>자기소개서가 길지 않아도 괜찮습니다.</strong> \"문치과병원에서 일하는 것에 관심 있습니다\"라는 한 줄만으로도 충분합니다.\n가지고 계신 이력서와 간단한 소개를 아래 이메일로 보내주시면 저희가 확인 후 연락드립니다.",
+					'label' => '체크 항목 (한 줄에 1개, HTML 허용)',
+					'type'  => 'textarea',
+				),
+				'recruit_apply_btn_label' => array( 'default' => '이력서 보내기', 'label' => '이메일 버튼 라벨', 'type' => 'text' ),
+				'recruit_apply_flow_title' => array( 'default' => '지원 후 진행 과정', 'label' => '진행 과정 · 소제목', 'type' => 'text' ),
+				'recruit_apply_flow_steps' => array(
+					'default' => "서류 검토 | 3~5일 이내\n면접 | 실장 · 대표원장\n채용 확정 · 입사 | 3개월 수습 후 정규직",
+					'label' => '진행 과정 단계 (한 줄에 1개, 형식: 제목 | 설명)',
+					'type'  => 'textarea',
+				),
+			),
+		),
+		'cta' => array(
+			'title'  => '상시채용 · CTA',
+			'fields' => array(
+				'recruit_page_cta_chip'  => array( 'default' => '📧 지원 접수', 'label' => 'CTA 칩', 'type' => 'text' ),
+				'recruit_page_cta_title' => array( 'default' => "지금 이메일로\n편하게 보내주세요", 'label' => 'CTA 제목 (줄바꿈 유지)', 'type' => 'textarea' ),
+				'recruit_page_cta_lead'  => array( 'default' => '길지 않아도, 완벽하지 않아도 괜찮습니다. 함께 오래 갈 분을 기다리고 있습니다.', 'label' => 'CTA 리드', 'type' => 'textarea' ),
 			),
 		),
 	);
