@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.31.1
+Version:      3.31.2
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -3282,6 +3282,122 @@ button.elementor-button {
   padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
+/* v3.31.2 · 프린트 최적화 · sticky/fixed 요소 숨김·가독성 개선 */
+@media print {
+  /* 배경·기본 색상 초기화 */
+  * {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  body { margin: 0 !important; padding: 0 !important; font-size: 11pt; line-height: 1.5; }
+  html { color-scheme: light !important; }
+
+  /* 페이지 여백 */
+  @page { margin: 15mm 12mm; }
+
+  /* Sticky/fixed 인터랙션 요소 완전 숨김 */
+  .md-site-header,
+  .md-header,
+  .md-header__inner,
+  .md-mobile-cta,
+  .md-fab-stack,
+  .md-fab,
+  .md-utilbar,
+  .language-switcher,
+  .md-language-switcher,
+  #goog-gt-tt,
+  .goog-te-banner-frame,
+  .skiptranslate,
+  .glang-widget,
+  .glang-tools,
+  [class*="glang"],
+  .md-fsoc,
+  .md-footer__social,
+  .md-cta-banner,
+  .md-cta-banner__hint,
+  .md-region-cta,
+  .md-docs-cta,
+  .md-priceX-cta,
+  .md-docsingle-others,
+  .md-doc-single-cta,
+  .md-testimonials__more,
+  .md-header__cta,
+  .md-header__nav-toggle,
+  .md-header__nav,
+  .md-locmap,
+  .md-mapbtn-grid,
+  #wpadminbar,
+  form,
+  iframe,
+  [role="tablist"],
+  [aria-hidden="true"] {
+    display: none !important;
+  }
+
+  /* 콘텐츠 전폭 사용 */
+  .md-container,
+  .md-container--narrow {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+  }
+  .md-section { padding: 12pt 0 !important; page-break-inside: avoid; }
+
+  /* 링크 URL 표시 */
+  a[href]:not([href^="#"]):not([href^="javascript:"]):after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #555 !important;
+    word-break: break-all;
+  }
+  a { text-decoration: underline; color: #000 !important; }
+
+  /* 헤딩 색 강제 */
+  h1, h2, h3, h4, h5, h6 { color: #000 !important; page-break-after: avoid; }
+  h1 { font-size: 22pt; margin: 8pt 0 6pt; }
+  h2 { font-size: 16pt; margin: 12pt 0 6pt; border-bottom: 1pt solid #000; padding-bottom: 3pt; }
+  h3 { font-size: 13pt; margin: 8pt 0 4pt; }
+
+  /* 카드·박스 프린트 프렌들리 */
+  article, section, aside {
+    background: #fff !important;
+    border: 1pt solid #ccc !important;
+    padding: 6pt !important;
+    margin-bottom: 6pt !important;
+    page-break-inside: avoid;
+  }
+
+  /* 이미지 축소 */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+  }
+
+  /* 표 프린트 대응 */
+  table { border-collapse: collapse !important; width: 100% !important; }
+  table, th, td { border: 1pt solid #999 !important; padding: 4pt !important; }
+  th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
+
+  /* 페이지 브레이크 힌트 */
+  ul, ol, dl { page-break-inside: avoid; }
+  tr { page-break-inside: avoid; }
+
+  /* 푸터에 병원 정보 프린트 시 표시 */
+  .md-footer {
+    background: transparent !important;
+    color: #000 !important;
+    border-top: 2pt solid #000 !important;
+    padding: 8pt 0 !important;
+    margin-top: 12pt !important;
+  }
+  .md-footer * { color: #000 !important; }
+  .md-footer__grid { display: block !important; }
+  .md-footer__col { margin-bottom: 8pt !important; border: none !important; padding: 0 !important; }
+}
+
 /* v3.30.6 · 법적 표시 + 저작권 · 단일 문단으로 통합 (구분선 완전 제거) */
 .md-footer__legal-line {
   margin-top: clamp(20px, 2.5vw, 28px);
@@ -5535,6 +5651,70 @@ html { scroll-behavior: smooth; }
   color: var(--color-primary);
   font-weight: 800;
   font-size: 1.25rem;
+}
+
+/* v3.31.2 · 복리후생 카테고리 그리드 */
+.md-recruit-benefits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(16px, 2vw, 24px);
+  margin-top: clamp(16px, 2vw, 24px);
+}
+@media (max-width: 900px) { .md-recruit-benefits { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .md-recruit-benefits { grid-template-columns: 1fr; } }
+.md-recruit-benefit {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: clamp(16px, 2vw, 22px);
+  transition: border-color .2s, transform .2s;
+}
+.md-recruit-benefit:hover {
+  border-color: var(--color-primary-light);
+  transform: translateY(-2px);
+}
+.md-recruit-benefit h4 {
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0 0 12px;
+  color: var(--color-primary-dark);
+  letter-spacing: -0.015em;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+.md-recruit-benefit ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.md-recruit-benefit li {
+  position: relative;
+  padding-left: 16px;
+  margin-bottom: 6px;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--color-text);
+  word-break: keep-all;
+}
+.md-recruit-benefit li::before {
+  content: '·';
+  position: absolute;
+  left: 3px; top: -3px;
+  color: var(--color-primary);
+  font-weight: 800;
+  font-size: 1.25rem;
+}
+.md-recruit-benefit li strong {
+  color: var(--color-primary-dark);
+}
+.md-recruit-card__hint {
+  margin: clamp(16px, 2vw, 22px) 0 0;
+  padding-top: clamp(12px, 1.5vw, 16px);
+  border-top: 1px dashed var(--color-border);
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  line-height: 1.65;
+  word-break: keep-all;
 }
 
 /* 홈 소식 스니펫 (.md-home-news) */

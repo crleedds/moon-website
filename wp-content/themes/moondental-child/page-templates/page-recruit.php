@@ -53,36 +53,109 @@ $show_email = $hr_email ?: ( $info['email'] ?: 'moondental1995@naver.com' );
 			</p>
 		</header>
 
-		<!-- 공통 근무 조건·복리후생 -->
+		<!-- 근무 조건 -->
 		<article class="md-recruit-card md-recruit-card--common">
 			<div class="md-recruit-card__head">
-				<span class="md-recruit-card__badge md-recruit-card__badge--common">상시채용</span>
-				<h3>💼 근무 조건 · 복리후생</h3>
-				<p class="md-recruit-card__lead">진료실·상담실 공통으로 적용됩니다.</p>
+				<span class="md-recruit-card__badge md-recruit-card__badge--common">근무 조건</span>
+				<h3>💼 진료실 · 상담실 공통 근무 조건</h3>
+				<p class="md-recruit-card__lead">직원 시프트 · 병원 진료시간과 다릅니다.</p>
 			</div>
 			<div class="md-recruit-grid">
 				<div class="md-recruit-block">
-					<h4>💼 근무 조건 <span class="md-recruit-block__caption">(직원 시프트 · 병원 진료시간과 다름)</span></h4>
+					<h4>🕐 근무 시간</h4>
 					<ul>
 						<li>주 5일 근무 (평일 + 토요일 격주)</li>
 						<li>평일 9:00~19:30 (점심시간 1시간 포함)</li>
 						<li>월·화·수·금 야간진료는 오후 시프트 로테이션 (~20:30)</li>
 						<li>목요일 9:00~18:30 · 토요일 9:00~14:00</li>
 						<li>일요일·공휴일 휴무</li>
-						<li>4대 보험 · 퇴직금 · 연차 (법정 필수)</li>
 					</ul>
 				</div>
 				<div class="md-recruit-block">
-					<h4>🎁 복리후생</h4>
+					<h4>📅 연차 · 법정 보장</h4>
 					<ul>
-						<li>인센티브 · 명절 상여 · 우수사원 포상</li>
-						<li>본인·가족 치과 진료 할인</li>
-						<li>학회·세미나 참여 지원 (교육비)</li>
-						<li>유니폼·식대·간식 제공</li>
-						<li>경조사 휴가·경조금 · <strong>장기근속 포상</strong></li>
+						<li>4대 보험 (건강·국민연금·고용·산재)</li>
+						<li>퇴직연금 운영</li>
+						<li>연차 (1년차 · 2년차 이상 확대 적용)</li>
+						<li>출산·육아휴가 (법정 + 확장 운영)</li>
 					</ul>
 				</div>
 			</div>
+		</article>
+
+		<!-- 복리후생 · 카테고리별 -->
+		<article class="md-recruit-card md-u-mt-cards">
+			<div class="md-recruit-card__head">
+				<span class="md-recruit-card__badge">복리후생</span>
+				<h3>🎁 함께 성장하고 오래 일할 수 있도록</h3>
+				<p class="md-recruit-card__lead">문치과병원은 20여년 함께한 선생님들이 계신 이유가 있습니다. 아래는 병원이 운영 중인 복리후생 프로그램입니다.</p>
+			</div>
+
+			<div class="md-recruit-benefits">
+
+				<div class="md-recruit-benefit">
+					<h4>💰 급여 · 인센티브</h4>
+					<ul>
+						<li>급여테이블 기준 월 급여</li>
+						<li>다양한 인센티브 (매출·소개·근태 등)</li>
+						<li>명절·여름휴가 상여금</li>
+						<li>진료 관련 자격증 보유자 자격수당</li>
+					</ul>
+				</div>
+
+				<div class="md-recruit-benefit">
+					<h4>📚 교육 · 성장 지원</h4>
+					<ul>
+						<li>보수교육·세미나 등록비 지원</li>
+						<li>법정교육 + 사내 직무교육 프로그램</li>
+						<li>학회 참여 지원</li>
+					</ul>
+				</div>
+
+				<div class="md-recruit-benefit">
+					<h4>👨‍👩‍👧 가족 · 생활 지원</h4>
+					<ul>
+						<li>자녀 학자금 지원 (유아~대학)</li>
+						<li>본인·가족 의료비 지원</li>
+						<li>본인·가족 치과 진료 할인</li>
+						<li>결혼축하금 · 생일 수당 · 명절 선물</li>
+					</ul>
+				</div>
+
+				<div class="md-recruit-benefit">
+					<h4>🏠 근무 환경</h4>
+					<ul>
+						<li>기숙사 지원 (원거리 신규 직원)</li>
+						<li>중식·석식 제공</li>
+						<li>유니폼 지급</li>
+					</ul>
+				</div>
+
+				<div class="md-recruit-benefit">
+					<h4>🌳 문화 · 복지</h4>
+					<ul>
+						<li>직원 리조트 회원가 지원 (리솜·한화)</li>
+						<li>동아리 활동 지원</li>
+						<li>봄·가을 체육대회 (상반기 1회 · 하반기 1회)</li>
+						<li>주말농장 운영 (희망자)</li>
+						<li>워크샵·회식비 지원</li>
+					</ul>
+				</div>
+
+				<div class="md-recruit-benefit">
+					<h4>🕰️ 장기근속 · 경조사</h4>
+					<ul>
+						<li><strong>장기근속자 해외여행 지원</strong> (12년 이상 근속 시)</li>
+						<li>상조회 운영 (경사·애사 지원)</li>
+						<li>근속 연수별 결혼축하금 확대</li>
+					</ul>
+				</div>
+
+			</div>
+
+			<p class="md-recruit-card__hint">
+				※ 구체적인 금액·요건은 입사 후 안내드립니다. 세부 내용은 면접 시 궁금하신 부분 언제든 질문해주세요.
+			</p>
 		</article>
 	</div>
 </section>
