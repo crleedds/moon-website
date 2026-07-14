@@ -145,9 +145,9 @@ $show_email = $hr_email ?: ( $info['email'] ?: 'moondental1995@naver.com' );
 				<div class="md-recruit-benefit">
 					<h4>🕰️ 장기근속 · 경조사</h4>
 					<ul>
-						<li><strong>장기근속자 해외여행 지원</strong> (12년 이상 근속 시)</li>
 						<li>상조회 운영 (경사·애사 지원)</li>
 						<li>근속 연수별 결혼축하금 확대</li>
+						<li>장기근속 포상</li>
 					</ul>
 				</div>
 
