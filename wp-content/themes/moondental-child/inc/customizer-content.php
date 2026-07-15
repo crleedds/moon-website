@@ -2101,8 +2101,8 @@ function moondental_region_content_fields() {
 				'region_popular_title'   => array( 'default' => '{region}에서 오시는 환자분들의 인기 진료', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
 				'region_popular_lead'    => array( 'default' => '{region}에서 천안까지 오시는 분들이 자주 받으시는 진료입니다.', 'label' => '섹션 리드 (토큰: {region})', 'type' => 'textarea' ),
 				'region_popular_items'   => array(
-					'default' => "임플란트-센터 | 🦷 | {region} 임플란트 | {region}에서 정밀 임플란트 — CBCT 디지털 가이드·자체 보철 제작·30여년 임상.\n투명교정-센터 | ✨ | {region} 투명교정 | {region}에서 슈어스마일 SureSmile 투명교정 — Dentsply Sirona AI 시뮬레이션.\n심미치료 | 💎 | {region} 라미네이트 | {region}에서 자연스러운 미소 — 최소 삭제 라미네이트·미백·심미 보철.\n자연치아-살리기 | 🌿 | {region} 자연치아 살리기 | {region}에서 신경치료·재근관치료 — 발치보다 보존 우선.\n사랑니-발치 | 🦴 | {region} 사랑니 발치 | {region}에서 매복 사랑니까지 — CBCT 안전 진단 + 진정요법.",
-					'label' => '인기 진료 (한 줄에 1개, 형식: 페이지 슬러그 | 아이콘 | 제목 | 설명) · 토큰: {region}',
+					'default' => "임플란트-센터 | icon:implant | {region} 임플란트 | {region}에서 정밀 임플란트 — CBCT 디지털 가이드·자체 보철 제작·30여년 임상.\n투명교정-센터 | icon:ortho | {region} 투명교정 | {region}에서 슈어스마일 SureSmile 투명교정 — Dentsply Sirona AI 시뮬레이션.\n심미치료 | icon:aesthetic | {region} 라미네이트 | {region}에서 자연스러운 미소 — 최소 삭제 라미네이트·미백·심미 보철.\n자연치아-살리기 | icon:preserve | {region} 자연치아 살리기 | {region}에서 신경치료·재근관치료 — 발치보다 보존 우선.\n사랑니-발치 | icon:wisdom | {region} 사랑니 발치 | {region}에서 매복 사랑니까지 — CBCT 안전 진단 + 진정요법.",
+					'label' => '인기 진료 (한 줄에 1개, 형식: 페이지 슬러그 | 아이콘 | 제목 | 설명) · 아이콘은 이모지 또는 icon:implant 형식 · 토큰: {region}',
 					'type'  => 'textarea',
 				),
 			),
@@ -2302,8 +2302,8 @@ function moondental_finish_content_fields() {
 				'doctors_view_label' => array( 'default' => '상세 프로필 보기 →', 'label' => '카드 · 상세 프로필 링크 라벨', 'type' => 'text' ),
 				'doctors_cta_hint'   => array( 'default' => '🕐 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진', 'label' => 'CTA 하단 진료시간 힌트', 'type' => 'text' ),
 				'doctors_specialties' => array(
-					'default' => "🦷 | 치과보철과 | 임플란트·크라운·틀니 등 손상된 치아 복원 전문\n✨ | 치과교정과 | 부정교합 · 투명교정 · 부분교정 등 치아 배열 전문\n🌿 | 치과보존과 | 신경치료 · 충치 치료 등 자연치 보존 전문\n🩺 | 치주과 | 잇몸 질환 · 잇몸 수술 · 치주 관리 전문\n🧒 | 소아치과 | 아이의 첫 치과 진료부터 청소년 교정까지\n🦴 | 구강악안면외과 | 사랑니 · 매복치 · 임플란트 외과 진료",
-					'label' => '진료과 카드 (한 줄에 1개, 형식: 아이콘 | 제목 | 설명)',
+					'default' => "icon:implant | 치과보철과 | 임플란트·크라운·틀니 등 손상된 치아 복원 전문\nicon:ortho | 치과교정과 | 부정교합 · 투명교정 · 부분교정 등 치아 배열 전문\nicon:preserve | 치과보존과 | 신경치료 · 충치 치료 등 자연치 보존 전문\nicon:leaf | 치주과 | 잇몸 질환 · 잇몸 수술 · 치주 관리 전문\nicon:pediatric | 소아치과 | 아이의 첫 치과 진료부터 청소년 교정까지\nicon:wisdom | 구강악안면외과 | 사랑니 · 매복치 · 임플란트 외과 진료",
+					'label' => '진료과 카드 (한 줄에 1개, 형식: 아이콘 | 제목 | 설명) · 아이콘은 이모지 또는 icon:implant 형식',
 					'type'  => 'textarea',
 				),
 			),

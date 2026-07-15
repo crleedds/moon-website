@@ -240,7 +240,7 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 		<div class="md-spec-grid">
 			<?php foreach ( $specialties as $sp ) : ?>
 				<article class="md-spec">
-					<div class="md-spec__icon" aria-hidden="true"><?php echo $sp['icon']; ?></div>
+					<div class="md-spec__icon" aria-hidden="true"><?php echo moondental_render_icon( $sp['icon'] ); ?></div>
 					<div class="md-spec__body">
 						<h3 class="md-spec__title"><?php echo esc_html( $sp['title'] ); ?></h3>
 						<p class="md-spec__desc"><?php echo esc_html( $sp['desc'] ); ?></p>

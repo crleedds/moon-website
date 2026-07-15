@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.32.8
+Version:      3.33.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -1210,6 +1210,40 @@ button.elementor-button {
 }
 .md-service-card:hover .md-service-card__icon {
   transform: scale(1.08) rotate(-4deg);
+}
+
+/* v3.33.0 · SVG 아이콘 · currentColor 기반 · 이모지와 서비스 카드 공통 크기 */
+.md-svg-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  color: inherit;
+}
+.md-svg-icon svg {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+.md-emoji-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+/* 서비스 카드 · 원형 배경 안 SVG는 42px 크기 (font-size 40px과 유사한 비주얼) */
+.md-service-card__icon .md-svg-icon svg {
+  width: 42px; height: 42px;
+  stroke-width: 1.7;
+}
+.md-service-card__icon .md-svg-icon { color: var(--color-primary); }
+/* 지역 pill · 작은 SVG */
+.md-region-pill__icon .md-svg-icon svg { width: 18px; height: 18px; stroke-width: 1.8; }
+/* 클리닉 인트로 카드 · 중간 크기 */
+.md-clinic-card__icon .md-svg-icon svg { width: 40px; height: 40px; stroke-width: 1.7; }
+/* 다크모드 · SVG 아이콘 대비 확보 */
+@media (prefers-color-scheme: dark) {
+  .md-service-card__icon .md-svg-icon { color: var(--color-primary-light); }
 }
 .md-service-card__title {
   font-size: var(--fs-h4);

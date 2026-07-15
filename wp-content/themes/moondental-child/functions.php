@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.32.8' );
+define( 'MOONDENTAL_VERSION', '3.33.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -332,6 +332,42 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3317', 'done' );
 }, 49 );
+
+/* 일회성 마이그레이션 v3.33.0 · 커스텀 SVG 아이콘 세트 이관.
+ *  기존 저장된 값이 옛 이모지(📱 · 🔄 · 🦴 등)로 남아 있으면 새 SVG 키로 업그레이드.
+ *  이미 icon: 형식으로 저장된 값은 건드리지 않음. 사용자가 직접 입력한 다른 이모지도 보존. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_icons_v3330' ) === 'done' ) return;
+
+	$icon_maps = array(
+		// 지역 인기 진료 (region_popular_items)
+		'md_content_region_popular_items' => array(
+			'임플란트-센터 | 🦷 |'       => '임플란트-센터 | icon:implant |',
+			'투명교정-센터 | ✨ |'       => '투명교정-센터 | icon:ortho |',
+			'심미치료 | 💎 |'            => '심미치료 | icon:aesthetic |',
+			'자연치아-살리기 | 🌿 |'     => '자연치아-살리기 | icon:preserve |',
+			'사랑니-발치 | 🦴 |'         => '사랑니-발치 | icon:wisdom |',
+			'사랑니-발치 | 📱 |'         => '사랑니-발치 | icon:wisdom |',
+		),
+		// 의료진 진료과 (doctors_specialties)
+		'md_content_doctors_specialties' => array(
+			'🦷 | 치과보철과'    => 'icon:implant | 치과보철과',
+			'✨ | 치과교정과'    => 'icon:ortho | 치과교정과',
+			'🌿 | 치과보존과'    => 'icon:preserve | 치과보존과',
+			'🩺 | 치주과'        => 'icon:leaf | 치주과',
+			'🧒 | 소아치과'      => 'icon:pediatric | 소아치과',
+			'🦴 | 구강악안면외과' => 'icon:wisdom | 구강악안면외과',
+			'📱 | 구강악안면외과' => 'icon:wisdom | 구강악안면외과',
+		),
+	);
+	foreach ( $icon_maps as $key => $swaps ) {
+		$saved = get_theme_mod( $key );
+		if ( ! is_string( $saved ) || $saved === '' ) continue;
+		$new = strtr( $saved, $swaps );
+		if ( $new !== $saved ) set_theme_mod( $key, $new );
+	}
+	update_option( 'moondental_icons_v3330', 'done' );
+}, 50 );
 
 /* 일회성 마이그레이션 v3.29.0 · 여러 진료시간 안내 텍스트 (cta_hint, price_cta_meta_1_value)
  * 옛 default를 저장했으면 → 목 18:00 → 18:30 자동 갱신 · 앞 0 제거. */
@@ -872,6 +908,7 @@ require_once MOONDENTAL_DIR . '/inc/enhancements.php';
 require_once MOONDENTAL_DIR . '/inc/customizer-content.php';
 require_once MOONDENTAL_DIR . '/inc/strengths.php';
 require_once MOONDENTAL_DIR . '/inc/regions.php';
+require_once MOONDENTAL_DIR . '/inc/icons.php';
 
 
 /* ============================================================
@@ -2858,48 +2895,48 @@ function moondental_footer_menu_fallback() {
  */
 function moondental_get_services() {
 	// 슬러그는 사용자가 만든 실제 페이지의 한글 슬러그(URL의 한글 부분)와 일치.
-	// 페이지가 없으면 service grid 카드 클릭 시 fallback URL로 이동.
+	// v3.33.0 · icon: prefix 커스텀 SVG 사용 (inc/icons.php). 이모지로도 오버라이드 가능.
 	return array(
 		array(
 			'slug'  => '임플란트-센터',
 			'title' => '천안·아산 임플란트',
-			'icon'  => '🦷',
+			'icon'  => 'icon:implant',
 			'desc'  => '천안 만남로 10F 임플란트센터 — 단일·다수·전악 임플란트까지, CBCT 디지털 가이드 수술과 보철 전문의 협진.',
 		),
 		array(
 			'slug'  => '투명교정-센터',
 			'title' => '천안·아산 투명교정',
-			'icon'  => '✨',
+			'icon'  => 'icon:ortho',
 			'desc'  => '천안 만남로 11F 교정과 — 슈어스마일(SureSmile) AI 투명교정 + 치과교정과 전문의·인정의 라이프스타일 맞춤 진료.',
 		),
 		array(
 			'slug'  => '자연치아-살리기',
 			'title' => '천안·아산 자연치아 살리기',
-			'icon'  => '🌿',
+			'icon'  => 'icon:preserve',
 			'desc'  => '천안·아산 신경치료·재근관치료·치주치료. 보존과 전문의의 정밀 진료 — 발치보다 보존을 먼저 고민합니다.',
 		),
 		array(
 			'slug'  => '턱관절-클리닉',
 			'title' => '천안·아산 턱관절 클리닉',
-			'icon'  => '🔄',
+			'icon'  => 'icon:jaw',
 			'desc'  => '천안·아산 턱관절 통증·소리·개구장애 — 대한턱관절교합학회 이사진의 전문 진료. 보존적 치료 우선.',
 		),
 		array(
 			'slug'  => '사랑니-발치',
 			'title' => '천안·아산 사랑니 발치',
-			'icon'  => '🩻',
+			'icon'  => 'icon:wisdom',
 			'desc'  => '천안·아산 매복 사랑니까지 — CBCT 3D 정밀 진단으로 구강악안면외과 전문 의료진이 안전하게 발치합니다.',
 		),
 		array(
 			'slug'  => '심미치료',
 			'title' => '천안·아산 라미네이트·미백',
-			'icon'  => '💎',
+			'icon'  => 'icon:aesthetic',
 			'desc'  => '천안·아산 라미네이트·치아미백·올세라믹 — 최소 삭제 보존적 접근으로 자연스러운 미소를 디자인합니다.',
 		),
 		array(
 			'slug'  => '소아치과',
 			'title' => '천안·아산 소아치과',
-			'icon'  => '🧒',
+			'icon'  => 'icon:pediatric',
 			'desc'  => '천안·아산 어린이 첫 치과 경험부터 정기 검진·예방·1차 교정까지. 평생 구강 건강의 시작.',
 		),
 	);
@@ -2918,35 +2955,35 @@ function moondental_get_service_areas() {
 		array(
 			'slug'  => '임플란트-센터',
 			'title' => '임플란트센터',
-			'icon'  => '🦷',
+			'icon'  => 'icon:implant',
 			'desc'  => '진단·수술·보철·평생 관리까지 — 임플란트 전 과정을 원내 협진 체계로.',
 			'url'   => $home . '임플란트-센터/',
 		),
 		array(
 			'slug'  => '투명교정-센터',
 			'title' => '교정센터',
-			'icon'  => '✨',
+			'icon'  => 'icon:ortho',
 			'desc'  => '슈어스마일(SureSmile) AI 투명교정 + 치과교정과 전문의·인정의 진료.',
 			'url'   => $home . '투명교정-센터/',
 		),
 		array(
 			'slug'  => '스마일디자인센터',
 			'title' => '스마일디자인센터',
-			'icon'  => '💎',
+			'icon'  => 'icon:aesthetic',
 			'desc'  => '라미네이트·치아미백·심미보철 — 최소 삭제 보존적 심미 치료.',
 			'url'   => $home . '스마일디자인센터/',
 		),
 		array(
 			'slug'  => '자연치아-살리기',
 			'title' => '자연치아 살리기',
-			'icon'  => '🌿',
+			'icon'  => 'icon:preserve',
 			'desc'  => '충치치료·신경치료·잇몸치료 — 발치보다 보존을 먼저 고민합니다.',
 			'url'   => $home . '자연치아-살리기/',
 		),
 		array(
 			'slug'  => '진료항목',
 			'title' => '진료과',
-			'icon'  => '🩺',
+			'icon'  => 'icon:general',
 			'desc'  => '턱관절·이갈이·사랑니·소아치과·예방클리닉 — 전 진료과 협진 체계.',
 			'url'   => $home . '진료항목/',
 		),

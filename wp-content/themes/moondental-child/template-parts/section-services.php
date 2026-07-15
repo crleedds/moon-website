@@ -26,7 +26,7 @@ $services = moondental_get_services();
 			?>
 				<article class="md-service-card md-reveal">
 					<span class="md-service-card__num" aria-hidden="true"><?php echo esc_html( $num ); ?></span>
-					<div class="md-service-card__icon" aria-hidden="true"><?php echo $svc['icon']; ?></div>
+					<div class="md-service-card__icon" aria-hidden="true"><?php echo moondental_render_icon( $svc['icon'] ); ?></div>
 					<h3 class="md-service-card__title"><?php echo esc_html( $svc['title'] ); ?></h3>
 					<p class="md-service-card__desc"><?php echo esc_html( $svc['desc'] ); ?></p>
 					<span class="md-service-card__more" aria-hidden="true"><?php echo esc_html( md_content( 'micro_more_label', '자세히 보기 →' ) ); ?></span>

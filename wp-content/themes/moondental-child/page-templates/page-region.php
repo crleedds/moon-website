@@ -222,7 +222,7 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 			?>
 				<article class="md-service-card">
 					<span class="md-service-card__num" aria-hidden="true"><?php echo esc_html( $num ); ?></span>
-					<div class="md-service-card__icon" aria-hidden="true"><?php echo esc_html( $svc['icon'] ); ?></div>
+					<div class="md-service-card__icon" aria-hidden="true"><?php echo moondental_render_icon( $svc['icon'] ); ?></div>
 					<h3 class="md-service-card__title"><?php echo esc_html( $title ); ?></h3>
 					<p class="md-service-card__desc"><?php echo esc_html( $replace( $svc['desc'] ) ); ?></p>
 					<span class="md-service-card__more" aria-hidden="true">자세히 보기 <span class="md-service-card__arrow">→</span></span>

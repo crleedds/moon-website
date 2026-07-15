@@ -170,7 +170,7 @@ if ( function_exists( 'moondental_get_faqs_by_service' ) ) {
 				if ( $area['slug'] === $current_area ) continue;
 			?>
 				<article class="md-service-card">
-					<div class="md-service-card__icon" aria-hidden="true"><?php echo $area['icon']; ?></div>
+					<div class="md-service-card__icon" aria-hidden="true"><?php echo moondental_render_icon( $area['icon'] ); ?></div>
 					<h3 class="md-service-card__title"><?php echo esc_html( $area['title'] ); ?></h3>
 					<p class="md-service-card__desc"><?php echo esc_html( $area['desc'] ); ?></p>
 					<a class="md-service-card__link" href="<?php echo esc_url( $area['url'] ); ?>"><?php echo esc_html( $area['title'] ); ?></a>
