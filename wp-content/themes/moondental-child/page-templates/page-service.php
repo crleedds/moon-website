@@ -31,7 +31,7 @@ foreach ( $services as $svc ) {
 			 ▸ <span><?php the_title(); ?></span>
 		</nav>
 		<?php if ( $current_svc ) : ?>
-			<div class="md-page-hero__icon" aria-hidden="true"><?php echo $current_svc['icon']; ?></div>
+			<div class="md-page-hero__icon" aria-hidden="true"><?php echo moondental_render_icon( $current_svc['icon'] ); ?></div>
 		<?php endif; ?>
 		<h1 class="md-page-hero__title"><?php the_title(); ?></h1>
 		<?php if ( $current_svc ) : ?>

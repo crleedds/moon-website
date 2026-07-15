@@ -116,7 +116,7 @@ $closer = $mc( 'clinic_intro_closer', '앞으로도 문치과병원은 봉사와
 				<article class="md-clinic-card">
 					<header>
 						<span class="md-clinic-card__num"><?php echo esc_html( $c['num'] ); ?></span>
-						<span class="md-clinic-card__icon" aria-hidden="true"><?php echo esc_html( $c['icon'] ); ?></span>
+						<span class="md-clinic-card__icon" aria-hidden="true"><?php echo moondental_render_icon( $c['icon'] ); ?></span>
 						<h3><?php echo esc_html( $c['title'] ); ?></h3>
 					</header>
 					<p class="md-clinic-card__lead"><?php echo esc_html( $c['lead'] ); ?></p>

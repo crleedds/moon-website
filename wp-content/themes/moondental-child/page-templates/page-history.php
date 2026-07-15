@@ -177,7 +177,7 @@ $explore_cards = array(
 		<div class="md-history-explore">
 			<?php foreach ( $explore_cards as $card ) : ?>
 				<a class="md-history-explore__card" href="<?php echo esc_url( $card['url'] ); ?>">
-					<span class="md-history-explore__icon" aria-hidden="true"><?php echo esc_html( $card['icon'] ); ?></span>
+					<span class="md-history-explore__icon" aria-hidden="true"><?php echo moondental_render_icon( $card['icon'] ); ?></span>
 					<h3><?php echo esc_html( $card['title'] ); ?></h3>
 					<p><?php echo esc_html( $card['desc'] ); ?></p>
 					<span class="md-history-explore__more"><?php echo esc_html( $card['label'] ); ?></span>

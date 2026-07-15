@@ -52,7 +52,7 @@ $body = function_exists( 'md_content' )
 			<span><?php echo esc_html( $data['label'] ); ?></span>
 		</nav>
 		<div class="md-strength-hero__inner">
-			<div class="md-strength-hero__icon" aria-hidden="true"><?php echo $data['icon']; ?></div>
+			<div class="md-strength-hero__icon" aria-hidden="true"><?php echo moondental_render_icon( $data['icon'] ); ?></div>
 			<span class="md-strength-hero__label"><?php echo esc_html( $data['label'] ); ?></span>
 			<h1 class="md-strength-hero__title"><?php echo esc_html( $data['value'] ); ?></h1>
 			<p class="md-strength-hero__lead"><?php echo esc_html( $data['summary'] ); ?></p>
