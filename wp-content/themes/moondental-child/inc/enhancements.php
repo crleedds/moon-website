@@ -872,6 +872,42 @@ function moondental_strip_ancestor_classes_on_standalone( $classes, $item ) {
 add_filter( 'nav_menu_css_class', 'moondental_strip_ancestor_classes_on_standalone', 20, 2 );
 
 
+/**
+ * v3.34.1 · 특정 상위 메뉴 항목 클릭 비활성화 (하위 서브메뉴만 접근).
+ *  병원안내·자연치아살리기·진료과 3개 항목은 클릭 시 페이지 이동 X
+ *  → 서브메뉴가 열리는 용도로만 동작.
+ *  하위 페이지 링크는 그대로 정상 클릭 가능.
+ */
+function moondental_nolink_parent_menu_titles() {
+	return array( '병원안내', '병원 안내', '자연치아살리기', '자연치아 살리기', '진료과' );
+}
+add_filter( 'nav_menu_css_class', function( $classes, $item ) {
+	$titles = moondental_nolink_parent_menu_titles();
+	if ( in_array( trim( (string) $item->title ), $titles, true ) ) {
+		$classes[] = 'md-nav-nolink';
+	}
+	return $classes;
+}, 25, 2 );
+
+/**
+ * 클릭 무효화 JS · CSS는 style.css에 정의.
+ *  desktop hover / mobile inline 서브메뉴 열리는 동작은 그대로.
+ */
+add_action( 'wp_footer', function() {
+	?>
+	<script id="md-nolink-parent">
+	(function(){
+		document.addEventListener('click', function(e){
+			var a = e.target.closest( '.md-nav-nolink > a' );
+			if ( ! a ) return;
+			e.preventDefault();
+		});
+	})();
+	</script>
+	<?php
+}, 25 );
+
+
 /* ============================================================
  * 3. GA4 클릭 이벤트 트래킹 (전화·카톡·네이버 예약·예약폼 제출)
  *    GA4 측정 ID가 설정돼있을 때만 gtag 호출. 없으면 dataLayer만.
