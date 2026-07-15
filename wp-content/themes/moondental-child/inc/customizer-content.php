@@ -61,6 +61,7 @@ function md_all_content_field_defaults() {
 		'moondental_bot_content_fields',
 		'moondental_finish_content_fields',
 		'moondental_final_content_fields',
+		'moondental_service_body_content_fields',
 	);
 	foreach ( $fn_names as $fn ) {
 		if ( ! function_exists( $fn ) ) continue;
@@ -1720,6 +1721,20 @@ function moondental_register_final_content_customizer( $wp_customize ) {
 add_action( 'customize_register', 'moondental_register_final_content_customizer', 50 );
 
 /**
+ * 진료 페이지 본문 HTML 등록.
+ */
+function moondental_register_service_body_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_service_body_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '진료 페이지 본문 HTML',
+		'description' => '/임플란트-센터/, /투명교정-센터/, /사랑니-발치/ 등 진료 페이지의 본문 내용을 HTML로 편집합니다. 비우면 테마 기본 내용이 자동으로 사용됩니다. h2·h3·h4·p·ul·li·strong·em 등 표준 HTML 태그 사용 가능.',
+		'priority'    => 51,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_service_body_content_fields(), 'md_section_svc_body_' );
+}
+add_action( 'customize_register', 'moondental_register_service_body_content_customizer', 51 );
+
+/**
  * 자연치아 살리기 페이지 (충치·신경·잇몸 3섹션) 콘텐츠.
  */
 function moondental_preservation_content_fields() {
@@ -2458,6 +2473,41 @@ function moondental_final_content_fields() {
 }
 
 /**
+ * 진료 페이지 본문 · 각 서비스별 HTML 편집 가능.
+ *  비어있으면 inc/content-defaults.php 의 기본 HTML이 사용됨.
+ *  HTML 태그 (h2, h3, h4, p, ul, li, strong, em, blockquote, br, a) 그대로 입력 가능.
+ */
+function moondental_service_body_content_fields() {
+	$service_bodies = array(
+		'임플란트-센터'    => '임플란트 센터 본문',
+		'투명교정-센터'    => '투명교정 센터 본문',
+		'턱관절-클리닉'    => '턱관절 클리닉 본문',
+		'사랑니-발치'      => '사랑니 발치 본문',
+		'소아치과'         => '소아치과 본문',
+		'심미치료'         => '심미치료 본문',
+	);
+	$default_map = function_exists( 'moondental_service_content_default_map' )
+		? moondental_service_content_default_map()
+		: array();
+	$fields = array();
+	foreach ( $service_bodies as $slug => $label ) {
+		$fields[ 'service_body_' . $slug ] = array(
+			'default'     => $default_map[ $slug ] ?? '',
+			'label'       => $label . ' (HTML)',
+			'description' => '<h2>·<h3>·<h4>·<p>·<ul>·<li>·<strong>·<em>·<blockquote>·<br>·<a> 태그 사용 가능. 편집 후 저장 즉시 반영. 다시 기본 내용으로 되돌리려면 전체 삭제 후 저장.',
+			'type'        => 'html_textarea',
+		);
+	}
+	return array(
+		'bodies' => array(
+			'title'       => '진료 페이지 본문 HTML',
+			'description' => '/임플란트-센터/, /투명교정-센터/, /사랑니-발치/, /소아치과/, /턱관절-클리닉/, /심미치료/ 페이지 본문을 HTML로 편집합니다. 처음 열면 현재 기본 내용이 채워져 있습니다.',
+			'fields'      => $fields,
+		),
+	);
+}
+
+/**
  * 공통 헬퍼 — 그룹 정의를 받아 섹션·세팅·컨트롤을 등록.
  */
 function moondental_register_panel_groups( $wp_customize, $panel_id, $groups, $section_id_prefix ) {
@@ -2465,24 +2515,37 @@ function moondental_register_panel_groups( $wp_customize, $panel_id, $groups, $s
 	foreach ( $groups as $group_key => $group ) {
 		$section_id = $section_id_prefix . $group_key;
 		$wp_customize->add_section( $section_id, array(
-			'title'    => $group['title'],
-			'panel'    => $panel_id,
-			'priority' => $prio,
+			'title'       => $group['title'],
+			'panel'       => $panel_id,
+			'priority'    => $prio,
+			'description' => $group['description'] ?? '',
 		) );
 		$prio += 10;
 		foreach ( $group['fields'] as $key => $field ) {
 			$setting_id = 'md_content_' . $key;
 			$default    = $field['default'];
 			$type       = $field['type'] ?? 'text';
+
+			// v3.33.5 · html_textarea 타입 · HTML 허용 큰 textarea (진료 페이지 본문용)
+			$is_html = ( $type === 'html_textarea' );
+			$sanitize = 'sanitize_text_field';
+			if ( $is_html ) {
+				$sanitize = 'wp_kses_post';
+			} elseif ( $type === 'textarea' ) {
+				$sanitize = 'sanitize_textarea_field';
+			}
+
 			$wp_customize->add_setting( $setting_id, array(
 				'default'           => $default,
-				'sanitize_callback' => $type === 'textarea' ? 'sanitize_textarea_field' : 'sanitize_text_field',
+				'sanitize_callback' => $sanitize,
 				'transport'         => 'refresh',
 			) );
 			$wp_customize->add_control( $setting_id, array(
-				'label'   => $field['label'],
-				'section' => $section_id,
-				'type'    => $type,
+				'label'       => $field['label'],
+				'description' => $field['description'] ?? '',
+				'section'     => $section_id,
+				'type'        => $is_html ? 'textarea' : $type,
+				'input_attrs' => $is_html ? array( 'rows' => 20, 'style' => 'font-family: monospace; font-size: 12px;' ) : array(),
 			) );
 		}
 	}

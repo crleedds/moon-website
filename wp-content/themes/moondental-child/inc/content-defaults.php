@@ -12,12 +12,14 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 
 /**
- * 진료영역별 기본 본문 콘텐츠.
+ * 진료영역별 기본 본문 HTML 맵 (Customizer 오버라이드 체크 없음).
+ *  Customizer field default 프리필용으로 사용.
  *
- * @param string $slug 사용자가 만든 페이지 슬러그 (한글 OK)
- * @return string HTML
+ * @return array<string,string> slug => HTML
  */
-function moondental_default_service_content( $slug ) {
+function moondental_service_content_default_map() {
+	static $map = null;
+	if ( $map !== null ) return $map;
 	$map = array(
 
 		/* ─────────────────────────────  임플란트 센터 (10F)  ───────────────────────────── */
@@ -928,7 +930,28 @@ function moondental_default_service_content( $slug ) {
 <p><strong>Q. 심미 보철 후 자연스러워 보이려면?</strong><br>치과의사와의 충분한 상담·형태 시뮬레이션·치아 색상 매칭이 핵심입니다. 문치과는 디지털 스캔·심미 가이드라인을 따라 자연스러운 결과를 만듭니다.</p>',
 	);
 
-	return $map[ $slug ] ?? '';
+	return $map;
+}
+
+/**
+ * 진료영역별 기본 본문 콘텐츠.
+ *  Customizer 저장값 있으면 우선, 없으면 위 맵 기본값.
+ *
+ * @param string $slug 사용자가 만든 페이지 슬러그 (한글 OK)
+ * @return string HTML
+ */
+function moondental_default_service_content( $slug ) {
+	$map = moondental_service_content_default_map();
+	$default = $map[ $slug ] ?? '';
+
+	// v3.33.5 · Customizer 오버라이드 지원.
+	if ( function_exists( 'md_content' ) ) {
+		$override = get_theme_mod( 'md_content_service_body_' . $slug, '' );
+		if ( is_string( $override ) && trim( $override ) !== '' ) {
+			return $override;
+		}
+	}
+	return $default;
 }
 
 
