@@ -23,10 +23,10 @@ if ( ! $region ) {
 	?>
 	<section class="md-section">
 		<div class="md-container md-container--narrow md-u-center">
-			<h1>지역 정보를 찾을 수 없습니다</h1>
+			<h1><?php echo esc_html( md_content( 'region_not_found_title', '지역 정보를 찾을 수 없습니다' ) ); ?></h1>
 			<p class="md-u-mt-24">
 				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>">
-					← 오시는 길로 돌아가기
+					<?php echo esc_html( md_content( 'region_back_label', '← 오시는 길로 돌아가기' ) ); ?>
 				</a>
 			</p>
 		</div>

@@ -27,7 +27,7 @@ if ( ! $data ) {
 			<p><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'strength_404_desc', '요청하신 강점 항목이 존재하지 않습니다.' ) : '요청하신 강점 항목이 존재하지 않습니다.' ); ?></p>
 			<p class="md-u-mt-24">
 				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( home_url( '/기술력-시설/' ) ); ?>">
-					← 강점 목록으로
+					<?php echo esc_html( md_content( 'strength_back_label', '← 강점 목록으로' ) ); ?>
 				</a>
 			</p>
 		</div>
@@ -69,7 +69,7 @@ $body = function_exists( 'md_content' )
 
 		<?php if ( ! empty( $data['related'] ) ) : ?>
 			<aside class="md-strength-related" aria-label="관련 페이지">
-				<h2 class="md-strength-related__title">관련 페이지</h2>
+				<h2 class="md-strength-related__title"><?php echo esc_html( md_content( 'strength_related_title', '관련 페이지' ) ); ?></h2>
 				<ul class="md-strength-related__list">
 					<?php foreach ( $data['related'] as $r ) : ?>
 						<li>
@@ -91,8 +91,8 @@ $body = function_exists( 'md_content' )
 	<section class="md-section md-section--surface md-section--sm" aria-label="다른 강점 보기">
 		<div class="md-container">
 			<header class="md-section-head">
-				<span class="md-section-head__eyebrow">EXPLORE MORE</span>
-				<h2 class="md-section-head__title">다른 강점도 확인하세요</h2>
+				<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'strength_more_eyebrow', 'EXPLORE MORE' ) ); ?></span>
+				<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'strength_more_title', '다른 강점도 확인하세요' ) ); ?></h2>
 			</header>
 			<div class="md-strengths">
 				<?php foreach ( $all as $key => $s ) :

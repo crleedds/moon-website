@@ -1645,6 +1645,20 @@ function moondental_register_finish_content_customizer( $wp_customize ) {
 add_action( 'customize_register', 'moondental_register_finish_content_customizer', 49 );
 
 /**
+ * 진짜 최종 · 잔여 마이크로카피 등록.
+ */
+function moondental_register_final_content_customizer( $wp_customize ) {
+	$panel_id = 'md_panel_final_content';
+	$wp_customize->add_panel( $panel_id, array(
+		'title'       => '진짜 마지막 · 마이크로카피·플로팅 CTA·푸터 라벨',
+		'description' => '역사 페이지 리드, 모바일 하단·데스크탑 플로팅 CTA 라벨, 강점·서비스 페이지 헤딩, 지역 404 텍스트, 푸터 요일/법적 표시 프리픽스 등 나머지 텍스트.',
+		'priority'    => 50,
+	) );
+	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_final_content_fields(), 'md_section_final_' );
+}
+add_action( 'customize_register', 'moondental_register_final_content_customizer', 50 );
+
+/**
  * 자연치아 살리기 페이지 (충치·신경·잇몸 3섹션) 콘텐츠.
  */
 function moondental_preservation_content_fields() {
@@ -2320,6 +2334,63 @@ function moondental_finish_content_fields() {
 				'notices_notice_subhead' => array( 'default' => '📢 문치과병원 소식', 'label' => '소식 서브 헤딩', 'type' => 'text' ),
 				'notices_story_subhead'  => array( 'default' => '🦷 문치과병원 치아이야기', 'label' => '치아이야기 서브 헤딩', 'type' => 'text' ),
 				'notices_notice_tag'    => array( 'default' => '공지', 'label' => '공지 태그 라벨', 'type' => 'text' ),
+			),
+		),
+	);
+}
+
+/**
+ * 최종 마무리 · 진짜 마지막 잔여 하드코딩.
+ *  히스토리 히어로 리드, 플로팅 CTA, 크로스링크 헤딩, 각종 마이크로카피, 푸터 라벨.
+ */
+function moondental_final_content_fields() {
+	return array(
+		'history_hero' => array(
+			'title'  => '역사 페이지 · 히어로 리드',
+			'fields' => array(
+				'history_hero_lead' => array( 'default' => '1995년부터 천안·아산에서 — 환자 한 분의 평생 치아 건강을 책임지는 마음으로 진료해온 30여년의 기록.', 'label' => '히어로 · 리드 문장', 'type' => 'textarea' ),
+			),
+		),
+		'floating_cta' => array(
+			'title'  => '플로팅 CTA (모바일 하단·데스크탑 오른쪽)',
+			'fields' => array(
+				'fcta_mobile_call_label'  => array( 'default' => '전화 예약', 'label' => '모바일 하단 · 전화 라벨', 'type' => 'text' ),
+				'fcta_mobile_kakao_label' => array( 'default' => '카카오톡', 'label' => '모바일 하단 · 카카오톡 라벨', 'type' => 'text' ),
+				'fcta_mobile_naver_label' => array( 'default' => '네이버 예약', 'label' => '모바일 하단 · 네이버 라벨', 'type' => 'text' ),
+				'fcta_desk_call_label'    => array( 'default' => '전화 상담', 'label' => '데스크탑 FAB · 전화 라벨', 'type' => 'text' ),
+				'fcta_desk_kakao_label'   => array( 'default' => '카카오톡 상담', 'label' => '데스크탑 FAB · 카카오톡 라벨', 'type' => 'text' ),
+				'fcta_desk_naver_label'   => array( 'default' => '네이버 예약', 'label' => '데스크탑 FAB · 네이버 라벨', 'type' => 'text' ),
+			),
+		),
+		'microcopy' => array(
+			'title'  => '공통 마이크로카피 · 헤딩',
+			'fields' => array(
+				'micro_more_label'         => array( 'default' => '자세히 보기 →', 'label' => '홈 서비스 카드 · "자세히 보기" 라벨', 'type' => 'text' ),
+				'micro_faq_all_label'      => array( 'default' => '전체 FAQ 보기 →', 'label' => '홈 FAQ · "전체 FAQ 보기" 버튼', 'type' => 'text' ),
+				'svc_faq_title'            => array( 'default' => '자주 묻는 질문', 'label' => '진료 상세 페이지 · FAQ 섹션 제목', 'type' => 'text' ),
+				'svc_other_title'          => array( 'default' => '다른 진료 영역 보기', 'label' => '진료 상세 페이지 · 다른 진료 영역 제목', 'type' => 'text' ),
+				'strength_related_title'   => array( 'default' => '관련 페이지', 'label' => '강점 페이지 · 관련 페이지 헤딩', 'type' => 'text' ),
+				'strength_more_eyebrow'    => array( 'default' => 'EXPLORE MORE', 'label' => '강점 페이지 · 다른 강점 eyebrow', 'type' => 'text' ),
+				'strength_more_title'      => array( 'default' => '다른 강점도 확인하세요', 'label' => '강점 페이지 · 다른 강점 제목', 'type' => 'text' ),
+				'strength_back_label'      => array( 'default' => '← 강점 목록으로', 'label' => '강점 404 · 목록으로 돌아가기 버튼', 'type' => 'text' ),
+				'region_back_label'        => array( 'default' => '← 오시는 길로 돌아가기', 'label' => '지역 404 · 돌아가기 버튼', 'type' => 'text' ),
+				'region_not_found_title'   => array( 'default' => '지역 정보를 찾을 수 없습니다', 'label' => '지역 404 · 제목', 'type' => 'text' ),
+				'notice_tag_notice'        => array( 'default' => '소식', 'label' => '소식 페이지 · 카드 태그 (소식)', 'type' => 'text' ),
+				'notice_tag_story'         => array( 'default' => '치아이야기', 'label' => '소식 페이지 · 카드 태그 (치아이야기)', 'type' => 'text' ),
+			),
+		),
+		'footer_labels' => array(
+			'title'  => '푸터 라벨 프리픽스',
+			'fields' => array(
+				'footer_hour_wd_label'    => array( 'default' => '평일', 'label' => '진료시간 · 평일 라벨', 'type' => 'text' ),
+				'footer_hour_thu_label'   => array( 'default' => '목요일', 'label' => '진료시간 · 목요일 라벨', 'type' => 'text' ),
+				'footer_hour_sat_label'   => array( 'default' => '토요일', 'label' => '진료시간 · 토요일 라벨', 'type' => 'text' ),
+				'footer_hour_lunch_label' => array( 'default' => '점심', 'label' => '진료시간 · 점심 라벨', 'type' => 'text' ),
+				'footer_prefix_rep'       => array( 'default' => '대표자: ', 'label' => '법적 표시 · 대표자 프리픽스', 'type' => 'text' ),
+				'footer_prefix_open'      => array( 'default' => '개업일: ', 'label' => '법적 표시 · 개업일 프리픽스', 'type' => 'text' ),
+				'footer_prefix_med'       => array( 'default' => '요양기관번호: ', 'label' => '법적 표시 · 요양기관번호 프리픽스', 'type' => 'text' ),
+				'footer_prefix_ad'        => array( 'default' => '광고심의: ', 'label' => '법적 표시 · 광고심의 프리픽스', 'type' => 'text' ),
+				'footer_name_token'       => array( 'default' => '한아의료재단 문치과병원', 'label' => '{name} 토큰 값 (저작권/각종 표기)', 'type' => 'text' ),
 			),
 		),
 	);

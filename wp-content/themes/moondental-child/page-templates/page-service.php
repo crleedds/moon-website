@@ -141,7 +141,7 @@ if ( function_exists( 'moondental_get_faqs_by_service' ) ) {
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">FAQ</span>
-			<h2 class="md-section-head__title">자주 묻는 질문</h2>
+			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'svc_faq_title', '자주 묻는 질문' ) ); ?></h2>
 		</header>
 		<div class="md-faq">
 			<?php foreach ( $faqs_map[ $slug ] as $i => $item ) : ?>
@@ -159,7 +159,7 @@ if ( function_exists( 'moondental_get_faqs_by_service' ) ) {
 <section class="md-section md-section--surface md-section--sm" aria-label="다른 진료 영역">
 	<div class="md-container">
 		<header class="md-section-head">
-			<h2 class="md-section-head__title md-section-head__title--sm">다른 진료 영역 보기</h2>
+			<h2 class="md-section-head__title md-section-head__title--sm"><?php echo esc_html( md_content( 'svc_other_title', '다른 진료 영역 보기' ) ); ?></h2>
 		</header>
 		<div class="md-service-grid">
 			<?php

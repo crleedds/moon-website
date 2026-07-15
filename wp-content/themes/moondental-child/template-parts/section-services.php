@@ -29,7 +29,7 @@ $services = moondental_get_services();
 					<div class="md-service-card__icon" aria-hidden="true"><?php echo $svc['icon']; ?></div>
 					<h3 class="md-service-card__title"><?php echo esc_html( $svc['title'] ); ?></h3>
 					<p class="md-service-card__desc"><?php echo esc_html( $svc['desc'] ); ?></p>
-					<span class="md-service-card__more" aria-hidden="true">자세히 보기 <span class="md-service-card__arrow">→</span></span>
+					<span class="md-service-card__more" aria-hidden="true"><?php echo esc_html( md_content( 'micro_more_label', '자세히 보기 →' ) ); ?></span>
 					<a class="md-service-card__link" href="<?php echo esc_url( $url ); ?>">
 						<span class="md-screen-reader-text"><?php echo esc_html( $svc['title'] ); ?> 자세히 보기</span>
 					</a>

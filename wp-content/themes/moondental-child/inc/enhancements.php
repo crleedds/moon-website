@@ -618,7 +618,7 @@ function moondental_floating_actions() {
 		   data-track="cta-call-mobile"
 		   aria-label="전화로 예약·상담">
 			<span class="md-mobile-cta__icon" aria-hidden="true">📞</span>
-			<span class="md-mobile-cta__label">전화 예약</span>
+			<span class="md-mobile-cta__label"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'fcta_mobile_call_label', '전화 예약' ) : '전화 예약' ); ?></span>
 		</a>
 		<?php if ( $kakao && $kakao !== '#' ) : ?>
 		<a class="md-mobile-cta__item md-mobile-cta__item--kakao"
@@ -627,7 +627,7 @@ function moondental_floating_actions() {
 		   data-track="cta-kakao-mobile"
 		   aria-label="카카오톡으로 상담">
 			<span class="md-mobile-cta__icon" aria-hidden="true">💬</span>
-			<span class="md-mobile-cta__label">카카오톡</span>
+			<span class="md-mobile-cta__label"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'fcta_mobile_kakao_label', '카카오톡' ) : '카카오톡' ); ?></span>
 		</a>
 		<?php endif; ?>
 		<?php if ( $naver && $naver !== '#' ) : ?>
@@ -637,7 +637,7 @@ function moondental_floating_actions() {
 		   data-track="cta-naver-mobile"
 		   aria-label="네이버로 예약">
 			<span class="md-mobile-cta__icon" aria-hidden="true">📅</span>
-			<span class="md-mobile-cta__label">네이버 예약</span>
+			<span class="md-mobile-cta__label"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'fcta_mobile_naver_label', '네이버 예약' ) : '네이버 예약' ); ?></span>
 		</a>
 		<?php endif; ?>
 	</div>
@@ -650,7 +650,7 @@ function moondental_floating_actions() {
 		   data-track="cta-phone-fab"
 		   aria-label="전화 상담 — <?php echo esc_attr( $info['phone'] ); ?>">
 			<span class="md-fab__icon" aria-hidden="true">📞</span>
-			<span class="md-fab__label">전화 상담</span>
+			<span class="md-fab__label"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'fcta_desk_call_label', '전화 상담' ) : '전화 상담' ); ?></span>
 		</a>
 		<?php endif; ?>
 		<?php if ( $naver && $naver !== '#' ) : ?>
@@ -660,7 +660,7 @@ function moondental_floating_actions() {
 		   data-track="cta-naver-fab"
 		   aria-label="네이버 예약 열기">
 			<span class="md-fab__icon" aria-hidden="true">N</span>
-			<span class="md-fab__label">네이버 예약</span>
+			<span class="md-fab__label"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'fcta_desk_naver_label', '네이버 예약' ) : '네이버 예약' ); ?></span>
 		</a>
 		<?php endif; ?>
 		<?php if ( $kakao && $kakao !== '#' ) : ?>
@@ -672,7 +672,7 @@ function moondental_floating_actions() {
 			<svg class="md-fab__icon md-fab__icon--svg" viewBox="0 0 36 36" aria-hidden="true">
 				<path fill="#3C1E1E" d="M18 6C10.27 6 4 10.93 4 17c0 3.97 2.69 7.46 6.72 9.4l-1.43 5.24c-.13.47.39.85.79.58l6.36-4.2c.51.05 1.02.08 1.56.08 7.73 0 14-4.93 14-11s-6.27-11-14-11z"/>
 			</svg>
-			<span class="md-fab__label">카카오톡 상담</span>
+			<span class="md-fab__label"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'fcta_desk_kakao_label', '카카오톡 상담' ) : '카카오톡 상담' ); ?></span>
 		</a>
 		<?php endif; ?>
 

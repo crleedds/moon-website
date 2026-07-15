@@ -43,7 +43,7 @@ for ( $i = 1; $i <= 6; $i++ ) {
 
 		<div class="md-section-tail md-section-tail--sm">
 			<a class="md-btn md-btn-ghost" href="<?php echo esc_url( home_url( '/faq/' ) ); ?>">
-				전체 FAQ 보기 →
+				<?php echo esc_html( md_content( 'micro_faq_all_label', '전체 FAQ 보기 →' ) ); ?>
 			</a>
 		</div>
 	</div>

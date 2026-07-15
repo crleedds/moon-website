@@ -118,10 +118,10 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				<ul>
 					<?php
 					$hour_rows = array(
-						array( '평일',   $info['hours_wd']    ?? '' ),
-						array( '목요일', $info['hours_thu']   ?? '' ),
-						array( '토요일', $info['hours_sat']   ?? '' ),
-						array( '점심',   $info['hours_lunch'] ?? '' ),
+						array( $mc( 'footer_hour_wd_label',    '평일' ),   $info['hours_wd']    ?? '' ),
+						array( $mc( 'footer_hour_thu_label',   '목요일' ), $info['hours_thu']   ?? '' ),
+						array( $mc( 'footer_hour_sat_label',   '토요일' ), $info['hours_sat']   ?? '' ),
+						array( $mc( 'footer_hour_lunch_label', '점심' ),   $info['hours_lunch'] ?? '' ),
 					);
 					foreach ( $hour_rows as $row ) :
 						list( $label, $value ) = $row;
@@ -200,17 +200,17 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 		if ( ! $legal_open_date ) $legal_open_date = '1995.04';
 
 		$legal_items = array();
-		if ( $col_rep_raw )    $legal_items[] = '대표자: ' . esc_html( $col_rep_raw );
-		if ( $legal_open_date ) $legal_items[] = '개업일: ' . esc_html( $legal_open_date );
-		if ( $legal_med_no )    $legal_items[] = '요양기관번호: ' . esc_html( $legal_med_no );
-		if ( $legal_ad_no )     $legal_items[] = '광고심의: ' . esc_html( $legal_ad_no );
+		if ( $col_rep_raw )    $legal_items[] = esc_html( $mc( 'footer_prefix_rep',  '대표자: ' ) ) . esc_html( $col_rep_raw );
+		if ( $legal_open_date ) $legal_items[] = esc_html( $mc( 'footer_prefix_open', '개업일: ' ) ) . esc_html( $legal_open_date );
+		if ( $legal_med_no )    $legal_items[] = esc_html( $mc( 'footer_prefix_med',  '요양기관번호: ' ) ) . esc_html( $legal_med_no );
+		if ( $legal_ad_no )     $legal_items[] = esc_html( $mc( 'footer_prefix_ad',   '광고심의: ' ) ) . esc_html( $legal_ad_no );
 		?>
 		<?php
 		// v3.28.4 · v3.30.6 — 법적 표시 + 저작권 · 단일 문단으로 통합
 		$copyright_tpl = $mc( 'footer_copyright_bar', 'Copyright {year} {name}  All Rights Reserved.' );
 		$copyright_text = strtr( $copyright_tpl, array(
 			'{year}' => date_i18n( 'Y' ),
-			'{name}' => '한아의료재단 문치과병원',
+			'{name}' => $mc( 'footer_name_token', '한아의료재단 문치과병원' ),
 		) );
 		?>
 		<?php if ( $legal_items || $copyright_text ) : ?>

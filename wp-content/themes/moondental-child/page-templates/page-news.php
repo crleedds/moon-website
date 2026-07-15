@@ -136,7 +136,7 @@ $is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
 								<?php else : ?>
 									<span class="md-news-card__media-fallback" aria-hidden="true">📢</span>
 								<?php endif; ?>
-								<span class="md-news-card__category md-news-card__category--notice">소식</span>
+								<span class="md-news-card__category md-news-card__category--notice"><?php echo esc_html( md_content( 'notice_tag_notice', '소식' ) ); ?></span>
 							</div>
 							<div class="md-news-card__body">
 								<time class="md-news-card__date" datetime="<?php echo esc_attr( get_the_date( 'Y-m-d' ) ); ?>">
@@ -199,7 +199,7 @@ $is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
 								<?php else : ?>
 									<span class="md-news-card__media-fallback" aria-hidden="true">🦷</span>
 								<?php endif; ?>
-								<span class="md-news-card__category">치아이야기</span>
+								<span class="md-news-card__category"><?php echo esc_html( md_content( 'notice_tag_story', '치아이야기' ) ); ?></span>
 							</div>
 							<div class="md-news-card__body">
 								<time class="md-news-card__date" datetime="<?php echo esc_attr( get_the_date( 'Y-m-d' ) ); ?>">
