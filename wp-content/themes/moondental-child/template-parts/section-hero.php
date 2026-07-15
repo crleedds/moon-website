@@ -2,7 +2,8 @@
 /**
  * Section: Hero
  *
- * 홈 첫 화면 — 슬로건 / CTA / 메인 이미지
+ * 홈 첫 화면 — 슬로건 · CTA · 핵심 지표
+ * v3.34.0: 이미지 placeholder 영역 제거 · 텍스트 중심 · 단일 컬럼 · 강력한 CTA
  *
  * @package moondental-child
  */
@@ -16,58 +17,69 @@ $lead    = get_theme_mod( 'moondental_hero_lead',
 	"분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다."
 );
 
-// Hero 이미지 — 외관/진료실/원장님 사진 중 택일 (Customizer로 차후 분리)
-$hero_image_id = get_theme_mod( 'moondental_hero_image', 0 );
+$phone      = $info['phone'] ?? '';
+$phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $phone );
+$naver_book = $info['naver_place'] ?? '';
+
+$hero_cta_primary_url   = get_theme_mod( 'moondental_hero_cta_primary_url',   '/상담예약/' );
+$hero_cta_primary_label = get_theme_mod( 'moondental_hero_cta_primary_label', '📅 상담 예약하기' );
 ?>
 
-<section class="md-hero" aria-label="문치과병원 소개">
+<section class="md-hero md-hero--centered" aria-label="문치과병원 소개">
 	<div class="md-container">
-		<div class="md-hero__inner">
+		<div class="md-hero__center">
 
-			<div class="md-hero__text">
-				<span class="md-hero__eyebrow"><?php echo esc_html( $eyebrow ); ?></span>
-				<h1 class="md-hero__title">
-					<?php echo esc_html( $title_a ); ?><br>
-					<em><?php echo esc_html( $title_b ); ?></em>
-				</h1>
-				<p class="md-hero__lead"><?php echo nl2br( esc_html( $lead ) ); ?></p>
+			<span class="md-hero__eyebrow"><?php echo esc_html( $eyebrow ); ?></span>
 
-				<?php /* v3.25.4 — Hero의 네이버·카톡·전화 CTA 3버튼 제거. 우측 하단 플로팅 FAB로 상시 접근 가능. */ ?>
+			<h1 class="md-hero__title">
+				<?php echo esc_html( $title_a ); ?><br>
+				<em><?php echo esc_html( $title_b ); ?></em>
+			</h1>
 
+			<p class="md-hero__lead"><?php echo nl2br( esc_html( $lead ) ); ?></p>
+
+			<?php
+			$hero_badges_raw = function_exists( 'md_content' )
+				? md_content( 'hero_badges', "천안 만남로 1995년 개원 · 30여년 임상\n분야별 전문 의료진 협진\n요양기관번호 34400117 · 한아의료재단" )
+				: "천안 만남로 1995년 개원 · 30여년 임상\n분야별 전문 의료진 협진\n요양기관번호 34400117 · 한아의료재단";
+			$hero_badges = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", (string) $hero_badges_raw ) ) );
+			?>
+			<?php if ( $hero_badges ) : ?>
+				<ul class="md-hero__badges" aria-label="천안 만남로 문치과병원의 특징">
+					<?php foreach ( $hero_badges as $badge ) : ?>
+						<li><span aria-hidden="true">✓</span> <?php echo esc_html( $badge ); ?></li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+
+			<div class="md-hero__actions">
 				<?php
-				// v3.30.0 · Hero 배지를 Customizer 텍스트영역으로 이동 (한 줄에 하나)
-				$hero_badges_raw = function_exists( 'md_content' )
-					? md_content( 'hero_badges', "천안 만남로 1995년 개원 · 30여년 임상\n분야별 전문 의료진 협진\n요양기관번호 34400117 · 한아의료재단" )
-					: "천안 만남로 1995년 개원 · 30여년 임상\n분야별 전문 의료진 협진\n요양기관번호 34400117 · 한아의료재단";
-				$hero_badges = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", (string) $hero_badges_raw ) ) );
+				$hero_url = $hero_cta_primary_url;
+				if ( is_string( $hero_url ) && $hero_url !== '' && $hero_url[0] === '/' ) {
+					$hero_url = home_url( $hero_url );
+				}
 				?>
-				<?php if ( $hero_badges ) : ?>
-					<ul class="md-hero__badges" aria-label="천안 만남로 문치과병원의 특징">
-						<?php foreach ( $hero_badges as $badge ) : ?>
-							<li><span aria-hidden="true">✓</span> <?php echo esc_html( $badge ); ?></li>
-						<?php endforeach; ?>
-					</ul>
+				<a class="md-btn md-btn-primary md-btn--lg" href="<?php echo esc_url( $hero_url ); ?>" data-track="cta-hero-primary">
+					<?php echo esc_html( $hero_cta_primary_label ); ?>
+				</a>
+				<?php if ( $naver_book ) : ?>
+					<a class="md-btn md-btn-ghost md-btn--lg" href="<?php echo esc_url( $naver_book ); ?>" target="_blank" rel="noopener" data-track="cta-hero-naver">
+						<svg class="md-btn__icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+							<path d="M9 8h2.2l3.6 5.1V8H17v8h-2.2l-3.6-5.1V16H9V8z" fill="currentColor"/>
+						</svg>
+						네이버 예약
+					</a>
 				<?php endif; ?>
-			</div>
-
-			<div class="md-hero__media">
-				<?php if ( $hero_image_id ) : ?>
-					<?php // v3.31.1 · Hero 이미지는 LCP 요소 · lazy 대신 즉시 로드 + fetchpriority high ?>
-					<?php echo wp_get_attachment_image( $hero_image_id, 'moondental-hero', false, array(
-						'alt' => esc_attr( $info['name_short'] . ' 메인 이미지' ),
-						'loading' => 'eager',
-						'fetchpriority' => 'high',
-						'decoding' => 'async',
-					) ); ?>
-				<?php else : ?>
-					<div class="md-hero__media-placeholder" aria-hidden="true">
-						<?php if ( current_user_can( 'edit_theme_options' ) ) : ?>
-							<span class="md-hero__admin-note">관리자에게만 보임 · Customizer에서 메인 이미지 등록 가능</span>
-						<?php endif; ?>
-					</div>
+				<?php if ( $phone_link ) : ?>
+					<a class="md-btn md-btn-ghost md-btn--lg" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-hero-call">
+						📞 <?php echo esc_html( $phone ); ?>
+					</a>
 				<?php endif; ?>
 			</div>
 
 		</div>
+	</div>
+	<div class="md-hero__scroll" aria-hidden="true">
+		<span></span>
 	</div>
 </section>

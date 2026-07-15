@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.33.8' );
+define( 'MOONDENTAL_VERSION', '3.34.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1482,15 +1482,30 @@ function moondental_customize_register( $wp_customize ) {
 			'type'    => $f['type'],
 		) );
 	}
-	$wp_customize->add_setting( 'moondental_hero_image', array(
-		'default'           => 0,
-		'sanitize_callback' => 'absint',
+	// v3.34.0 · 히어로 CTA 버튼 커스터마이징 (라벨 · 링크)
+	$wp_customize->add_setting( 'moondental_hero_cta_primary_label', array(
+		'default'           => '📅 상담 예약하기',
+		'sanitize_callback' => 'sanitize_text_field',
 	) );
-	$wp_customize->add_control( new WP_Customize_Media_Control( $wp_customize, 'moondental_hero_image', array(
-		'label'     => '메인 이미지 (세로 비율 권장)',
-		'section'   => 'moondental_section_home_hero',
-		'mime_type' => 'image',
-	) ) );
+	$wp_customize->add_control( 'moondental_hero_cta_primary_label', array(
+		'label'   => '히어로 · 메인 CTA 버튼 라벨',
+		'section' => 'moondental_section_home_hero',
+		'type'    => 'text',
+	) );
+	$wp_customize->add_setting( 'moondental_hero_cta_primary_url', array(
+		'default'           => '/상담예약/',
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'moondental_hero_cta_primary_url', array(
+		'label'       => '히어로 · 메인 CTA 링크',
+		'description' => '사이트 내부 경로(/상담예약/) 또는 전체 URL',
+		'section'     => 'moondental_section_home_hero',
+		'type'        => 'text',
+	) );
+
+	// v3.34.0 · Hero 이미지 필드는 유지하되 사용 안 함 (하위 호환)
+	// 히어로가 이미지 영역 없이 중앙 정렬로 재구성되었기 때문에 이미지 업로드는
+	// 향후 배경 이미지로 활용 가능. 필드는 삭제하지 않고 남겨둠.
 
 	/* ── 모든 페이지 — 오시는 길 섹션 (푸터 위) — 지도 이미지 / iframe 임베드 ───── */
 	$wp_customize->add_section( 'moondental_section_flocation_map', array(
