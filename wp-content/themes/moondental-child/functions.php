@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.33.6' );
+define( 'MOONDENTAL_VERSION', '3.33.7' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -332,6 +332,33 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3317', 'done' );
 }, 49 );
+
+/* 일회성 마이그레이션 v3.33.7 · 진료 페이지 WP 본문 시드.
+ *  content-defaults.php 의 기본 HTML을 각 진료 페이지(임플란트-센터 등)의
+ *  WP post_content에 자동 복사.
+ *  → 이후 사용자가 wp-admin → 페이지 → 임플란트 센터 편집으로
+ *    블록 에디터 / 클래식 에디터에서 자유롭게 편집 가능.
+ *
+ *  안전장치: WP 페이지 본문이 이미 비어있지 않다면 (사용자가 편집한 흔적)
+ *  절대 덮어쓰지 않음.
+ *
+ *  wp_update_post 는 post types 등록이 완료된 init 이후에 안전. */
+add_action( 'init', function() {
+	if ( get_option( 'moondental_seed_service_content_v3337' ) === 'done' ) return;
+	if ( ! function_exists( 'moondental_service_content_default_map' ) ) return;
+	$map = moondental_service_content_default_map();
+	foreach ( $map as $slug => $html ) {
+		$page = get_page_by_path( $slug );
+		if ( ! $page ) continue;
+		$current = trim( (string) $page->post_content );
+		if ( $current !== '' ) continue; // 이미 편집된 페이지는 스킵
+		wp_update_post( array(
+			'ID'           => $page->ID,
+			'post_content' => trim( $html ),
+		) );
+	}
+	update_option( 'moondental_seed_service_content_v3337', 'done' );
+}, 20 );
 
 /* 일회성 마이그레이션 v3.33.0 · 커스텀 SVG 아이콘 세트 이관.
  *  기존 저장된 값이 옛 이모지(📱 · 🔄 · 🦴 등)로 남아 있으면 새 SVG 키로 업그레이드.

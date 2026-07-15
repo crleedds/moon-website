@@ -1720,66 +1720,12 @@ function moondental_register_final_content_customizer( $wp_customize ) {
 }
 add_action( 'customize_register', 'moondental_register_final_content_customizer', 50 );
 
-/**
- * 진료 페이지 본문 HTML 등록.
+/* v3.33.7 · Customizer "진료 페이지 본문 HTML" 패널 제거.
+ *  진료 페이지 본문은 wp-admin → 페이지 → (임플란트 센터 등) 편집에서
+ *  블록 에디터로 자유롭게 편집하는 것이 표준입니다.
+ *  마이그레이션이 WP 페이지 본문에 기본 HTML을 자동 시드해줍니다.
+ *  아래 필드 정의 함수는 md_content 캐시 호환용으로만 남깁니다.
  */
-function moondental_register_service_body_content_customizer( $wp_customize ) {
-	$panel_id = 'md_panel_service_body_content';
-	$wp_customize->add_panel( $panel_id, array(
-		'title'       => '진료 페이지 본문 HTML',
-		'description' => '/임플란트-센터/, /투명교정-센터/, /사랑니-발치/ 등 진료 페이지의 본문 내용을 HTML로 편집합니다. 비우면 테마 기본 내용이 자동으로 사용됩니다. h2·h3·h4·p·ul·li·strong·em 등 표준 HTML 태그 사용 가능.',
-		'priority'    => 51,
-	) );
-	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_service_body_content_fields(), 'md_section_svc_body_' );
-}
-add_action( 'customize_register', 'moondental_register_service_body_content_customizer', 51 );
-
-/**
- * Customizer 컨트롤 뒤에 "현재 기본 HTML 불러오기" 버튼 삽입.
- *  service_body_{slug} 필드 아래에 버튼 → 클릭 시 현재 기본 HTML을 textarea에 채움.
- */
-function moondental_customize_service_body_helper_script() {
-	if ( ! function_exists( 'moondental_service_content_default_map' ) ) return;
-	$map = moondental_service_content_default_map();
-	$js_map = array();
-	foreach ( $map as $slug => $html ) {
-		$js_map[ 'md_content_service_body_' . $slug ] = $html;
-	}
-	?>
-	<script id="md-service-body-helper">
-	(function( $, api ) {
-		if ( ! api ) return;
-		var defaults = <?php echo wp_json_encode( $js_map ); ?>;
-		api.bind( 'ready', function() {
-			Object.keys( defaults ).forEach( function( settingId ) {
-				var control = api.control( settingId );
-				if ( ! control ) return;
-				control.deferred.embedded.done( function() {
-					var $container = control.container;
-					if ( $container.find( '.md-load-default-btn' ).length ) return;
-					var $btn = $( '<button type="button" class="button button-secondary md-load-default-btn" style="margin-top:6px;">현재 기본 HTML 불러오기</button>' );
-					$btn.on( 'click', function( e ) {
-						e.preventDefault();
-						if ( ! confirm( '현재 기본 HTML을 편집기에 채웁니다. 기존에 입력한 내용이 있다면 덮어씌워집니다. 계속?' ) ) return;
-						var setting = api( settingId );
-						setting.set( defaults[ settingId ] );
-					} );
-					var $reset = $( '<button type="button" class="button md-reset-btn" style="margin-top:6px; margin-left:6px;">비우고 기본값 사용</button>' );
-					$reset.on( 'click', function( e ) {
-						e.preventDefault();
-						if ( ! confirm( '이 필드를 비우고 저장하면 사이트가 테마 기본 내용을 표시합니다. 계속?' ) ) return;
-						var setting = api( settingId );
-						setting.set( '' );
-					} );
-					$container.append( $btn ).append( $reset );
-				} );
-			} );
-		} );
-	})( jQuery, wp.customize );
-	</script>
-	<?php
-}
-add_action( 'customize_controls_print_footer_scripts', 'moondental_customize_service_body_helper_script' );
 
 /**
  * 자연치아 살리기 페이지 (충치·신경·잇몸 3섹션) 콘텐츠.
