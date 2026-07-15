@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.33.7' );
+define( 'MOONDENTAL_VERSION', '3.33.8' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -936,6 +936,7 @@ require_once MOONDENTAL_DIR . '/inc/customizer-content.php';
 require_once MOONDENTAL_DIR . '/inc/strengths.php';
 require_once MOONDENTAL_DIR . '/inc/regions.php';
 require_once MOONDENTAL_DIR . '/inc/icons.php';
+require_once MOONDENTAL_DIR . '/inc/admin-dashboard.php';
 
 
 /* ============================================================

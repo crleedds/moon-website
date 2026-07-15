@@ -12,6 +12,12 @@
 get_header();
 $info = moondental_get_info();
 
+/* v3.33.8 · WP 페이지 본문 오버라이드 우선 */
+if ( function_exists( 'moondental_render_page_body_override' ) && moondental_render_page_body_override() ) {
+	get_footer();
+	return;
+}
+
 $hr_email = function_exists( 'md_content' ) ? md_content( 'recruit_hr_email', '' ) : '';
 $show_email = $hr_email ?: ( $info['email'] ?: 'moondental1995@naver.com' );
 

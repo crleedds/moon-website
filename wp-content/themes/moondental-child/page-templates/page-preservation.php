@@ -17,6 +17,13 @@ get_header();
 $info       = moondental_get_info();
 $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'] );
 
+/* v3.33.8 · WP 페이지 편집기 본문 있으면 그것을 우선 렌더 (Customizer 무시)
+ *  wp-admin → 페이지 → 자연치아 살리기 → 본문 입력 후 저장하면 여기 표시. */
+if ( function_exists( 'moondental_render_page_body_override' ) && moondental_render_page_body_override() ) {
+	get_footer();
+	return;
+}
+
 /* 카드 파서 · 한 줄에 "stage | title | body" 형식 (HTML 허용) */
 $parse_cards = function( $text ) {
 	$out = array();

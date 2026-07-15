@@ -15,6 +15,12 @@
 
 get_header();
 
+/* v3.33.8 · WP 페이지 본문 오버라이드 우선 */
+if ( function_exists( 'moondental_render_page_body_override' ) && moondental_render_page_body_override() ) {
+	get_footer();
+	return;
+}
+
 /* 카드 파서 · 2 파트 (title | body) 또는 3 파트 (stage | title | body) */
 $parse_cards = function( $text ) {
 	$out = array();
