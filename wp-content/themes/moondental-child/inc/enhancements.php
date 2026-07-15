@@ -890,8 +890,10 @@ add_filter( 'nav_menu_css_class', function( $classes, $item ) {
 }, 25, 2 );
 
 /**
- * 클릭 무효화 JS · CSS는 style.css에 정의.
- *  desktop hover / mobile inline 서브메뉴 열리는 동작은 그대로.
+ * 클릭 무효화 + 서브메뉴 토글 JS.
+ *  v3.34.2 · 페이지 이동은 막고, 클릭 시 서브메뉴가 열리도록 개선.
+ *  desktop: 클릭 → .md-nav-open 토글 · 바깥 클릭 시 자동 닫기 · hover 동작 유지
+ *  mobile: 이미 인라인 확장이므로 클릭 무효화만 적용
  */
 add_action( 'wp_footer', function() {
 	?>
@@ -899,8 +901,32 @@ add_action( 'wp_footer', function() {
 	(function(){
 		document.addEventListener('click', function(e){
 			var a = e.target.closest( '.md-nav-nolink > a' );
-			if ( ! a ) return;
-			e.preventDefault();
+			if ( a ) {
+				e.preventDefault();
+				var li = a.parentElement;
+				var wasOpen = li.classList.contains( 'md-nav-open' );
+				// 다른 열린 nolink 메뉴 모두 닫기
+				document.querySelectorAll( '.md-nav-nolink.md-nav-open' ).forEach(function( el ){
+					if ( el !== li ) el.classList.remove( 'md-nav-open' );
+				});
+				// 자신 토글
+				li.classList.toggle( 'md-nav-open', ! wasOpen );
+				return;
+			}
+			// 메뉴 바깥 클릭 시 모두 닫기
+			if ( ! e.target.closest( '.md-nav-nolink' ) ) {
+				document.querySelectorAll( '.md-nav-nolink.md-nav-open' ).forEach(function( el ){
+					el.classList.remove( 'md-nav-open' );
+				});
+			}
+		});
+		// Esc 키로도 닫기
+		document.addEventListener('keydown', function(e){
+			if ( e.key === 'Escape' ) {
+				document.querySelectorAll( '.md-nav-nolink.md-nav-open' ).forEach(function( el ){
+					el.classList.remove( 'md-nav-open' );
+				});
+			}
 		});
 	})();
 	</script>
