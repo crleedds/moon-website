@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.34.2' );
+define( 'MOONDENTAL_VERSION', '3.34.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -2833,16 +2833,25 @@ function moondental_primary_menu_data() {
 
 /**
  * 주 메뉴 HTML 렌더 — UL.md-nav 형태로 출력 (현재 페이지 강조 포함).
+ *  v3.34.3 · 상위 메뉴 클릭 비활성 항목에 md-nav-nolink 클래스 자동 추가.
  */
 function moondental_render_primary_menu() {
 	$items = moondental_primary_menu_data();
 	$current = trailingslashit( home_url( add_query_arg( null, null ) ) );
+
+	// 클릭 비활성 상위 메뉴 라벨 (nav_menu_css_class 필터와 동기화)
+	$nolink_titles = function_exists( 'moondental_nolink_parent_menu_titles' )
+		? moondental_nolink_parent_menu_titles()
+		: array( '병원안내', '병원 안내', '자연치아살리기', '자연치아 살리기', '진료과' );
+
 	echo '<ul class="md-nav">';
 	foreach ( $items as $item ) {
 		$has_kids = ! empty( $item['children'] );
 		$classes  = array( 'menu-item' );
 		if ( $has_kids ) $classes[] = 'menu-item-has-children';
-		// 현재 페이지면 current-menu-item
+		if ( in_array( trim( (string) $item['label'] ), $nolink_titles, true ) ) {
+			$classes[] = 'md-nav-nolink';
+		}
 		if ( untrailingslashit( $item['url'] ) === untrailingslashit( $current ) ) {
 			$classes[] = 'current-menu-item';
 		}
