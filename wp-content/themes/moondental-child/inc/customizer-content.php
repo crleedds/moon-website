@@ -12,9 +12,70 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
  * 콘텐츠 값 반환 헬퍼. setting id = "md_content_{key}".
+ *
+ *  우선순위:
+ *   1. Customizer에 저장된 값 (사용자 편집)
+ *   2. 함수 호출 시 전달한 $default
+ *   3. moondental_*_content_fields() 에 등록된 default (v3.33.4)
+ *
+ *  WP의 get_theme_mod() 는 프론트엔드에서 Customizer add_setting default를
+ *  자동으로 참조하지 않기 때문에, 필드 정의에 있는 default를 별도 조회한다.
  */
 function md_content( $key, $default = '' ) {
-	return get_theme_mod( 'md_content_' . $key, $default );
+	$stored = get_theme_mod( 'md_content_' . $key, null );
+	if ( is_string( $stored ) && $stored !== '' ) return $stored;
+	if ( ! is_null( $stored ) && ! is_string( $stored ) ) return $stored;
+	if ( $default !== '' && $default !== null ) return $default;
+	// 등록된 필드 default fallback
+	$defaults = md_all_content_field_defaults();
+	return $defaults[ $key ] ?? '';
+}
+
+/**
+ * 모든 *_content_fields() 함수에서 등록된 default 값을 key로 flat 매핑.
+ *  프론트엔드 로드 시 한 번 캐시.
+ */
+function md_all_content_field_defaults() {
+	static $cache = null;
+	if ( $cache !== null ) return $cache;
+	$cache = array();
+	$fn_names = array(
+		'moondental_home_content_fields',
+		'moondental_pricing_content_fields',
+		'moondental_service_content_fields',
+		'moondental_doctor_content_fields',
+		'moondental_subpage_content_fields',
+		'moondental_chrome_content_fields',
+		'moondental_testimonials_content_fields',
+		'moondental_compare_content_fields',
+		'moondental_service_faq_content_fields',
+		'moondental_doctor_meta_content_fields',
+		'moondental_doctor_single_content_fields',
+		'moondental_history_content_fields',
+		'moondental_preservation_content_fields',
+		'moondental_smile_content_fields',
+		'moondental_prevention_content_fields',
+		'moondental_recruit_page_content_fields',
+		'moondental_region_content_fields',
+		'moondental_misc_pages_content_fields',
+		'moondental_bot_content_fields',
+		'moondental_finish_content_fields',
+		'moondental_final_content_fields',
+	);
+	foreach ( $fn_names as $fn ) {
+		if ( ! function_exists( $fn ) ) continue;
+		$groups = call_user_func( $fn );
+		if ( ! is_array( $groups ) ) continue;
+		foreach ( $groups as $group ) {
+			if ( empty( $group['fields'] ) || ! is_array( $group['fields'] ) ) continue;
+			foreach ( $group['fields'] as $key => $field ) {
+				if ( isset( $field['default'] ) ) {
+					$cache[ $key ] = $field['default'];
+				}
+			}
+		}
+	}
+	return $cache;
 }
 
 /**
