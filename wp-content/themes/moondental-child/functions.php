@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.34.7' );
+define( 'MOONDENTAL_VERSION', '3.34.8' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -321,6 +321,63 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3316', 'done' );
 }, 48 );
+
+/* 일회성 마이그레이션 v3.34.8 · SEO 강 강도 · 지역+전국 신뢰 워딩 통합.
+ *  이전 default가 저장돼 있으면 새 default로 갱신.
+ *  사용자가 직접 다른 값을 입력했다면 절대 덮어쓰지 않음. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_seo_strong_v3348' ) === 'done' ) return;
+	$updates = array(
+		'moondental_hero_eyebrow' => array(
+			'old' => array( '천안 만남로 · 1995년부터 한자리에서', '천안 만남로에서 1995년부터', '30여년을 한결같이' ),
+			'new' => '천안·아산 대표 치과병원 · 전국에서 찾아오는',
+		),
+		'moondental_hero_title_b' => array(
+			'old' => array( '환자 한 분의 평생 치아를' ),
+			'new' => '전국 환자가 신뢰하는 통합 진료',
+		),
+		'md_content_trust_1_sub' => array(
+			'old' => array( '한자리에서 이어온 신뢰' ),
+			'new' => '전국에서 찾아오는 30여년 신뢰',
+		),
+		'md_content_why_eyebrow' => array(
+			'old' => array( 'Why Moon Dental' ),
+			'new' => 'WHY MOON DENTAL',
+		),
+		'md_content_why_title' => array(
+			'old' => array( '천안·아산에서 왜 문치과병원을 찾으시나요?' ),
+			'new' => '천안·아산 대표 치과병원 · 전국에서 찾아오시는 이유',
+		),
+		'md_content_why_lead' => array(
+			'old' => array( '천안 만남로에서 30여년 — 환자분들이 선택해온 이유 4가지로 정리해드립니다.', '천안 만남로에서 30여년 — 천안·아산 환자분들이 선택해온 이유 4가지로 정리해드립니다.' ),
+			'new' => '1995년 개원 30여년 · 천안 만남로에서 전국 환자분들이 문치과병원을 선택하시는 4가지 이유',
+		),
+		'md_content_why_1_title' => array(
+			'old' => array( '30여년, 한자리에서' ),
+			'new' => '전국에서 찾아오는 30여년',
+		),
+		'md_content_clinic_intro_title' => array(
+			'old' => array( '30년 이상 한자리에서, 문치과병원' ),
+			'new' => '천안·아산 대표 치과병원 · 전국에서 찾아오는 통합 진료',
+		),
+		'md_content_cta_title' => array(
+			'old' => array( '치아 때문에 망설이고 계신가요?' ),
+			'new' => '천안·아산 대표 치과병원 · 전국에서 찾아오시는 병원',
+		),
+		'md_content_notices_title' => array(
+			'old' => array( '공지사항', '천안·아산 문치과병원 소식', '천안 문치과병원 소식' ),
+			'new' => '천안·아산 대표 치과병원 · 문치과병원 소식',
+		),
+	);
+	foreach ( $updates as $key => $data ) {
+		$saved = get_theme_mod( $key );
+		if ( ! is_string( $saved ) ) continue;
+		if ( in_array( $saved, $data['old'], true ) ) {
+			set_theme_mod( $key, $data['new'] );
+		}
+	}
+	update_option( 'moondental_seo_strong_v3348', 'done' );
+}, 51 );
 
 /* 일회성 마이그레이션 v3.31.7 · 사용자 정정 · 게레레 → 게를레 복구.
  * v3.31.6에서 PDF 표기를 따라 게레레로 저장했으나 실제 이름은 게를레. */

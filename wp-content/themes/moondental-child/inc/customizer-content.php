@@ -196,7 +196,7 @@ function moondental_home_content_fields() {
 				'trust_1_value' => array( 'default' => '30',    'label' => '①번 — 숫자',     'type' => 'text' ),
 				'trust_1_unit'  => array( 'default' => '년',     'label' => '①번 — 단위',     'type' => 'text' ),
 				'trust_1_label' => array( 'default' => '1995년 개원', 'label' => '①번 — 라벨', 'type' => 'text' ),
-				'trust_1_sub'   => array( 'default' => '한자리에서 이어온 신뢰', 'label' => '①번 — 부제', 'type' => 'text' ),
+				'trust_1_sub'   => array( 'default' => '전국에서 찾아오는 30여년 신뢰', 'label' => '①번 — 부제', 'type' => 'text' ),
 
 				'trust_2_value' => array( 'default' => '11',    'label' => '②번 — 숫자',     'type' => 'text' ),
 				'trust_2_unit'  => array( 'default' => '개',    'label' => '②번 — 단위',     'type' => 'text' ),
@@ -219,13 +219,13 @@ function moondental_home_content_fields() {
 		'why' => array(
 			'title'  => '홈 — Why 차별점 4 카드',
 			'fields' => array(
-				'why_eyebrow' => array( 'default' => 'Why Moon Dental', 'label' => '섹션 — eyebrow', 'type' => 'text' ),
-				'why_title'   => array( 'default' => '천안·아산에서 왜 문치과병원을 찾으시나요?', 'label' => '섹션 — 제목', 'type' => 'text' ),
-				'why_lead'    => array( 'default' => '천안 만남로에서 30여년 — 환자분들이 선택해온 이유 4가지로 정리해드립니다.', 'label' => '섹션 — 설명', 'type' => 'textarea' ),
+				'why_eyebrow' => array( 'default' => 'WHY MOON DENTAL', 'label' => '섹션 — eyebrow', 'type' => 'text' ),
+				'why_title'   => array( 'default' => '천안·아산 대표 치과병원 · 전국에서 찾아오시는 이유', 'label' => '섹션 — 제목', 'type' => 'text' ),
+				'why_lead'    => array( 'default' => '1995년 개원 30여년 · 천안 만남로에서 전국 환자분들이 문치과병원을 선택하시는 4가지 이유', 'label' => '섹션 — 설명', 'type' => 'textarea' ),
 
 				'why_1_icon'  => array( 'default' => '🏥', 'label' => '①번 — 아이콘(이모지)', 'type' => 'text' ),
-				'why_1_title' => array( 'default' => '30여년, 한자리에서', 'label' => '①번 — 제목', 'type' => 'text' ),
-				'why_1_desc'  => array( 'default' => '1995년부터 천안 만남로 한자리에서 진료해온 동네 치과. 환자 한 분의 평생 치아를 길게 봅니다.', 'label' => '①번 — 설명', 'type' => 'textarea' ),
+				'why_1_title' => array( 'default' => '전국에서 찾아오는 30여년', 'label' => '①번 — 제목', 'type' => 'text' ),
+				'why_1_desc'  => array( 'default' => '1995년부터 천안 만남로 한자리에서 진료해온 동네 치과. 지역 환자분과 함께 전국에서 찾아오시는 분들의 평생 치아를 길게 봅니다.', 'label' => '①번 — 설명', 'type' => 'textarea' ),
 
 				'why_2_icon'  => array( 'default' => '🏢', 'label' => '②번 — 아이콘', 'type' => 'text' ),
 				'why_2_title' => array( 'default' => '통합 진료센터', 'label' => '②번 — 제목', 'type' => 'text' ),
@@ -246,8 +246,8 @@ function moondental_home_content_fields() {
 			'title'  => '홈 — 진료 시스템 소개 (6 카드)',
 			'fields' => array(
 				'clinic_intro_eyebrow' => array( 'default' => 'CLINIC SYSTEM · 진료 시스템', 'label' => '섹션 eyebrow', 'type' => 'text' ),
-				'clinic_intro_title'   => array( 'default' => '30년 이상 한자리에서, 문치과병원', 'label' => '섹션 제목', 'type' => 'text' ),
-				'clinic_intro_lead'    => array( 'default' => "문치과병원은 각 분과의 원장님들이 다양한 임상경험을 바탕으로\n대학병원식 협진 시스템을 통해 30년 이상 한자리에서 전문적이고 정직하게 진료합니다.", 'label' => '섹션 설명 (줄바꿈으로 두 줄)', 'type' => 'textarea' ),
+				'clinic_intro_title'   => array( 'default' => '천안·아산 대표 치과병원 · 전국에서 찾아오는 통합 진료', 'label' => '섹션 제목', 'type' => 'text' ),
+				'clinic_intro_lead'    => array( 'default' => "천안 만남로 1995년 개원 · 30여년 임상. 각 분과 전문 의료진의 대학병원식 협진 시스템으로\n지역 환자분과 전국에서 찾아오시는 환자분 모두를 한 자리에서 진료합니다.", 'label' => '섹션 설명 (줄바꿈으로 두 줄)', 'type' => 'textarea' ),
 
 				/* 01 임플란트센터 */
 				'clinic_intro_implant_icon'  => array( 'default' => '🦷', 'label' => '① 임플란트센터 · 아이콘', 'type' => 'text' ),
@@ -458,7 +458,7 @@ function moondental_home_content_fields() {
 			'title'  => '홈 — 소식 섹션',
 			'fields' => array(
 				'notices_eyebrow'        => array( 'default' => 'News',         'label' => '섹션 — eyebrow', 'type' => 'text' ),
-				'notices_title'          => array( 'default' => '공지사항',     'label' => '섹션 — 제목',    'type' => 'text' ),
+				'notices_title'          => array( 'default' => '천안·아산 대표 치과병원 · 문치과병원 소식',     'label' => '섹션 — 제목',    'type' => 'text' ),
 				'notices_all_link_label' => array( 'default' => '전체보기 →',  'label' => '전체보기 링크 라벨', 'type' => 'text' ),
 			),
 		),
@@ -468,7 +468,7 @@ function moondental_home_content_fields() {
 			'title'  => '홈 — 하단 CTA 배너',
 			'fields' => array(
 				'cta_eyebrow' => array( 'default' => '상담 예약', 'label' => 'eyebrow', 'type' => 'text' ),
-				'cta_title'   => array( 'default' => '치아 때문에 망설이고 계신가요?', 'label' => '제목', 'type' => 'text' ),
+				'cta_title'   => array( 'default' => '천안·아산 대표 치과병원 · 전국에서 찾아오시는 병원', 'label' => '제목', 'type' => 'text' ),
 				'cta_lead'    => array( 'default' => "환자분의 상황을 먼저 듣고, 꼭 필요한 치료만 권합니다.\n지금 상담을 신청하시면 진료시간 내 빠르게 연락드릴게요.", 'label' => '설명 (줄바꿈 가능)', 'type' => 'textarea' ),
 				'cta_btn1'    => array( 'default' => '📅 상담 예약하기', 'label' => '버튼 1 라벨', 'type' => 'text' ),
 				'cta_btn2'    => array( 'default' => '카카오톡', 'label' => '버튼 2 라벨', 'type' => 'text' ),

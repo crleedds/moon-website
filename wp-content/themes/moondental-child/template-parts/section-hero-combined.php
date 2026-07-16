@@ -9,10 +9,10 @@
  */
 $info = moondental_get_info();
 
-/* Hero title */
-$eyebrow = get_theme_mod( 'moondental_hero_eyebrow', '천안 만남로 · 1995년부터 한자리에서' );
+/* Hero title · v3.34.8 · SEO 강도 강 (지역+전국 신뢰) */
+$eyebrow = get_theme_mod( 'moondental_hero_eyebrow', '천안·아산 대표 치과병원 · 전국에서 찾아오는' );
 $title_a = get_theme_mod( 'moondental_hero_title_a', '천안·아산에서 30여년,' );
-$title_b = get_theme_mod( 'moondental_hero_title_b', '환자 한 분의 평생 치아를' );
+$title_b = get_theme_mod( 'moondental_hero_title_b', '전국 환자가 신뢰하는 통합 진료' );
 
 /* Mission */
 $mission_eyebrow = md_content( 'mission_band_eyebrow', 'OUR MISSION · 한아의료재단 문치과병원의 사명' );
