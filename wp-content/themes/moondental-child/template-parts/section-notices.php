@@ -18,7 +18,7 @@ foreach ( array( 'notice', '공지사항', 'announcement' ) as $slug ) {
 // 공지사항 · 전체 (최대 12개)
 $notice_q = new WP_Query( array(
 	'post_type'      => 'post',
-	'posts_per_page' => 12,
+	'posts_per_page' => 6,
 	'category_name'  => 'notice,공지사항,announcement',
 	'orderby'        => 'date',
 	'order'          => 'DESC',
