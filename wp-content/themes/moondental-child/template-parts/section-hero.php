@@ -38,19 +38,7 @@ $hero_cta_primary_label = get_theme_mod( 'moondental_hero_cta_primary_label', '�
 
 			<p class="md-hero__lead"><?php echo nl2br( esc_html( $lead ) ); ?></p>
 
-			<?php
-			$hero_badges_raw = function_exists( 'md_content' )
-				? md_content( 'hero_badges', "천안 만남로 1995년 개원 · 30여년 임상\n분야별 전문 의료진 협진\n요양기관번호 34400117 · 한아의료재단" )
-				: "천안 만남로 1995년 개원 · 30여년 임상\n분야별 전문 의료진 협진\n요양기관번호 34400117 · 한아의료재단";
-			$hero_badges = array_filter( array_map( 'trim', preg_split( "/\r\n|\r|\n/", (string) $hero_badges_raw ) ) );
-			?>
-			<?php if ( $hero_badges ) : ?>
-				<ul class="md-hero__badges" aria-label="천안 만남로 문치과병원의 특징">
-					<?php foreach ( $hero_badges as $badge ) : ?>
-						<li><span aria-hidden="true">✓</span> <?php echo esc_html( $badge ); ?></li>
-					<?php endforeach; ?>
-				</ul>
-			<?php endif; ?>
+			<?php /* v3.34.5 · 히어로 배지 3개 제거 (사용자 요청 · 미니멀 히어로) · Customizer 필드는 유지되니 언제든 복원 가능 */ ?>
 
 			<div class="md-hero__actions">
 				<?php
