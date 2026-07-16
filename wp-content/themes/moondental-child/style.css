@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.34.6
+Version:      3.34.7
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -1074,10 +1074,7 @@ button.elementor-button {
    ============================================================= */
 .md-hero-combined {
   position: relative;
-  padding: clamp(80px, 8vw, 120px) 0 clamp(60px, 6vw, 96px);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
+  padding: clamp(48px, 6vw, 88px) 0 clamp(40px, 4.5vw, 64px);
   overflow: hidden;
   background:
     radial-gradient(ellipse 60% 45% at 15% 15%, rgba(216, 128, 98, 0.10), transparent 60%),
@@ -1090,7 +1087,7 @@ button.elementor-button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(28px, 4vw, 48px);
+  gap: clamp(20px, 3vw, 36px);
   text-align: center;
   width: 100%;
 }
@@ -1233,7 +1230,7 @@ button.elementor-button {
   .md-hero-combined__stats { grid-template-columns: repeat(4, 1fr); gap: 12px; }
 }
 @media (max-width: 640px) {
-  .md-hero-combined { min-height: 0; padding-top: clamp(56px, 8vw, 80px); padding-bottom: clamp(48px, 6vw, 72px); }
+  .md-hero-combined { padding-top: clamp(40px, 8vw, 64px); padding-bottom: clamp(32px, 6vw, 56px); }
   .md-hero-combined__stats { grid-template-columns: repeat(2, 1fr); gap: 20px 12px; }
   .md-hero-combined__certs { gap: 6px 8px; }
   .md-hero-combined__certs li { font-size: 0.75rem; padding: 5px 11px; }
