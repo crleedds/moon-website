@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.34.5
+Version:      3.34.6
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -1068,6 +1068,195 @@ button.elementor-button {
  *   서브메뉴는 hover/tap 으로 여전히 열림, 부모 클릭만 무효화 (JS) */
 .md-nav-nolink > a { cursor: default; }
 .md-nav-nolink > a:hover { color: var(--color-primary); } /* hover 유지 · 시각 피드백 */
+
+/* =============================================================
+   v3.34.6 · Combined Hero (Hero + Mission + Trust · 한 화면)
+   ============================================================= */
+.md-hero-combined {
+  position: relative;
+  padding: clamp(80px, 8vw, 120px) 0 clamp(60px, 6vw, 96px);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 60% 45% at 15% 15%, rgba(216, 128, 98, 0.10), transparent 60%),
+    radial-gradient(ellipse 55% 40% at 85% 85%, rgba(143, 174, 146, 0.10), transparent 60%),
+    var(--color-bg);
+}
+.md-hero-combined .md-container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(28px, 4vw, 48px);
+  text-align: center;
+  width: 100%;
+}
+
+/* 1) 제목 블록 */
+.md-hero-combined__title-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.md-hero-combined__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  background: var(--color-white);
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.05em;
+  border: 1px solid var(--color-border);
+}
+.md-hero-combined__title {
+  font-size: clamp(1.875rem, 5vw, 3.5rem);
+  line-height: 1.22;
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  word-break: keep-all;
+  max-width: 22ch;
+}
+.md-hero-combined__title em {
+  color: var(--color-primary);
+  font-style: normal;
+  position: relative;
+  display: inline-block;
+}
+.md-hero-combined__title em::after {
+  content: '';
+  position: absolute;
+  bottom: 2px; left: 0; right: 0;
+  height: clamp(8px, 1vw, 14px);
+  background: var(--color-accent-light);
+  opacity: 0.5;
+  z-index: -1;
+  border-radius: 6px;
+}
+
+/* 2) 사명 quote */
+.md-hero-combined__quote {
+  margin: 0;
+  padding: 0;
+  max-width: 780px;
+  border: none;
+}
+.md-hero-combined__quote p {
+  font-size: clamp(0.9375rem, 1.2vw, 1.0625rem);
+  line-height: 1.75;
+  color: var(--color-text-sub);
+  font-weight: 500;
+  margin: 0;
+  word-break: keep-all;
+  font-style: italic;
+}
+
+/* 3) 협력 의료기관 pill */
+.md-hero-combined__certs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  justify-content: center;
+  max-width: 900px;
+}
+.md-hero-combined__certs li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: 0.8125rem;
+  color: var(--color-text);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.md-hero-combined__certs li:hover {
+  border-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+/* 4) Trust 4stat */
+.md-hero-combined__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(16px, 2vw, 32px);
+  width: 100%;
+  max-width: 960px;
+  padding-top: clamp(16px, 2vw, 28px);
+  border-top: 1px solid var(--color-border);
+}
+.md-hero-combined__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.md-hero-combined__stat-num {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.md-hero-combined__stat-value {
+  font-size: clamp(2rem, 4vw, 2.875rem);
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.md-hero-combined__stat-unit {
+  font-size: clamp(0.875rem, 1.1vw, 1rem);
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+.md-hero-combined__stat-label {
+  font-size: clamp(0.8125rem, 1vw, 0.9375rem);
+  color: var(--color-text-sub);
+  font-weight: 600;
+  text-align: center;
+  word-break: keep-all;
+}
+
+/* 반응형 */
+@media (max-width: 900px) {
+  .md-hero-combined__stats { grid-template-columns: repeat(4, 1fr); gap: 12px; }
+}
+@media (max-width: 640px) {
+  .md-hero-combined { min-height: 0; padding-top: clamp(56px, 8vw, 80px); padding-bottom: clamp(48px, 6vw, 72px); }
+  .md-hero-combined__stats { grid-template-columns: repeat(2, 1fr); gap: 20px 12px; }
+  .md-hero-combined__certs { gap: 6px 8px; }
+  .md-hero-combined__certs li { font-size: 0.75rem; padding: 5px 11px; }
+}
+
+/* 다크모드 */
+@media (prefers-color-scheme: dark) {
+  .md-hero-combined {
+    background:
+      radial-gradient(ellipse 60% 45% at 15% 15%, rgba(244, 177, 149, 0.10), transparent 60%),
+      radial-gradient(ellipse 55% 40% at 85% 85%, rgba(182, 206, 183, 0.08), transparent 60%),
+      var(--color-bg);
+  }
+  .md-hero-combined__eyebrow,
+  .md-hero-combined__certs li {
+    background: rgba(255, 246, 232, 0.06);
+    border-color: rgba(244, 177, 149, 0.18);
+    color: var(--color-text);
+  }
+  .md-hero-combined__eyebrow { color: var(--color-primary-light); }
+  .md-hero-combined__stat-value { color: var(--color-primary-light); }
+  .md-hero-combined__stats { border-top-color: rgba(244, 177, 149, 0.15); }
+}
 
 /* =============================================================
    v3.34.0 · Hero Centered Layout · 이미지 영역 제거 · 텍스트 중심

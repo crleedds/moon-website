@@ -13,11 +13,8 @@
 get_header();
 ?>
 
-<?php get_template_part( 'template-parts/section', 'hero' ); ?>
-
-<?php get_template_part( 'template-parts/section', 'mission' ); ?>
-
-<?php get_template_part( 'template-parts/section', 'trust' ); ?>
+<?php /* v3.34.6 · 히어로+사명+지표 3개 섹션을 통합 · 한 화면 첫 임팩트 */ ?>
+<?php get_template_part( 'template-parts/section', 'hero-combined' ); ?>
 
 <?php get_template_part( 'template-parts/section', 'why' ); ?>
 
