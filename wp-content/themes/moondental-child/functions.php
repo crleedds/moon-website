@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.35.0' );
+define( 'MOONDENTAL_VERSION', '3.35.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -995,6 +995,7 @@ require_once MOONDENTAL_DIR . '/inc/regions.php';
 require_once MOONDENTAL_DIR . '/inc/icons.php';
 require_once MOONDENTAL_DIR . '/inc/admin-dashboard.php';
 require_once MOONDENTAL_DIR . '/inc/encyclopedia.php';
+require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed.php';
 
 
 /* ============================================================
