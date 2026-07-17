@@ -15,10 +15,10 @@ $search_q    = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q']
 $categories = get_terms( array( 'taxonomy' => 'md_term_category', 'hide_empty' => false ) );
 if ( is_wp_error( $categories ) ) $categories = array();
 
-// 전체 용어 (필터 서버측 · 최대 500)
+// 전체 용어 (필터 서버측 · 제한 없음)
 $args = array(
 	'post_type'      => 'md_term',
-	'posts_per_page' => 500,
+	'posts_per_page' => -1,
 	'orderby'        => 'title',
 	'order'          => 'ASC',
 	'no_found_rows'  => true,
