@@ -170,7 +170,7 @@ function moondental_encyclopedia_seed_data_v3355() {
 		array( '컴퓨터 마취기', 'surgery', '자동 속도 조절 마취기', '<p>CCLAD (The Wand). <strong>일정한 속도·통증 최소</strong> 자동 마취기.</p>' ),
 		array( '무바늘 마취', 'surgery', '고압 젯 · 표층 마취', '<p>Needleless. <strong>고압 젯 분사</strong>. 표층 마취·소량.</p>' ),
 		array( '표면 마취 종류', 'surgery', '리도카인·벤조카인 젤', '<p>Topical Types. <strong>리도카인 5%·벤조카인 20% 젤</strong>.</p>' ),
-		array( 'ㅍ주의 후 대기 시간', 'surgery', '2~5분', '<p>Onset Time. <strong>침윤 2~5분·전달 5~10분</strong>.</p>' ),
+		array( '주사 후 대기 시간', 'surgery', '침윤 마취 2~5분 · 전달 마취 5~10분', '<p>Onset Time. <strong>침윤 마취 2~5분·전달 마취 5~10분</strong> 대기 후 무감각 확인.</p>' ),
 		array( '마취 감각 확인', 'surgery', '무감각·입술 부기 신호', '<p>Anesthesia Test. <strong>무감각·볼·입술 부기감</strong>·프로브 두드림.</p>' ),
 		array( '마취 후 무감각 지속', 'surgery', '2~5시간 정상', '<p>Numbness Duration. 리도카인 <strong>1~2시간·아르티카인 2~3시간</strong>·부피바카인 6~8시간.</p>' ),
 		array( '마취 후 어지러움', 'surgery', '드물지만 발생 가능', '<p>Dizziness. <strong>일시적</strong>·앉거나 눕고 회복. 10분 지속 시 알림.</p>' ),
@@ -289,6 +289,32 @@ function moondental_encyclopedia_seed_data_v3355() {
 		array( '치과 온라인 상담', 'general', '비대면 사진·문의', '<p>Online Consultation. <strong>사진 첨부·기본 상담</strong>. 정확한 진단은 방문 필수.</p>' ),
 	);
 }
+
+/**
+ * v3.35.6 · 오타 정정 · 'ㅍ주의 후 대기 시간' → '주사 후 대기 시간'
+ *  이미 저장된 잘못된 제목의 포스트를 찾아 수정.
+ */
+add_action( 'init', function() {
+	if ( get_option( 'moondental_encyclopedia_typo_fix_v3356' ) === 'done' ) return;
+	if ( ! post_type_exists( 'md_term' ) ) return;
+
+	$wrong = get_posts( array(
+		'post_type'      => 'md_term',
+		'title'          => 'ㅍ주의 후 대기 시간',
+		'posts_per_page' => -1,
+		'post_status'    => 'any',
+	) );
+	foreach ( $wrong as $p ) {
+		wp_update_post( array(
+			'ID'           => $p->ID,
+			'post_title'   => '주사 후 대기 시간',
+			'post_name'    => sanitize_title( '주사 후 대기 시간' ),
+			'post_excerpt' => '침윤 마취 2~5분 · 전달 마취 5~10분',
+			'post_content' => '<p>Onset Time. <strong>침윤 마취 2~5분·전달 마취 5~10분</strong> 대기 후 무감각 확인.</p>',
+		) );
+	}
+	update_option( 'moondental_encyclopedia_typo_fix_v3356', 'done' );
+}, 60 );
 
 /**
  * v3.35.5 · 5차 대량 확장 시드 마이그레이션.
