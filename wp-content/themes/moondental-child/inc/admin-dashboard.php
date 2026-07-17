@@ -143,6 +143,14 @@ function moondental_render_content_dashboard() {
 				<a class="button" href="<?php echo esc_url( admin_url( 'post-new.php' ) ); ?>">새 글 작성</a>
 			</div>
 
+			<div class="md-cm-card">
+				<h2>📖 치과사전 (Encyclopedia)<span class="md-cm-badge md-cm-badge--post">CPT</span></h2>
+				<p class="md-cm-desc">치과 용어 사전. 카테고리·초성 필터. SEO 롱테일 키워드 확보.</p>
+				<a class="button button-primary" href="<?php echo esc_url( admin_url( 'edit.php?post_type=md_term' ) ); ?>">용어 목록 →</a>
+				<a class="button" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=md_term' ) ); ?>">새 용어 추가</a>
+				<a class="button" href="<?php echo esc_url( admin_url( 'edit-tags.php?taxonomy=md_term_category&post_type=md_term' ) ); ?>">분야 관리</a>
+			</div>
+
 			<!-- ─── 홈페이지 섹션 (Customizer) ─── -->
 			<div class="md-cm-section-title">🏠 홈페이지 섹션 <span style="font-size:13px; font-weight:400; color:#50575e;">— 외모 → 사용자 정의하기</span></div>
 

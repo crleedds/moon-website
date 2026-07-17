@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.34.8
+Version:      3.35.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -1068,6 +1068,201 @@ button.elementor-button {
  *   서브메뉴는 hover/tap 으로 여전히 열림, 부모 클릭만 무효화 (JS) */
 .md-nav-nolink > a { cursor: default; }
 .md-nav-nolink > a:hover { color: var(--color-primary); } /* hover 유지 · 시각 피드백 */
+
+/* =============================================================
+   v3.35.0 · 치과사전 (Encyclopedia)
+   ============================================================= */
+.md-enc { padding-top: clamp(32px, 4vw, 48px); }
+
+/* 검색 */
+.md-enc-search {
+  display: flex; align-items: stretch; gap: 8px;
+  max-width: 720px; margin: 0 auto clamp(24px, 3vw, 36px);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 6px 6px 6px 20px;
+}
+.md-enc-search input[type="search"] {
+  flex: 1; border: 0; background: transparent; outline: none;
+  font-size: 0.9375rem; color: var(--color-text);
+  min-width: 0;
+}
+.md-enc-search input[type="search"]::placeholder { color: var(--color-text-mute); }
+.md-enc-search .md-btn { padding: 10px 22px; border-radius: var(--radius-pill); }
+.md-enc-clear {
+  align-self: center; padding: 0 12px;
+  font-size: 0.8125rem; color: var(--color-text-sub);
+  text-decoration: underline;
+}
+
+/* 카테고리 탭 */
+.md-enc-cats {
+  display: flex; flex-wrap: wrap; gap: 6px 8px;
+  justify-content: center;
+  margin-bottom: clamp(16px, 2vw, 24px);
+}
+.md-enc-cat {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: 0.875rem; font-weight: 600;
+  color: var(--color-text); text-decoration: none;
+  transition: all .18s var(--ease);
+}
+.md-enc-cat:hover { border-color: var(--color-primary-light); color: var(--color-primary-dark); }
+.md-enc-cat.is-active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+.md-enc-cat__n {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; padding: 0 6px;
+  background: rgba(0,0,0,0.06); color: inherit;
+  border-radius: 999px; font-size: 0.6875rem; font-weight: 700;
+}
+.md-enc-cat.is-active .md-enc-cat__n { background: rgba(255,255,255,0.24); }
+
+/* 초성 필터 */
+.md-enc-initials {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  justify-content: center;
+  margin-bottom: clamp(24px, 3vw, 32px);
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+}
+.md-enc-initial {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  font-size: 0.9375rem; font-weight: 700;
+  color: var(--color-text); text-decoration: none;
+  transition: all .15s var(--ease);
+}
+.md-enc-initial:first-child { width: auto; padding: 0 12px; }
+.md-enc-initial:hover { background: var(--color-white); color: var(--color-primary-dark); }
+.md-enc-initial.is-active { background: var(--color-primary); color: #fff; }
+
+/* 결과 카운트 */
+.md-enc-count {
+  text-align: center; font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  margin: 0 0 clamp(24px, 3vw, 32px);
+}
+.md-enc-count strong { color: var(--color-primary-dark); }
+.md-enc-count em { font-style: normal; color: var(--color-text); }
+
+/* 그룹 */
+.md-enc-group { margin-bottom: clamp(32px, 4vw, 48px); }
+.md-enc-group__title {
+  font-size: clamp(1.375rem, 2vw, 1.75rem);
+  font-weight: 800;
+  margin: 0 0 clamp(16px, 2vw, 22px);
+  padding: 6px 16px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: #fff;
+  border-radius: 8px;
+  display: inline-block;
+  letter-spacing: -0.02em;
+}
+
+/* 카드 그리드 */
+.md-enc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: clamp(14px, 1.8vw, 20px);
+}
+.md-enc-card {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 18px 20px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: inherit;
+  transition: transform .22s var(--ease), border-color .22s var(--ease), box-shadow .22s var(--ease);
+}
+.md-enc-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary-light);
+  box-shadow: 0 8px 20px rgba(216, 128, 98, 0.10);
+}
+.md-enc-card__title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.015em;
+}
+.md-enc-card:hover .md-enc-card__title { color: var(--color-primary-dark); }
+.md-enc-card__excerpt {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-sub);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.md-enc-card__cats {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  margin-top: auto; padding-top: 4px;
+}
+.md-enc-card__cat {
+  font-size: 0.6875rem; font-weight: 600;
+  color: var(--color-text-mute);
+  padding: 2px 8px;
+  background: var(--color-surface);
+  border-radius: 999px;
+}
+
+/* 빈 결과 */
+.md-enc-empty {
+  text-align: center; padding: 60px 20px;
+  color: var(--color-text-sub);
+}
+.md-enc-empty p:first-child { font-size: 1.25rem; font-weight: 700; margin: 0 0 8px; }
+
+/* 단일 용어 페이지 */
+.md-term-hero__cats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.md-term-hero__cat {
+  display: inline-flex; align-items: center;
+  padding: 4px 12px;
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem; font-weight: 600;
+  color: var(--color-primary-dark); text-decoration: none;
+}
+.md-term-hero__cat:hover { background: var(--color-primary); color: #fff; }
+.md-term-content { font-size: var(--fs-body); line-height: 1.85; }
+.md-term-content > *:first-child { margin-top: 0; }
+.md-term-actions {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  justify-content: space-between; align-items: center;
+  margin-top: clamp(32px, 4vw, 48px); padding-top: clamp(24px, 3vw, 32px);
+  border-top: 1px solid var(--color-border);
+}
+
+/* 반응형 */
+@media (max-width: 560px) {
+  .md-enc-search { flex-wrap: wrap; padding: 8px; border-radius: var(--radius-md); }
+  .md-enc-search input[type="search"] { padding: 8px 12px; }
+  .md-enc-search .md-btn { flex: 1; }
+  .md-enc-initial { width: 30px; height: 30px; font-size: 0.875rem; }
+  .md-enc-grid { grid-template-columns: 1fr; }
+}
+
+/* 다크모드 */
+@media (prefers-color-scheme: dark) {
+  .md-enc-search { background: rgba(255,246,232,0.06); border-color: rgba(244,177,149,0.18); }
+  .md-enc-cat { background: rgba(255,246,232,0.06); border-color: rgba(244,177,149,0.18); color: var(--color-text); }
+  .md-enc-initials { background: rgba(255,246,232,0.04); }
+  .md-enc-initial:hover { background: rgba(255,246,232,0.10); }
+  .md-enc-card { background: rgba(255,246,232,0.05); border-color: rgba(244,177,149,0.18); }
+  .md-enc-card__cat { background: rgba(255,246,232,0.08); color: var(--color-text-sub); }
+  .md-term-hero__cat { background: rgba(255,246,232,0.08); border-color: rgba(244,177,149,0.18); color: var(--color-primary-light); }
+}
 
 /* =============================================================
    v3.34.6 · Combined Hero (Hero + Mission + Trust · 한 화면)

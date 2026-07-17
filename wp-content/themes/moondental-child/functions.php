@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.34.8' );
+define( 'MOONDENTAL_VERSION', '3.35.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -994,6 +994,7 @@ require_once MOONDENTAL_DIR . '/inc/strengths.php';
 require_once MOONDENTAL_DIR . '/inc/regions.php';
 require_once MOONDENTAL_DIR . '/inc/icons.php';
 require_once MOONDENTAL_DIR . '/inc/admin-dashboard.php';
+require_once MOONDENTAL_DIR . '/inc/encyclopedia.php';
 
 
 /* ============================================================
@@ -2883,6 +2884,7 @@ function moondental_primary_menu_data() {
 			array( 'label' => '30여년의 역사',     'url' => $home . '역사/' ),
 			array( 'label' => '기술력/시설',        'url' => $home . '기술력-시설/' ),
 			array( 'label' => '병원소식',          'url' => $home . '소식/' ),
+			array( 'label' => '치과사전',          'url' => $home . '치과사전/' ),
 			array( 'label' => '상시채용',          'url' => $home . '상시채용/' ),
 		) ),
 	);
