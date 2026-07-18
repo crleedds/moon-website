@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.36.0
+Version:      3.36.1
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -603,8 +603,19 @@ ul, ol { padding-left: 1.25em; }
   box-shadow: 0 8px 22px rgba(216, 128, 98, 0.38);
 }
 
-/* v3.36.0 · 예약 CTA 3버튼 통일 스타일 (전화·네이버·카톡)
- *  FAB 스택 디자인과 동일: pill · 아이콘 컨테이너 · 그림자 */
+/* v3.36.1 · 예약 CTA 3버튼 · FAB 스택 디자인과 완전 동일
+ *  세로 스택 · 균등 폭 · 중앙 정렬 (원본 우측 하단 FAB 스타일) */
+.md-btn-group.md-rcta,
+.md-rcta {
+  display: flex;
+  flex-direction: column !important;
+  align-items: stretch;
+  gap: 12px;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+  flex-wrap: nowrap;
+}
 .md-rcta__btn {
   display: inline-flex;
   align-items: center;
@@ -613,7 +624,7 @@ ul, ol { padding-left: 1.25em; }
   font-weight: 700;
   white-space: nowrap;
   transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), background-color 0.2s var(--ease);
-  min-width: 180px;
+  width: 100%;
   justify-content: center;
 }
 .md-rcta__btn:hover {
@@ -634,22 +645,6 @@ ul, ol { padding-left: 1.25em; }
 .md-rcta__label {
   font-weight: 700;
   letter-spacing: -0.01em;
-}
-
-/* 예약 CTA 그룹 · 통일 스타일 */
-.md-btn-group.md-rcta,
-.md-rcta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
-}
-
-/* 반응형: 모바일에서 3개 버튼 세로 스택 · 균등 폭 */
-@media (max-width: 640px) {
-  .md-rcta__btn { min-width: 0; width: 100%; }
-  .md-btn-group.md-rcta,
-  .md-rcta { flex-direction: column; align-items: stretch; }
 }
 
 /* 다크모드 · 전화 버튼 그림자 강화 */

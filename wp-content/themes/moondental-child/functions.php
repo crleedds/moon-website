@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.36.0' );
+define( 'MOONDENTAL_VERSION', '3.36.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1392,7 +1392,22 @@ function md_render_reservation_ctas( $args = array() ) {
 		. '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
 		. '</svg>';
 
-	$out  = '<div class="md-btn-group md-rcta" style="' . esc_attr( $group_style ) . '">';
+	$out  = '<div class="md-btn-group md-rcta">';
+
+	// v3.36.1 · 순서 변경 · FAB 스택과 동일 (전화 → 네이버 → 카톡)
+	// 전화 상담 (코럴 브랜드)
+	if ( $args['show_call'] && $call_label && $phone_link ) {
+		$clean_label = $strip_emoji( $call_label );
+		$label_html  = esc_html( $clean_label );
+		if ( $show_phone !== 'no' && $phone ) {
+			$label_html .= ' ' . esc_html( $phone );
+		}
+		$out .= '<a class="md-btn md-btn--phone' . esc_attr( $btn_size_cls ) . ' md-rcta__call md-rcta__btn" '
+		     . 'href="tel:' . esc_attr( $phone_link ) . '" '
+		     . 'data-track="' . esc_attr( $args['track'] ) . '-call">'
+		     . $svg_phone
+		     . '<span class="md-rcta__label">' . $label_html . '</span></a>';
+	}
 
 	// 네이버 예약 (Naver green)
 	if ( $args['show_naver'] && $naver_label && $naver_url ) {
@@ -1412,21 +1427,6 @@ function md_render_reservation_ctas( $args = array() ) {
 		     . 'data-track="' . esc_attr( $args['track'] ) . '-kakao">'
 		     . $svg_kakao
 		     . '<span class="md-rcta__label">' . esc_html( $clean_label ) . '</span></a>';
-	}
-
-	// 전화 (ghost)
-	if ( $args['show_call'] && $call_label && $phone_link ) {
-		$clean_label = $strip_emoji( $call_label );
-		$label_html  = esc_html( $clean_label );
-		if ( $show_phone !== 'no' && $phone ) {
-			$label_html .= ' ' . esc_html( $phone );
-		}
-		// v3.36.0 · 전화 버튼도 브랜드 스타일 (ghost → phone) · FAB 스택 디자인과 통일
-		$out .= '<a class="md-btn md-btn--phone' . esc_attr( $btn_size_cls ) . ' md-rcta__call md-rcta__btn" '
-		     . 'href="tel:' . esc_attr( $phone_link ) . '" '
-		     . 'data-track="' . esc_attr( $args['track'] ) . '-call">'
-		     . $svg_phone
-		     . '<span class="md-rcta__label">' . $label_html . '</span></a>';
 	}
 
 	$out .= '</div>';
