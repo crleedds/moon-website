@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.35.6' );
+define( 'MOONDENTAL_VERSION', '3.36.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1421,7 +1421,8 @@ function md_render_reservation_ctas( $args = array() ) {
 		if ( $show_phone !== 'no' && $phone ) {
 			$label_html .= ' ' . esc_html( $phone );
 		}
-		$out .= '<a class="md-btn md-btn-ghost' . esc_attr( $btn_size_cls ) . ' md-rcta__call md-rcta__btn" '
+		// v3.36.0 · 전화 버튼도 브랜드 스타일 (ghost → phone) · FAB 스택 디자인과 통일
+		$out .= '<a class="md-btn md-btn--phone' . esc_attr( $btn_size_cls ) . ' md-rcta__call md-rcta__btn" '
 		     . 'href="tel:' . esc_attr( $phone_link ) . '" '
 		     . 'data-track="' . esc_attr( $args['track'] ) . '-call">'
 		     . $svg_phone

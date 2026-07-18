@@ -185,7 +185,7 @@ $aside_call = str_replace( '{phone}', $info['phone'], $aside_call_tpl );
 				</a>
 			<?php endif; ?>
 
-			<a class="md-btn md-btn-ghost md-btn--lg md-dentalbot__cta-btn"
+			<a class="md-btn md-btn--phone md-btn--lg md-dentalbot__cta-btn"
 			   href="tel:<?php echo esc_attr( $phone_link ); ?>"
 			   data-track="cta-dentalbot-call">
 				<svg class="md-rcta__icon md-rcta__icon--stroke" viewBox="0 0 24 24" aria-hidden="true">
