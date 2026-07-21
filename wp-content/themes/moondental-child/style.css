@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.37.6
+Version:      3.37.7
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -3989,41 +3989,53 @@ button.elementor-button {
 /* =============================================================
    12. CTA Banner
    ============================================================= */
+/* v3.37.7 · CTA 배너 재디자인
+ *  깊이감 있는 코럴 그라디언트 + 편집자적 typography + 3버튼 카드 스타일 */
 .md-cta-banner {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,246,232,0.14) 0%, transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(0,0,0,0.10) 0%, transparent 45%),
+    linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 55%, var(--color-primary-light) 100%);
   color: var(--color-text-on-primary);
-  border-radius: var(--radius-xl);
-  padding: clamp(36px, 5vw, 64px);
+  border-radius: clamp(20px, 2vw, 28px);
+  padding: clamp(48px, 6vw, 80px) clamp(24px, 5vw, 64px);
   text-align: center;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 20px 60px rgba(184, 99, 71, 0.22);
 }
 .md-cta-banner::before {
   content: '';
   position: absolute;
-  top: -60px; left: -60px;
-  width: 240px; height: 240px;
+  top: -100px; left: -100px;
+  width: 320px; height: 320px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(255, 246, 232, 0.07);
 }
 .md-cta-banner::after {
   content: '';
   position: absolute;
-  bottom: -80px; right: -40px;
-  width: 280px; height: 280px;
+  bottom: -120px; right: -80px;
+  width: 360px; height: 360px;
   border-radius: 50%;
-  background: rgba(143, 174, 146, 0.18);
+  background: rgba(255, 246, 232, 0.05);
 }
 .md-cta-banner__title {
-  font-size: var(--fs-h2);
+  font-size: clamp(1.75rem, 3.4vw, 2.375rem);
+  line-height: 1.28;
+  letter-spacing: -0.022em;
+  font-weight: 800;
   color: var(--color-text-on-primary);
-  margin: 0 0 16px;
+  margin: 0 auto 20px;
+  max-width: 24ch;
   position: relative;
 }
 .md-cta-banner__lead {
-  font-size: var(--fs-body);
-  color: rgba(255, 255, 255, 0.92);
-  margin: 0 0 28px;
+  font-size: 1rem;
+  color: rgba(255, 246, 232, 0.94);
+  line-height: 1.7;
+  margin: 0 auto 40px;
+  max-width: 48ch;
   position: relative;
 }
 .md-cta-banner .md-btn-group { position: relative; }
@@ -4760,27 +4772,39 @@ button.elementor-button {
 /* =============================================================
    22. CTA Banner — Eyebrow + Hint (banner enhancement)
    ============================================================= */
+/* v3.37.7 · eyebrow · pill chip 제거 · 편집자적 미니 라인 스타일 */
 .md-cta-banner__eyebrow {
-  display: inline-block;
-  font-size: var(--fs-caption);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.92);
-  background: rgba(255, 255, 255, 0.18);
-  padding: 6px 16px;
-  border-radius: var(--radius-pill);
-  margin-bottom: 16px;
+  color: rgba(255, 246, 232, 0.85);
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  margin-bottom: 22px;
   position: relative;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.md-cta-banner__eyebrow::before,
+.md-cta-banner__eyebrow::after {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: rgba(255, 246, 232, 0.55);
 }
 .md-cta-banner__hint {
-  font-size: var(--fs-caption);
-  color: rgba(255, 255, 255, 0.78);
-  margin: 20px 0 0;
+  font-size: 0.8125rem;
+  color: rgba(255, 246, 232, 0.82);
+  margin: 28px 0 0;
   position: relative;
-  letter-spacing: -0.005em;
+  letter-spacing: 0;
+  line-height: 1.6;
 }
 .md-cta-banner .md-btn-primary {
   background: var(--color-white);
@@ -4803,34 +4827,74 @@ button.elementor-button {
   border-color: var(--color-white);
 }
 
-/* v3.37.6 · CTA 배너 안 전화 버튼 대비 개선
- *  코럴 배경에 코럴 버튼이 묻히던 문제 해결 · 흰 알약 + 코럴-다크 텍스트 + 빨간 아이콘
- *  네이버 초록 · 카톡 노랑 · 전화 흰색 → 3버튼 각기 다른 색으로 균등 대비 */
+/* v3.37.7 · CTA 배너 3버튼 카드 스타일 · 알약 → 정사각형에 가까운 카드
+ *  아이콘 위 · 라벨 아래 · 각 카드가 독립된 채널 느낌 */
+.md-cta-banner .md-rcta,
+.md-cta-banner .md-btn-group.md-rcta {
+  gap: 14px;
+  max-width: 640px;
+  flex-wrap: nowrap;
+}
+.md-cta-banner .md-rcta__btn {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 14px;
+  border-radius: 16px;
+  min-height: 116px;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), background-color 0.2s var(--ease);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.16);
+}
+.md-cta-banner .md-rcta__btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.22);
+}
+.md-cta-banner .md-rcta__btn .md-rcta__icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+.md-cta-banner .md-rcta__btn .md-rcta__label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
+}
+/* 전화 버튼 · 흰 카드 + 코럴-다크 텍스트 (배너 primary 패턴) */
 .md-cta-banner .md-btn--phone {
   background: var(--color-white);
   color: var(--color-primary-dark);
   border-color: var(--color-white);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
 }
 .md-cta-banner .md-btn--phone:hover {
   background: var(--color-surface);
   color: var(--color-primary-dark);
   border-color: var(--color-surface);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
 }
-/* 네이버/카톡도 살짝 강한 그림자로 3버튼 공중 부양감 통일 */
-.md-cta-banner .md-btn--naver,
-.md-cta-banner .md-btn--kakao {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
-}
-.md-cta-banner .md-btn--naver:hover,
-.md-cta-banner .md-btn--kakao:hover {
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
-}
-/* 힌트 텍스트 가독성 개선 · 0.78 → 0.9 */
-.md-cta-banner__hint {
-  color: rgba(255, 255, 255, 0.9);
+
+/* 모바일: 카드형 유지하되 세로 스택 · 각 카드는 wide */
+@media (max-width: 520px) {
+  .md-cta-banner .md-rcta,
+  .md-cta-banner .md-btn-group.md-rcta {
+    flex-direction: column;
+    max-width: 380px;
+  }
+  .md-cta-banner .md-rcta__btn {
+    flex-direction: row;
+    gap: 12px;
+    min-height: 64px;
+    padding: 16px 22px;
+    width: 100%;
+  }
+  .md-cta-banner .md-rcta__btn .md-rcta__icon {
+    width: 28px;
+    height: 28px;
+  }
 }
 
 /* =============================================================
@@ -5419,13 +5483,23 @@ body { overflow-x: clip; }
   .md-location-card { padding: 20px 18px; }
   .md-location-floors { padding: 22px 20px; }
 
-  /* CTA banner — 모바일에서 padding/title 줄임 */
+  /* v3.37.7 · CTA banner 모바일 — 카드형 유지하며 padding 축소 */
   .md-cta-banner {
-    padding: clamp(28px, 5vw, 40px) clamp(20px, 4vw, 32px);
-    border-radius: var(--radius-lg);
+    padding: clamp(36px, 6vw, 56px) clamp(20px, 4vw, 32px);
+    border-radius: 20px;
   }
-  .md-cta-banner__title { font-size: 1.375rem; line-height: 1.4; }
+  .md-cta-banner__eyebrow {
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+  }
+  .md-cta-banner__eyebrow::before,
+  .md-cta-banner__eyebrow::after {
+    width: 14px;
+  }
+  .md-cta-banner__title { font-size: 1.5rem; line-height: 1.3; margin-bottom: 14px; }
+  .md-cta-banner__lead { font-size: 0.9375rem; margin-bottom: 28px; }
   .md-cta-banner__lead br { display: none; } /* 모바일 줄바꿈 제거 */
+  .md-cta-banner__hint { font-size: 0.75rem; margin-top: 22px; }
 
   /* Doctor row (의료진 페이지) — 모바일 가독성 */
   .md-doc-row__bio { grid-template-columns: 1fr; gap: 2px 0; }
