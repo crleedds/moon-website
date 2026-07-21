@@ -210,17 +210,7 @@ for ( $i = 1; $i <= 4; $i++ ) {
 				<p class="md-priceX-hero__lead">
 					<?php echo nl2br( esc_html( md_content( 'price_hero_lead', '문치과병원은 30여년 동안 정직한 진료비를 약속해왔습니다. 불필요한 치료를 권하지 않고, 시작 후 추가 비용이 발생하지 않습니다.' ) ) ); ?>
 				</p>
-				<div class="md-btn-group">
-					<a class="md-btn md-btn-primary md-btn--lg" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-priceX-hero-call">
-						<?php echo esc_html( md_content( 'price_hero_btn1', '📞 무료 비용 상담' ) ); ?>
-						<span class="md-btn__sub"><?php echo esc_html( $info['phone'] ); ?></span>
-					</a>
-					<?php if ( $naver_book ) : ?>
-						<a class="md-btn md-btn-secondary md-btn--lg" href="<?php echo esc_url( $naver_book ); ?>" target="_blank" rel="noopener" data-track="cta-priceX-hero-naver">
-							<?php echo esc_html( md_content( 'price_hero_btn2', '🟢 네이버 예약' ) ); ?>
-						</a>
-					<?php endif; ?>
-				</div>
+				<?php /* v3.37.5 · 비용안내 히어로 CTA 버튼 제거 (하단 통일 CTA와 중복) */ ?>
 			</div>
 
 			<aside class="md-priceX-promise" aria-label="문치과 비용 약속">
