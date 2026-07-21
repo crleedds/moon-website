@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.36.1' );
+define( 'MOONDENTAL_VERSION', '3.37.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -400,7 +400,8 @@ add_action( 'after_setup_theme', function() {
  *  절대 덮어쓰지 않음.
  *
  *  wp_update_post 는 post types 등록이 완료된 init 이후에 안전. */
-add_action( 'init', function() {
+// v3.37.0 · admin_init로 이동 (관리자 컨텍스트에서만 실행)
+add_action( 'admin_init', function() {
 	if ( get_option( 'moondental_seed_service_content_v3337' ) === 'done' ) return;
 	if ( ! function_exists( 'moondental_service_content_default_map' ) ) return;
 	$map = moondental_service_content_default_map();
@@ -1896,6 +1897,10 @@ function moondental_admin_menu() {
 add_action( 'admin_menu', 'moondental_admin_menu' );
 
 function moondental_admin_tools_page() {
+	// v3.37.0 · defense in depth · capability 이중 체크
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( __( '이 페이지에 접근할 권한이 없습니다.' ), 403 );
+	}
 	$ran = false; $created = array();
 	if ( isset( $_POST['moondental_seed_pages'] ) && check_admin_referer( 'moondental_seed' ) ) {
 		$created = moondental_create_default_pages();
@@ -2566,6 +2571,10 @@ add_filter( 'body_class', 'moondental_body_class' );
  * @return array       ['menu_id'=>int, 'count'=>int, 'items'=>array]
  */
 function moondental_setup_primary_menu( $force = false ) {
+	// v3.37.0 · defense in depth · 메뉴 편집 권한 없으면 거절
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		return array( 'menu_id'=>0, 'count'=>0, 'items'=>array(), 'error'=>'insufficient_permissions' );
+	}
 	$menu_name = '주 메뉴 (자동 생성)';
 	$menu_obj  = wp_get_nav_menu_object( $menu_name );
 	if ( ! $menu_obj ) {
@@ -2729,6 +2738,10 @@ add_action( 'wp_loaded', 'moondental_auto_create_pages_once' );
  * @return array ['story'=>int, 'notice'=>int, 'skipped'=>int]
  */
 function moondental_recategorize_posts() {
+	// v3.37.0 · defense in depth · 글 카테고리 이동은 편집자 이상만
+	if ( ! current_user_can( 'edit_others_posts' ) ) {
+		return array( 'story'=>0, 'notice'=>0, 'skipped'=>0, 'error'=>'insufficient_permissions' );
+	}
 	// ▶ 소식·운영 키워드 — 최우선. 하나라도 매칭되면 '문치과병원 소식'.
 	//   임상 키워드가 함께 있어도 소식이 이깁니다 (MOU·연합회·협약 등은 임상글 아님).
 	$news_keywords = array(

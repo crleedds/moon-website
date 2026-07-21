@@ -207,6 +207,10 @@ function moondental_naver_import_one( $rss_item, $blog_id ) {
  * @return array  ['created' => [..post_ids..], 'skipped' => N, 'errors' => [..messages..]]
  */
 function moondental_naver_import_all( $limit = 20 ) {
+	// v3.37.0 · 외부 리소스 fetch·글 생성 → 관리자 전용 이중 체크
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return array( 'created'=>array(), 'skipped'=>0, 'errors'=>array( 'insufficient_permissions' ) );
+	}
 	$result = array( 'created' => array(), 'skipped' => 0, 'errors' => array() );
 
 	$info = moondental_get_info();
@@ -286,9 +290,31 @@ function moondental_sideload_images_in_body( $body, $post_id ) {
 	$first_id = 0;
 	$count = 0;
 
+	// v3.37.0 · SSRF 방어 · 정확한 호스트 매칭 (substring 매칭 X)
+	$naver_hosts_exact = array(
+		'blog.naver.com',
+		'blogfiles.naver.net',
+		'blogpfthumb-phinf.pstatic.net',
+		'postfiles.pstatic.net',
+	);
+	$naver_hosts_suffix = array(
+		'.pstatic.net',
+		'.phinf.naver.net',
+		'.blogfiles.naver.net',
+	);
+
 	foreach ( $urls as $url ) {
-		// 네이버 CDN 패턴만 (이미 로컬 호스트는 건너뜀)
-		$is_naver = preg_match( '#(pstatic\.net|naver\.com|phinf|blogfiles)#i', $url );
+		$parsed = wp_parse_url( $url );
+		if ( empty( $parsed['host'] ) || empty( $parsed['scheme'] ) ) continue;
+		if ( ! in_array( strtolower( $parsed['scheme'] ), array( 'http', 'https' ), true ) ) continue;
+
+		$host = strtolower( $parsed['host'] );
+		$is_naver = in_array( $host, $naver_hosts_exact, true );
+		if ( ! $is_naver ) {
+			foreach ( $naver_hosts_suffix as $suf ) {
+				if ( substr( $host, -strlen( $suf ) ) === $suf ) { $is_naver = true; break; }
+			}
+		}
 		$is_local = strpos( $url, home_url() ) === 0 || $url[0] === '/';
 		if ( ! $is_naver || $is_local ) continue;
 
@@ -317,6 +343,10 @@ function moondental_sideload_images_in_body( $body, $post_id ) {
  * @return array ['created' => [..ids..], 'skipped' => N, 'images' => N, 'errors' => [..]]
  */
 function moondental_naver_import_local( $limit = 15 ) {
+	// v3.37.0 · 이미지 sideload·글 생성 → 관리자 전용 이중 체크
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return array( 'created'=>array(), 'skipped'=>0, 'images'=>0, 'errors'=>array( 'insufficient_permissions' ) );
+	}
 	@set_time_limit( 600 );
 	$result = array( 'created' => array(), 'skipped' => 0, 'images' => 0, 'errors' => array() );
 

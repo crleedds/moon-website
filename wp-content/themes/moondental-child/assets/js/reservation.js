@@ -12,6 +12,17 @@
     var form = document.getElementById('md-reservation-form');
     if (!form) return;
 
+    // v3.37.0 · 허니팟 (봇이 채우면 서버에서 조용히 거절)
+    // 화면 밖 · 자동완성 off · label 없음
+    var hp = document.createElement('input');
+    hp.type = 'text';
+    hp.name = 'md_hp_website';
+    hp.tabIndex = -1;
+    hp.autocomplete = 'off';
+    hp.setAttribute('aria-hidden', 'true');
+    hp.style.cssText = 'position:absolute!important;left:-10000px!important;top:auto!important;width:1px!important;height:1px!important;overflow:hidden!important;';
+    form.appendChild(hp);
+
     var steps = form.querySelectorAll('.md-step');
     var panels = form.querySelectorAll('.md-step-panel');
     var nextBtns = form.querySelectorAll('.md-step-next');
@@ -155,6 +166,8 @@
       var fd = new FormData(form);
       fd.append('action', 'moondental_reservation');
       fd.append('_nonce', MoondentalRes.nonce);
+      // v3.37.0 · 봇 감지용 폼 렌더 시각 (2초 미만 제출 차단)
+      fd.append('md_form_render_time', MoondentalRes.renderTime || '');
 
       submitBtn.disabled = true;
       submitBtn.textContent = '전송 중...';

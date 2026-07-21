@@ -300,7 +300,8 @@ function moondental_encyclopedia_seed_data() {
 /**
  * 마이그레이션 · 대량 시드 · 한 번만 실행.
  */
-add_action( 'init', function() {
+// v3.37.0 · admin_init로 이동
+add_action( 'admin_init', function() {
 	if ( get_option( 'moondental_encyclopedia_massive_v3351' ) === 'done' ) return;
 	if ( ! post_type_exists( 'md_term' ) ) return;
 

@@ -103,7 +103,8 @@ function moondental_seed_encyclopedia_categories() {
 	}
 	update_option( 'moondental_encyclopedia_cats_v3350', 'done' );
 }
-add_action( 'init', 'moondental_seed_encyclopedia_categories', 20 );
+// v3.37.0 · 마이그레이션은 admin_init로 (프론트 요청마다 get_option 호출 방지 + 관리자 컨텍스트에서만 실행)
+add_action( 'admin_init', 'moondental_seed_encyclopedia_categories', 20 );
 
 
 /* ============================================================
@@ -148,7 +149,8 @@ function moondental_initial_group( $ch ) {
  * 4. 초기 시드 용어 (마이그레이션 · 첫 활성화 시 20개 예시)
  *    이후 사용자가 wp-admin → 📖 치과사전에서 추가·편집.
  * ========================================================== */
-add_action( 'init', function() {
+// v3.37.0 · admin_init로 이동
+add_action( 'admin_init', function() {
 	if ( get_option( 'moondental_encyclopedia_seed_v3350' ) === 'done' ) return;
 
 	$terms = array(
