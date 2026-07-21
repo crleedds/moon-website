@@ -251,22 +251,7 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 	</div>
 </section>
 
-<!-- ============ CTA 배너 ============ -->
-<section class="md-section md-section--sm">
-	<div class="md-container">
-		<div class="md-docs-cta">
-			<span class="md-docs-cta__chip"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_cta_chip', '상담 예약' ) : '상담 예약' ); ?></span>
-			<h2 class="md-docs-cta__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_cta_title', '어떤 원장님께 진료받고 싶으신가요?' ) : '어떤 원장님께 진료받고 싶으신가요?' ); ?></h2>
-			<p class="md-docs-cta__lead">
-				<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_cta_lead', '부담 없이 상담받으세요. 환자분께 맞는 의료진을 안내드립니다.' ) : '부담 없이 상담받으세요. 환자분께 맞는 의료진을 안내드립니다.' ) ); ?>
-			</p>
-			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-docs-banner', 'size' => 'lg', 'align' => 'center' ) ); ?>
-			<p class="md-docs-cta__hours">
-				<?php echo esc_html( md_content( 'doctors_cta_hint', '🕐 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진' ) ); ?>
-			</p>
-		</div>
-	</div>
-</section>
+<?php /* v3.37.2 · 의료진 페이지 중간 CTA 배너 제거 (하단 CTA 배너에 이미 있음) */ ?>
 
 <?php
 get_footer();

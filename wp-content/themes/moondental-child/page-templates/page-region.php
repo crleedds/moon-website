@@ -236,19 +236,7 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 </section>
 <?php endif; ?>
 
-<!-- ============ 4. 예약 CTA ============ -->
-<section class="md-section md-section--sm" id="region-cta">
-	<div class="md-container md-container--narrow">
-		<div class="md-region-cta">
-			<span class="md-region-cta__chip"><?php echo esc_html( md_content( 'region_cta_chip', '' ) ); ?></span>
-			<h2 class="md-region-cta__title"><?php echo nl2br( esc_html( $replace( md_content( 'region_cta_title', '' ) ) ) ); ?></h2>
-			<p class="md-region-cta__lead"><?php echo esc_html( md_content( 'region_cta_lead', '' ) ); ?></p>
-			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-region-' . $slug, 'size' => 'lg', 'align' => 'center' ) ); ?>
-			<p class="md-region-cta__hint"><?php echo esc_html( md_content( 'region_cta_hint', '' ) ); ?></p>
-			<p class="md-region-cta__hint md-region-cta__hint--sub"><?php echo esc_html( md_content( 'region_cta_hint_addr', '' ) ); ?></p>
-		</div>
-	</div>
-</section>
+<?php /* v3.37.2 · 지역 페이지 중간 CTA 배너 제거 (하단 CTA 배너에 이미 있음) */ ?>
 
 <!-- ============ 5. 지역 FAQ ============ -->
 <?php if ( $faq_items ) : ?>

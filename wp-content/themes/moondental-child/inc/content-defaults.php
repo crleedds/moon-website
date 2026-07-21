@@ -1188,9 +1188,7 @@ function moondental_default_privacy_content() {
 		<span>🕐 월·화·수·금 야간 20:30</span>
 		<span>🅿️ 자체 주차장</span>
 	</div>
-	<div class="md-policy-hero__cta">
-		<?php if ( function_exists( 'md_render_reservation_ctas' ) ) { echo md_render_reservation_ctas( array( 'track' => 'cta-policy', 'size' => '', 'align' => 'center' ) ); } ?>
-	</div>
+	<?php /* v3.37.2 · 정책 페이지 히어로 내 CTA 제거 (하단 CTA 배너에 이미 있음) */ ?>
 </div>
 
 <p class="md-policy-meta">시행일: 2026년 5월 27일 · 최종 수정: 2026년 5월 27일</p>

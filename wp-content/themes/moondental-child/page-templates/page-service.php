@@ -122,9 +122,7 @@ if ( function_exists( 'moondental_service_ideal_candidates' ) ) {
 					</li>
 				<?php endforeach; ?>
 			</ul>
-			<div class="md-ideal__cta">
-				<?php echo md_render_reservation_ctas( array( 'track' => 'cta-service-ideal', 'size' => '', 'align' => 'start' ) ); ?>
-			</div>
+			<?php /* v3.37.2 · 중간 CTA 제거 (하단 CTA 배너에 이미 있음) */ ?>
 		</div>
 	</div>
 </section>

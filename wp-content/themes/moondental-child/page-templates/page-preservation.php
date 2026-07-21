@@ -206,19 +206,7 @@ $perio_cards        = $parse_cards( md_content( 'preservation_perio_cards', '' )
 	</div>
 </section>
 
-<!-- ============ CTA ============ -->
-<section class="md-section md-section--sm">
-	<div class="md-container md-container--narrow">
-		<div class="md-region-cta">
-			<?php $chip = md_content( 'preservation_cta_chip', '' ); if ( $chip ) : ?>
-				<span class="md-region-cta__chip"><?php echo esc_html( $chip ); ?></span>
-			<?php endif; ?>
-			<h2 class="md-region-cta__title"><?php echo nl2br( esc_html( md_content( 'preservation_cta_title', '' ) ) ); ?></h2>
-			<p class="md-region-cta__lead"><?php echo esc_html( md_content( 'preservation_cta_lead', '' ) ); ?></p>
-			<?php echo md_render_reservation_ctas( array( 'track' => 'cta-preservation', 'size' => 'lg', 'align' => 'center' ) ); ?>
-		</div>
-	</div>
-</section>
+<?php /* v3.37.2 · 자연치아살리기 페이지 중간 CTA 제거 (하단 CTA 배너에 이미 있음) */ ?>
 
 <?php
 get_footer();
