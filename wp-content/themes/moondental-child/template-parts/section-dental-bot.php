@@ -164,9 +164,8 @@ $aside_call = str_replace( '{phone}', $info['phone'], $aside_call_tpl );
 				<a class="md-btn md-btn--phone md-btn--lg md-dentalbot__cta-btn md-dentalbot__cta-btn--phone"
 				   href="tel:<?php echo esc_attr( $phone_link ); ?>"
 				   data-track="cta-dentalbot-call">
-					<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">
-						<circle cx="12" cy="12" r="12" fill="#e63946"/>
-						<path d="M17.2 14.9v1.9c0 .5-.4.8-.8.8-4.9-.5-8.7-4.3-9.2-9.2 0-.4.3-.8.8-.8h1.9c.4 0 .8.3.8.7.1.6.3 1.2.5 1.8.1.3 0 .6-.2.8L10 11.1c1 1.9 2.5 3.4 4.3 4.3l1.2-1.2c.2-.2.5-.3.8-.2.6.2 1.2.4 1.8.5.4 0 .7.4.7.8z" fill="#fff"/>
+					<svg class="md-rcta__icon md-rcta__icon--phone-glyph" viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57a1.02 1.02 0 0 0-1.02.24l-2.2 2.2a15.05 15.05 0 0 1-6.59-6.59l2.2-2.2c.28-.27.36-.66.24-1.02A11.36 11.36 0 0 1 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z" fill="#e63946"/>
 					</svg>
 					<span class="md-rcta__label"><?php echo esc_html( $aside_call ); ?></span>
 				</a>

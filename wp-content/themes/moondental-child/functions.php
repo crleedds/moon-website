@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.37.3' );
+define( 'MOONDENTAL_VERSION', '3.37.4' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1414,10 +1414,9 @@ function md_render_reservation_ctas( $args = array() ) {
 	$svg_kakao = '<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">'
 		. '<path d="M12 6c-3.7 0-6.7 2.4-6.7 5.4 0 1.9 1.3 3.6 3.2 4.5l-.7 2.6c-.06.23.18.4.38.27l3.05-2c.25.03.51.04.78.04 3.7 0 6.7-2.4 6.7-5.4S15.7 6 12 6z" fill="#3C1E1E"/>'
 		. '</svg>';
-	// v3.37.3 · 전화 아이콘도 네이버·카톡과 동일한 컬러 원 + 흰 아이콘 스타일로 통일
-	$svg_phone = '<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">'
-		. '<circle cx="12" cy="12" r="12" fill="#e63946"/>'
-		. '<path d="M17.2 14.9v1.9c0 .5-.4.8-.8.8-4.9-.5-8.7-4.3-9.2-9.2 0-.4.3-.8.8-.8h1.9c.4 0 .8.3.8.7.1.6.3 1.2.5 1.8.1.3 0 .6-.2.8L10 11.1c1 1.9 2.5 3.4 4.3 4.3l1.2-1.2c.2-.2.5-.3.8-.2.6.2 1.2.4 1.8.5.4 0 .7.4.7.8z" fill="#fff"/>'
+	// v3.37.4 · 전화 아이콘 · 원 없이 빨간 수화기만 · 코럴 버튼에 직접 표시
+	$svg_phone = '<svg class="md-rcta__icon md-rcta__icon--phone-glyph" viewBox="0 0 24 24" aria-hidden="true">'
+		. '<path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57a1.02 1.02 0 0 0-1.02.24l-2.2 2.2a15.05 15.05 0 0 1-6.59-6.59l2.2-2.2c.28-.27.36-.66.24-1.02A11.36 11.36 0 0 1 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z" fill="#e63946"/>'
 		. '</svg>';
 
 	$out  = '<div class="md-btn-group md-rcta">';
