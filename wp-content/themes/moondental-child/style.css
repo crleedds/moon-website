@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.37.5
+Version:      3.37.6
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -4801,6 +4801,36 @@ button.elementor-button {
   background: rgba(255, 255, 255, 0.14);
   color: var(--color-white);
   border-color: var(--color-white);
+}
+
+/* v3.37.6 · CTA 배너 안 전화 버튼 대비 개선
+ *  코럴 배경에 코럴 버튼이 묻히던 문제 해결 · 흰 알약 + 코럴-다크 텍스트 + 빨간 아이콘
+ *  네이버 초록 · 카톡 노랑 · 전화 흰색 → 3버튼 각기 다른 색으로 균등 대비 */
+.md-cta-banner .md-btn--phone {
+  background: var(--color-white);
+  color: var(--color-primary-dark);
+  border-color: var(--color-white);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+}
+.md-cta-banner .md-btn--phone:hover {
+  background: var(--color-surface);
+  color: var(--color-primary-dark);
+  border-color: var(--color-surface);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+}
+/* 네이버/카톡도 살짝 강한 그림자로 3버튼 공중 부양감 통일 */
+.md-cta-banner .md-btn--naver,
+.md-cta-banner .md-btn--kakao {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+}
+.md-cta-banner .md-btn--naver:hover,
+.md-cta-banner .md-btn--kakao:hover {
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+}
+/* 힌트 텍스트 가독성 개선 · 0.78 → 0.9 */
+.md-cta-banner__hint {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* =============================================================
