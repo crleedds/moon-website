@@ -410,41 +410,7 @@ for ( $i = 1; $i <= 4; $i++ ) {
 	</div>
 </section>
 
-<!-- ============ CTA (코럴 — 스크린샷의 다크브라운과 차별) ============ -->
-<section class="md-section md-section--sm">
-	<div class="md-container">
-		<div class="md-priceX-cta">
-			<div class="md-priceX-cta__text">
-				<span class="md-priceX-cta__chip"><?php echo esc_html( md_content( 'price_cta_chip', '무료 비용 상담' ) ); ?></span>
-				<h2 class="md-priceX-cta__title"><?php echo esc_html( md_content( 'price_cta_title', '내 진료 비용이 궁금하신가요?' ) ); ?></h2>
-				<p class="md-priceX-cta__lead">
-					<?php echo nl2br( esc_html( md_content( 'price_cta_lead', '정확한 진단 후 맞춤 견적서를 안내드립니다. 부담 없이 먼저 들어보세요.' ) ) ); ?>
-				</p>
-				<div class="md-btn-group">
-					<a class="md-btn md-btn-primary md-btn--lg" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-priceX-banner-call">
-						📞 <?php echo esc_html( $info['phone'] ); ?>
-					</a>
-					<?php if ( $kakao_url ) : ?>
-						<a class="md-btn md-btn-ghost md-btn--lg" href="<?php echo esc_url( $kakao_url ); ?>" target="_blank" rel="noopener" data-track="cta-priceX-banner-kakao">
-							💬 카카오톡 상담
-						</a>
-					<?php endif; ?>
-				</div>
-			</div>
-			<div class="md-priceX-cta__meta">
-				<dl>
-					<?php for ( $i = 1; $i <= 3; $i++ ) : ?>
-						<div>
-							<dt><?php echo esc_html( md_content( "price_cta_meta_{$i}_label", '' ) ); ?></dt>
-							<dd><?php echo esc_html( md_content( "price_cta_meta_{$i}_value", '' ) ); ?></dd>
-						</div>
-					<?php endfor; ?>
-				</dl>
-			</div>
-		</div>
-	</div>
-</section>
-
+<?php /* v3.37.8 · 비용안내 중간 CTA (md-priceX-cta) 제거 · 하단 통일 CTA와 중복 */ ?>
 <?php /* 위치 섹션은 푸터 위 section-location과 중복되어 제거됨 — v3.12.3 */ ?>
 
 <?php get_template_part( 'template-parts/section', 'cta' ); ?>
