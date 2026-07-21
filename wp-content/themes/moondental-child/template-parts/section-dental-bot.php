@@ -78,7 +78,7 @@ $aside_title = md_content( 'bot_aside_title', '진단 안 받고 바로 상담' 
 $aside_lead  = md_content( 'bot_aside_lead', '증상이 명확하다면 곧장 예약·상담하세요.' );
 $aside_naver = md_content( 'bot_aside_btn_naver', '네이버 예약' );
 $aside_kakao = md_content( 'bot_aside_btn_kakao', '카카오톡 상담' );
-$aside_call_tpl = md_content( 'bot_aside_btn_call', '전화 상담 {phone}' );
+$aside_call_tpl = md_content( 'bot_aside_btn_call', '전화 상담' );
 $aside_hint  = md_content( 'bot_aside_hint', '진료시간: 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00' );
 
 $info       = moondental_get_info();
@@ -160,39 +160,42 @@ $aside_call = str_replace( '{phone}', $info['phone'], $aside_call_tpl );
 			<h3 class="md-dentalbot__cta-title"><?php echo esc_html( $aside_title ); ?></h3>
 			<p class="md-dentalbot__cta-lead"><?php echo esc_html( $aside_lead ); ?></p>
 
-			<?php if ( $naver_book ) : ?>
-				<a class="md-btn md-btn--naver md-btn--lg md-dentalbot__cta-btn"
-				   href="<?php echo esc_url( $naver_book ); ?>"
-				   target="_blank" rel="noopener"
-				   data-track="cta-dentalbot-naver">
+			<div class="md-dentalbot__cta-btns">
+				<a class="md-btn md-btn--phone md-btn--lg md-dentalbot__cta-btn md-dentalbot__cta-btn--phone"
+				   href="tel:<?php echo esc_attr( $phone_link ); ?>"
+				   data-track="cta-dentalbot-call">
 					<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">
-						<circle cx="12" cy="12" r="12" fill="#ffffff"/>
-						<path d="M9 8h2.2l3.6 5.1V8H17v8h-2.2l-3.6-5.1V16H9V8z" fill="#03C75A"/>
+						<circle cx="12" cy="12" r="12" fill="#e63946"/>
+						<path d="M17.2 14.9v1.9c0 .5-.4.8-.8.8-4.9-.5-8.7-4.3-9.2-9.2 0-.4.3-.8.8-.8h1.9c.4 0 .8.3.8.7.1.6.3 1.2.5 1.8.1.3 0 .6-.2.8L10 11.1c1 1.9 2.5 3.4 4.3 4.3l1.2-1.2c.2-.2.5-.3.8-.2.6.2 1.2.4 1.8.5.4 0 .7.4.7.8z" fill="#fff"/>
 					</svg>
-					<span class="md-rcta__label"><?php echo esc_html( $aside_naver ); ?></span>
+					<span class="md-rcta__label"><?php echo esc_html( $aside_call ); ?></span>
 				</a>
-			<?php endif; ?>
 
-			<?php if ( $kakao_url ) : ?>
-				<a class="md-btn md-btn--kakao md-btn--lg md-dentalbot__cta-btn"
-				   href="<?php echo esc_url( $kakao_url ); ?>"
-				   target="_blank" rel="noopener"
-				   data-track="cta-dentalbot-kakao">
-					<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">
-						<path d="M12 6c-3.7 0-6.7 2.4-6.7 5.4 0 1.9 1.3 3.6 3.2 4.5l-.7 2.6c-.06.23.18.4.38.27l3.05-2c.25.03.51.04.78.04 3.7 0 6.7-2.4 6.7-5.4S15.7 6 12 6z" fill="#3C1E1E"/>
-					</svg>
-					<span class="md-rcta__label"><?php echo esc_html( $aside_kakao ); ?></span>
-				</a>
-			<?php endif; ?>
+				<?php if ( $naver_book ) : ?>
+					<a class="md-btn md-btn--naver md-btn--lg md-dentalbot__cta-btn"
+					   href="<?php echo esc_url( $naver_book ); ?>"
+					   target="_blank" rel="noopener"
+					   data-track="cta-dentalbot-naver">
+						<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">
+							<circle cx="12" cy="12" r="12" fill="#ffffff"/>
+							<path d="M9 8h2.2l3.6 5.1V8H17v8h-2.2l-3.6-5.1V16H9V8z" fill="#03C75A"/>
+						</svg>
+						<span class="md-rcta__label"><?php echo esc_html( $aside_naver ); ?></span>
+					</a>
+				<?php endif; ?>
 
-			<a class="md-btn md-btn--phone md-btn--lg md-dentalbot__cta-btn"
-			   href="tel:<?php echo esc_attr( $phone_link ); ?>"
-			   data-track="cta-dentalbot-call">
-				<svg class="md-rcta__icon md-rcta__icon--stroke" viewBox="0 0 24 24" aria-hidden="true">
-					<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-				</svg>
-				<span class="md-rcta__label"><?php echo esc_html( $aside_call ); ?></span>
-			</a>
+				<?php if ( $kakao_url ) : ?>
+					<a class="md-btn md-btn--kakao md-btn--lg md-dentalbot__cta-btn"
+					   href="<?php echo esc_url( $kakao_url ); ?>"
+					   target="_blank" rel="noopener"
+					   data-track="cta-dentalbot-kakao">
+						<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">
+							<path d="M12 6c-3.7 0-6.7 2.4-6.7 5.4 0 1.9 1.3 3.6 3.2 4.5l-.7 2.6c-.06.23.18.4.38.27l3.05-2c.25.03.51.04.78.04 3.7 0 6.7-2.4 6.7-5.4S15.7 6 12 6z" fill="#3C1E1E"/>
+						</svg>
+						<span class="md-rcta__label"><?php echo esc_html( $aside_kakao ); ?></span>
+					</a>
+				<?php endif; ?>
+			</div>
 
 			<p class="md-dentalbot__cta-hint"><?php echo esc_html( $aside_hint ); ?></p>
 		</aside>

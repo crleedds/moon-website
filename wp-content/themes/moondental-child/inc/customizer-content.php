@@ -2292,7 +2292,7 @@ function moondental_bot_content_fields() {
 				'bot_aside_lead'       => array( 'default' => '증상이 명확하다면 곧장 예약·상담하세요.', 'label' => 'aside 리드', 'type' => 'textarea' ),
 				'bot_aside_btn_naver'  => array( 'default' => '네이버 예약', 'label' => '네이버 예약 버튼 라벨', 'type' => 'text' ),
 				'bot_aside_btn_kakao'  => array( 'default' => '카카오톡 상담', 'label' => '카카오톡 버튼 라벨', 'type' => 'text' ),
-				'bot_aside_btn_call'   => array( 'default' => '전화 상담 {phone}', 'label' => '전화 버튼 라벨 (토큰 {phone})', 'type' => 'text' ),
+				'bot_aside_btn_call'   => array( 'default' => '전화 상담', 'label' => '전화 버튼 라벨 (짧게 유지 · 가로 3버튼 배치)', 'type' => 'text' ),
 				'bot_aside_hint'       => array( 'default' => '진료시간: 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00', 'label' => 'aside 하단 진료시간 힌트', 'type' => 'text' ),
 			),
 		),

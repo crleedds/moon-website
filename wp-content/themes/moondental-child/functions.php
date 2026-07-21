@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.37.0' );
+define( 'MOONDENTAL_VERSION', '3.37.1' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -417,6 +417,18 @@ add_action( 'admin_init', function() {
 	}
 	update_option( 'moondental_seed_service_content_v3337', 'done' );
 }, 20 );
+
+/* v3.37.1 · 자가진단 aside 전화 버튼 라벨 마이그레이션
+ *  기존 저장값이 '{phone}' 토큰을 포함하면 초기화 (짧은 '전화 상담'으로 재적용).
+ *  이유: 3버튼 가로 배치로 바뀌면서 전화번호가 라벨에 붙으면 폭 초과. */
+add_action( 'admin_init', function() {
+	if ( get_option( 'moondental_bot_call_label_v3371' ) === 'done' ) return;
+	$stored = get_theme_mod( 'md_content_bot_aside_btn_call', null );
+	if ( is_string( $stored ) && strpos( $stored, '{phone}' ) !== false ) {
+		remove_theme_mod( 'md_content_bot_aside_btn_call' );
+	}
+	update_option( 'moondental_bot_call_label_v3371', 'done' );
+} );
 
 /* 일회성 마이그레이션 v3.33.0 · 커스텀 SVG 아이콘 세트 이관.
  *  기존 저장된 값이 옛 이모지(📱 · 🔄 · 🦴 등)로 남아 있으면 새 SVG 키로 업그레이드.
