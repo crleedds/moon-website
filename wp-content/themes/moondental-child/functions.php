@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.37.2' );
+define( 'MOONDENTAL_VERSION', '3.37.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -428,6 +428,18 @@ add_action( 'admin_init', function() {
 		remove_theme_mod( 'md_content_bot_aside_btn_call' );
 	}
 	update_option( 'moondental_bot_call_label_v3371', 'done' );
+} );
+
+/* v3.37.3 · 전역 예약 CTA 전화번호 표시 off 마이그레이션
+ *  기존 저장값이 'yes'면 초기화 → 새 default 'no' 적용.
+ *  이유: 3버튼 가로 통일로 전화번호가 붙으면 균형 깨짐. */
+add_action( 'admin_init', function() {
+	if ( get_option( 'moondental_cta_show_phone_v3373' ) === 'done' ) return;
+	$stored = get_theme_mod( 'md_content_cta_btn_show_phone', null );
+	if ( is_string( $stored ) && strtolower( trim( $stored ) ) === 'yes' ) {
+		remove_theme_mod( 'md_content_cta_btn_show_phone' );
+	}
+	update_option( 'moondental_cta_show_phone_v3373', 'done' );
 } );
 
 /* 일회성 마이그레이션 v3.33.0 · 커스텀 SVG 아이콘 세트 이관.
@@ -1376,7 +1388,8 @@ function md_render_reservation_ctas( $args = array() ) {
 	$naver_label = function_exists( 'md_content' ) ? md_content( 'cta_btn_naver_label', '📅 네이버 예약' ) : '📅 네이버 예약';
 	$kakao_label = function_exists( 'md_content' ) ? md_content( 'cta_btn_kakao_label', '💬 카카오톡 상담' ) : '💬 카카오톡 상담';
 	$call_label  = function_exists( 'md_content' ) ? md_content( 'cta_btn_call_label',  '📞 전화 상담' )       : '📞 전화 상담';
-	$show_phone  = function_exists( 'md_content' ) ? md_content( 'cta_btn_show_phone',  'yes' )              : 'yes';
+	// v3.37.3 · 전화번호 표시 기본 off · 라벨 짧게 유지해 3버튼 가로 배치 균형
+	$show_phone  = function_exists( 'md_content' ) ? md_content( 'cta_btn_show_phone',  'no' )               : 'no';
 
 	$phone       = $info['phone'] ?? '';
 	$phone_link  = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $phone );
@@ -1401,8 +1414,10 @@ function md_render_reservation_ctas( $args = array() ) {
 	$svg_kakao = '<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">'
 		. '<path d="M12 6c-3.7 0-6.7 2.4-6.7 5.4 0 1.9 1.3 3.6 3.2 4.5l-.7 2.6c-.06.23.18.4.38.27l3.05-2c.25.03.51.04.78.04 3.7 0 6.7-2.4 6.7-5.4S15.7 6 12 6z" fill="#3C1E1E"/>'
 		. '</svg>';
-	$svg_phone = '<svg class="md-rcta__icon md-rcta__icon--stroke" viewBox="0 0 24 24" aria-hidden="true">'
-		. '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+	// v3.37.3 · 전화 아이콘도 네이버·카톡과 동일한 컬러 원 + 흰 아이콘 스타일로 통일
+	$svg_phone = '<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">'
+		. '<circle cx="12" cy="12" r="12" fill="#e63946"/>'
+		. '<path d="M17.2 14.9v1.9c0 .5-.4.8-.8.8-4.9-.5-8.7-4.3-9.2-9.2 0-.4.3-.8.8-.8h1.9c.4 0 .8.3.8.7.1.6.3 1.2.5 1.8.1.3 0 .6-.2.8L10 11.1c1 1.9 2.5 3.4 4.3 4.3l1.2-1.2c.2-.2.5-.3.8-.2.6.2 1.2.4 1.8.5.4 0 .7.4.7.8z" fill="#fff"/>'
 		. '</svg>';
 
 	$out  = '<div class="md-btn-group md-rcta">';

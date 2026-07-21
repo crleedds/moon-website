@@ -284,5 +284,7 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 </section>
 <?php endif; ?>
 
+<?php get_template_part( 'template-parts/section', 'cta' ); ?>
+
 <?php
 get_footer();

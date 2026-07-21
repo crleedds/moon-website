@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.37.2
+Version:      3.37.3
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -603,15 +603,16 @@ ul, ol { padding-left: 1.25em; }
   box-shadow: 0 8px 22px rgba(216, 128, 98, 0.38);
 }
 
-/* v3.36.1 · 예약 CTA 3버튼 · FAB 스택 디자인과 완전 동일
- *  세로 스택 · 균등 폭 · 중앙 정렬 (원본 우측 하단 FAB 스타일) */
+/* v3.37.3 · 예약 CTA 3버튼 · 가로 배치 통일 · 모든 페이지 하단 동일 디자인
+ *  전화 → 네이버 → 카톡 · 균등 폭 · 좁은 화면에서만 세로 fallback */
 .md-btn-group.md-rcta,
 .md-rcta {
   display: flex;
-  flex-direction: column !important;
+  flex-direction: row;
   align-items: stretch;
+  justify-content: center;
   gap: 12px;
-  max-width: 320px;
+  max-width: 720px;
   margin-left: auto;
   margin-right: auto;
   flex-wrap: nowrap;
@@ -619,13 +620,27 @@ ul, ol { padding-left: 1.25em; }
 .md-rcta__btn {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   border-radius: var(--radius-pill);
   font-weight: 700;
   white-space: nowrap;
   transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), background-color 0.2s var(--ease);
-  width: 100%;
+  flex: 1 1 0;
+  min-width: 0;
   justify-content: center;
+  padding-left: 14px;
+  padding-right: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 좁은 화면 fallback — 라벨이 잘리기 시작하는 지점에서 세로 스택 */
+@media (max-width: 520px) {
+  .md-btn-group.md-rcta,
+  .md-rcta {
+    flex-direction: column;
+    max-width: 340px;
+  }
+  .md-rcta__btn { flex: 1 1 auto; width: 100%; }
 }
 .md-rcta__btn:hover {
   transform: translateY(-3px);

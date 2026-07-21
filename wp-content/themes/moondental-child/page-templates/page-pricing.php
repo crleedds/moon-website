@@ -457,5 +457,7 @@ for ( $i = 1; $i <= 4; $i++ ) {
 
 <?php /* 위치 섹션은 푸터 위 section-location과 중복되어 제거됨 — v3.12.3 */ ?>
 
+<?php get_template_part( 'template-parts/section', 'cta' ); ?>
+
 <?php
 get_footer();

@@ -215,7 +215,7 @@ $nav_items = $parse_nav( md_content( 'smile_nav_items', '' ) );
 	</div>
 </section>
 
-<?php /* v3.37.2 · 스마일디자인 페이지 중간 CTA 제거 (하단 CTA 배너에 이미 있음) */ ?>
+<?php get_template_part( 'template-parts/section', 'cta' ); ?>
 
 <?php
 get_footer();

@@ -206,7 +206,7 @@ $perio_cards        = $parse_cards( md_content( 'preservation_perio_cards', '' )
 	</div>
 </section>
 
-<?php /* v3.37.2 · 자연치아살리기 페이지 중간 CTA 제거 (하단 CTA 배너에 이미 있음) */ ?>
+<?php get_template_part( 'template-parts/section', 'cta' ); ?>
 
 <?php
 get_footer();

@@ -251,7 +251,7 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 	</div>
 </section>
 
-<?php /* v3.37.2 · 의료진 페이지 중간 CTA 배너 제거 (하단 CTA 배너에 이미 있음) */ ?>
+<?php get_template_part( 'template-parts/section', 'cta' ); ?>
 
 <?php
 get_footer();
