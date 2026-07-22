@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.37.8' );
+define( 'MOONDENTAL_VERSION', '3.37.9' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1343,6 +1343,206 @@ function md_autolink_addresses( $html ) {
 
 // 사이트 전역 the_content 필터로 자동 주소 링크 (priority 90 — wpautop 후 / lazy-image 전)
 add_filter( 'the_content', 'md_autolink_addresses', 90 );
+
+
+/* ============================================================
+ * v3.37.9 · 하단 CTA 배너 · 페이지별 맞춤 문구 시스템
+ *
+ *  section-cta.php는 어느 페이지에서 호출되든 이 helper로 컨텍스트를 파악해
+ *  적절한 title/lead/eyebrow를 골라 보여줌.
+ *  기존 페이지별 사용자 정의 필드(doctors_cta_*, price_cta_*, ...)를 재사용해
+ *  Customizer에서 그대로 편집 가능.
+ * ========================================================== */
+
+/**
+ * 현재 페이지의 하단 CTA 배너 컨텍스트 감지.
+ * @return string
+ */
+function moondental_cta_context() {
+	// 지역 페이지는 rewrite intercept 로드 · is_page_template 안 먹음
+	if ( get_query_var( 'region_slug' ) )                                    return 'region';
+
+	if ( is_page_template( 'page-templates/page-doctors.php' ) )            return 'doctors';
+	if ( is_page_template( 'page-templates/page-doctor-single.php' ) )      return 'doctor_single';
+	if ( is_page_template( 'page-templates/page-pricing.php' ) )            return 'pricing';
+	if ( is_page_template( 'page-templates/page-preservation.php' ) )       return 'preservation';
+	if ( is_page_template( 'page-templates/page-prevention.php' ) )         return 'prevention';
+	if ( is_page_template( 'page-templates/page-smile-design.php' ) )       return 'smile';
+	if ( is_page_template( 'page-templates/page-recruit.php' ) )            return 'recruit';
+	if ( is_page_template( 'page-templates/page-location.php' ) )           return 'location';
+	if ( is_page_template( 'page-templates/page-facility.php' ) )           return 'facility';
+	if ( is_page_template( 'page-templates/page-faq.php' ) )                return 'faq';
+	if ( is_page_template( 'page-templates/page-news.php' ) )               return 'news';
+	if ( is_page_template( 'page-templates/page-history.php' ) )            return 'history';
+	if ( is_page_template( 'page-templates/page-service.php' ) )            return 'service';
+	if ( is_page_template( 'page-templates/page-strength.php' ) )           return 'facility'; // 강점·기술력 → facility 톤 공유
+
+	if ( is_singular( 'md_term' ) )                                          return 'encyclopedia';
+	if ( is_post_type_archive( 'md_term' ) || is_tax( 'md_term_cat' ) )      return 'encyclopedia';
+	if ( is_single() )                                                       return 'news';
+
+	return 'default';
+}
+
+/**
+ * 컨텍스트별 CTA 배너 카피 반환 (eyebrow · title · lead).
+ * 기존 페이지별 Customizer 필드가 있으면 그것을 우선 사용, 없으면 tailored default.
+ *
+ * @param string|null $context null이면 자동 감지
+ * @return array{eyebrow:string,title:string,lead:string}
+ */
+function moondental_cta_copy( $context = null ) {
+	if ( ! $context ) $context = moondental_cta_context();
+
+	$shared_eyebrow = md_content( 'cta_eyebrow', '상담 예약' );
+	$shared_title   = md_content( 'cta_title',   '30년 임상 · 정직한 견적을 지금 확인하세요' );
+	$shared_lead    = md_content( 'cta_lead',    "환자분의 상황을 먼저 듣고, 꼭 필요한 치료만 권합니다.\n지금 상담을 신청하시면 진료시간 내 빠르게 연락드릴게요." );
+
+	switch ( $context ) {
+		case 'doctors':
+			$copy = array(
+				'eyebrow' => '원장님 상담',
+				'title'   => md_content( 'doctors_cta_title', '어떤 원장님께 진료받고 싶으신가요?' ),
+				'lead'    => md_content( 'doctors_cta_lead',  '부담 없이 상담받으세요. 환자분께 맞는 의료진을 안내드립니다.' ),
+			);
+			break;
+
+		case 'doctor_single':
+			$doctor_name = get_the_title();
+			$title_tpl   = md_content( 'doc_single_cta_title', '원장님께 진료받고 싶으시면' );
+			$copy = array(
+				'eyebrow' => '진료 예약',
+				'title'   => trim( $doctor_name . ' ' . $title_tpl ),
+				'lead'    => md_content( 'doc_single_cta_lead', '원하시는 일정에 맞춰 진료 예약을 도와드립니다.' ),
+			);
+			break;
+
+		case 'pricing':
+			$copy = array(
+				'eyebrow' => '무료 비용 상담',
+				'title'   => md_content( 'price_cta_title', '내 진료 비용이 궁금하신가요?' ),
+				'lead'    => md_content( 'price_cta_lead',  '정확한 진단 후 맞춤 견적서를 안내드립니다. 부담 없이 먼저 들어보세요.' ),
+			);
+			break;
+
+		case 'preservation':
+			$copy = array(
+				'eyebrow' => '자연치아 살리기',
+				'title'   => md_content( 'preservation_cta_title', "발치 권유받으셨나요?\n한 번 더 살펴보세요" ),
+				'lead'    => md_content( 'preservation_cta_lead',  '보존과·치주과 전문 의료진의 정밀 진단으로 자연치아를 살릴 수 있는지 검토해드립니다.' ),
+			);
+			break;
+
+		case 'prevention':
+			$copy = array(
+				'eyebrow' => '예방 클리닉',
+				'title'   => md_content( 'prevention_cta_title', "치료 전에 예방을 시작하세요\n덴탈 SPA로 평생 관리" ),
+				'lead'    => md_content( 'prevention_cta_lead',  '6개월 주기 정기 SPA로 자연치아를 평생 건강하게 — 가장 경제적인 투자입니다.' ),
+			);
+			break;
+
+		case 'smile':
+			$copy = array(
+				'eyebrow' => '스마일 디자인',
+				'title'   => md_content( 'smile_cta_title', "지금 내 미소,\n디자인해보세요" ),
+				'lead'    => md_content( 'smile_cta_lead',  '디지털 스마일 시뮬레이션으로 결과를 미리 확인하고 시작할 수 있습니다.' ),
+			);
+			break;
+
+		case 'region':
+			$region_name = '';
+			if ( function_exists( 'moondental_get_region_by_slug' ) ) {
+				$region = moondental_get_region_by_slug( get_query_var( 'region_slug' ) );
+				if ( $region && ! empty( $region['name'] ) ) $region_name = $region['name'];
+			}
+			$title_raw = md_content( 'region_cta_title', "{region}에서 문치과병원까지\n지금 바로 상담 받아보세요" );
+			$copy = array(
+				'eyebrow' => '우리 지역 환자',
+				'title'   => str_replace( '{region}', $region_name, $title_raw ),
+				'lead'    => md_content( 'region_cta_lead', '네이버 예약 24시간 자동 · 전화·카카오톡으로 편하게 문의하세요.' ),
+			);
+			break;
+
+		case 'recruit':
+			$copy = array(
+				'eyebrow' => '채용 문의',
+				'title'   => md_content( 'recruit_page_cta_title', "지금 이메일로\n편하게 보내주세요" ),
+				'lead'    => md_content( 'recruit_page_cta_lead',  '길지 않아도, 완벽하지 않아도 괜찮습니다. 함께 오래 갈 분을 기다리고 있습니다.' ),
+			);
+			break;
+
+		case 'location':
+			$copy = array(
+				'eyebrow' => '방문 예약',
+				'title'   => md_content( 'cta_location_title', "오시는 길 확인하셨다면\n지금 예약해주세요" ),
+				'lead'    => md_content( 'cta_location_lead',  '문타워 9·10·11·13층 · 자체 주차장 · 편하신 방법으로 연락주세요.' ),
+			);
+			break;
+
+		case 'facility':
+			$copy = array(
+				'eyebrow' => '병원 방문 상담',
+				'title'   => md_content( 'cta_facility_title', '시설을 직접 보고 결정하세요' ),
+				'lead'    => md_content( 'cta_facility_lead',  '편하신 시간에 방문 상담이 가능합니다. 미리 예약해주시면 대기 없이 안내드립니다.' ),
+			);
+			break;
+
+		case 'faq':
+			$copy = array(
+				'eyebrow' => '궁금증 해결',
+				'title'   => md_content( 'cta_faq_title', '여전히 궁금한 점이 있으신가요?' ),
+				'lead'    => md_content( 'cta_faq_lead',  'FAQ에서 답을 찾지 못하셨다면 언제든 편하게 상담해주세요.' ),
+			);
+			break;
+
+		case 'news':
+			$copy = array(
+				'eyebrow' => '병원 소식',
+				'title'   => md_content( 'cta_news_title', '궁금한 진료가 있으신가요?' ),
+				'lead'    => md_content( 'cta_news_lead',  '관련 상담을 원하시면 부담 없이 연락주세요. 진료시간 내 빠르게 답변드립니다.' ),
+			);
+			break;
+
+		case 'encyclopedia':
+			$copy = array(
+				'eyebrow' => '정확한 진단은 내원',
+				'title'   => md_content( 'cta_enc_title', '이 증상, 나에게 해당할까요?' ),
+				'lead'    => md_content( 'cta_enc_lead',  '치과사전은 참고용입니다. 정확한 진단·치료 계획은 의료진 상담이 필요합니다.' ),
+			);
+			break;
+
+		case 'history':
+			$copy = array(
+				'eyebrow' => '30년 문치과',
+				'title'   => md_content( 'cta_history_title', '30년 임상, 지금 만나보세요' ),
+				'lead'    => md_content( 'cta_history_lead',  '오랜 시간 축적된 진료 노하우로 정직하게 상담드립니다.' ),
+			);
+			break;
+
+		case 'service':
+			$service_name = get_the_title();
+			$copy = array(
+				'eyebrow' => '상담 · 예약',
+				'title'   => md_content( 'cta_service_title', ( $service_name ? $service_name . ', ' : '' ) . '나에게 맞는지 상담받아보세요' ),
+				'lead'    => md_content( 'cta_service_lead',  '진단부터 치료 계획까지 부담 없이 안내드립니다. 시작 전에 궁금한 점을 다 여쭤보세요.' ),
+			);
+			break;
+
+		default:
+			$copy = array(
+				'eyebrow' => $shared_eyebrow,
+				'title'   => $shared_title,
+				'lead'    => $shared_lead,
+			);
+	}
+
+	/**
+	 * 필터로 최종 카피 커스터마이즈 가능.
+	 * @param array  $copy    ['eyebrow','title','lead']
+	 * @param string $context 컨텍스트 키
+	 */
+	return apply_filters( 'moondental_cta_copy', $copy, $context );
+}
 
 /**
  * Astra 부모 테마의 기본 scroll-to-top 버튼 끄기 — 테마 자체 .md-totop만 사용.

@@ -463,16 +463,41 @@ function moondental_home_content_fields() {
 			),
 		),
 
-		/* ─── CTA 배너 ─────────────────────────────────────── */
+		/* ─── CTA 배너 (기본 · 홈 및 나머지 페이지) ─────────── */
 		'cta' => array(
 			'title'  => '홈 — 하단 CTA 배너',
 			'fields' => array(
-				'cta_eyebrow' => array( 'default' => '상담 예약', 'label' => 'eyebrow', 'type' => 'text' ),
+				'cta_eyebrow' => array( 'default' => '상담 예약', 'label' => 'eyebrow (홈 등 기본 문구)', 'type' => 'text' ),
 				'cta_title'   => array( 'default' => '천안·아산 대표 치과병원 · 전국에서 찾아오시는 병원', 'label' => '제목', 'type' => 'text' ),
 				'cta_lead'    => array( 'default' => "환자분의 상황을 먼저 듣고, 꼭 필요한 치료만 권합니다.\n지금 상담을 신청하시면 진료시간 내 빠르게 연락드릴게요.", 'label' => '설명 (줄바꿈 가능)', 'type' => 'textarea' ),
 				'cta_btn1'    => array( 'default' => '📅 상담 예약하기', 'label' => '버튼 1 라벨', 'type' => 'text' ),
 				'cta_btn2'    => array( 'default' => '카카오톡', 'label' => '버튼 2 라벨', 'type' => 'text' ),
-				'cta_hint'    => array( 'default' => '진료시간: 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진', 'label' => '하단 진료시간 안내', 'type' => 'text' ),
+				'cta_hint'    => array( 'default' => '진료시간: 월·화·수·금 9:00–20:30 · 목 9:00–18:30 · 토 9:00–14:00 · 일/공휴일 휴진', 'label' => '하단 진료시간 안내 (모든 페이지 공용)', 'type' => 'text' ),
+			),
+		),
+
+		/* ─── v3.37.9 · 페이지별 하단 CTA 오버라이드 ────────
+		 *  기존 페이지 섹션에 이미 필드가 있는 경우(doctors_cta_*, price_cta_*,
+		 *  preservation_cta_*, prevention_cta_*, smile_cta_*, region_cta_*,
+		 *  recruit_page_cta_*, doc_single_cta_*)는 그대로 재사용.
+		 *  여기는 그 외 페이지들만 추가. */
+		'cta_extra' => array(
+			'title'  => '하단 CTA — 페이지별 문구 (기타)',
+			'fields' => array(
+				'cta_location_title' => array( 'default' => "오시는 길 확인하셨다면\n지금 예약해주세요", 'label' => '오시는 길 · 제목 (줄바꿈 가능)', 'type' => 'textarea' ),
+				'cta_location_lead'  => array( 'default' => '문타워 9·10·11·13층 · 자체 주차장 · 편하신 방법으로 연락주세요.', 'label' => '오시는 길 · 설명', 'type' => 'textarea' ),
+				'cta_facility_title' => array( 'default' => '시설을 직접 보고 결정하세요', 'label' => '기술력·시설 · 제목', 'type' => 'text' ),
+				'cta_facility_lead'  => array( 'default' => '편하신 시간에 방문 상담이 가능합니다. 미리 예약해주시면 대기 없이 안내드립니다.', 'label' => '기술력·시설 · 설명', 'type' => 'textarea' ),
+				'cta_faq_title'      => array( 'default' => '여전히 궁금한 점이 있으신가요?', 'label' => 'FAQ · 제목', 'type' => 'text' ),
+				'cta_faq_lead'       => array( 'default' => 'FAQ에서 답을 찾지 못하셨다면 언제든 편하게 상담해주세요.', 'label' => 'FAQ · 설명', 'type' => 'textarea' ),
+				'cta_news_title'     => array( 'default' => '궁금한 진료가 있으신가요?', 'label' => '병원 소식 · 제목', 'type' => 'text' ),
+				'cta_news_lead'      => array( 'default' => '관련 상담을 원하시면 부담 없이 연락주세요. 진료시간 내 빠르게 답변드립니다.', 'label' => '병원 소식 · 설명', 'type' => 'textarea' ),
+				'cta_enc_title'      => array( 'default' => '이 증상, 나에게 해당할까요?', 'label' => '치과사전 · 제목', 'type' => 'text' ),
+				'cta_enc_lead'       => array( 'default' => '치과사전은 참고용입니다. 정확한 진단·치료 계획은 의료진 상담이 필요합니다.', 'label' => '치과사전 · 설명', 'type' => 'textarea' ),
+				'cta_history_title'  => array( 'default' => '30년 임상, 지금 만나보세요', 'label' => '30년 발자취 · 제목', 'type' => 'text' ),
+				'cta_history_lead'   => array( 'default' => '오랜 시간 축적된 진료 노하우로 정직하게 상담드립니다.', 'label' => '30년 발자취 · 설명', 'type' => 'textarea' ),
+				'cta_service_title'  => array( 'default' => '나에게 맞는지 상담받아보세요', 'label' => '진료 영역 페이지 · 제목 (앞에 진료명 자동 붙음)', 'type' => 'text' ),
+				'cta_service_lead'   => array( 'default' => '진단부터 치료 계획까지 부담 없이 안내드립니다. 시작 전에 궁금한 점을 다 여쭤보세요.', 'label' => '진료 영역 페이지 · 설명', 'type' => 'textarea' ),
 			),
 		),
 
