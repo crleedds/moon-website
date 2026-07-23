@@ -68,12 +68,12 @@ $total_count = array_sum( array_map( 'count', $visible_groups ) );
 <section class="md-page-hero md-page-hero--enc">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>치과사전</span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( md_content( 'breadcrumb_encyclopedia', '치과사전' ) ); ?></span>
 		</nav>
-		<span class="md-page-hero__eyebrow">DENTAL ENCYCLOPEDIA · 치과사전</span>
-		<h1 class="md-page-hero__title">천안·아산 문치과병원 · 치과사전</h1>
+		<span class="md-page-hero__eyebrow"><?php echo esc_html( md_content( 'enc_hero_eyebrow', 'DENTAL ENCYCLOPEDIA · 치과사전' ) ); ?></span>
+		<h1 class="md-page-hero__title"><?php echo esc_html( md_content( 'enc_hero_title', '천안·아산 문치과병원 · 치과사전' ) ); ?></h1>
 		<p class="md-page-hero__lead">
-			치과 진료·시술·질환에 대한 용어를 알기 쉽게 정리했습니다. 궁금한 용어를 검색하거나 카테고리·초성으로 찾아보세요.
+			<?php echo esc_html( md_content( 'enc_hero_lead', '치과 진료·시술·질환에 대한 용어를 알기 쉽게 정리했습니다. 궁금한 용어를 검색하거나 카테고리·초성으로 찾아보세요.' ) ); ?>
 		</p>
 	</div>
 </section>
@@ -83,31 +83,31 @@ $total_count = array_sum( array_map( 'count', $visible_groups ) );
 
 		<!-- 검색 -->
 		<form class="md-enc-search" method="get" action="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>">
-			<label for="md-enc-q" class="md-sr-only">용어 검색</label>
-			<input type="search" id="md-enc-q" name="q" value="<?php echo esc_attr( $search_q ); ?>" placeholder="🔍 용어 검색 (예: 임플란트, 스케일링, 라미네이트…)" autocomplete="off">
+			<label for="md-enc-q" class="md-sr-only"><?php echo esc_html( md_content( 'enc_search_label', '용어 검색' ) ); ?></label>
+			<input type="search" id="md-enc-q" name="q" value="<?php echo esc_attr( $search_q ); ?>" placeholder="<?php echo esc_attr( md_content( 'enc_search_placeholder', '🔍 용어 검색 (예: 임플란트, 스케일링, 라미네이트…)' ) ); ?>" autocomplete="off">
 			<?php if ( $active_cat ) : ?><input type="hidden" name="cat" value="<?php echo esc_attr( $active_cat ); ?>"><?php endif; ?>
-			<button type="submit" class="md-btn md-btn-primary">검색</button>
+			<button type="submit" class="md-btn md-btn-primary"><?php echo esc_html( md_content( 'enc_search_btn', '검색' ) ); ?></button>
 			<?php if ( $search_q || $active_cat || $active_init ) : ?>
-				<a class="md-enc-clear" href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>">전체 보기</a>
+				<a class="md-enc-clear" href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>"><?php echo esc_html( md_content( 'enc_clear', '전체 보기' ) ); ?></a>
 			<?php endif; ?>
 		</form>
 
 		<!-- 카테고리 탭 -->
-		<div class="md-enc-cats" role="tablist" aria-label="분야">
-			<a class="md-enc-cat<?php echo $active_cat ? '' : ' is-active'; ?>" href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>">전체</a>
+		<div class="md-enc-cats" role="tablist" aria-label="<?php echo esc_attr( md_content( 'enc_cats_aria', '분야' ) ); ?>">
+			<a class="md-enc-cat<?php echo $active_cat ? '' : ' is-active'; ?>" href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>"><?php echo esc_html( md_content( 'enc_cats_all', '전체' ) ); ?></a>
 			<?php foreach ( $categories as $cat ) : $url = add_query_arg( array( 'cat' => $cat->slug ), get_post_type_archive_link( 'md_term' ) ); ?>
 				<a class="md-enc-cat<?php echo $active_cat === $cat->slug ? ' is-active' : ''; ?>" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $cat->name ); ?><span class="md-enc-cat__n"><?php echo (int) $cat->count; ?></span></a>
 			<?php endforeach; ?>
 		</div>
 
 		<!-- 초성 필터 -->
-		<div class="md-enc-initials" role="tablist" aria-label="초성 필터">
+		<div class="md-enc-initials" role="tablist" aria-label="<?php echo esc_attr( md_content( 'enc_initials_aria', '초성 필터' ) ); ?>">
 			<?php
 			$base_args = array();
 			if ( $active_cat ) $base_args['cat'] = $active_cat;
 			if ( $search_q )   $base_args['q']   = $search_q;
 			?>
-			<a class="md-enc-initial<?php echo $active_init ? '' : ' is-active'; ?>" href="<?php echo esc_url( add_query_arg( $base_args, get_post_type_archive_link( 'md_term' ) ) ); ?>">전체</a>
+			<a class="md-enc-initial<?php echo $active_init ? '' : ' is-active'; ?>" href="<?php echo esc_url( add_query_arg( $base_args, get_post_type_archive_link( 'md_term' ) ) ); ?>"><?php echo esc_html( md_content( 'enc_cats_all', '전체' ) ); ?></a>
 			<?php foreach ( moondental_initial_groups() as $g ) :
 				$url = add_query_arg( array_merge( $base_args, array( 'ㅊ' => $g ) ), get_post_type_archive_link( 'md_term' ) ); ?>
 				<a class="md-enc-initial<?php echo $active_init === $g ? ' is-active' : ''; ?>" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $g ); ?></a>
@@ -115,13 +115,18 @@ $total_count = array_sum( array_map( 'count', $visible_groups ) );
 		</div>
 
 		<!-- 결과 카운트 -->
-		<p class="md-enc-count"><strong><?php echo (int) $total_count; ?></strong>개 용어<?php if ( $search_q ) : ?> · 검색어: <em>"<?php echo esc_html( $search_q ); ?>"</em><?php endif; ?></p>
+		<p class="md-enc-count"><strong><?php echo (int) $total_count; ?></strong><?php echo esc_html( md_content( 'enc_count_unit', '개 용어' ) ); ?><?php if ( $search_q ) : ?> · <?php echo esc_html( md_content( 'enc_search_label_prefix', '검색어:' ) ); ?> <em>"<?php echo esc_html( $search_q ); ?>"</em><?php endif; ?></p>
 
 		<!-- 초성별 그룹 결과 -->
 		<?php if ( $total_count === 0 ) : ?>
 			<div class="md-enc-empty">
-				<p>😔 검색 결과가 없습니다.</p>
-				<p>다른 검색어를 시도하거나 <a href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>">전체 용어</a>를 확인해보세요.</p>
+				<p><?php echo esc_html( md_content( 'enc_empty_title', '😔 검색 결과가 없습니다.' ) ); ?></p>
+				<p>
+					<?php
+					$link_html = '<a href="' . esc_url( get_post_type_archive_link( 'md_term' ) ) . '">' . esc_html( md_content( 'enc_empty_hint_link', '전체 용어' ) ) . '</a>';
+					echo wp_kses( str_replace( '{link}', $link_html, md_content( 'enc_empty_hint_tpl', '다른 검색어를 시도하거나 {link}를 확인해보세요.' ) ), array( 'a' => array( 'href' => array() ) ) );
+					?>
+				</p>
 			</div>
 		<?php else : ?>
 			<?php foreach ( $visible_groups as $group => $items ) : ?>

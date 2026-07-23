@@ -101,7 +101,7 @@ get_header();
 							if ( $svc_html ) {
 								echo $svc_html;
 							} else {
-								echo '<p style="color:var(--color-text-sub);">콘텐츠 준비 중입니다.</p>';
+								echo '<p style="color:var(--color-text-sub);">' . esc_html( md_content( 'ui_empty_content', '콘텐츠 준비 중입니다.' ) ) . '</p>';
 							}
 					}
 				}

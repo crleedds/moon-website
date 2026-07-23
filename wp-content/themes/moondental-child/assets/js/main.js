@@ -19,7 +19,10 @@
         var expanded = toggle.getAttribute('aria-expanded') === 'true';
         toggle.setAttribute('aria-expanded', String(!expanded));
         nav.classList.toggle('is-open', !expanded);
-        toggle.setAttribute('aria-label', expanded ? '메뉴 열기' : '메뉴 닫기');
+        // v3.38.2 · aria 라벨은 헤더 templates에서 data-open-label / data-close-label로 주입 (Customizer 편집)
+        toggle.setAttribute('aria-label', expanded
+          ? (toggle.dataset.openLabel || '메뉴 열기')
+          : (toggle.dataset.closeLabel || '메뉴 닫기'));
       });
 
       // Close on outside click

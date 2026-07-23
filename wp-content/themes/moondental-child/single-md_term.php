@@ -45,8 +45,8 @@ while ( have_posts() ) : the_post();
 <section class="md-page-hero md-page-hero--term">
 	<div class="md-container md-container--narrow">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸
-			<a href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>">치과사전</a>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸
+			<a href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_encyclopedia', '치과사전' ) ); ?></a>
 			<?php if ( ! empty( $cats ) ) : $first_cat = $cats[0]; ?>
 				▸ <a href="<?php echo esc_url( add_query_arg( array( 'cat' => $first_cat->slug ), get_post_type_archive_link( 'md_term' ) ) ); ?>"><?php echo esc_html( $first_cat->name ); ?></a>
 			<?php endif; ?>
@@ -73,8 +73,8 @@ while ( have_posts() ) : the_post();
 		</article>
 
 		<div class="md-term-actions">
-			<a class="md-btn md-btn-ghost" href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>">← 전체 치과사전으로</a>
-			<a class="md-btn md-btn-primary" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>">📅 상담 예약하기</a>
+			<a class="md-btn md-btn-ghost" href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>"><?php echo esc_html( md_content( 'ui_back_to_enc', '← 전체 치과사전으로' ) ); ?></a>
+			<a class="md-btn md-btn-primary" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>"><?php echo esc_html( md_content( 'ui_book_now', '📅 상담 예약하기' ) ); ?></a>
 		</div>
 	</div>
 </section>
@@ -84,7 +84,7 @@ while ( have_posts() ) : the_post();
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow">RELATED</span>
-			<h2 class="md-section-head__title">관련 용어</h2>
+			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'ui_related_terms', '관련 용어' ) ); ?></h2>
 		</header>
 		<div class="md-enc-grid">
 			<?php foreach ( $related as $r ) : ?>

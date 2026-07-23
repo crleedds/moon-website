@@ -29,7 +29,7 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
-<a class="md-sr-only" href="#md-main">본문 바로가기</a>
+<a class="md-sr-only" href="#md-main"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'aria_skip_link', '본문 바로가기' ) : '본문 바로가기' ); ?></a>
 
 <header class="md-site-header" role="banner">
 	<div class="md-header">
@@ -62,11 +62,11 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 					<?php endif; ?>
 				</a>
 
-				<button class="md-header__nav-toggle" aria-expanded="false" aria-controls="md-primary-menu" aria-label="메뉴 열기">
+				<button class="md-header__nav-toggle" aria-expanded="false" aria-controls="md-primary-menu" aria-label="<?php echo esc_attr( function_exists( 'md_content' ) ? md_content( 'aria_menu_open', '메뉴 열기' ) : '메뉴 열기' ); ?>" data-open-label="<?php echo esc_attr( function_exists( 'md_content' ) ? md_content( 'aria_menu_open', '메뉴 열기' ) : '메뉴 열기' ); ?>" data-close-label="<?php echo esc_attr( function_exists( 'md_content' ) ? md_content( 'aria_menu_close', '메뉴 닫기' ) : '메뉴 닫기' ); ?>">
 					<span></span><span></span><span></span>
 				</button>
 
-				<nav class="md-header__nav" id="md-primary-menu" aria-label="주 메뉴">
+				<nav class="md-header__nav" id="md-primary-menu" aria-label="<?php echo esc_attr( function_exists( 'md_content' ) ? md_content( 'aria_primary_menu', '주 메뉴' ) : '주 메뉴' ); ?>">
 					<?php
 					wp_nav_menu( array(
 						'theme_location' => 'primary',
@@ -78,7 +78,7 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 				</nav>
 
 				<div class="md-header__aside">
-					<div class="md-header__info" aria-label="진료시간 및 전화">
+					<div class="md-header__info" aria-label="<?php echo esc_attr( function_exists( 'md_content' ) ? md_content( 'aria_hours_call', '진료시간 및 전화' ) : '진료시간 및 전화' ); ?>">
 						<?php if ( $phone ) : ?>
 							<a class="md-header__phone" href="tel:<?php echo esc_attr( $phone_link ?: preg_replace( '/[^0-9]/', '', $phone ) ); ?>" data-track="cta-header-call">
 								<span class="md-header__phone-icon" aria-hidden="true">📞</span>
@@ -86,7 +86,7 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 							</a>
 						<?php endif; ?>
 						<?php if ( $hours_wd ) : ?>
-							<a class="md-header__hours" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>#hours" data-track="cta-header-hours" aria-label="오시는 길과 진료시간 보기" title="오시는 길·전체 진료시간 보기">
+							<a class="md-header__hours" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>#hours" data-track="cta-header-hours" aria-label="<?php echo esc_attr( function_exists( 'md_content' ) ? md_content( 'aria_hours_location', '오시는 길과 진료시간 보기' ) : '오시는 길과 진료시간 보기' ); ?>" title="<?php echo esc_attr( function_exists( 'md_content' ) ? md_content( 'aria_hours_location', '오시는 길과 진료시간 보기' ) : '오시는 길과 진료시간 보기' ); ?>">
 								<?php echo esc_html( $hours_wd ); ?>
 							</a>
 						<?php endif; ?>

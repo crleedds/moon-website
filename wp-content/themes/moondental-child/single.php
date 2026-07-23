@@ -20,8 +20,8 @@ if ( have_posts() ) :
 <section class="md-page-hero md-page-hero--news">
 	<div class="md-container md-container--narrow">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸
-			<a href="<?php echo esc_url( home_url( '/소식/' ) ); ?>">소식</a> ▸
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸
+			<a href="<?php echo esc_url( home_url( '/소식/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_news', '소식' ) ); ?></a> ▸
 			<span><?php the_title(); ?></span>
 		</nav>
 		<?php if ( $category ) : ?>
@@ -51,12 +51,15 @@ if ( have_posts() ) :
 
 			<?php if ( $src_url ) : ?>
 				<p class="md-single__source">
-					이 글의 원문은 <a href="<?php echo esc_url( $src_url ); ?>" target="_blank" rel="noopener">네이버 블로그</a>에서도 보실 수 있습니다.
+					<?php
+					$link_html = '<a href="' . esc_url( $src_url ) . '" target="_blank" rel="noopener">' . esc_html( md_content( 'ui_original_naver_link', '네이버 블로그' ) ) . '</a>';
+					echo wp_kses( str_replace( '{link}', $link_html, md_content( 'ui_original_naver_tpl', '이 글의 원문은 {link} 에서도 보실 수 있습니다.' ) ), array( 'a' => array( 'href' => array(), 'target' => array(), 'rel' => array() ) ) );
+					?>
 				</p>
 			<?php endif; ?>
 
 			<div class="md-single__nav">
-				<a class="md-btn md-btn-ghost" href="<?php echo esc_url( home_url( '/소식/' ) ); ?>">← 소식 목록으로</a>
+				<a class="md-btn md-btn-ghost" href="<?php echo esc_url( home_url( '/소식/' ) ); ?>"><?php echo esc_html( md_content( 'ui_back_to_news', '← 소식 목록으로' ) ); ?></a>
 			</div>
 		</footer>
 	</div>
@@ -81,7 +84,7 @@ if ( have_posts() ) :
 	<section class="md-section md-section--surface md-section--sm">
 		<div class="md-container">
 			<header class="md-section-head" style="margin-bottom:32px;">
-				<h2 class="md-section-head__title" style="font-size:var(--fs-h3);">관련 글</h2>
+				<h2 class="md-section-head__title" style="font-size:var(--fs-h3);"><?php echo esc_html( md_content( 'ui_related_posts', '관련 글' ) ); ?></h2>
 			</header>
 			<div class="md-news-grid">
 				<?php while ( $related->have_posts() ) : $related->the_post();
