@@ -544,6 +544,21 @@ function moondental_home_content_fields() {
 				'ui_original_naver_link'  => array( 'default' => '네이버 블로그', 'label' => 'UI · 네이버 원문 링크 텍스트', 'type' => 'text' ),
 				'ui_empty_content'        => array( 'default' => '콘텐츠 준비 중입니다.', 'label' => 'UI · 빈 페이지 fallback', 'type' => 'text' ),
 				'ui_see_more'             => array( 'default' => '자세히 보기', 'label' => 'UI · 카드 자세히 보기 링크', 'type' => 'text' ),
+				// v3.38.4 · 자가진단 봇 결과 문구 (JS · MoondentalMain.bot)
+				'bot_result_none'         => array( 'default' => '특별한 증상은 없으신 것 같습니다. 정기 검진·스케일링을 권해드립니다.', 'label' => '자가진단 봇 · 매칭 없음 결과', 'type' => 'textarea' ),
+				'bot_result_single'       => array( 'default' => '아래 진료과가 가장 적합합니다.', 'label' => '자가진단 봇 · 1개 진료과 결과', 'type' => 'text' ),
+				'bot_result_multiple'     => array( 'default' => '아래 {n}개 진료과를 우선순위로 추천드립니다.', 'label' => '자가진단 봇 · N개 진료과 결과 ({n} 토큰)', 'type' => 'text' ),
+				'bot_match_aria'          => array( 'default' => '적합도', 'label' => '자가진단 봇 · 적합도 aria', 'type' => 'text' ),
+				'bot_match_tpl'           => array( 'default' => '적합도 {pct}%', 'label' => '자가진단 봇 · 적합도 표시 ({pct} 토큰)', 'type' => 'text' ),
+				// 언어 라벨 (드롭다운 스위처)
+				'lang_ko'                 => array( 'default' => '한국어', 'label' => '언어 라벨 · 한국어', 'type' => 'text' ),
+				'lang_en'                 => array( 'default' => 'English', 'label' => '언어 라벨 · 영어', 'type' => 'text' ),
+				'lang_ja'                 => array( 'default' => '日本語', 'label' => '언어 라벨 · 일본어', 'type' => 'text' ),
+				'lang_zh'                 => array( 'default' => '中文', 'label' => '언어 라벨 · 중국어', 'type' => 'text' ),
+				'lang_ru'                 => array( 'default' => 'Русский', 'label' => '언어 라벨 · 러시아어', 'type' => 'text' ),
+				'lang_vi'                 => array( 'default' => 'Tiếng Việt', 'label' => '언어 라벨 · 베트남어', 'type' => 'text' ),
+				// 채용
+				'recruit_mail_subject'    => array( 'default' => '문치과병원 채용 지원', 'label' => '채용 · 지원 메일 subject', 'type' => 'text' ),
 				// 치과사전 아카이브 UI
 				'enc_hero_eyebrow'        => array( 'default' => 'DENTAL ENCYCLOPEDIA · 치과사전', 'label' => '치과사전 · eyebrow', 'type' => 'text' ),
 				'enc_hero_title'          => array( 'default' => '천안·아산 문치과병원 · 치과사전', 'label' => '치과사전 · 제목', 'type' => 'text' ),

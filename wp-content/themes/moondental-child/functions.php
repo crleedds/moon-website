@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.38.3' );
+define( 'MOONDENTAL_VERSION', '3.38.4' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1101,6 +1101,24 @@ function moondental_enqueue_styles() {
 			filemtime( $js_path ),
 			true
 		);
+		// v3.38.4 · 자가진단 봇 결과 문구를 Customizer에서 편집 가능하게
+		wp_localize_script( 'moondental-main', 'MoondentalMain', array(
+			'bot' => array(
+				'noneMatch'   => md_content( 'bot_result_none', '특별한 증상은 없으신 것 같습니다. 정기 검진·스케일링을 권해드립니다.' ),
+				'singleBest'  => md_content( 'bot_result_single', '아래 진료과가 가장 적합합니다.' ),
+				'multipleTpl' => md_content( 'bot_result_multiple', '아래 {n}개 진료과를 우선순위로 추천드립니다.' ),
+				'matchAria'   => md_content( 'bot_match_aria', '적합도' ),
+				'matchTpl'    => md_content( 'bot_match_tpl',  '적합도 {pct}%' ),
+			),
+			'lang' => array(
+				'ko' => md_content( 'lang_ko', '한국어' ),
+				'en' => md_content( 'lang_en', '영어' ),
+				'ja' => md_content( 'lang_ja', '일본어' ),
+				'zh' => md_content( 'lang_zh', '중국어' ),
+				'ru' => md_content( 'lang_ru', '러시아어' ),
+				'vi' => md_content( 'lang_vi', '베트남어' ),
+			),
+		) );
 	}
 
 	// 5. 언어 전환 — v3.25.7에서 커스텀 스위처 완전 제거. GTranslate 플러그인이 담당.

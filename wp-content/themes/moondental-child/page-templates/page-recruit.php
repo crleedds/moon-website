@@ -57,7 +57,7 @@ $cond_leg_list     = md_parse_lines( md_content( 'recruit_cond_leg_list', '' ) )
 				"천안 만남로 1995년 개원 30여년.\n20년 넘게 근무하고 계신 선생님들도 많은 병원입니다.\n짧게 스쳐가는 자리가 아니라, 길게 보고 함께할 분을 모십니다." ) ) ); ?>
 		</p>
 		<div class="md-btn-group md-page-hero__actions">
-			<a class="md-btn md-btn-primary md-btn--lg" href="mailto:<?php echo esc_attr( $show_email ); ?>?subject=<?php echo rawurlencode( '문치과병원 채용 지원' ); ?>" data-track="cta-recruit-email-hero">
+			<a class="md-btn md-btn-primary md-btn--lg" href="mailto:<?php echo esc_attr( $show_email ); ?>?subject=<?php echo rawurlencode( md_content( 'recruit_mail_subject', '문치과병원 채용 지원' ) ); ?>" data-track="cta-recruit-email-hero">
 				<?php echo esc_html( md_content( 'recruit_hero_email_btn', '📧 이메일로 지원하기' ) ); ?>
 				<span class="md-btn__sub"><?php echo esc_html( $show_email ); ?></span>
 			</a>
@@ -177,7 +177,7 @@ $cond_leg_list     = md_parse_lines( md_content( 'recruit_cond_leg_list', '' ) )
 					<?php endforeach; ?>
 				</ul>
 				<?php endif; ?>
-				<a class="md-apply-card__mail" href="mailto:<?php echo esc_attr( $show_email ); ?>?subject=<?php echo rawurlencode( '문치과병원 채용 지원' ); ?>">
+				<a class="md-apply-card__mail" href="mailto:<?php echo esc_attr( $show_email ); ?>?subject=<?php echo rawurlencode( md_content( 'recruit_mail_subject', '문치과병원 채용 지원' ) ); ?>">
 					<span class="md-apply-card__mail-ic" aria-hidden="true">📧</span>
 					<span class="md-apply-card__mail-txt">
 						<span class="md-apply-card__mail-label"><?php echo esc_html( md_content( 'recruit_apply_btn_label', '이력서 보내기' ) ); ?></span>
@@ -216,7 +216,7 @@ $cond_leg_list     = md_parse_lines( md_content( 'recruit_cond_leg_list', '' ) )
 			<h2 class="md-region-cta__title"><?php echo nl2br( esc_html( md_content( 'recruit_page_cta_title', '' ) ) ); ?></h2>
 			<p class="md-region-cta__lead"><?php echo esc_html( md_content( 'recruit_page_cta_lead', '' ) ); ?></p>
 			<div class="md-btn-group md-btn-group--center md-rcta">
-				<a class="md-btn md-btn-primary md-btn--lg" href="mailto:<?php echo esc_attr( $show_email ); ?>?subject=<?php echo rawurlencode( '문치과병원 채용 지원' ); ?>" data-track="cta-recruit-final-email">
+				<a class="md-btn md-btn-primary md-btn--lg" href="mailto:<?php echo esc_attr( $show_email ); ?>?subject=<?php echo rawurlencode( md_content( 'recruit_mail_subject', '문치과병원 채용 지원' ) ); ?>" data-track="cta-recruit-final-email">
 					📧 <?php echo esc_html( $show_email ); ?>
 				</a>
 			</div>

@@ -323,7 +323,8 @@ function moondental_get_regions() {
  */
 function moondental_get_region_by_slug( $slug ) {
 	$all = moondental_get_regions();
-	return isset( $all[ $slug ] ) ? $all[ $slug ] : null;
+	if ( ! isset( $all[ $slug ] ) ) return null;
+	return moondental_apply_region_overrides( $all[ $slug ] );
 }
 
 /**
@@ -341,9 +342,40 @@ function moondental_get_regions_by_province() {
 		'경기'            => array(),
 	);
 	foreach ( moondental_get_regions() as $r ) {
+		$r = moondental_apply_region_overrides( $r );
 		if ( isset( $groups[ $r['province'] ] ) ) {
 			$groups[ $r['province'] ][] = $r;
 		}
 	}
 	return $groups;
+}
+
+/**
+ * v3.38.4 · 지역 데이터에 Customizer 오버라이드 적용.
+ *  각 지역의 텍스트 필드(name·name_long·note·highway·ktx·bus·duration_label·icon)와
+ *  수치 필드(distance_km·duration_min)를 사용자 정의하기에서 편집 가능:
+ *   region_{slug}_name, region_{slug}_note, region_{slug}_highway 등
+ *  Customizer에 값이 있으면 우선, 없으면 코드 default 사용.
+ *
+ *  왜 override 방식인가: 28개 지역 × 10개 필드 = 280개 → Customizer 그룹 등록은
+ *  불필요. 대신 편집자가 특정 지역만 바꾸고 싶을 때 해당 키만 넣으면 됨.
+ *  향후 CPT `md_region` 로 이관하기 전 과도기 방식.
+ */
+function moondental_apply_region_overrides( $data ) {
+	if ( ! is_array( $data ) || empty( $data['slug'] ) ) return $data;
+	if ( ! function_exists( 'md_content' ) ) return $data;
+	$slug = $data['slug'];
+	$text_fields = array( 'name', 'name_long', 'note', 'highway', 'ktx', 'bus', 'duration_label', 'icon', 'province' );
+	foreach ( $text_fields as $field ) {
+		$key = 'region_' . $slug . '_' . $field;
+		$override = md_content( $key, '' );
+		if ( $override !== '' ) $data[ $field ] = $override;
+	}
+	// 숫자 필드 (0/빈 무시)
+	foreach ( array( 'distance_km', 'duration_min' ) as $num ) {
+		$key = 'region_' . $slug . '_' . $num;
+		$override = md_content( $key, '' );
+		if ( $override !== '' && is_numeric( $override ) ) $data[ $num ] = 0 + $override;
+	}
+	return $data;
 }

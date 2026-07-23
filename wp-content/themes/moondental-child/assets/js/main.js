@@ -201,14 +201,17 @@
         if (!resultsEl) return;
         resultsEl.innerHTML = '';
 
+        // v3.38.4 · Customizer 문구
+        var BOT = (window.MoondentalMain && MoondentalMain.bot) || {};
         if (!keys.length) {
-          if (resultLeadEl) resultLeadEl.textContent = '특별한 증상은 없으신 것 같습니다. 정기 검진·스케일링을 권해드립니다.';
+          if (resultLeadEl) resultLeadEl.textContent = BOT.noneMatch || '특별한 증상은 없으신 것 같습니다. 정기 검진·스케일링을 권해드립니다.';
           var d = depts['일반-검진'];
           if (d) keys = ['일반-검진'];
         } else if (resultLeadEl) {
+          var n = Math.min(keys.length, 3);
           resultLeadEl.textContent = keys.length === 1
-            ? '아래 진료과가 가장 적합합니다.'
-            : '아래 ' + Math.min(keys.length, 3) + '개 진료과를 우선순위로 추천드립니다.';
+            ? (BOT.singleBest || '아래 진료과가 가장 적합합니다.')
+            : (BOT.multipleTpl || '아래 {n}개 진료과를 우선순위로 추천드립니다.').replace('{n}', n);
         }
 
         var topMax = Math.min(keys.length, 3);
@@ -232,9 +235,9 @@
               '<div class="md-bot-card__name">' + escapeHtml(d.name) + '</div>' +
               '<div class="md-bot-card__sub">' + escapeHtml(d.sub || '') + '</div>' +
               '<p class="md-bot-card__summary">' + escapeHtml(d.summary || '') + '</p>' +
-              '<div class="md-bot-card__match" aria-label="적합도">' +
+              '<div class="md-bot-card__match" aria-label="' + escapeHtml(BOT.matchAria || '적합도') + '">' +
                 '<div class="md-bot-card__match-bar"><span style="width:' + pct + '%"></span></div>' +
-                '<span class="md-bot-card__match-text">적합도 ' + pct + '%</span>' +
+                '<span class="md-bot-card__match-text">' + escapeHtml((BOT.matchTpl || '적합도 {pct}%').replace('{pct}', pct)) + '</span>' +
               '</div>' +
             '</div>' +
             '<div class="md-bot-card__arrow" aria-hidden="true">→</div>';
