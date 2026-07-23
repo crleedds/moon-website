@@ -15,7 +15,7 @@ get_header();
 <section class="md-page-hero" aria-label="<?php the_title_attribute(); ?>">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span><?php the_title(); ?></span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php the_title(); ?></span>
 		</nav>
 		<h1 class="md-page-hero__title"><?php the_title(); ?></h1>
 		<?php

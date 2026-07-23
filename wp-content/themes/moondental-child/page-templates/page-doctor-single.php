@@ -28,12 +28,16 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 $kakao_url  = $info['kakao_url'] ?? '';
 $naver_book = $info['naver_place'] ?? '';
 
-/* Customizer key 매핑 — moondental_get_team_with_customizer와 동일 */
-$name_to_key = array(
-	'문은수' => 'munes',  '이승주' => 'leesj',  '이수연' => 'leesu',
-	'권혜진' => 'kwon',   '문지현' => 'munji',  '이창률' => 'leech',
-	'이영일' => 'leeyi',  '김세일' => 'kimsi',  '정석형' => 'jeong',
-);
+/* Customizer key 매핑 — v3.38.6 · Customizer 편집 가능 (한 줄에 하나 · '이름|slug')
+ *  moondental_get_team_with_customizer와 동일 */
+$name_to_key_default = "문은수|munes\n이승주|leesj\n이수연|leesu\n권혜진|kwon\n문지현|munji\n이창률|leech\n이영일|leeyi\n김세일|kimsi\n정석형|jeong";
+$name_to_key = array();
+foreach ( md_parse_lines( md_content( 'doctor_slug_map', $name_to_key_default ) ) as $line ) {
+	$parts = array_map( 'trim', explode( '|', $line, 2 ) );
+	if ( count( $parts ) === 2 && $parts[0] !== '' && $parts[1] !== '' ) {
+		$name_to_key[ $parts[0] ] = $parts[1];
+	}
+}
 $doc_key = $name_to_key[ $doctor['name'] ] ?? '';
 
 /* 데이터 추출 — Customizer override 우선, 없으면 fallback */

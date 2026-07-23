@@ -20,7 +20,7 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 <section class="md-page-hero md-page-hero--reservation">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>상담 예약</span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span>상담 예약</span>
 		</nav>
 		<span class="md-page-hero__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_hero_eyebrow', 'RESERVATION' ) : 'RESERVATION' ); ?></span>
 		<h1 class="md-page-hero__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_hero_title', '상담 예약 & 오시는 길' ) : '상담 예약 & 오시는 길' ); ?></h1>

@@ -13,7 +13,7 @@ $faqs = moondental_get_faqs();
 <section class="md-page-hero">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>자주 묻는 질문</span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span>자주 묻는 질문</span>
 		</nav>
 		<h1 class="md-page-hero__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'faq_page_title', get_the_title() ) : get_the_title() ); ?></h1>
 		<p class="md-page-hero__lead">

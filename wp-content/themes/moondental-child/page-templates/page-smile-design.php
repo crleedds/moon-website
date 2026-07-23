@@ -89,7 +89,7 @@ $nav_items = $parse_nav( md_content( 'smile_nav_items', '' ) );
 <section class="md-page-hero md-page-hero--smile">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span><?php echo esc_html( get_the_title() ?: '스마일디자인센터' ); ?></span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( get_the_title() ?: '스마일디자인센터' ); ?></span>
 		</nav>
 		<span class="md-page-hero__eyebrow"><?php echo esc_html( md_content( 'smile_hero_eyebrow', '' ) ); ?></span>
 		<h1 class="md-page-hero__title">

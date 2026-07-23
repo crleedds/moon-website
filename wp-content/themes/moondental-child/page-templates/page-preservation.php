@@ -73,7 +73,7 @@ $perio_cards        = $parse_cards( md_content( 'preservation_perio_cards', '' )
 <section class="md-page-hero md-page-hero--preservation">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span><?php echo esc_html( get_the_title() ?: '자연치아 살리기' ); ?></span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( get_the_title() ?: '자연치아 살리기' ); ?></span>
 		</nav>
 		<span class="md-page-hero__eyebrow"><?php echo esc_html( md_content( 'preservation_hero_eyebrow', '' ) ); ?></span>
 		<h1 class="md-page-hero__title">

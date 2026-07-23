@@ -197,7 +197,7 @@ for ( $i = 1; $i <= 4; $i++ ) {
 <section class="md-priceX-hero">
 	<div class="md-container">
 		<nav class="md-priceX-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>비용 안내</span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span>비용 안내</span>
 		</nav>
 
 		<div class="md-priceX-hero__inner">

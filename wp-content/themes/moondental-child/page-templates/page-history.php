@@ -33,8 +33,8 @@ for ( $i = 1; $i <= 4; $i++ ) {
 <section class="md-page-hero">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸
-			<a href="<?php echo esc_url( home_url( '/병원소개/' ) ); ?>">병원안내</a> ▸
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸
+			<a href="<?php echo esc_url( home_url( '/병원소개/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_about', '병원안내' ) ); ?></a> ▸
 			<span><?php echo esc_html( $display_title ); ?></span>
 		</nav>
 		<h1 class="md-page-hero__title"><?php echo esc_html( $display_title ); ?></h1>

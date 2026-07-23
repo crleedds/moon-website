@@ -87,7 +87,7 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 <section class="md-docs-hero">
 	<div class="md-container">
 		<nav class="md-docs-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span>의료진</span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span>의료진</span>
 		</nav>
 		<span class="md-docs-hero__chip"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'doctors_chip', 'MOON DENTAL HOSPITAL · OUR DOCTORS' ) : 'MOON DENTAL HOSPITAL · OUR DOCTORS' ); ?></span>
 		<h1 class="md-docs-hero__title">

@@ -98,7 +98,7 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 <section class="md-region-hero">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸
 			<a href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>">오시는 길</a> ▸
 			<span><?php echo esc_html( $region_name ); ?></span>
 		</nav>

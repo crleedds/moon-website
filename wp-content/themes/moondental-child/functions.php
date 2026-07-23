@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.38.5' );
+define( 'MOONDENTAL_VERSION', '3.38.6' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -2749,17 +2749,23 @@ add_action( 'init', 'moondental_flush_rewrites_once', 99 );
  *  한글 URL은 인코딩 호환성 문제로 영문 슬러그 사용.
  */
 function moondental_doctor_name_to_slug( $name ) {
-	$map = array(
-		'문은수' => 'munes',
-		'이승주' => 'leesj',
-		'이수연' => 'leesu',
-		'권혜진' => 'kwon',
-		'문지현' => 'munji',
-		'이창률' => 'leech',
-		'이영일' => 'leeyi',
-		'김세일' => 'kimsi',
-		'정석형' => 'jeong',
-	);
+	static $map = null;
+	if ( $map === null ) {
+		// v3.38.6 · Customizer 'doctor_slug_map' 텍스트영역에서 파싱 (한 줄에 '이름|slug')
+		$map = array();
+		$default_raw = "문은수|munes\n이승주|leesj\n이수연|leesu\n권혜진|kwon\n문지현|munji\n이창률|leech\n이영일|leeyi\n김세일|kimsi\n정석형|jeong";
+		$raw = function_exists( 'md_content' )
+			? md_content( 'doctor_slug_map', $default_raw )
+			: $default_raw;
+		foreach ( preg_split( "/\r\n|\r|\n/", (string) $raw ) as $line ) {
+			$line = trim( $line );
+			if ( $line === '' || $line[0] === '#' ) continue;
+			$parts = array_map( 'trim', explode( '|', $line, 2 ) );
+			if ( count( $parts ) === 2 && $parts[0] !== '' && $parts[1] !== '' ) {
+				$map[ $parts[0] ] = $parts[1];
+			}
+		}
+	}
 	return $map[ $name ] ?? sanitize_title( $name );
 }
 
@@ -3597,18 +3603,20 @@ function moondental_get_team_with_customizer() {
 	$groups = moondental_get_team();
 	if ( ! function_exists( 'get_theme_mod' ) ) return $groups;
 
-	/* 의료진 이름 → Customizer key 매핑 */
-	$name_to_key = array(
-		'문은수' => 'munes',
-		'이승주' => 'leesj',
-		'이수연' => 'leesu',
-		'권혜진' => 'kwon',
-		'문지현' => 'munji',
-		'이창률' => 'leech',
-		'이영일' => 'leeyi',
-		'김세일' => 'kimsi',
-		'정석형' => 'jeong',
-	);
+	/* 의료진 이름 → Customizer key 매핑 · v3.38.6 · Customizer 편집 가능 */
+	$name_to_key = array();
+	$default_raw = "문은수|munes\n이승주|leesj\n이수연|leesu\n권혜진|kwon\n문지현|munji\n이창률|leech\n이영일|leeyi\n김세일|kimsi\n정석형|jeong";
+	$raw = function_exists( 'md_content' )
+		? md_content( 'doctor_slug_map', $default_raw )
+		: $default_raw;
+	foreach ( preg_split( "/\r\n|\r|\n/", (string) $raw ) as $line ) {
+		$line = trim( $line );
+		if ( $line === '' || $line[0] === '#' ) continue;
+		$parts = array_map( 'trim', explode( '|', $line, 2 ) );
+		if ( count( $parts ) === 2 && $parts[0] !== '' && $parts[1] !== '' ) {
+			$name_to_key[ $parts[0] ] = $parts[1];
+		}
+	}
 
 	/* 그룹명 Customizer override (4개) */
 	if ( function_exists( 'md_content' ) ) {

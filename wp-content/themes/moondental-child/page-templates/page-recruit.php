@@ -45,7 +45,7 @@ $cond_leg_list     = md_parse_lines( md_content( 'recruit_cond_leg_list', '' ) )
 <section class="md-page-hero md-page-hero--recruit">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸ <span><?php echo esc_html( get_the_title() ?: '상시채용' ); ?></span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( get_the_title() ?: '상시채용' ); ?></span>
 		</nav>
 		<span class="md-page-hero__eyebrow"><?php echo esc_html( md_content( 'recruit_hero_eyebrow', '' ) ); ?></span>
 		<h1 class="md-page-hero__title">

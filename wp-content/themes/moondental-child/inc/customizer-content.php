@@ -586,6 +586,13 @@ function moondental_home_content_fields() {
 				'hero_lead'               => array( 'default' => "천안·아산 임플란트·투명교정·라미네이트·자연치아 살리기까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다.", 'label' => 'Hero · 리드 문단 (단일 hero용)', 'type' => 'textarea' ),
 				'hero_cta_url'            => array( 'default' => '/상담예약/', 'label' => 'Hero · CTA URL', 'type' => 'text' ),
 				'hero_cta_label'          => array( 'default' => '📅 상담 예약하기', 'label' => 'Hero · CTA 라벨', 'type' => 'text' ),
+				// v3.38.6 · 브레드크럼 추가 + 원장 이름→슬러그 매핑
+				'breadcrumb_about'        => array( 'default' => '병원안내', 'label' => '브레드크럼 · 병원안내 라벨', 'type' => 'text' ),
+				'doctor_slug_map'         => array(
+					'default' => "문은수|munes\n이승주|leesj\n이수연|leesu\n권혜진|kwon\n문지현|munji\n이창률|leech\n이영일|leeyi\n김세일|kimsi\n정석형|jeong",
+					'label'   => '원장 이름→ASCII 슬러그 매핑 (한 줄에 하나 · 형식: 이름|slug · 새 원장 추가 시 여기에 이름과 URL용 slug를 추가하고 소식·강점·의료진 상세 페이지 커스텀 필드 채우기)',
+					'type'    => 'textarea',
+				),
 				// 치과사전 아카이브 UI
 				'enc_hero_eyebrow'        => array( 'default' => 'DENTAL ENCYCLOPEDIA · 치과사전', 'label' => '치과사전 · eyebrow', 'type' => 'text' ),
 				'enc_hero_title'          => array( 'default' => '천안·아산 문치과병원 · 치과사전', 'label' => '치과사전 · 제목', 'type' => 'text' ),
