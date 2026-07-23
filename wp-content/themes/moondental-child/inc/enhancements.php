@@ -32,6 +32,11 @@ function moondental_seo_meta_tags() {
 	$site_url  = home_url( '/' );
 	$default_image = MOONDENTAL_URI . '/assets/images/logo/logo-square.png';
 
+	// v3.38.1 · 제목 접미어 (모든 페이지 뒤에 자동 붙음)
+	$title_suffix = str_replace( '{site}', $site_name,
+		md_content( 'seo_title_suffix', ' — {site}' ) );
+	$T = function( $core ) use ( $title_suffix ) { return $core . $title_suffix; };
+
 	// 페이지별 컨텍스트 결정
 	$meta_title = '';
 	$meta_desc  = '';
@@ -43,106 +48,62 @@ function moondental_seo_meta_tags() {
 	if ( $region_slug && function_exists( 'moondental_get_region_by_slug' ) ) {
 		$region = moondental_get_region_by_slug( $region_slug );
 		if ( $region ) {
-			$rn = $region['name'];
-			$meta_title    = $rn . '에서 천안·아산 치과 | ' . $rn . ' 임플란트·' . $rn . ' 교정 — ' . $site_name;
-			$meta_desc     = $rn . '에서 천안 만남로 문치과병원까지 자동차 약 ' . $region['duration_min'] . '분 (' . $region['distance_km'] . 'km). ' . $rn . ' 환자분께 천안·아산 임플란트·투명교정·라미네이트 진료. 1995년부터 30여년 한자리.';
-			$meta_keywords = $rn . ' 치과, ' . $rn . ' 임플란트, ' . $rn . ' 교정, ' . $rn . ' 투명교정, ' . $rn . ' 라미네이트, ' . $rn . ' 사랑니 발치, ' . $rn . ' 신경치료, ' . $rn . ' 치과 추천, 천안 치과, 천안 임플란트, 문치과병원';
+			$tok = array(
+				'{region}'  => $region['name'],
+				'{minutes}' => $region['duration_min'],
+				'{km}'      => $region['distance_km'],
+			);
+			$meta_title    = $T( strtr( md_content( 'seo_region_title_tpl', '{region}에서 천안·아산 치과 | {region} 임플란트·{region} 교정' ), $tok ) );
+			$meta_desc     = strtr( md_content( 'seo_region_desc_tpl',  '{region}에서 천안 만남로 문치과병원까지 자동차 약 {minutes}분 ({km}km). {region} 환자분께 천안·아산 임플란트·투명교정·라미네이트 진료. 1995년부터 30여년 한자리.' ), $tok );
+			$meta_keywords = strtr( md_content( 'seo_region_kw_tpl',    '{region} 치과, {region} 임플란트, {region} 교정, {region} 투명교정, {region} 라미네이트, {region} 사랑니 발치, {region} 신경치료, {region} 치과 추천, 천안 치과, 천안 임플란트, 문치과병원' ), $tok );
 			$og_type = 'article';
 		}
 	}
 
 	if ( ! $meta_title && is_front_page() ) {
-		$meta_title    = '천안·아산 치과 | 천안 임플란트·투명교정·자연치아살리기 — ' . $site_name;
-		$meta_desc     = '천안 만남로 1995년 개원 30여년 한자리 진료. 천안·아산 임플란트·투명교정·라미네이트·사랑니 발치·턱관절 치료. 분야별 전문 의료진 협진·CBCT 디지털 가이드·월·화·수·금 야간진료(20:30).';
-		$meta_keywords = '천안 치과, 아산 치과, 천안치과, 아산치과, 천안 임플란트, 아산 임플란트, 천안 투명교정, 아산 투명교정, 천안 라미네이트, 아산 라미네이트, 천안 자연치아 살리기, 아산 자연치아 살리기, 천안 사랑니 발치, 아산 사랑니 발치, 천안 턱관절, 아산 턱관절, 천안 신경치료, 아산 신경치료, 천안 미백, 아산 미백, 천안 치과병원, 아산 치과병원, 천안 만남로 치과, 천안 신부동 치과, 천안 동남구 치과, 한아의료재단, 문치과병원, 슈어스마일 투명교정';
+		$meta_title    = $T( md_content( 'seo_home_title', '천안·아산 치과 | 천안 임플란트·투명교정·자연치아살리기' ) );
+		$meta_desc     = md_content( 'seo_home_desc', '천안 만남로 1995년 개원 30여년 한자리 진료. 천안·아산 임플란트·투명교정·라미네이트·사랑니 발치·턱관절 치료. 분야별 전문 의료진 협진·CBCT 디지털 가이드·월·화·수·금 야간진료(20:30).' );
+		$meta_keywords = md_content( 'seo_home_kw',   '천안 치과, 아산 치과, 문치과병원' );
 	} elseif ( ! $meta_title && is_page() ) {
 		$slug = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
 		$page_title = wp_strip_all_tags( get_the_title() );
 
-		$service_map = array(
-			'임플란트-센터'     => array(
-				'title' => '천안·아산 임플란트 | CBCT 디지털 가이드 수술 — ' . $site_name,
-				'desc'  => '천안·아산 임플란트 시작가 85만원~. 천안 만남로 30여년 임상, 분야별 전문 의료진 협진, CBCT 디지털 가이드 수술, 전신질환 안심 진료. 자체 한아 임플란트 보철연구소.',
-				'kw'    => '천안 임플란트, 아산 임플란트, 천안 임플란트 가격, 아산 임플란트 가격, 천안 임플란트 전문, 아산 임플란트 전문, 천안 디지털 임플란트, 아산 디지털 임플란트, 천안 골이식 임플란트, 아산 골이식 임플란트, 천안 노인 임플란트, 아산 노인 임플란트, 천안 만남로 임플란트',
-			),
-			'투명교정-센터'     => array(
-				'title' => '천안·아산 투명교정 | 슈어스마일 SureSmile — ' . $site_name,
-				'desc'  => '천안·아산 투명교정 슈어스마일 (Dentsply Sirona). 천안 만남로 치과교정과 전문의 진료, AI 3D 시뮬레이션, Lite·Standard·Advanced 단계별 합리적 가격(190만원~).',
-				'kw'    => '천안 투명교정, 아산 투명교정, 천안 슈어스마일, 아산 슈어스마일, 천안 교정, 아산 교정, 천안 치아교정, 아산 치아교정, 천안 성인교정, 아산 성인교정, 천안 부분교정, 아산 부분교정, 천안 투명교정 가격',
-			),
-			'자연치아-살리기'   => array(
-				'title' => '천안·아산 자연치아 살리기 | 신경치료·재근관치료·치주치료 — ' . $site_name,
-				'desc'  => '천안·아산 자연치아 살리기. 발치보다 보존 우선 — 신경치료·재근관치료·치주치료로 자연치아 최대한 살리는 천안 만남로 치과병원.',
-				'kw'    => '천안 신경치료, 아산 신경치료, 천안 자연치아 살리기, 아산 자연치아 살리기, 천안 치주치료, 아산 치주치료, 천안 잇몸치료, 아산 잇몸치료, 천안 재근관치료, 천안 충치치료, 아산 충치치료',
-			),
-			'턱관절-클리닉'     => array(
-				'title' => '천안·아산 턱관절 치료 | 통증·소리·개구장애 — ' . $site_name,
-				'desc'  => '천안·아산 턱관절 클리닉. 턱 소리·통증·개구장애 진단 및 치료. 천안 만남로 치과병원에서 보존적 치료 우선, 11F 교정과 협진으로 교합 안정화.',
-				'kw'    => '천안 턱관절, 아산 턱관절, 천안 턱관절 치료, 아산 턱관절 치료, 천안 턱 소리, 천안 이갈이, 아산 이갈이, 천안 턱관절 보톡스, 천안 스플린트',
-			),
-			'사랑니-발치'       => array(
-				'title' => '천안·아산 사랑니 발치 | CBCT 안전 진단 — ' . $site_name,
-				'desc'  => '천안·아산 사랑니 발치. CBCT 3D 진단으로 신경 손상 위험 최소화, 매복 사랑니까지 천안 만남로 구강악안면외과 진료. 진정요법 가능.',
-				'kw'    => '천안 사랑니 발치, 아산 사랑니 발치, 천안 매복 사랑니, 아산 매복 사랑니, 천안 사랑니, 아산 사랑니, 천안 구강외과, 아산 구강외과',
-			),
-			'심미치료'         => array(
-				'title' => '천안·아산 라미네이트·미백 | 자연스러운 미소 — ' . $site_name,
-				'desc'  => '천안·아산 라미네이트·치아미백·심미보철. 최소 삭제 보존적 접근, 자연스러운 미소를 만드는 천안 만남로 심미치료 전문.',
-				'kw'    => '천안 라미네이트, 아산 라미네이트, 천안 미백, 아산 미백, 천안 치아미백, 아산 치아미백, 천안 심미치료, 아산 심미치료, 천안 라미네이트 가격, 천안 앞니 라미네이트',
-			),
-			'비용-안내'         => array(
-				'title' => '천안·아산 치과 비용 안내 | 정직한 진료비 — ' . $site_name,
-				'desc'  => '천안·아산 치과 비용 — 임플란트·투명교정·라미네이트·사랑니 발치 비용 안내. 사전 견적서 제공, 시작 후 추가 비용 0원.',
-				'kw'    => '천안 치과 비용, 아산 치과 비용, 천안 임플란트 비용, 아산 임플란트 비용, 천안 투명교정 비용, 아산 투명교정 비용, 천안 라미네이트 비용, 천안 사랑니 비용, 천안 치과 가격, 아산 치과 가격',
-			),
-			'의료진'           => array(
-				'title' => '천안·아산 치과 의료진 | 분야별 전문 의료진 협진 — ' . $site_name,
-				'desc'  => '천안 만남로 문치과병원 의료진 — 보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 분야별 전문 의료진이 한 케이스를 함께 봅니다.',
-				'kw'    => '천안 치과 의사, 아산 치과 의사, 천안 치과 의료진, 아산 치과 의료진, 천안 임플란트 전문의, 아산 임플란트 전문의, 천안 교정 전문의, 아산 교정 전문의, 문치과병원 원장',
-			),
-			'오시는-길'         => array(
-				'title' => '천안 만남로 치과 — 오시는 길 · 주차 · 진료시간 — ' . $site_name,
-				'desc'  => '천안 동남구 만남로 52 문타워 9·10·11·13층. 천안종합·고속버스터미널 도보 5분, 천안역 버스 10분. 본원 지하 기계식 주차장 무료.',
-				'kw'    => '천안 만남로 치과, 천안 신부동 치과, 천안 동남구 치과, 천안 버스터미널 치과, 문치과병원 위치',
-			),
-			'상담예약'         => array(
-				'title' => '천안·아산 치과 예약 — 네이버 예약·카카오톡 상담 — ' . $site_name,
-				'desc'  => '천안 만남로 문치과병원 예약. 네이버 예약 24시간, 전화·카카오톡 상담. 월·화·수·금 야간진료 20:30까지 (목 18:30·토 14:00).',
-				'kw'    => '천안 치과 예약, 아산 치과 예약, 천안 치과 상담, 아산 치과 상담, 천안 만남로 치과 예약, 문치과병원 예약',
-			),
-			'역사'             => array(
-				'title' => '문치과병원 30여년의 발자취 | 천안 만남로 1995년 개원 — ' . $site_name,
-				'desc'  => '천안 만남로에서 1995년부터 30여년 한자리 진료. 한아의료재단 비영리 법인의 30여년 발자취와 핵심 가치.',
-				'kw'    => '문치과병원 역사, 한아의료재단, 천안 30년 치과, 아산 30년 치과, 천안 만남로 치과 1995',
-			),
-			'기술력-시설'       => array(
-				'title' => '천안·아산 치과 시설 | CBCT·디지털 가이드·원내 기공실 — ' . $site_name,
-				'desc'  => '천안 만남로 문치과병원 기술력·시설 — 의료기관 종별, 9·10·11·13F 4개 층 통합 진료센터, 디지털 진단·자체 보철 제작·전신질환 대응.',
-				'kw'    => '천안 치과 시설, 아산 치과 시설, 천안 디지털 치과, 아산 디지털 치과, 천안 CBCT, 아산 CBCT, 천안 임플란트 가이드, 천안 치과 장비',
-			),
-			'faq'              => array(
-				'title' => '천안·아산 치과 자주 묻는 질문 — 예약·비용·진료 안내 — ' . $site_name,
-				'desc'  => '천안 만남로 문치과병원 자주 묻는 질문 — 예약·비용·진료·전신질환 대응·주차·진료시간 등.',
-				'kw'    => '천안 치과 FAQ, 아산 치과 FAQ, 천안 치과 문의, 아산 치과 문의, 문치과병원 FAQ',
-			),
+		// v3.38.1 · 슬러그 → Customizer 키 매핑. 12개 랜딩 페이지 SEO 각각 편집 가능.
+		$slug_map = array(
+			'임플란트-센터'   => 'implant',
+			'투명교정-센터'   => 'ortho',
+			'자연치아-살리기' => 'preservation',
+			'턱관절-클리닉'   => 'tmj',
+			'사랑니-발치'     => 'wisdom',
+			'심미치료'        => 'aesthetic',
+			'비용-안내'       => 'pricing',
+			'의료진'          => 'doctors',
+			'오시는-길'       => 'location',
+			'상담예약'        => 'reservation',
+			'역사'            => 'history',
+			'기술력-시설'     => 'facility',
+			'faq'             => 'faq',
 		);
 
-		if ( isset( $service_map[ $slug ] ) ) {
-			$meta_title    = $service_map[ $slug ]['title'];
-			$meta_desc     = $service_map[ $slug ]['desc'];
-			$meta_keywords = $service_map[ $slug ]['kw'];
+		if ( isset( $slug_map[ $slug ] ) ) {
+			$k = $slug_map[ $slug ];
+			$meta_title    = $T( md_content( "seo_{$k}_title", '' ) );
+			$meta_desc     = md_content( "seo_{$k}_desc", '' );
+			$meta_keywords = md_content( "seo_{$k}_kw",   '' );
 		} else {
-			$meta_title = $page_title . ' — ' . $site_name . ' (천안·아산 치과)';
-			$meta_desc  = '천안 만남로 ' . $site_name . ' — ' . $page_title . '. 1995년부터 천안·아산에서 진료해온 종합 치과병원.';
-			$meta_keywords = '천안 치과, 아산 치과, 천안 ' . $page_title . ', 아산 ' . $page_title . ', ' . $site_name;
+			$tok = array( '{title}' => $page_title, '{site}' => $site_name );
+			$meta_title    = strtr( md_content( 'seo_page_title_tpl', '{title} — {site} (천안·아산 치과)' ), $tok );
+			$meta_desc     = strtr( md_content( 'seo_page_desc_tpl',  '천안 만남로 {site} — {title}. 1995년부터 천안·아산에서 진료해온 종합 치과병원.' ), $tok );
+			$meta_keywords = strtr( md_content( 'seo_page_kw_tpl',    '천안 치과, 아산 치과, 천안 {title}, 아산 {title}, {site}' ), $tok );
 		}
 		$og_type = 'article';
 	} elseif ( is_single() ) {
 		$post_title = wp_strip_all_tags( get_the_title() );
 		$excerpt    = wp_strip_all_tags( get_the_excerpt() );
-		$meta_title = $post_title . ' — ' . $site_name . ' (천안·아산 치과)';
-		$meta_desc  = $excerpt ?: ( '천안 만남로 ' . $site_name . ' — ' . $post_title );
-		$meta_keywords = '천안 치과, 아산 치과, 천안 치과 소식, 아산 치과 소식, ' . $site_name;
+		$tok = array( '{title}' => $post_title, '{site}' => $site_name );
+		$meta_title    = strtr( md_content( 'seo_single_title_tpl', '{title} — {site} (천안·아산 치과)' ), $tok );
+		$meta_desc     = $excerpt ?: strtr( md_content( 'seo_single_desc_tpl', '천안 만남로 {site} — {title}' ), $tok );
+		$meta_keywords = strtr( md_content( 'seo_single_kw_tpl', '천안 치과, 아산 치과, 천안 치과 소식, 아산 치과 소식, {site}' ), $tok );
 		$og_type    = 'article';
 	}
 
@@ -612,22 +573,22 @@ function moondental_floating_actions() {
 	$naver      = $info['naver_place'] ?: '#';
 	?>
 	<!-- 모바일 하단 고정 CTA 바 (모바일에서만) -->
-	<div class="md-mobile-cta" role="navigation" aria-label="빠른 예약·문의">
+	<div class="md-mobile-cta" role="navigation" aria-label="<?php echo esc_attr( md_content( 'aria_mobile_group', '빠른 예약·문의' ) ); ?>">
 		<a class="md-mobile-cta__item md-mobile-cta__item--call"
 		   href="tel:<?php echo esc_attr( $phone_link ); ?>"
 		   data-track="cta-call-mobile"
-		   aria-label="전화로 예약·상담">
+		   aria-label="<?php echo esc_attr( md_content( 'aria_mobile_call', '전화로 예약·상담' ) ); ?>">
 			<span class="md-mobile-cta__icon" aria-hidden="true">📞</span>
-			<span class="md-mobile-cta__label"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'fcta_mobile_call_label', '전화 예약' ) : '전화 예약' ); ?></span>
+			<span class="md-mobile-cta__label"><?php echo esc_html( md_content( 'fcta_mobile_call_label', '전화 예약' ) ); ?></span>
 		</a>
 		<?php if ( $kakao && $kakao !== '#' ) : ?>
 		<a class="md-mobile-cta__item md-mobile-cta__item--kakao"
 		   href="<?php echo esc_url( $kakao ); ?>"
 		   target="_blank" rel="noopener"
 		   data-track="cta-kakao-mobile"
-		   aria-label="카카오톡으로 상담">
+		   aria-label="<?php echo esc_attr( md_content( 'aria_mobile_kakao', '카카오톡으로 상담' ) ); ?>">
 			<span class="md-mobile-cta__icon" aria-hidden="true">💬</span>
-			<span class="md-mobile-cta__label"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'fcta_mobile_kakao_label', '카카오톡' ) : '카카오톡' ); ?></span>
+			<span class="md-mobile-cta__label"><?php echo esc_html( md_content( 'fcta_mobile_kakao_label', '카카오톡' ) ); ?></span>
 		</a>
 		<?php endif; ?>
 		<?php if ( $naver && $naver !== '#' ) : ?>
@@ -635,9 +596,9 @@ function moondental_floating_actions() {
 		   href="<?php echo esc_url( $naver ); ?>"
 		   target="_blank" rel="noopener"
 		   data-track="cta-naver-mobile"
-		   aria-label="네이버로 예약">
+		   aria-label="<?php echo esc_attr( md_content( 'aria_mobile_naver', '네이버로 예약' ) ); ?>">
 			<span class="md-mobile-cta__icon" aria-hidden="true">📅</span>
-			<span class="md-mobile-cta__label"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'fcta_mobile_naver_label', '네이버 예약' ) : '네이버 예약' ); ?></span>
+			<span class="md-mobile-cta__label"><?php echo esc_html( md_content( 'fcta_mobile_naver_label', '네이버 예약' ) ); ?></span>
 		</a>
 		<?php endif; ?>
 	</div>
@@ -648,9 +609,9 @@ function moondental_floating_actions() {
 		<a class="md-fab md-fab--phone"
 		   href="tel:<?php echo esc_attr( $phone_link ); ?>"
 		   data-track="cta-phone-fab"
-		   aria-label="전화 상담 — <?php echo esc_attr( $info['phone'] ); ?>">
+		   aria-label="<?php echo esc_attr( str_replace( '{phone}', $info['phone'], md_content( 'aria_fab_call_tpl', '전화 상담 — {phone}' ) ) ); ?>">
 			<span class="md-fab__icon" aria-hidden="true">📞</span>
-			<span class="md-fab__label"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'fcta_desk_call_label', '전화 상담' ) : '전화 상담' ); ?></span>
+			<span class="md-fab__label"><?php echo esc_html( md_content( 'fcta_desk_call_label', '전화 상담' ) ); ?></span>
 		</a>
 		<?php endif; ?>
 		<?php if ( $naver && $naver !== '#' ) : ?>
@@ -658,9 +619,9 @@ function moondental_floating_actions() {
 		   href="<?php echo esc_url( $naver ); ?>"
 		   target="_blank" rel="noopener"
 		   data-track="cta-naver-fab"
-		   aria-label="네이버 예약 열기">
+		   aria-label="<?php echo esc_attr( md_content( 'aria_fab_naver', '네이버 예약 열기' ) ); ?>">
 			<span class="md-fab__icon" aria-hidden="true">N</span>
-			<span class="md-fab__label"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'fcta_desk_naver_label', '네이버 예약' ) : '네이버 예약' ); ?></span>
+			<span class="md-fab__label"><?php echo esc_html( md_content( 'fcta_desk_naver_label', '네이버 예약' ) ); ?></span>
 		</a>
 		<?php endif; ?>
 		<?php if ( $kakao && $kakao !== '#' ) : ?>
@@ -668,16 +629,16 @@ function moondental_floating_actions() {
 		   href="<?php echo esc_url( $kakao ); ?>"
 		   target="_blank" rel="noopener"
 		   data-track="cta-kakao-fab"
-		   aria-label="카카오톡 상담 열기">
+		   aria-label="<?php echo esc_attr( md_content( 'aria_fab_kakao', '카카오톡 상담 열기' ) ); ?>">
 			<svg class="md-fab__icon md-fab__icon--svg" viewBox="0 0 36 36" aria-hidden="true">
 				<path fill="#3C1E1E" d="M18 6C10.27 6 4 10.93 4 17c0 3.97 2.69 7.46 6.72 9.4l-1.43 5.24c-.13.47.39.85.79.58l6.36-4.2c.51.05 1.02.08 1.56.08 7.73 0 14-4.93 14-11s-6.27-11-14-11z"/>
 			</svg>
-			<span class="md-fab__label"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'fcta_desk_kakao_label', '카카오톡 상담' ) : '카카오톡 상담' ); ?></span>
+			<span class="md-fab__label"><?php echo esc_html( md_content( 'fcta_desk_kakao_label', '카카오톡 상담' ) ); ?></span>
 		</a>
 		<?php endif; ?>
 
-		<!-- 맨 위로 스크롤 버튼 (FAB 스택의 맨 아래 — 카카오톡 밑) -->
-		<button class="md-totop" type="button" aria-label="페이지 맨 위로 이동" data-track="cta-scroll-top" hidden>
+		<!-- 맨 위로 스크롤 버튼 -->
+		<button class="md-totop" type="button" aria-label="<?php echo esc_attr( md_content( 'aria_totop', '페이지 맨 위로 이동' ) ); ?>" data-track="cta-scroll-top" hidden>
 			<svg viewBox="0 0 24 24" aria-hidden="true">
 				<path d="M12 5l-7 7 1.41 1.41L12 7.83l5.59 5.58L19 12z" fill="currentColor"/>
 			</svg>
@@ -698,11 +659,14 @@ function moondental_filter_nav_items( $items, $args ) {
 		return $items;
 	}
 
-	// "역사" 타이틀 항목을 "30여년의 발자취"로 자동 표기 변환
-	foreach ( $items as $item ) {
-		$t = trim( wp_strip_all_tags( $item->title ) );
-		if ( $t === '역사' || $t === '사명 & 역사' ) {
-			$item->title = '30여년의 발자취';
+	// v3.38.2 · '역사' 타이틀 자동 재작성 · Customizer 편집 가능 (빈칸 시 재작성 안 함)
+	$history_rewrite = md_content( 'menu_history_rewrite', '30여년의 발자취' );
+	if ( $history_rewrite !== '' ) {
+		foreach ( $items as $item ) {
+			$t = trim( wp_strip_all_tags( $item->title ) );
+			if ( $t === '역사' || $t === '사명 & 역사' ) {
+				$item->title = $history_rewrite;
+			}
 		}
 	}
 	$hide_titles = array(
@@ -717,9 +681,10 @@ function moondental_filter_nav_items( $items, $args ) {
 	 * 톱레벨로 승격할 항목 정의.
 	 * 서브메뉴에서 발견되면 (1) 서브에서 숨기고 (2) 톱레벨에 같은 URL로 자동 노출.
 	 */
+	// v3.38.2 · 승격 톱레벨 라벨 · Customizer 편집 가능
 	$promote_defs = array(
 		'doctors' => array(
-			'title'           => '의료진',
+			'title'           => md_content( 'menu_promote_doctors', '의료진' ),
 			'titles'          => array( '의료진', 'doctors', 'Doctors' ),
 			'url_substrings'  => array( '/의료진/', '/doctors/' ),
 			'fallback_url'    => home_url( '/의료진/' ),
@@ -727,7 +692,7 @@ function moondental_filter_nav_items( $items, $args ) {
 			'menu_order'      => 999,
 		),
 		'pricing' => array(
-			'title'           => '비용안내',
+			'title'           => md_content( 'menu_promote_pricing', '비용안내' ),
 			'titles'          => array( '비용안내', '비용 안내', '비급여진료비', '비급여 진료비', '비급여 진료비 안내', '진료비안내', '진료비 안내', '진료비', 'pricing', 'Pricing' ),
 			'url_substrings'  => array( '/pricing/', '/비용-안내/', '/비용안내/', '/비급여-진료비/', '/비급여진료비/', '/진료비안내/', '/진료비/' ),
 			'fallback_url'    => home_url( '/비용-안내/' ),
