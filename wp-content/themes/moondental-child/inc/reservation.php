@@ -83,9 +83,37 @@ function moondental_reservation_enqueue() {
 			true
 		);
 		wp_localize_script( 'moondental-reservation', 'MoondentalRes', array(
-			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-			'nonce'   => wp_create_nonce( 'moondental_reservation' ),
+			'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+			'nonce'      => wp_create_nonce( 'moondental_reservation' ),
 			'renderTime' => time(), // v3.37.0 · 폼 렌더링 시각 · 최소 작성 시간 체크
+			// v3.38.0 · 모든 사용자 노출 문자열 Customizer에서 편집
+			'msg' => array(
+				'alertSvc'       => md_content( 'res_alert_svc',       '진료항목을 선택해주세요.' ),
+				'alertDate'      => md_content( 'res_alert_date',      '희망 날짜를 선택해주세요.' ),
+				'alertTime'      => md_content( 'res_alert_time',      '희망 시간을 선택해주세요.' ),
+				'alertName'      => md_content( 'res_alert_name',      '성함을 입력해주세요.' ),
+				'alertPhone'     => md_content( 'res_alert_phone',     '연락처를 입력해주세요.' ),
+				'alertPhoneFmt'  => md_content( 'res_alert_phone_fmt', '연락처 형식이 올바르지 않습니다. (예: 010-1234-5678)' ),
+				'alertPrivacy'   => md_content( 'res_alert_privacy',   '개인정보 처리방침 동의가 필요합니다.' ),
+				'hintDefault'    => md_content( 'res_hint_date_default', '선택하신 요일에 따라 가능한 시간이 표시됩니다.' ),
+				'hintClosed'     => md_content( 'res_hint_date_closed',  '⚠️ 선택하신 날짜는 휴진일입니다. 다른 날짜를 선택해주세요.' ),
+				'hintOpen'       => md_content( 'res_hint_date_open',    '✓ {day}요일 진료 가능 시간: 09:00 – {until}' ),
+				'btnSending'     => md_content( 'res_btn_sending', '전송 중...' ),
+				'btnSubmit'      => md_content( 'res_btn_submit',  '예약 신청' ),
+				'alertFail'      => md_content( 'res_alert_fail',    '예약 전송에 실패했습니다.' ),
+				'alertNetwork'   => md_content( 'res_alert_network', '네트워크 오류 — 잠시 후 다시 시도해주세요.' ),
+				'successTitle'   => md_content( 'res_success_title', '예약 신청이 완료되었습니다!' ),
+				'successLead'    => md_content( 'res_success_lead',  '담당자가 확인 후 빠른 시간 내에 연락드리겠습니다.' ),
+				'successLblNo'   => md_content( 'res_success_lbl_no',   '예약번호' ),
+				'successLblSvc'  => md_content( 'res_success_lbl_svc',  '진료항목' ),
+				'successLblDt'   => md_content( 'res_success_lbl_dt',   '희망일시' ),
+				'successLblName' => md_content( 'res_success_lbl_name', '예약자' ),
+				'successHint'    => md_content( 'res_success_hint', '예약 확정 전 변경이 필요하시면 전화 또는 카카오톡으로 연락주세요.' ),
+				'successBtnKakao' => md_content( 'res_success_btn_kakao', '💬 카카오톡 친구 추가' ),
+				'successBtnHome' => md_content( 'res_success_btn_home', '홈으로' ),
+				'kakaoUrl'       => moondental_get_info()['kakao_url'] ?? 'http://pf.kakao.com/_VTcgE/chat',
+				'homeUrl'        => home_url( '/' ),
+			),
 		) );
 	}
 }
@@ -113,9 +141,10 @@ function moondental_handle_reservation() {
 	}
 
 	// v3.37.0 · 최소 작성 시간 체크 (2초 미만 = 봇)
+	$msg_throttle = md_content( 'res_msg_throttle', '잠시 후 다시 시도해주세요.' );
 	$render_time = isset( $_POST['md_form_render_time'] ) ? absint( $_POST['md_form_render_time'] ) : 0;
 	if ( $render_time > 0 && ( time() - $render_time ) < 2 ) {
-		wp_send_json_error( array( 'message' => '잠시 후 다시 시도해주세요.' ), 429 );
+		wp_send_json_error( array( 'message' => $msg_throttle ), 429 );
 	}
 
 	// 60초 중복 제출 차단
@@ -123,7 +152,7 @@ function moondental_handle_reservation() {
 	$ip       = sanitize_text_field( $ip_raw ); // v3.37.0 · 명시적 sanitize
 	$tkey     = 'moondental_res_throttle_' . md5( $ip );
 	if ( get_transient( $tkey ) ) {
-		wp_send_json_error( array( 'message' => '잠시 후 다시 시도해주세요.' ), 429 );
+		wp_send_json_error( array( 'message' => $msg_throttle ), 429 );
 	}
 
 	$service = sanitize_text_field( $_POST['service'] ?? '' );
@@ -136,42 +165,58 @@ function moondental_handle_reservation() {
 	$marketing = ! empty( $_POST['agree_marketing'] );
 	$ua      = sanitize_text_field( $_SERVER['HTTP_USER_AGENT'] ?? '' ); // v3.37.0
 
-	// 필수 항목
+	// 필수 항목 · v3.38.0 라벨은 Customizer에서 편집
 	$errors = array();
-	if ( ! $service ) $errors[] = '진료항목';
-	if ( ! $date )    $errors[] = '희망 날짜';
-	if ( ! $time )    $errors[] = '희망 시간';
-	if ( ! $name )    $errors[] = '성함';
-	if ( ! $phone )   $errors[] = '연락처';
-	if ( ! $agree )   $errors[] = '개인정보 동의';
+	if ( ! $service ) $errors[] = md_content( 'res_field_service', '진료항목' );
+	if ( ! $date )    $errors[] = md_content( 'res_field_date',    '희망 날짜' );
+	if ( ! $time )    $errors[] = md_content( 'res_field_time',    '희망 시간' );
+	if ( ! $name )    $errors[] = md_content( 'res_field_name',    '성함' );
+	if ( ! $phone )   $errors[] = md_content( 'res_field_phone',   '연락처' );
+	if ( ! $agree )   $errors[] = md_content( 'res_field_privacy', '개인정보 동의' );
 
 	if ( $errors ) {
-		wp_send_json_error( array( 'message' => '필수 항목이 비어 있습니다: ' . implode( ', ', $errors ) ), 400 );
+		$msg = str_replace( '{fields}', implode( ', ', $errors ),
+			md_content( 'res_msg_required', '필수 항목이 비어 있습니다: {fields}' ) );
+		wp_send_json_error( array( 'message' => $msg ), 400 );
 	}
 
 	// 전화번호 형식 (한국)
 	if ( ! preg_match( '/^[0-9]{2,4}-?[0-9]{3,4}-?[0-9]{4}$/', preg_replace( '/[^0-9-]/', '', $phone ) ) ) {
-		wp_send_json_error( array( 'message' => '연락처 형식이 올바르지 않습니다.' ), 400 );
+		wp_send_json_error( array( 'message' => md_content( 'res_msg_phone_invalid', '연락처 형식이 올바르지 않습니다.' ) ), 400 );
 	}
 
 	// 예약 번호 생성
 	$res_no = 'M' . date( 'ymd' ) . '-' . strtoupper( substr( md5( $ip . microtime() ), 0, 5 ) );
 
-	// 이메일 본문
+	// 이메일 본문 · v3.38.0 모든 라벨 Customizer
 	$info     = moondental_get_info();
 	$to       = ! empty( $info['email'] ) ? $info['email'] : get_option( 'admin_email' );
-	$subject  = sprintf( '[문치과 상담예약] %s · %s %s', $name, $date, $time );
+	$subject  = str_replace(
+		array( '{name}', '{date}', '{time}' ),
+		array( $name, $date, $time ),
+		md_content( 'res_email_subject_tpl', '[문치과 상담예약] {name} · {date} {time}' )
+	);
 
-	$body  = "새 상담예약이 접수되었습니다.\n\n";
-	$body .= "예약번호 : {$res_no}\n";
-	$body .= "성함     : {$name}\n";
-	$body .= "연락처   : {$phone}\n";
-	$body .= "진료항목 : {$service}\n";
-	$body .= "희망일시 : {$date} {$time}\n";
-	$body .= "마케팅 수신 동의 : " . ( $marketing ? '예' : '아니오' ) . "\n";
-	$body .= "\n--- 증상/문의 ---\n" . ( $note ?: '(없음)' ) . "\n";
+	$lbl_no      = md_content( 'res_email_lbl_no',      '예약번호' );
+	$lbl_name    = md_content( 'res_email_lbl_name',    '성함' );
+	$lbl_phone   = md_content( 'res_email_lbl_phone',   '연락처' );
+	$lbl_service = md_content( 'res_email_lbl_service', '진료항목' );
+	$lbl_dt      = md_content( 'res_email_lbl_dt',      '희망일시' );
+	$lbl_mkt     = md_content( 'res_email_lbl_mkt',     '마케팅 수신 동의' );
+	$yes         = md_content( 'res_email_yes',         '예' );
+	$no          = md_content( 'res_email_no',          '아니오' );
+
+	$body  = md_content( 'res_email_intro', '새 상담예약이 접수되었습니다.' ) . "\n\n";
+	$body .= "{$lbl_no} : {$res_no}\n";
+	$body .= "{$lbl_name} : {$name}\n";
+	$body .= "{$lbl_phone} : {$phone}\n";
+	$body .= "{$lbl_service} : {$service}\n";
+	$body .= "{$lbl_dt} : {$date} {$time}\n";
+	$body .= "{$lbl_mkt} : " . ( $marketing ? $yes : $no ) . "\n";
+	$body .= "\n" . md_content( 'res_email_note_head', '--- 증상/문의 ---' ) . "\n";
+	$body .= ( $note ?: md_content( 'res_email_note_empty', '(없음)' ) ) . "\n";
 	$body .= "\n----\nIP: {$ip}\nUA: {$ua}\n";
-	$body .= "접수시각: " . current_time( 'Y-m-d H:i:s' ) . "\n";
+	$body .= md_content( 'res_email_received', '접수시각' ) . ': ' . current_time( 'Y-m-d H:i:s' ) . "\n";
 
 	$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
 	$mail_ok = wp_mail( $to, $subject, $body, $headers );
@@ -214,18 +259,25 @@ add_action( 'wp_ajax_nopriv_moondental_reservation', 'moondental_handle_reservat
 
 /**
  * 진료항목 옵션 (예약 폼 1단계).
+ *
+ * v3.38.0 · Customizer 텍스트영역 res_services 에서 파싱.
+ *  형식: 한 줄에 하나. `value|title|desc`
+ *  fallback 은 기본 8개. 빈 값이면 라인 스킵.
  */
 function moondental_reservation_services() {
-	return array(
-		array( 'value' => '임플란트',          'title' => '임플란트',        'desc' => '치아 식립·뼈이식·재식립' ),
-		array( 'value' => '투명교정',          'title' => '투명교정',        'desc' => '슈어스마일·설측·일반교정' ),
-		array( 'value' => '자연치아 살리기',  'title' => '자연치아 살리기', 'desc' => '신경·근관·치근단 보존' ),
-		array( 'value' => '턱관절 클리닉',     'title' => '턱관절 클리닉',   'desc' => '통증·소리·이갈이' ),
-		array( 'value' => '사랑니 발치',       'title' => '사랑니 발치',     'desc' => '매복 사랑니 안전 발치' ),
-		array( 'value' => '심미치료',          'title' => '심미치료',        'desc' => '라미네이트·미백·보철' ),
-		array( 'value' => '소아·예방진료',     'title' => '소아·예방진료',   'desc' => '아이 치아·정기 검진' ),
-		array( 'value' => '일반/기타',         'title' => '일반/기타 상담',  'desc' => '충치·잇몸·스케일링 등' ),
-	);
+	$raw = md_content( 'res_services', "임플란트|임플란트|치아 식립·뼈이식·재식립\n투명교정|투명교정|슈어스마일·설측·일반교정\n자연치아 살리기|자연치아 살리기|신경·근관·치근단 보존\n턱관절 클리닉|턱관절 클리닉|통증·소리·이갈이\n사랑니 발치|사랑니 발치|매복 사랑니 안전 발치\n심미치료|심미치료|라미네이트·미백·보철\n소아·예방진료|소아·예방진료|아이 치아·정기 검진\n일반/기타|일반/기타 상담|충치·잇몸·스케일링 등" );
+
+	$out = array();
+	foreach ( md_parse_lines( $raw ) as $line ) {
+		$parts = array_map( 'trim', explode( '|', $line ) );
+		if ( count( $parts ) < 2 || $parts[0] === '' ) continue;
+		$out[] = array(
+			'value' => $parts[0],
+			'title' => $parts[1] !== '' ? $parts[1] : $parts[0],
+			'desc'  => $parts[2] ?? '',
+		);
+	}
+	return $out;
 }
 
 

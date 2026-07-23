@@ -501,6 +501,68 @@ function moondental_home_content_fields() {
 			),
 		),
 
+		/* ─── v3.38.0 · 예약 폼 · 알림·에러·이메일·성공화면 문구 ─── */
+		'reservation_form' => array(
+			'title'  => '예약 폼 — 알림·에러·이메일·성공화면 문구',
+			'fields' => array(
+				// 서비스(진료항목) 옵션 · pipe 3개 (value|title|desc)
+				'res_services' => array(
+					'default' => "임플란트|임플란트|치아 식립·뼈이식·재식립\n투명교정|투명교정|슈어스마일·설측·일반교정\n자연치아 살리기|자연치아 살리기|신경·근관·치근단 보존\n턱관절 클리닉|턱관절 클리닉|통증·소리·이갈이\n사랑니 발치|사랑니 발치|매복 사랑니 안전 발치\n심미치료|심미치료|라미네이트·미백·보철\n소아·예방진료|소아·예방진료|아이 치아·정기 검진\n일반/기타|일반/기타 상담|충치·잇몸·스케일링 등",
+					'label'   => '진료항목 옵션 (한 줄에 하나 · value|표시명|설명)',
+					'type'    => 'textarea',
+				),
+				// 서버측 응답 메시지
+				'res_msg_throttle'      => array( 'default' => '잠시 후 다시 시도해주세요.', 'label' => '서버 · 봇/과다 요청 차단 메시지', 'type' => 'text' ),
+				'res_msg_required'      => array( 'default' => '필수 항목이 비어 있습니다: {fields}', 'label' => '서버 · 필수 누락 안내 ({fields} 자동 치환)', 'type' => 'text' ),
+				'res_msg_phone_invalid' => array( 'default' => '연락처 형식이 올바르지 않습니다.', 'label' => '서버 · 전화번호 형식 오류', 'type' => 'text' ),
+				'res_field_service'     => array( 'default' => '진료항목', 'label' => '필수 항목명 · 진료항목', 'type' => 'text' ),
+				'res_field_date'        => array( 'default' => '희망 날짜', 'label' => '필수 항목명 · 희망 날짜', 'type' => 'text' ),
+				'res_field_time'        => array( 'default' => '희망 시간', 'label' => '필수 항목명 · 희망 시간', 'type' => 'text' ),
+				'res_field_name'        => array( 'default' => '성함', 'label' => '필수 항목명 · 성함', 'type' => 'text' ),
+				'res_field_phone'       => array( 'default' => '연락처', 'label' => '필수 항목명 · 연락처', 'type' => 'text' ),
+				'res_field_privacy'     => array( 'default' => '개인정보 동의', 'label' => '필수 항목명 · 개인정보 동의', 'type' => 'text' ),
+				// 관리자 이메일 (병원이 받는 알림)
+				'res_email_subject_tpl' => array( 'default' => '[문치과 상담예약] {name} · {date} {time}', 'label' => '관리자 이메일 · 제목 ({name}·{date}·{time})', 'type' => 'text' ),
+				'res_email_intro'       => array( 'default' => '새 상담예약이 접수되었습니다.', 'label' => '관리자 이메일 · 인트로', 'type' => 'text' ),
+				'res_email_lbl_no'      => array( 'default' => '예약번호', 'label' => '이메일 라벨 · 예약번호', 'type' => 'text' ),
+				'res_email_lbl_name'    => array( 'default' => '성함',     'label' => '이메일 라벨 · 성함', 'type' => 'text' ),
+				'res_email_lbl_phone'   => array( 'default' => '연락처',   'label' => '이메일 라벨 · 연락처', 'type' => 'text' ),
+				'res_email_lbl_service' => array( 'default' => '진료항목', 'label' => '이메일 라벨 · 진료항목', 'type' => 'text' ),
+				'res_email_lbl_dt'      => array( 'default' => '희망일시', 'label' => '이메일 라벨 · 희망일시', 'type' => 'text' ),
+				'res_email_lbl_mkt'     => array( 'default' => '마케팅 수신 동의', 'label' => '이메일 라벨 · 마케팅', 'type' => 'text' ),
+				'res_email_yes'         => array( 'default' => '예',       'label' => '이메일 · 예',    'type' => 'text' ),
+				'res_email_no'          => array( 'default' => '아니오',   'label' => '이메일 · 아니오', 'type' => 'text' ),
+				'res_email_note_head'   => array( 'default' => '--- 증상/문의 ---', 'label' => '이메일 · 증상 섹션 헤더', 'type' => 'text' ),
+				'res_email_note_empty'  => array( 'default' => '(없음)',   'label' => '이메일 · 증상 없음 표시', 'type' => 'text' ),
+				'res_email_received'    => array( 'default' => '접수시각', 'label' => '이메일 · 접수시각 라벨', 'type' => 'text' ),
+				// 클라이언트 alert 메시지 (JS)
+				'res_alert_svc'         => array( 'default' => '진료항목을 선택해주세요.', 'label' => 'JS · 진료항목 미선택 alert', 'type' => 'text' ),
+				'res_alert_date'        => array( 'default' => '희망 날짜를 선택해주세요.', 'label' => 'JS · 날짜 미선택 alert', 'type' => 'text' ),
+				'res_alert_time'        => array( 'default' => '희망 시간을 선택해주세요.', 'label' => 'JS · 시간 미선택 alert', 'type' => 'text' ),
+				'res_alert_name'        => array( 'default' => '성함을 입력해주세요.', 'label' => 'JS · 성함 미입력 alert', 'type' => 'text' ),
+				'res_alert_phone'       => array( 'default' => '연락처를 입력해주세요.', 'label' => 'JS · 연락처 미입력 alert', 'type' => 'text' ),
+				'res_alert_phone_fmt'   => array( 'default' => '연락처 형식이 올바르지 않습니다. (예: 010-1234-5678)', 'label' => 'JS · 연락처 형식 alert', 'type' => 'text' ),
+				'res_alert_privacy'     => array( 'default' => '개인정보 처리방침 동의가 필요합니다.', 'label' => 'JS · 개인정보 동의 alert', 'type' => 'text' ),
+				'res_hint_date_default' => array( 'default' => '선택하신 요일에 따라 가능한 시간이 표시됩니다.', 'label' => 'JS · 날짜 힌트 (초기)', 'type' => 'text' ),
+				'res_hint_date_closed'  => array( 'default' => '⚠️ 선택하신 날짜는 휴진일입니다. 다른 날짜를 선택해주세요.', 'label' => 'JS · 휴진일 안내', 'type' => 'text' ),
+				'res_hint_date_open'    => array( 'default' => '✓ {day}요일 진료 가능 시간: 09:00 – {until}', 'label' => 'JS · 날짜 힌트 ({day}·{until})', 'type' => 'text' ),
+				'res_btn_sending'       => array( 'default' => '전송 중...', 'label' => 'JS · 전송 중 버튼 라벨', 'type' => 'text' ),
+				'res_btn_submit'        => array( 'default' => '예약 신청',  'label' => 'JS · 기본 버튼 라벨', 'type' => 'text' ),
+				'res_alert_fail'        => array( 'default' => '예약 전송에 실패했습니다.', 'label' => 'JS · 실패 alert', 'type' => 'text' ),
+				'res_alert_network'     => array( 'default' => '네트워크 오류 — 잠시 후 다시 시도해주세요.', 'label' => 'JS · 네트워크 오류', 'type' => 'text' ),
+				// 성공화면
+				'res_success_title'     => array( 'default' => '예약 신청이 완료되었습니다!', 'label' => '성공화면 · 제목', 'type' => 'text' ),
+				'res_success_lead'      => array( 'default' => '담당자가 확인 후 빠른 시간 내에 연락드리겠습니다.', 'label' => '성공화면 · 설명', 'type' => 'textarea' ),
+				'res_success_lbl_no'    => array( 'default' => '예약번호',  'label' => '성공화면 라벨 · 예약번호', 'type' => 'text' ),
+				'res_success_lbl_svc'   => array( 'default' => '진료항목',  'label' => '성공화면 라벨 · 진료항목', 'type' => 'text' ),
+				'res_success_lbl_dt'    => array( 'default' => '희망일시',  'label' => '성공화면 라벨 · 희망일시', 'type' => 'text' ),
+				'res_success_lbl_name'  => array( 'default' => '예약자',    'label' => '성공화면 라벨 · 예약자', 'type' => 'text' ),
+				'res_success_hint'      => array( 'default' => '예약 확정 전 변경이 필요하시면 전화 또는 카카오톡으로 연락주세요.', 'label' => '성공화면 · 하단 힌트', 'type' => 'textarea' ),
+				'res_success_btn_kakao' => array( 'default' => '💬 카카오톡 친구 추가', 'label' => '성공화면 · 카카오 버튼', 'type' => 'text' ),
+				'res_success_btn_home'  => array( 'default' => '홈으로',    'label' => '성공화면 · 홈 버튼', 'type' => 'text' ),
+			),
+		),
+
 	);
 }
 
