@@ -151,7 +151,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 				<header class="md-park__head">
 					<span class="md-park__badge"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_badge', '🅿️ 주차 안내' ) : '🅿️ 주차 안내' ); ?></span>
 					<h3 class="md-park__title"><?php echo wp_kses_post( str_replace( '무료', '<strong>무료</strong>', $mdf( 'loc_park_title', '본원 지하 기계식 무료' ) ) ); ?></h3>
-					<p class="md-park__lead"><?php echo wp_kses_post( $mdf( 'loc_park_lead', '방문 시 데스크에 주차권을 제출하시면 등록해드립니다.' ) ); ?></p>
+					<?php /* v3.37.11 · 주차 lead 문구 제거 (아래 01·02 카드에 동일 안내 포함) */ ?>
 				</header>
 				<ul class="md-park__list">
 					<li>
