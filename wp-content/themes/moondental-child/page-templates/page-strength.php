@@ -47,8 +47,8 @@ $body = function_exists( 'md_content' )
 <section class="md-strength-hero">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">홈</a> ▸
-			<a href="<?php echo esc_url( home_url( '/기술력-시설/' ) ); ?>">기술력·시설</a> ▸
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸
+			<a href="<?php echo esc_url( home_url( '/기술력-시설/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_facility', '기술력·시설' ) ); ?></a> ▸
 			<span><?php echo esc_html( $data['label'] ); ?></span>
 		</nav>
 		<div class="md-strength-hero__inner">
@@ -87,7 +87,8 @@ $body = function_exists( 'md_content' )
 
 <!-- ============ 다른 강점 9 카드 (Cross-link) ============ -->
 <?php if ( function_exists( 'moondental_get_strengths' ) ) :
-	$all = moondental_get_strengths(); ?>
+	// v3.38.3 · 각 강점에 Customizer 오버라이드 적용
+	$all = array_map( 'moondental_apply_strength_overrides', moondental_get_strengths() ); ?>
 	<section class="md-section md-section--surface md-section--sm" aria-label="다른 강점 보기">
 		<div class="md-container">
 			<header class="md-section-head">

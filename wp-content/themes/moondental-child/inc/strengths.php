@@ -423,12 +423,31 @@ function moondental_get_strengths() {
 }
 
 /**
- * 슬러그로 단일 강점 데이터 반환.
+ * v3.38.3 · 강점 데이터에 Customizer 오버라이드 적용.
+ *  각 강점의 label / value / summary / body 는 사용자 정의하기에서 편집 가능:
+ *   strength_{slug}_label, strength_{slug}_value, strength_{slug}_summary, strength_{slug}_body
+ *  이 함수를 통해 나온 모든 강점 데이터에 자동 적용.
+ */
+function moondental_apply_strength_overrides( $data ) {
+	if ( ! is_array( $data ) || empty( $data['slug'] ) ) return $data;
+	if ( ! function_exists( 'md_content' ) ) return $data;
+	$slug = $data['slug'];
+	foreach ( array( 'label', 'value', 'summary', 'body' ) as $field ) {
+		$key = 'strength_' . $slug . '_' . $field;
+		$override = md_content( $key, $data[ $field ] ?? '' );
+		if ( $override !== '' ) $data[ $field ] = $override;
+	}
+	return $data;
+}
+
+/**
+ * 슬러그로 단일 강점 데이터 반환. v3.38.3 부터 override 자동 적용.
  *
  * @param string $slug
  * @return array|null
  */
 function moondental_get_strength_by_slug( $slug ) {
 	$all = moondental_get_strengths();
-	return isset( $all[ $slug ] ) ? $all[ $slug ] : null;
+	if ( ! isset( $all[ $slug ] ) ) return null;
+	return moondental_apply_strength_overrides( $all[ $slug ] );
 }

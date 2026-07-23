@@ -509,6 +509,7 @@ function moondental_home_content_fields() {
 				'breadcrumb_home'          => array( 'default' => '홈', 'label' => '브레드크럼 · 홈 링크 라벨', 'type' => 'text' ),
 				'breadcrumb_news'          => array( 'default' => '소식', 'label' => '브레드크럼 · 소식 라벨', 'type' => 'text' ),
 				'breadcrumb_encyclopedia'  => array( 'default' => '치과사전', 'label' => '브레드크럼 · 치과사전 라벨', 'type' => 'text' ),
+				'breadcrumb_facility'      => array( 'default' => '기술력·시설', 'label' => '브레드크럼 · 기술력·시설 라벨', 'type' => 'text' ),
 				// 헤더 aria
 				'aria_skip_link'          => array( 'default' => '본문 바로가기', 'label' => '헤더 · 본문 바로가기 (스킵 링크)', 'type' => 'text' ),
 				'aria_menu_open'          => array( 'default' => '메뉴 열기', 'label' => '헤더 · 메뉴 열기 aria', 'type' => 'text' ),

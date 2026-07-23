@@ -8,7 +8,8 @@
  */
 if ( ! function_exists( 'moondental_get_strengths' ) ) return;
 
-$strengths = moondental_get_strengths();
+// v3.38.3 · 각 강점에 Customizer 오버라이드 적용 (label/value/summary/body)
+$strengths = array_map( 'moondental_apply_strength_overrides', moondental_get_strengths() );
 $eyebrow   = function_exists( 'md_content' ) ? md_content( 'strengths_eyebrow', 'STRENGTHS' ) : 'STRENGTHS';
 $title     = function_exists( 'md_content' ) ? md_content( 'strengths_title',   '문치과병원의 강점' ) : '문치과병원의 강점';
 $lead      = function_exists( 'md_content' ) ? md_content( 'strengths_lead',    '의료기관 종별·시설·운영·임상 측면에서 갖추고 있는 9가지 강점입니다. 각 항목을 클릭하시면 자세한 설명을 보실 수 있습니다.' ) : '의료기관 종별·시설·운영·임상 측면에서 갖추고 있는 9가지 강점입니다. 각 항목을 클릭하시면 자세한 설명을 보실 수 있습니다.';
