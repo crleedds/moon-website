@@ -9,10 +9,11 @@
  */
 $info = moondental_get_info();
 
-/* Hero title · v3.34.8 · SEO 강도 강 (지역+전국 신뢰) */
-$eyebrow = get_theme_mod( 'moondental_hero_eyebrow', '천안·아산 대표 치과병원 · 전국에서 찾아오는' );
-$title_a = get_theme_mod( 'moondental_hero_title_a', '천안·아산에서 30여년,' );
-$title_b = get_theme_mod( 'moondental_hero_title_b', '전국 환자가 신뢰하는 통합 진료' );
+/* Hero title · v3.34.8 · SEO 강도 강 (지역+전국 신뢰)
+ * v3.38.5 · md_content 우선, 기존 theme_mod 폴백 (사용자 정의값 안전 보존) */
+$eyebrow = md_content( 'hero_eyebrow', get_theme_mod( 'moondental_hero_eyebrow', '천안·아산 대표 치과병원 · 전국에서 찾아오는' ) );
+$title_a = md_content( 'hero_title_a', get_theme_mod( 'moondental_hero_title_a', '천안·아산에서 30여년,' ) );
+$title_b = md_content( 'hero_title_b', get_theme_mod( 'moondental_hero_title_b', '전국 환자가 신뢰하는 통합 진료' ) );
 
 /* Mission */
 $mission_eyebrow = md_content( 'mission_band_eyebrow', 'OUR MISSION · 한아의료재단 문치과병원의 사명' );
@@ -56,7 +57,7 @@ $stats = array(
 );
 ?>
 
-<section class="md-hero-combined" aria-label="문치과병원 첫 화면">
+<section class="md-hero-combined" aria-label="<?php echo esc_attr( md_content( 'aria_sec_hero_combined', '문치과병원 첫 화면' ) ); ?>">
 	<div class="md-container">
 
 		<!-- 1) 제목 -->
@@ -75,7 +76,7 @@ $stats = array(
 
 		<!-- 3) 지정·협력 의료기관 -->
 		<?php if ( $certifications ) : ?>
-			<ul class="md-hero-combined__certs" aria-label="국가지정·협력 의료기관">
+			<ul class="md-hero-combined__certs" aria-label="<?php echo esc_attr( md_content( 'aria_sec_hero_certs', '국가지정·협력 의료기관' ) ); ?>">
 				<?php foreach ( $certifications as $c ) : ?>
 					<li>
 						<span aria-hidden="true"><?php echo $c['icon']; ?></span>

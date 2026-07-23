@@ -14,7 +14,7 @@ $eyebrow   = function_exists( 'md_content' ) ? md_content( 'strengths_eyebrow', 
 $title     = function_exists( 'md_content' ) ? md_content( 'strengths_title',   '문치과병원의 강점' ) : '문치과병원의 강점';
 $lead      = function_exists( 'md_content' ) ? md_content( 'strengths_lead',    '의료기관 종별·시설·운영·임상 측면에서 갖추고 있는 9가지 강점입니다. 각 항목을 클릭하시면 자세한 설명을 보실 수 있습니다.' ) : '의료기관 종별·시설·운영·임상 측면에서 갖추고 있는 9가지 강점입니다. 각 항목을 클릭하시면 자세한 설명을 보실 수 있습니다.';
 ?>
-<section class="md-section" aria-label="문치과병원의 강점">
+<section class="md-section" aria-label="<?php echo esc_attr( md_content( 'aria_sec_strengths', '문치과병원의 강점' ) ); ?>">
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( $eyebrow ); ?></span>

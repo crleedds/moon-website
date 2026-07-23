@@ -7,7 +7,7 @@
 $services = moondental_get_services();
 ?>
 
-<section class="md-section md-section--surface" id="services" aria-label="진료안내">
+<section class="md-section md-section--surface" id="services" aria-label="<?php echo esc_attr( md_content( 'aria_sec_services', '진료안내' ) ); ?>">
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'services_eyebrow', 'CLINICAL SERVICES · 천안·아산 진료항목' ) ); ?></span>

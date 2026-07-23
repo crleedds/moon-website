@@ -16,7 +16,7 @@ for ( $i = 1; $i <= 6; $i++ ) {
 }
 ?>
 
-<section class="md-section" id="facility" aria-label="문치과병원 시설·장비">
+<section class="md-section" id="facility" aria-label="<?php echo esc_attr( md_content( 'aria_sec_facility', '문치과병원 시설·장비' ) ); ?>">
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'facility_eyebrow', 'Facility & Equipment' ) ); ?></span>

@@ -25,7 +25,7 @@ foreach ( preg_split( "/\r\n|\r|\n/", (string) $certs_raw ) as $line ) {
 }
 ?>
 
-<section class="md-section md-mission-band" aria-label="병원 사명 · 협력 기관">
+<section class="md-section md-mission-band" aria-label="<?php echo esc_attr( md_content( 'aria_sec_mission', '병원 사명 · 협력 기관' ) ); ?>">
 	<div class="md-container md-container--narrow">
 		<div class="md-mission-band__inner">
 			<span class="md-mission-band__eyebrow"><?php echo esc_html( $mission_eyebrow ); ?></span>
@@ -33,7 +33,7 @@ foreach ( preg_split( "/\r\n|\r|\n/", (string) $certs_raw ) as $line ) {
 				<p>"<?php echo esc_html( $mission_text ); ?>"</p>
 			</blockquote>
 
-			<ul class="md-mission-band__certs" aria-label="국가지정·협력 의료기관">
+			<ul class="md-mission-band__certs" aria-label="<?php echo esc_attr( md_content( 'aria_sec_hero_certs', '국가지정·협력 의료기관' ) ); ?>">
 				<?php foreach ( $certifications as $c ) : ?>
 					<li>
 						<span aria-hidden="true"><?php echo $c['icon']; ?></span>

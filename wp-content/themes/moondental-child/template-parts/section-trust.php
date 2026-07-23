@@ -38,7 +38,7 @@ $stats = array(
 );
 ?>
 
-<section class="md-trust" aria-label="문치과병원의 약속">
+<section class="md-trust" aria-label="<?php echo esc_attr( md_content( 'aria_sec_trust', '문치과병원의 약속' ) ); ?>">
 	<div class="md-container">
 		<div class="md-trust__grid">
 			<?php foreach ( $stats as $stat ) : ?>

@@ -15,7 +15,7 @@ for ( $i = 1; $i <= 6; $i++ ) {
 }
 ?>
 
-<section class="md-section md-section--surface" id="faq-home" aria-label="자주 묻는 질문">
+<section class="md-section md-section--surface" id="faq-home" aria-label="<?php echo esc_attr( md_content( 'aria_sec_faq', '자주 묻는 질문' ) ); ?>">
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'faq_eyebrow', 'FAQ' ) ); ?></span>

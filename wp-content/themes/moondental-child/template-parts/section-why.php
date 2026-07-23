@@ -30,7 +30,7 @@ $points = array(
 );
 ?>
 
-<section class="md-section" id="why" aria-label="문치과병원의 차별점">
+<section class="md-section" id="why" aria-label="<?php echo esc_attr( md_content( 'aria_sec_why', '문치과병원의 차별점' ) ); ?>">
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'why_eyebrow', 'Why Moon Dental' ) ); ?></span>

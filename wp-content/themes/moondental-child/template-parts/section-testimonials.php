@@ -9,7 +9,7 @@ if ( empty( $testimonials ) ) return;
 $info = moondental_get_info();
 ?>
 
-<section class="md-section" id="testimonials" aria-label="환자 후기">
+<section class="md-section" id="testimonials" aria-label="<?php echo esc_attr( md_content( 'aria_sec_testimonials', '환자 후기' ) ); ?>">
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'testimonials_eyebrow', 'Reviews' ) ); ?></span>

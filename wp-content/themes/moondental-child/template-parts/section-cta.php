@@ -13,7 +13,7 @@ $args = wp_parse_args( $args ?? array(), array( 'context' => null ) );
 $copy = moondental_cta_copy( $args['context'] );
 ?>
 
-<section class="md-section md-section--sm" aria-label="예약 안내">
+<section class="md-section md-section--sm" aria-label="<?php echo esc_attr( md_content( 'aria_sec_cta_banner', '예약 안내' ) ); ?>">
 	<div class="md-container">
 		<div class="md-cta-banner md-reveal">
 			<?php if ( ! empty( $copy['eyebrow'] ) ) : ?>

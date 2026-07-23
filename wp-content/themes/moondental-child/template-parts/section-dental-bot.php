@@ -87,7 +87,7 @@ $kakao_url  = $info['kakao_url'] ?? '';
 $naver_book = $info['naver_place'] ?? '';
 $aside_call = str_replace( '{phone}', $info['phone'], $aside_call_tpl );
 ?>
-<section class="md-section md-section--surface md-dentalbot" id="dental-bot" aria-label="구강 자가진단">
+<section class="md-section md-section--surface md-dentalbot" id="dental-bot" aria-label="<?php echo esc_attr( md_content( 'aria_sec_dentalbot', '구강 자가진단' ) ); ?>">
 	<div class="md-container">
 
 		<header class="md-section-head">
@@ -156,7 +156,7 @@ $aside_call = str_replace( '{phone}', $info['phone'], $aside_call_tpl );
 		</div>
 
 		<!-- 우측 예약·상담 aside (모바일에선 하단 스택) -->
-		<aside class="md-dentalbot__cta" aria-label="예약·상담 채널">
+		<aside class="md-dentalbot__cta" aria-label="<?php echo esc_attr( md_content( 'aria_sec_dentalbot_cta', '예약·상담 채널' ) ); ?>">
 			<h3 class="md-dentalbot__cta-title"><?php echo esc_html( $aside_title ); ?></h3>
 			<p class="md-dentalbot__cta-lead"><?php echo esc_html( $aside_lead ); ?></p>
 

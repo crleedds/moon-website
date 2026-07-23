@@ -64,7 +64,7 @@ if ( ! function_exists( 'md_home_news_thumb' ) ) {
 }
 ?>
 
-<section class="md-section md-section--surface" id="notices" aria-label="병원 소식">
+<section class="md-section md-section--surface" id="notices" aria-label="<?php echo esc_attr( md_content( 'aria_sec_notices', '병원 소식' ) ); ?>">
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'notices_eyebrow', 'NEWS · 병원 소식' ) ); ?></span>

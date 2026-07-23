@@ -9,23 +9,23 @@
  */
 $info = moondental_get_info();
 
-$eyebrow = get_theme_mod( 'moondental_hero_eyebrow', '천안 만남로 · 1995년부터 한자리에서' );
-$title_a = get_theme_mod( 'moondental_hero_title_a', '천안·아산에서 30여년,' );
-$title_b = get_theme_mod( 'moondental_hero_title_b', '환자 한 분의 평생 치아를' );
-$lead    = get_theme_mod( 'moondental_hero_lead',
-	"천안·아산 임플란트·투명교정·라미네이트·자연치아 살리기까지.\n" .
-	"분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다."
-);
+// v3.38.5 · md_content 우선, 기존 theme_mod 폴백 (마이그레이션 안전)
+$eyebrow = md_content( 'hero_eyebrow', get_theme_mod( 'moondental_hero_eyebrow', '천안 만남로 · 1995년부터 한자리에서' ) );
+$title_a = md_content( 'hero_title_a', get_theme_mod( 'moondental_hero_title_a', '천안·아산에서 30여년,' ) );
+$title_b = md_content( 'hero_title_b', get_theme_mod( 'moondental_hero_title_b', '환자 한 분의 평생 치아를' ) );
+$lead    = md_content( 'hero_lead', get_theme_mod( 'moondental_hero_lead',
+	"천안·아산 임플란트·투명교정·라미네이트·자연치아 살리기까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다."
+) );
 
 $phone      = $info['phone'] ?? '';
 $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $phone );
 $naver_book = $info['naver_place'] ?? '';
 
-$hero_cta_primary_url   = get_theme_mod( 'moondental_hero_cta_primary_url',   '/상담예약/' );
-$hero_cta_primary_label = get_theme_mod( 'moondental_hero_cta_primary_label', '📅 상담 예약하기' );
+$hero_cta_primary_url   = md_content( 'hero_cta_url',   get_theme_mod( 'moondental_hero_cta_primary_url',   '/상담예약/' ) );
+$hero_cta_primary_label = md_content( 'hero_cta_label', get_theme_mod( 'moondental_hero_cta_primary_label', '📅 상담 예약하기' ) );
 ?>
 
-<section class="md-hero md-hero--centered" aria-label="문치과병원 소개">
+<section class="md-hero md-hero--centered" aria-label="<?php echo esc_attr( md_content( 'aria_sec_hero', '문치과병원 소개' ) ); ?>">
 	<div class="md-container">
 		<div class="md-hero__center">
 

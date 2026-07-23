@@ -55,7 +55,7 @@ $time_sat = function_exists( 'moondental_extract_time_range' )
 $park_walk  = function_exists( 'md_content' ) ? md_content( 'loc_park_walk',  '🚌 천안종합·고속버스터미널에서 도보 약 5분' ) : '🚌 천안종합·고속버스터미널에서 도보 약 5분';
 $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '🚆 천안역에서 버스로 약 10분' )                : '🚆 천안역에서 버스로 약 10분';
 ?>
-<section class="md-flocation" aria-label="오시는 길">
+<section class="md-flocation" aria-label="<?php echo esc_attr( md_content( 'aria_sec_location', '오시는 길' ) ); ?>">
 	<div class="md-container">
 		<header class="md-flocation__head">
 			<h2 class="md-flocation__title"><?php echo esc_html( $title ); ?></h2>
@@ -65,7 +65,7 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 					   target="_blank" rel="noopener"
 					   class="md-flocation__addr-link"
 					   data-track="cta-flocation-addr"
-					   aria-label="네이버 지도에서 위치 보기">
+					   aria-label="<?php echo esc_attr( md_content( 'aria_sec_naver_map', '네이버 지도에서 위치 보기' ) ); ?>">
 						<?php echo esc_html( $address ); ?>
 					</a>
 				</p>
@@ -95,7 +95,7 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 			   href="<?php echo esc_url( $map_naver ); ?>"
 			   target="_blank" rel="noopener"
 			   data-track="cta-flocation-mainmap"
-			   aria-label="네이버 지도에서 위치 보기"
+			   aria-label="<?php echo esc_attr( md_content( 'aria_sec_naver_map', '네이버 지도에서 위치 보기' ) ); ?>"
 			   <?php echo $map_image ? 'style="background-image:url(' . esc_url( $map_image ) . ');"' : ''; ?>>
 				<?php if ( ! $map_image ) : ?>
 					<div class="md-locmap__pattern" aria-hidden="true"></div>

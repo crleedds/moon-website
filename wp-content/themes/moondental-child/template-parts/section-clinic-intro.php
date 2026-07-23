@@ -100,7 +100,7 @@ $night_desc  = $mc( 'clinic_intro_night_desc',  '천안시 신부동에 위치�
 
 $closer = $mc( 'clinic_intro_closer', '앞으로도 문치과병원은 봉사와 지역의료의 책임을 감당해 나가겠습니다.' );
 ?>
-<section class="md-section md-clinic-intro" aria-label="문치과병원 진료 시스템 소개">
+<section class="md-section md-clinic-intro" aria-label="<?php echo esc_attr( md_content( 'aria_sec_clinic_intro', '문치과병원 진료 시스템 소개' ) ); ?>">
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( $section_eyebrow ); ?></span>
