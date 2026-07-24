@@ -16,19 +16,8 @@ $info       = moondental_get_info();
 $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'] );
 ?>
 
-<!-- ============ Hero ============ -->
-<section class="md-page-hero md-page-hero--reservation">
-	<div class="md-container">
-		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span>상담 예약</span>
-		</nav>
-		<span class="md-page-hero__eyebrow"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_hero_eyebrow', 'RESERVATION' ) : 'RESERVATION' ); ?></span>
-		<h1 class="md-page-hero__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'res_hero_title', '상담 예약 & 오시는 길' ) : '상담 예약 & 오시는 길' ); ?></h1>
-		<p class="md-page-hero__lead">
-			<?php echo nl2br( esc_html( function_exists( 'md_content' ) ? md_content( 'res_hero_lead', "내 증상을 빠르게 자가진단하고 가장 적합한 진료과를 추천받으세요.\n전화 · 카카오톡 · 네이버 예약으로 편하게 예약하실 수 있습니다." ) : "내 증상을 빠르게 자가진단하고 가장 적합한 진료과를 추천받으세요.\n전화 · 카카오톡 · 네이버 예약으로 편하게 예약하실 수 있습니다." ) ); ?>
-		</p>
-	</div>
-</section>
+<?php /* v3.40.2 · 예약 페이지 히어로(RESERVATION · 상담 예약 & 오시는 길) 제거
+ *  자가진단 봇으로 바로 진입하도록 화면 정리 */ ?>
 
 <!-- ============ 1. 구강 자가진단 봇 ============ -->
 <?php get_template_part( 'template-parts/section-dental-bot' ); ?>
