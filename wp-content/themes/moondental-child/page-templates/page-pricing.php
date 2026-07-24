@@ -151,17 +151,25 @@ $tab_fallback_rows = array(
 		array( '레진 · 세 면 이상 (씹는 면·양쪽 옆면 모두)', '50만 원', '' ),
 		array( '레진 · 치아 변색 (반점치) 부위',     '20만 원', '' ),
 		array( '레진 비니어 (앞니 코팅)',           '35만 원', '' ),
-		array( '레진 코어 (크라운 씌우기 전 기둥)',  '8만 원', '' ),
-		array( '신경치료 후 레진 마감',             '8만 원', '' ),
-		array( '유치 레진 · 한 면',                 '8만 원', '' ),
-		array( '유치 레진 · 두 면 이상',            '10만 원', '' ),
 	),
 );
 foreach ( $price_tabs as $key => $tab ) {
 	$label = $tab['label'] ?? '';
 	if ( isset( $tab_fallback_rows[ $label ] ) ) {
 		$rows = $tab['rows'] ?? array();
-		if ( count( $rows ) < 3 ) {
+		// v3.42.4 · 제거 대상 항목 포함 시에도 fallback 강제
+		$has_deprecated = false;
+		foreach ( $rows as $r ) {
+			$name = $r[0] ?? '';
+			if ( strpos( $name, '레진 코어' ) !== false
+				|| strpos( $name, '신경치료 후' ) !== false
+				|| strpos( $name, '유치 레진' ) !== false
+				|| strpos( $name, '럭사코어' ) !== false ) {
+				$has_deprecated = true;
+				break;
+			}
+		}
+		if ( count( $rows ) < 3 || $has_deprecated ) {
 			$price_tabs[ $key ]['rows'] = $tab_fallback_rows[ $label ];
 		}
 	}
