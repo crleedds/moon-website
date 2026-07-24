@@ -42,6 +42,9 @@
     function go(n) {
       if (n < 1 || n > panels.length) return;
       current = n;
+      // v3.42.0 · md-steps 컨테이너에 data-current 세팅 · 진행 라인 애니메이션
+      var stepsContainer = form.querySelector('.md-steps');
+      if (stepsContainer) stepsContainer.setAttribute('data-current', String(n));
       steps.forEach(function (s) {
         var k = parseInt(s.dataset.step, 10);
         s.classList.toggle('is-active', k === n);

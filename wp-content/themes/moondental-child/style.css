@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.41.2
+Version:      3.42.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -10709,4 +10709,379 @@ a.md-bot-card:hover {
   border-color: var(--color-accent-hover);
   color: #fff;
   transform: translateY(-2px);
+}
+
+
+/* =============================================================
+   v3.42.0 · 6종 폴리시 · 다크모드·이미지호버·히어로배경·FAQ·스텝·프린트
+   ============================================================= */
+
+/* ─── (1) 다크모드 대비 재검 · 부족한 요소 보강 ─── */
+@media (prefers-color-scheme: dark) {
+  /* muted 텍스트가 다크모드에서 잘 안 보이던 문제 · 밝기 상향 */
+  :root {
+    --color-text-sub: #D6C8B7;   /* 기존 대비 밝게 */
+    --color-text-mute: #A89685;  /* 캡션·힌트 · 여전히 mute 유지하되 최소 대비 확보 */
+  }
+  /* 링크 · 다크 배경에서 코럴 링크가 낮은 대비. primary-light 사용 */
+  a { color: var(--color-primary-light); }
+  a:hover { color: var(--color-primary); }
+  /* 입력 필드 · 다크에서 배경·테두리 명확히 */
+  input[type="text"], input[type="email"], input[type="tel"], input[type="date"],
+  textarea, select {
+    background-color: #241c17 !important;
+    color: var(--color-text) !important;
+    border-color: #4a3d33 !important;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--color-primary-light) !important;
+    outline-color: var(--color-primary-light);
+  }
+  /* placeholder 텍스트 대비 · 20% opacity → 45% */
+  ::placeholder { color: rgba(215, 200, 183, 0.55); opacity: 1; }
+  /* 카드 border · 다크에서 약간 밝게 · 카드 경계 확보 */
+  .md-service-card, .md-news-card, .md-doccard, .md-strength-card,
+  .md-preservation-card, .md-enc-card, .md-region-card, .md-testimonial,
+  .md-facility-card, .md-priceX-card {
+    border-color: rgba(215, 200, 183, 0.12);
+  }
+  /* 코럴 배지·chip · 다크 배경에서 밝은 primary-light 사용 */
+  .md-hero-combined__stat-value,
+  .md-hero-combined__stat-unit,
+  .md-trust__value {
+    color: var(--color-accent-light);
+  }
+  /* 진료시간 힌트 등 · rgba로 하드코딩된 것들 opacity 재조정 */
+  .md-cta-banner__hint { color: rgba(255, 246, 232, 0.85); }
+  .md-header__hours { color: var(--color-text-sub); }
+}
+
+/* ─── (2) 카드 hover 이미지 확대 ─── */
+.md-doccard__photo,
+.md-facility-card__media,
+.md-news-card__media,
+.md-team-card__photo,
+.md-doc-row__photo,
+.md-priceX-card__media,
+.md-strength-card__media {
+  overflow: hidden;
+  border-radius: inherit;
+}
+.md-doccard__photo img,
+.md-facility-card__media img,
+.md-news-card__media img,
+.md-team-card__photo img,
+.md-doc-row__photo img,
+.md-priceX-card__media img,
+.md-strength-card__media img {
+  transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+a.md-doccard:hover .md-doccard__photo img,
+a.md-news-card:hover .md-news-card__media img,
+a.md-team-card:hover .md-team-card__photo img,
+.md-doc-row:hover .md-doc-row__photo img,
+.md-facility-card:hover .md-facility-card__media img,
+.md-strength-card:hover .md-strength-card__media img,
+.md-priceX-card:hover .md-priceX-card__media img {
+  transform: scale(1.06);
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-doccard__photo img,
+  .md-facility-card__media img,
+  .md-news-card__media img,
+  .md-team-card__photo img,
+  .md-doc-row__photo img,
+  .md-priceX-card__media img,
+  .md-strength-card__media img {
+    transition: none;
+  }
+  a:hover .md-doccard__photo img,
+  a:hover .md-news-card__media img,
+  a:hover .md-team-card__photo img { transform: none !important; }
+}
+
+/* ─── (3) Hero 배경 · 부드러운 저채도 패턴 ─── */
+.md-hero-combined,
+.md-page-hero {
+  position: relative;
+  overflow: hidden;
+}
+.md-hero-combined::before,
+.md-page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 20%, rgba(216, 128, 98, 0.06), transparent 60%),
+    radial-gradient(ellipse 55% 45% at 85% 80%, rgba(143, 174, 146, 0.07), transparent 60%),
+    radial-gradient(circle at 50% 100%, rgba(232, 164, 138, 0.04), transparent 70%);
+  opacity: 0.9;
+}
+.md-hero-combined > *,
+.md-page-hero > * {
+  position: relative;
+  z-index: 1;
+}
+@media (prefers-color-scheme: dark) {
+  .md-hero-combined::before,
+  .md-page-hero::before {
+    background:
+      radial-gradient(ellipse 60% 40% at 15% 20%, rgba(244, 177, 149, 0.08), transparent 60%),
+      radial-gradient(ellipse 55% 45% at 85% 80%, rgba(143, 174, 146, 0.10), transparent 60%),
+      radial-gradient(circle at 50% 100%, rgba(232, 164, 138, 0.05), transparent 70%);
+  }
+}
+
+/* ─── (4) FAQ 아코디언 애니메이션 폴리시 ─── */
+.md-faq__item {
+  overflow: hidden;
+  transition: background-color 0.24s var(--ease);
+}
+.md-faq__item summary {
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+  padding-right: 40px;
+  transition: color 0.2s var(--ease);
+}
+.md-faq__item summary::-webkit-details-marker { display: none; }
+.md-faq__item summary::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid var(--color-text-sub);
+  border-bottom: 2px solid var(--color-text-sub);
+  transform: translateY(-70%) rotate(45deg);
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s var(--ease);
+}
+.md-faq__item[open] summary::after {
+  transform: translateY(-30%) rotate(-135deg);
+  border-color: var(--color-primary);
+}
+.md-faq__item[open] summary {
+  color: var(--color-primary-dark);
+}
+/* details 내용부 애니메이션 · Chrome 129+ interpolate-size 사용 */
+@supports (interpolate-size: allow-keywords) {
+  :root { interpolate-size: allow-keywords; }
+  .md-faq__item::details-content {
+    block-size: 0;
+    overflow-y: clip;
+    transition: block-size 0.36s cubic-bezier(0.22, 0.61, 0.36, 1),
+                content-visibility 0.36s allow-discrete;
+  }
+  .md-faq__item[open]::details-content {
+    block-size: auto;
+  }
+}
+/* 폴백 · 구형 브라우저에는 부드러운 fade */
+.md-faq__item[open] p,
+.md-faq__item[open] > *:not(summary) {
+  animation: md-faq-open 0.32s ease both;
+}
+@keyframes md-faq-open {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-faq__item[open] p,
+  .md-faq__item[open] > *:not(summary) { animation: none; }
+  .md-faq__item summary::after { transition: none; }
+}
+
+/* ─── (5) 예약 폼 스텝 인디케이터 강화 · 실제 클래스: .md-step__no ─── */
+.md-steps {
+  position: relative;
+}
+/* 스텝 간 진행 라인 (스텝 원 뒤 배경) */
+.md-steps::before {
+  content: '';
+  position: absolute;
+  top: 22px;
+  left: 12%;
+  right: 12%;
+  height: 2px;
+  background: var(--color-border);
+  z-index: 0;
+}
+.md-steps::after {
+  content: '';
+  position: absolute;
+  top: 22px;
+  left: 12%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+  z-index: 1;
+  transition: width 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.md-steps[data-current="2"]::after { width: calc(38%); }
+.md-steps[data-current="3"]::after { width: calc(76%); }
+/* 스텝 원 · 활성 시 살짝 커지고 그림자 · 완료 시 세이지 배경 (기존 CSS는 primary 유지) */
+.md-step {
+  position: relative;
+  z-index: 2;
+}
+.md-step__no {
+  transition: background 0.28s var(--ease), color 0.28s var(--ease),
+              transform 0.28s var(--ease), box-shadow 0.28s var(--ease);
+}
+.md-step.is-active .md-step__no {
+  transform: scale(1.15);
+  box-shadow: 0 6px 16px rgba(216, 128, 98, 0.32);
+}
+.md-step.is-done .md-step__no {
+  background: var(--color-accent) !important;
+}
+.md-step.is-done .md-step__no::before {
+  animation: md-step-check 0.32s ease;
+}
+@keyframes md-step-check {
+  0%   { transform: scale(0);   opacity: 0; }
+  60%  { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-step__no,
+  .md-steps::after { transition: none; }
+  .md-step.is-done .md-step__no::before { animation: none; }
+}
+
+/* ─── (6) 프린트 스타일 · 진료비·예약 확인 최적화 ─── */
+@media print {
+  /* 링크·컬러 · 인쇄에서 잉크 절약 · 순 흑백 */
+  :root {
+    --color-bg: #ffffff !important;
+    --color-surface: #ffffff !important;
+    --color-primary: #333 !important;
+    --color-text: #000 !important;
+    --color-text-sub: #333 !important;
+    --color-text-mute: #666 !important;
+    --color-border: #ccc !important;
+  }
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+  /* 숨김 · 인쇄 불필요 요소 */
+  .md-site-header,
+  .md-header,
+  footer,
+  .md-fab-stack,
+  .md-mobile-cta,
+  .md-totop,
+  .md-lang-switcher,
+  .md-preservation-nav,
+  .md-header__nav-toggle,
+  .md-header__cta,
+  #google_translate_element,
+  .skiptranslate,
+  .goog-te-banner-frame,
+  .md-cta-banner,
+  .md-hero__scroll,
+  .md-reveal:not(.is-revealed),
+  .md-dentalbot,
+  section[aria-label="예약 안내"],
+  .md-btn-group,
+  .md-btn,
+  a.md-service-card,
+  .md-page-hero__crumbs,
+  .md-single__tags,
+  .md-single__nav,
+  .md-news-grid,
+  .md-related,
+  video, iframe {
+    display: none !important;
+  }
+  /* 나타남 강제 · reveal 요소 인쇄에서 항상 보임 */
+  .md-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* 링크 URL 표시 · 인쇄 시 참조 */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+    font-weight: normal;
+  }
+  a[href^="tel:"]::after,
+  a[href^="mailto:"]::after,
+  a[href^="#"]::after {
+    content: '';
+  }
+  /* 페이지 여백 · 병원 브랜딩 최소 유지 */
+  @page {
+    margin: 15mm 15mm 20mm 15mm;
+    size: A4;
+  }
+  /* 섹션 · 부드럽게 페이지 나눔 · 카드/테이블/블록 중간 절단 방지 */
+  section, article, .md-preservation-card, .md-priceX-card,
+  .md-faq__item, table, tr, .md-res-success {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  h1, h2, h3 {
+    page-break-after: avoid;
+    break-after: avoid;
+    color: #000 !important;
+  }
+  /* 진료비 표 · 인쇄 최적 */
+  table {
+    width: 100% !important;
+    border-collapse: collapse;
+  }
+  table th, table td {
+    border: 1px solid #999 !important;
+    padding: 6pt 8pt !important;
+    text-align: left;
+  }
+  table th {
+    background: #f2f2f2 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* 예약 성공 · 인쇄용 · 예약번호 강조 */
+  .md-res-success {
+    border: 1px solid #333 !important;
+    padding: 12pt !important;
+    background: #fff !important;
+  }
+  .md-res-success__title { font-size: 16pt !important; }
+  .md-res-success__detail {
+    display: block !important;
+    margin: 8pt 0 !important;
+  }
+  .md-res-success__detail dt {
+    font-weight: bold;
+    display: inline-block;
+    width: 80pt;
+  }
+  .md-res-success__detail dd {
+    display: inline;
+    margin-left: 8pt;
+  }
+  .md-res-success__detail dd::after {
+    content: '\A';
+    white-space: pre;
+  }
+  /* 상단에 사이트명·전화 · 인쇄용 헤더 */
+  body::before {
+    content: '한아의료재단 문치과병원 · 041-563-2875 · https://moondental.co.kr';
+    display: block;
+    text-align: center;
+    font-size: 9pt;
+    color: #666;
+    padding-bottom: 8pt;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 12pt;
+  }
 }
