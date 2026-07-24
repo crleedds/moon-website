@@ -134,6 +134,39 @@ $default_all_tabs = "== 임플란트 ==\n" .
 	"나이트가드 (이갈이 방지·소프트) | 30만 원 | 야간 착용";
 
 $price_tabs = md_parse_price_tabs( md_content( 'price_tabs_all', $default_all_tabs ) );
+
+/* v3.42.3 · 렌더러 안전장치
+ * 저장된 price_tabs_all의 특정 탭이 비어있으면 (rows < 3개) 코드 default로 자동 대체.
+ * 관리자 접속 없이도 프론트에서 즉시 폴백. Customizer 저장값은 건드리지 않음. */
+$tab_fallback_rows = array(
+	'충치·레진' => array(
+		array( '치경부 마모증 (잇몸 경계 시린 부위)', '8만 원', '' ),
+		array( '레진 · 한 면 충전',                 '10만 원', '' ),
+		array( '레진 · 한 면 (넓은 범위)',           '15만 원', '' ),
+		array( '레진 · 앞니 사이 틈 메우기 (정중이개)', '25만 원', '' ),
+		array( '레진 · 두 면 충전',                 '15만 원', '' ),
+		array( '레진 · 두 면 (씹는 면 포함)',        '30만 원', '' ),
+		array( '레진 · 세 면 이상',                 '30만 원', '' ),
+		array( '레진 · 세 면 이상 (씹는 면 포함)',   '35만 원', '' ),
+		array( '레진 · 세 면 이상 (씹는 면·양쪽 옆면 모두)', '50만 원', '' ),
+		array( '레진 · 치아 변색 (반점치) 부위',     '20만 원', '' ),
+		array( '레진 비니어 (앞니 코팅)',           '35만 원', '' ),
+		array( '레진 코어 (크라운 씌우기 전 기둥)',  '8만 원', '' ),
+		array( '신경치료 후 레진 마감',             '8만 원', '' ),
+		array( '유치 레진 · 한 면',                 '8만 원', '' ),
+		array( '유치 레진 · 두 면 이상',            '10만 원', '' ),
+	),
+);
+foreach ( $price_tabs as $key => $tab ) {
+	$label = $tab['label'] ?? '';
+	if ( isset( $tab_fallback_rows[ $label ] ) ) {
+		$rows = $tab['rows'] ?? array();
+		if ( count( $rows ) < 3 ) {
+			$price_tabs[ $key ]['rows'] = $tab_fallback_rows[ $label ];
+		}
+	}
+}
+
 $first_tab_key = $price_tabs ? array_key_first( $price_tabs ) : '';
 
 // 비용 확정까지 4단계 — Customizer 연동 (기본값은 Customizer 정의와 동일)
