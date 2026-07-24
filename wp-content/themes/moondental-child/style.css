@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.41.1
+Version:      3.41.2
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -36,6 +36,9 @@ body {
   --color-primary-dark: #B86347;     /* pressed */
   --color-accent: #8FAE92;           /* soft sage — secondary CTA, icons */
   --color-accent-light: #B6CEB7;
+  --color-accent-dark: #6B8F72;      /* v3.41.2 · 더 진한 세이지 · 텍스트 강조용 */
+  --color-accent-hover: #7A9E7E;     /* 호버 상태 */
+  --color-accent-bg: rgba(143, 174, 146, 0.08);  /* 배경용 부드러운 세이지 */
 
   /* Surfaces */
   --color-bg: #FFFAF4;               /* warm cream — page background */
@@ -10636,4 +10639,74 @@ a.md-bot-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--card-shadow-hover);
   border-color: var(--color-primary-light);
+}
+
+
+/* =============================================================
+   v3.41.2 · Secondary 컬러 (세이지 그린) 도입 · 시각 다양성
+   코럴 단독 지배에서 벗어나 세이지 accent로 신뢰·안정 톤 추가
+   ============================================================= */
+
+/* 통계 숫자 (신뢰 지표) · 세이지 강조 */
+.md-hero-combined__stat-value,
+.md-hero-combined__stat-unit,
+.md-trust__value,
+.md-trust__num {
+  color: var(--color-accent-dark);
+}
+
+/* 예방·자연치아 계열 콜아웃 · 세이지 좌측 보더 */
+.md-preservation-callout {
+  border-left-color: var(--color-accent);
+  background: linear-gradient(135deg, var(--color-accent-bg) 0%, var(--color-surface) 100%);
+}
+.md-preservation-callout strong {
+  color: var(--color-accent-dark);
+}
+
+/* 강점 카드 아이콘 · 세이지 배지 */
+.md-strength-card__icon,
+.md-strength-hero__icon {
+  color: var(--color-accent-dark);
+}
+
+/* 자가진단 신뢰 지표 · 세이지 톤 */
+.md-bot__intro-trust li {
+  color: var(--color-accent-dark);
+}
+
+/* 예방스파 3단계 다이어그램 · 마지막 카드(SPA)는 코럴 유지 · 다른 것은 accent 원형 */
+.md-spa-oral__item:not(:last-child) .md-spa-oral__num {
+  background: var(--color-accent);
+}
+
+/* 진료실 · 예방클리닉 흐름 · 진료실 배지 세이지톤으로 (기존 청색에서 변경) */
+.md-spa-flow__item--clinic {
+  border-left-color: var(--color-accent);
+  background: var(--color-accent-bg);
+}
+.md-spa-flow__item--clinic .md-spa-flow__loc {
+  background: var(--color-accent-dark);
+}
+
+/* Success badge · 세이지 */
+.md-badge--success,
+.md-tag--verified {
+  background: var(--color-accent-bg);
+  color: var(--color-accent-dark);
+  border-color: var(--color-accent);
+}
+
+/* Secondary CTA button variant · 세이지 (신뢰용) */
+.md-btn--sage,
+.md-btn-secondary--sage {
+  background-color: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+}
+.md-btn--sage:hover {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  color: #fff;
+  transform: translateY(-2px);
 }
