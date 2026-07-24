@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.40.2' );
+define( 'MOONDENTAL_VERSION', '3.40.3' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -2849,20 +2849,20 @@ function moondental_setup_primary_menu( $force = false ) {
 	$home = home_url( '/' );
 
 	$structure = array(
-		array( 'title'=>'임플란트센터',     'url'=>$home.'임플란트-센터/' ),
-		array( 'title'=>'교정센터',         'url'=>$home.'투명교정-센터/' ),
+		array( 'title'=>'임플란트센터',     'url'=>$home.'진료항목/임플란트-센터/' ),
+		array( 'title'=>'교정센터',         'url'=>$home.'진료항목/투명교정-센터/' ),
 		array( 'title'=>'스마일디자인센터', 'url'=>$home.'스마일디자인센터/' ),
-		array( 'title'=>'자연치아살리기',   'url'=>$home.'자연치아-살리기/', 'children'=>array(
-			array( 'title'=>'충치치료', 'url'=>$home.'자연치아-살리기/#cavity' ),
-			array( 'title'=>'신경치료', 'url'=>$home.'자연치아-살리기/#endo' ),
-			array( 'title'=>'잇몸치료', 'url'=>$home.'자연치아-살리기/#perio' ),
+		array( 'title'=>'자연치아살리기',   'url'=>$home.'진료항목/자연치아-살리기/', 'children'=>array(
+			array( 'title'=>'충치치료', 'url'=>$home.'진료항목/자연치아-살리기/#cavity' ),
+			array( 'title'=>'신경치료', 'url'=>$home.'진료항목/자연치아-살리기/#endo' ),
+			array( 'title'=>'잇몸치료', 'url'=>$home.'진료항목/자연치아-살리기/#perio' ),
 		)),
 		array( 'title'=>'진료과', 'url'=>$home.'진료항목/', 'children'=>array(
-			array( 'title'=>'턱관절클리닉',      'url'=>$home.'턱관절-클리닉/' ),
-			array( 'title'=>'이갈이·이악물기', 'url'=>$home.'턱관절-클리닉/' ),
-			array( 'title'=>'사랑니',           'url'=>$home.'사랑니-발치/' ),
-			array( 'title'=>'소아치과',         'url'=>$home.'소아치과/' ),
-			array( 'title'=>'예방클리닉',       'url'=>$home.'예방클리닉/' ),
+			array( 'title'=>'턱관절클리닉',      'url'=>$home.'진료항목/턱관절-클리닉/' ),
+			array( 'title'=>'이갈이·이악물기', 'url'=>$home.'진료항목/턱관절-클리닉/' ),
+			array( 'title'=>'사랑니',           'url'=>$home.'진료항목/사랑니-발치/' ),
+			array( 'title'=>'소아치과',         'url'=>$home.'진료항목/소아치과/' ),
+			array( 'title'=>'예방클리닉',       'url'=>$home.'진료항목/예방클리닉/' ),
 		)),
 		array( 'title'=>'의료진',   'url'=>$home.'의료진/' ),
 		array( 'title'=>'비용안내', 'url'=>$home.'비용-안내/' ),
@@ -3132,20 +3132,20 @@ function moondental_recategorize_posts() {
 function moondental_primary_menu_data() {
 	$home = home_url( '/' );
 	return array(
-		array( 'label' => '임플란트센터',     'url' => $home . '임플란트-센터/',     'children' => array() ),
-		array( 'label' => '교정센터',         'url' => $home . '투명교정-센터/',     'children' => array() ),
+		array( 'label' => '임플란트센터',     'url' => $home . '진료항목/임플란트-센터/',     'children' => array() ),
+		array( 'label' => '교정센터',         'url' => $home . '진료항목/투명교정-센터/',     'children' => array() ),
 		array( 'label' => '스마일디자인센터', 'url' => $home . '스마일디자인센터/',  'children' => array() ),
-		array( 'label' => '자연치아살리기',   'url' => $home . '자연치아-살리기/',   'children' => array(
-			array( 'label' => '충치치료', 'url' => $home . '자연치아-살리기/#cavity' ),
-			array( 'label' => '신경치료', 'url' => $home . '자연치아-살리기/#endo' ),
-			array( 'label' => '잇몸치료', 'url' => $home . '자연치아-살리기/#perio' ),
+		array( 'label' => '자연치아살리기',   'url' => $home . '진료항목/자연치아-살리기/',   'children' => array(
+			array( 'label' => '충치치료', 'url' => $home . '진료항목/자연치아-살리기/#cavity' ),
+			array( 'label' => '신경치료', 'url' => $home . '진료항목/자연치아-살리기/#endo' ),
+			array( 'label' => '잇몸치료', 'url' => $home . '진료항목/자연치아-살리기/#perio' ),
 		) ),
 		array( 'label' => '진료과',           'url' => $home . '진료항목/',           'children' => array(
-			array( 'label' => '턱관절클리닉',    'url' => $home . '턱관절-클리닉/' ),
-			array( 'label' => '이갈이·이악물기','url' => $home . '턱관절-클리닉/' ),
-			array( 'label' => '사랑니',          'url' => $home . '사랑니-발치/' ),
-			array( 'label' => '소아치과',        'url' => $home . '소아치과/' ),
-			array( 'label' => '예방클리닉',      'url' => $home . '예방클리닉/' ),
+			array( 'label' => '턱관절클리닉',    'url' => $home . '진료항목/턱관절-클리닉/' ),
+			array( 'label' => '이갈이·이악물기','url' => $home . '진료항목/턱관절-클리닉/' ),
+			array( 'label' => '사랑니',          'url' => $home . '진료항목/사랑니-발치/' ),
+			array( 'label' => '소아치과',        'url' => $home . '진료항목/소아치과/' ),
+			array( 'label' => '예방클리닉',      'url' => $home . '진료항목/예방클리닉/' ),
 		) ),
 		array( 'label' => '의료진',           'url' => $home . '의료진/',             'children' => array() ),
 		array( 'label' => '비용안내',         'url' => $home . '비용-안내/',          'children' => array() ),
@@ -3338,14 +3338,14 @@ function moondental_get_service_areas() {
 			'title' => '임플란트센터',
 			'icon'  => 'icon:implant',
 			'desc'  => '진단·수술·보철·평생 관리까지 — 임플란트 전 과정을 원내 협진 체계로.',
-			'url'   => $home . '임플란트-센터/',
+			'url'   => $home . '진료항목/임플란트-센터/',
 		),
 		array(
 			'slug'  => '투명교정-센터',
 			'title' => '교정센터',
 			'icon'  => 'icon:ortho',
 			'desc'  => '슈어스마일(SureSmile) AI 투명교정 + 치과교정과 전문의·인정의 진료.',
-			'url'   => $home . '투명교정-센터/',
+			'url'   => $home . '진료항목/투명교정-센터/',
 		),
 		array(
 			'slug'  => '스마일디자인센터',
@@ -3359,7 +3359,7 @@ function moondental_get_service_areas() {
 			'title' => '자연치아 살리기',
 			'icon'  => 'icon:preserve',
 			'desc'  => '충치치료·신경치료·잇몸치료 — 발치보다 보존을 먼저 고민합니다.',
-			'url'   => $home . '자연치아-살리기/',
+			'url'   => $home . '진료항목/자연치아-살리기/',
 		),
 		array(
 			'slug'  => '진료항목',
