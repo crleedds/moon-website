@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.42.4' );
+define( 'MOONDENTAL_VERSION', '3.42.5' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -22,10 +22,10 @@ define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
  * '레진 코어'·'유치 레진' 등 제거 대상을 포함하면 → default_decay(11항목)로 교체.
  * 다른 탭은 사용자 편집값 그대로 유지. 한 번만 실행. */
 add_action( 'init', function() {
-	if ( get_option( 'moondental_pricing_decay_v3424' ) === 'done' ) return;
+	if ( get_option( 'moondental_pricing_decay_v3425' ) === 'done' ) return;
 	$stored = get_theme_mod( 'md_content_price_tabs_all', '' );
 	if ( ! $stored ) {
-		update_option( 'moondental_pricing_decay_v3424', 'done' );
+		update_option( 'moondental_pricing_decay_v3425', 'done' );
 		return;
 	}
 	// 저장값 파싱 (== 탭 == 단위)
@@ -53,10 +53,10 @@ add_action( 'init', function() {
 	           . "레진 · 한 면 (넓은 범위) | 15만 원 | \n"
 	           . "레진 · 앞니 사이 틈 메우기 (정중이개) | 25만 원 | \n"
 	           . "레진 · 두 면 충전 | 15만 원 | \n"
-	           . "레진 · 두 면 (씹는 면 포함) | 30만 원 | \n"
+	           . "레진 · 두 면 (인접면 포함) | 30만 원 | \n"
 	           . "레진 · 세 면 이상 | 30만 원 | \n"
-	           . "레진 · 세 면 이상 (씹는 면 포함) | 35만 원 | \n"
-	           . "레진 · 세 면 이상 (씹는 면·양쪽 옆면 모두) | 50만 원 | \n"
+	           . "레진 · 세 면 이상 (인접면 포함) | 35만 원 | \n"
+	           . "레진 · 세 면 이상 (인접면 양쪽 포함) | 50만 원 | \n"
 	           . "레진 · 치아 변색 (반점치) 부위 | 20만 원 | \n"
 	           . "레진 비니어 (앞니 코팅) | 35만 원 | ";
 
@@ -69,11 +69,13 @@ add_action( 'init', function() {
 			$r = trim( $r );
 			if ( $r && strpos( $r, '|' ) !== false && strpos( $r, '#' ) !== 0 ) $count++;
 		}
-		// v3.42.4 · 제거 대상 항목 포함 시에도 sync
+		// v3.42.5 · 제거 대상 + '씹는 면 포함' 옛 문구 감지 시 sync
 		$has_deprecated = ( strpos( $tabs[ $decay_key ], '레진 코어' ) !== false
 			|| strpos( $tabs[ $decay_key ], '신경치료 후 레진' ) !== false
 			|| strpos( $tabs[ $decay_key ], '유치 레진' ) !== false
-			|| strpos( $tabs[ $decay_key ], '럭사코어' ) !== false );
+			|| strpos( $tabs[ $decay_key ], '럭사코어' ) !== false
+			|| strpos( $tabs[ $decay_key ], '씹는 면 포함' ) !== false
+			|| strpos( $tabs[ $decay_key ], '양쪽 옆면 모두' ) !== false );
 		if ( $count < 3 || $has_deprecated ) {
 			$tabs[ $decay_key ] = $new_decay . "\n";
 		}
@@ -84,7 +86,7 @@ add_action( 'init', function() {
 		$rebuilt[] = '== ' . $label . " ==\n" . rtrim( $tabs[ $label ] );
 	}
 	set_theme_mod( 'md_content_price_tabs_all', implode( "\n\n", $rebuilt ) );
-	update_option( 'moondental_pricing_decay_v3424', 'done' );
+	update_option( 'moondental_pricing_decay_v3425', 'done' );
 } );
 
 /* 일회성 마이그레이션: 가격표 자유 편집 형식으로 통합 (v3.27.0)
