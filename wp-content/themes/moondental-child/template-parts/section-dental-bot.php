@@ -155,49 +155,7 @@ $aside_call = str_replace( '{phone}', $info['phone'], $aside_call_tpl );
 
 		</div>
 
-		<!-- 우측 예약·상담 aside (모바일에선 하단 스택) -->
-		<aside class="md-dentalbot__cta" aria-label="<?php echo esc_attr( md_content( 'aria_sec_dentalbot_cta', '예약·상담 채널' ) ); ?>">
-			<h3 class="md-dentalbot__cta-title"><?php echo esc_html( $aside_title ); ?></h3>
-			<p class="md-dentalbot__cta-lead"><?php echo esc_html( $aside_lead ); ?></p>
-
-			<div class="md-dentalbot__cta-btns">
-				<a class="md-btn md-btn--phone md-btn--lg md-dentalbot__cta-btn md-dentalbot__cta-btn--phone"
-				   href="tel:<?php echo esc_attr( $phone_link ); ?>"
-				   data-track="cta-dentalbot-call">
-					<svg class="md-rcta__icon md-rcta__icon--phone-glyph" viewBox="0 0 24 24" aria-hidden="true">
-						<path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57a1.02 1.02 0 0 0-1.02.24l-2.2 2.2a15.05 15.05 0 0 1-6.59-6.59l2.2-2.2c.28-.27.36-.66.24-1.02A11.36 11.36 0 0 1 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z" fill="#e63946"/>
-					</svg>
-					<span class="md-rcta__label"><?php echo esc_html( $aside_call ); ?></span>
-				</a>
-
-				<?php if ( $naver_book ) : ?>
-					<a class="md-btn md-btn--naver md-btn--lg md-dentalbot__cta-btn"
-					   href="<?php echo esc_url( $naver_book ); ?>"
-					   target="_blank" rel="noopener"
-					   data-track="cta-dentalbot-naver">
-						<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">
-							<circle cx="12" cy="12" r="12" fill="#ffffff"/>
-							<path d="M9 8h2.2l3.6 5.1V8H17v8h-2.2l-3.6-5.1V16H9V8z" fill="#03C75A"/>
-						</svg>
-						<span class="md-rcta__label"><?php echo esc_html( $aside_naver ); ?></span>
-					</a>
-				<?php endif; ?>
-
-				<?php if ( $kakao_url ) : ?>
-					<a class="md-btn md-btn--kakao md-btn--lg md-dentalbot__cta-btn"
-					   href="<?php echo esc_url( $kakao_url ); ?>"
-					   target="_blank" rel="noopener"
-					   data-track="cta-dentalbot-kakao">
-						<svg class="md-rcta__icon" viewBox="0 0 24 24" aria-hidden="true">
-							<path d="M12 6c-3.7 0-6.7 2.4-6.7 5.4 0 1.9 1.3 3.6 3.2 4.5l-.7 2.6c-.06.23.18.4.38.27l3.05-2c.25.03.51.04.78.04 3.7 0 6.7-2.4 6.7-5.4S15.7 6 12 6z" fill="#3C1E1E"/>
-						</svg>
-						<span class="md-rcta__label"><?php echo esc_html( $aside_kakao ); ?></span>
-					</a>
-				<?php endif; ?>
-			</div>
-
-			<p class="md-dentalbot__cta-hint"><?php echo esc_html( $aside_hint ); ?></p>
-		</aside>
+		<?php /* v3.38.8 · 자가진단 aside CTA 제거 (하단 통일 CTA 배너와 중복) */ ?>
 
 		</div><!-- /.md-dentalbot__layout -->
 	</div>
