@@ -470,7 +470,59 @@
       });
     });
 
-    // 6. IntersectionObserver-based reveal
+    // 6. IntersectionObserver-based reveal · v3.41.0 · 자동 부여 확장
+    // 페이지 로드 시 프론트 콘텐츠 요소에 자동으로 .md-reveal 클래스 부여.
+    // 카드·섹션 헤더·주요 블록이 스크롤 시 부드럽게 fade-up.
+    (function autoAssignReveal() {
+      var selectors = [
+        // 주요 섹션 컴포넌트 (첫 히어로 제외)
+        '.md-section-head',
+        '.md-hero-combined__stat',
+        '.md-hero-combined__quote',
+        '.md-hero-combined__certs > li',
+        // 카드 그룹
+        '.md-service-card', '.md-service-grid > article',
+        '.md-news-card',
+        '.md-doccard', '.md-doc-row',
+        '.md-strength-card',
+        '.md-preservation-card',
+        '.md-region-card', '.md-region-pill',
+        '.md-testimonial',
+        '.md-enc-card',
+        '.md-bot-card',
+        '.md-facility-card',
+        '.md-priceX-card',
+        '.md-team-card',
+        // 예방클리닉 신규 블록
+        '.md-spa-why', '.md-spa-oral__item', '.md-spa-who', '.md-spa-after',
+        '.md-spa-flow__item', '.md-spa-test__item',
+        // 자가진단봇 intro 요소
+        '.md-bot__intro-step', '.md-bot__intro-chips',
+        '.md-bot__chief-btn',
+        // CTA 배너
+        '.md-cta-banner',
+      ];
+      var alreadyClass = ':not(.md-reveal)';
+      var enhanceable = document.querySelectorAll(
+        selectors.map(function (s) { return s + alreadyClass; }).join(',')
+      );
+      enhanceable.forEach(function (el, i) {
+        el.classList.add('md-reveal');
+        // 형제 카드/스텝은 stagger delay 부여 (같은 부모 내 몇 번째인지)
+        if (!el.hasAttribute('data-reveal-delay')) {
+          var siblingIndex = 0;
+          var prev = el.previousElementSibling;
+          while (prev) {
+            if (prev.classList && prev.classList.contains('md-reveal')) siblingIndex++;
+            prev = prev.previousElementSibling;
+          }
+          if (siblingIndex > 0 && siblingIndex < 7) {
+            el.setAttribute('data-reveal-delay', String(siblingIndex));
+          }
+        }
+      });
+    })();
+
     var revealEls = document.querySelectorAll('.md-reveal');
     if (revealEls.length) {
       if (reducedMotion || !('IntersectionObserver' in window)) {
@@ -483,7 +535,7 @@
               io.unobserve(entry.target);
             }
           });
-        }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
         revealEls.forEach(function (el) { io.observe(el); });
       }
     }
