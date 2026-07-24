@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.41.0
+Version:      3.41.1
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -67,6 +67,14 @@ body {
   --shadow-hover: 0 12px 32px rgba(216, 128, 98, 0.18);
   --shadow-card: 0 2px 12px rgba(61, 47, 38, 0.06);
 
+  /* v3.41.1 · 카드 시스템 통합 tokens (모든 카드 공통) */
+  --card-radius: 14px;
+  --card-shadow: 0 6px 20px rgba(61, 47, 38, 0.06);
+  --card-shadow-hover: 0 14px 32px rgba(61, 47, 38, 0.12);
+  --card-border: 1px solid var(--color-border);
+  --card-padding: clamp(20px, 2.4vw, 28px);
+  --card-transition: transform 0.24s var(--ease), box-shadow 0.24s var(--ease), border-color 0.24s var(--ease);
+
   /* Layout */
   --container-max: 1200px;
   --container-narrow: 880px;
@@ -111,6 +119,9 @@ body {
     --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.35);
     --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.5);
     --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.4);
+    /* v3.41.1 · 다크모드 카드 shadow */
+    --card-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    --card-shadow-hover: 0 14px 32px rgba(0, 0, 0, 0.55);
   }
   /* 이미지·로고 살짝 톤 다운 */
   .md-doccard__photo img,
@@ -10583,4 +10594,46 @@ html { scroll-behavior: smooth; }
   margin: 18px 0 0;
   font-size: var(--fs-caption);
   color: rgba(255, 255, 255, 0.78);
+}
+
+
+/* =============================================================
+   v3.41.1 · 카드 시스템 통합 · 사이트 전반 카드 시각 통일
+   기존 각 카드가 개별 border-radius/shadow 값 사용 → 일관성 없음.
+   여기서 카드 계열 셀렉터를 공용 tokens로 표준화.
+   ============================================================= */
+
+/* 모든 주요 카드 · 공통 시각 톡큰 · 마지막에 정의되어 cascade 우선 */
+.md-service-card,
+.md-news-card,
+.md-doccard,
+.md-strength-card,
+.md-preservation-card,
+.md-testimonial,
+.md-facility-card,
+.md-enc-card,
+.md-region-card,
+.md-bot-card,
+.md-team-card,
+.md-priceX-card,
+.md-doc-row,
+.md-spa-test__item,
+.md-bot__intro-step,
+.md-bot__chief-btn {
+  border-radius: var(--card-radius);
+  transition: var(--card-transition);
+}
+
+/* 링크형 카드 · 호버 시 상승 · 공통 인터랙션 */
+a.md-service-card:hover,
+a.md-news-card:hover,
+a.md-doccard:hover,
+a.md-strength-card:hover,
+a.md-preservation-card:hover,
+a.md-enc-card:hover,
+a.md-region-card:hover,
+a.md-bot-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--color-primary-light);
 }
