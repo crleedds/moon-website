@@ -100,14 +100,71 @@ $aside_call = str_replace( '{phone}', $info['phone'], $aside_call_tpl );
 
 		<div class="md-bot" data-md-bot data-md-bot-json="<?php echo esc_attr( wp_json_encode( $bot_data ) ); ?>">
 
-			<!-- 1) Intro -->
+			<!-- 1) Intro · v3.39.0 · 3단계 프로세스 + 진료영역 chip + 신뢰 지표 -->
 			<div class="md-bot__panel md-bot__panel--intro" data-md-bot-screen="intro">
-				<div class="md-bot__intro-icon" aria-hidden="true">🦷</div>
-				<h3 class="md-bot__intro-title"><?php echo esc_html( $intro_title ); ?></h3>
-				<p class="md-bot__intro-lead"><?php echo esc_html( $bot_count_label ); ?></p>
+				<div class="md-bot__intro-head">
+					<div class="md-bot__intro-icon" aria-hidden="true">🦷</div>
+					<h3 class="md-bot__intro-title"><?php echo esc_html( $intro_title ); ?></h3>
+					<p class="md-bot__intro-lead"><?php echo esc_html( $bot_count_label ); ?></p>
+				</div>
+
+				<!-- 3단계 진단 프로세스 시각화 -->
+				<ol class="md-bot__intro-steps" aria-label="<?php echo esc_attr( md_content( 'bot_intro_steps_aria', '진단 진행 방식' ) ); ?>">
+					<li class="md-bot__intro-step">
+						<span class="md-bot__intro-step-num">1</span>
+						<div class="md-bot__intro-step-body">
+							<strong><?php echo esc_html( md_content( 'bot_intro_step_1_title', '증상 답변' ) ); ?></strong>
+							<span><?php echo esc_html( md_content( 'bot_intro_step_1_desc', '예/아니오 두 버튼으로 간단히' ) ); ?></span>
+						</div>
+					</li>
+					<li class="md-bot__intro-step">
+						<span class="md-bot__intro-step-num">2</span>
+						<div class="md-bot__intro-step-body">
+							<strong><?php echo esc_html( md_content( 'bot_intro_step_2_title', '가중치 분석' ) ); ?></strong>
+							<span><?php echo esc_html( md_content( 'bot_intro_step_2_desc', '증상별 관련 진료과 자동 매칭' ) ); ?></span>
+						</div>
+					</li>
+					<li class="md-bot__intro-step">
+						<span class="md-bot__intro-step-num">3</span>
+						<div class="md-bot__intro-step-body">
+							<strong><?php echo esc_html( md_content( 'bot_intro_step_3_title', '진료과 추천' ) ); ?></strong>
+							<span><?php echo esc_html( md_content( 'bot_intro_step_3_desc', '적합도순 최대 3개 안내' ) ); ?></span>
+						</div>
+					</li>
+				</ol>
+
+				<!-- 커버하는 진료영역 chip -->
+				<?php if ( ! empty( $depts ) ) : ?>
+				<div class="md-bot__intro-chips" aria-label="<?php echo esc_attr( md_content( 'bot_intro_chips_aria', '커버하는 진료 영역' ) ); ?>">
+					<span class="md-bot__intro-chips-label"><?php echo esc_html( md_content( 'bot_intro_chips_label', '커버 진료영역' ) ); ?></span>
+					<ul class="md-bot__intro-chip-list">
+						<?php foreach ( array_slice( $depts, 0, 8 ) as $d ) : ?>
+							<li class="md-bot__intro-chip"><?php echo esc_html( $d['name'] ); ?></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+				<?php endif; ?>
+
 				<button type="button" class="md-btn md-btn-primary md-btn--lg md-bot__start" data-md-bot-start>
 					<?php echo esc_html( $bot_start ); ?>
 				</button>
+
+				<!-- 신뢰 지표 3개 -->
+				<ul class="md-bot__intro-trust" aria-label="<?php echo esc_attr( md_content( 'bot_intro_trust_aria', '자가진단 봇 특징' ) ); ?>">
+					<li>
+						<span aria-hidden="true">🔒</span>
+						<?php echo esc_html( md_content( 'bot_intro_trust_1', '답변 저장 안 함' ) ); ?>
+					</li>
+					<li>
+						<span aria-hidden="true">⚡</span>
+						<?php echo esc_html( md_content( 'bot_intro_trust_2', '30초 안에 결과' ) ); ?>
+					</li>
+					<li>
+						<span aria-hidden="true">🆓</span>
+						<?php echo esc_html( md_content( 'bot_intro_trust_3', '완전 무료' ) ); ?>
+					</li>
+				</ul>
+
 				<p class="md-bot__intro-note"><?php echo esc_html( $intro_note ); ?></p>
 			</div>
 

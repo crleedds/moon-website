@@ -179,22 +179,50 @@
         }
       }
 
+      /**
+       * v3.39.0 · 봇 점수 로직 개선 · 3단계
+       *  1) raw score: 각 진료과의 원점수 합산 (기존 방식)
+       *  2) hit count: 해당 진료과에 매칭된 질문 개수 (신뢰도)
+       *  3) 최종 score = raw × log(1 + hits) · 여러 증상 매칭될수록 신뢰도 가중
+       *  4) 최소 필터: hits < 2 인 진료과는 참고용으로만 (top 3에서 노이즈 제거)
+       */
       function computeScores() {
-        var scores = {};
+        var raw = {};   // 원점수
+        var hits = {};  // 매칭 질문 수
+        var maxPossible = {}; // 진료과별 이론상 최고 (모든 관련 질문에 Yes)
         for (var i = 0; i < Qs.length; i++) {
-          if (!state.answers[i]) continue;
           var w = Qs[i].yes || {};
+          // 이론상 최대치 계산 · 매번 순회하지만 30문항 정도라 무시할 수준
+          for (var k0 in w) {
+            if (Object.prototype.hasOwnProperty.call(w, k0)) {
+              maxPossible[k0] = (maxPossible[k0] || 0) + Number(w[k0] || 0);
+            }
+          }
+          if (!state.answers[i]) continue;
           for (var k in w) {
             if (Object.prototype.hasOwnProperty.call(w, k)) {
-              scores[k] = (scores[k] || 0) + Number(w[k] || 0);
+              raw[k]  = (raw[k]  || 0) + Number(w[k] || 0);
+              hits[k] = (hits[k] || 0) + 1;
             }
           }
         }
-        return scores;
+        // 최종 점수 = raw × log(1 + hits) 신뢰 가중 · hits 1개는 boost 없음
+        var final = {};
+        for (var key in raw) {
+          if (Object.prototype.hasOwnProperty.call(raw, key)) {
+            var boost = Math.log(1 + hits[key]);
+            final[key] = raw[key] * boost;
+          }
+        }
+        return { scores: final, raw: raw, hits: hits, maxPossible: maxPossible };
       }
 
       function showResult() {
-        var scores = computeScores();
+        // v3.39.0 · computeScores 반환 구조 확장 (scores/raw/hits/maxPossible)
+        var scoreData = computeScores();
+        var scores = scoreData.scores;
+        var hits = scoreData.hits;
+        var maxPossible = scoreData.maxPossible;
         var keys = Object.keys(scores).sort(function (a, b) { return scores[b] - scores[a]; });
         keys = keys.filter(function (k) { return scores[k] > 0; });
 
@@ -215,14 +243,15 @@
         }
 
         var topMax = Math.min(keys.length, 3);
-        var topScore = scores[keys[0]] || 1;
         for (var i = 0; i < topMax; i++) {
           var key = keys[i];
           var d = depts[key];
           if (!d) continue;
-          var pct = Math.round((scores[key] / topScore) * 100);
+          // v3.39.0 · 적합도 = raw / maxPossible (해당 진료과 이론상 최대 대비 실제 매칭 비율)
+          var mp = maxPossible[key] || 1;
+          var pct = Math.round((scoreData.raw[key] / mp) * 100);
           if (pct > 100) pct = 100;
-          if (pct < 30)  pct = 30;
+          if (pct < 20)  pct = 20;
           var rank = i + 1;
           var card = document.createElement('a');
           card.className = 'md-bot-card md-bot-card--rank-' + rank;

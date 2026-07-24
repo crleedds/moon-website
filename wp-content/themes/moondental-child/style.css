@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.38.8
+Version:      3.39.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -8793,17 +8793,10 @@ html { scroll-behavior: smooth; }
 .md-dentalbot {
   /* surface 배경은 .md-section--surface가 처리 */
 }
-/* 봇 + 우측 CTA 2-col 레이아웃 */
+/* v3.38.9 · aside 제거 후 단일 컬럼 · 중앙 정렬 · 최대폭 제한 */
 .md-dentalbot__layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: clamp(20px, 2.5vw, 32px);
-  align-items: start;
-}
-@media (max-width: 880px) {
-  .md-dentalbot__layout {
-    grid-template-columns: 1fr;
-  }
+  max-width: 780px;
+  margin: 0 auto;
 }
 
 /* 우측 CTA 사이드 */
@@ -8877,31 +8870,167 @@ html { scroll-behavior: smooth; }
   .md-bot__panel { animation: none; }
 }
 
-/* ── Intro ── */
+/* ── Intro · v3.39.0 · 3단계 프로세스 + chip + trust ── */
 .md-bot__panel--intro {
   text-align: center;
-  padding: clamp(16px, 2vw, 28px) 0;
+  padding: clamp(8px, 1.5vw, 16px) 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 2.5vw, 28px);
+}
+.md-bot__intro-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
 .md-bot__intro-icon {
   font-size: clamp(2.5rem, 5vw, 3.5rem);
-  margin-bottom: 12px;
+  margin-bottom: 4px;
   filter: drop-shadow(0 6px 12px rgba(216, 128, 98, 0.25));
+  animation: md-bot-icon-bob 3.5s ease-in-out infinite;
+}
+@keyframes md-bot-icon-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-bot__intro-icon { animation: none; }
 }
 .md-bot__intro-title {
   font-size: clamp(1.25rem, 2vw, 1.625rem);
   font-weight: 800;
   letter-spacing: -0.015em;
-  margin: 0 0 8px;
+  margin: 0;
 }
 .md-bot__intro-lead {
   font-size: var(--fs-small);
   color: var(--color-text-sub);
-  margin: 0 0 clamp(20px, 2.5vw, 28px);
+  margin: 0;
+  max-width: 44ch;
 }
+
+/* 3단계 프로세스 */
+.md-bot__intro-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  text-align: left;
+  position: relative;
+}
+.md-bot__intro-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  transition: transform 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.md-bot__intro-step:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary-light);
+}
+.md-bot__intro-step-num {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.8125rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.md-bot__intro-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.md-bot__intro-step-body strong {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+.md-bot__intro-step-body span {
+  font-size: 0.75rem;
+  color: var(--color-text-sub);
+  line-height: 1.45;
+}
+@media (max-width: 640px) {
+  .md-bot__intro-steps {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* 진료영역 chip */
+.md-bot__intro-chips {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 12px;
+  background: linear-gradient(135deg, rgba(216, 128, 98, 0.05) 0%, rgba(232, 164, 138, 0.08) 100%);
+  border-radius: 14px;
+}
+.md-bot__intro-chips-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-primary-dark);
+}
+.md-bot__intro-chip-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.md-bot__intro-chip {
+  padding: 5px 12px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  color: var(--color-text-sub);
+  font-weight: 600;
+}
+
+/* Trust 지표 3개 */
+.md-bot__intro-trust {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  gap: clamp(12px, 3vw, 24px);
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: var(--color-text-sub);
+}
+.md-bot__intro-trust li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
 .md-bot__intro-note {
   font-size: 0.75rem;
   color: var(--color-text-mute);
-  margin: 14px 0 0;
+  margin: 0;
 }
 
 /* ── Quiz ── */
