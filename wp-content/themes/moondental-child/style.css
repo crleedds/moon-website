@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.39.0
+Version:      3.40.0
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -9025,6 +9025,142 @@ html { scroll-behavior: smooth; }
   display: inline-flex;
   align-items: center;
   gap: 5px;
+}
+
+/* ── Chief Complaint · v3.40.0 · 어디가 불편하세요? ── */
+.md-bot__panel--chief {
+  text-align: center;
+  padding: clamp(12px, 2vw, 24px) 0;
+}
+.md-bot__chief-title {
+  font-size: clamp(1.125rem, 1.9vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  margin: 0 0 8px;
+}
+.md-bot__chief-lead {
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  margin: 0 auto clamp(20px, 2.5vw, 28px);
+  max-width: 44ch;
+  line-height: 1.55;
+}
+.md-bot__chief-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  text-align: left;
+}
+@media (max-width: 640px) {
+  .md-bot__chief-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 380px) {
+  .md-bot__chief-grid { grid-template-columns: 1fr; }
+}
+.md-bot__chief-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 18px 16px;
+  background: var(--color-white);
+  border: 2px solid var(--color-border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  font-family: inherit;
+  color: var(--color-text);
+  text-align: left;
+}
+.md-bot__chief-btn:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(216, 128, 98, 0.18);
+}
+.md-bot__chief-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+.md-bot__chief-label {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.md-bot__chief-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-sub);
+  line-height: 1.45;
+}
+
+/* ── Safety Notice · v3.40.0 · 금기·주의 사항 ── */
+.md-bot__panel--safety {
+  padding: clamp(8px, 1.5vw, 16px) 0;
+}
+.md-bot__safety-head {
+  text-align: center;
+  margin-bottom: clamp(20px, 2.5vw, 28px);
+}
+.md-bot__safety-icon {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 4px 10px rgba(230, 57, 70, 0.28));
+}
+.md-bot__safety-title {
+  font-size: clamp(1.125rem, 1.9vw, 1.4rem);
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  margin: 0 0 6px;
+}
+.md-bot__safety-lead {
+  font-size: var(--fs-small);
+  color: var(--color-text-sub);
+  margin: 0;
+}
+.md-bot__safety-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 clamp(20px, 2.5vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.md-bot__safety-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(230, 57, 70, 0.06);
+  border-left: 3px solid #e63946;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--color-text);
+}
+.md-bot__safety-item-icon {
+  flex-shrink: 0;
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+.md-bot__safety-continue {
+  display: block;
+  margin: 0 auto;
+}
+
+/* ── Urgent tag on result card ── */
+.md-bot-card--urgent {
+  border-color: #e63946 !important;
+  box-shadow: 0 8px 22px rgba(230, 57, 70, 0.18);
+}
+.md-bot-card__urgent-tag {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: #e63946;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 6px;
 }
 
 .md-bot__intro-note {

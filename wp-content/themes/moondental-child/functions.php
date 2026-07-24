@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.39.0' );
+define( 'MOONDENTAL_VERSION', '3.40.0' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
@@ -1109,6 +1109,7 @@ function moondental_enqueue_styles() {
 				'multipleTpl' => md_content( 'bot_result_multiple', '아래 {n}개 진료과를 우선순위로 추천드립니다.' ),
 				'matchAria'   => md_content( 'bot_match_aria', '적합도' ),
 				'matchTpl'    => md_content( 'bot_match_tpl',  '적합도 {pct}%' ),
+				'urgentLabel' => md_content( 'bot_urgent_label', '⚡ 우선 상담 권장' ),
 			),
 			'lang' => array(
 				'ko' => md_content( 'lang_ko', '한국어' ),

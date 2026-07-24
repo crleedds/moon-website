@@ -27,7 +27,11 @@ foreach ( md_parse_lines( $depts_raw ) as $line ) {
 	);
 }
 
-/* 질문 파싱 */
+/* v3.40.0 · 확장 스키마 · 5개 컬럼
+ *  카테고리 | 질문 | 진료과키:가중치, ... | chief 태그(콤마) | 특수 태그(콤마)
+ *  chief 태그: 치아·잇몸·턱관절·심미·예방·all·(빈칸=all)
+ *  특수 태그: urgent · contra=diabetes · contra=anticoag · contra=bisphos · contra=pregnancy · contra=heart · contra=allergy · 여러 개는 콤마
+ *  하위 호환: 3개 컬럼만 있어도 동작 (chief=all, 태그 없음) */
 $questions_raw = md_content( 'bot_questions', '' );
 $questions = array();
 $idx = 1;
@@ -43,18 +47,71 @@ foreach ( md_parse_lines( $questions_raw ) as $line ) {
 			$yes[ $pp[0] ] = (int) $pp[1];
 		}
 	}
+	// chief 태그
+	$chief = array();
+	if ( isset( $parts[3] ) && trim( $parts[3] ) !== '' ) {
+		foreach ( explode( ',', $parts[3] ) as $c ) {
+			$c = trim( $c );
+			if ( $c !== '' ) $chief[] = $c;
+		}
+	}
+	if ( empty( $chief ) ) $chief = array( 'all' );
+	// 특수 태그
+	$urgent  = false;
+	$contras = array();
+	if ( isset( $parts[4] ) && trim( $parts[4] ) !== '' ) {
+		foreach ( explode( ',', $parts[4] ) as $t ) {
+			$t = trim( $t );
+			if ( $t === '' ) continue;
+			if ( strtolower( $t ) === 'urgent' ) { $urgent = true; continue; }
+			if ( strpos( $t, 'contra=' ) === 0 ) {
+				$contras[] = substr( $t, 7 );
+			}
+		}
+	}
 	$questions[] = array(
-		'id'  => 'q' . $idx,
-		'cat' => $cat,
-		'q'   => $q,
-		'yes' => $yes,
+		'id'      => 'q' . $idx,
+		'cat'     => $cat,
+		'q'       => $q,
+		'yes'     => $yes,
+		'chief'   => $chief,
+		'urgent'  => $urgent,
+		'contras' => $contras,
 	);
 	$idx++;
 }
 
+/* chief 선택지 파싱 · '키|아이콘|라벨|설명' */
+$chief_raw = md_content( 'bot_chief_options',
+	"치아|🦷|치아 문제|통증·충치·시림·부러짐·발치\n잇몸|💧|잇몸·구강|붓기·출혈·구취·시림\n턱관절|🦴|턱관절·얼굴|턱 소리·통증·개구장애·이갈이\n심미|✨|심미·미소|색·모양·라미네이트·미백\n예방|🛡️|예방·검진|스케일링·정기 검진\nall|📋|잘 모르겠음|전체 질문 진행"
+);
+$chief_options = array();
+foreach ( md_parse_lines( $chief_raw ) as $line ) {
+	$p = array_map( 'trim', explode( '|', $line ) );
+	if ( count( $p ) < 3 ) continue;
+	$chief_options[] = array(
+		'key'   => $p[0],
+		'icon'  => $p[1] ?? '',
+		'label' => $p[2] ?? '',
+		'desc'  => $p[3] ?? '',
+	);
+}
+
+/* 금기 · contra 안내문 매핑 */
+$contra_messages = array(
+	'diabetes'  => md_content( 'bot_contra_diabetes',  '당뇨병이 있으시면 임플란트·발치 전 최근 혈당 조절 상태(HbA1c 등)를 알려주세요. 감염·상처 회복에 영향을 줄 수 있습니다.' ),
+	'anticoag'  => md_content( 'bot_contra_anticoag',  '항응고제(아스피린·와파린·NOAC 등) 복용 중이시면 발치·수술 전 처방 내과와 조율이 필요할 수 있습니다.' ),
+	'bisphos'   => md_content( 'bot_contra_bisphos',   '골다공증 약(비스포스포네이트 계열) 복용 이력이 있으시면 반드시 알려주세요. 임플란트·발치 시 턱뼈괴사(MRONJ) 위험을 사전에 평가해야 합니다.' ),
+	'pregnancy' => md_content( 'bot_contra_pregnancy', '임신·수유 중이시면 X-ray·특정 마취제·항생제 사용을 조절합니다. 방문 시 반드시 알려주세요.' ),
+	'heart'     => md_content( 'bot_contra_heart',     '심장 판막 이상·인공 판막이 있으시면 발치·수술 전 예방적 항생제가 필요할 수 있습니다.' ),
+	'allergy'   => md_content( 'bot_contra_allergy',   '치과 마취제·페니실린 계열 항생제 등 알러지가 있으시면 반드시 사전에 알려주세요.' ),
+);
+
 $bot_data = array(
-	'questions' => array_values( $questions ),
-	'depts'     => $depts,
+	'questions'    => array_values( $questions ),
+	'depts'        => $depts,
+	'chiefOptions' => $chief_options,
+	'contraMsgs'   => $contra_messages,
 );
 
 $bot_eyebrow  = md_content( 'bot_eyebrow',  'SELF-CHECK' );
@@ -168,6 +225,23 @@ $aside_call = str_replace( '{phone}', $info['phone'], $aside_call_tpl );
 				<p class="md-bot__intro-note"><?php echo esc_html( $intro_note ); ?></p>
 			</div>
 
+			<!-- 1.5) Chief Complaint · v3.40.0 · 어디가 불편하세요? -->
+			<div class="md-bot__panel md-bot__panel--chief" data-md-bot-screen="chief" hidden>
+				<h3 class="md-bot__chief-title"><?php echo esc_html( md_content( 'bot_chief_title', '어디가 가장 불편하신가요?' ) ); ?></h3>
+				<p class="md-bot__chief-lead"><?php echo esc_html( md_content( 'bot_chief_lead', '주 증상 부위를 선택하시면 관련 질문만 보여드립니다. 잘 모르시겠으면 "잘 모르겠음"을 선택하세요.' ) ); ?></p>
+				<div class="md-bot__chief-grid" role="group">
+					<?php foreach ( $chief_options as $c ) : ?>
+						<button type="button" class="md-bot__chief-btn" data-md-bot-chief="<?php echo esc_attr( $c['key'] ); ?>">
+							<span class="md-bot__chief-icon" aria-hidden="true"><?php echo esc_html( $c['icon'] ); ?></span>
+							<span class="md-bot__chief-label"><?php echo esc_html( $c['label'] ); ?></span>
+							<?php if ( ! empty( $c['desc'] ) ) : ?>
+								<span class="md-bot__chief-desc"><?php echo esc_html( $c['desc'] ); ?></span>
+							<?php endif; ?>
+						</button>
+					<?php endforeach; ?>
+				</div>
+			</div>
+
 			<!-- 2) Quiz -->
 			<div class="md-bot__panel md-bot__panel--quiz" data-md-bot-screen="quiz" hidden>
 				<div class="md-bot__progress">
@@ -188,6 +262,21 @@ $aside_call = str_replace( '{phone}', $info['phone'], $aside_call_tpl );
 					</button>
 				</div>
 				<button type="button" class="md-bot__back" data-md-bot-back hidden><?php echo esc_html( $back_label ); ?></button>
+			</div>
+
+			<!-- 2.5) Safety Notice · v3.40.0 · 금기·주의 사항 감지 시 결과 전 안내 -->
+			<div class="md-bot__panel md-bot__panel--safety" data-md-bot-screen="safety" hidden>
+				<div class="md-bot__safety-head">
+					<div class="md-bot__safety-icon" aria-hidden="true">⚠️</div>
+					<h3 class="md-bot__safety-title"><?php echo esc_html( md_content( 'bot_safety_title', '내원 상담 시 꼭 알려주세요' ) ); ?></h3>
+					<p class="md-bot__safety-lead"><?php echo esc_html( md_content( 'bot_safety_lead', '아래 항목이 안전한 진료를 위해 확인이 필요합니다.' ) ); ?></p>
+				</div>
+				<ul class="md-bot__safety-list" data-md-bot-safety-list role="list">
+					<!-- JS 동적 생성 -->
+				</ul>
+				<button type="button" class="md-btn md-btn-primary md-btn--lg md-bot__safety-continue" data-md-bot-safety-continue>
+					<?php echo esc_html( md_content( 'bot_safety_continue', '결과 보기 →' ) ); ?>
+				</button>
 			</div>
 
 			<!-- 3) Result -->

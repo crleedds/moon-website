@@ -550,6 +550,27 @@ function moondental_home_content_fields() {
 				'bot_result_multiple'     => array( 'default' => '아래 {n}개 진료과를 우선순위로 추천드립니다.', 'label' => '자가진단 봇 · N개 진료과 결과 ({n} 토큰)', 'type' => 'text' ),
 				'bot_match_aria'          => array( 'default' => '적합도', 'label' => '자가진단 봇 · 적합도 aria', 'type' => 'text' ),
 				'bot_match_tpl'           => array( 'default' => '적합도 {pct}%', 'label' => '자가진단 봇 · 적합도 표시 ({pct} 토큰)', 'type' => 'text' ),
+				// v3.40.0 · chief 분기 + urgent + safety
+				'bot_chief_title'         => array( 'default' => '어디가 가장 불편하신가요?', 'label' => '자가진단 · Chief 화면 제목', 'type' => 'text' ),
+				'bot_chief_lead'          => array( 'default' => '주 증상 부위를 선택하시면 관련 질문만 보여드립니다. 잘 모르시겠으면 "잘 모르겠음"을 선택하세요.', 'label' => '자가진단 · Chief 화면 리드', 'type' => 'textarea' ),
+				'bot_chief_options'       => array(
+					'default' => "치아|🦷|치아 문제|통증·충치·시림·부러짐·발치\n잇몸|💧|잇몸·구강|붓기·출혈·구취·시림\n턱관절|🦴|턱관절·얼굴|턱 소리·통증·개구장애·이갈이\n심미|✨|심미·미소|색·모양·라미네이트·미백\n예방|🛡️|예방·검진|스케일링·정기 검진\nall|📋|잘 모르겠음|전체 질문 진행",
+					'label'   => '자가진단 · Chief 선택 옵션 (한 줄에 하나 · 형식: 키|아이콘|라벨|설명 · 키는 봇 질문의 chief 태그와 일치해야 함)',
+					'type'    => 'textarea',
+				),
+				'bot_urgent_label'        => array( 'default' => '⚡ 우선 상담 권장', 'label' => '자가진단 · Urgent 태그 라벨 (증상 심함 진료과에 표시)', 'type' => 'text' ),
+				'bot_safety_title'        => array( 'default' => '내원 상담 시 꼭 알려주세요', 'label' => '자가진단 · Safety 화면 제목', 'type' => 'text' ),
+				'bot_safety_lead'         => array( 'default' => '아래 항목이 안전한 진료를 위해 확인이 필요합니다.', 'label' => '자가진단 · Safety 화면 리드', 'type' => 'text' ),
+				'bot_safety_continue'     => array( 'default' => '결과 보기 →', 'label' => '자가진단 · Safety 확인 버튼', 'type' => 'text' ),
+				// contra 안내문 (금기 태그별 상세 안내)
+				'bot_contra_diabetes'     => array( 'default' => '당뇨병이 있으시면 임플란트·발치 전 최근 혈당 조절 상태(HbA1c 등)를 알려주세요. 감염·상처 회복에 영향을 줄 수 있습니다.', 'label' => 'Contra · 당뇨 안내', 'type' => 'textarea' ),
+				'bot_contra_anticoag'     => array( 'default' => '항응고제(아스피린·와파린·NOAC 등) 복용 중이시면 발치·수술 전 처방 내과와 조율이 필요할 수 있습니다.', 'label' => 'Contra · 항응고제 안내', 'type' => 'textarea' ),
+				'bot_contra_bisphos'      => array( 'default' => '골다공증 약(비스포스포네이트 계열) 복용 이력이 있으시면 반드시 알려주세요. 임플란트·발치 시 턱뼈괴사(MRONJ) 위험을 사전에 평가해야 합니다.', 'label' => 'Contra · 골다공증 안내', 'type' => 'textarea' ),
+				'bot_contra_pregnancy'    => array( 'default' => '임신·수유 중이시면 X-ray·특정 마취제·항생제 사용을 조절합니다. 방문 시 반드시 알려주세요.', 'label' => 'Contra · 임신 안내', 'type' => 'textarea' ),
+				'bot_contra_heart'        => array( 'default' => '심장 판막 이상·인공 판막이 있으시면 발치·수술 전 예방적 항생제가 필요할 수 있습니다.', 'label' => 'Contra · 심장 안내', 'type' => 'textarea' ),
+				'bot_contra_allergy'      => array( 'default' => '치과 마취제·페니실린 계열 항생제 등 알러지가 있으시면 반드시 사전에 알려주세요.', 'label' => 'Contra · 알러지 안내', 'type' => 'textarea' ),
+				// bot_questions default에 태그가 포함된 샘플 (사용자가 봇 질문 미설정 시 참고)
+				'bot_questions_help'      => array( 'default' => "형식: 카테고리|질문|진료과키:가중치,진료과키:가중치|chief태그(콤마)|특수태그(콤마)\n예시:\n치아 통증|이가 심하게 아프신가요?|endo:3,implant:1|치아|urgent\n잇몸|잇몸에서 자주 피가 나나요?|perio:3|잇몸|contra=diabetes\n\n특수태그: urgent · contra=diabetes|anticoag|bisphos|pregnancy|heart|allergy", 'label' => '자가진단 봇 질문 형식 가이드 (읽기 전용 · 실제 질문은 bot_questions에)', 'type' => 'textarea' ),
 				// 언어 라벨 (드롭다운 스위처)
 				'lang_ko'                 => array( 'default' => '한국어', 'label' => '언어 라벨 · 한국어', 'type' => 'text' ),
 				'lang_en'                 => array( 'default' => 'English', 'label' => '언어 라벨 · 영어', 'type' => 'text' ),

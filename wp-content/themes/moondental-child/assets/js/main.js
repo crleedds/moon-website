@@ -122,7 +122,7 @@
       });
     }
 
-    // 7b. 구강 자가진단 봇 — Yes/No 질문 → 추천 진료과
+    // 7b. 구강 자가진단 봇 · v3.40.0 · chief 분기 + urgent 부스트 + contra 안전 체크
     (function initDentalBot() {
       var bot = document.querySelector('[data-md-bot]');
       if (!bot) return;
@@ -131,11 +131,16 @@
       catch (e) { return; }
       if (!data.questions || !data.questions.length || !data.depts) return;
 
-      var Qs = data.questions;
+      var AllQs = data.questions;         // 전체 질문
+      var Qs = AllQs;                     // 현재 활성 질문 (chief 필터 적용)
       var depts = data.depts;
+      var chiefOptions = data.chiefOptions || [];
+      var contraMsgs = data.contraMsgs || {};
       var screens = {
         intro:  bot.querySelector('[data-md-bot-screen="intro"]'),
+        chief:  bot.querySelector('[data-md-bot-screen="chief"]'),
         quiz:   bot.querySelector('[data-md-bot-screen="quiz"]'),
+        safety: bot.querySelector('[data-md-bot-screen="safety"]'),
         result: bot.querySelector('[data-md-bot-screen="result"]')
       };
       var idxEl   = bot.querySelector('[data-md-bot-idx]');
@@ -146,8 +151,19 @@
       var backEl  = bot.querySelector('[data-md-bot-back]');
       var resultsEl = bot.querySelector('[data-md-bot-results]');
       var resultLeadEl = bot.querySelector('[data-md-bot-result-lead]');
+      var safetyListEl = bot.querySelector('[data-md-bot-safety-list]');
 
-      var state = { idx: 0, answers: [] };
+      var state = { idx: 0, answers: [], chief: 'all' };
+
+      // chief 태그가 없는 (구 데이터) 또는 all 포함하면 모든 chief 에 매칭
+      function questionMatchesChief(q, chief) {
+        if (!q.chief || !q.chief.length) return true;
+        if (chief === 'all') return true;
+        return q.chief.indexOf(chief) !== -1 || q.chief.indexOf('all') !== -1;
+      }
+      function filterQuestions(chief) {
+        return AllQs.filter(function (q) { return questionMatchesChief(q, chief); });
+      }
 
       function show(name) {
         Object.keys(screens).forEach(function (k) {
@@ -173,63 +189,108 @@
         state.idx++;
         if (state.idx >= Qs.length) {
           if (fillEl) fillEl.style.width = '100%';
-          showResult();
+          finalizeAndShow(); // v3.40.0 · contra 있으면 safety 먼저
         } else {
           renderQ();
         }
       }
 
       /**
-       * v3.39.0 · 봇 점수 로직 개선 · 3단계
-       *  1) raw score: 각 진료과의 원점수 합산 (기존 방식)
-       *  2) hit count: 해당 진료과에 매칭된 질문 개수 (신뢰도)
-       *  3) 최종 score = raw × log(1 + hits) · 여러 증상 매칭될수록 신뢰도 가중
-       *  4) 최소 필터: hits < 2 인 진료과는 참고용으로만 (top 3에서 노이즈 제거)
+       * v3.40.0 · 봇 점수 로직 · v3.39.0 개선 + urgent 부스트 + contra 수집
+       *  1) raw score: 각 진료과의 원점수 합산
+       *  2) hit count: 매칭 질문 개수 (신뢰도)
+       *  3) urgent boost: urgent 태그 있는 Yes는 관련 진료과에 ×1.5
+       *  4) 최종 score = (raw + urgentBoost) × log(1 + hits)
+       *  5) contras 수집: 답이 Yes인 질문의 contra 태그 모두
        */
       function computeScores() {
-        var raw = {};   // 원점수
-        var hits = {};  // 매칭 질문 수
-        var maxPossible = {}; // 진료과별 이론상 최고 (모든 관련 질문에 Yes)
+        var raw = {};
+        var hits = {};
+        var maxPossible = {};
+        var urgentBonus = {};   // urgent 태그로 boost된 만큼
+        var contras = {};       // contra 태그 → true 집합
+        var urgentDepts = {};   // urgent 진료과 flag
         for (var i = 0; i < Qs.length; i++) {
-          var w = Qs[i].yes || {};
-          // 이론상 최대치 계산 · 매번 순회하지만 30문항 정도라 무시할 수준
+          var qi = Qs[i];
+          var w = qi.yes || {};
           for (var k0 in w) {
             if (Object.prototype.hasOwnProperty.call(w, k0)) {
               maxPossible[k0] = (maxPossible[k0] || 0) + Number(w[k0] || 0);
             }
           }
           if (!state.answers[i]) continue;
+          // 이 질문에 Yes → contra 태그 수집
+          if (qi.contras && qi.contras.length) {
+            for (var ci = 0; ci < qi.contras.length; ci++) contras[qi.contras[ci]] = true;
+          }
           for (var k in w) {
             if (Object.prototype.hasOwnProperty.call(w, k)) {
-              raw[k]  = (raw[k]  || 0) + Number(w[k] || 0);
+              var v = Number(w[k] || 0);
+              raw[k]  = (raw[k]  || 0) + v;
               hits[k] = (hits[k] || 0) + 1;
+              if (qi.urgent) {
+                // urgent · 0.5 배 추가 (=총 1.5배)
+                urgentBonus[k] = (urgentBonus[k] || 0) + v * 0.5;
+                urgentDepts[k] = true;
+              }
             }
           }
         }
-        // 최종 점수 = raw × log(1 + hits) 신뢰 가중 · hits 1개는 boost 없음
         var final = {};
         for (var key in raw) {
           if (Object.prototype.hasOwnProperty.call(raw, key)) {
             var boost = Math.log(1 + hits[key]);
-            final[key] = raw[key] * boost;
+            final[key] = (raw[key] + (urgentBonus[key] || 0)) * boost;
           }
         }
-        return { scores: final, raw: raw, hits: hits, maxPossible: maxPossible };
+        return {
+          scores: final, raw: raw, hits: hits, maxPossible: maxPossible,
+          contras: Object.keys(contras), urgentDepts: urgentDepts
+        };
       }
 
-      function showResult() {
-        // v3.39.0 · computeScores 반환 구조 확장 (scores/raw/hits/maxPossible)
-        var scoreData = computeScores();
+      // scoreData 캐시 (safety → result 전환용)
+      var lastScoreData = null;
+
+      /** v3.40.0 · 결과 진행: 우선 contra 체크 → 있으면 safety 화면, 없으면 바로 result */
+      function finalizeAndShow() {
+        lastScoreData = computeScores();
+        // contra 있으면 안전 화면 먼저
+        if (lastScoreData.contras && lastScoreData.contras.length && safetyListEl && screens.safety) {
+          renderSafety(lastScoreData.contras);
+          show('safety');
+          return;
+        }
+        renderResult();
+        show('result');
+      }
+
+      function renderSafety(contraKeys) {
+        safetyListEl.innerHTML = '';
+        for (var i = 0; i < contraKeys.length; i++) {
+          var key = contraKeys[i];
+          var msg = contraMsgs[key];
+          if (!msg) continue;
+          var li = document.createElement('li');
+          li.className = 'md-bot__safety-item';
+          li.innerHTML =
+            '<span class="md-bot__safety-item-icon" aria-hidden="true">⚠️</span>' +
+            '<span class="md-bot__safety-item-msg">' + escapeHtml(msg) + '</span>';
+          safetyListEl.appendChild(li);
+        }
+      }
+
+      function renderResult() {
+        var scoreData = lastScoreData || computeScores();
         var scores = scoreData.scores;
-        var hits = scoreData.hits;
         var maxPossible = scoreData.maxPossible;
+        var urgentDepts = scoreData.urgentDepts || {};
         var keys = Object.keys(scores).sort(function (a, b) { return scores[b] - scores[a]; });
         keys = keys.filter(function (k) { return scores[k] > 0; });
 
         if (!resultsEl) return;
         resultsEl.innerHTML = '';
 
-        // v3.38.4 · Customizer 문구
         var BOT = (window.MoondentalMain && MoondentalMain.bot) || {};
         if (!keys.length) {
           if (resultLeadEl) resultLeadEl.textContent = BOT.noneMatch || '특별한 증상은 없으신 것 같습니다. 정기 검진·스케일링을 권해드립니다.';
@@ -243,24 +304,26 @@
         }
 
         var topMax = Math.min(keys.length, 3);
+        var urgentLabel = BOT.urgentLabel || '⚡ 우선 상담 권장';
         for (var i = 0; i < topMax; i++) {
           var key = keys[i];
           var d = depts[key];
           if (!d) continue;
-          // v3.39.0 · 적합도 = raw / maxPossible (해당 진료과 이론상 최대 대비 실제 매칭 비율)
           var mp = maxPossible[key] || 1;
           var pct = Math.round((scoreData.raw[key] / mp) * 100);
           if (pct > 100) pct = 100;
           if (pct < 20)  pct = 20;
           var rank = i + 1;
+          var isUrgent = !!urgentDepts[key];
           var card = document.createElement('a');
-          card.className = 'md-bot-card md-bot-card--rank-' + rank;
+          card.className = 'md-bot-card md-bot-card--rank-' + rank + (isUrgent ? ' md-bot-card--urgent' : '');
           card.setAttribute('href', d.url);
           card.setAttribute('role', 'listitem');
           card.setAttribute('data-track', 'cta-bot-dept-' + key);
           card.innerHTML =
             '<div class="md-bot-card__rank">#' + rank + '</div>' +
             '<div class="md-bot-card__body">' +
+              (isUrgent ? '<span class="md-bot-card__urgent-tag">' + escapeHtml(urgentLabel) + '</span>' : '') +
               '<div class="md-bot-card__name">' + escapeHtml(d.name) + '</div>' +
               '<div class="md-bot-card__sub">' + escapeHtml(d.sub || '') + '</div>' +
               '<p class="md-bot-card__summary">' + escapeHtml(d.summary || '') + '</p>' +
@@ -272,8 +335,6 @@
             '<div class="md-bot-card__arrow" aria-hidden="true">→</div>';
           resultsEl.appendChild(card);
         }
-
-        show('result');
       }
 
       function escapeHtml(s) {
@@ -282,9 +343,28 @@
         });
       }
 
+      // v3.40.0 · 시작 → chief 화면 (chief 옵션 없으면 바로 quiz)
       bot.querySelectorAll('[data-md-bot-start]').forEach(function (b) {
         b.addEventListener('click', function () {
-          state = { idx: 0, answers: [] };
+          state = { idx: 0, answers: [], chief: 'all' };
+          lastScoreData = null;
+          if (fillEl) fillEl.style.width = '0%';
+          if (chiefOptions.length && screens.chief) {
+            show('chief');
+          } else {
+            Qs = AllQs;
+            show('quiz');
+            renderQ();
+          }
+        });
+      });
+      // v3.40.0 · chief 선택 → 필터 적용 후 quiz
+      bot.querySelectorAll('[data-md-bot-chief]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          state.chief = b.getAttribute('data-md-bot-chief') || 'all';
+          Qs = filterQuestions(state.chief);
+          if (!Qs.length) Qs = AllQs; // 필터 결과 0개면 전체로 fallback
+          state.idx = 0; state.answers = [];
           show('quiz');
           renderQ();
         });
@@ -301,9 +381,18 @@
           renderQ();
         }
       });
+      // v3.40.0 · safety 화면 확인 후 결과로
+      bot.querySelectorAll('[data-md-bot-safety-continue]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          renderResult();
+          show('result');
+        });
+      });
       bot.querySelectorAll('[data-md-bot-restart]').forEach(function (b) {
         b.addEventListener('click', function () {
-          state = { idx: 0, answers: [] };
+          state = { idx: 0, answers: [], chief: 'all' };
+          lastScoreData = null;
+          Qs = AllQs;
           if (fillEl) fillEl.style.width = '0%';
           show('intro');
         });
