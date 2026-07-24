@@ -2241,6 +2241,58 @@ function moondental_prevention_content_fields() {
 				),
 				'prevention_spa_callout_title' => array( 'default' => '💆 누구에게 추천?', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
 				'prevention_spa_callout_body'  => array( 'default' => '✓ 잇몸 출혈·붓기가 자주 있는 분 / ✓ 커피·차·담배 착색이 신경 쓰이는 분 / ✓ 정기 검진을 더 깊이 받고 싶은 분 / ✓ 임플란트·교정·라미네이트 시작 전 구강 환경 정비 / ✓ 양치 후에도 입냄새가 신경 쓰이는 분.', 'label' => '콜아웃 · 본문', 'type' => 'textarea' ),
+				// v3.40.1 · 이순민 예방스파 제안 PDF 반영 · 대폭 확장
+				// (1) 스켈링만으로 부족한 이유
+				'prevention_spa_why_question' => array( 'default' => '스켈링만으로 우리의 입안은 완전히 깨끗해질까요?', 'label' => 'SPA · Why 질문', 'type' => 'text' ),
+				'prevention_spa_why_body'     => array(
+					'default' => "스켈링은 <strong>치석을 제거하는 행위</strong>입니다. (치석 = 음식물이 겹겹이 쌓여 돌처럼 단단해진 침착물)\n\n보통 치과에서는 초음파 스케일러 기계로 치석을 떨어뜨려 제거하지만, <strong>치아 면에 붙어있는 플라그(치태)와 잇몸 속 음식 잔여물을 완벽히 제거하기는 어렵습니다.</strong>\n\n그래서 스케일링만으로 부족한 부분을 채우는 <strong>추가 세척과 잇몸 관리</strong>가 필요합니다 — 그것이 바로 <strong>덴탈 SPA</strong>입니다.",
+					'label'   => 'SPA · Why 본문 (HTML 가능)',
+					'type'    => 'textarea',
+				),
+				// (2) 구강세척 3단계 개념
+				'prevention_spa_oral_title' => array( 'default' => '구강세척의 3단계', 'label' => 'SPA · 구강세척 3단계 제목', 'type' => 'text' ),
+				'prevention_spa_oral_steps' => array(
+					'default' => "칫솔질 | 매일 스스로 · 표면 세척\n스케일링 | 치과에서 6~12개월 · 치석 제거\n덴탈 SPA | 전문가 관리 · 플라그·잇몸속 세척 + 마사지",
+					'label'   => 'SPA · 3단계 (제목 | 부제)',
+					'type'    => 'textarea',
+				),
+				// (3) 이런 분께 필요합니다
+				'prevention_spa_who_title' => array( 'default' => '이런 분께 필요합니다', 'label' => 'SPA · 대상 제목', 'type' => 'text' ),
+				'prevention_spa_who_lead'  => array( 'default' => '아래 중 하나라도 해당되신다면 전문가에게 맡겨보세요.', 'label' => 'SPA · 대상 리드', 'type' => 'text' ),
+				'prevention_spa_who_items' => array(
+					'default' => "스케일링은 주기적으로 받는데 잇몸에서 자주 피가 난다\n칫솔질을 해도 개운하지 않다\n입 안을 볼 수 없어 잘 닦였는지 모르겠다\n치아가 고르지 않아 칫솔질이 잘 안 된다\n치아도 누군가 관리를 해주었으면 좋겠다",
+					'label'   => 'SPA · 대상 리스트 (한 줄에 하나)',
+					'type'    => 'textarea',
+				),
+				'prevention_spa_who_cta'   => array( 'default' => '→ 전문가에게 맡겨보세요.', 'label' => 'SPA · 대상 CTA', 'type' => 'text' ),
+				// (4) 치료 후 관리 필수
+				'prevention_spa_after_title' => array( 'default' => '치료 후, 이제는 「관리」가 필수입니다', 'label' => 'SPA · 치료 후 관리 제목', 'type' => 'text' ),
+				'prevention_spa_after_body'  => array(
+					'default' => "치료가 끝났다고 치과와 헤어질 수 없습니다.\n오히려 임플란트·잇몸치료 이후가 관리의 시작입니다.",
+					'label'   => 'SPA · 치료 후 관리 본문 (줄바꿈 가능)',
+					'type'    => 'textarea',
+				),
+				'prevention_spa_after_items' => array(
+					'default' => "임플란트를 평생 사용하려면 주기적인 잇몸·주변 조직 관리가 필수\n잇몸치료 후 재발을 막으려면 6개월 주기 SPA가 가장 효과적\n힘든 치료는 이제 그만 — 부드러운 SPA로 평생 유지\n\"치료 끝 = 관리 시작\" · 관리하면 치과가 즐거운 공간이 됩니다",
+					'label'   => 'SPA · 치료 후 항목 (한 줄에 하나)',
+					'type'    => 'textarea',
+				),
+				'prevention_spa_after_cta'   => array( 'default' => '→ 지금 덴탈 SPA를 시작하세요. 평생 건강한 치아를 유지할 수 있습니다.', 'label' => 'SPA · 치료 후 CTA', 'type' => 'text' ),
+				// (5) 진료실 ↔ 예방클리닉 이동 흐름
+				'prevention_spa_flow_title' => array( 'default' => '진료실 → 예방클리닉 이동 흐름', 'label' => 'SPA · 흐름 제목', 'type' => 'text' ),
+				'prevention_spa_flow_lead'  => array( 'default' => '구강진단·불소도포 등 일부 절차는 진료실에서, 덴탈 SPA는 예방클리닉으로 이동해 편안하게 받으십니다.', 'label' => 'SPA · 흐름 리드', 'type' => 'textarea' ),
+				'prevention_spa_flow_steps' => array(
+					'default' => "진료실 | 1. 구강 진단 | 치아·잇몸·X-ray 촬영 · 예방 방향 결정\n진료실 | 2. 정밀 스케일링 | 초음파 스케일러로 치석 제거\n예방클리닉 | 3. 덴탈 SPA | 편안한 자리에서 플라그·잇몸속 세척 + 마사지\n진료실 | 4. 불소도포 | 도포 후 30분 음식 자제\n진료실 | 5. 실란트(선택) | 어금니 홈 메우기 · 소아·성인 모두 가능",
+					'label'   => 'SPA · 흐름 단계 (위치 | 제목 | 설명)',
+					'type'    => 'textarea',
+				),
+				// (6) 환자 후기
+				'prevention_spa_test_title'     => array( 'default' => '덴탈 SPA 후 환자분들의 반응', 'label' => 'SPA · 후기 제목', 'type' => 'text' ),
+				'prevention_spa_testimonials'   => array(
+					'default' => "이런 개운함은 처음이에요!\n왜 이 좋은 관리를 이제야 알게 되었을까요?\n더 자주 와서 받아도 되나요?\n스파를 받는 동안 편안해서 자꾸 졸음이 와요.\n치료는 아파서 싫었는데 SPA는 너무 좋아요.",
+					'label'   => 'SPA · 후기 (한 줄에 하나)',
+					'type'    => 'textarea',
+				),
 			),
 		),
 		'scaling' => array(

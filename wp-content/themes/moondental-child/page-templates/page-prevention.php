@@ -107,16 +107,48 @@ $nav_items = $parse_nav( md_content( 'prevention_nav_items', '' ) );
 </nav>
 <?php endif; ?>
 
-<!-- ============ 01 덴탈 SPA (steps 형식) ============ -->
+<!-- ============ 01 덴탈 SPA (steps 형식) · v3.40.1 · 대폭 확장 ============ -->
 <section class="md-section md-section--surface" id="dental-spa">
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<?php if ( md_content( 'prevention_spa_eyebrow', '' ) ) : ?><span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'prevention_spa_eyebrow', '' ) ); ?></span><?php endif; ?>
 			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'prevention_spa_title', '' ) ); ?></h2>
-			<p class="md-section-head__lead"><?php echo esc_html( md_content( 'prevention_spa_lead', '' ) ); ?></p>
+			<p class="md-section-head__lead"><?php echo nl2br( esc_html( md_content( 'prevention_spa_lead', '' ) ) ); ?></p>
 		</header>
 
-		<?php
+		<?php /* v3.40.1 · '왜 덴탈SPA?' — 스켈링만으로 부족한 이유 */
+		$why_q = md_content( 'prevention_spa_why_question', '' );
+		$why_body = md_content( 'prevention_spa_why_body', '' );
+		if ( $why_q || $why_body ) : ?>
+		<div class="md-spa-why">
+			<?php if ( $why_q ) : ?>
+				<h3 class="md-spa-why__q">❓ <?php echo esc_html( $why_q ); ?></h3>
+			<?php endif; ?>
+			<?php if ( $why_body ) : ?>
+				<div class="md-spa-why__body"><?php echo wp_kses_post( wpautop( $why_body ) ); ?></div>
+			<?php endif; ?>
+		</div>
+		<?php endif; ?>
+
+		<?php /* v3.40.1 · 구강세척 3단계 다이어그램 */
+		$oral_title = md_content( 'prevention_spa_oral_title', '' );
+		$oral_steps = $parse_cards( md_content( 'prevention_spa_oral_steps', '' ) );
+		if ( $oral_steps ) : ?>
+		<div class="md-spa-oral">
+			<?php if ( $oral_title ) : ?><h3 class="md-preservation-h3"><?php echo esc_html( $oral_title ); ?></h3><?php endif; ?>
+			<ol class="md-spa-oral__list">
+				<?php $ns = count( $oral_steps ); foreach ( $oral_steps as $i => $s ) : ?>
+				<li class="md-spa-oral__item">
+					<span class="md-spa-oral__num"><?php echo (int) ( $i + 1 ); ?></span>
+					<strong class="md-spa-oral__name"><?php echo esc_html( $s['title'] ); ?></strong>
+					<?php if ( $s['body'] ) : ?><span class="md-spa-oral__desc"><?php echo esc_html( $s['body'] ); ?></span><?php endif; ?>
+				</li>
+				<?php endforeach; ?>
+			</ol>
+		</div>
+		<?php endif; ?>
+
+		<?php /* 덴탈SPA 상세 절차 (기존 steps 유지) */
 		$steps_title = md_content( 'prevention_spa_steps_title', '' );
 		$steps = $parse_cards( md_content( 'prevention_spa_steps', '' ) );
 		if ( $steps ) : ?>
@@ -131,7 +163,87 @@ $nav_items = $parse_nav( md_content( 'prevention_nav_items', '' ) );
 			</ol>
 		<?php endif; ?>
 
-		<?php
+		<?php /* v3.40.1 · 이런 분께 필요합니다 (candidate list) */
+		$who_title = md_content( 'prevention_spa_who_title', '' );
+		$who_lead  = md_content( 'prevention_spa_who_lead', '' );
+		$who_items = md_parse_lines( md_content( 'prevention_spa_who_items', '' ) );
+		if ( $who_items ) : ?>
+		<div class="md-spa-who">
+			<?php if ( $who_title ) : ?><h3 class="md-preservation-h3"><?php echo esc_html( $who_title ); ?></h3><?php endif; ?>
+			<?php if ( $who_lead ) : ?><p class="md-spa-who__lead"><?php echo esc_html( $who_lead ); ?></p><?php endif; ?>
+			<ul class="md-spa-who__list">
+				<?php foreach ( $who_items as $item ) : ?>
+					<li><span aria-hidden="true">✓</span> <?php echo esc_html( $item ); ?></li>
+				<?php endforeach; ?>
+			</ul>
+			<?php $who_cta = md_content( 'prevention_spa_who_cta', '' );
+			if ( $who_cta ) : ?>
+				<p class="md-spa-who__cta"><?php echo esc_html( $who_cta ); ?></p>
+			<?php endif; ?>
+		</div>
+		<?php endif; ?>
+
+		<?php /* v3.40.1 · 치료 후 관리 · 임플란트/잇몸치료 이후 SPA */
+		$after_title = md_content( 'prevention_spa_after_title', '' );
+		$after_body  = md_content( 'prevention_spa_after_body', '' );
+		$after_items = md_parse_lines( md_content( 'prevention_spa_after_items', '' ) );
+		if ( $after_title || $after_body || $after_items ) : ?>
+		<div class="md-spa-after">
+			<?php if ( $after_title ) : ?><h3 class="md-preservation-h3"><?php echo esc_html( $after_title ); ?></h3><?php endif; ?>
+			<?php if ( $after_body ) : ?><p class="md-spa-after__body"><?php echo nl2br( esc_html( $after_body ) ); ?></p><?php endif; ?>
+			<?php if ( $after_items ) : ?>
+			<ul class="md-spa-after__list">
+				<?php foreach ( $after_items as $ai ) : ?><li>▪ <?php echo esc_html( $ai ); ?></li><?php endforeach; ?>
+			</ul>
+			<?php endif; ?>
+			<?php $after_cta = md_content( 'prevention_spa_after_cta', '' );
+			if ( $after_cta ) : ?>
+				<p class="md-spa-after__cta"><?php echo esc_html( $after_cta ); ?></p>
+			<?php endif; ?>
+		</div>
+		<?php endif; ?>
+
+		<?php /* v3.40.1 · 진료실 ↔ 예방클리닉 이동 흐름 */
+		$flow_title = md_content( 'prevention_spa_flow_title', '' );
+		$flow_lead  = md_content( 'prevention_spa_flow_lead', '' );
+		$flow_steps = $parse_cards( md_content( 'prevention_spa_flow_steps', '' ) );
+		if ( $flow_steps ) : ?>
+		<div class="md-spa-flow">
+			<?php if ( $flow_title ) : ?><h3 class="md-preservation-h3"><?php echo esc_html( $flow_title ); ?></h3><?php endif; ?>
+			<?php if ( $flow_lead ) : ?><p class="md-spa-flow__lead"><?php echo esc_html( $flow_lead ); ?></p><?php endif; ?>
+			<ol class="md-spa-flow__list">
+				<?php foreach ( $flow_steps as $fs ) :
+					$loc = trim( $fs['stage'] );
+					$loc_class = ( strpos( $loc, '예방' ) !== false ) ? ' md-spa-flow__item--spa' : ' md-spa-flow__item--clinic';
+				?>
+				<li class="md-spa-flow__item<?php echo esc_attr( $loc_class ); ?>">
+					<span class="md-spa-flow__loc"><?php echo esc_html( $loc ); ?></span>
+					<strong class="md-spa-flow__name"><?php echo esc_html( $fs['title'] ); ?></strong>
+					<?php if ( $fs['body'] ) : ?><span class="md-spa-flow__desc"><?php echo esc_html( $fs['body'] ); ?></span><?php endif; ?>
+				</li>
+				<?php endforeach; ?>
+			</ol>
+		</div>
+		<?php endif; ?>
+
+		<?php /* v3.40.1 · 환자 후기 */
+		$test_title = md_content( 'prevention_spa_test_title', '' );
+		$test_items = md_parse_lines( md_content( 'prevention_spa_testimonials', '' ) );
+		if ( $test_items ) : ?>
+		<div class="md-spa-test">
+			<?php if ( $test_title ) : ?><h3 class="md-preservation-h3"><?php echo esc_html( $test_title ); ?></h3><?php endif; ?>
+			<ul class="md-spa-test__list">
+				<?php foreach ( $test_items as $t ) : ?>
+					<li class="md-spa-test__item">
+						<span class="md-spa-test__quote" aria-hidden="true">“</span>
+						<p><?php echo esc_html( $t ); ?></p>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</div>
+		<?php endif; ?>
+
+		<?php /* 기존 callout · 유지 */
 		$sct = md_content( 'prevention_spa_callout_title', '' );
 		$scb = md_content( 'prevention_spa_callout_body', '' );
 		if ( $sct || $scb ) : ?>
