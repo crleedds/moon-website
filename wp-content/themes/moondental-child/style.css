@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.38.6
+Version:      3.38.7
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -8832,36 +8832,23 @@ html { scroll-behavior: smooth; }
   margin: 0 0 16px;
   line-height: 1.55;
 }
-/* v3.37.1 · 3버튼 가로 배치 · 전화 → 네이버 → 카톡 · 라벨 짧아져 폭 충분 */
+/* v3.38.7 · 자가진단 aside 3버튼 세로 스택 · 라벨 잘림 방지
+ *  aside는 좁은 사이드바라 가로 배치 시 '전...', '네...', '카...' 로 truncate 됨. */
 .md-dentalbot__cta-btns {
   display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  gap: 8px;
+  flex-direction: column;
+  gap: 10px;
   margin-top: 4px;
 }
 .md-dentalbot__cta-btn {
   display: flex !important;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  flex: 1 1 0;
-  min-width: 0;
-  padding-left: 10px;
-  padding-right: 10px;
+  gap: 10px;
+  width: 100%;
+  padding-left: 18px;
+  padding-right: 18px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.md-dentalbot__cta-btn .md-rcta__label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-/* 아주 좁은 화면에서만 세로 스택으로 fallback (아이콘+라벨이 잘리기 시작하는 지점) */
-@media (max-width: 360px) {
-  .md-dentalbot__cta-btns { flex-direction: column; }
-  .md-dentalbot__cta-btn { flex: 1 1 auto; width: 100%; }
 }
 .md-dentalbot__cta-hint {
   margin: 16px 0 0;
