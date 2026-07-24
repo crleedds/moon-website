@@ -23,12 +23,75 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  */
 function md_content( $key, $default = '' ) {
 	$stored = get_theme_mod( 'md_content_' . $key, null );
-	if ( is_string( $stored ) && $stored !== '' ) return $stored;
+	if ( is_string( $stored ) && $stored !== '' ) {
+		return moondental_translate_content( $key, $stored );
+	}
 	if ( ! is_null( $stored ) && ! is_string( $stored ) ) return $stored;
-	if ( $default !== '' && $default !== null ) return $default;
+	if ( $default !== '' && $default !== null ) {
+		return moondental_translate_content( $key, $default );
+	}
 	// 등록된 필드 default fallback
 	$defaults = md_all_content_field_defaults();
-	return $defaults[ $key ] ?? '';
+	$value = $defaults[ $key ] ?? '';
+	return moondental_translate_content( $key, $value );
+}
+
+/**
+ * v3.43.0 · 다국어 번역 레이어
+ *  Polylang 활성 시 현재 언어 감지 → /languages/md_translations_{lang}.php 배열에서 조회.
+ *  Korean(기본) or 번역문 없으면 원본 그대로 반환.
+ *
+ *  번역 파일 구조: return array( 'key' => 'translated string', ... );
+ *  없는 언어·없는 키는 자동으로 한국어 원본으로 fallback (안전).
+ *
+ * @param string $key
+ * @param string $value 원본 (한국어)
+ * @return string 번역된 값 (또는 원본)
+ */
+function moondental_translate_content( $key, $value ) {
+	if ( ! is_string( $value ) || $value === '' ) return $value;
+	$lang = moondental_current_language();
+	if ( $lang === 'ko' || $lang === '' ) return $value;
+	$translations = moondental_load_translations( $lang );
+	if ( isset( $translations[ $key ] ) && $translations[ $key ] !== '' ) {
+		return $translations[ $key ];
+	}
+	return $value;
+}
+
+/**
+ * 현재 언어 코드 반환. Polylang 우선 · fallback URL 파싱.
+ * @return string 'ko' | 'en' | 'zh' | 'vi' | 'ru' | 'mn'
+ */
+function moondental_current_language() {
+	static $cache = null;
+	if ( $cache !== null ) return $cache;
+	if ( function_exists( 'pll_current_language' ) ) {
+		$lang = pll_current_language();
+		if ( $lang ) return $cache = $lang;
+	}
+	// URL fallback (Polylang 없거나 아직 로드 안 됐을 때)
+	$uri = $_SERVER['REQUEST_URI'] ?? '';
+	if ( preg_match( '#^/(en|zh|vi|ru|mn)/#', $uri, $m ) ) {
+		return $cache = $m[1];
+	}
+	return $cache = 'ko';
+}
+
+/**
+ * 언어별 번역 배열 로드 · 파일 존재 캐시.
+ */
+function moondental_load_translations( $lang ) {
+	static $cache = array();
+	if ( isset( $cache[ $lang ] ) ) return $cache[ $lang ];
+	$file = defined( 'MOONDENTAL_DIR' ) ? MOONDENTAL_DIR . '/languages/md_translations_' . $lang . '.php' : '';
+	if ( $file && file_exists( $file ) ) {
+		$data = include $file;
+		$cache[ $lang ] = is_array( $data ) ? $data : array();
+	} else {
+		$cache[ $lang ] = array();
+	}
+	return $cache[ $lang ];
 }
 
 /**
