@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.43.2' );
+define( 'MOONDENTAL_VERSION', '3.43.3' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -61,6 +61,20 @@ add_filter( 'language_attributes', function ( $attrs ) {
 	$html_lang = $map[ $lang ] ?? 'ko-KR';
 	return preg_replace( '/lang="[^"]*"/', 'lang="' . $html_lang . '"', $attrs );
 } );
+
+/* (d) v3.43.3 · WordPress core canonical redirect도 언어 접두어 URL에서는 skip
+ *     그렇지 않으면 /en/ 이 /홈-english/ 로 URL 재작성됨. */
+add_filter( 'redirect_canonical', function ( $redirect_url, $requested_url ) {
+	$path = parse_url( $requested_url, PHP_URL_PATH ) ?? '';
+	if ( preg_match( '#^/(en|zh|vi|ru|mn)(/|$)#', $path ) ) {
+		return false;
+	}
+	return $redirect_url;
+}, 10, 2 );
+
+/* (e) v3.43.3 · Polylang의 홈-english 등 자동 duplicate 페이지가 있으면 프론트 URL 오염.
+ *     Polylang이 자동으로 만든 페이지의 슬러그가 홈-english/홈-中文 등이면 우리 rewrite로 안 잡힘 → skip. */
+add_filter( 'wpml_pll_seo_permalink', '__return_null' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 
