@@ -11,6 +11,35 @@
 
   document.addEventListener('DOMContentLoaded', function () {
 
+    // v3.43.1 · 언어 스위처 드롭다운 토글
+    (function langSwitcher() {
+      var lang = document.querySelector('[data-md-lang]');
+      if (!lang) return;
+      var btn  = lang.querySelector('.md-lang__toggle');
+      var menu = lang.querySelector('.md-lang__menu');
+      if (!btn || !menu) return;
+      function open() {
+        menu.hidden = false;
+        btn.setAttribute('aria-expanded', 'true');
+        lang.classList.add('is-open');
+      }
+      function close() {
+        menu.hidden = true;
+        btn.setAttribute('aria-expanded', 'false');
+        lang.classList.remove('is-open');
+      }
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (menu.hidden) open(); else close();
+      });
+      document.addEventListener('click', function (e) {
+        if (!lang.contains(e.target)) close();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') close();
+      });
+    })();
+
     // 1. Mobile nav toggle
     var toggle = document.querySelector('.md-header__nav-toggle');
     var nav    = document.getElementById('md-primary-menu');

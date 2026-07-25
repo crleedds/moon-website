@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.43.0
+Version:      3.43.1
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -10696,6 +10696,91 @@ a.md-bot-card:hover {
   color: var(--color-accent-dark);
   border-color: var(--color-accent);
 }
+
+/* v3.43.1 · 언어 스위처 헤더 드롭다운 */
+.md-lang {
+  position: relative;
+  margin-right: 8px;
+}
+.md-lang__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
+  line-height: 1;
+}
+.md-lang__toggle:hover {
+  background: var(--color-surface);
+  border-color: var(--color-primary-light);
+}
+.md-lang__globe { font-size: 0.9rem; }
+.md-lang__current { display: inline-flex; align-items: center; gap: 4px; }
+.md-lang__caret { font-size: 0.7rem; color: var(--color-text-sub); margin-left: 2px; }
+.md-lang.is-open .md-lang__caret { transform: rotate(180deg); }
+
+.md-lang__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--card-shadow-hover);
+  padding: 6px;
+  margin: 0;
+  list-style: none;
+  z-index: 1000;
+  animation: md-lang-fade 0.18s ease;
+}
+@keyframes md-lang-fade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.md-lang__item { margin: 0; }
+.md-lang__item a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s var(--ease);
+}
+.md-lang__item a:hover {
+  background: var(--color-surface);
+  color: var(--color-primary-dark);
+}
+.md-lang__item.is-current a {
+  background: var(--color-accent-bg);
+  color: var(--color-accent-dark);
+  font-weight: 700;
+}
+.md-lang__flag { font-size: 1.1rem; line-height: 1; }
+.md-lang__name { flex: 1; }
+
+/* 모바일에서는 이름 숨기고 지구 아이콘 + 국기만 · 헤더 공간 절약 */
+@media (max-width: 768px) {
+  .md-lang__toggle { padding: 6px 10px; }
+  .md-lang__current { font-size: 0.75rem; }
+}
+@media (max-width: 480px) {
+  .md-lang__current > span:not(.md-lang__flag):not(:first-child) { display: none; }
+}
+
+/* 스크롤 시 헤더 축소 · lang 토글도 축소 */
+.md-site-header.is-scrolled .md-lang__toggle { padding: 4px 10px; }
 
 /* Secondary CTA button variant · 세이지 (신뢰용) */
 .md-btn--sage,
