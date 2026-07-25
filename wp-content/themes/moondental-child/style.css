@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.43.1
+Version:      3.43.2
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -10697,7 +10697,98 @@ a.md-bot-card:hover {
   border-color: var(--color-accent);
 }
 
-/* v3.43.1 · 언어 스위처 헤더 드롭다운 */
+/* v3.43.2 · 언어 스위처 · FAB 스택 아래 (카톡 버튼 밑) */
+.md-lang-fab {
+  position: relative;
+  width: 100%;
+}
+.md-lang-fab__toggle {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--color-white);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  line-height: 1;
+  box-shadow: 0 4px 14px rgba(61, 47, 38, 0.08);
+}
+.md-lang-fab__toggle:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary-light);
+  box-shadow: 0 6px 18px rgba(216, 128, 98, 0.18);
+}
+.md-lang-fab__globe { font-size: 0.9rem; opacity: 0.7; }
+.md-lang-fab__flag { font-size: 1.05rem; line-height: 1; }
+.md-lang-fab__label { font-size: 0.75rem; letter-spacing: -0.005em; }
+.md-lang-fab.is-open .md-lang-fab__toggle {
+  border-color: var(--color-primary);
+  box-shadow: 0 6px 18px rgba(216, 128, 98, 0.22);
+}
+
+.md-lang-fab__menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 32px rgba(61, 47, 38, 0.18);
+  padding: 6px;
+  margin: 0;
+  list-style: none;
+  z-index: 1000;
+  animation: md-lang-fab-fade 0.18s ease;
+}
+@keyframes md-lang-fab-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.md-lang-fab__item { margin: 0; }
+.md-lang-fab__item a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.15s var(--ease);
+}
+.md-lang-fab__item a:hover {
+  background: var(--color-surface);
+  color: var(--color-primary-dark);
+}
+.md-lang-fab__item.is-current a {
+  background: var(--color-accent-bg);
+  color: var(--color-accent-dark);
+  font-weight: 800;
+}
+.md-lang-fab__item.is-current a::after {
+  content: '✓';
+  margin-left: auto;
+  color: var(--color-accent-dark);
+}
+.md-lang-fab__item-flag { font-size: 1.1rem; line-height: 1; }
+.md-lang-fab__item-name { flex: 1; }
+
+/* 모바일에서 라벨 축소 · FAB 스택 세로폭 절약 */
+@media (max-width: 880px) {
+  .md-lang-fab__toggle { padding: 8px 12px; gap: 4px; }
+  .md-lang-fab__label { display: none; }
+}
+
+/* v3.43.1 · 헤더 언어 스위처 (v3.43.2에서 FAB로 이동됨 · 잔재 스타일은 안전 유지) */
 .md-lang {
   position: relative;
   margin-right: 8px;

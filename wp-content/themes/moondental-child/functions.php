@@ -13,7 +13,54 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.43.1' );
+define( 'MOONDENTAL_VERSION', '3.43.2' );
+
+/* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
+ *
+ * 문제: Polylang이 영어 홈페이지를 '홈-english' 슬러그로 자동 생성 →
+ *       /en/ → /홈-english/ → /en/홈-english/ 무한 리다이렉트
+ *
+ * 해결: (a) Polylang canonical 리다이렉트 완전 비활성
+ *       (b) 순수 rewrite 규칙으로 /en/ /zh/ /vi/ /ru/ /mn/ 를 root 페이지로 라우팅
+ *       (c) 언어는 URL 접두어에서 감지 (moondental_current_language())
+ *       (d) md_content 번역 레이어가 실제 번역 표시
+ *
+ * 결과: 하나의 WP 페이지가 6개 언어로 노출. Polylang 페이지 복제 불필요. */
+
+/* (a) Polylang canonical 우회 · 무한 리다이렉트 원천 차단 */
+add_filter( 'pll_check_canonical_url', '__return_false' );
+/* Polylang의 홈 URL 변환도 우회 · language switcher 링크 그대로 유지 */
+add_filter( 'pll_home_url_black_list', function ( $list ) {
+	return array_merge( (array) $list, array( array( 'function' => 'moondental_current_language' ) ) );
+} );
+
+/* (b) 언어 접두어 URL rewrite · /en/ /zh/ 등을 wp에 인식시킴 */
+add_action( 'init', function () {
+	$langs = 'en|zh|vi|ru|mn';
+	add_rewrite_rule( "^($langs)/?$",              'index.php',                        'top' );
+	add_rewrite_rule( "^($langs)/(.+?)/?$",        'index.php?pagename=$matches[2]',   'top' );
+} );
+/* rewrite 규칙 최초 1회 flush */
+add_action( 'admin_init', function () {
+	if ( get_option( 'md_lang_rewrite_v3432' ) === 'done' ) return;
+	flush_rewrite_rules( false );
+	update_option( 'md_lang_rewrite_v3432', 'done' );
+} );
+/* frontend에서도 최초 1회 flush (관리자 접속 안 해도 라이브 즉시 반영) */
+add_action( 'init', function () {
+	if ( get_option( 'md_lang_rewrite_frontend_v3432' ) === 'done' ) return;
+	flush_rewrite_rules( false );
+	update_option( 'md_lang_rewrite_frontend_v3432', 'done' );
+}, 999 );
+
+/* (c) HTML <html lang="..."> 속성 · 감지된 언어 반영 */
+add_filter( 'language_attributes', function ( $attrs ) {
+	if ( ! function_exists( 'moondental_current_language' ) ) return $attrs;
+	$lang = moondental_current_language();
+	$map  = array( 'ko' => 'ko-KR', 'en' => 'en-US', 'zh' => 'zh-CN', 'vi' => 'vi', 'ru' => 'ru-RU', 'mn' => 'mn' );
+	$html_lang = $map[ $lang ] ?? 'ko-KR';
+	return preg_replace( '/lang="[^"]*"/', 'lang="' . $html_lang . '"', $attrs );
+} );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
 

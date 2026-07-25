@@ -78,38 +78,7 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 				</nav>
 
 				<div class="md-header__aside">
-					<?php /* v3.43.1 · 언어 스위처 · Polylang 활성 시만 표시 */
-					if ( function_exists( 'pll_the_languages' ) ) : ?>
-						<div class="md-lang" data-md-lang>
-							<button type="button" class="md-lang__toggle" aria-haspopup="listbox" aria-expanded="false" aria-label="Language">
-								<span class="md-lang__globe" aria-hidden="true">🌐</span>
-								<?php
-								$current = function_exists( 'pll_current_language' ) ? pll_current_language( 'slug' ) : 'ko';
-								$flag_map = array( 'ko' => '🇰🇷', 'en' => '🇺🇸', 'zh' => '🇨🇳', 'vi' => '🇻🇳', 'ru' => '🇷🇺', 'mn' => '🇲🇳' );
-								$name_map = array( 'ko' => '한국어', 'en' => 'English', 'zh' => '中文', 'vi' => 'Tiếng Việt', 'ru' => 'Русский', 'mn' => 'Монгол' );
-								?>
-								<span class="md-lang__current"><?php echo esc_html( $flag_map[ $current ] ?? '🌐' ); ?> <?php echo esc_html( $name_map[ $current ] ?? 'KO' ); ?></span>
-								<span class="md-lang__caret" aria-hidden="true">▾</span>
-							</button>
-							<ul class="md-lang__menu" role="listbox" hidden>
-								<?php
-								$langs = pll_the_languages( array( 'raw' => 1, 'echo' => 0, 'hide_if_no_translation' => 0, 'hide_current' => 0 ) );
-								if ( is_array( $langs ) ) foreach ( $langs as $l ) :
-									$slug = $l['slug'] ?? '';
-									$url  = $l['url']  ?? '';
-									if ( ! $url && $slug ) $url = home_url( '/' . $slug . '/' );
-									$is_current = ! empty( $l['current_lang'] );
-								?>
-									<li class="md-lang__item<?php echo $is_current ? ' is-current' : ''; ?>" role="option" aria-selected="<?php echo $is_current ? 'true' : 'false'; ?>">
-										<a href="<?php echo esc_url( $url ); ?>" lang="<?php echo esc_attr( $slug ); ?>">
-											<span class="md-lang__flag" aria-hidden="true"><?php echo esc_html( $flag_map[ $slug ] ?? '🌐' ); ?></span>
-											<span class="md-lang__name"><?php echo esc_html( $name_map[ $slug ] ?? ( $l['name'] ?? strtoupper( $slug ) ) ); ?></span>
-										</a>
-									</li>
-								<?php endforeach; ?>
-							</ul>
-						</div>
-					<?php endif; ?>
+					<?php /* v3.43.2 · 언어 스위처는 우측 하단 FAB 스택 아래로 이동됨 (inc/enhancements.php) */ ?>
 
 					<div class="md-header__info" aria-label="<?php echo esc_attr( function_exists( 'md_content' ) ? md_content( 'aria_hours_call', '진료시간 및 전화' ) : '진료시간 및 전화' ); ?>">
 						<?php if ( $phone ) : ?>

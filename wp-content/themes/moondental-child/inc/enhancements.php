@@ -637,6 +637,41 @@ function moondental_floating_actions() {
 		</a>
 		<?php endif; ?>
 
+		<?php /* v3.43.2 · 언어 스위처 · 카톡 버튼 바로 밑 · Polylang 불필요 · 순수 커스텀 */ ?>
+		<div class="md-lang-fab" data-md-lang>
+			<?php
+			$md_current_lang = function_exists( 'moondental_current_language' ) ? moondental_current_language() : 'ko';
+			$md_flag_map = array( 'ko' => '🇰🇷', 'en' => '🇺🇸', 'zh' => '🇨🇳', 'vi' => '🇻🇳', 'ru' => '🇷🇺', 'mn' => '🇲🇳' );
+			$md_name_map = array( 'ko' => '한국어', 'en' => 'English', 'zh' => '中文', 'vi' => 'Tiếng Việt', 'ru' => 'Русский', 'mn' => 'Монгол' );
+			// 언어 전환 URL 계산 · 현재 경로에서 언어 접두어 제거 후 새 접두어 붙임
+			$md_current_uri = $_SERVER['REQUEST_URI'] ?? '/';
+			$md_bare_path = preg_replace( '#^/(en|zh|vi|ru|mn)(/|$)#', '/', $md_current_uri );
+			$md_url_for_lang = function ( $lang ) use ( $md_bare_path ) {
+				if ( $lang === 'ko' ) return home_url( $md_bare_path );
+				$path = ltrim( $md_bare_path, '/' );
+				return home_url( '/' . $lang . '/' . $path );
+			};
+			?>
+			<button type="button" class="md-lang-fab__toggle" aria-haspopup="listbox" aria-expanded="false" aria-label="Language / 언어">
+				<span class="md-lang-fab__globe" aria-hidden="true">🌐</span>
+				<span class="md-lang-fab__flag" aria-hidden="true"><?php echo esc_html( $md_flag_map[ $md_current_lang ] ?? '🌐' ); ?></span>
+				<span class="md-lang-fab__label"><?php echo esc_html( $md_name_map[ $md_current_lang ] ?? 'KO' ); ?></span>
+			</button>
+			<ul class="md-lang-fab__menu" role="listbox" hidden>
+				<?php foreach ( $md_flag_map as $slug => $flag ) :
+					$is_current = ( $slug === $md_current_lang );
+					$url = $md_url_for_lang( $slug );
+				?>
+					<li class="md-lang-fab__item<?php echo $is_current ? ' is-current' : ''; ?>" role="option" aria-selected="<?php echo $is_current ? 'true' : 'false'; ?>">
+						<a href="<?php echo esc_url( $url ); ?>" lang="<?php echo esc_attr( $slug ); ?>" hreflang="<?php echo esc_attr( $slug ); ?>">
+							<span class="md-lang-fab__item-flag" aria-hidden="true"><?php echo esc_html( $flag ); ?></span>
+							<span class="md-lang-fab__item-name"><?php echo esc_html( $md_name_map[ $slug ] ); ?></span>
+						</a>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</div>
+
 		<!-- 맨 위로 스크롤 버튼 -->
 		<button class="md-totop" type="button" aria-label="<?php echo esc_attr( md_content( 'aria_totop', '페이지 맨 위로 이동' ) ); ?>" data-track="cta-scroll-top" hidden>
 			<svg viewBox="0 0 24 24" aria-hidden="true">

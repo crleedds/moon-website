@@ -66,14 +66,14 @@ function moondental_translate_content( $key, $value ) {
 function moondental_current_language() {
 	static $cache = null;
 	if ( $cache !== null ) return $cache;
+	// v3.43.2 · URL 접두어 우선 (Polylang 리다이렉트 루프 회피)
+	$uri = $_SERVER['REQUEST_URI'] ?? '';
+	if ( preg_match( '#^/(en|zh|vi|ru|mn)(/|$)#', $uri, $m ) ) {
+		return $cache = $m[1];
+	}
 	if ( function_exists( 'pll_current_language' ) ) {
 		$lang = pll_current_language();
 		if ( $lang ) return $cache = $lang;
-	}
-	// URL fallback (Polylang 없거나 아직 로드 안 됐을 때)
-	$uri = $_SERVER['REQUEST_URI'] ?? '';
-	if ( preg_match( '#^/(en|zh|vi|ru|mn)/#', $uri, $m ) ) {
-		return $cache = $m[1];
 	}
 	return $cache = 'ko';
 }
