@@ -121,4 +121,128 @@ return array(
 	'lang_vi' => 'Vietnamese',
 	'lang_ru' => 'Russian',
 	'lang_mn' => 'Mongolian',
+
+	/* === Services section (홈 · 진료 안내) === */
+	'services_eyebrow' => 'OUR SERVICES',
+	'services_title'   => 'Comprehensive Dental Care',
+	'services_lead'    => 'Implant · Orthodontics · Aesthetic · Preservation · Pediatric · TMJ — all specialty areas in one place.',
+
+	/* === Why section (왜 문치과인가) === */
+	'why_eyebrow'  => 'WHY MOON DENTAL',
+	'why_title'    => 'Cheonan-Asan Leading Dental Hospital · Why Patients Choose Us',
+	'why_lead'     => 'Since 1995 · 30+ years at the same Mannam-ro location · 4 reasons nationwide patients trust us.',
+	'why_1_title'  => '30+ Years, Nationwide Trust',
+	'why_1_desc'   => 'Same location in Cheonan Mannam-ro since 1995. Consistent care philosophy backed by decades of clinical experience.',
+	'why_2_title'  => 'Multi-Specialty Team Approach',
+	'why_2_desc'   => 'Specialists in every field — Prosthodontics · Preservation · Prevention · Implant · Aesthetic · Oral Surgery · TMJ · Orthodontics · Pediatric · Periodontal — reviewing one case together.',
+	'why_3_title'  => 'Digital-First Diagnosis',
+	'why_3_desc'   => 'CBCT · digital-guide surgery · intraoral scanner · in-house prosthetic lab — precision at every step.',
+	'why_4_title'  => 'Only What You Actually Need',
+	'why_4_desc'   => 'We listen first, recommend only necessary treatment. Written estimate before starting · no additional costs after.',
+
+	/* === Clinic Intro section (진료 시스템 소개) === */
+	'clinic_intro_eyebrow' => 'INTEGRATED CARE SYSTEM',
+	'clinic_intro_title'   => 'Cheonan-Asan Leading Dental Hospital · Integrated Care Nationwide Patients Trust',
+	'clinic_intro_lead'    => 'Diagnosis · treatment · maintenance in one place. Specialists in every field cross-review each patient case.',
+
+	/* === Trust stat sub-labels === */
+	'trust_1_sub' => '30+ years of nationwide trust',
+	'trust_2_sub' => 'Cross-specialty consultation',
+	'trust_3_sub' => 'One-stop building',
+	'trust_4_sub' => 'Personal in-depth consultation',
+
+	/* === Notices section (병원 소식) === */
+	'notices_eyebrow'         => 'HOSPITAL NEWS',
+	'notices_title'           => 'Moon Dental Hospital News · Cheonan-Asan Leading Dental Hospital',
+	'notices_all_label'       => 'View all news',
+	'notices_notice_subhead'  => 'Announcements',
+	'notices_story_subhead'   => 'Dental Stories',
+	'notice_tag_notice'       => 'Announcement',
+	'notice_tag_story'        => 'Story',
+
+	/* === Testimonials section (환자 후기) === */
+	'testimonials_eyebrow'    => 'PATIENT REVIEWS',
+	'testimonials_title'      => 'Words from Our Patients',
+	'testimonials_lead'       => 'Reviews shared by patients who have visited us in Cheonan-Asan.',
+	'testimonials_more_label' => 'View more reviews',
+	'testimonials_disclaimer' => '※ Excerpts from patient reviews on Naver Reservation and Google Reviews. Results may vary.',
+
+	/* === Strengths section (강점 카드) === */
+	'strengths_eyebrow' => 'OUR STRENGTHS',
+	'strengths_title'   => 'Moon Dental Hospital Strengths',
+	'strengths_lead'    => '9 key strengths across facility · operations · clinical practice. Click each item for details.',
+
+	/* === Facility section (시설) === */
+	'facility_eyebrow' => 'FACILITY',
+	'facility_title'   => 'Cheonan-Asan Dental Facility · Moon Tower 9-13F',
+	'facility_lead'    => 'A 4-floor integrated care center — treatment rooms · consultation · in-house lab · imaging.',
+
+	/* === FAQ section === */
+	'faq_eyebrow' => 'FREQUENTLY ASKED',
+	'faq_title'   => 'Common Questions',
+	'faq_lead'    => 'What patients ask most about our care · Answers from our clinical team.',
+
+	/* === Micro-FAQ helpers === */
+	'micro_faq_all_label' => 'View all FAQ',
+	'micro_more_label'    => 'View more',
+
+	/* === Location section (오시는 길) === */
+	'flocation_title'       => 'Directions',
+	'flocation_address'     => '',
+	'flocation_btn_naver'   => 'Naver Maps',
+	'flocation_btn_naver_sub' => 'Directions · Public Transit',
+	'flocation_btn_kakao'   => 'Kakao Map',
+	'flocation_btn_kakao_sub' => 'Directions · Street View',
+	'flocation_btn_google'  => 'Google Maps',
+	'flocation_btn_google_sub' => 'Directions · Street View',
+	'loc_hours_badge'       => '🕐 Hours',
+	'loc_hours_title'       => 'Business Hours',
+	'loc_park_badge'        => '🅿️ Parking',
+	'loc_park_walk'         => '🚌 5 min walk from Cheonan Bus Terminal',
+	'loc_park_train'        => '🚆 10 min by bus from Cheonan Station',
+	'loc_map_fallback'      => '🗺️ Open map',
+
+	/* === Header CTA cycle (스크롤에 따라 라벨 바뀌는 버튼) === */
+	'header_cta_url'   => '/en/reservation/',
+	'header_cta_label' => '📅 Book Consultation',
+	'header_cta_cycle' => "✨ Book Consultation | #5C8B82 | #FFFFFF | 92,139,130\n🦷 Self-Diagnosis | #E37B5C | #FFFFFF | 227,123,92\n💬 KakaoTalk Now | #FEE500 | #181600 | 254,229,0\n📅 Book Now | #D88062 | #FFFFFF | 216,128,98",
+
+	/* === Footer === */
+	'footer_col_policy_title' => 'Info',
+	'footer_link_privacy'     => 'Privacy Policy|/privacy-policy/',
+	'footer_link_terms'       => 'Terms of Service|/terms/',
+	'footer_link_email'       => 'Email Collection Refusal|/email-refusal/',
+	'footer_legal_rep'        => 'Chairman Munsu Moon',
+
+	/* === Bot section (self-diagnosis) === */
+	'bot_eyebrow'         => 'SELF-CHECK',
+	'bot_title'           => '🦷 Check Your Oral Health',
+	'bot_lead'            => "Answer a few questions to find the most suitable treatment area for you.\n※ This is for reference only · accurate diagnosis requires in-person consultation.",
+	'bot_start_label'     => 'Start Diagnosis →',
+	'bot_count_template'  => '{count} Yes/No questions · ~2-3 minutes · covers all treatment areas',
+	'bot_intro_title'     => 'Simple Self-Diagnosis',
+	'bot_intro_note'      => 'No personal info collected or stored. Answers stay in your browser.',
+	'bot_answer_yes'      => '✓ Yes',
+	'bot_answer_no'       => '✗ No',
+	'bot_back_label'      => '← Previous',
+	'bot_result_title'    => 'Diagnosis Results — Recommended Treatment',
+	'bot_result_lead'     => 'These treatment areas best match your symptoms.',
+	'bot_result_book_label' => '📅 Book Consultation Now',
+	'bot_result_restart'  => '↺ Restart Diagnosis',
+	'bot_disclaimer'      => '⚠️ This is for reference only. Accurate diagnosis and treatment requires an in-person medical consultation.',
+	'bot_intro_step_1_title' => 'Answer Symptoms',
+	'bot_intro_step_1_desc'  => 'Simple Yes/No buttons',
+	'bot_intro_step_2_title' => 'Weighted Analysis',
+	'bot_intro_step_2_desc'  => 'Auto-match symptoms to specialties',
+	'bot_intro_step_3_title' => 'Get Recommendations',
+	'bot_intro_step_3_desc'  => 'Top 3 by fit score',
+	'bot_intro_chips_label'  => 'AREAS COVERED',
+	'bot_intro_trust_1'      => 'No answers saved',
+	'bot_intro_trust_2'      => 'Results in 30 seconds',
+	'bot_intro_trust_3'      => 'Completely free',
+	'bot_chief_title'        => 'Where does it bother you most?',
+	'bot_chief_lead'         => 'Select the affected area to see only relevant questions. Choose "Not sure" if uncertain.',
+	'bot_safety_title'       => 'Please share these when you visit',
+	'bot_safety_lead'        => 'The following items need to be confirmed for safe treatment.',
+	'bot_safety_continue'    => 'View Results →',
 );
