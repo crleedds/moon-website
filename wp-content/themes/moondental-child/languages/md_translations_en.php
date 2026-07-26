@@ -245,4 +245,80 @@ return array(
 	'bot_safety_title'       => 'Please share these when you visit',
 	'bot_safety_lead'        => 'The following items need to be confirmed for safe treatment.',
 	'bot_safety_continue'    => 'View Results →',
+
+	/* === Doctors page === */
+	'doctors_chip'         => 'MOON DENTAL HOSPITAL · OUR DOCTORS',
+	'doctors_title_a'      => '30+ Years of Clinical Experience,',
+	'doctors_title_b'      => 'Multi-Specialty Team Approach',
+	'doctors_lead'         => "Prosthetic · Orthodontic · Preservation · Surgical — specialists in every field, all in one place\nreviewing your case together.",
+	'doctors_stat_3_value' => '30+',
+	'doctors_stat_3_label' => 'Years since 1995',
+	'doctors_list_eyebrow' => 'Our Doctors',
+	'doctors_list_title'   => 'Meet Our Medical Team',
+	'doctors_list_lead'    => 'Receive care from specialists in every dental field.',
+	'doctors_view_label'   => 'View Profile',
+	'doctors_grid_hint'    => 'Click any doctor to see full bio and appointments.',
+	'doctors_spec_eyebrow' => 'SPECIALTY AREAS',
+	'doctors_spec_title'   => 'Areas of Practice',
+	'doctors_spec_lead'    => 'Areas we specialize in across our multi-disciplinary team.',
+
+	/* === Doctor single page === */
+	'doc_single_back_label'       => '← Back to All Doctors',
+	'doc_single_intro_eyebrow'    => 'INTRODUCTION',
+	'doc_single_edu_eyebrow'      => 'EDUCATION & CREDENTIALS',
+	'doc_single_qa_eyebrow'       => 'DOCTOR Q&A',
+	'doc_single_qa_title'         => 'Frequently Asked',
+	'doc_single_qa_lead'          => 'Common questions from patients answered by the doctor.',
+	'doc_single_interests_title'  => 'Areas of Interest',
+	'doc_single_others_title'     => 'Other Doctors',
+
+	/* === Service page common === */
+	'svc_faq_title'        => 'Frequently Asked Questions',
+	'svc_other_title'      => 'Explore Other Treatment Areas',
+
+	/* === Preservation (자연치아 살리기) === */
+	'preservation_hero_eyebrow' => 'PRESERVATION · Save Your Natural Teeth',
+	'preservation_hero_lead'    => 'Considering extraction? Take one more look — our specialists in preservation and periodontal care assess whether your natural tooth can be saved.',
+
+	/* === Prevention (예방클리닉) === */
+	'prevention_hero_eyebrow' => 'PREVENTION · Cheonan-Asan Prevention Clinic',
+	'prevention_hero_lead'    => "Blocking cavities and gum disease before they start — the most economical and conservative treatment.\nMoon Dental Hospital Prevention Clinic: Dental SPA · Air Flow · Fluoride · Sealant.",
+
+	/* === Smile Design (스마일디자인) === */
+	'smile_hero_eyebrow' => 'SMILE DESIGN · Aesthetic Center',
+	'smile_hero_lead'    => 'Laminate · Whitening · Aesthetic prosthetics — minimally invasive approach to your ideal smile.',
+
+	/* === Pricing (비용 안내) === */
+	'price_hero_chip'    => 'BILLING TRANSPARENCY · Cost Guide',
+	'price_hero_title_a' => 'The estimate you first heard,',
+	'price_hero_title_b' => 'stays the same until treatment ends',
+	'price_hero_title_c' => '',
+	'price_hero_lead'    => 'Moon Dental Hospital has promised honest care fees for 30+ years. We do not recommend unnecessary treatment · no additional costs after starting.',
+	'price_tables_eyebrow' => 'ESTIMATED COST',
+	'price_tables_title'   => 'Cost by Treatment',
+	'price_tables_lead'    => 'The table below is our standard reference. Exact cost is confirmed by written estimate after diagnosis.',
+	'price_tables_hint'    => 'May be adjusted based on patient oral condition · material choice · treatment difficulty. Final cost is confirmed by written estimate after examination.',
+	'price_promise_year'   => 'SINCE 1995',
+	'price_promise_title'  => 'Our 3 Promises',
+	'price_promise_1_title' => 'Estimate Stays the Same',
+	'price_promise_1_desc'  => 'Zero additional costs after starting',
+	'price_promise_2_title' => 'All Non-Covered Items Disclosed',
+	'price_promise_2_desc'  => 'Nothing hidden, everything upfront',
+	'price_promise_3_title' => 'Preservation First',
+	'price_promise_3_desc'  => 'Saving teeth before extraction',
+	'price_steps_eyebrow'   => 'PROCESS',
+	'price_steps_title'     => 'How Cost is Confirmed · 4 Steps',
+	'price_steps_lead'      => 'Consultation → Diagnosis → Estimate → Treatment (after consent). You have full opportunity to review at each step.',
+	'price_step_1_title'    => 'Comfortable Consultation',
+	'price_step_1_desc'     => 'We fully listen to your symptoms, budget, schedule, and concerns. Phone, KakaoTalk, or in-person all available.',
+	'price_step_2_title'    => 'Precise Diagnosis',
+	'price_step_2_desc'     => 'X-ray, CT, and clinical examination for accurate understanding of your condition.',
+	'price_step_3_title'    => 'Detailed Written Estimate',
+	'price_step_3_desc'     => 'Cost, duration, and process of each treatment option — provided in writing.',
+	'price_step_4_title'    => 'Treatment After Consent',
+	'price_step_4_desc'     => 'Full review then treat only what you have agreed to. Zero additional costs.',
+
+	/* === Location page === */
+	'locpage_hero_title'    => 'Directions',
+	'locpage_region_note'   => 'ⓘ Travel times are approximate by car. Actual times may vary by traffic.',
 );
