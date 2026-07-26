@@ -112,22 +112,29 @@ function moondental_translation_cache_flush( $lang = null ) {
  */
 function moondental_translate_via_api( $source, $lang ) {
 	if ( trim( (string) $source ) === '' ) return null;
-	$provider = get_option( 'md_translate_provider', 'google' );
+	$provider = get_option( 'md_translate_provider', 'azure' );
 	$api_key  = get_option( 'md_translate_api_key', '' );
 	if ( ! $api_key ) return null;
 
-	// Google 언어 코드 매핑 (mn은 Google에서 'mn' 지원)
-	$google_lang = array(
-		'en' => 'en',
-		'zh' => 'zh-CN',
-		'vi' => 'vi',
-		'ru' => 'ru',
-		'mn' => 'mn',
+	// 각 provider의 언어 코드 매핑
+	$lang_map = array(
+		'google' => array( 'en' => 'en', 'zh' => 'zh-CN', 'vi' => 'vi', 'ru' => 'ru', 'mn' => 'mn' ),
+		'azure'  => array( 'en' => 'en', 'zh' => 'zh-Hans', 'vi' => 'vi', 'ru' => 'ru', 'mn' => 'mn-Mong' ),
+		'deepl'  => array( 'en' => 'EN', 'zh' => 'ZH', 'ru' => 'RU' ), // vi, mn 미지원
 	);
-	$target = $google_lang[ $lang ] ?? $lang;
+	$target = $lang_map[ $provider ][ $lang ] ?? null;
+	if ( ! $target ) return null; // 이 provider에서 지원 안 함
 
 	if ( $provider === 'google' ) {
 		return moondental_translate_google( $source, $target, $api_key );
+	}
+	if ( $provider === 'azure' ) {
+		$region = get_option( 'md_translate_azure_region', 'koreacentral' );
+		return moondental_translate_azure( $source, $target, $api_key, $region );
+	}
+	if ( $provider === 'deepl' ) {
+		$is_pro = (bool) get_option( 'md_translate_deepl_pro', false );
+		return moondental_translate_deepl( $source, $target, $api_key, $is_pro );
 	}
 	return null;
 }
@@ -141,7 +148,7 @@ function moondental_translate_google( $source, $target, $api_key ) {
 		'q'      => $source,
 		'source' => 'ko',
 		'target' => $target,
-		'format' => 'text', // HTML이면 'html'로 · 지금은 text 안전
+		'format' => 'text',
 	);
 	$response = wp_remote_post( $url, array(
 		'headers' => array( 'Content-Type' => 'application/json' ),
@@ -149,11 +156,58 @@ function moondental_translate_google( $source, $target, $api_key ) {
 		'timeout' => 8,
 	) );
 	if ( is_wp_error( $response ) ) return null;
-	$code = wp_remote_retrieve_response_code( $response );
-	if ( $code !== 200 ) return null;
+	if ( wp_remote_retrieve_response_code( $response ) !== 200 ) return null;
 	$data = json_decode( wp_remote_retrieve_body( $response ), true );
-	if ( ! is_array( $data ) || empty( $data['data']['translations'][0]['translatedText'] ) ) return null;
+	if ( empty( $data['data']['translations'][0]['translatedText'] ) ) return null;
 	return $data['data']['translations'][0]['translatedText'];
+}
+
+/**
+ * Microsoft Azure Translator v3.0 호출.
+ * 무료 F0 티어 · 월 2,000,000자 · 6개 언어 모두 지원 (권장).
+ */
+function moondental_translate_azure( $source, $target, $api_key, $region = 'koreacentral' ) {
+	$url = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=ko&to=' . urlencode( $target );
+	$response = wp_remote_post( $url, array(
+		'headers' => array(
+			'Ocp-Apim-Subscription-Key'    => $api_key,
+			'Ocp-Apim-Subscription-Region' => $region,
+			'Content-Type'                 => 'application/json',
+		),
+		'body'    => wp_json_encode( array( array( 'text' => $source ) ) ),
+		'timeout' => 8,
+	) );
+	if ( is_wp_error( $response ) ) return null;
+	if ( wp_remote_retrieve_response_code( $response ) !== 200 ) return null;
+	$data = json_decode( wp_remote_retrieve_body( $response ), true );
+	if ( empty( $data[0]['translations'][0]['text'] ) ) return null;
+	return $data[0]['translations'][0]['text'];
+}
+
+/**
+ * DeepL API 호출 (Free 또는 Pro).
+ * Free: 월 500K자 · Pro: $6.99/월~ · 최고 품질 (지원 언어: en/zh/ru만 · vi/mn 미지원)
+ */
+function moondental_translate_deepl( $source, $target, $api_key, $is_pro = false ) {
+	$base = $is_pro ? 'https://api.deepl.com' : 'https://api-free.deepl.com';
+	$url  = $base . '/v2/translate';
+	$response = wp_remote_post( $url, array(
+		'headers' => array(
+			'Authorization' => 'DeepL-Auth-Key ' . $api_key,
+			'Content-Type'  => 'application/x-www-form-urlencoded',
+		),
+		'body'    => array(
+			'text'        => $source,
+			'source_lang' => 'KO',
+			'target_lang' => $target,
+		),
+		'timeout' => 8,
+	) );
+	if ( is_wp_error( $response ) ) return null;
+	if ( wp_remote_retrieve_response_code( $response ) !== 200 ) return null;
+	$data = json_decode( wp_remote_retrieve_body( $response ), true );
+	if ( empty( $data['translations'][0]['text'] ) ) return null;
+	return $data['translations'][0]['text'];
 }
 
 
@@ -223,8 +277,10 @@ function moondental_translate_admin_page() {
 
 	// API 설정 저장
 	if ( isset( $_POST['md_save_api'] ) && check_admin_referer( 'md_translate_admin' ) ) {
-		update_option( 'md_translate_provider', sanitize_text_field( $_POST['md_provider'] ?? 'google' ) );
-		update_option( 'md_translate_api_key',  sanitize_text_field( $_POST['md_api_key']  ?? '' ) );
+		update_option( 'md_translate_provider',     sanitize_text_field( $_POST['md_provider'] ?? 'azure' ) );
+		update_option( 'md_translate_api_key',      sanitize_text_field( $_POST['md_api_key']  ?? '' ) );
+		update_option( 'md_translate_azure_region', sanitize_text_field( $_POST['md_azure_region'] ?? 'koreacentral' ) );
+		update_option( 'md_translate_deepl_pro',    ! empty( $_POST['md_deepl_pro'] ) ? 1 : 0 );
 		echo '<div class="notice notice-success"><p>API 설정 저장 완료</p></div>';
 	}
 
@@ -245,8 +301,10 @@ function moondental_translate_admin_page() {
 		}
 	}
 
-	$provider = get_option( 'md_translate_provider', 'google' );
-	$api_key  = get_option( 'md_translate_api_key', '' );
+	$provider     = get_option( 'md_translate_provider', 'azure' );
+	$api_key      = get_option( 'md_translate_api_key', '' );
+	$azure_region = get_option( 'md_translate_azure_region', 'koreacentral' );
+	$deepl_pro    = (bool) get_option( 'md_translate_deepl_pro', false );
 	$stats = $wpdb->get_results( "SELECT lang, COUNT(*) AS cnt FROM $table GROUP BY lang", ARRAY_A );
 	?>
 	<div class="wrap">
@@ -262,25 +320,66 @@ function moondental_translate_admin_page() {
 						<td>
 							<select name="md_provider" id="md_provider">
 								<option value="">-- 사용 안 함 (수동 파일 번역만) --</option>
-								<option value="google" <?php selected( $provider, 'google' ); ?>>Google Cloud Translate (권장 · 무료 500K자/월)</option>
+								<option value="azure"  <?php selected( $provider, 'azure' ); ?>>⭐ Microsoft Azure Translator (권장 · 영구 무료 2M자/월 · 6개 언어 모두 지원)</option>
+								<option value="google" <?php selected( $provider, 'google' ); ?>>Google Cloud Translate ($20/1M자 · 무료 크레딧 12개월)</option>
+								<option value="deepl"  <?php selected( $provider, 'deepl' ); ?>>DeepL (최고 품질 · 무료 500K자/월 · 몽골·베트남 미지원)</option>
 							</select>
 						</td>
 					</tr>
 					<tr>
 						<th><label for="md_api_key">API Key</label></th>
 						<td>
-							<input type="password" name="md_api_key" id="md_api_key" class="regular-text" value="<?php echo esc_attr( $api_key ); ?>" autocomplete="off" placeholder="AIzaSy..." />
-							<p class="description">Google Cloud Console에서 발급 · 아래 안내 참조 · 저장 후 위의 <strong>API 테스트</strong> 클릭 권장</p>
+							<input type="password" name="md_api_key" id="md_api_key" class="regular-text" value="<?php echo esc_attr( $api_key ); ?>" autocomplete="off" />
+							<p class="description">아래 provider별 안내 참조 · 저장 후 <strong>API 테스트</strong>로 확인</p>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="md_azure_region">Azure Region <span style="color:#999">(Azure 사용 시만)</span></label></th>
+						<td>
+							<select name="md_azure_region" id="md_azure_region">
+								<option value="koreacentral" <?php selected( $azure_region, 'koreacentral' ); ?>>Korea Central (권장 · 서울 · 가장 빠름)</option>
+								<option value="global"       <?php selected( $azure_region, 'global' ); ?>>Global</option>
+								<option value="eastus"       <?php selected( $azure_region, 'eastus' ); ?>>East US</option>
+								<option value="westus"       <?php selected( $azure_region, 'westus' ); ?>>West US</option>
+							</select>
+							<p class="description">Azure Portal에서 리소스 생성 시 선택한 region</p>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="md_deepl_pro">DeepL Plan <span style="color:#999">(DeepL 사용 시만)</span></label></th>
+						<td>
+							<label><input type="checkbox" name="md_deepl_pro" value="1" <?php checked( $deepl_pro ); ?>> DeepL Pro (유료 · api.deepl.com)</label>
+							<p class="description">체크 안 하면 무료 · api-free.deepl.com</p>
 						</td>
 					</tr>
 				</table>
 				<p>
 					<input type="submit" name="md_save_api" class="button button-primary" value="설정 저장">
 					<?php if ( $api_key ) : ?>
-						<input type="submit" name="md_test_api" class="button button-secondary" value="API 테스트">
+						<input type="submit" name="md_test_api" class="button button-secondary" value="🧪 API 테스트">
 					<?php endif; ?>
 				</p>
 			</form>
+		</div>
+
+		<div class="card" style="max-width:800px; margin-top:20px; background:#f0f6fc; border-left:4px solid #2271b1">
+			<h2>⭐ Microsoft Azure Translator 발급 안내 (권장 · 진짜 무료)</h2>
+			<p><strong>왜 Azure를 권장하나:</strong> 월 200만자 <strong>영구 무료</strong> · 6개 언어 모두 지원 (Google 4배 · DeepL 4배)</p>
+			<ol>
+				<li><a href="https://portal.azure.com/" target="_blank">Azure Portal</a> 로그인 (Microsoft 계정 · 없으면 무료 가입)</li>
+				<li>상단 검색창 → <code>Translator</code> 검색 → <strong>Translator</strong> 클릭</li>
+				<li><strong>Create</strong> 클릭</li>
+				<li>Resource group: 새로 생성 · 이름 "moondental"</li>
+				<li>Region: <strong>Korea Central</strong> (한국 · 빠름)</li>
+				<li>Name: 예 "moondental-translator"</li>
+				<li>Pricing tier: <strong>F0 (Free)</strong> 선택 · 월 200만자 영구 무료</li>
+				<li>Review + create → Create</li>
+				<li>배포 완료 후 리소스 클릭 → 좌측 메뉴 <strong>Keys and Endpoint</strong></li>
+				<li><strong>KEY 1</strong> 복사 → 위 API Key 필드에 붙여넣기</li>
+				<li>Region이 <code>koreacentral</code>로 되어있는지 확인</li>
+				<li>설정 저장 → API 테스트 클릭</li>
+			</ol>
+			<p><strong>결제 걱정 없음:</strong> F0 티어는 초과해도 자동 차단 · 청구 안 됨. 신용카드 등록 없이 가입 가능.</p>
 		</div>
 
 		<div class="card" style="max-width:800px; margin-top:20px">
@@ -320,14 +419,24 @@ function moondental_translate_admin_page() {
 		</div>
 
 		<div class="card" style="max-width:800px; margin-top:20px">
-			<h2>Google Cloud Translate API 키 발급 안내</h2>
+			<h2>Google Cloud Translate 발급 (대안)</h2>
 			<ol>
-				<li><a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a> 로그인 (구글 계정)</li>
-				<li>프로젝트 생성 (예: "moondental")</li>
-				<li>좌측 메뉴 → APIs & Services → Library → "Cloud Translation API" 검색 · 활성화</li>
-				<li>APIs & Services → Credentials → Create Credentials → API key</li>
-				<li>발급된 키 복사 → 위 Customizer에 붙여넣기</li>
-				<li>무료: 월 500,000자 · 이 사이트 규모는 충분</li>
+				<li><a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a> 로그인</li>
+				<li>프로젝트 생성 → APIs & Services → Library → <code>Cloud Translation API</code> 활성화</li>
+				<li>Credentials → Create Credentials → API key</li>
+				<li>무료: 최초 12개월 $300 크레딧 (~15M자) · 이후 $20/1M자</li>
+				<li><strong>주의:</strong> 500K자/월 영구 무료 티어는 명시가 애매 · 장기적으론 결제 발생 가능</li>
+			</ol>
+		</div>
+
+		<div class="card" style="max-width:800px; margin-top:20px">
+			<h2>DeepL 발급 (최고 품질 · 지원 언어 제한)</h2>
+			<ol>
+				<li><a href="https://www.deepl.com/pro-api" target="_blank">DeepL API</a> → Free 계정 가입</li>
+				<li>계정 페이지 → Account → Authentication Key 복사</li>
+				<li>무료: 월 500,000자 영구</li>
+				<li><strong>지원 언어:</strong> 영어·중국어·러시아어만 · <strong>몽골어·베트남어 미지원</strong></li>
+				<li>미지원 언어는 자동으로 한국어 fallback · 다른 provider 병용 필요</li>
 			</ol>
 		</div>
 	</div>
