@@ -52,9 +52,14 @@ function moondental_translate_content( $key, $value ) {
 	if ( ! is_string( $value ) || $value === '' ) return $value;
 	$lang = moondental_current_language();
 	if ( $lang === 'ko' || $lang === '' ) return $value;
+	// 1. 파일 기반 번역 (수동 시드 · 최우선 · 품질 보장)
 	$translations = moondental_load_translations( $lang );
 	if ( isset( $translations[ $key ] ) && $translations[ $key ] !== '' ) {
 		return $translations[ $key ];
+	}
+	// 2. v3.44.0 · 자동 번역 (DB 캐시 → API) · 파일 번역 없을 때 fallback
+	if ( function_exists( 'moondental_translate_auto' ) ) {
+		return moondental_translate_auto( $lang, $value );
 	}
 	return $value;
 }

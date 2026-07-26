@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.43.4' );
+define( 'MOONDENTAL_VERSION', '3.44.0' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -1148,6 +1148,7 @@ require_once MOONDENTAL_DIR . '/inc/naver-importer.php';
 require_once MOONDENTAL_DIR . '/inc/reservation.php';
 require_once MOONDENTAL_DIR . '/inc/enhancements.php';
 require_once MOONDENTAL_DIR . '/inc/customizer-content.php';
+require_once MOONDENTAL_DIR . '/inc/auto-translate.php'; // v3.44.0
 require_once MOONDENTAL_DIR . '/inc/strengths.php';
 require_once MOONDENTAL_DIR . '/inc/regions.php';
 require_once MOONDENTAL_DIR . '/inc/icons.php';
