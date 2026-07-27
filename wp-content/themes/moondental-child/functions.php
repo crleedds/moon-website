@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.7' );
+define( 'MOONDENTAL_VERSION', '3.44.8' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -1543,11 +1543,24 @@ function moondental_cta_context() {
 			'병원안내'       => 'about',
 			'진료항목'       => 'services_parent',
 			'소식'           => 'news',
+			'공지사항'       => 'news',
+			'뉴스'           => 'news',
 			'상담예약'       => 'reservation',
+			'예약'           => 'reservation',
 			'예방클리닉'     => 'prevention',
 			'스마일디자인센터' => 'smile',
+			'심미치료'       => 'smile',
+			'임상-케이스'    => 'about',
+			'임상케이스'     => 'about',
+			'역사'           => 'history',
+			'기술력-시설'    => 'facility',
+			'기술력'         => 'facility',
+			'시설'           => 'facility',
+			'faq'            => 'faq',
+			'자주묻는질문'   => 'faq',
 			'개인정보처리방침' => 'legal',
 			'이용약관'       => 'legal',
+			'사이트맵'       => 'legal',
 		);
 		if ( isset( $slug_map[ $slug ] ) ) return $slug_map[ $slug ];
 	}
@@ -1741,10 +1754,12 @@ function moondental_cta_copy( $context = null ) {
 			break;
 
 		default:
+			/* v3.44.8 · 미분류 페이지 · 사용자 옛 cta_title 커스터마이저 override
+			 * ('30년 임상 · 정직한 견적') 로부터 격리 · 새 키 cta_generic_* 사용 */
 			$copy = array(
-				'eyebrow' => $shared_eyebrow,
-				'title'   => $shared_title,
-				'lead'    => $shared_lead,
+				'eyebrow' => md_content( 'cta_generic_eyebrow', '상담 안내' ),
+				'title'   => md_content( 'cta_generic_title',   '궁금한 점이 있으신가요?' ),
+				'lead'    => md_content( 'cta_generic_lead',    "환자분의 상황을 먼저 듣고, 꼭 필요한 치료만 권합니다.\n지금 상담을 신청하시면 진료시간 내 빠르게 연락드립니다." ),
 			);
 	}
 

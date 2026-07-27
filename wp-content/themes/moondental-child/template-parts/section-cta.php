@@ -11,7 +11,11 @@
 
 $args = wp_parse_args( $args ?? array(), array( 'context' => null ) );
 $copy = moondental_cta_copy( $args['context'] );
+/* v3.44.8 · 디버그 · 페이지 소스에서 감지된 CTA 컨텍스트 확인 가능 */
+$_ctx_debug = $args['context'] ?: moondental_cta_context();
+$_slug_debug = is_page() ? get_post_field( 'post_name', get_the_ID() ) : '';
 ?>
+<!-- md-cta-context: <?php echo esc_html( $_ctx_debug ); ?> · page-slug: <?php echo esc_html( $_slug_debug ); ?> -->
 
 <section class="md-section md-section--sm" aria-label="<?php echo esc_attr( md_content( 'aria_sec_cta_banner', '예약 안내' ) ); ?>">
 	<div class="md-container">
