@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.6' );
+define( 'MOONDENTAL_VERSION', '3.44.7' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -1534,6 +1534,24 @@ function moondental_cta_context() {
 	if ( is_post_type_archive( 'md_term' ) || is_tax( 'md_term_cat' ) )      return 'encyclopedia';
 	if ( is_single() )                                                       return 'news';
 
+	/* v3.44.7 · 슬러그 기반 컨텍스트 · 템플릿 없는 페이지 (병원소개·진료항목·홈 등) */
+	if ( is_front_page() ) return 'home';
+	if ( is_page() ) {
+		$slug = get_post_field( 'post_name', get_the_ID() );
+		$slug_map = array(
+			'병원소개'       => 'about',
+			'병원안내'       => 'about',
+			'진료항목'       => 'services_parent',
+			'소식'           => 'news',
+			'상담예약'       => 'reservation',
+			'예방클리닉'     => 'prevention',
+			'스마일디자인센터' => 'smile',
+			'개인정보처리방침' => 'legal',
+			'이용약관'       => 'legal',
+		);
+		if ( isset( $slug_map[ $slug ] ) ) return $slug_map[ $slug ];
+	}
+
 	return 'default';
 }
 
@@ -1678,6 +1696,47 @@ function moondental_cta_copy( $context = null ) {
 				'eyebrow' => '상담 · 예약',
 				'title'   => md_content( 'cta_service_title', ( $service_name ? $service_name . ', ' : '' ) . '나에게 맞는지 상담받아보세요' ),
 				'lead'    => md_content( 'cta_service_lead',  '진단부터 치료 계획까지 부담 없이 안내드립니다. 시작 전에 궁금한 점을 다 여쭤보세요.' ),
+			);
+			break;
+
+		/* v3.44.7 · 슬러그 기반 신규 컨텍스트 */
+		case 'home':
+			$copy = array(
+				'eyebrow' => md_content( 'cta_home_eyebrow', '첫 방문 환영' ),
+				'title'   => md_content( 'cta_home_title',   "천안·아산 30년 임상,\n오늘 첫 상담 예약하세요" ),
+				'lead'    => md_content( 'cta_home_lead',    "환자분께 꼭 필요한 치료만 정직하게 권합니다.\n지금 예약하시면 편하신 시간에 상세히 상담해드립니다." ),
+			);
+			break;
+
+		case 'about':
+			$copy = array(
+				'eyebrow' => md_content( 'cta_about_eyebrow', '병원 방문 상담' ),
+				'title'   => md_content( 'cta_about_title',   "실제 병원 분위기가 궁금하시면\n방문 상담 예약해주세요" ),
+				'lead'    => md_content( 'cta_about_lead',    '30여년 한자리 진료의 문치과병원 · 원장님·시설·의료진을 직접 확인하실 수 있습니다.' ),
+			);
+			break;
+
+		case 'services_parent':
+			$copy = array(
+				'eyebrow' => md_content( 'cta_services_parent_eyebrow', '진료 상담' ),
+				'title'   => md_content( 'cta_services_parent_title',   '어떤 진료가 필요한지 모르시겠나요?' ),
+				'lead'    => md_content( 'cta_services_parent_lead',    '증상을 말씀해주시면 적합한 진료과와 원장님을 안내드립니다. 정확한 진단 후 필요한 치료만 권해드립니다.' ),
+			);
+			break;
+
+		case 'reservation':
+			$copy = array(
+				'eyebrow' => md_content( 'cta_reservation_eyebrow', '다른 방법으로도' ),
+				'title'   => md_content( 'cta_reservation_title',   '위 양식이 불편하시면 편하신 채널로 연락주세요' ),
+				'lead'    => md_content( 'cta_reservation_lead',    '전화·네이버 예약·카카오톡 — 원하시는 방법으로 편하게 문의하실 수 있습니다.' ),
+			);
+			break;
+
+		case 'legal':
+			$copy = array(
+				'eyebrow' => md_content( 'cta_legal_eyebrow', '문의' ),
+				'title'   => md_content( 'cta_legal_title',   '개인정보 관련 문의사항이 있으신가요?' ),
+				'lead'    => md_content( 'cta_legal_lead',    '병원 대표 연락처로 언제든 문의해주시면 담당자가 성실히 답변드리겠습니다.' ),
 			);
 			break;
 
