@@ -131,9 +131,8 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 			</a>
 		</div>
 
-		<!-- 진료시간 + 주차 안내 (2-col) -->
-		<div class="md-info-pair md-flocation__pair">
-
+		<!-- 진료시간 (v3.44.3 · 주차 안내 카드 제거 요청) -->
+		<div class="md-flocation__pair md-flocation__pair--single">
 			<aside class="md-hours">
 				<header class="md-hours__head">
 					<span class="md-hours__badge"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_hours_badge', '🕐 진료시간' ) : '🕐 진료시간' ); ?></span>
@@ -158,49 +157,6 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 					</li>
 				</ul>
 			</aside>
-
-			<aside class="md-park md-park--compact">
-				<?php
-				// 헬퍼: Customizer 텍스트를 esc_html → md_autolink_addresses 처리
-				$mdf = function( $key, $default ) {
-					$raw = function_exists( 'md_content' ) ? md_content( $key, $default ) : $default;
-					$out = esc_html( $raw );
-					return function_exists( 'md_autolink_addresses' ) ? md_autolink_addresses( $out ) : $out;
-				};
-				?>
-				<header class="md-park__head">
-					<span class="md-park__badge"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_badge', '🅿️ 주차 안내' ) : '🅿️ 주차 안내' ); ?></span>
-					<h3 class="md-park__title"><?php echo wp_kses_post( str_replace( '무료', '<strong>무료</strong>', $mdf( 'loc_park_title', '본원 지하 기계식 무료' ) ) ); ?></h3>
-					<?php /* v3.37.10 · 주차 lead 문구 제거 (아래 01·02 카드에 동일 안내 포함) */ ?>
-				</header>
-				<ul class="md-park__list">
-					<li>
-						<span class="md-park__num">01</span>
-						<div>
-							<strong><?php echo wp_kses_post( $mdf( 'loc_park_1_title', '본원 지하 기계식 주차장' ) ); ?></strong>
-							<span><?php echo wp_kses_post( $mdf( 'loc_park_1_desc', '진료 시간 동안 무료 이용' ) ); ?></span>
-						</div>
-					</li>
-					<li>
-						<span class="md-park__num">02</span>
-						<div>
-							<strong><?php echo wp_kses_post( $mdf( 'loc_park_2_title', 'SUV·대형차 — 신부 제5공영주차장' ) ); ?></strong>
-							<span><?php echo wp_kses_post( $mdf( 'loc_park_2_desc', '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ) ); ?></span>
-						</div>
-					</li>
-				</ul>
-				<?php if ( $park_walk || $park_train ) : ?>
-				<p class="md-park__walk">
-					<?php if ( $park_walk ) : ?>
-						<span><?php echo esc_html( $park_walk ); ?></span>
-					<?php endif; ?>
-					<?php if ( $park_train ) : ?>
-						<span><?php echo esc_html( $park_train ); ?></span>
-					<?php endif; ?>
-				</p>
-				<?php endif; ?>
-			</aside>
-
 		</div>
 	</div>
 </section>
