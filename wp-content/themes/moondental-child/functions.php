@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.4' );
+define( 'MOONDENTAL_VERSION', '3.44.5' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2196,6 +2196,51 @@ add_action( 'admin_init', function() {
 	moondental_ensure_reservation_page();
 	update_option( 'moondental_reservation_page_v1', '1' );
 } );
+
+/**
+ * v3.44.5 · 핵심 페이지 유실 자동 복구
+ * 사용자가 실수로 wp-admin에서 '의료진', '오시는-길' 등 핵심 페이지를 삭제한 경우
+ * 프론트에서 404가 발생하므로 · admin 또는 프론트 접속 시 자동 재생성.
+ *
+ * 검사 대상: 슬러그·제목·템플릿 매칭이 없으면 wp_insert_post 후 flush.
+ * flag는 페이지 삭제 감지 후에도 다시 도는 로직 (get_option 저장 없이 매 요청마다 존재만 검사).
+ */
+function moondental_ensure_core_pages() {
+	static $checked = false;
+	if ( $checked ) return;
+	$checked = true;
+
+	$core_pages = array(
+		array( 'slug' => '의료진',       'title' => '의료진',       'template' => 'page-templates/page-doctors.php',      'parent' => '병원소개' ),
+		array( 'slug' => '오시는-길',     'title' => '오시는 길',     'template' => 'page-templates/page-location.php',     'parent' => '' ),
+		array( 'slug' => '상담예약',      'title' => '상담 예약',     'template' => 'page-templates/page-reservation.php',  'parent' => '' ),
+		array( 'slug' => '비용-안내',     'title' => '비용 안내',     'template' => 'page-templates/page-pricing.php',      'parent' => '' ),
+	);
+
+	$created = false;
+	foreach ( $core_pages as $p ) {
+		if ( get_page_by_path( $p['slug'] ) ) continue;
+		$parent_id = 0;
+		if ( $p['parent'] ) {
+			$parent_obj = get_page_by_path( $p['parent'] );
+			if ( $parent_obj ) $parent_id = $parent_obj->ID;
+		}
+		$id = wp_insert_post( array(
+			'post_title'    => $p['title'],
+			'post_name'     => $p['slug'],
+			'post_status'   => 'publish',
+			'post_type'     => 'page',
+			'post_content'  => '',
+			'post_parent'   => $parent_id,
+			'page_template' => $p['template'],
+		) );
+		if ( $id && ! is_wp_error( $id ) ) $created = true;
+	}
+	if ( $created ) flush_rewrite_rules( false );
+}
+add_action( 'admin_init', 'moondental_ensure_core_pages' );
+/* 프론트에서도 · 관리자 접속 전 자동 복구 · 요청당 1회만 실행 (static flag) */
+add_action( 'wp_loaded',   'moondental_ensure_core_pages' );
 
 /**
  * 페이지 일괄 생성. 이미 있는 슬러그는 건드리지 않음.
