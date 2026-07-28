@@ -27,6 +27,16 @@ function md_content( $key, $default = '' ) {
 		return moondental_translate_content( $key, $stored );
 	}
 	if ( ! is_null( $stored ) && ! is_string( $stored ) ) return $stored;
+
+	// v3.44.9 · 빈 default 여도 번역 파일에 값이 있으면 사용 (e.g. flocation_address 빈 default + EN 번역)
+	$lang = function_exists( 'moondental_current_language' ) ? moondental_current_language() : 'ko';
+	if ( $lang !== 'ko' && $lang !== '' ) {
+		$translations = function_exists( 'moondental_load_translations' ) ? moondental_load_translations( $lang ) : array();
+		if ( isset( $translations[ $key ] ) && $translations[ $key ] !== '' ) {
+			return $translations[ $key ];
+		}
+	}
+
 	if ( $default !== '' && $default !== null ) {
 		return moondental_translate_content( $key, $default );
 	}

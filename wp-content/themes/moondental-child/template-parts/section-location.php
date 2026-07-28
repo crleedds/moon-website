@@ -33,10 +33,12 @@ if ( ! $map_image ) {
 }
 
 $title   = function_exists( 'md_content' ) ? md_content( 'flocation_title', '오시는 길' ) : '오시는 길';
-// flocation_address: Customizer 값이 비어있으면 병원 기본 주소로 자동 fallback
+// v3.44.9 · flocation_address 우선 · 없으면 info_address (번역 가능) · 최종 fallback moondental_get_info
 $address = function_exists( 'md_content' ) ? md_content( 'flocation_address', '' ) : '';
 if ( $address === '' ) {
-	$address = $info['address'] ?? '';
+	$address = function_exists( 'md_content' )
+		? md_content( 'info_address', $info['address'] ?? '' )
+		: ( $info['address'] ?? '' );
 }
 
 // 진료시간 — 오늘 요일 강조용

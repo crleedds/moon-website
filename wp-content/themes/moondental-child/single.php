@@ -29,7 +29,7 @@ if ( have_posts() ) :
 		<?php endif; ?>
 		<h1 class="md-page-hero__title"><?php the_title(); ?></h1>
 		<time class="md-single__date" datetime="<?php echo esc_attr( get_the_date( 'Y-m-d' ) ); ?>">
-			<?php echo esc_html( get_the_date( 'Y년 n월 j일' ) ); ?>
+			<?php echo esc_html( get_the_date( md_content( 'date_format', 'Y년 n월 j일' ) ) ); ?>
 		</time>
 	</div>
 </section>
@@ -102,7 +102,7 @@ if ( have_posts() ) :
 								<?php if ( $rcat ) : ?><span class="md-news-card__category"><?php echo esc_html( $rcat ); ?></span><?php endif; ?>
 							</div>
 							<div class="md-news-card__body">
-								<time class="md-news-card__date"><?php echo esc_html( get_the_date( 'Y년 n월 j일' ) ); ?></time>
+								<time class="md-news-card__date"><?php echo esc_html( get_the_date( md_content( 'date_format', 'Y년 n월 j일' ) ) ); ?></time>
 								<h3 class="md-news-card__title"><?php the_title(); ?></h3>
 							</div>
 						</a>

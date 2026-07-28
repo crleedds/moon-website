@@ -321,4 +321,67 @@ return array(
 	/* === Location page === */
 	'locpage_hero_title'    => 'Directions',
 	'locpage_region_note'   => 'ⓘ Travel times are approximate by car. Actual times may vary by traffic.',
+
+	/* === News page (v3.44.9 · 병원소식) === */
+	'news_hero_title'         => 'Hospital News',
+	'news_hero_lead'          => 'Announcements and dental information from Moon Dental Hospital in Cheonan Mannam-ro.',
+	'news_notice_eyebrow'     => '📢 NOTICE',
+	'news_notice_title'       => 'Moon Dental Hospital Announcements',
+	'news_notice_lead'        => 'Schedule changes, closures, events, and operations — announced here first.',
+	'news_notice_empty'       => 'No announcements yet.',
+	'news_notice_empty_sub'   => 'We will share new updates soon.',
+	'news_stories_eyebrow'    => '🦷 DENTAL STORIES',
+	'news_stories_title'      => 'Moon Dental Hospital Stories',
+	'news_stories_lead'       => "Implant · Orthodontics · Preservation · Laminate · Prevention —\nOral health information to help patients.",
+	'news_stories_empty'      => 'No dental stories yet.',
+	'news_stories_empty_sub'  => 'We will share helpful information soon.',
+
+	/* === CTA generic (v3.44.8 · default context 격리) === */
+	'cta_generic_eyebrow' => 'CONSULTATION',
+	'cta_generic_title'   => 'Have a question?',
+	'cta_generic_lead'    => "We listen first, then only recommend truly necessary treatment.\nBook a consultation and we will contact you during business hours.",
+
+	/* === CTA · slug-based new contexts (v3.44.7) === */
+	'cta_home_eyebrow'          => 'WELCOME · FIRST VISIT',
+	'cta_home_title'            => "Cheonan-Asan · 30 Years of Clinical Care\nBook Your First Consultation Today",
+	'cta_home_lead'              => "We only recommend what's truly needed for our patients.\nBook now and we will arrange a detailed consultation at your convenience.",
+	'cta_about_eyebrow'         => 'IN-PERSON CONSULTATION',
+	'cta_about_title'           => "Curious about the actual hospital atmosphere?\nSchedule a visit consultation",
+	'cta_about_lead'            => 'Moon Dental Hospital — 30+ years at one location · meet our doctors, see our facility, in person.',
+	'cta_services_parent_eyebrow' => 'TREATMENT CONSULTATION',
+	'cta_services_parent_title' => 'Not sure which treatment you need?',
+	'cta_services_parent_lead'  => 'Share your symptoms and we will guide you to the right specialty and doctor. Only necessary treatment recommended after accurate diagnosis.',
+	'cta_reservation_eyebrow'   => 'OTHER CHANNELS',
+	'cta_reservation_title'     => 'Prefer another way? Choose whichever contact suits you',
+	'cta_reservation_lead'      => 'Phone · Naver Booking · KakaoTalk — reach us however works best for you.',
+	'cta_legal_eyebrow'         => 'INQUIRY',
+	'cta_legal_title'           => 'Questions about privacy or terms?',
+	'cta_legal_lead'            => 'Reach the hospital by phone anytime and our team will respond promptly.',
+
+	/* === Location · day labels (진료시간 표) === */
+	'loc_day_weekday'    => 'Mon · Tue · Wed · Fri',
+	'loc_day_thu'        => 'Thursday',
+	'loc_day_sat'        => 'Saturday',
+	'loc_day_sun'        => 'Sunday · Holidays',
+	'loc_day_closed'     => 'Closed',
+	'loc_hours_note'     => 'No lunch break on weekdays · Evening hours available',
+
+	/* === Location · parking === */
+	'loc_park_title'     => 'Free mechanical parking · basement',
+	'loc_park_1_title'   => 'Onsite basement mechanical parking',
+	'loc_park_1_desc'    => 'Free during treatment hours',
+	'loc_park_2_title'   => 'SUV / Large cars — Sinbu 5th Public Parking',
+	'loc_park_2_desc'    => 'Nearby Sinbu 5th Public Parking (Dongnam-gu Meokgeori 1-gil 10) · park then register free at the front desk',
+
+	/* === Address (moondental_get_info) === */
+	'flocation_address'  => 'Moon Tower 9·10·11·13F, 52 Mannam-ro, Dongnam-gu, Cheonan-si, Chungcheongnam-do (Sinbu-dong)',
+	'info_address'       => 'Moon Tower 9·10·11·13F, 52 Mannam-ro, Dongnam-gu, Cheonan-si, Chungcheongnam-do (Sinbu-dong)',
+
+	/* === Post/blog dates · Y년 n월 j일 → Month D, Y === */
+	'date_format'        => 'F j, Y',
+
+	/* === Language switcher label (FAB) === */
+	'lang_switcher_label' => 'Language',
+
+	/* === CTA hint (진료시간 배너 하단) — 이미 있음 재확인 === */
 );

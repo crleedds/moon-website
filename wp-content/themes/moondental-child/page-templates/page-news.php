@@ -140,7 +140,7 @@ $is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
 							</div>
 							<div class="md-news-card__body">
 								<time class="md-news-card__date" datetime="<?php echo esc_attr( get_the_date( 'Y-m-d' ) ); ?>">
-									<?php echo esc_html( get_the_date( 'Y년 n월 j일' ) ); ?>
+									<?php echo esc_html( get_the_date( md_content( 'date_format', 'Y년 n월 j일' ) ) ); ?>
 								</time>
 								<h3 class="md-news-card__title"><?php the_title(); ?></h3>
 								<p class="md-news-card__excerpt">
@@ -203,7 +203,7 @@ $is_editor = is_user_logged_in() && current_user_can( 'publish_posts' );
 							</div>
 							<div class="md-news-card__body">
 								<time class="md-news-card__date" datetime="<?php echo esc_attr( get_the_date( 'Y-m-d' ) ); ?>">
-									<?php echo esc_html( get_the_date( 'Y년 n월 j일' ) ); ?>
+									<?php echo esc_html( get_the_date( md_content( 'date_format', 'Y년 n월 j일' ) ) ); ?>
 								</time>
 								<h3 class="md-news-card__title"><?php the_title(); ?></h3>
 								<p class="md-news-card__excerpt">
