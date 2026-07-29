@@ -2758,7 +2758,7 @@ function moondental_misc_pages_content_fields() {
 				'loc_day_weekday' => array( 'default' => '평일 (월·화·수·금)', 'label' => '오시는 길 · 요일 라벨 (평일)', 'type' => 'text' ),
 				'loc_day_thu'     => array( 'default' => '목요일', 'label' => '오시는 길 · 요일 라벨 (목)', 'type' => 'text' ),
 				'loc_day_sat'     => array( 'default' => '토요일', 'label' => '오시는 길 · 요일 라벨 (토)', 'type' => 'text' ),
-				'loc_day_sun'     => array( 'default' => '일요일 · 공휴일', 'label' => '오시는 길 · 요일 라벨 (일/공휴일)', 'type' => 'text' ),
+				'loc_day_sun'     => array( 'default' => '일요일', 'label' => '오시는 길 · 요일 라벨 (일요일)', 'type' => 'text' ),
 				'loc_day_closed'  => array( 'default' => '휴진', 'label' => '오시는 길 · 휴진 표시', 'type' => 'text' ),
 				'loc_map_fallback' => array( 'default' => '🗺️ 지도 이미지 열기 →', 'label' => '오시는 길 · 지도 대체 라벨', 'type' => 'text' ),
 			),

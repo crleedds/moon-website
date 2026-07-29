@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.11' );
+define( 'MOONDENTAL_VERSION', '3.44.12' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -1298,7 +1298,7 @@ function moondental_get_info( $key = '' ) {
 		'hours_thu'    => '목요일 9:00 – 18:30',
 		'hours_sat'    => '토요일 09:00 – 14:00',
 		'hours_lunch'  => '',
-		'hours_off'    => '일요일·공휴일 휴진',
+		'hours_off'    => '일요일 휴진',
 		'biz_no'       => '',
 		'med_inst_no'  => '34400117',
 		'rep'          => '문은수',

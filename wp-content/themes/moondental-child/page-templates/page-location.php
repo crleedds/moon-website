@@ -136,7 +136,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 						<span class="md-hours__time"><?php echo esc_html( $time_sat ); ?></span>
 					</li>
 					<li class="md-hours__off<?php echo $today_dow === 0 ? ' is-today' : ''; ?>">
-						<span class="md-hours__day"><?php echo esc_html( md_content( 'loc_day_sun', '일요일 · 공휴일' ) ); ?></span>
+						<span class="md-hours__day"><?php echo esc_html( md_content( 'loc_day_sun', '일요일' ) ); ?></span>
 						<span class="md-hours__time"><?php echo esc_html( md_content( 'loc_day_closed', '휴진' ) ); ?></span>
 					</li>
 				</ul>
@@ -144,7 +144,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 					<?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_hours_note', '평일 점심시간 없이 진료 · 야간진료 운영' ) : '평일 점심시간 없이 진료 · 야간진료 운영' ); ?>
 				</p>
 				<?php
-				$_hours_note = md_content( 'loc_hours_naver_note', '⚠️ 임시 휴진·공휴일 진료 여부는 네이버 플레이스에서 최종 확인해주세요 →' );
+				$_hours_note = md_content( 'loc_hours_naver_note', '🔔 공휴일 진료 및 휴진 등 변동 사항은 네이버에서 최종 확인해주세요' );
 				if ( $_hours_note ) :
 				?>
 					<p class="md-hours__note-naver"><?php echo esc_html( $_hours_note ); ?></p>

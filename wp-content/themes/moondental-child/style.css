@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.11
+Version:      3.44.12
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -6080,20 +6080,37 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
   display: flex;
   flex-direction: column;
 }
-/* v3.44.11 · 진료시간 카드가 네이버 플레이스 링크가 될 때 */
+/* v3.44.12 · 진료시간 카드가 네이버 플레이스 링크가 될 때 · 호버 시 전체 색상 변화 */
 a.md-hours.md-hours--link {
   color: inherit;
   text-decoration: none;
-  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease),
+              border-color 0.25s var(--ease), background 0.25s var(--ease), color 0.25s var(--ease);
   cursor: pointer;
 }
 a.md-hours.md-hours--link:hover,
 a.md-hours.md-hours--link:focus-visible {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-soft);
-  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--color-primary);
+  background: linear-gradient(180deg, var(--color-accent-light) 0%, var(--color-white) 100%);
 }
-/* 안내 문구 (진료시간 목록 아래) */
+/* 카드 내부 모든 텍스트 (제목·요일·시간·안내문구) 색 변화 */
+a.md-hours.md-hours--link:hover .md-hours__title,
+a.md-hours.md-hours--link:focus-visible .md-hours__title,
+a.md-hours.md-hours--link:hover .md-hours__day,
+a.md-hours.md-hours--link:focus-visible .md-hours__day,
+a.md-hours.md-hours--link:hover .md-hours__time,
+a.md-hours.md-hours--link:focus-visible .md-hours__time {
+  color: var(--color-primary);
+}
+a.md-hours.md-hours--link:hover .md-hours__note,
+a.md-hours.md-hours--link:focus-visible .md-hours__note,
+a.md-hours.md-hours--link:hover .md-hours__note-naver,
+a.md-hours.md-hours--link:focus-visible .md-hours__note-naver {
+  color: var(--color-primary);
+}
+/* 안내 문구 (진료시간 목록 아래) · 평상시 */
 .md-hours__note-naver {
   margin: 12px 0 0 !important;
   padding-top: 12px;
@@ -6102,29 +6119,35 @@ a.md-hours.md-hours--link:focus-visible {
   color: var(--color-text-mute);
   line-height: 1.5;
   text-align: center;
+  transition: color 0.25s var(--ease);
 }
-a.md-hours--link:hover .md-hours__note-naver,
-a.md-hours--link:focus-visible .md-hours__note-naver {
-  color: var(--color-primary);
+a.md-hours.md-hours--link:hover .md-hours__note-naver,
+a.md-hours.md-hours--link:focus-visible .md-hours__note-naver {
+  border-top-color: var(--color-primary-light);
 }
 
-/* v3.44.11 · footer 진료시간 컬럼 링크 */
+/* v3.44.12 · footer 진료시간 컬럼 링크 · 호버 시 전체 색 변화 */
 .md-footer__hours-link {
   display: block;
   color: inherit;
   text-decoration: none;
-  transition: opacity 0.2s var(--ease);
+  padding: 12px;
+  margin: -12px;
+  border-radius: var(--radius-lg);
+  transition: background 0.25s var(--ease), color 0.25s var(--ease);
   cursor: pointer;
 }
 a.md-footer__hours-link:hover,
 a.md-footer__hours-link:focus-visible {
-  opacity: 1;
+  background: rgba(255, 255, 255, 0.06);
+}
+a.md-footer__hours-link:hover *,
+a.md-footer__hours-link:focus-visible * {
+  color: #fff !important;
 }
 a.md-footer__hours-link:hover h4,
 a.md-footer__hours-link:focus-visible h4 {
   color: #fff;
-  text-decoration: underline;
-  text-underline-offset: 4px;
 }
 .md-footer__hours-note {
   margin: 12px 0 0 !important;
@@ -6133,10 +6156,11 @@ a.md-footer__hours-link:focus-visible h4 {
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.6);
   line-height: 1.5;
+  transition: color 0.25s var(--ease), border-top-color 0.25s var(--ease);
 }
 a.md-footer__hours-link:hover .md-footer__hours-note,
 a.md-footer__hours-link:focus-visible .md-footer__hours-note {
-  color: rgba(255, 255, 255, 0.85);
+  border-top-color: rgba(255, 255, 255, 0.35);
 }
 .md-hours::before {
   content: '';

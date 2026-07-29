@@ -144,7 +144,7 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 						<?php endif; ?>
 					</ul>
 					<?php
-					$hours_note = $mc( 'footer_hours_naver_note', '⚠️ 임시 휴진·공휴일 진료 여부는 네이버 플레이스에서 최종 확인해주세요 →' );
+					$hours_note = $mc( 'footer_hours_naver_note', '🔔 공휴일 진료 및 휴진 등 변동 사항은 네이버에서 최종 확인해주세요' );
 					if ( $hours_note ) :
 					?>
 						<p class="md-footer__hours-note"><?php echo esc_html( $hours_note ); ?></p>
