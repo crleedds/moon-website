@@ -123,7 +123,15 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				$hours_wrap_close = $hours_naver_url ? '</a>' : '</div>';
 				?>
 				<?php echo $hours_wrap_open; ?>
-					<h4><?php echo esc_html( $col_hours ); ?></h4>
+					<h4>
+						<span class="md-footer__hours-badge" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="12" r="9"/>
+								<polyline points="12 7 12 12 15 14"/>
+							</svg>
+						</span>
+						<?php echo esc_html( $col_hours ); ?>
+					</h4>
 					<ul>
 						<?php
 						$hour_rows = array(
@@ -152,7 +160,17 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				<?php echo $hours_wrap_close; ?>
 			</div>
 
-			<?php /* v3.44.13 · 주차 안내 컬럼 (진료시간 오른편) */ ?>
+			<?php
+			/* v3.44.13 · 주차 안내 컬럼 (진료시간 오른편)
+			 * v3.44.14 · 항목별 링크: 01 → 문치과병원 네이버지도 · 02 → 신부제5공영주차장 네이버지도 */
+			$park_1_url = $mc( 'footer_park_1_url', $info['naver_map_url'] ?? 'https://map.naver.com/p/entry/place/12772165' );
+			$park_2_url = $mc( 'footer_park_2_url', 'https://map.naver.com/p/search/%EC%8B%A0%EB%B6%80%EC%A0%9C5%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5' );
+
+			$park_1_title = $mc( 'footer_park_1_title', '본원 지하 기계식 주차장' );
+			$park_1_desc  = $mc( 'footer_park_1_desc',  '주차 후 데스크에 접수 → 무료 등록' );
+			$park_2_title = $mc( 'footer_park_2_title', 'SUV·대형차 — 신부 제5공영주차장 (동남구 먹거리1길 10)' );
+			$park_2_desc  = $mc( 'footer_park_2_desc',  '인근 신부 제5공영주차장 주차 후 데스크에 접수 → 무료 등록' );
+			?>
 			<div class="md-footer__col md-footer__col--parking">
 				<h4>
 					<span class="md-footer__park-badge">P</span>
@@ -160,18 +178,26 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				</h4>
 				<ul class="md-footer__park-list">
 					<li>
-						<span class="md-footer__park-num">01</span>
-						<div>
-							<strong><?php echo esc_html( $mc( 'footer_park_1_title', '본원 지하 기계식 주차장' ) ); ?></strong>
-							<span><?php echo esc_html( $mc( 'footer_park_1_desc', '주차 후 데스크에 접수 → 무료 등록' ) ); ?></span>
-						</div>
+						<a class="md-footer__park-item" href="<?php echo esc_url( $park_1_url ); ?>" target="_blank" rel="noopener"
+						   data-track="cta-footer-park1"
+						   aria-label="<?php echo esc_attr( $park_1_title . ' — 네이버 지도에서 위치 보기' ); ?>">
+							<span class="md-footer__park-num">01</span>
+							<div>
+								<strong><?php echo esc_html( $park_1_title ); ?></strong>
+								<span><?php echo esc_html( $park_1_desc ); ?></span>
+							</div>
+						</a>
 					</li>
 					<li>
-						<span class="md-footer__park-num">02</span>
-						<div>
-							<strong><?php echo esc_html( $mc( 'footer_park_2_title', 'SUV·대형차 — 신부 제5공영주차장 (동남구 먹거리1길 10)' ) ); ?></strong>
-							<span><?php echo esc_html( $mc( 'footer_park_2_desc', '인근 신부 제5공영주차장 주차 후 데스크에 접수 → 무료 등록' ) ); ?></span>
-						</div>
+						<a class="md-footer__park-item" href="<?php echo esc_url( $park_2_url ); ?>" target="_blank" rel="noopener"
+						   data-track="cta-footer-park2"
+						   aria-label="<?php echo esc_attr( $park_2_title . ' — 네이버 지도에서 위치 보기' ); ?>">
+							<span class="md-footer__park-num">02</span>
+							<div>
+								<strong><?php echo esc_html( $park_2_title ); ?></strong>
+								<span><?php echo esc_html( $park_2_desc ); ?></span>
+							</div>
+						</a>
 					</li>
 				</ul>
 			</div>

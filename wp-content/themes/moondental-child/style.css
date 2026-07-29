@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.13
+Version:      3.44.14
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -4122,7 +4122,8 @@ button.elementor-button {
 }
 
 /* v3.44.13 · 푸터 주차 안내 카드 */
-.md-footer__col--parking h4 {
+.md-footer__col--parking h4,
+.md-footer__col--hours h4 {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -4139,6 +4140,23 @@ button.elementor-button {
   font-size: 0.75rem;
   font-weight: 700;
   line-height: 1;
+  flex-shrink: 0;
+}
+/* v3.44.14 · 진료시간 시계 배지 · P 배지와 동일 규격 */
+.md-footer__hours-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: var(--color-primary);
+  color: #fff;
+  flex-shrink: 0;
+}
+.md-footer__hours-badge svg {
+  width: 14px;
+  height: 14px;
 }
 .md-footer__park-list {
   list-style: none;
@@ -4146,12 +4164,39 @@ button.elementor-button {
   margin: 0;
 }
 .md-footer__park-list li {
-  display: flex;
-  gap: 12px;
-  padding: 10px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 .md-footer__park-list li:last-child { border-bottom: none; }
+/* v3.44.14 · li 내부 링크 (전체 항목 클릭 가능) */
+.md-footer__park-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 8px;
+  margin: 0 -8px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.2s var(--ease), transform 0.2s var(--ease);
+  cursor: pointer;
+}
+.md-footer__park-item:hover,
+.md-footer__park-item:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateX(2px);
+}
+.md-footer__park-item:hover .md-footer__park-num,
+.md-footer__park-item:focus-visible .md-footer__park-num {
+  background: var(--color-primary);
+  color: #fff;
+}
+.md-footer__park-item:hover strong,
+.md-footer__park-item:focus-visible strong {
+  color: #fff;
+}
+.md-footer__park-item:hover span,
+.md-footer__park-item:focus-visible span {
+  color: rgba(255, 255, 255, 0.85);
+}
 .md-footer__park-num {
   flex: 0 0 32px;
   height: 32px;
@@ -4163,24 +4208,27 @@ button.elementor-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
 }
-.md-footer__park-list li > div {
+.md-footer__park-item > div {
   flex: 1;
   min-width: 0;
 }
-.md-footer__park-list li strong {
+.md-footer__park-item strong {
   display: block;
   font-size: 0.8125rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.92);
   margin-bottom: 3px;
   line-height: 1.4;
+  transition: color 0.2s var(--ease);
 }
-.md-footer__park-list li span {
+.md-footer__park-item span {
   display: block;
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.6);
   line-height: 1.5;
+  transition: color 0.2s var(--ease);
 }
 
 /* v3.44.10 · 정책 링크 라인 (법적 표시 위) */
