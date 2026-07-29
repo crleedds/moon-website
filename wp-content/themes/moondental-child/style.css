@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.12
+Version:      3.44.13
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -4106,14 +4106,81 @@ button.elementor-button {
 /* v3.28.5 · 3 컬럼 (브랜드 | 진료시간 | 이용안내) */
 .md-footer__grid {
   display: grid;
-  /* v3.44.10 · 이용안내 컬럼 하단으로 이동 · 브랜드 + 진료시간 2컬럼 */
-  grid-template-columns: 1.6fr 1fr;
-  gap: clamp(24px, 3vw, 48px);
+  /* v3.44.13 · 3컬럼 · 브랜드 + 진료시간 + 주차 */
+  grid-template-columns: 1.4fr 1fr 1.1fr;
+  gap: clamp(20px, 2.5vw, 40px);
   margin-bottom: 40px;
-  max-width: 1100px;
+  max-width: 1200px;
+}
+@media (max-width: 900px) {
+  .md-footer__grid { grid-template-columns: 1fr 1fr; }
+  .md-footer__col--parking { grid-column: 1 / -1; }
 }
 @media (max-width: 520px) {
   .md-footer__grid { grid-template-columns: 1fr; }
+  .md-footer__col--parking { grid-column: auto; }
+}
+
+/* v3.44.13 · 푸터 주차 안내 카드 */
+.md-footer__col--parking h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.md-footer__park-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.md-footer__park-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.md-footer__park-list li {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.md-footer__park-list li:last-child { border-bottom: none; }
+.md-footer__park-num {
+  flex: 0 0 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(216, 128, 98, 0.18);
+  color: var(--color-primary-light);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.md-footer__park-list li > div {
+  flex: 1;
+  min-width: 0;
+}
+.md-footer__park-list li strong {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 3px;
+  line-height: 1.4;
+}
+.md-footer__park-list li span {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
 }
 
 /* v3.44.10 · 정책 링크 라인 (법적 표시 위) */

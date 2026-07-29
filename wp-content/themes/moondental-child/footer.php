@@ -152,6 +152,30 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				<?php echo $hours_wrap_close; ?>
 			</div>
 
+			<?php /* v3.44.13 · 주차 안내 컬럼 (진료시간 오른편) */ ?>
+			<div class="md-footer__col md-footer__col--parking">
+				<h4>
+					<span class="md-footer__park-badge">P</span>
+					<?php echo esc_html( $mc( 'footer_park_title', '주차 안내' ) ); ?>
+				</h4>
+				<ul class="md-footer__park-list">
+					<li>
+						<span class="md-footer__park-num">01</span>
+						<div>
+							<strong><?php echo esc_html( $mc( 'footer_park_1_title', '본원 지하 기계식 주차장' ) ); ?></strong>
+							<span><?php echo esc_html( $mc( 'footer_park_1_desc', '주차 후 데스크에 접수 → 무료 등록' ) ); ?></span>
+						</div>
+					</li>
+					<li>
+						<span class="md-footer__park-num">02</span>
+						<div>
+							<strong><?php echo esc_html( $mc( 'footer_park_2_title', 'SUV·대형차 — 신부 제5공영주차장 (동남구 먹거리1길 10)' ) ); ?></strong>
+							<span><?php echo esc_html( $mc( 'footer_park_2_desc', '인근 신부 제5공영주차장 주차 후 데스크에 접수 → 무료 등록' ) ); ?></span>
+						</div>
+					</li>
+				</ul>
+			</div>
+
 			<?php
 			// v3.44.10 · 이용안내 정책 링크 수집만 · 표시는 아래 법적 표시 라인에서
 			$policy_col_items = array();

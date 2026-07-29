@@ -390,5 +390,12 @@ return array(
 	'footer_hours_aria'       => 'View latest hours on Naver Place',
 	'loc_day_sun'             => 'Sunday',
 
+	/* === Footer parking (v3.44.13) === */
+	'footer_park_title'  => 'Parking',
+	'footer_park_1_title'=> 'Onsite basement mechanical parking',
+	'footer_park_1_desc' => 'Park then register free at the front desk',
+	'footer_park_2_title'=> 'SUV / Large cars — Sinbu 5th Public Parking (Meokgeori 1-gil 10)',
+	'footer_park_2_desc' => 'Park at nearby Sinbu 5th Public Parking then register free at the front desk',
+
 	/* === CTA hint (진료시간 배너 하단) — 이미 있음 재확인 === */
 );
