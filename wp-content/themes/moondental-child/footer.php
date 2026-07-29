@@ -113,27 +113,43 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 
 			</div>
 
-			<div class="md-footer__col">
-				<h4><?php echo esc_html( $col_hours ); ?></h4>
-				<ul>
+			<div class="md-footer__col md-footer__col--hours">
+				<?php
+				// v3.44.11 · 진료시간 전체를 네이버 플레이스 링크로 감쌈
+				$hours_naver_url = $place_url ?: ( $info['naver_map_url'] ?? '' );
+				$hours_wrap_open  = $hours_naver_url
+					? '<a class="md-footer__hours-link" href="' . esc_url( $hours_naver_url ) . '" target="_blank" rel="noopener" data-track="cta-footer-hours" aria-label="' . esc_attr( $mc( 'footer_hours_aria', '네이버 플레이스에서 최신 진료시간 보기' ) ) . '">'
+					: '<div class="md-footer__hours-link">';
+				$hours_wrap_close = $hours_naver_url ? '</a>' : '</div>';
+				?>
+				<?php echo $hours_wrap_open; ?>
+					<h4><?php echo esc_html( $col_hours ); ?></h4>
+					<ul>
+						<?php
+						$hour_rows = array(
+							array( $mc( 'footer_hour_wd_label',    '평일' ),   $info['hours_wd']    ?? '' ),
+							array( $mc( 'footer_hour_thu_label',   '목요일' ), $info['hours_thu']   ?? '' ),
+							array( $mc( 'footer_hour_sat_label',   '토요일' ), $info['hours_sat']   ?? '' ),
+							array( $mc( 'footer_hour_lunch_label', '점심' ),   $info['hours_lunch'] ?? '' ),
+						);
+						foreach ( $hour_rows as $row ) :
+							list( $label, $value ) = $row;
+							if ( ! $value ) continue;
+							$value_clean = preg_replace( '/^' . preg_quote( $label, '/' ) . '\s*/u', '', $value );
+						?>
+							<li class="md-footer__hours"><strong><?php echo esc_html( $label ); ?></strong><span><?php echo esc_html( $value_clean ); ?></span></li>
+						<?php endforeach; ?>
+						<?php if ( $info['hours_off'] ) : ?>
+							<li class="md-footer__hours-off"><?php echo esc_html( $info['hours_off'] ); ?></li>
+						<?php endif; ?>
+					</ul>
 					<?php
-					$hour_rows = array(
-						array( $mc( 'footer_hour_wd_label',    '평일' ),   $info['hours_wd']    ?? '' ),
-						array( $mc( 'footer_hour_thu_label',   '목요일' ), $info['hours_thu']   ?? '' ),
-						array( $mc( 'footer_hour_sat_label',   '토요일' ), $info['hours_sat']   ?? '' ),
-						array( $mc( 'footer_hour_lunch_label', '점심' ),   $info['hours_lunch'] ?? '' ),
-					);
-					foreach ( $hour_rows as $row ) :
-						list( $label, $value ) = $row;
-						if ( ! $value ) continue;
-						$value_clean = preg_replace( '/^' . preg_quote( $label, '/' ) . '\s*/u', '', $value );
+					$hours_note = $mc( 'footer_hours_naver_note', '⚠️ 임시 휴진·공휴일 진료 여부는 네이버 플레이스에서 최종 확인해주세요 →' );
+					if ( $hours_note ) :
 					?>
-						<li class="md-footer__hours"><strong><?php echo esc_html( $label ); ?></strong><span><?php echo esc_html( $value_clean ); ?></span></li>
-					<?php endforeach; ?>
-					<?php if ( $info['hours_off'] ) : ?>
-						<li class="md-footer__hours-off"><?php echo esc_html( $info['hours_off'] ); ?></li>
+						<p class="md-footer__hours-note"><?php echo esc_html( $hours_note ); ?></p>
 					<?php endif; ?>
-				</ul>
+				<?php echo $hours_wrap_close; ?>
 			</div>
 
 			<?php

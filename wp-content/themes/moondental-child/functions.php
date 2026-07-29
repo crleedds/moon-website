@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.10' );
+define( 'MOONDENTAL_VERSION', '3.44.11' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -1310,7 +1310,7 @@ function moondental_get_info( $key = '' ) {
 		'youtube_url'  => 'https://www.youtube.com/@%EC%B2%9C%EC%95%88%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90',
 		'naver_place'  => 'https://booking.naver.com/booking/13/bizes/485314',
 		'naver_review_url' => '', // v3.30.6 · 리뷰 전용 URL (예: https://m.place.naver.com/place/{id}/review)
-		'naver_map_url'=> 'https://map.naver.com/p/search/%ED%95%9C%EC%95%84%EC%9D%98%EB%A3%8C%EC%9E%AC%EB%8B%A8%20%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90',
+		'naver_map_url'=> 'https://map.naver.com/p/entry/place/12772165', // v3.44.11 · 병원 네이버 플레이스 직접 링크
 		'google_map_url'=> 'https://maps.app.goo.gl/MNt59kcxeKL92nCU9',
 		'map_embed'    => '',
 	);

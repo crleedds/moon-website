@@ -136,7 +136,15 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 		<!-- 진료시간 + 주차 안내 (2-col) -->
 		<div class="md-info-pair md-flocation__pair">
 
-			<aside class="md-hours">
+			<?php
+			// v3.44.11 · 진료시간 카드 전체를 네이버 플레이스 링크로 감쌈
+			$hours_naver_url = $info['naver_map_url'] ?? '';
+			$_hours_open  = $hours_naver_url
+				? '<a class="md-hours md-hours--link" href="' . esc_url( $hours_naver_url ) . '" target="_blank" rel="noopener" data-track="cta-location-hours" aria-label="' . esc_attr( md_content( 'loc_hours_aria', '네이버 플레이스에서 최신 진료시간 확인하기' ) ) . '">'
+				: '<aside class="md-hours">';
+			$_hours_close = $hours_naver_url ? '</a>' : '</aside>';
+			?>
+			<?php echo $_hours_open; ?>
 				<header class="md-hours__head">
 					<span class="md-hours__badge"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_hours_badge', '🕐 진료시간' ) : '🕐 진료시간' ); ?></span>
 					<h3 class="md-hours__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_hours_title', '진료 가능 시간' ) : '진료 가능 시간' ); ?></h3>
@@ -159,7 +167,13 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 						<span class="md-hours__time"><?php echo esc_html( md_content( 'loc_day_closed', '휴진' ) ); ?></span>
 					</li>
 				</ul>
-			</aside>
+				<?php
+				$_hours_note = md_content( 'loc_hours_naver_note', '⚠️ 임시 휴진·공휴일 진료 여부는 네이버 플레이스에서 최종 확인해주세요 →' );
+				if ( $_hours_note ) :
+				?>
+					<p class="md-hours__note-naver"><?php echo esc_html( $_hours_note ); ?></p>
+				<?php endif; ?>
+			<?php echo $_hours_close; ?>
 
 			<aside class="md-park md-park--compact">
 				<?php

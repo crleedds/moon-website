@@ -383,5 +383,11 @@ return array(
 	/* === Language switcher label (FAB) === */
 	'lang_switcher_label' => 'Language',
 
+	/* === Hours · Naver Place link (v3.44.11) === */
+	'loc_hours_naver_note'    => '⚠️ For temporary closures and holiday hours, please verify on Naver Place →',
+	'loc_hours_aria'          => 'Check latest hours on Naver Place',
+	'footer_hours_naver_note' => '⚠️ For temporary closures and holiday hours, verify on Naver Place →',
+	'footer_hours_aria'       => 'View latest hours on Naver Place',
+
 	/* === CTA hint (진료시간 배너 하단) — 이미 있음 재확인 === */
 );
