@@ -137,10 +137,8 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			</div>
 
 			<?php
-			// v3.28.4 — 이용안내 컬럼 (정책 링크 + 대표자)
-			$policy_col_title = $mc( 'footer_col_policy_title', '이용안내' );
+			// v3.44.10 · 이용안내 정책 링크 수집만 · 표시는 아래 법적 표시 라인에서
 			$policy_col_items = array();
-
 			$policy_col_keys = array(
 				'footer_link_privacy' => '개인정보취급방침|/개인정보처리방침/',
 				'footer_link_terms'   => '이용약관|/이용약관/',
@@ -158,7 +156,6 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			}
 
 			$col_rep_raw = trim( (string) $mc( 'footer_legal_rep', '문은수 이사장' ) );
-			// 접두어 정리 후 fallback
 			foreach ( array( '대표자:', '대표자' ) as $p ) {
 				if ( stripos( $col_rep_raw, $p ) === 0 ) {
 					$col_rep_raw = ltrim( substr( $col_rep_raw, strlen( $p ) ), " :·" );
@@ -167,20 +164,6 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			}
 			if ( ! $col_rep_raw ) $col_rep_raw = '문은수 이사장';
 			?>
-			<div class="md-footer__col">
-				<h4><?php echo esc_html( $policy_col_title ); ?></h4>
-				<ul>
-					<?php foreach ( $policy_col_items as $p ) : ?>
-						<li class="md-footer__policy-item">
-							<?php if ( $p['url'] ) : ?>
-								<a href="<?php echo esc_url( $p['url'] ); ?>"><?php echo esc_html( $p['label'] ); ?></a>
-							<?php else : ?>
-								<span><?php echo esc_html( $p['label'] ); ?></span>
-							<?php endif; ?>
-						</li>
-					<?php endforeach; ?>
-				</ul>
-			</div>
 
 		</div>
 
@@ -213,8 +196,24 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			'{name}' => $mc( 'footer_name_token', '한아의료재단 문치과병원' ),
 		) );
 		?>
-		<?php if ( $legal_items || $copyright_text ) : ?>
+		<?php
+		// v3.44.10 · 정책 링크 (개인정보처리방침 · 이용약관 · 이메일무단수집거부) 를 법적 표시 라인에 통합
+		$policy_line_items = array();
+		foreach ( $policy_col_items as $p ) {
+			if ( $p['url'] ) {
+				$policy_line_items[] = '<a href="' . esc_url( $p['url'] ) . '">' . esc_html( $p['label'] ) . '</a>';
+			} else {
+				$policy_line_items[] = esc_html( $p['label'] );
+			}
+		}
+		?>
+		<?php if ( $policy_line_items || $legal_items || $copyright_text ) : ?>
 			<div class="md-footer__legal-line">
+				<?php if ( $policy_line_items ) : ?>
+					<p class="md-footer__policy-line">
+						<?php echo implode( ' <span class="md-footer__sep">|</span> ', $policy_line_items ); ?>
+					</p>
+				<?php endif; ?>
 				<p>
 					<?php if ( $legal_items ) : ?>
 						<?php echo implode( ' <span class="md-footer__sep">|</span> ', $legal_items ); ?>
