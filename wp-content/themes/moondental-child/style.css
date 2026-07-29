@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.19
+Version:      3.44.20
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -4276,9 +4276,9 @@ button.elementor-button {
 .md-footer__phone,
 .md-footer__email,
 .md-footer__addr {
-  margin: 0 0 12px !important;
-  font-size: 0.875rem;
-  line-height: 1.5;
+  margin: 0 0 14px !important;
+  font-size: 0.9375rem;
+  line-height: 1.55;
 }
 .md-footer__phone a,
 .md-footer__email a,
@@ -4291,7 +4291,7 @@ button.elementor-button {
   text-decoration: none;
   transition: color 0.2s var(--ease), transform 0.2s var(--ease);
 }
-.md-footer__phone a { font-weight: 600; font-size: 1.0625rem; letter-spacing: 0.01em; }
+.md-footer__phone a { font-weight: 600; font-size: 1.125rem; letter-spacing: 0.01em; }
 .md-footer__phone a:hover,
 .md-footer__email a:hover,
 .md-footer__addr a:hover { color: var(--color-primary-light); }
@@ -4337,7 +4337,7 @@ button.elementor-button {
 .md-footer__col--hours h4,
 .md-footer__col--parking h4 {
   color: #fff;
-  font-size: 0.9375rem;
+  font-size: 1.0625rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   margin: 0 0 18px;
@@ -4372,35 +4372,35 @@ button.elementor-button {
 }
 .md-footer__hours:last-of-type { border-bottom: none; }
 .md-footer__hours strong {
-  color: rgba(255, 255, 255, 0.88) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
   font-weight: 500 !important;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
 }
 .md-footer__hours span {
   color: var(--color-primary-light);
   font-weight: 600;
   font-family: var(--font-mono, ui-monospace, 'SF Mono', monospace);
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   letter-spacing: 0.02em;
 }
 .md-footer__hours-off {
-  padding: 10px 0 !important;
-  font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.55) !important;
-  font-weight: 400;
+  padding: 12px 0 !important;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.65) !important;
+  font-weight: 500;
   border-top: 1px dashed rgba(255, 255, 255, 0.08);
   margin-top: 4px;
 }
 /* 안내 문구 · 색·간격 리파인 */
 .md-footer__hours-note {
   margin: 16px 0 0 !important;
-  padding: 12px 14px !important;
+  padding: 14px 16px !important;
   background: rgba(216, 128, 98, 0.08);
   border-radius: 8px;
   border-top: none !important;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.72) !important;
-  line-height: 1.55;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.78) !important;
+  line-height: 1.6;
   text-align: left;
 }
 
@@ -4414,24 +4414,26 @@ button.elementor-button {
   border-radius: 10px;
 }
 .md-footer__park-num {
-  flex: 0 0 30px !important;
-  height: 30px !important;
+  flex: 0 0 34px !important;
+  height: 34px !important;
   background: rgba(216, 128, 98, 0.14) !important;
   color: var(--color-primary-light) !important;
-  font-size: 0.6875rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
   letter-spacing: 0.03em;
   border: 1px solid rgba(216, 128, 98, 0.22);
 }
 .md-footer__park-item strong {
-  font-size: 0.8125rem !important;
+  font-size: 0.9375rem !important;
   color: rgba(255, 255, 255, 0.95) !important;
   font-weight: 600 !important;
+  margin-bottom: 4px !important;
 }
 .md-footer__park-item span {
-  font-size: 0.7375rem !important;
-  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 0.8125rem !important;
+  color: rgba(255, 255, 255, 0.68) !important;
   margin-top: 2px;
+  line-height: 1.55;
 }
 .md-footer__park-list li {
   border-bottom: 1px dashed rgba(255, 255, 255, 0.08) !important;
@@ -4444,9 +4446,9 @@ button.elementor-button {
   border-top: 1px dashed rgba(255, 255, 255, 0.1) !important;
 }
 .md-footer__park-transit li {
-  font-size: 0.7375rem !important;
-  color: rgba(255, 255, 255, 0.72) !important;
-  padding: 4px 0 !important;
+  font-size: 0.8125rem !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+  padding: 5px 0 !important;
   line-height: 1.6;
 }
 
@@ -4475,14 +4477,14 @@ button.elementor-button {
 }
 .md-footer__legal-line p {
   margin: 0 0 6px;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.875rem;
   letter-spacing: 0.01em;
   line-height: 1.7;
 }
 .md-footer__legal-line small {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.8125rem;
   letter-spacing: 0.02em;
 }
 .md-footer__sep {
@@ -4490,8 +4492,8 @@ button.elementor-button {
   margin: 0 4px;
 }
 .md-footer__policy-line {
-  margin: 0 0 10px !important;
-  font-size: 0.8125rem;
+  margin: 0 0 12px !important;
+  font-size: 0.875rem;
 }
 .md-footer__policy-line a {
   color: rgba(255, 255, 255, 0.78);
