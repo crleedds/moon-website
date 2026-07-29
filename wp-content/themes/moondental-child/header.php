@@ -87,11 +87,7 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 								<span class="md-header__phone-num"><?php echo esc_html( $phone ); ?></span>
 							</a>
 						<?php endif; ?>
-						<?php if ( $hours_wd ) : ?>
-							<a class="md-header__hours" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>#hours" data-track="cta-header-hours" aria-label="<?php echo esc_attr( function_exists( 'md_content' ) ? md_content( 'aria_hours_location', '오시는 길과 진료시간 보기' ) : '오시는 길과 진료시간 보기' ); ?>" title="<?php echo esc_attr( function_exists( 'md_content' ) ? md_content( 'aria_hours_location', '오시는 길과 진료시간 보기' ) : '오시는 길과 진료시간 보기' ); ?>">
-								<?php echo esc_html( $hours_wd ); ?>
-							</a>
-						<?php endif; ?>
+						<?php /* v3.44.16 · 헤더 우측 오늘 진료시간 버튼 제거 (사용자 요청) */ ?>
 					</div>
 
 					<?php
