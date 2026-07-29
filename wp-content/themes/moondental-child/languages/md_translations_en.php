@@ -435,19 +435,8 @@ return array(
 	'res_faq_eyebrow'      => 'FAQ',
 	'res_faq_lead'         => 'Answers to the most common booking questions.',
 
-	/* === Reservation FAQ items (v3.44.22) === */
-	'res_faq_q1' => 'Can I book same-day appointments?',
-	'res_faq_a1' => 'Yes, same-day booking is available. However, wait times may occur based on schedule — we recommend calling or messaging via KakaoTalk first to confirm availability.',
-	'res_faq_q2' => 'How do I change or cancel my booking?',
-	'res_faq_a2' => 'Naver Booking can be changed or cancelled directly on the booking page. Otherwise, please contact us by phone or KakaoTalk. Changes are accepted up to the day before your appointment.',
-	'res_faq_q3' => 'What do I need to bring for my first visit?',
-	'res_faq_a3' => 'Just yourself and your ID. If you have recent X-rays or dental records, bringing them helps our review — but it is not required.',
-	'res_faq_q4' => 'Can I still receive treatment with systemic conditions (hypertension, diabetes, heart disease)?',
-	'res_faq_a4' => 'Yes, safely. We have blood pressure, blood sugar, ECG, and oxygen saturation monitors on hand. Please tell us about any medications (blood thinners, osteoporosis meds, etc.) in advance for safe treatment.',
-	'res_faq_q5' => 'Can I know the cost in advance?',
-	'res_faq_a5' => 'Non-covered treatments (implant, orthodontics, aesthetic) are provided as a written estimate after precise diagnosis, including per-option cost and duration. No additional cost after starting.',
-	'res_faq_q6' => 'Is it OK to come only after checking the self-diagnosis result?',
-	'res_faq_a6' => 'Yes. The self-diagnosis is a reference — we will conduct a full examination and consultation regardless. It just helps us understand your concerns faster.',
+	/* === Reservation FAQ items (v3.44.23 · 전체 문자열 번역) === */
+	'res_faq_items' => "Can I book same-day appointments? | Yes, same-day booking is available. However, wait times may occur based on schedule — we recommend calling first to confirm availability.\nHow do I change or cancel my booking? | Naver Booking can be changed or cancelled directly on the booking page. Otherwise, please contact us by phone or KakaoTalk. Changes are accepted up to the day before your appointment.\nWhat do I need to bring for my first visit? | Please bring your ID (or health insurance card). If you have any medications, please share that information — it helps with treatment. Recent X-ray files from other clinics (USB / email) can shorten diagnosis time.\nCan I still receive treatment with systemic conditions (hypertension, diabetes, heart disease)? | Yes, safely. Moon Dental Hospital has blood pressure, blood sugar, ECG, and oxygen saturation monitors on hand. We check any medications (blood thinners, osteoporosis meds, etc.) in advance for safe treatment.\nCan I know the cost in advance? | Non-covered treatments (implant, orthodontics, aesthetic) are estimated based on your oral condition (CT / X-ray). Per-option cost and duration are provided at the first consultation, with full time to review before starting.\nIs it OK to come only after checking the self-diagnosis result? | The self-diagnosis is helpful as a reference. However, an accurate diagnosis and treatment plan requires an in-person examination (visual · X-ray · oral check). Showing your self-diagnosis result speeds up the consultation.",
 
 	/* === Footer hours values (v3.44.22 · md_content routed) === */
 	'info_hours_wd'    => 'Weekdays 09:00 – 20:30',

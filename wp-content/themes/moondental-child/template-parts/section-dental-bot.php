@@ -195,8 +195,23 @@ $aside_call = str_replace( '{phone}', $info['phone'], $aside_call_tpl );
 				<div class="md-bot__intro-chips" aria-label="<?php echo esc_attr( md_content( 'bot_intro_chips_aria', '커버하는 진료 영역' ) ); ?>">
 					<span class="md-bot__intro-chips-label"><?php echo esc_html( md_content( 'bot_intro_chips_label', '커버 진료영역' ) ); ?></span>
 					<ul class="md-bot__intro-chip-list">
-						<?php foreach ( array_slice( $depts, 0, 8 ) as $d ) : ?>
-							<li class="md-bot__intro-chip"><?php echo esc_html( $d['name'] ); ?></li>
+						<?php
+						/* v3.44.23 · chip 이름 · 슬러그 기반 번역 지원 · bot_chip_{slug} */
+						$_chip_slug_map = array(
+							'자연치아-살리기' => 'preserve',
+							'임플란트-센터'   => 'implant',
+							'투명교정-센터'   => 'ortho',
+							'턱관절-클리닉'   => 'tmj',
+							'사랑니-발치'     => 'wisdom',
+							'심미치료'        => 'aesthetic',
+							'일반-검진'       => 'checkup',
+							'예방클리닉'      => 'prevention',
+						);
+						foreach ( array_slice( $depts, 0, 8, true ) as $slug => $d ) :
+							$_chip_key = 'bot_chip_' . ( $_chip_slug_map[ $slug ] ?? md5( $slug ) );
+							$_chip_label = md_content( $_chip_key, $d['name'] );
+						?>
+							<li class="md-bot__intro-chip"><?php echo esc_html( $_chip_label ); ?></li>
 						<?php endforeach; ?>
 					</ul>
 				</div>
