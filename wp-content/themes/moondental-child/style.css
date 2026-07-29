@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.18
+Version:      3.44.19
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -4243,6 +4243,268 @@ button.elementor-button {
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.7;
   padding: 3px 0;
+}
+
+/* =============================================================
+   v3.44.19 · Footer 디자인 세련 · 콘텐츠 그대로 · 시각적 개선
+   ============================================================= */
+.md-footer {
+  background: linear-gradient(180deg, #2A211A 0%, #221A14 100%);
+  padding: clamp(56px, 6.5vw, 96px) 0 24px;
+}
+/* 미묘한 상단 그라디언트 라인 (문치과 로고 톤) */
+.md-footer::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg,
+    var(--color-primary) 0%,
+    var(--color-accent) 50%,
+    var(--color-primary) 100%);
+  opacity: 0.7;
+  margin: 0 auto clamp(40px, 5vw, 64px);
+  max-width: 120px;
+  border-radius: 2px;
+}
+
+/* --- 브랜드 컬럼 리파인 --- */
+.md-footer__brand {
+  padding-right: 20px;
+}
+.md-footer__brand-img { max-height: 60px; margin-bottom: 20px; }
+
+.md-footer__phone,
+.md-footer__email,
+.md-footer__addr {
+  margin: 0 0 12px !important;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.md-footer__phone a,
+.md-footer__email a,
+.md-footer__addr a,
+.md-footer__addr {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  transition: color 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.md-footer__phone a { font-weight: 600; font-size: 1.0625rem; letter-spacing: 0.01em; }
+.md-footer__phone a:hover,
+.md-footer__email a:hover,
+.md-footer__addr a:hover { color: var(--color-primary-light); }
+
+/* 브랜드 SNS 아이콘 · 간격 & 크기 */
+.md-footer__social {
+  display: flex;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+}
+.md-fsoc {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.md-fsoc svg { width: 100%; height: 100%; display: block; }
+.md-fsoc:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* --- 컬럼 카드 스타일 · 진료시간 & 주차 --- */
+.md-footer__col--hours,
+.md-footer__col--parking {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 24px 22px;
+  transition: background 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.md-footer__col--hours:hover,
+.md-footer__col--parking:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.09);
+}
+
+/* h4 헤더 리파인 · 더 크고 뚜렷 */
+.md-footer__col--hours h4,
+.md-footer__col--parking h4 {
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 0 0 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 배지 그림자로 살짝 뜨는 느낌 */
+.md-footer__hours-badge,
+.md-footer__park-badge {
+  box-shadow: 0 2px 8px rgba(216, 128, 98, 0.35);
+}
+
+/* --- 진료시간 리스트 시각 계층 --- */
+.md-footer__hours-link {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: none !important;
+  border-radius: 0 !important;
+}
+.md-footer__hours-link:hover,
+.md-footer__hours-link:focus-visible {
+  background: none !important;
+}
+.md-footer__col--hours ul { padding: 0; margin: 0; }
+.md-footer__hours {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center;
+  padding: 10px 0 !important;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+.md-footer__hours:last-of-type { border-bottom: none; }
+.md-footer__hours strong {
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem;
+}
+.md-footer__hours span {
+  color: var(--color-primary-light);
+  font-weight: 600;
+  font-family: var(--font-mono, ui-monospace, 'SF Mono', monospace);
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+}
+.md-footer__hours-off {
+  padding: 10px 0 !important;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.55) !important;
+  font-weight: 400;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  margin-top: 4px;
+}
+/* 안내 문구 · 색·간격 리파인 */
+.md-footer__hours-note {
+  margin: 16px 0 0 !important;
+  padding: 12px 14px !important;
+  background: rgba(216, 128, 98, 0.08);
+  border-radius: 8px;
+  border-top: none !important;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.72) !important;
+  line-height: 1.55;
+  text-align: left;
+}
+
+/* --- 주차 리스트 리파인 --- */
+.md-footer__col--parking ul.md-footer__park-list {
+  margin: 0 -8px;
+}
+.md-footer__park-item {
+  padding: 12px 12px !important;
+  gap: 14px !important;
+  border-radius: 10px;
+}
+.md-footer__park-num {
+  flex: 0 0 30px !important;
+  height: 30px !important;
+  background: rgba(216, 128, 98, 0.14) !important;
+  color: var(--color-primary-light) !important;
+  font-size: 0.6875rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.03em;
+  border: 1px solid rgba(216, 128, 98, 0.22);
+}
+.md-footer__park-item strong {
+  font-size: 0.8125rem !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 600 !important;
+}
+.md-footer__park-item span {
+  font-size: 0.7375rem !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  margin-top: 2px;
+}
+.md-footer__park-list li {
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08) !important;
+}
+.md-footer__park-list li:last-child { border-bottom: none !important; }
+/* 대중교통 안내 · 상단 여백 확대 */
+.md-footer__park-transit {
+  margin: 16px 0 0 !important;
+  padding: 14px 4px 0 !important;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1) !important;
+}
+.md-footer__park-transit li {
+  font-size: 0.7375rem !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  padding: 4px 0 !important;
+  line-height: 1.6;
+}
+
+/* --- 3컬럼 그리드 · 간격 확대 --- */
+.md-footer__grid {
+  grid-template-columns: 1.3fr 1fr 1.15fr;
+  gap: clamp(24px, 3vw, 44px);
+  margin-bottom: clamp(36px, 4.5vw, 56px);
+  max-width: 1240px;
+}
+@media (max-width: 900px) {
+  .md-footer__col--hours,
+  .md-footer__col--parking { padding: 20px 18px; }
+}
+@media (max-width: 520px) {
+  .md-footer__col--hours,
+  .md-footer__col--parking { padding: 18px 16px; }
+  .md-footer__brand { padding-right: 0; }
+}
+
+/* --- 법적 표시 라인 · 상단 여백 확대 & 시각 계층 --- */
+.md-footer__legal-line {
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+.md-footer__legal-line p {
+  margin: 0 0 6px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+  line-height: 1.7;
+}
+.md-footer__legal-line small {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+.md-footer__sep {
+  color: rgba(255, 255, 255, 0.25);
+  margin: 0 4px;
+}
+.md-footer__policy-line {
+  margin: 0 0 10px !important;
+  font-size: 0.8125rem;
+}
+.md-footer__policy-line a {
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
+}
+.md-footer__policy-line a:hover,
+.md-footer__policy-line a:focus-visible {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  text-decoration: none;
 }
 
 /* v3.44.10 · 정책 링크 라인 (법적 표시 위) */
