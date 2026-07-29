@@ -200,6 +200,21 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 						</a>
 					</li>
 				</ul>
+				<?php
+				/* v3.44.18 · 대중교통 안내 · 주차 리스트 하단 */
+				$park_walk_txt  = $mc( 'footer_park_walk',  '🚌 천안종합·고속버스터미널에서 도보 약 5분' );
+				$park_train_txt = $mc( 'footer_park_train', '🚆 천안역에서 버스로 약 10분' );
+				if ( $park_walk_txt || $park_train_txt ) :
+				?>
+					<ul class="md-footer__park-transit" aria-label="<?php echo esc_attr( $mc( 'footer_park_transit_aria', '대중교통 안내' ) ); ?>">
+						<?php if ( $park_walk_txt ) : ?>
+							<li><?php echo esc_html( $park_walk_txt ); ?></li>
+						<?php endif; ?>
+						<?php if ( $park_train_txt ) : ?>
+							<li><?php echo esc_html( $park_train_txt ); ?></li>
+						<?php endif; ?>
+					</ul>
+				<?php endif; ?>
 			</div>
 
 			<?php

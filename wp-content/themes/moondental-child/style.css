@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.17
+Version:      3.44.18
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -4229,6 +4229,20 @@ button.elementor-button {
   color: rgba(255, 255, 255, 0.6);
   line-height: 1.5;
   transition: color 0.2s var(--ease);
+}
+
+/* v3.44.18 · 대중교통 안내 · 주차 리스트 하단 */
+.md-footer__park-transit {
+  list-style: none;
+  padding: 12px 0 0;
+  margin: 12px 0 0;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+}
+.md-footer__park-transit li {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.7;
+  padding: 3px 0;
 }
 
 /* v3.44.10 · 정책 링크 라인 (법적 표시 위) */
