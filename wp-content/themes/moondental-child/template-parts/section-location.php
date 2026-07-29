@@ -147,7 +147,7 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 			<?php echo $_hours_open; ?>
 				<header class="md-hours__head">
 					<span class="md-hours__badge"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_hours_badge', '🕐 진료시간' ) : '🕐 진료시간' ); ?></span>
-					<h3 class="md-hours__title"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_hours_title', '진료 가능 시간' ) : '진료 가능 시간' ); ?></h3>
+					<?php /* v3.44.15 · '진료 가능 시간' 제목 제거 (사용자 요청) */ ?>
 				</header>
 				<ul class="md-hours__list">
 					<li<?php echo in_array( $today_dow, array(1,2,3,5), true ) ? ' class="is-today"' : ''; ?>>
