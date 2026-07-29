@@ -78,14 +78,18 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 					</p>
 				<?php endif; ?>
 
-				<?php if ( ! empty( $info['address'] ) ) : ?>
+				<?php
+				// v3.44.22 · 주소 번역 지원 · info_address 키 우선
+				$footer_addr = $mc( 'info_address', $info['address'] ?? '' );
+				if ( ! $footer_addr ) $footer_addr = $info['address'] ?? '';
+				if ( $footer_addr ) : ?>
 					<p class="md-footer__addr">
 						<?php if ( $place_url ) : ?>
 							<a href="<?php echo esc_url( $place_url ); ?>" target="_blank" rel="noopener" data-track="cta-footer-address">
-								<?php echo esc_html( $info['address'] ); ?>
+								<?php echo esc_html( $footer_addr ); ?>
 							</a>
 						<?php else : ?>
-							<?php echo md_address_link( $info['address'] ); ?>
+							<?php echo md_address_link( $footer_addr ); ?>
 						<?php endif; ?>
 					</p>
 				<?php endif; ?>
@@ -134,11 +138,12 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 					</h4>
 					<ul>
 						<?php
+						// v3.44.22 · 값도 md_content 로 라우팅 (다국어 지원)
 						$hour_rows = array(
-							array( $mc( 'footer_hour_wd_label',    '평일' ),   $info['hours_wd']    ?? '' ),
-							array( $mc( 'footer_hour_thu_label',   '목요일' ), $info['hours_thu']   ?? '' ),
-							array( $mc( 'footer_hour_sat_label',   '토요일' ), $info['hours_sat']   ?? '' ),
-							array( $mc( 'footer_hour_lunch_label', '점심' ),   $info['hours_lunch'] ?? '' ),
+							array( $mc( 'footer_hour_wd_label',    '평일' ),   $mc( 'info_hours_wd',  $info['hours_wd']  ?? '' ) ),
+							array( $mc( 'footer_hour_thu_label',   '목요일' ), $mc( 'info_hours_thu', $info['hours_thu'] ?? '' ) ),
+							array( $mc( 'footer_hour_sat_label',   '토요일' ), $mc( 'info_hours_sat', $info['hours_sat'] ?? '' ) ),
+							array( $mc( 'footer_hour_lunch_label', '점심' ),   $mc( 'info_hours_lunch', $info['hours_lunch'] ?? '' ) ),
 						);
 						foreach ( $hour_rows as $row ) :
 							list( $label, $value ) = $row;
@@ -147,8 +152,10 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 						?>
 							<li class="md-footer__hours"><strong><?php echo esc_html( $label ); ?></strong><span><?php echo esc_html( $value_clean ); ?></span></li>
 						<?php endforeach; ?>
-						<?php if ( $info['hours_off'] ) : ?>
-							<li class="md-footer__hours-off"><?php echo esc_html( $info['hours_off'] ); ?></li>
+						<?php
+						$_hours_off = $mc( 'info_hours_off', $info['hours_off'] ?? '' );
+						if ( $_hours_off ) : ?>
+							<li class="md-footer__hours-off"><?php echo esc_html( $_hours_off ); ?></li>
 						<?php endif; ?>
 					</ul>
 					<?php

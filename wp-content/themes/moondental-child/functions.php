@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.21' );
+define( 'MOONDENTAL_VERSION', '3.44.22' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -3417,6 +3417,40 @@ function moondental_primary_menu_data() {
  * 주 메뉴 HTML 렌더 — UL.md-nav 형태로 출력 (현재 페이지 강조 포함).
  *  v3.34.3 · 상위 메뉴 클릭 비활성 항목에 md-nav-nolink 클래스 자동 추가.
  */
+/**
+ * v3.44.22 · 메뉴 라벨 → 번역키 매핑 (다국어 지원)
+ * 한글 라벨을 안정적인 키로 매핑 · md_content 를 통해 파일 번역·API 번역·Customizer override 순서로 조회
+ */
+function moondental_menu_label_key( $label ) {
+	static $map = array(
+		'임플란트센터'         => 'menu_impl',
+		'교정센터'             => 'menu_ortho',
+		'스마일디자인센터'     => 'menu_smile',
+		'자연치아살리기'       => 'menu_preserve',
+		'자연치아 살리기'      => 'menu_preserve',
+		'진료과'               => 'menu_dept',
+		'의료진'               => 'menu_doctors',
+		'비용안내'             => 'menu_pricing',
+		'병원안내'             => 'menu_about',
+		'병원 안내'            => 'menu_about',
+		'충치치료'             => 'menu_cavity',
+		'신경치료'             => 'menu_endo',
+		'잇몸치료'             => 'menu_perio',
+		'턱관절클리닉'         => 'menu_jaw',
+		'이갈이·이악물기'      => 'menu_bruxism',
+		'사랑니'               => 'menu_wisdom',
+		'소아치과'             => 'menu_pediatric',
+		'예방클리닉'           => 'menu_prevention',
+		'오시는길·진료시간'    => 'menu_directions',
+		'30여년의 역사'        => 'menu_history',
+		'기술력/시설'          => 'menu_facility',
+		'병원소식'             => 'menu_news',
+		'치과사전'             => 'menu_encyclopedia',
+		'상시채용'             => 'menu_recruit',
+	);
+	return $map[ $label ] ?? null;
+}
+
 function moondental_render_primary_menu() {
 	$items = moondental_primary_menu_data();
 	$current = trailingslashit( home_url( add_query_arg( null, null ) ) );
@@ -3437,19 +3471,24 @@ function moondental_render_primary_menu() {
 		if ( untrailingslashit( $item['url'] ) === untrailingslashit( $current ) ) {
 			$classes[] = 'current-menu-item';
 		}
+		// v3.44.22 · 라벨 번역 (파일 → API → 원본)
+		$_key   = function_exists( 'moondental_menu_label_key' ) ? moondental_menu_label_key( $item['label'] ) : null;
+		$_label = ( $_key && function_exists( 'md_content' ) ) ? md_content( $_key, $item['label'] ) : $item['label'];
 		printf(
 			'<li class="%s"><a href="%s">%s</a>',
 			esc_attr( implode( ' ', $classes ) ),
 			esc_url( $item['url'] ),
-			esc_html( $item['label'] )
+			esc_html( $_label )
 		);
 		if ( $has_kids ) {
 			echo '<ul class="sub-menu">';
 			foreach ( $item['children'] as $kid ) {
+				$_kkey   = function_exists( 'moondental_menu_label_key' ) ? moondental_menu_label_key( $kid['label'] ) : null;
+				$_klabel = ( $_kkey && function_exists( 'md_content' ) ) ? md_content( $_kkey, $kid['label'] ) : $kid['label'];
 				printf(
 					'<li class="menu-item"><a href="%s">%s</a></li>',
 					esc_url( $kid['url'] ),
-					esc_html( $kid['label'] )
+					esc_html( $_klabel )
 				);
 			}
 			echo '</ul>';
