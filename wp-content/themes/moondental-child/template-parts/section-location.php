@@ -133,7 +133,27 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 			</a>
 		</div>
 
-		<!-- 진료시간 + 주차 안내 (2-col) -->
+		<?php
+		/* v3.44.17 · 진료시간 + 주차 pair 는 · 오시는 길 페이지 · 상담예약 페이지에서만 노출.
+		 * 다른 페이지 (푸터 include 경로) 에서는 지도·주소·맵 버튼만 표시. */
+		$_show_hp_pair = false;
+		if ( is_page() ) {
+			$_pid   = get_queried_object_id();
+			$_tpl_s = get_page_template_slug( $_pid );
+			$_slug_s = urldecode( (string) get_post_field( 'post_name', $_pid ) );
+			if (
+				in_array( $_tpl_s, array(
+					'page-templates/page-location.php',
+					'page-templates/page-reservation.php',
+				), true )
+				|| in_array( $_slug_s, array( '오시는-길', '오시는길', '상담예약', 'reservation', 'location' ), true )
+			) {
+				$_show_hp_pair = true;
+			}
+		}
+		if ( $_show_hp_pair ) :
+		?>
+		<!-- 진료시간 + 주차 안내 (2-col) · 오시는 길·상담예약 페이지 한정 -->
 		<div class="md-info-pair md-flocation__pair">
 
 			<?php
@@ -217,5 +237,6 @@ $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '�
 			</aside>
 
 		</div>
+		<?php endif; /* $_show_hp_pair */ ?>
 	</div>
 </section>
