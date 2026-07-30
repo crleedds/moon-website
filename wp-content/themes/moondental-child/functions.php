@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.29' );
+define( 'MOONDENTAL_VERSION', '3.44.30' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -3432,6 +3432,50 @@ function moondental_primary_menu_data() {
  * 주 메뉴 HTML 렌더 — UL.md-nav 형태로 출력 (현재 페이지 강조 포함).
  *  v3.34.3 · 상위 메뉴 클릭 비활성 항목에 md-nav-nolink 클래스 자동 추가.
  */
+/**
+ * v3.44.30 · 서비스 페이지 히어로 이미지·스탯 매핑
+ * 슬러그별 대표 이미지 + 임팩트 스탯 3개 반환. 페이지 콘텐츠와 무관하게 항상 노출.
+ */
+function moondental_service_visual( $slug ) {
+	$uri = defined( 'MOONDENTAL_URI' ) ? MOONDENTAL_URI : '';
+	$map = array(
+		'임플란트-센터' => array(
+			'image' => $uri . '/assets/images/services/implant-navigation.jpg',
+			'alt'   => 'CBCT 3D 시뮬레이션 기반 네비게이션 임플란트',
+			'stats' => array(
+				array( 'value' => '30+', 'unit' => '년', 'label' => '임플란트 임상 경험' ),
+				array( 'value' => '±0.5', 'unit' => 'mm', 'label' => '가이드 수술 정확도' ),
+				array( 'value' => '10F',  'unit' => '',   'label' => '임플란트 전용층' ),
+			),
+			'headline' => '천안·아산 임플란트, 30여년 임상으로 지키는 안정감',
+			'sub'      => 'CBCT 3D 정밀 진단 · 네비게이션 가이드 수술 · 발치부터 평생 관리까지 한 곳에서',
+		),
+		'투명교정-센터' => array(
+			'image' => $uri . '/assets/images/services/suresmile-hero.jpg',
+			'alt'   => 'SureSmile 투명교정 · Dentsply Sirona',
+			'stats' => array(
+				array( 'value' => '중부권', 'unit' => '', 'label' => '슈어스마일 센터병원' ),
+				array( 'value' => '0.1',    'unit' => 'mm', 'label' => '치료 계획 정밀도' ),
+				array( 'value' => '11F',    'unit' => '',   'label' => '교정 전용층' ),
+			),
+			'headline' => '슈어스마일 투명교정, 미국 FDA 승인 · 중부권 센터병원',
+			'sub'      => '3D 시뮬레이션으로 최종 치열 미리 확인 · 프라임스캐너 정밀 스캔 · 재교정 걱정 없이',
+		),
+		'자연치아-살리기' => array(
+			'image' => '',
+			'alt'   => '',
+			'stats' => array(
+				array( 'value' => '보존', 'unit' => '', 'label' => '전문의 정밀 진단' ),
+				array( 'value' => '30+',  'unit' => '년', 'label' => '자연치아 살리기 경험' ),
+				array( 'value' => '재근관', 'unit' => '', 'label' => '치료 가능' ),
+			),
+			'headline' => '발치 권유받으셨나요? 한 번 더 살펴보세요',
+			'sub'      => '보존과·치주과 전문의가 신경치료·재근관·치주치료로 자연치아를 살립니다',
+		),
+	);
+	return $map[ $slug ] ?? null;
+}
+
 /**
  * v3.44.22 · 메뉴 라벨 → 번역키 매핑 (다국어 지원)
  * 한글 라벨을 안정적인 키로 매핑 · md_content 를 통해 파일 번역·API 번역·Customizer override 순서로 조회

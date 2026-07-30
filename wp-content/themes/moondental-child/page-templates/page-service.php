@@ -40,6 +40,39 @@ foreach ( $services as $svc ) {
 	</div>
 </section>
 
+<?php
+/* v3.44.30 · 강제 히어로 이미지 + 임팩트 스탯 (페이지 콘텐츠와 무관하게 항상 노출) */
+$_visual = function_exists( 'moondental_service_visual' ) ? moondental_service_visual( $slug ) : null;
+if ( $_visual ) :
+?>
+<section class="md-svc-hero" aria-label="<?php echo esc_attr( $_visual['headline'] ); ?>">
+	<div class="md-container">
+		<?php if ( ! empty( $_visual['image'] ) ) : ?>
+			<figure class="md-svc-hero__figure">
+				<img src="<?php echo esc_url( $_visual['image'] ); ?>" alt="<?php echo esc_attr( $_visual['alt'] ); ?>" loading="eager">
+			</figure>
+		<?php endif; ?>
+		<div class="md-svc-hero__body">
+			<h2 class="md-svc-hero__headline"><?php echo esc_html( $_visual['headline'] ); ?></h2>
+			<p class="md-svc-hero__sub"><?php echo esc_html( $_visual['sub'] ); ?></p>
+			<?php if ( ! empty( $_visual['stats'] ) ) : ?>
+				<ul class="md-svc-hero__stats" aria-label="핵심 지표">
+					<?php foreach ( $_visual['stats'] as $s ) : ?>
+						<li>
+							<span class="md-svc-hero__stat-value"><?php echo esc_html( $s['value'] ); ?></span>
+							<?php if ( ! empty( $s['unit'] ) ) : ?>
+								<span class="md-svc-hero__stat-unit"><?php echo esc_html( $s['unit'] ); ?></span>
+							<?php endif; ?>
+							<span class="md-svc-hero__stat-label"><?php echo esc_html( $s['label'] ); ?></span>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</div>
+	</div>
+</section>
+<?php endif; ?>
+
 <section class="md-section">
 	<div class="md-container md-container--narrow">
 		<article class="md-page-content">

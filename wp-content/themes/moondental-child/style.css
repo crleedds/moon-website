@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.29
+Version:      3.44.30
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -11738,6 +11738,139 @@ a.md-team-card:hover .md-team-card__photo img,
     margin-bottom: 12pt;
   }
 }
+
+/* =============================================================
+   v3.44.30 · 서비스 페이지 강제 히어로 (이미지 + 임팩트 스탯)
+   모든 서비스 페이지 상단 · 페이지 본문과 무관하게 항상 표시
+   ============================================================= */
+.md-svc-hero {
+  padding: clamp(28px, 4vw, 56px) 0;
+  background: linear-gradient(180deg,
+    var(--color-surface, #FDF4E4) 0%,
+    var(--color-bg, #FFF6E8) 100%);
+}
+.md-svc-hero .md-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(24px, 4vw, 56px);
+  align-items: center;
+}
+.md-svc-hero__figure {
+  margin: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.15);
+  aspect-ratio: 4 / 3;
+  background: #000;
+}
+.md-svc-hero__figure img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.md-svc-hero__body { min-width: 0; }
+.md-svc-hero__headline {
+  margin: 0 0 12px;
+  font-size: clamp(1.5rem, 3vw, 2.125rem);
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+.md-svc-hero__sub {
+  margin: 0 0 28px;
+  font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
+  line-height: 1.65;
+  color: var(--color-text-sub);
+}
+.md-svc-hero__stats {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.md-svc-hero__stats li {
+  padding: 18px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(216, 128, 98, 0.15);
+  text-align: center;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.md-svc-hero__stats li:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(216, 128, 98, 0.15);
+}
+.md-svc-hero__stat-value {
+  display: block;
+  font-size: clamp(1.375rem, 2.6vw, 1.875rem);
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.md-svc-hero__stat-unit {
+  font-size: 0.75em;
+  font-weight: 600;
+  margin-left: 2px;
+  opacity: 0.75;
+}
+.md-svc-hero__stat-label {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-sub);
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+/* 모바일 · 세로 스택 + 텍스트 크기 조정 */
+@media (max-width: 860px) {
+  .md-svc-hero .md-container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .md-svc-hero__figure { aspect-ratio: 16 / 10; }
+}
+@media (max-width: 520px) {
+  .md-svc-hero { padding: 20px 0 32px; }
+  .md-svc-hero__figure { border-radius: 14px; }
+  .md-svc-hero__stats { gap: 8px; }
+  .md-svc-hero__stats li { padding: 14px 8px; }
+  .md-svc-hero__stat-label { font-size: 0.6875rem; }
+}
+
+/* 다크모드 대응 */
+@media (prefers-color-scheme: dark) {
+  .md-svc-hero {
+    background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      var(--color-bg) 100%);
+  }
+  .md-svc-hero__figure {
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55);
+  }
+  .md-svc-hero__stats li {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(244, 177, 149, 0.2);
+  }
+  .md-svc-hero__stat-value { color: var(--color-primary-light); }
+}
+:root[data-theme="dark"] .md-svc-hero {
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    var(--color-bg) 100%);
+}
+:root[data-theme="dark"] .md-svc-hero__stats li {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(244, 177, 149, 0.2);
+}
+:root[data-theme="dark"] .md-svc-hero__stat-value { color: var(--color-primary-light); }
+
 
 /* =============================================================
    v3.44.26 · 서비스 콘텐츠 이미지 (figure)
