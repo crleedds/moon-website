@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.39' );
+define( 'MOONDENTAL_VERSION', '3.44.40' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -3439,18 +3439,15 @@ function moondental_primary_menu_data() {
  *  v3.34.3 · 상위 메뉴 클릭 비활성 항목에 md-nav-nolink 클래스 자동 추가.
  */
 /**
- * v3.44.33 · 자체 파일 기반 페이지 캐시 · TTFB 10초 → 100ms
+ * v3.44.40 · DB 기반 페이지 캐시 (transient) · Cafe24 파일 시스템 이슈 회피
  *
- * 배경: 카페24 openresty + LiteSpeed Cache 플러그인 설치돼 있지만
- *       Cache-Control: no-cache 응답 · 실제 캐싱 안 됨.
- *       매 요청마다 WP 전체 실행 → TTFB 6~12초.
+ * 배경:
+ * - v3.44.33~39 파일 기반 캐시 · 파일이 저장되지만 매번 삭제됨
+ * - Cafe24 호스팅에서 wp-content 파일이 요청 사이에 사라지는 현상
+ * - Wordfence 스캔 또는 호스팅 자동 정리로 추정
  *
- * 해결: 프론트 페이지·비로그인·GET·200 응답만 정적 HTML로 저장 후 재사용.
- *       페이지 저장·글 게시·설정 변경 시 자동 무효화.
- *
- * 위치: wp-content/uploads/md-cache/ (URL 해시 기반)
- * TTL: 6시간 (자주 바뀌지 않는 콘텐츠)
- * 안전장치: admin·로그인·nonce·query string·POST·404 모두 캐시 skip
+ * 해결: wp_options (DB) 에 캐시 저장. DB는 절대 자동 삭제되지 않음.
+ * TTL: 6시간
  */
 function moondental_pagecache_key() {
 	$uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '/';
@@ -3461,17 +3458,6 @@ function moondental_pagecache_key() {
 	// 모바일·데스크탑 구분 (같은 URL이라도 다른 반응형 이미지)
 	$mobile = ( function_exists( 'wp_is_mobile' ) && wp_is_mobile() ) ? 'm' : 'd';
 	return md5( $uri . '|' . $lang . '|' . $mobile );
-}
-function moondental_pagecache_dir() {
-	// v3.44.39 · uploads 폴더 · git 동기화 대상 아님 (Moon Deploy가 안 지움)
-	$uploads = wp_upload_dir( null, false );
-	$dir = $uploads['basedir'] . '/md-cache';
-	if ( ! is_dir( $dir ) ) {
-		@mkdir( $dir, 0755, true );
-		@file_put_contents( $dir . '/index.html', '' );
-		@file_put_contents( $dir . '/.htaccess', "Order allow,deny\nAllow from all\n" );
-	}
-	return $dir;
 }
 function moondental_pagecache_skip() {
 	// 관리자·로그인·AJAX·REST·CRON 스킵
@@ -3497,32 +3483,16 @@ function moondental_pagecache_skip() {
 	return false;
 }
 
-/* 캐시 조회 · 있으면 즉시 서빙 · 없으면 다음 훅에서 저장 */
+/* 캐시 조회 · transient (DB) 사용 · v3.44.40 */
 function moondental_pagecache_serve() {
-	if ( moondental_pagecache_skip() ) {
-		echo "<!-- MD-Cache: SKIP (skip check triggered) -->\n";
-		return;
-	}
-	clearstatcache(); // v3.44.36 · Cafe24 opcache 이슈 회피
-	$dir = moondental_pagecache_dir();
-	$key = moondental_pagecache_key();
-	$file = $dir . '/' . $key . '.html';
-	$dir_files_count = is_dir( $dir ) ? count( glob( "$dir/*.html" ) ) : 0;
-	if ( ! file_exists( $file ) ) {
-		echo "<!-- MD-Cache: NO_FILE · dir=$dir · files_in_dir=$dir_files_count · looking_for=" . basename( $file ) . " -->\n";
-		return;
-	}
-	$ttl = 6 * HOUR_IN_SECONDS;
-	if ( ( time() - filemtime( $file ) ) > $ttl ) {
-		@unlink( $file );
-		echo "<!-- MD-Cache: EXPIRED -->\n";
-		return;
-	}
-	// 캐시 hit · 즉시 서빙 후 종료
+	if ( moondental_pagecache_skip() ) return;
+	$key = 'md_pcache_' . moondental_pagecache_key();
+	$cached = get_transient( $key );
+	if ( ! $cached || ! is_string( $cached ) || strlen( $cached ) < 500 ) return;
 	header( 'X-MD-Cache: hit' );
 	header( 'Cache-Control: public, max-age=1800' );
-	echo "<!-- MD-Cache: HIT · v3.44.36 · age=" . ( time() - filemtime( $file ) ) . "s -->\n";
-	readfile( $file );
+	echo "<!-- MD-Cache: HIT · v3.44.40 · transient · size=" . strlen( $cached ) . "B -->\n";
+	echo $cached;
 	exit;
 }
 add_action( 'template_redirect', 'moondental_pagecache_serve', 0 );
@@ -3539,37 +3509,21 @@ function moondental_pagecache_save( $html ) {
 	if ( strlen( $html ) < 500 ) return $html;
 	if ( strpos( $html, '<html' ) === false && strpos( $html, '<!doctype' ) === false && strpos( $html, '<!DOCTYPE' ) === false ) return $html;
 
-	$dir = moondental_pagecache_dir();
-	$key = moondental_pagecache_key();
-	$file = $dir . '/' . $key . '.html';
-	$marker = "\n<!-- MD Cache · v3.44.37 · saved " . gmdate( 'Y-m-d H:i:s' ) . " UTC · key=" . $key . " -->";
+	$key = 'md_pcache_' . moondental_pagecache_key();
+	$ttl = 6 * HOUR_IN_SECONDS;
+	$marker = "\n<!-- MD Cache · v3.44.40 · saved " . gmdate( 'Y-m-d H:i:s' ) . " UTC -->";
+	$ok = set_transient( $key, $html . $marker, $ttl );
 
-	// v3.44.37 · 저장 직후 검증
-	$saved_bytes = @file_put_contents( $file, $html . $marker );
-	clearstatcache();
-	$exists_after = file_exists( $file ) ? 'yes' : 'no';
-	$readback_size = file_exists( $file ) ? filesize( $file ) : 0;
-	$writable = is_writable( $dir ) ? 'yes' : 'no';
-	$dir_files = count( glob( "$dir/*.html" ) );
-
-	$status = "<!-- MD-Cache: miss · saved=" . ( $saved_bytes ? $saved_bytes . 'B' : 'FAIL' ) .
-	          " · exists_after=" . $exists_after . " · readback=" . $readback_size . 'B' .
-	          " · writable=" . $writable . " · files_after=" . $dir_files .
-	          " · file=" . $file . " -->";
+	$status = "<!-- MD-Cache: miss · saved=" . ( $ok ? 'OK' : 'FAIL' ) . " · size=" . strlen( $html ) . "B · key=$key -->";
 	return $status . $html;
 }
 
-/* v3.44.38 · 캐시 무효화 · 로그인 사용자만 (프론트 GET 요청은 절대 flush 안 함) */
+/* v3.44.40 · 캐시 무효화 · 로그인/관리자만 · transient 삭제 */
 function moondental_pagecache_flush() {
-	// GET 요청에서는 flush 안 함 (프론트 방문자에 의한 트리거 방지)
 	if ( isset( $_SERVER['REQUEST_METHOD'] ) && strtoupper( $_SERVER['REQUEST_METHOD'] ) === 'GET' ) return;
-	// 관리자 액션만 flush
 	if ( ! is_admin() && ! ( defined( 'DOING_CRON' ) && DOING_CRON ) ) return;
-	$dir = moondental_pagecache_dir();
-	foreach ( glob( $dir . '/*.html' ) as $f ) {
-		if ( basename( $f ) === 'index.html' ) continue;
-		@unlink( $f );
-	}
+	global $wpdb;
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_md\\_pcache\\_%' OR option_name LIKE '\\_transient\\_timeout\\_md\\_pcache\\_%'" );
 }
 add_action( 'save_post',        'moondental_pagecache_flush' );
 add_action( 'deleted_post',     'moondental_pagecache_flush' );
