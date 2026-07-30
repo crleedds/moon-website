@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.37' );
+define( 'MOONDENTAL_VERSION', '3.44.38' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -3557,19 +3557,21 @@ function moondental_pagecache_save( $html ) {
 	return $status . $html;
 }
 
-/* 캐시 무효화 · 콘텐츠·설정 변경 시 전체 삭제 */
+/* v3.44.38 · 캐시 무효화 · 로그인 사용자만 (프론트 GET 요청은 절대 flush 안 함) */
 function moondental_pagecache_flush() {
+	// GET 요청에서는 flush 안 함 (프론트 방문자에 의한 트리거 방지)
+	if ( isset( $_SERVER['REQUEST_METHOD'] ) && strtoupper( $_SERVER['REQUEST_METHOD'] ) === 'GET' ) return;
+	// 관리자 액션만 flush
+	if ( ! is_admin() && ! ( defined( 'DOING_CRON' ) && DOING_CRON ) ) return;
 	$dir = moondental_pagecache_dir();
 	foreach ( glob( $dir . '/*.html' ) as $f ) {
 		if ( basename( $f ) === 'index.html' ) continue;
 		@unlink( $f );
 	}
 }
-// 콘텐츠 발행·수정·삭제 시
 add_action( 'save_post',        'moondental_pagecache_flush' );
 add_action( 'deleted_post',     'moondental_pagecache_flush' );
 add_action( 'trashed_post',     'moondental_pagecache_flush' );
-// 댓글 · 사용자정의하기 · 위젯 · 옵션 저장 시
 add_action( 'comment_post',     'moondental_pagecache_flush' );
 add_action( 'customize_save_after', 'moondental_pagecache_flush' );
 add_action( 'switch_theme',     'moondental_pagecache_flush' );
