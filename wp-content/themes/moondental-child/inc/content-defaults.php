@@ -27,11 +27,6 @@ function moondental_service_content_default_map() {
 <h2>10F 임플란트센터 — 30여년 임상으로 지키는 안정감</h2>
 <p class="lead">문치과병원은 1995년 개원 이래 천안·아산에서 30여년간 임플란트 임상을 이어왔습니다. 단순히 잘 심는 것을 넘어, <strong>발치·뼈이식·식립·보철·평생 관리까지 한 곳에서 책임지는 체계적인 시스템</strong>으로 환자분의 임플란트가 오래 유지되도록 합니다.</p>
 
-<figure class="md-content-figure md-content-figure--hero">
-<img src="/wp-content/themes/moondental-child/assets/images/services/implant-navigation.jpg" alt="CBCT 3D 시뮬레이션 기반 네비게이션 임플란트" loading="lazy">
-<figcaption>▲ CBCT 3D 시뮬레이션 · 신경·혈관·골 두께 사전 분석 · 네비게이션 가이드 정밀 수술</figcaption>
-</figure>
-
 <h3>전국에서 문치과병원을 찾아주시는 이유</h3>
 <p>정밀한 임플란트 시술뿐 아니라 정기 검진을 통한 사후관리까지 철저하게 진행하고 있습니다. 다음과 같은 케이스를 전국에서 의뢰받아 진료합니다.</p>
 <ul>
@@ -254,10 +249,6 @@ function moondental_service_content_default_map() {
 <h3>교정 종류 — 라이프스타일에 맞춰 선택</h3>
 
 <h4>1. 투명교정 — 슈어스마일 (SureSmile) 얼라이너 · 주력 진료</h4>
-
-<figure class="md-content-figure md-content-figure--hero">
-<img src="/wp-content/themes/moondental-child/assets/images/services/suresmile-hero.jpg" alt="SureSmile 투명교정 얼라이너 — Dentsply Sirona" loading="lazy">
-</figure>
 
 <p>문치과병원 11F 교정과는 <strong>덴츠플라이 시로나(Dentsply Sirona)의 슈어스마일 얼라이너 시스템</strong>을 도입하고 있습니다. 맞춤 제작된 투명한 플라스틱 장치를 단계별로 교체하며 치아를 이동시키는 방식으로, <strong>직장인·교사·서비스직·결혼을 앞둔 분</strong> 등 외관 관리가 중요한 환자에게 가장 인기 있는 옵션입니다.</p>
 
