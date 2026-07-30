@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.35' );
+define( 'MOONDENTAL_VERSION', '3.44.36' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -3497,18 +3497,29 @@ function moondental_pagecache_skip() {
 
 /* 캐시 조회 · 있으면 즉시 서빙 · 없으면 다음 훅에서 저장 */
 function moondental_pagecache_serve() {
-	if ( moondental_pagecache_skip() ) return;
-	$file = moondental_pagecache_dir() . '/' . moondental_pagecache_key() . '.html';
-	if ( ! file_exists( $file ) ) return;
+	if ( moondental_pagecache_skip() ) {
+		echo "<!-- MD-Cache: SKIP (skip check triggered) -->\n";
+		return;
+	}
+	clearstatcache(); // v3.44.36 · Cafe24 opcache 이슈 회피
+	$dir = moondental_pagecache_dir();
+	$key = moondental_pagecache_key();
+	$file = $dir . '/' . $key . '.html';
+	$dir_files_count = is_dir( $dir ) ? count( glob( "$dir/*.html" ) ) : 0;
+	if ( ! file_exists( $file ) ) {
+		echo "<!-- MD-Cache: NO_FILE · dir=$dir · files_in_dir=$dir_files_count · looking_for=" . basename( $file ) . " -->\n";
+		return;
+	}
 	$ttl = 6 * HOUR_IN_SECONDS;
 	if ( ( time() - filemtime( $file ) ) > $ttl ) {
 		@unlink( $file );
+		echo "<!-- MD-Cache: EXPIRED -->\n";
 		return;
 	}
 	// 캐시 hit · 즉시 서빙 후 종료
 	header( 'X-MD-Cache: hit' );
 	header( 'Cache-Control: public, max-age=1800' );
-	echo "<!-- MD-Cache: HIT · v3.44.34 · age=" . ( time() - filemtime( $file ) ) . "s -->\n";
+	echo "<!-- MD-Cache: HIT · v3.44.36 · age=" . ( time() - filemtime( $file ) ) . "s -->\n";
 	readfile( $file );
 	exit;
 }
