@@ -416,6 +416,8 @@ return array(
 	'menu_wisdom'       => 'Wisdom Tooth',
 	'menu_pediatric'    => 'Pediatric Dentistry',
 	'menu_prevention'   => 'Prevention Clinic',
+	'menu_suresmile'    => 'SureSmile Clear Aligner',
+	'menu_braces'       => 'Fixed Braces',
 	'menu_directions'   => 'Directions & Hours',
 	'menu_history'      => '30 Years of History',
 	'menu_facility'     => 'Facility & Technology',

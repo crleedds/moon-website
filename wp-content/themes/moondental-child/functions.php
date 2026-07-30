@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.43' );
+define( 'MOONDENTAL_VERSION', '3.44.44' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2287,6 +2287,8 @@ add_filter( 'the_title', function( $title, $post_id = null ) {
 	$slug = urldecode( (string) $slug );
 	$map  = array(
 		'투명교정-센터' => '교정센터',
+		'슈어스마일-투명교정' => '슈어스마일 투명교정',
+		'장치교정' => '장치교정',
 	);
 	if ( isset( $map[ $slug ] ) ) return $map[ $slug ];
 	return $title;
@@ -2306,13 +2308,17 @@ function moondental_ensure_core_pages() {
 	$checked = true;
 
 	// v3.44.41 · 매 요청마다 실행 방지 · 1시간에 1회만 · DB 조회 4회 절감
-	if ( get_transient( 'md_core_pages_verified' ) ) return;
+	// v3.44.44 · 새 페이지 추가 시 transient 키 버전업으로 강제 재확인
+	if ( get_transient( 'md_core_pages_verified_v44' ) ) return;
 
 	$core_pages = array(
-		array( 'slug' => '의료진',       'title' => '의료진',       'template' => 'page-templates/page-doctors.php',      'parent' => '병원소개' ),
-		array( 'slug' => '오시는-길',     'title' => '오시는 길',     'template' => 'page-templates/page-location.php',     'parent' => '' ),
-		array( 'slug' => '상담예약',      'title' => '상담 예약',     'template' => 'page-templates/page-reservation.php',  'parent' => '' ),
-		array( 'slug' => '비용-안내',     'title' => '비용 안내',     'template' => 'page-templates/page-pricing.php',      'parent' => '' ),
+		array( 'slug' => '의료진',              'title' => '의료진',            'template' => 'page-templates/page-doctors.php',     'parent' => '병원소개' ),
+		array( 'slug' => '오시는-길',           'title' => '오시는 길',          'template' => 'page-templates/page-location.php',    'parent' => '' ),
+		array( 'slug' => '상담예약',            'title' => '상담 예약',          'template' => 'page-templates/page-reservation.php', 'parent' => '' ),
+		array( 'slug' => '비용-안내',           'title' => '비용 안내',          'template' => 'page-templates/page-pricing.php',     'parent' => '' ),
+		// v3.44.44 · 교정센터 하위 페이지 2개 신설
+		array( 'slug' => '슈어스마일-투명교정', 'title' => '슈어스마일 투명교정', 'template' => 'page-templates/page-service.php',     'parent' => '진료항목' ),
+		array( 'slug' => '장치교정',            'title' => '장치교정',           'template' => 'page-templates/page-service.php',     'parent' => '진료항목' ),
 	);
 
 	$created = false;
@@ -2336,7 +2342,7 @@ function moondental_ensure_core_pages() {
 	}
 	if ( $created ) flush_rewrite_rules( false );
 	// 모두 존재 확인됨 · 1시간 동안 재확인 안 함
-	set_transient( 'md_core_pages_verified', 1, HOUR_IN_SECONDS );
+	set_transient( 'md_core_pages_verified_v44', 1, HOUR_IN_SECONDS );
 }
 add_action( 'admin_init', 'moondental_ensure_core_pages' );
 /* 프론트에서도 · 관리자 접속 전 자동 복구 · 요청당 1회만 실행 (static flag) */
@@ -3412,7 +3418,10 @@ function moondental_primary_menu_data() {
 	$home = home_url( '/' );
 	return array(
 		array( 'label' => '임플란트센터',     'url' => $home . '진료항목/임플란트-센터/',     'children' => array() ),
-		array( 'label' => '교정센터',         'url' => $home . '진료항목/투명교정-센터/',     'children' => array() ),
+		array( 'label' => '교정센터',         'url' => $home . '진료항목/투명교정-센터/',     'children' => array(
+			array( 'label' => '슈어스마일 투명교정', 'url' => $home . '진료항목/슈어스마일-투명교정/' ),
+			array( 'label' => '장치교정',           'url' => $home . '진료항목/장치교정/' ),
+		) ),
 		array( 'label' => '스마일디자인센터', 'url' => $home . '스마일디자인센터/',  'children' => array() ),
 		array( 'label' => '자연치아살리기',   'url' => $home . '진료항목/자연치아-살리기/',   'children' => array(
 			array( 'label' => '충치치료', 'url' => $home . '진료항목/자연치아-살리기/#cavity' ),
@@ -3571,15 +3580,37 @@ function moondental_service_visual( $slug ) {
 			'sub'      => 'CBCT 3D 정밀 진단 · 네비게이션 가이드 수술 · 발치부터 평생 관리까지 한 곳에서',
 		),
 		'투명교정-센터' => array(
+			'image' => '',
+			'alt'   => '',
+			'stats' => array(
+				array( 'value' => '11F',   'unit' => '',   'label' => '교정 전용층' ),
+				array( 'value' => '중부권', 'unit' => '',   'label' => '슈어스마일 센터병원' ),
+				array( 'value' => '2가지', 'unit' => '',   'label' => '투명·장치 교정' ),
+			),
+			'headline' => '천안·아산 교정센터 · 라이프스타일 맞춤 진료',
+			'sub'      => '슈어스마일 투명교정과 장치교정 · 치과교정과 전문의·인정의가 환자분께 가장 적합한 방식을 제안합니다',
+		),
+		'슈어스마일-투명교정' => array(
 			'image' => $uri . '/assets/images/services/suresmile-hero.jpg',
 			'alt'   => 'SureSmile 투명교정 · Dentsply Sirona',
 			'stats' => array(
-				array( 'value' => '중부권', 'unit' => '', 'label' => '슈어스마일 센터병원' ),
+				array( 'value' => '중부권', 'unit' => '',   'label' => '슈어스마일 센터병원' ),
 				array( 'value' => '0.1',    'unit' => 'mm', 'label' => '치료 계획 정밀도' ),
-				array( 'value' => '11F',    'unit' => '',   'label' => '교정 전용층' ),
+				array( 'value' => 'FDA',   'unit' => '',   'label' => '미국 승인 시스템' ),
 			),
 			'headline' => '슈어스마일 투명교정, 미국 FDA 승인 · 중부권 센터병원',
 			'sub'      => '3D 시뮬레이션으로 최종 치열 미리 확인 · 프라임스캐너 정밀 스캔 · 재교정 걱정 없이',
+		),
+		'장치교정' => array(
+			'image' => '',
+			'alt'   => '',
+			'stats' => array(
+				array( 'value' => '설측·일반', 'unit' => '', 'label' => '장치교정 옵션' ),
+				array( 'value' => '±0.1', 'unit' => 'mm', 'label' => '치아 이동 정밀도' ),
+				array( 'value' => '전문의', 'unit' => '', 'label' => '치과교정과 인정의' ),
+			),
+			'headline' => '장치교정 · 검증된 표준 방식으로 정확한 결과를',
+			'sub'      => '설측교정(안쪽 브라켓)·메탈·세라믹·자가결찰 브라켓·소아 성장기 교정까지 케이스에 맞게 선택',
 		),
 		'자연치아-살리기' => array(
 			'image' => '',
@@ -3620,6 +3651,8 @@ function moondental_menu_label_key( $label ) {
 		'사랑니'               => 'menu_wisdom',
 		'소아치과'             => 'menu_pediatric',
 		'예방클리닉'           => 'menu_prevention',
+		'슈어스마일 투명교정'  => 'menu_suresmile',
+		'장치교정'             => 'menu_braces',
 		'오시는길·진료시간'    => 'menu_directions',
 		'30여년의 역사'        => 'menu_history',
 		'기술력/시설'          => 'menu_facility',
@@ -3637,7 +3670,7 @@ function moondental_render_primary_menu() {
 	// 클릭 비활성 상위 메뉴 라벨 (nav_menu_css_class 필터와 동기화)
 	$nolink_titles = function_exists( 'moondental_nolink_parent_menu_titles' )
 		? moondental_nolink_parent_menu_titles()
-		: array( '병원안내', '병원 안내', '자연치아살리기', '자연치아 살리기', '진료과' );
+		: array( '병원안내', '병원 안내', '자연치아살리기', '자연치아 살리기', '진료과', '교정센터' );
 
 	echo '<ul class="md-nav">';
 	foreach ( $items as $item ) {
@@ -3790,6 +3823,21 @@ function moondental_get_services() {
 			'title' => '천안·아산 소아치과',
 			'icon'  => 'icon:pediatric',
 			'desc'  => '천안·아산 어린이 첫 치과 경험부터 정기 검진·예방·1차 교정까지. 평생 구강 건강의 시작.',
+		),
+		// v3.44.44 · 교정센터 하위 세부 진료 · 홈 카드에는 표시 안 함 (hidden=true)
+		array(
+			'slug'  => '슈어스마일-투명교정',
+			'title' => '슈어스마일 투명교정',
+			'icon'  => 'icon:ortho',
+			'desc'  => 'Dentsply Sirona 슈어스마일 AI 투명교정 · 미국 FDA 승인 · 3D 시뮬레이션 · 프라임스캐너 정밀 스캔.',
+			'hidden' => true,
+		),
+		array(
+			'slug'  => '장치교정',
+			'title' => '장치교정',
+			'icon'  => 'icon:ortho',
+			'desc'  => '설측교정·메탈·세라믹·자가결찰 브라켓·소아 성장기 교정까지 · 케이스 맞춤 표준 교정.',
+			'hidden' => true,
 		),
 	);
 }

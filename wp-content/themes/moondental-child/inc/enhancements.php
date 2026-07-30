@@ -879,7 +879,7 @@ add_filter( 'nav_menu_css_class', 'moondental_strip_ancestor_classes_on_standalo
  *  하위 페이지 링크는 그대로 정상 클릭 가능.
  */
 function moondental_nolink_parent_menu_titles() {
-	return array( '병원안내', '병원 안내', '자연치아살리기', '자연치아 살리기', '진료과' );
+	return array( '병원안내', '병원 안내', '자연치아살리기', '자연치아 살리기', '진료과', '교정센터' );
 }
 add_filter( 'nav_menu_css_class', function( $classes, $item ) {
 	$titles = moondental_nolink_parent_menu_titles();

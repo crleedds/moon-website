@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.43
+Version:      3.44.44
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -11912,6 +11912,101 @@ a.md-team-card:hover .md-team-card__photo img,
   .md-content-figure figcaption {
     background: rgba(255, 255, 255, 0.02);
     border-top-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* =============================================================
+   v3.44.44 · 트랙 카드 (교정센터 랜딩 · 슈어스마일 vs 장치교정)
+   ============================================================= */
+.md-content .md-track-grid,
+.md-content div.md-track-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 32px 0;
+}
+@media (max-width: 720px) {
+  .md-content .md-track-grid,
+  .md-content div.md-track-grid { grid-template-columns: 1fr; }
+}
+.md-content .md-track,
+.md-content a.md-track {
+  display: block;
+  padding: 28px 24px;
+  border-radius: 16px;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface, #fafafa);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
+  position: relative;
+}
+.md-content a.md-track:hover,
+.md-content a.md-track:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(216, 128, 98, 0.18);
+  border-color: var(--color-primary);
+}
+.md-content .md-track--featured {
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg,
+    rgba(216, 128, 98, 0.06) 0%,
+    rgba(143, 174, 146, 0.04) 100%);
+}
+.md-content .md-track__badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  letter-spacing: 0.02em;
+}
+.md-content .md-track h4 {
+  margin: 0 0 12px;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.md-content .md-track p {
+  margin: 0 0 14px;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--color-text-sub);
+}
+.md-content .md-track ul {
+  margin: 12px 0 20px;
+  padding-left: 20px;
+}
+.md-content .md-track ul li {
+  font-size: 0.875rem;
+  color: var(--color-text-sub);
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+.md-content .md-track__more {
+  display: inline-block;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  transition: transform 0.2s var(--ease);
+}
+.md-content a.md-track:hover .md-track__more,
+.md-content a.md-track:focus-visible .md-track__more {
+  transform: translateX(4px);
+}
+@media (prefers-color-scheme: dark) {
+  .md-content .md-track,
+  .md-content a.md-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .md-content .md-track--featured {
+    background: linear-gradient(135deg,
+      rgba(244, 177, 149, 0.08) 0%,
+      rgba(182, 206, 183, 0.06) 100%);
   }
 }
 

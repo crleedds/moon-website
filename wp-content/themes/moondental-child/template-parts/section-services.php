@@ -19,6 +19,8 @@ $services = moondental_get_services();
 
 		<div class="md-service-grid">
 			<?php foreach ( $services as $idx => $svc ) :
+				// v3.44.44 · hidden=true 카드는 홈 그리드에서 스킵
+				if ( ! empty( $svc['hidden'] ) ) continue;
 				// 슬러그가 한글이어도 get_page_by_path 가 그대로 받아들임.
 				$page = get_page_by_path( $svc['slug'] );
 				$url  = $page ? get_permalink( $page ) : home_url( '/' . rawurlencode( $svc['slug'] ) . '/' );
