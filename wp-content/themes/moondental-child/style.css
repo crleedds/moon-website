@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.25
+Version:      3.44.26
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -11736,6 +11736,49 @@ a.md-team-card:hover .md-team-card__photo img,
     padding-bottom: 8pt;
     border-bottom: 1px solid #ccc;
     margin-bottom: 12pt;
+  }
+}
+
+/* =============================================================
+   v3.44.26 · 서비스 콘텐츠 이미지 (figure)
+   ============================================================= */
+.md-content-figure {
+  margin: 32px 0;
+  padding: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--color-surface, #fafafa);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+.md-content-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+.md-content-figure figcaption {
+  padding: 12px 20px;
+  font-size: 0.875rem;
+  color: var(--color-text-mute);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.02);
+  border-top: 1px solid var(--color-border);
+  line-height: 1.5;
+}
+.md-content-figure--hero {
+  margin: 24px 0 36px;
+  border-radius: 20px;
+}
+@media (prefers-color-scheme: dark) {
+  .md-content-figure {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  .md-content-figure figcaption {
+    background: rgba(255, 255, 255, 0.02);
+    border-top-color: rgba(255, 255, 255, 0.08);
   }
 }
 

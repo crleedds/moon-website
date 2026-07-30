@@ -237,6 +237,11 @@ function moondental_service_content_default_map() {
 <h3>교정 종류 — 라이프스타일에 맞춰 선택</h3>
 
 <h4>1. 투명교정 — 슈어스마일 (SureSmile) 얼라이너</h4>
+
+<figure class="md-content-figure md-content-figure--hero">
+<img src="/wp-content/themes/moondental-child/assets/images/services/suresmile-hero.jpg" alt="SureSmile 투명교정 얼라이너 — Dentsply Sirona" loading="lazy">
+</figure>
+
 <p>문치과병원 11F 교정과는 <strong>덴츠플라이 시로나(Dentsply Sirona)의 슈어스마일 얼라이너 시스템</strong>을 도입하고 있습니다. 맞춤 제작된 투명한 플라스틱 장치를 단계별로 교체하며 치아를 이동시키는 방식으로, <strong>직장인·교사·서비스직·결혼을 앞둔 분</strong> 등 외관 관리가 중요한 환자에게 가장 인기 있는 옵션입니다.</p>
 
 <h5>SureSmile 투명교정이란?</h5>
@@ -250,6 +255,11 @@ function moondental_service_content_default_map() {
 <p>미국 슈어스마일 디지털센터와 <strong>실시간 협업</strong>하여 <strong>0.1mm 단위의 정밀한 투명 교정 치료 계획</strong>을 수립하며, 매 단계마다 진행 상황을 3D로 검증합니다.</p>
 </div>
 
+<figure class="md-content-figure">
+<img src="/wp-content/themes/moondental-child/assets/images/services/suresmile-software-3d.jpg" alt="SureSmile 소프트웨어 3D 시뮬레이션 화면" loading="lazy">
+<figcaption>▲ 슈어스마일 3D 시뮬레이션 · 치아 이동 단계별 시각화 · 최종 치열 미리 확인</figcaption>
+</figure>
+
 <h5>🎯 프라임스캐너 (PrimeScan) — 정밀도의 시작</h5>
 <p>슈어스마일 투명교정의 정확도는 구강 스캐너의 정밀도에서 시작됩니다. 문치과병원은 덴츠플라이 시로나의 <strong>프라임스캐너(PrimeScan)</strong>를 사용합니다.</p>
 <p>프라임스캐너는 <strong>스마트 픽셀 센서</strong>와 <strong>다이내믹 뎁스 스캔(Dynamic Depth Scan)</strong> 기술을 적용해 <strong>업계 최고 수준의 정밀도(오차율 최소)</strong>를 구현하는 구강 스캐너입니다. 정확한 3D 구강 모델로 시뮬레이션 오차를 최소화하고, 얼라이너 적합도를 극대화합니다.</p>
@@ -259,6 +269,11 @@ function moondental_service_content_default_map() {
 <li><strong>실시간 컬러 3D</strong> — 잇몸·치아 색상 구분으로 마진 라인 명확</li>
 <li><strong>인상 채득 불필요</strong> — 구역질 없이 편안한 스캔 (평균 1~2분)</li>
 </ul>
+
+<figure class="md-content-figure">
+<img src="/wp-content/themes/moondental-child/assets/images/services/suresmile-aligners-product.jpg" alt="슈어스마일 투명 얼라이너 실제 제품" loading="lazy">
+<figcaption>▲ 슈어스마일 얼라이너 · 투명 폴리우레탄 소재 · 단계별 맞춤 제작</figcaption>
+</figure>
 
 <h5>슈어스마일 단계별 옵션</h5>
 <ul>
