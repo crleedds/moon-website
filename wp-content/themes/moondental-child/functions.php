@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.34' );
+define( 'MOONDENTAL_VERSION', '3.44.35' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -3463,11 +3463,10 @@ function moondental_pagecache_key() {
 	return md5( $uri . '|' . $lang . '|' . $mobile );
 }
 function moondental_pagecache_dir() {
-	$uploads = wp_upload_dir();
-	$dir = $uploads['basedir'] . '/md-cache';
+	// v3.44.35 · uploads 대신 wp-content로 이동 (Cafe24 uploads 쓰기 이슈 가능성 회피)
+	$dir = WP_CONTENT_DIR . '/md-cache';
 	if ( ! is_dir( $dir ) ) {
-		@wp_mkdir_p( $dir );
-		// 인덱스 파일로 디렉터리 리스팅 방지
+		@mkdir( $dir, 0755, true );
 		@file_put_contents( $dir . '/index.html', '' );
 	}
 	return $dir;
@@ -3530,11 +3529,18 @@ function moondental_pagecache_save( $html ) {
 	// HTML 문서만 (JSON/XML 등 스킵)
 	if ( strpos( $html, '<html' ) === false && strpos( $html, '<!doctype' ) === false && strpos( $html, '<!DOCTYPE' ) === false ) return $html;
 
-	$file = moondental_pagecache_dir() . '/' . moondental_pagecache_key() . '.html';
-	$marker = "\n<!-- MD Cache · v3.44.34 · saved " . gmdate( 'Y-m-d H:i:s' ) . " UTC · key=" . moondental_pagecache_key() . " -->";
+	$dir = moondental_pagecache_dir();
+	$key = moondental_pagecache_key();
+	$file = $dir . '/' . $key . '.html';
+	$marker = "\n<!-- MD Cache · v3.44.35 · saved " . gmdate( 'Y-m-d H:i:s' ) . " UTC · key=" . $key . " -->";
 	$saved_bytes = @file_put_contents( $file, $html . $marker, LOCK_EX );
-	// 캐시 상태를 HTML 코멘트로 삽입 (헤더는 이미 전송돼서 무시될 수 있음)
-	$status = "<!-- MD-Cache: miss · saved=" . ( $saved_bytes ? 'OK' : 'FAIL' ) . " · file=" . basename( $file ) . " -->";
+	// v3.44.35 · 상세 디버깅 · 저장 실패 원인 파악
+	$writable = is_writable( $dir ) ? 'yes' : 'no';
+	$dir_exists = is_dir( $dir ) ? 'yes' : 'no';
+	$status = "<!-- MD-Cache: miss · saved=" . ( $saved_bytes ? $saved_bytes . 'B' : 'FAIL' ) .
+	          " · dir_exists=" . $dir_exists . " · writable=" . $writable .
+	          " · dir=" . str_replace( ABSPATH, '', $dir ) .
+	          " · key=" . $key . " -->";
 	return $status . $html;
 }
 
