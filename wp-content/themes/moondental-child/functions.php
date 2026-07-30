@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.33' );
+define( 'MOONDENTAL_VERSION', '3.44.34' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -3509,6 +3509,7 @@ function moondental_pagecache_serve() {
 	// 캐시 hit · 즉시 서빙 후 종료
 	header( 'X-MD-Cache: hit' );
 	header( 'Cache-Control: public, max-age=1800' );
+	echo "<!-- MD-Cache: HIT · v3.44.34 · age=" . ( time() - filemtime( $file ) ) . "s -->\n";
 	readfile( $file );
 	exit;
 }
@@ -3530,11 +3531,11 @@ function moondental_pagecache_save( $html ) {
 	if ( strpos( $html, '<html' ) === false && strpos( $html, '<!doctype' ) === false && strpos( $html, '<!DOCTYPE' ) === false ) return $html;
 
 	$file = moondental_pagecache_dir() . '/' . moondental_pagecache_key() . '.html';
-	// 캐시 마커 주석 (디버깅용)
-	$marker = "\n<!-- MD Cache · saved " . gmdate( 'Y-m-d H:i:s' ) . ' UTC -->';
-	@file_put_contents( $file, $html . $marker, LOCK_EX );
-	header( 'X-MD-Cache: miss' );
-	return $html;
+	$marker = "\n<!-- MD Cache · v3.44.34 · saved " . gmdate( 'Y-m-d H:i:s' ) . " UTC · key=" . moondental_pagecache_key() . " -->";
+	$saved_bytes = @file_put_contents( $file, $html . $marker, LOCK_EX );
+	// 캐시 상태를 HTML 코멘트로 삽입 (헤더는 이미 전송돼서 무시될 수 있음)
+	$status = "<!-- MD-Cache: miss · saved=" . ( $saved_bytes ? 'OK' : 'FAIL' ) . " · file=" . basename( $file ) . " -->";
+	return $status . $html;
 }
 
 /* 캐시 무효화 · 콘텐츠·설정 변경 시 전체 삭제 */
