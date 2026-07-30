@@ -50,7 +50,8 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 						}
 						if ( $theme_logo ) : ?>
 							<img class="md-header__brand-img" src="<?php echo esc_url( $theme_logo ); ?>"
-								 alt="<?php echo esc_attr( moondental_get_info( 'name_full' ) ); ?>">
+								 alt="<?php echo esc_attr( moondental_get_info( 'name_full' ) ); ?>"
+								 loading="eager" fetchpriority="high" decoding="async" width="200" height="60">
 						<?php else : ?>
 							<span class="md-header__brand-name">
 								<?php echo esc_html( moondental_get_info( 'name_short' ) ); ?>

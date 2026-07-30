@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.30' );
+define( 'MOONDENTAL_VERSION', '3.44.31' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -1215,12 +1215,18 @@ function moondental_enqueue_styles() {
 		'1.3.9'
 	);
 
-	// 3. 자식 테마 스타일 — 파일 mtime을 cache-buster로 사용
-	$css_path = MOONDENTAL_DIR . '/style.css';
-	$css_ver  = file_exists( $css_path ) ? filemtime( $css_path ) : MOONDENTAL_VERSION;
+	// 3. 자식 테마 스타일 — 프로덕션 미니파이 · 로그인/디버그 시 원본 (v3.44.31)
+	$min_path  = MOONDENTAL_DIR . '/style.min.css';
+	$full_path = MOONDENTAL_DIR . '/style.css';
+	$use_min   = file_exists( $min_path )
+		&& ( ! defined( 'SCRIPT_DEBUG' ) || ! SCRIPT_DEBUG )
+		&& ! is_user_logged_in();
+	$css_path  = $use_min ? $min_path : $full_path;
+	$css_url   = $use_min ? MOONDENTAL_URI . '/style.min.css' : MOONDENTAL_URI . '/style.css';
+	$css_ver   = file_exists( $css_path ) ? filemtime( $css_path ) : MOONDENTAL_VERSION;
 	wp_enqueue_style(
 		'moondental-child-style',
-		MOONDENTAL_URI . '/style.css',
+		$css_url,
 		array( 'astra-parent-style', 'pretendard-variable' ),
 		$css_ver
 	);
@@ -3432,6 +3438,28 @@ function moondental_primary_menu_data() {
  * 주 메뉴 HTML 렌더 — UL.md-nav 형태로 출력 (현재 페이지 강조 포함).
  *  v3.34.3 · 상위 메뉴 클릭 비활성 항목에 md-nav-nolink 클래스 자동 추가.
  */
+/**
+ * v3.44.31 · 이미지 lazy loading + decoding=async 전면 자동 적용
+ * 콘텐츠·위젯·네비게이션 등 모든 <img> 태그에 · loading=lazy, decoding=async 없으면 자동 삽입.
+ * 이미 지정된 태그는 그대로 존중.
+ */
+function moondental_auto_lazy_images( $html ) {
+	if ( is_admin() || empty( $html ) ) return $html;
+	// loading 속성 없는 <img> 태그에 lazy 추가
+	$html = preg_replace_callback( '#<img\b(?![^>]*\bloading=)([^>]*?)>#i', function( $m ) {
+		return '<img loading="lazy" decoding="async"' . $m[1] . '>';
+	}, $html );
+	// loading은 있지만 decoding 없는 경우 decoding=async 추가
+	$html = preg_replace_callback( '#<img\b((?:(?!\bdecoding=)[^>])*)>#i', function( $m ) {
+		return '<img decoding="async"' . $m[1] . '>';
+	}, $html );
+	return $html;
+}
+add_filter( 'the_content',        'moondental_auto_lazy_images', 20 );
+add_filter( 'post_thumbnail_html','moondental_auto_lazy_images', 20 );
+add_filter( 'widget_text_content','moondental_auto_lazy_images', 20 );
+add_filter( 'wp_get_attachment_image', 'moondental_auto_lazy_images', 20 );
+
 /**
  * v3.44.30 · 서비스 페이지 히어로 이미지·스탯 매핑
  * 슬러그별 대표 이미지 + 임팩트 스탯 3개 반환. 페이지 콘텐츠와 무관하게 항상 노출.

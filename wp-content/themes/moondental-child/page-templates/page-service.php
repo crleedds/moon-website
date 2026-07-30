@@ -49,7 +49,7 @@ if ( $_visual ) :
 	<div class="md-container">
 		<?php if ( ! empty( $_visual['image'] ) ) : ?>
 			<figure class="md-svc-hero__figure">
-				<img src="<?php echo esc_url( $_visual['image'] ); ?>" alt="<?php echo esc_attr( $_visual['alt'] ); ?>" loading="eager">
+				<img src="<?php echo esc_url( $_visual['image'] ); ?>" alt="<?php echo esc_attr( $_visual['alt'] ); ?>" loading="eager" fetchpriority="high" decoding="async">
 			</figure>
 		<?php endif; ?>
 		<div class="md-svc-hero__body">

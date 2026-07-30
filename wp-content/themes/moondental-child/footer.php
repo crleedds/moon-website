@@ -50,7 +50,7 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				if ( file_exists( $footer_logo_path ) ) :
 				?>
 					<a class="md-footer__brand-link" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php echo esc_attr( $info['name_full'] ); ?>">
-						<img class="md-footer__brand-img" src="<?php echo esc_url( MOONDENTAL_URI . '/assets/images/logo/logo-wide-white.png' ); ?>" alt="<?php echo esc_attr( $info['name_full'] ); ?>">
+						<img class="md-footer__brand-img" src="<?php echo esc_url( MOONDENTAL_URI . '/assets/images/logo/logo-wide-white.png' ); ?>" alt="<?php echo esc_attr( $info['name_full'] ); ?>" loading="lazy" decoding="async" width="200" height="60">
 					</a>
 				<?php else : ?>
 					<h3><?php echo esc_html( $info['name_full'] ); ?></h3>
