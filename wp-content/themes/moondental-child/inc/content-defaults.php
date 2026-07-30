@@ -97,6 +97,12 @@ function moondental_service_content_default_map() {
 </ul>
 
 <h3>맞춤형 지대주 제작 (Custom Abutment) — 기성 지대주는 사용하지 않습니다</h3>
+
+<figure class="md-content-figure">
+<img src="/wp-content/themes/moondental-child/assets/images/services/implant-digital-prosthetic.png" alt="디지털 보철 · 3D 스캔 기반 맞춤형 지대주·크라운 설계" loading="lazy">
+<figcaption>▲ 디지털 보철 설계 · 3D 스캔 데이터로 환자 개별 맞춤 지대주·크라운 제작</figcaption>
+</figure>
+
 <p>모든 임플란트 보철에 <strong>공장에서 나온 기성 지대주가 아니라, 환자별 맞춤형 지대주</strong>를 사용합니다. 지대주(어버트먼트)는 임플란트 픽스처와 최종 크라운을 연결하는 핵심 부품으로, 이 부분이 얼마나 정밀하게 만들어지느냐가 <strong>보철물의 수명과 심미성을 결정</strong>합니다.</p>
 <ul>
 <li><strong>치은 형태에 맞춘 개별 설계</strong> — 잇몸 라인이 자연스럽고 음식물 끼임 최소화</li>
@@ -151,8 +157,8 @@ function moondental_service_content_default_map() {
 <h4>5. 네비게이션 임플란트 (R2GATE)</h4>
 
 <figure class="md-content-figure">
-<img src="/wp-content/themes/moondental-child/assets/images/services/implant-navigation.jpg" alt="네비게이션 임플란트 3D 시뮬레이션 · CBCT 기반 정밀 가이드" loading="lazy">
-<figcaption>▲ 네비게이션 임플란트 · CBCT 3D 스캔 기반 정밀 시뮬레이션 · 신경·혈관·골 두께 사전 분석</figcaption>
+<img src="/wp-content/themes/moondental-child/assets/images/services/implant-navigation-3d.png" alt="R2GATE 네비게이션 임플란트 3D 가이드 · CBCT + 구강 스캔 정합" loading="lazy">
+<figcaption>▲ R2GATE 3D 시뮬레이션 · CBCT + 스캔 데이터 정합 · 신경·혈관·골 사전 분석 후 정밀 식립</figcaption>
 </figure>
 
 <p>3D 컴퓨터 모의 시술을 통해 네비게이션 가이드 장치를 만들어 정확하게 수술합니다.</p>
