@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.40' );
+define( 'MOONDENTAL_VERSION', '3.44.41' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2305,6 +2305,9 @@ function moondental_ensure_core_pages() {
 	if ( $checked ) return;
 	$checked = true;
 
+	// v3.44.41 · 매 요청마다 실행 방지 · 1시간에 1회만 · DB 조회 4회 절감
+	if ( get_transient( 'md_core_pages_verified' ) ) return;
+
 	$core_pages = array(
 		array( 'slug' => '의료진',       'title' => '의료진',       'template' => 'page-templates/page-doctors.php',      'parent' => '병원소개' ),
 		array( 'slug' => '오시는-길',     'title' => '오시는 길',     'template' => 'page-templates/page-location.php',     'parent' => '' ),
@@ -2332,6 +2335,8 @@ function moondental_ensure_core_pages() {
 		if ( $id && ! is_wp_error( $id ) ) $created = true;
 	}
 	if ( $created ) flush_rewrite_rules( false );
+	// 모두 존재 확인됨 · 1시간 동안 재확인 안 함
+	set_transient( 'md_core_pages_verified', 1, HOUR_IN_SECONDS );
 }
 add_action( 'admin_init', 'moondental_ensure_core_pages' );
 /* 프론트에서도 · 관리자 접속 전 자동 복구 · 요청당 1회만 실행 (static flag) */
@@ -3483,7 +3488,7 @@ function moondental_pagecache_skip() {
 	return false;
 }
 
-/* 캐시 조회 · transient (DB) 사용 · v3.44.40 */
+/* v3.44.41 · 캐시 서빙 · 디버그 코멘트 제거 (LiteSpeed Cache 충돌 방지) */
 function moondental_pagecache_serve() {
 	if ( moondental_pagecache_skip() ) return;
 	$key = 'md_pcache_' . moondental_pagecache_key();
@@ -3491,7 +3496,6 @@ function moondental_pagecache_serve() {
 	if ( ! $cached || ! is_string( $cached ) || strlen( $cached ) < 500 ) return;
 	header( 'X-MD-Cache: hit' );
 	header( 'Cache-Control: public, max-age=1800' );
-	echo "<!-- MD-Cache: HIT · v3.44.40 · transient · size=" . strlen( $cached ) . "B -->\n";
 	echo $cached;
 	exit;
 }
@@ -3508,14 +3512,9 @@ function moondental_pagecache_save( $html ) {
 	if ( http_response_code() !== 200 ) return $html;
 	if ( strlen( $html ) < 500 ) return $html;
 	if ( strpos( $html, '<html' ) === false && strpos( $html, '<!doctype' ) === false && strpos( $html, '<!DOCTYPE' ) === false ) return $html;
-
 	$key = 'md_pcache_' . moondental_pagecache_key();
-	$ttl = 6 * HOUR_IN_SECONDS;
-	$marker = "\n<!-- MD Cache · v3.44.40 · saved " . gmdate( 'Y-m-d H:i:s' ) . " UTC -->";
-	$ok = set_transient( $key, $html . $marker, $ttl );
-
-	$status = "<!-- MD-Cache: miss · saved=" . ( $ok ? 'OK' : 'FAIL' ) . " · size=" . strlen( $html ) . "B · key=$key -->";
-	return $status . $html;
+	set_transient( $key, $html, 6 * HOUR_IN_SECONDS );
+	return $html;
 }
 
 /* v3.44.40 · 캐시 무효화 · 로그인/관리자만 · transient 삭제 */
@@ -3540,13 +3539,11 @@ add_action( 'wp_update_nav_menu','moondental_pagecache_flush' );
  */
 function moondental_auto_lazy_images( $html ) {
 	if ( is_admin() || empty( $html ) ) return $html;
+	// v3.44.41 · 성능 · img 태그 없으면 즉시 리턴 (regex 스킵)
+	if ( strpos( $html, '<img' ) === false ) return $html;
 	// loading 속성 없는 <img> 태그에 lazy 추가
 	$html = preg_replace_callback( '#<img\b(?![^>]*\bloading=)([^>]*?)>#i', function( $m ) {
 		return '<img loading="lazy" decoding="async"' . $m[1] . '>';
-	}, $html );
-	// loading은 있지만 decoding 없는 경우 decoding=async 추가
-	$html = preg_replace_callback( '#<img\b((?:(?!\bdecoding=)[^>])*)>#i', function( $m ) {
-		return '<img decoding="async"' . $m[1] . '>';
 	}, $html );
 	return $html;
 }
