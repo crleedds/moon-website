@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.26' );
+define( 'MOONDENTAL_VERSION', '3.44.27' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2272,6 +2272,21 @@ add_action( 'admin_init', function() {
 } );
 
 /**
+ * v3.44.27 · 슬러그 → 페이지 표시 제목 강제 오버라이드
+ * (WP 페이지 post_title이 옛 값 남아 있어도 표시는 새 이름으로)
+ */
+add_filter( 'the_title', function( $title, $post_id = null ) {
+	if ( ! $post_id ) return $title;
+	$slug = get_post_field( 'post_name', $post_id );
+	$slug = urldecode( (string) $slug );
+	$map  = array(
+		'투명교정-센터' => '교정센터',
+	);
+	if ( isset( $map[ $slug ] ) ) return $map[ $slug ];
+	return $title;
+}, 10, 2 );
+
+/**
  * v3.44.5 · 핵심 페이지 유실 자동 복구
  * 사용자가 실수로 wp-admin에서 '의료진', '오시는-길' 등 핵심 페이지를 삭제한 경우
  * 프론트에서 404가 발생하므로 · admin 또는 프론트 접속 시 자동 재생성.
@@ -3578,9 +3593,9 @@ function moondental_get_services() {
 		),
 		array(
 			'slug'  => '투명교정-센터',
-			'title' => '천안·아산 투명교정',
+			'title' => '교정센터',
 			'icon'  => 'icon:ortho',
-			'desc'  => '천안 만남로 11F 교정과 — 슈어스마일(SureSmile) AI 투명교정 + 치과교정과 전문의·인정의 라이프스타일 맞춤 진료.',
+			'desc'  => '천안 만남로 11F 교정과 — 슈어스마일(SureSmile) AI 투명교정을 주력으로 하는 치과교정과 전문의·인정의 라이프스타일 맞춤 진료.',
 		),
 		array(
 			'slug'  => '자연치아-살리기',
