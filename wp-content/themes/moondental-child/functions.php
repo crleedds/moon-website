@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.46' );
+define( 'MOONDENTAL_VERSION', '3.44.47' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -3618,10 +3618,10 @@ function moondental_service_visual( $slug ) {
 			'stats' => array(
 				array( 'value' => '11F',   'unit' => '',   'label' => '교정 전용층' ),
 				array( 'value' => '중부권', 'unit' => '',   'label' => '슈어스마일 센터병원' ),
-				array( 'value' => '2가지', 'unit' => '',   'label' => '투명·장치 교정' ),
+				array( 'value' => '2가지', 'unit' => '',   'label' => '투명·브라켓 교정' ),
 			),
 			'headline' => '천안·아산 교정센터 · 라이프스타일 맞춤 진료',
-			'sub'      => '슈어스마일 투명교정과 장치교정 · 치과교정과 전문의·인정의가 환자분께 가장 적합한 방식을 제안합니다',
+			'sub'      => '슈어스마일 투명교정과 브라켓 치아교정 · 치과교정과 전문의·인정의가 환자분께 가장 적합한 방식을 제안합니다',
 		),
 		'슈어스마일-투명교정' => array(
 			'image' => $uri . '/assets/images/services/suresmile-hero.jpg',
@@ -3826,7 +3826,7 @@ function moondental_get_services() {
 			'slug'  => '투명교정-센터',
 			'title' => '교정센터',
 			'icon'  => 'icon:ortho',
-			'desc'  => '천안 만남로 11F 교정과 — 슈어스마일(SureSmile) AI 투명교정을 주력으로 하는 치과교정과 전문의·인정의 라이프스타일 맞춤 진료.',
+			'desc'  => '천안 만남로 11F 교정과 — 슈어스마일(SureSmile) AI 투명교정과 브라켓 치아교정 · 치과교정과 전문의·인정의 라이프스타일 맞춤 진료.',
 		),
 		array(
 			'slug'  => '자연치아-살리기',
