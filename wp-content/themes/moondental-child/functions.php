@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.45' );
+define( 'MOONDENTAL_VERSION', '3.44.46' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2310,7 +2310,7 @@ function moondental_ensure_core_pages() {
 
 	// v3.44.41 · 매 요청마다 실행 방지 · 1시간에 1회만 · DB 조회 4회 절감
 	// v3.44.44 · 새 페이지 추가 시 transient 키 버전업으로 강제 재확인
-	if ( get_transient( 'md_core_pages_verified_v45' ) ) return;
+	if ( get_transient( 'md_core_pages_verified_v46' ) ) return;
 
 	// v3.44.45 · 옛 '장치교정' 페이지가 존재하면 → '브라켓-치아교정'으로 이름·슬러그 변경
 	$old = get_page_by_path( '장치교정' );
@@ -2320,6 +2320,20 @@ function moondental_ensure_core_pages() {
 			'post_name'  => '브라켓-치아교정',
 			'post_title' => '브라켓 치아교정',
 		) );
+	}
+
+	// v3.44.46 · 교정센터 페이지 · 옛 SureSmile 상세 본문 초기화 (file 기본값 적용되도록)
+	$ortho = get_page_by_path( '투명교정-센터' );
+	if ( $ortho && $ortho->post_content !== '' ) {
+		// 옛 상세 콘텐츠 detection · 슈어스마일 관련 특정 문구 있으면 리셋
+		if ( strpos( $ortho->post_content, '슈어스마일' ) !== false
+		  || strpos( $ortho->post_content, 'SureSmile' ) !== false
+		  || strlen( $ortho->post_content ) > 500 ) {
+			wp_update_post( array(
+				'ID'           => $ortho->ID,
+				'post_content' => '', // file default 사용 · 새 랜딩 페이지 노출
+			) );
+		}
 	}
 
 	$core_pages = array(
@@ -2353,7 +2367,7 @@ function moondental_ensure_core_pages() {
 	}
 	if ( $created ) flush_rewrite_rules( false );
 	// 모두 존재 확인됨 · 1시간 동안 재확인 안 함
-	set_transient( 'md_core_pages_verified_v45', 1, HOUR_IN_SECONDS );
+	set_transient( 'md_core_pages_verified_v46', 1, HOUR_IN_SECONDS );
 }
 add_action( 'admin_init', 'moondental_ensure_core_pages' );
 /* 프론트에서도 · 관리자 접속 전 자동 복구 · 요청당 1회만 실행 (static flag) */
