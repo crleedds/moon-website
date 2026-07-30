@@ -263,8 +263,8 @@ function moondental_service_content_default_map() {
 <span class="md-track__more">자세히 보기 →</span>
 </a>
 
-<a class="md-track" href="/진료항목/장치교정/">
-<h4>장치교정</h4>
+<a class="md-track" href="/진료항목/브라켓-치아교정/">
+<h4>브라켓 치아교정</h4>
 <p>가장 오래 검증된 표준 방식. <strong>설측교정</strong>·<strong>메탈</strong>·<strong>세라믹</strong>·<strong>자가결찰 브라켓</strong>·<strong>소아 성장기 교정</strong>·<strong>부분 교정</strong>·<strong>양악 협진 교정</strong>까지 케이스에 맞게 선택합니다.</p>
 <ul>
 <li>복잡한 부정교합·발치 케이스 대응</li>
@@ -380,9 +380,9 @@ function moondental_service_content_default_map() {
 <li>분실·파손 시 단계별 재제작 비용이 발생할 수 있습니다.</li>
 </ul>',
 
-		/* ─────────────────────────────  장치교정 (v3.44.44) ───────────────────────────── */
-		'장치교정' => '
-<h2>장치교정 · 검증된 표준 방식으로 정확한 결과를</h2>
+		/* ─────────────────────────────  브라켓 치아교정 (v3.44.45 · 옛 장치교정) ───────────────────────────── */
+		'브라켓-치아교정' => '
+<h2>브라켓 치아교정 · 검증된 표준 방식으로 정확한 결과를</h2>
 <p class="lead">가장 오래 검증된 표준 교정 방식입니다. 슈어스마일 투명교정으로 다루기 어려운 <strong>복잡한 부정교합·발치 케이스·성장기 청소년·양악 수술 협진</strong> 등에 최적입니다. 문치과병원 11F 교정과 <strong>치과교정과 전문의·인정의</strong>가 케이스마다 가장 적합한 방식을 제안합니다.</p>
 
 <h3>1. 설측교정 (Lingual)</h3>
@@ -445,7 +445,7 @@ function moondental_service_content_default_map() {
 <li><strong>양악 수술 동반</strong>: 사전 협진 후 결정 (통상 2~3년)</li>
 </ul>
 
-<h3>이런 분께 장치교정을 권합니다</h3>
+<h3>이런 분께 브라켓 치아교정을 권합니다</h3>
 <ul>
 <li>골격성 부정교합 · 심한 발치 케이스</li>
 <li>성장기 청소년 (턱뼈 성장 유도 목적)</li>

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.44' );
+define( 'MOONDENTAL_VERSION', '3.44.45' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2288,7 +2288,8 @@ add_filter( 'the_title', function( $title, $post_id = null ) {
 	$map  = array(
 		'투명교정-센터' => '교정센터',
 		'슈어스마일-투명교정' => '슈어스마일 투명교정',
-		'장치교정' => '장치교정',
+		'브라켓-치아교정' => '브라켓 치아교정',
+		'장치교정' => '브라켓 치아교정', // legacy - 옛 페이지 접속 시에도 새 이름으로
 	);
 	if ( isset( $map[ $slug ] ) ) return $map[ $slug ];
 	return $title;
@@ -2309,7 +2310,17 @@ function moondental_ensure_core_pages() {
 
 	// v3.44.41 · 매 요청마다 실행 방지 · 1시간에 1회만 · DB 조회 4회 절감
 	// v3.44.44 · 새 페이지 추가 시 transient 키 버전업으로 강제 재확인
-	if ( get_transient( 'md_core_pages_verified_v44' ) ) return;
+	if ( get_transient( 'md_core_pages_verified_v45' ) ) return;
+
+	// v3.44.45 · 옛 '장치교정' 페이지가 존재하면 → '브라켓-치아교정'으로 이름·슬러그 변경
+	$old = get_page_by_path( '장치교정' );
+	if ( $old && ! get_page_by_path( '브라켓-치아교정' ) ) {
+		wp_update_post( array(
+			'ID'         => $old->ID,
+			'post_name'  => '브라켓-치아교정',
+			'post_title' => '브라켓 치아교정',
+		) );
+	}
 
 	$core_pages = array(
 		array( 'slug' => '의료진',              'title' => '의료진',            'template' => 'page-templates/page-doctors.php',     'parent' => '병원소개' ),
@@ -2318,7 +2329,7 @@ function moondental_ensure_core_pages() {
 		array( 'slug' => '비용-안내',           'title' => '비용 안내',          'template' => 'page-templates/page-pricing.php',     'parent' => '' ),
 		// v3.44.44 · 교정센터 하위 페이지 2개 신설
 		array( 'slug' => '슈어스마일-투명교정', 'title' => '슈어스마일 투명교정', 'template' => 'page-templates/page-service.php',     'parent' => '진료항목' ),
-		array( 'slug' => '장치교정',            'title' => '장치교정',           'template' => 'page-templates/page-service.php',     'parent' => '진료항목' ),
+		array( 'slug' => '브라켓-치아교정',      'title' => '브라켓 치아교정',    'template' => 'page-templates/page-service.php',     'parent' => '진료항목' ),
 	);
 
 	$created = false;
@@ -2342,7 +2353,7 @@ function moondental_ensure_core_pages() {
 	}
 	if ( $created ) flush_rewrite_rules( false );
 	// 모두 존재 확인됨 · 1시간 동안 재확인 안 함
-	set_transient( 'md_core_pages_verified_v44', 1, HOUR_IN_SECONDS );
+	set_transient( 'md_core_pages_verified_v45', 1, HOUR_IN_SECONDS );
 }
 add_action( 'admin_init', 'moondental_ensure_core_pages' );
 /* 프론트에서도 · 관리자 접속 전 자동 복구 · 요청당 1회만 실행 (static flag) */
@@ -3420,7 +3431,7 @@ function moondental_primary_menu_data() {
 		array( 'label' => '임플란트센터',     'url' => $home . '진료항목/임플란트-센터/',     'children' => array() ),
 		array( 'label' => '교정센터',         'url' => $home . '진료항목/투명교정-센터/',     'children' => array(
 			array( 'label' => '슈어스마일 투명교정', 'url' => $home . '진료항목/슈어스마일-투명교정/' ),
-			array( 'label' => '장치교정',           'url' => $home . '진료항목/장치교정/' ),
+			array( 'label' => '브라켓 치아교정',     'url' => $home . '진료항목/브라켓-치아교정/' ),
 		) ),
 		array( 'label' => '스마일디자인센터', 'url' => $home . '스마일디자인센터/',  'children' => array() ),
 		array( 'label' => '자연치아살리기',   'url' => $home . '진료항목/자연치아-살리기/',   'children' => array(
@@ -3533,6 +3544,14 @@ function moondental_pagecache_flush() {
 	global $wpdb;
 	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_md\\_pcache\\_%' OR option_name LIKE '\\_transient\\_timeout\\_md\\_pcache\\_%'" );
 }
+
+/* v3.44.45 · 배포 버전 변경 시 · 캐시 강제 자동 무효화 (1회) */
+add_action( 'wp_loaded', function() {
+	if ( get_option( 'md_cache_version' ) === MOONDENTAL_VERSION ) return;
+	global $wpdb;
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_md\\_pcache\\_%' OR option_name LIKE '\\_transient\\_timeout\\_md\\_pcache\\_%'" );
+	update_option( 'md_cache_version', MOONDENTAL_VERSION );
+}, 5 );
 add_action( 'save_post',        'moondental_pagecache_flush' );
 add_action( 'deleted_post',     'moondental_pagecache_flush' );
 add_action( 'trashed_post',     'moondental_pagecache_flush' );
@@ -3601,15 +3620,15 @@ function moondental_service_visual( $slug ) {
 			'headline' => '슈어스마일 투명교정, 미국 FDA 승인 · 중부권 센터병원',
 			'sub'      => '3D 시뮬레이션으로 최종 치열 미리 확인 · 프라임스캐너 정밀 스캔 · 재교정 걱정 없이',
 		),
-		'장치교정' => array(
+		'브라켓-치아교정' => array(
 			'image' => '',
 			'alt'   => '',
 			'stats' => array(
-				array( 'value' => '설측·일반', 'unit' => '', 'label' => '장치교정 옵션' ),
+				array( 'value' => '설측·일반', 'unit' => '', 'label' => '브라켓 옵션' ),
 				array( 'value' => '±0.1', 'unit' => 'mm', 'label' => '치아 이동 정밀도' ),
 				array( 'value' => '전문의', 'unit' => '', 'label' => '치과교정과 인정의' ),
 			),
-			'headline' => '장치교정 · 검증된 표준 방식으로 정확한 결과를',
+			'headline' => '브라켓 치아교정 · 검증된 표준 방식으로 정확한 결과를',
 			'sub'      => '설측교정(안쪽 브라켓)·메탈·세라믹·자가결찰 브라켓·소아 성장기 교정까지 케이스에 맞게 선택',
 		),
 		'자연치아-살리기' => array(
@@ -3652,7 +3671,8 @@ function moondental_menu_label_key( $label ) {
 		'소아치과'             => 'menu_pediatric',
 		'예방클리닉'           => 'menu_prevention',
 		'슈어스마일 투명교정'  => 'menu_suresmile',
-		'장치교정'             => 'menu_braces',
+		'브라켓 치아교정'      => 'menu_braces',
+		'장치교정'             => 'menu_braces', // legacy alias
 		'오시는길·진료시간'    => 'menu_directions',
 		'30여년의 역사'        => 'menu_history',
 		'기술력/시설'          => 'menu_facility',
@@ -3833,8 +3853,8 @@ function moondental_get_services() {
 			'hidden' => true,
 		),
 		array(
-			'slug'  => '장치교정',
-			'title' => '장치교정',
+			'slug'  => '브라켓-치아교정',
+			'title' => '브라켓 치아교정',
 			'icon'  => 'icon:ortho',
 			'desc'  => '설측교정·메탈·세라믹·자가결찰 브라켓·소아 성장기 교정까지 · 케이스 맞춤 표준 교정.',
 			'hidden' => true,
