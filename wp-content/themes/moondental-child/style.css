@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.47
+Version:      3.44.48
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -2710,10 +2710,10 @@ button.elementor-button {
   .md-fab-stack { display: none !important; }
 }
 
-/* 데스크탑 우측 하단 — 네이버 예약(상) + 카카오톡(하) 세로 스택 */
+/* v3.44.48 · 데스크탑 우측 하단 · FAB 스택 (전화 · 네이버 · 카카오) · 좀 더 아래로 */
 .md-fab-stack {
   position: fixed;
-  right: 24px; bottom: 92px;  /* v3.25.2 — 언어 스위처(bottom:24px, 약 44px) + gap 위로 이동 */
+  right: 24px; bottom: 24px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -11174,16 +11174,26 @@ a.md-bot-card:hover {
   border-color: var(--color-accent);
 }
 
-/* v3.43.2 · 언어 스위처 · FAB 스택 아래 (카톡 버튼 밑) */
+/* v3.44.48 · 언어 스위처 · 좌측 하단 fixed · 데스크탑+모바일 모두 노출 */
+.md-lang-fab-wrap {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 160;
+}
+@media (max-width: 768px) {
+  .md-lang-fab-wrap {
+    left: 12px;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px)); /* 모바일 하단 CTA 바(60px) 위 */
+  }
+}
+
 .md-lang-fab {
   position: relative;
-  width: 100%;
 }
 .md-lang-fab__toggle {
-  width: 100%;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
   padding: 10px 14px;
   background: var(--color-white);
@@ -11195,7 +11205,7 @@ a.md-bot-card:hover {
   cursor: pointer;
   transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
   line-height: 1;
-  box-shadow: 0 4px 14px rgba(61, 47, 38, 0.08);
+  box-shadow: 0 4px 14px rgba(61, 47, 38, 0.15);
 }
 .md-lang-fab__toggle:hover {
   transform: translateY(-2px);
@@ -11213,7 +11223,7 @@ a.md-bot-card:hover {
 .md-lang-fab__menu {
   position: absolute;
   bottom: calc(100% + 8px);
-  right: 0;
+  left: 0;
   min-width: 180px;
   background: var(--color-white);
   border: 1px solid var(--color-border);
@@ -11259,8 +11269,8 @@ a.md-bot-card:hover {
 .md-lang-fab__item-flag { font-size: 1.1rem; line-height: 1; }
 .md-lang-fab__item-name { flex: 1; }
 
-/* 모바일에서 라벨 축소 · FAB 스택 세로폭 절약 */
-@media (max-width: 880px) {
+/* v3.44.48 · 모바일에서 라벨 축소 · 국기+지구본만 노출 */
+@media (max-width: 768px) {
   .md-lang-fab__toggle { padding: 8px 12px; gap: 4px; }
   .md-lang-fab__label { display: none; }
 }

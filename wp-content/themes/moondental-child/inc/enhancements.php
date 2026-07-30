@@ -637,13 +637,23 @@ function moondental_floating_actions() {
 		</a>
 		<?php endif; ?>
 
-		<?php /* v3.43.2 · 언어 스위처 · 카톡 버튼 바로 밑 · Polylang 불필요 · 순수 커스텀 */ ?>
+		<?php /* v3.44.48 · 언어 스위처 · FAB 스택에서 분리 · 좌측 하단으로 이동 (아래 별도 렌더) */ ?>
+
+		<!-- 맨 위로 스크롤 버튼 -->
+		<button class="md-totop" type="button" aria-label="<?php echo esc_attr( md_content( 'aria_totop', '페이지 맨 위로 이동' ) ); ?>" data-track="cta-scroll-top" hidden>
+			<svg viewBox="0 0 24 24" aria-hidden="true">
+				<path d="M12 5l-7 7 1.41 1.41L12 7.83l5.59 5.58L19 12z" fill="currentColor"/>
+			</svg>
+		</button>
+	</div>
+
+	<?php /* v3.44.48 · 언어 스위처 · 좌측 하단 · 데스크탑+모바일 모두 노출 */ ?>
+	<div class="md-lang-fab-wrap">
 		<div class="md-lang-fab" data-md-lang>
 			<?php
 			$md_current_lang = function_exists( 'moondental_current_language' ) ? moondental_current_language() : 'ko';
 			$md_flag_map = array( 'ko' => '🇰🇷', 'en' => '🇺🇸', 'zh' => '🇨🇳', 'vi' => '🇻🇳', 'ru' => '🇷🇺', 'mn' => '🇲🇳' );
 			$md_name_map = array( 'ko' => '한국어', 'en' => 'English', 'zh' => '中文', 'vi' => 'Tiếng Việt', 'ru' => 'Русский', 'mn' => 'Монгол' );
-			// 언어 전환 URL 계산 · 현재 경로에서 언어 접두어 제거 후 새 접두어 붙임
 			$md_current_uri = $_SERVER['REQUEST_URI'] ?? '/';
 			$md_bare_path = preg_replace( '#^/(en|zh|vi|ru|mn)(/|$)#', '/', $md_current_uri );
 			$md_url_for_lang = function ( $lang ) use ( $md_bare_path ) {
@@ -671,13 +681,6 @@ function moondental_floating_actions() {
 				<?php endforeach; ?>
 			</ul>
 		</div>
-
-		<!-- 맨 위로 스크롤 버튼 -->
-		<button class="md-totop" type="button" aria-label="<?php echo esc_attr( md_content( 'aria_totop', '페이지 맨 위로 이동' ) ); ?>" data-track="cta-scroll-top" hidden>
-			<svg viewBox="0 0 24 24" aria-hidden="true">
-				<path d="M12 5l-7 7 1.41 1.41L12 7.83l5.59 5.58L19 12z" fill="currentColor"/>
-			</svg>
-		</button>
 	</div>
 	<?php
 }
