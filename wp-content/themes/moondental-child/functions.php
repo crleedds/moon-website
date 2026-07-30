@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.38' );
+define( 'MOONDENTAL_VERSION', '3.44.39' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -3463,11 +3463,13 @@ function moondental_pagecache_key() {
 	return md5( $uri . '|' . $lang . '|' . $mobile );
 }
 function moondental_pagecache_dir() {
-	// v3.44.35 · uploads 대신 wp-content로 이동 (Cafe24 uploads 쓰기 이슈 가능성 회피)
-	$dir = WP_CONTENT_DIR . '/md-cache';
+	// v3.44.39 · uploads 폴더 · git 동기화 대상 아님 (Moon Deploy가 안 지움)
+	$uploads = wp_upload_dir( null, false );
+	$dir = $uploads['basedir'] . '/md-cache';
 	if ( ! is_dir( $dir ) ) {
 		@mkdir( $dir, 0755, true );
 		@file_put_contents( $dir . '/index.html', '' );
+		@file_put_contents( $dir . '/.htaccess', "Order allow,deny\nAllow from all\n" );
 	}
 	return $dir;
 }
