@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.24
+Version:      3.44.25
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -11736,5 +11736,60 @@ a.md-team-card:hover .md-team-card__photo img,
     padding-bottom: 8pt;
     border-bottom: 1px solid #ccc;
     margin-bottom: 12pt;
+  }
+}
+
+/* =============================================================
+   v3.44.25 · 서비스 콘텐츠 · 하이라이트 카드 (SureSmile 중부권 등)
+   ============================================================= */
+.md-content .md-highlight,
+.md-content div.md-highlight {
+  margin: 32px 0;
+  padding: 28px 32px;
+  background: linear-gradient(135deg,
+    rgba(216, 128, 98, 0.08) 0%,
+    rgba(143, 174, 146, 0.06) 100%);
+  border: 1px solid rgba(216, 128, 98, 0.18);
+  border-left: 4px solid var(--color-primary);
+  border-radius: 14px;
+  position: relative;
+}
+.md-content .md-highlight--center {
+  text-align: center;
+  border-left: 4px solid var(--color-primary);
+}
+.md-content .md-highlight h5 {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.md-content .md-highlight p {
+  margin: 8px 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--color-text);
+}
+.md-content .md-highlight p:last-child { margin-bottom: 0; }
+.md-content .md-highlight strong {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+@media (max-width: 640px) {
+  .md-content .md-highlight,
+  .md-content div.md-highlight {
+    padding: 20px 22px;
+    margin: 24px 0;
+  }
+  .md-content .md-highlight h5 { font-size: 1.125rem; }
+}
+@media (prefers-color-scheme: dark) {
+  .md-content .md-highlight,
+  .md-content div.md-highlight {
+    background: linear-gradient(135deg,
+      rgba(244, 177, 149, 0.10) 0%,
+      rgba(182, 206, 183, 0.08) 100%);
+    border-color: rgba(244, 177, 149, 0.28);
   }
 }
