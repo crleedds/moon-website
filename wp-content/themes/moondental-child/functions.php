@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.31' );
+define( 'MOONDENTAL_VERSION', '3.44.32' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -4067,8 +4067,18 @@ function moondental_apply_team_zoom_customizer( $groups ) {
  */
 function moondental_history_photo_url( $filename ) {
 	if ( ! $filename ) return false;
-	$path = MOONDENTAL_DIR . '/assets/images/history/' . $filename;
-	return file_exists( $path ) ? MOONDENTAL_URI . '/assets/images/history/' . $filename : false;
+	// v3.44.32 · 확장자 fallback (png → jpg 자동 전환 이후 대비)
+	$base = pathinfo( $filename, PATHINFO_FILENAME );
+	$exts = array( pathinfo( $filename, PATHINFO_EXTENSION ), 'jpg', 'jpeg', 'png', 'webp' );
+	$exts = array_filter( array_unique( $exts ) );
+	foreach ( $exts as $ext ) {
+		$try_file = $base . '.' . $ext;
+		$path = MOONDENTAL_DIR . '/assets/images/history/' . $try_file;
+		if ( file_exists( $path ) ) {
+			return MOONDENTAL_URI . '/assets/images/history/' . $try_file;
+		}
+	}
+	return false;
 }
 
 
