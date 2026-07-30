@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.32' );
+define( 'MOONDENTAL_VERSION', '3.44.33' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -3438,6 +3438,123 @@ function moondental_primary_menu_data() {
  * 주 메뉴 HTML 렌더 — UL.md-nav 형태로 출력 (현재 페이지 강조 포함).
  *  v3.34.3 · 상위 메뉴 클릭 비활성 항목에 md-nav-nolink 클래스 자동 추가.
  */
+/**
+ * v3.44.33 · 자체 파일 기반 페이지 캐시 · TTFB 10초 → 100ms
+ *
+ * 배경: 카페24 openresty + LiteSpeed Cache 플러그인 설치돼 있지만
+ *       Cache-Control: no-cache 응답 · 실제 캐싱 안 됨.
+ *       매 요청마다 WP 전체 실행 → TTFB 6~12초.
+ *
+ * 해결: 프론트 페이지·비로그인·GET·200 응답만 정적 HTML로 저장 후 재사용.
+ *       페이지 저장·글 게시·설정 변경 시 자동 무효화.
+ *
+ * 위치: wp-content/uploads/md-cache/ (URL 해시 기반)
+ * TTL: 6시간 (자주 바뀌지 않는 콘텐츠)
+ * 안전장치: admin·로그인·nonce·query string·POST·404 모두 캐시 skip
+ */
+function moondental_pagecache_key() {
+	$uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '/';
+	$lang = 'ko';
+	if ( preg_match( '#^/(en|zh|vi|ru|mn)(/|$)#', $uri, $m ) ) {
+		$lang = $m[1];
+	}
+	// 모바일·데스크탑 구분 (같은 URL이라도 다른 반응형 이미지)
+	$mobile = ( function_exists( 'wp_is_mobile' ) && wp_is_mobile() ) ? 'm' : 'd';
+	return md5( $uri . '|' . $lang . '|' . $mobile );
+}
+function moondental_pagecache_dir() {
+	$uploads = wp_upload_dir();
+	$dir = $uploads['basedir'] . '/md-cache';
+	if ( ! is_dir( $dir ) ) {
+		@wp_mkdir_p( $dir );
+		// 인덱스 파일로 디렉터리 리스팅 방지
+		@file_put_contents( $dir . '/index.html', '' );
+	}
+	return $dir;
+}
+function moondental_pagecache_skip() {
+	// 관리자·로그인·AJAX·REST·CRON 스킵
+	if ( is_admin() ) return true;
+	if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) return true;
+	if ( defined( 'DOING_CRON' ) && DOING_CRON ) return true;
+	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) return true;
+	if ( defined( 'WP_CLI' ) && WP_CLI ) return true;
+	// GET 만 · POST/PUT/DELETE 스킵
+	if ( isset( $_SERVER['REQUEST_METHOD'] ) && strtoupper( $_SERVER['REQUEST_METHOD'] ) !== 'GET' ) return true;
+	// query string 있으면 스킵 (검색·페이지네이션은 캐시 안 함 · 안전)
+	if ( ! empty( $_GET ) ) return true;
+	// 로그인 사용자 스킵 (Customizer 미리보기·편집 상태 등)
+	if ( is_user_logged_in() ) return true;
+	// 커스터마이저 preview 스킵
+	if ( isset( $_GET['customize_changeset_uuid'] ) ) return true;
+	// 사용자가 방금 댓글 남긴 상태 스킵
+	foreach ( $_COOKIE as $k => $v ) {
+		if ( strpos( $k, 'wordpress_logged_in' ) === 0 ) return true;
+		if ( strpos( $k, 'wp-postpass_' )         === 0 ) return true;
+		if ( strpos( $k, 'comment_author_' )      === 0 ) return true;
+	}
+	return false;
+}
+
+/* 캐시 조회 · 있으면 즉시 서빙 · 없으면 다음 훅에서 저장 */
+function moondental_pagecache_serve() {
+	if ( moondental_pagecache_skip() ) return;
+	$file = moondental_pagecache_dir() . '/' . moondental_pagecache_key() . '.html';
+	if ( ! file_exists( $file ) ) return;
+	$ttl = 6 * HOUR_IN_SECONDS;
+	if ( ( time() - filemtime( $file ) ) > $ttl ) {
+		@unlink( $file );
+		return;
+	}
+	// 캐시 hit · 즉시 서빙 후 종료
+	header( 'X-MD-Cache: hit' );
+	header( 'Cache-Control: public, max-age=1800' );
+	readfile( $file );
+	exit;
+}
+add_action( 'template_redirect', 'moondental_pagecache_serve', 0 );
+
+/* 페이지 렌더 후 · 캐시에 저장 */
+function moondental_pagecache_save_start() {
+	if ( moondental_pagecache_skip() ) return;
+	ob_start( 'moondental_pagecache_save' );
+}
+add_action( 'template_redirect', 'moondental_pagecache_save_start', 999 );
+
+function moondental_pagecache_save( $html ) {
+	// 200 응답만 · 4xx/5xx 캐시 안 함
+	if ( http_response_code() !== 200 ) return $html;
+	// 최소 크기 검증 (에러 페이지 방지)
+	if ( strlen( $html ) < 500 ) return $html;
+	// HTML 문서만 (JSON/XML 등 스킵)
+	if ( strpos( $html, '<html' ) === false && strpos( $html, '<!doctype' ) === false && strpos( $html, '<!DOCTYPE' ) === false ) return $html;
+
+	$file = moondental_pagecache_dir() . '/' . moondental_pagecache_key() . '.html';
+	// 캐시 마커 주석 (디버깅용)
+	$marker = "\n<!-- MD Cache · saved " . gmdate( 'Y-m-d H:i:s' ) . ' UTC -->';
+	@file_put_contents( $file, $html . $marker, LOCK_EX );
+	header( 'X-MD-Cache: miss' );
+	return $html;
+}
+
+/* 캐시 무효화 · 콘텐츠·설정 변경 시 전체 삭제 */
+function moondental_pagecache_flush() {
+	$dir = moondental_pagecache_dir();
+	foreach ( glob( $dir . '/*.html' ) as $f ) {
+		if ( basename( $f ) === 'index.html' ) continue;
+		@unlink( $f );
+	}
+}
+// 콘텐츠 발행·수정·삭제 시
+add_action( 'save_post',        'moondental_pagecache_flush' );
+add_action( 'deleted_post',     'moondental_pagecache_flush' );
+add_action( 'trashed_post',     'moondental_pagecache_flush' );
+// 댓글 · 사용자정의하기 · 위젯 · 옵션 저장 시
+add_action( 'comment_post',     'moondental_pagecache_flush' );
+add_action( 'customize_save_after', 'moondental_pagecache_flush' );
+add_action( 'switch_theme',     'moondental_pagecache_flush' );
+add_action( 'wp_update_nav_menu','moondental_pagecache_flush' );
+
 /**
  * v3.44.31 · 이미지 lazy loading + decoding=async 전면 자동 적용
  * 콘텐츠·위젯·네비게이션 등 모든 <img> 태그에 · loading=lazy, decoding=async 없으면 자동 삽입.
