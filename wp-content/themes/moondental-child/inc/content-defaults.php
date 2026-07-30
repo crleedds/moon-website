@@ -27,6 +27,11 @@ function moondental_service_content_default_map() {
 <h2>10F 임플란트센터 — 30여년 임상으로 지키는 안정감</h2>
 <p class="lead">문치과병원은 1995년 개원 이래 천안·아산에서 30여년간 임플란트 임상을 이어왔습니다. 단순히 잘 심는 것을 넘어, <strong>발치·뼈이식·식립·보철·평생 관리까지 한 곳에서 책임지는 체계적인 시스템</strong>으로 환자분의 임플란트가 오래 유지되도록 합니다.</p>
 
+<figure class="md-content-figure md-content-figure--hero">
+<img src="/wp-content/themes/moondental-child/assets/images/services/implant-navigation.jpg" alt="CBCT 3D 시뮬레이션 기반 네비게이션 임플란트" loading="lazy">
+<figcaption>▲ CBCT 3D 시뮬레이션 · 신경·혈관·골 두께 사전 분석 · 네비게이션 가이드 정밀 수술</figcaption>
+</figure>
+
 <h3>전국에서 문치과병원을 찾아주시는 이유</h3>
 <p>정밀한 임플란트 시술뿐 아니라 정기 검진을 통한 사후관리까지 철저하게 진행하고 있습니다. 다음과 같은 케이스를 전국에서 의뢰받아 진료합니다.</p>
 <ul>
