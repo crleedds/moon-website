@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.36' );
+define( 'MOONDENTAL_VERSION', '3.44.37' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -3533,25 +3533,27 @@ function moondental_pagecache_save_start() {
 add_action( 'template_redirect', 'moondental_pagecache_save_start', 999 );
 
 function moondental_pagecache_save( $html ) {
-	// 200 응답만 · 4xx/5xx 캐시 안 함
 	if ( http_response_code() !== 200 ) return $html;
-	// 최소 크기 검증 (에러 페이지 방지)
 	if ( strlen( $html ) < 500 ) return $html;
-	// HTML 문서만 (JSON/XML 등 스킵)
 	if ( strpos( $html, '<html' ) === false && strpos( $html, '<!doctype' ) === false && strpos( $html, '<!DOCTYPE' ) === false ) return $html;
 
 	$dir = moondental_pagecache_dir();
 	$key = moondental_pagecache_key();
 	$file = $dir . '/' . $key . '.html';
-	$marker = "\n<!-- MD Cache · v3.44.35 · saved " . gmdate( 'Y-m-d H:i:s' ) . " UTC · key=" . $key . " -->";
-	$saved_bytes = @file_put_contents( $file, $html . $marker, LOCK_EX );
-	// v3.44.35 · 상세 디버깅 · 저장 실패 원인 파악
+	$marker = "\n<!-- MD Cache · v3.44.37 · saved " . gmdate( 'Y-m-d H:i:s' ) . " UTC · key=" . $key . " -->";
+
+	// v3.44.37 · 저장 직후 검증
+	$saved_bytes = @file_put_contents( $file, $html . $marker );
+	clearstatcache();
+	$exists_after = file_exists( $file ) ? 'yes' : 'no';
+	$readback_size = file_exists( $file ) ? filesize( $file ) : 0;
 	$writable = is_writable( $dir ) ? 'yes' : 'no';
-	$dir_exists = is_dir( $dir ) ? 'yes' : 'no';
+	$dir_files = count( glob( "$dir/*.html" ) );
+
 	$status = "<!-- MD-Cache: miss · saved=" . ( $saved_bytes ? $saved_bytes . 'B' : 'FAIL' ) .
-	          " · dir_exists=" . $dir_exists . " · writable=" . $writable .
-	          " · dir=" . str_replace( ABSPATH, '', $dir ) .
-	          " · key=" . $key . " -->";
+	          " · exists_after=" . $exists_after . " · readback=" . $readback_size . 'B' .
+	          " · writable=" . $writable . " · files_after=" . $dir_files .
+	          " · file=" . $file . " -->";
 	return $status . $html;
 }
 
