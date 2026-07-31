@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.50' );
+define( 'MOONDENTAL_VERSION', '3.44.51' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -42,15 +42,15 @@ add_action( 'init', function () {
 } );
 /* rewrite 규칙 최초 1회 flush */
 add_action( 'admin_init', function () {
-	if ( get_option( 'md_lang_rewrite_v3432' ) === 'done' ) return;
+	if ( get_option( 'md_lang_rewrite_v3449_ja' ) === 'done' ) return;
 	flush_rewrite_rules( false );
-	update_option( 'md_lang_rewrite_v3432', 'done' );
+	update_option( 'md_lang_rewrite_v3449_ja', 'done' );
 } );
 /* frontend에서도 최초 1회 flush (관리자 접속 안 해도 라이브 즉시 반영) */
 add_action( 'init', function () {
-	if ( get_option( 'md_lang_rewrite_frontend_v3432' ) === 'done' ) return;
+	if ( get_option( 'md_lang_rewrite_frontend_v3449_ja' ) === 'done' ) return;
 	flush_rewrite_rules( false );
-	update_option( 'md_lang_rewrite_frontend_v3432', 'done' );
+	update_option( 'md_lang_rewrite_frontend_v3449_ja', 'done' );
 }, 999 );
 
 /* (c) HTML <html lang="..."> 속성 · 감지된 언어 반영 */
