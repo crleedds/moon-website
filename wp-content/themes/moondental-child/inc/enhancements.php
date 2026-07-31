@@ -652,10 +652,10 @@ function moondental_floating_actions() {
 		<div class="md-lang-fab" data-md-lang>
 			<?php
 			$md_current_lang = function_exists( 'moondental_current_language' ) ? moondental_current_language() : 'ko';
-			$md_flag_map = array( 'ko' => '🇰🇷', 'en' => '🇺🇸', 'zh' => '🇨🇳', 'vi' => '🇻🇳', 'ru' => '🇷🇺', 'mn' => '🇲🇳' );
-			$md_name_map = array( 'ko' => '한국어', 'en' => 'English', 'zh' => '中文', 'vi' => 'Tiếng Việt', 'ru' => 'Русский', 'mn' => 'Монгол' );
+			$md_flag_map = array( 'ko' => '🇰🇷', 'en' => '🇺🇸', 'ja' => '🇯🇵', 'zh' => '🇨🇳', 'vi' => '🇻🇳', 'ru' => '🇷🇺', 'mn' => '🇲🇳' );
+			$md_name_map = array( 'ko' => '한국어', 'en' => 'English', 'ja' => '日本語', 'zh' => '中文', 'vi' => 'Tiếng Việt', 'ru' => 'Русский', 'mn' => 'Монгол' );
 			$md_current_uri = $_SERVER['REQUEST_URI'] ?? '/';
-			$md_bare_path = preg_replace( '#^/(en|zh|vi|ru|mn)(/|$)#', '/', $md_current_uri );
+			$md_bare_path = preg_replace( '#^/(en|ja|zh|vi|ru|mn)(/|$)#', '/', $md_current_uri );
 			$md_url_for_lang = function ( $lang ) use ( $md_bare_path ) {
 				if ( $lang === 'ko' ) return home_url( $md_bare_path );
 				$path = ltrim( $md_bare_path, '/' );

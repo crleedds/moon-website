@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.48' );
+define( 'MOONDENTAL_VERSION', '3.44.49' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -36,7 +36,7 @@ add_filter( 'pll_home_url_black_list', function ( $list ) {
 
 /* (b) 언어 접두어 URL rewrite · /en/ /zh/ 등을 wp에 인식시킴 */
 add_action( 'init', function () {
-	$langs = 'en|zh|vi|ru|mn';
+	$langs = 'en|ja|zh|vi|ru|mn';
 	add_rewrite_rule( "^($langs)/?$",              'index.php',                        'top' );
 	add_rewrite_rule( "^($langs)/(.+?)/?$",        'index.php?pagename=$matches[2]',   'top' );
 } );
@@ -57,7 +57,7 @@ add_action( 'init', function () {
 add_filter( 'language_attributes', function ( $attrs ) {
 	if ( ! function_exists( 'moondental_current_language' ) ) return $attrs;
 	$lang = moondental_current_language();
-	$map  = array( 'ko' => 'ko-KR', 'en' => 'en-US', 'zh' => 'zh-CN', 'vi' => 'vi', 'ru' => 'ru-RU', 'mn' => 'mn' );
+	$map  = array( 'ko' => 'ko-KR', 'en' => 'en-US', 'ja' => 'ja-JP', 'zh' => 'zh-CN', 'vi' => 'vi', 'ru' => 'ru-RU', 'mn' => 'mn' );
 	$html_lang = $map[ $lang ] ?? 'ko-KR';
 	return preg_replace( '/lang="[^"]*"/', 'lang="' . $html_lang . '"', $attrs );
 } );
@@ -66,7 +66,7 @@ add_filter( 'language_attributes', function ( $attrs ) {
  *     그렇지 않으면 /en/ 이 /홈-english/ 로 URL 재작성됨. */
 add_filter( 'redirect_canonical', function ( $redirect_url, $requested_url ) {
 	$path = parse_url( $requested_url, PHP_URL_PATH ) ?? '';
-	if ( preg_match( '#^/(en|zh|vi|ru|mn)(/|$)#', $path ) ) {
+	if ( preg_match( '#^/(en|ja|zh|vi|ru|mn)(/|$)#', $path ) ) {
 		return false;
 	}
 	return $redirect_url;
@@ -3491,7 +3491,7 @@ function moondental_primary_menu_data() {
 function moondental_pagecache_key() {
 	$uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '/';
 	$lang = 'ko';
-	if ( preg_match( '#^/(en|zh|vi|ru|mn)(/|$)#', $uri, $m ) ) {
+	if ( preg_match( '#^/(en|ja|zh|vi|ru|mn)(/|$)#', $uri, $m ) ) {
 		$lang = $m[1];
 	}
 	// 모바일·데스크탑 구분 (같은 URL이라도 다른 반응형 이미지)

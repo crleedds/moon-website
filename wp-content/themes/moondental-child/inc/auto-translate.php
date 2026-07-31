@@ -107,7 +107,7 @@ function moondental_translation_cache_flush( $lang = null ) {
  * Google Cloud Translate v2 REST · API 키 인증.
  *
  * @param string $source 한국어 원본
- * @param string $lang   'en' | 'zh' | 'vi' | 'ru' | 'mn'
+ * @param string $lang   'en' | 'ja' | 'zh' | 'vi' | 'ru' | 'mn'
  * @return string|null   성공 시 번역 · 실패 시 null
  */
 function moondental_translate_via_api( $source, $lang ) {
@@ -118,9 +118,9 @@ function moondental_translate_via_api( $source, $lang ) {
 
 	// 각 provider의 언어 코드 매핑
 	$lang_map = array(
-		'google' => array( 'en' => 'en', 'zh' => 'zh-CN', 'vi' => 'vi', 'ru' => 'ru', 'mn' => 'mn' ),
-		'azure'  => array( 'en' => 'en', 'zh' => 'zh-Hans', 'vi' => 'vi', 'ru' => 'ru', 'mn' => 'mn-Mong' ),
-		'deepl'  => array( 'en' => 'EN', 'zh' => 'ZH', 'ru' => 'RU' ), // vi, mn 미지원
+		'google' => array( 'en' => 'en', 'ja' => 'ja', 'zh' => 'zh-CN', 'vi' => 'vi', 'ru' => 'ru', 'mn' => 'mn' ),
+		'azure'  => array( 'en' => 'en', 'ja' => 'ja', 'zh' => 'zh-Hans', 'vi' => 'vi', 'ru' => 'ru', 'mn' => 'mn-Mong' ),
+		'deepl'  => array( 'en' => 'EN', 'ja' => 'JA', 'zh' => 'ZH', 'ru' => 'RU' ), // vi, mn 미지원
 	);
 	$target = $lang_map[ $provider ][ $lang ] ?? null;
 	if ( ! $target ) return null; // 이 provider에서 지원 안 함

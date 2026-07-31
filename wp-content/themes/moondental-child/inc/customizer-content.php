@@ -83,7 +83,7 @@ function moondental_current_language() {
 	if ( $cache !== null ) return $cache;
 	// v3.43.2 · URL 접두어 우선 (Polylang 리다이렉트 루프 회피)
 	$uri = $_SERVER['REQUEST_URI'] ?? '';
-	if ( preg_match( '#^/(en|zh|vi|ru|mn)(/|$)#', $uri, $m ) ) {
+	if ( preg_match( '#^/(en|ja|zh|vi|ru|mn)(/|$)#', $uri, $m ) ) {
 		return $cache = $m[1];
 	}
 	if ( function_exists( 'pll_current_language' ) ) {
