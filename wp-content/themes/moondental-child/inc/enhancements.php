@@ -681,11 +681,15 @@ function moondental_floating_actions() {
 			$md_flag_map = array( 'ko' => '🇰🇷', 'en' => '🇺🇸', 'ja' => '🇯🇵', 'zh' => '🇨🇳', 'vi' => '🇻🇳', 'ru' => '🇷🇺', 'mn' => '🇲🇳' );
 			$md_name_map = array( 'ko' => '한국어', 'en' => 'English', 'ja' => '日本語', 'zh' => '中文', 'vi' => 'Tiếng Việt', 'ru' => 'Русский', 'mn' => 'Монгол' );
 			$md_current_uri = $_SERVER['REQUEST_URI'] ?? '/';
+			// v3.44.56 · query string 제거 · 언어 접두어 스트립
+			$md_current_uri = strtok( $md_current_uri, '?' );
 			$md_bare_path = preg_replace( '#^/(en|ja|zh|vi|ru|mn)(/|$)#', '/', $md_current_uri );
-			$md_url_for_lang = function ( $lang ) use ( $md_bare_path ) {
-				if ( $lang === 'ko' ) return home_url( $md_bare_path );
+			// v3.44.56 · home_url() 대신 site_url 직접 사용 (Polylang 필터 우회)
+			$md_site_base = untrailingslashit( site_url() );
+			$md_url_for_lang = function ( $lang ) use ( $md_bare_path, $md_site_base ) {
+				if ( $lang === 'ko' ) return $md_site_base . $md_bare_path;
 				$path = ltrim( $md_bare_path, '/' );
-				return home_url( '/' . $lang . '/' . $path );
+				return $md_site_base . '/' . $lang . '/' . $path;
 			};
 			?>
 			<button type="button" class="md-lang-fab__toggle" aria-haspopup="listbox" aria-expanded="false" aria-label="Language / 언어">
