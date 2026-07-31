@@ -601,6 +601,19 @@ function moondental_floating_actions() {
 			<span class="md-mobile-cta__label"><?php echo esc_html( md_content( 'fcta_mobile_naver_label', '네이버 예약' ) ); ?></span>
 		</a>
 		<?php endif; ?>
+		<?php
+		// v3.44.50 · 오시는길 (네이버 지도) 버튼 · 네이버예약 우측
+		$naver_map = $info['naver_map_url'] ?? 'https://map.naver.com/p/entry/place/12772165';
+		if ( $naver_map ) : ?>
+		<a class="md-mobile-cta__item md-mobile-cta__item--directions"
+		   href="<?php echo esc_url( $naver_map ); ?>"
+		   target="_blank" rel="noopener"
+		   data-track="cta-directions-mobile"
+		   aria-label="<?php echo esc_attr( md_content( 'aria_mobile_directions', '오시는 길 · 네이버 지도' ) ); ?>">
+			<span class="md-mobile-cta__icon" aria-hidden="true">📍</span>
+			<span class="md-mobile-cta__label"><?php echo esc_html( md_content( 'fcta_mobile_directions_label', '오시는길' ) ); ?></span>
+		</a>
+		<?php endif; ?>
 	</div>
 
 	<!-- 데스크탑 우측 하단 플로팅 버튼 스택 (전화 + 네이버 + 카카오, 데스크탑에서만) -->

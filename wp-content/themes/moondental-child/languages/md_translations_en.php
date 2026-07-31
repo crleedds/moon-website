@@ -418,6 +418,10 @@ return array(
 	'menu_prevention'   => 'Prevention Clinic',
 	'menu_suresmile'    => 'SureSmile Clear Aligner',
 	'menu_braces'       => 'Traditional Braces',
+
+	/* === Mobile CTA · Directions (v3.44.50) === */
+	'fcta_mobile_directions_label' => 'Directions',
+	'aria_mobile_directions'       => 'View directions on Naver Map',
 	'menu_directions'   => 'Directions & Hours',
 	'menu_history'      => '30 Years of History',
 	'menu_facility'     => 'Facility & Technology',

@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.49
+Version:      3.44.50
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -2685,23 +2685,33 @@ button.elementor-button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 10px 4px;
+  gap: 3px;
+  padding: 8px 2px;
   text-decoration: none;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   color: var(--color-text);
   transition: background 0.2s var(--ease);
   text-align: center;
   min-height: 60px;
+  min-width: 0;
 }
 .md-mobile-cta__item:active { background: var(--color-surface); }
-.md-mobile-cta__item--call   { color: var(--color-primary-dark); border-right: 1px solid var(--color-border); }
-.md-mobile-cta__item--kakao  { color: #3C1E1E; background: #FEE500; border-right: 1px solid var(--color-border); }
-.md-mobile-cta__item--naver  { color: #fff; background: #03C75A; }
-.md-mobile-cta__item--kakao:active { background: #F0D900; }
-.md-mobile-cta__item--naver:active { background: #029e49; }
-.md-mobile-cta__icon { font-size: 1.25rem; line-height: 1; }
+.md-mobile-cta__item--call       { color: var(--color-primary-dark); border-right: 1px solid var(--color-border); }
+.md-mobile-cta__item--kakao      { color: #3C1E1E; background: #FEE500; border-right: 1px solid var(--color-border); }
+.md-mobile-cta__item--naver      { color: #fff; background: #03C75A; border-right: 1px solid rgba(0,0,0,0.08); }
+.md-mobile-cta__item--directions { color: var(--color-primary-dark); background: var(--color-surface); }
+.md-mobile-cta__item--kakao:active      { background: #F0D900; }
+.md-mobile-cta__item--naver:active      { background: #029e49; }
+.md-mobile-cta__item--directions:active { background: var(--color-border); }
+.md-mobile-cta__icon { font-size: 1.15rem; line-height: 1; }
+.md-mobile-cta__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  letter-spacing: -0.01em;
+}
 
 @media (max-width: 768px) {
   .md-mobile-cta { display: flex; }
@@ -11174,17 +11184,18 @@ a.md-bot-card:hover {
   border-color: var(--color-accent);
 }
 
-/* v3.44.48 · 언어 스위처 · 좌측 하단 fixed · 데스크탑+모바일 모두 노출 */
+/* v3.44.50 · 언어 스위처 · 좌측 하단 fixed · 모든 화면에서 명시적 노출 */
 .md-lang-fab-wrap {
-  position: fixed;
+  position: fixed !important;
   left: 24px;
   bottom: 24px;
-  z-index: 160;
+  z-index: 250 !important; /* 모바일 CTA 바 (200) 보다 위 */
+  display: block !important;
 }
 @media (max-width: 768px) {
   .md-lang-fab-wrap {
-    left: 12px;
-    bottom: calc(72px + env(safe-area-inset-bottom, 0px)); /* 모바일 하단 CTA 바(60px) 위 */
+    left: 10px;
+    bottom: calc(70px + env(safe-area-inset-bottom, 0px));
   }
 }
 
