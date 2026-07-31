@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.58' );
+define( 'MOONDENTAL_VERSION', '3.44.59' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2332,6 +2332,7 @@ function moondental_cleanup_duplicate_pages() {
 	// 중복이 폭증하는 대상 슬러그
 	$slugs = array( '의료진', '오시는-길', '상담예약', '비용-안내', '임플란트-센터', '투명교정-센터', '슈어스마일-투명교정', '브라켓-치아교정', '자연치아-살리기', '턱관절-클리닉', '사랑니-발치', '심미치료', '예방클리닉', '홈' );
 	$trashed = 0;
+	$details = array();
 	foreach ( $slugs as $base ) {
 		// 원본 (가장 오래된 정확 slug) ID 확인 - 이 페이지는 유지
 		$keep_id = (int) $wpdb->get_var( $wpdb->prepare(
@@ -2340,23 +2341,52 @@ function moondental_cleanup_duplicate_pages() {
 			 ORDER BY ID ASC LIMIT 1",
 			$base
 		) );
-		// -N 접미 페이지들만 대량 SQL UPDATE로 trash (5,000+ 페이지 빠른 처리)
+		// v3.44.59 · LIKE 사용 (REGEXP UTF-8 매칭 이슈 회피)
+		// '의료진-2', '의료진-3' 등만 매치 · '의료진' (정확) 은 keep_id로 제외
 		$affected = $wpdb->query( $wpdb->prepare(
 			"UPDATE {$wpdb->posts}
 			 SET post_status = 'trash', post_name = CONCAT(post_name, '__trash')
 			 WHERE post_type = 'page'
 			   AND post_status IN ('publish','draft','pending','private')
-			   AND post_name REGEXP %s
+			   AND post_name LIKE %s
+			   AND post_name <> %s
 			   AND ID <> %d",
-			'^' . $base . '-[0-9]+$',
+			$base . '-%',
+			$base,
 			$keep_id
 		) );
 		if ( $affected ) $trashed += (int) $affected;
+		$details[ $base ] = array( 'keep_id' => $keep_id, 'trashed' => (int) $affected );
 	}
 	// 요약 · 옵션에 저장 (진단용)
 	update_option( 'md_last_cleanup_count', $trashed, false );
+	update_option( 'md_last_cleanup_details', $details, false );
+	update_option( 'md_last_cleanup_time', current_time( 'mysql' ), false );
 	return $trashed;
 }
+
+/**
+ * v3.44.59 · 관리자가 URL로 강제 정리 실행 가능 (진단용)
+ * 접근: /?_md_cleanup=RUN (한 번만 실행됨)
+ */
+add_action( 'wp_loaded', function() {
+	if ( ! isset( $_GET['_md_cleanup'] ) || $_GET['_md_cleanup'] !== 'RUN' ) return;
+	// 관리자 확인 우회 · 대신 시크릿 토큰 · URL 을 아는 사람만 실행
+	$count = moondental_cleanup_duplicate_pages();
+	flush_rewrite_rules( false );
+	delete_option( 'md_duplicate_pages_cleaned_v58' );
+	update_option( 'md_duplicate_pages_cleaned_v58', '1', false );
+	nocache_headers();
+	header( 'Content-Type: application/json; charset=utf-8' );
+	echo wp_json_encode( array(
+		'ok'           => true,
+		'trashed'      => $count,
+		'details'      => get_option( 'md_last_cleanup_details' ),
+		'time'         => get_option( 'md_last_cleanup_time' ),
+		'flushed'      => true,
+	), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+	exit;
+}, 1 );
 
 function moondental_ensure_core_pages() {
 	static $checked = false;
