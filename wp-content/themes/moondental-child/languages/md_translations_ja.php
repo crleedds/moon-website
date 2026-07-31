@@ -151,6 +151,8 @@ return array(
 	'menu_braces'       => 'ブラケット歯列矯正',
 	'fcta_mobile_directions_label' => 'アクセス',
 	'aria_mobile_directions'       => 'ネイバー地図で道順確認',
+	'fcta_desk_directions_label'   => 'アクセス',
+	'aria_fab_directions'          => 'ネイバー地図でアクセス',
 	'menu_directions'   => 'アクセス・診療時間',
 	'menu_history'      => '30余年の歴史',
 	'menu_facility'     => '技術力・施設',

@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.54
+Version:      3.44.55
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -2804,6 +2804,22 @@ button.elementor-button {
 .md-fab--phone .md-fab__icon {
   background: transparent;
   font-size: 1rem;
+}
+
+/* v3.44.55 · 오시는 길 FAB · 세이지 그린 (secondary) 톤 */
+.md-fab--directions {
+  background: var(--color-accent, #8FAE92);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(143, 174, 146, 0.32);
+}
+.md-fab--directions:hover {
+  background: var(--color-accent-dark, #6E8E71);
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(143, 174, 146, 0.42);
+}
+.md-fab--directions .md-fab__icon {
+  background: transparent;
+  font-size: 1.05rem;
 }
 
 /* =============================================================
@@ -11993,22 +12009,29 @@ a.md-team-card:hover .md-team-card__photo img,
 
 
 /* =============================================================
-   v3.44.26 · 서비스 콘텐츠 이미지 (figure)
+   v3.44.55 · 서비스 콘텐츠 이미지 (figure) · 세로 이미지 max-height 제한
    ============================================================= */
 .md-content-figure {
-  margin: 32px 0;
+  margin: 32px auto;
   padding: 0;
   border-radius: 16px;
   overflow: hidden;
   background: var(--color-surface, #fafafa);
   border: 1px solid var(--color-border);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  max-width: 720px;                 /* v3.44.55 · 데스크탑에서도 너무 크지 않게 */
 }
 .md-content-figure img {
   display: block;
   width: 100%;
   height: auto;
-  object-fit: cover;
+  max-height: 520px;                /* v3.44.55 · 세로 이미지 (프라임스캐너 등) 제한 */
+  object-fit: contain;              /* v3.44.55 · 이미지 왜곡 방지 · 여백 유지 */
+  margin: 0 auto;
+  background: #fff;
+}
+@media (max-width: 640px) {
+  .md-content-figure img { max-height: 400px; }
 }
 .md-content-figure figcaption {
   padding: 12px 20px;

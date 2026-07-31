@@ -422,6 +422,8 @@ return array(
 	/* === Mobile CTA · Directions (v3.44.50) === */
 	'fcta_mobile_directions_label' => 'Directions',
 	'aria_mobile_directions'       => 'View directions on Naver Map',
+	'fcta_desk_directions_label'   => 'Directions',
+	'aria_fab_directions'          => 'Directions on Naver Map',
 	'menu_directions'   => 'Directions & Hours',
 	'menu_history'      => '30 Years of History',
 	'menu_facility'     => 'Facility & Technology',

@@ -616,8 +616,21 @@ function moondental_floating_actions() {
 		<?php endif; ?>
 	</div>
 
-	<!-- 데스크탑 우측 하단 플로팅 버튼 스택 (전화 + 네이버 + 카카오, 데스크탑에서만) -->
+	<!-- 데스크탑 우측 하단 플로팅 버튼 스택 (오시는길 + 전화 + 네이버 + 카카오, 데스크탑에서만) -->
 	<div class="md-fab-stack" aria-hidden="false">
+		<?php
+		// v3.44.55 · 오시는 길 (네이버 지도 문치과병원) · 스택 최상단
+		$naver_map_fab = $info['naver_map_url'] ?? 'https://map.naver.com/p/entry/place/12772165';
+		if ( $naver_map_fab ) : ?>
+		<a class="md-fab md-fab--directions"
+		   href="<?php echo esc_url( $naver_map_fab ); ?>"
+		   target="_blank" rel="noopener"
+		   data-track="cta-directions-fab"
+		   aria-label="<?php echo esc_attr( md_content( 'aria_fab_directions', '오시는 길 · 네이버 지도' ) ); ?>">
+			<span class="md-fab__icon" aria-hidden="true">📍</span>
+			<span class="md-fab__label"><?php echo esc_html( md_content( 'fcta_desk_directions_label', '오시는 길' ) ); ?></span>
+		</a>
+		<?php endif; ?>
 		<?php if ( $phone_link ) : ?>
 		<a class="md-fab md-fab--phone"
 		   href="tel:<?php echo esc_attr( $phone_link ); ?>"
