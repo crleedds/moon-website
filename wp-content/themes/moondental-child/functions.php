@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.57' );
+define( 'MOONDENTAL_VERSION', '3.44.58' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2260,6 +2260,8 @@ function moondental_default_pages() {
  *  이미 있으면 건드리지 않음.
  */
 function moondental_ensure_reservation_page() {
+	// v3.44.58 · Polylang 우회 · wpdb 직접 조회
+	if ( function_exists( 'moondental_page_exists_by_slug' ) && moondental_page_exists_by_slug( '상담예약' ) ) return;
 	if ( get_page_by_path( '상담예약' ) ) return;
 	wp_insert_post( array(
 		'post_title'    => '상담 예약',
@@ -2303,14 +2305,71 @@ add_filter( 'the_title', function( $title, $post_id = null ) {
  * 검사 대상: 슬러그·제목·템플릿 매칭이 없으면 wp_insert_post 후 flush.
  * flag는 페이지 삭제 감지 후에도 다시 도는 로직 (get_option 저장 없이 매 요청마다 존재만 검사).
  */
+/**
+ * v3.44.58 · Polylang 우회 · 페이지 존재 여부를 wpdb 직접 조회
+ *          get_page_by_path() 는 Polylang 언어 필터에 걸려서 false 반환하는 경우가 있음
+ *          → wpdb 원시 쿼리로 슬러그·페이지 존재 여부만 확인
+ */
+function moondental_page_exists_by_slug( $slug ) {
+	global $wpdb;
+	$id = $wpdb->get_var( $wpdb->prepare(
+		"SELECT ID FROM {$wpdb->posts}
+		 WHERE post_type = 'page'
+		   AND post_status = 'publish'
+		   AND post_name = %s
+		 LIMIT 1",
+		$slug
+	) );
+	return $id ? (int) $id : 0;
+}
+
+/**
+ * v3.44.58 · '슬러그-N' 형태 중복 페이지 일괄 휴지통 이동
+ *          Polylang 필터 문제로 반복 자동 생성된 페이지들 정리
+ */
+function moondental_cleanup_duplicate_pages() {
+	global $wpdb;
+	// 중복이 폭증하는 대상 슬러그
+	$slugs = array( '의료진', '오시는-길', '상담예약', '비용-안내', '임플란트-센터', '투명교정-센터', '슈어스마일-투명교정', '브라켓-치아교정', '자연치아-살리기', '턱관절-클리닉', '사랑니-발치', '심미치료', '예방클리닉', '홈' );
+	$trashed = 0;
+	foreach ( $slugs as $base ) {
+		// 원본 (가장 오래된 정확 slug) ID 확인 - 이 페이지는 유지
+		$keep_id = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts}
+			 WHERE post_type = 'page' AND post_name = %s
+			 ORDER BY ID ASC LIMIT 1",
+			$base
+		) );
+		// -N 접미 페이지들만 대량 SQL UPDATE로 trash (5,000+ 페이지 빠른 처리)
+		$affected = $wpdb->query( $wpdb->prepare(
+			"UPDATE {$wpdb->posts}
+			 SET post_status = 'trash', post_name = CONCAT(post_name, '__trash')
+			 WHERE post_type = 'page'
+			   AND post_status IN ('publish','draft','pending','private')
+			   AND post_name REGEXP %s
+			   AND ID <> %d",
+			'^' . $base . '-[0-9]+$',
+			$keep_id
+		) );
+		if ( $affected ) $trashed += (int) $affected;
+	}
+	// 요약 · 옵션에 저장 (진단용)
+	update_option( 'md_last_cleanup_count', $trashed, false );
+	return $trashed;
+}
+
 function moondental_ensure_core_pages() {
 	static $checked = false;
 	if ( $checked ) return;
 	$checked = true;
 
 	// v3.44.41 · 매 요청마다 실행 방지 · 1시간에 1회만 · DB 조회 4회 절감
-	// v3.44.44 · 새 페이지 추가 시 transient 키 버전업으로 강제 재확인
-	if ( get_transient( 'md_core_pages_verified_v46' ) ) return;
+	// v3.44.58 · 중복 페이지 자동 정리 (한 번만) + Polylang 우회 · transient 키 갱신
+	if ( get_option( 'md_duplicate_pages_cleaned_v58' ) !== '1' ) {
+		moondental_cleanup_duplicate_pages();
+		update_option( 'md_duplicate_pages_cleaned_v58', '1', false );
+	}
+	if ( get_transient( 'md_core_pages_verified_v58' ) ) return;
 
 	// v3.44.45 · 옛 '장치교정' 페이지가 존재하면 → '브라켓-치아교정'으로 이름·슬러그 변경
 	$old = get_page_by_path( '장치교정' );
@@ -2348,11 +2407,11 @@ function moondental_ensure_core_pages() {
 
 	$created = false;
 	foreach ( $core_pages as $p ) {
-		if ( get_page_by_path( $p['slug'] ) ) continue;
+		// v3.44.58 · Polylang 우회 · wpdb 직접 조회로 존재 확인
+		if ( moondental_page_exists_by_slug( $p['slug'] ) ) continue;
 		$parent_id = 0;
 		if ( $p['parent'] ) {
-			$parent_obj = get_page_by_path( $p['parent'] );
-			if ( $parent_obj ) $parent_id = $parent_obj->ID;
+			$parent_id = moondental_page_exists_by_slug( $p['parent'] );
 		}
 		$id = wp_insert_post( array(
 			'post_title'    => $p['title'],
@@ -2367,7 +2426,7 @@ function moondental_ensure_core_pages() {
 	}
 	if ( $created ) flush_rewrite_rules( false );
 	// 모두 존재 확인됨 · 1시간 동안 재확인 안 함
-	set_transient( 'md_core_pages_verified_v46', 1, HOUR_IN_SECONDS );
+	set_transient( 'md_core_pages_verified_v58', 1, HOUR_IN_SECONDS );
 }
 add_action( 'admin_init', 'moondental_ensure_core_pages' );
 /* 프론트에서도 · 관리자 접속 전 자동 복구 · 요청당 1회만 실행 (static flag) */
@@ -3560,10 +3619,16 @@ function moondental_pagecache_flush() {
 }
 
 /* v3.44.45 · 배포 버전 변경 시 · 캐시 강제 자동 무효화 (1회) */
+/* v3.44.58 · 추가 · 배포 버전 변경 시 · 재작성 규칙(permalinks) 도 함께 flush
+             (Cafe24에서 페이지 URL이 404 나는 문제 방지) */
 add_action( 'wp_loaded', function() {
 	if ( get_option( 'md_cache_version' ) === MOONDENTAL_VERSION ) return;
 	global $wpdb;
 	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_md\\_pcache\\_%' OR option_name LIKE '\\_transient\\_timeout\\_md\\_pcache\\_%'" );
+	// v3.44.58 · rewrite rules 완전 재생성 (한글 슬러그 페이지 404 방지)
+	if ( function_exists( 'flush_rewrite_rules' ) ) {
+		flush_rewrite_rules( false );
+	}
 	update_option( 'md_cache_version', MOONDENTAL_VERSION );
 }, 5 );
 add_action( 'save_post',        'moondental_pagecache_flush' );
