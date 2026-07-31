@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.63' );
+define( 'MOONDENTAL_VERSION', '3.44.64' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -669,6 +669,28 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_price_from_v3241', 'done' );
 }, 35 );
+
+/* 일회성 마이그레이션: 셀프진단봇 · 30개 질문 → 10개 압축 (v3.44.64)
+ * 사용자가 Customizer에서 편집하지 않은 옛 30-질문 기본값이면 remove_theme_mod
+ * → 새 10개 질문 기본값 자동 적용. 사용자 편집본은 보존. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_bot_10q_v3464' ) === 'done' ) return;
+	$stored = get_theme_mod( 'md_content_bot_questions' );
+	if ( is_string( $stored ) && $stored !== '' ) {
+		// 옛 30-질문 default 감지: 특유 문구 두 개가 모두 있으면 옛 기본값
+		if ( strpos( $stored, '심한 통증 |' ) !== false
+		  && strpos( $stored, '임신·수유 |' ) !== false
+		  && strpos( $stored, 'urgent' ) === false
+		  && strpos( $stored, 'contra=' ) === false ) {
+			remove_theme_mod( 'md_content_bot_questions' );
+		}
+	}
+	// bot_count_template 이 옛 '약 2-3분 소요' 값이면 리셋
+	if ( get_theme_mod( 'md_content_bot_count_template' ) === '{count}개의 Yes/No 질문 · 약 2-3분 소요 · 모든 진료영역 망라' ) {
+		remove_theme_mod( 'md_content_bot_count_template' );
+	}
+	update_option( 'moondental_bot_10q_v3464', 'done' );
+}, 32 );
 
 /* 일회성 마이그레이션: '천안 문치과병원' → '천안·아산 문치과병원' notices_title 정리 (v3.23.3) */
 add_action( 'after_setup_theme', function() {
