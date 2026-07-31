@@ -684,8 +684,11 @@ function moondental_floating_actions() {
 			// v3.44.56 · query string 제거 · 언어 접두어 스트립
 			$md_current_uri = strtok( $md_current_uri, '?' );
 			$md_bare_path = preg_replace( '#^/(en|ja|zh|vi|ru|mn)(/|$)#', '/', $md_current_uri );
-			// v3.44.56 · home_url() 대신 site_url 직접 사용 (Polylang 필터 우회)
-			$md_site_base = untrailingslashit( site_url() );
+			// v3.44.57 · Polylang이 esc_url/site_url 모두 필터링해서 왜곡함
+			//         → HTTP_HOST 원시값으로 URL 조립 (완전 우회)
+			$md_host   = $_SERVER['HTTP_HOST'] ?? 'moondental.co.kr';
+			$md_scheme = ( ! empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] !== 'off' ) ? 'https' : 'http';
+			$md_site_base = $md_scheme . '://' . $md_host;
 			$md_url_for_lang = function ( $lang ) use ( $md_bare_path, $md_site_base ) {
 				if ( $lang === 'ko' ) return $md_site_base . $md_bare_path;
 				$path = ltrim( $md_bare_path, '/' );
@@ -703,7 +706,7 @@ function moondental_floating_actions() {
 					$url = $md_url_for_lang( $slug );
 				?>
 					<li class="md-lang-fab__item<?php echo $is_current ? ' is-current' : ''; ?>" role="option" aria-selected="<?php echo $is_current ? 'true' : 'false'; ?>">
-						<a href="<?php echo esc_url( $url ); ?>" lang="<?php echo esc_attr( $slug ); ?>" hreflang="<?php echo esc_attr( $slug ); ?>">
+						<a href="<?php echo htmlspecialchars( $url, ENT_QUOTES, 'UTF-8' ); ?>" lang="<?php echo esc_attr( $slug ); ?>" hreflang="<?php echo esc_attr( $slug ); ?>">
 							<span class="md-lang-fab__item-flag" aria-hidden="true"><?php echo esc_html( $flag ); ?></span>
 							<span class="md-lang-fab__item-name"><?php echo esc_html( $md_name_map[ $slug ] ); ?></span>
 						</a>
