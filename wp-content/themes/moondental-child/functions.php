@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.59' );
+define( 'MOONDENTAL_VERSION', '3.44.60' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2312,13 +2312,15 @@ add_filter( 'the_title', function( $title, $post_id = null ) {
  */
 function moondental_page_exists_by_slug( $slug ) {
 	global $wpdb;
+	// v3.44.60 · 한글 slug는 DB에 URL 인코딩(소문자)으로 저장됨 · 양쪽 다 시도
+	$encoded = strtolower( urlencode( $slug ) );
 	$id = $wpdb->get_var( $wpdb->prepare(
 		"SELECT ID FROM {$wpdb->posts}
 		 WHERE post_type = 'page'
 		   AND post_status = 'publish'
-		   AND post_name = %s
-		 LIMIT 1",
-		$slug
+		   AND post_name IN (%s, %s)
+		 ORDER BY ID ASC LIMIT 1",
+		$slug, $encoded
 	) );
 	return $id ? (int) $id : 0;
 }
@@ -2329,11 +2331,14 @@ function moondental_page_exists_by_slug( $slug ) {
  */
 function moondental_cleanup_duplicate_pages() {
 	global $wpdb;
-	// 중복이 폭증하는 대상 슬러그
-	$slugs = array( '의료진', '오시는-길', '상담예약', '비용-안내', '임플란트-센터', '투명교정-센터', '슈어스마일-투명교정', '브라켓-치아교정', '자연치아-살리기', '턱관절-클리닉', '사랑니-발치', '심미치료', '예방클리닉', '홈' );
+	// 중복이 폭증하는 대상 슬러그 · 한글 원본
+	$slugs_raw = array( '의료진', '오시는-길', '상담예약', '비용-안내', '임플란트-센터', '투명교정-센터', '슈어스마일-투명교정', '브라켓-치아교정', '자연치아-살리기', '턱관절-클리닉', '사랑니-발치', '심미치료', '예방클리닉', '홈' );
 	$trashed = 0;
 	$details = array();
-	foreach ( $slugs as $base ) {
+	foreach ( $slugs_raw as $raw ) {
+		// v3.44.60 · WP는 한글 slug를 URL 인코딩(소문자)으로 저장
+		//         '의료진' → '%ec%9d%98%eb%a3%8c%ec%a7%84'
+		$base = strtolower( urlencode( $raw ) );
 		// 원본 (가장 오래된 정확 slug) ID 확인 - 이 페이지는 유지
 		$keep_id = (int) $wpdb->get_var( $wpdb->prepare(
 			"SELECT ID FROM {$wpdb->posts}
@@ -2341,8 +2346,7 @@ function moondental_cleanup_duplicate_pages() {
 			 ORDER BY ID ASC LIMIT 1",
 			$base
 		) );
-		// v3.44.59 · LIKE 사용 (REGEXP UTF-8 매칭 이슈 회피)
-		// '의료진-2', '의료진-3' 등만 매치 · '의료진' (정확) 은 keep_id로 제외
+		// '의료진-2', '의료진-3' 등 접미 페이지들만 대량 trash
 		$affected = $wpdb->query( $wpdb->prepare(
 			"UPDATE {$wpdb->posts}
 			 SET post_status = 'trash', post_name = CONCAT(post_name, '__trash')
@@ -2356,7 +2360,7 @@ function moondental_cleanup_duplicate_pages() {
 			$keep_id
 		) );
 		if ( $affected ) $trashed += (int) $affected;
-		$details[ $base ] = array( 'keep_id' => $keep_id, 'trashed' => (int) $affected );
+		$details[ $raw ] = array( 'encoded' => $base, 'keep_id' => $keep_id, 'trashed' => (int) $affected );
 	}
 	// 요약 · 옵션에 저장 (진단용)
 	update_option( 'md_last_cleanup_count', $trashed, false );
