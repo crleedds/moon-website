@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.51
+Version:      3.44.52
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -1109,21 +1109,52 @@ button.elementor-button {
 .md-header__nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 @media (max-width: 880px) {
-  .md-header__nav-toggle { display: flex; }
+  .md-header__nav-toggle { display: flex; position: relative; z-index: 220; }
+
+  /* v3.44.52 · 모바일 메뉴 · 우측에서 슬라이드 인 · 부분 너비 · 백드롭 */
   .md-header__nav {
     position: fixed;
-    top: 72px; left: 0; right: 0;
-    bottom: 0;                                             /* v3.31.7 · 전체 화면 · 스크롤 가능 */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    width: 78%;
+    max-width: 400px;
+    min-width: 280px;
     background: var(--color-bg);
-    border-bottom: 1px solid var(--color-border);
-    box-shadow: var(--shadow-soft);
-    padding: 16px 20px calc(120px + env(safe-area-inset-bottom, 0px));  /* v3.31.7 · 하단 CTA 바(60px) + FAB(24px) 여백 확보 */
-    display: none;
-    z-index: 200;
-    overflow-y: auto;                                      /* v3.31.7 · 긴 메뉴 스크롤 */
+    border-left: 1px solid var(--color-border);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.15);
+    padding: 72px 20px calc(120px + env(safe-area-inset-bottom, 0px));
+    z-index: 210;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    transform: translateX(100%);
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    visibility: hidden;
+    display: block;
   }
-  .md-header__nav.is-open { display: block; }
+  .md-header__nav.is-open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  /* 백드롭 · body::before로 · 별도 HTML 불필요 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 205;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.28s ease;
+    pointer-events: none;
+  }
+  body:has(.md-header__nav.is-open)::before {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
 
   .md-nav,
   .md-header__nav > ul,
@@ -11184,13 +11215,14 @@ a.md-bot-card:hover {
   border-color: var(--color-accent);
 }
 
-/* v3.44.50 · 언어 스위처 · 좌측 하단 fixed · 모든 화면에서 명시적 노출 */
+/* v3.44.52 · 언어 스위처 · 좌측 하단 fixed · 모바일 최우선 노출 */
 .md-lang-fab-wrap {
   position: fixed !important;
   left: 24px;
   bottom: 24px;
-  z-index: 250 !important; /* 모바일 CTA 바 (200) 보다 위 */
+  z-index: 300 !important; /* 모바일 백드롭(205) + 메뉴(210) 모두 위 · 항상 노출 */
   display: block !important;
+  visibility: visible !important;
 }
 @media (max-width: 768px) {
   .md-lang-fab-wrap {
