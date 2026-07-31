@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.52
+Version:      3.44.53
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -1138,23 +1138,7 @@ button.elementor-button {
     visibility: visible;
   }
 
-  /* 백드롭 · body::before로 · 별도 HTML 불필요 */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    z-index: 205;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.28s ease;
-    pointer-events: none;
-  }
-  body:has(.md-header__nav.is-open)::before {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-  }
+  /* v3.44.53 · 백드롭 제거 (사용자 요청) · 메뉴 열려도 화면 어두워지지 않음 */
 
   .md-nav,
   .md-header__nav > ul,
@@ -4493,8 +4477,82 @@ button.elementor-button {
 }
 @media (max-width: 520px) {
   .md-footer__col--hours,
-  .md-footer__col--parking { padding: 18px 16px; }
+  .md-footer__col--parking { padding: 20px 18px; }
   .md-footer__brand { padding-right: 0; }
+}
+
+/* v3.44.53 · 모바일 푸터 전면 재조정 · 텍스트 깨짐·오버플로우 방지 */
+@media (max-width: 768px) {
+  .md-footer { padding: 40px 0 20px !important; }
+  .md-footer__grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    margin-bottom: 24px !important;
+  }
+  .md-footer__col--parking { grid-column: auto !important; }
+  .md-footer__brand-img { max-height: 44px; margin-bottom: 14px; }
+  .md-footer__phone a,
+  .md-footer__email a,
+  .md-footer__addr {
+    font-size: 0.9375rem !important;
+    word-break: keep-all;
+  }
+  .md-footer__phone a { font-size: 1rem !important; }
+  .md-footer__addr { line-height: 1.55; }
+  .md-footer__social { gap: 8px; margin-top: 14px; }
+  .md-fsoc { width: 34px; height: 34px; border-radius: 8px; }
+
+  /* 진료시간 · 주차 카드 · 모바일 padding·폰트 */
+  .md-footer__col--hours,
+  .md-footer__col--parking {
+    padding: 18px 16px !important;
+    border-radius: 12px !important;
+  }
+  .md-footer__col--hours h4,
+  .md-footer__col--parking h4 {
+    font-size: 1rem !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 14px !important;
+  }
+  .md-footer__hours strong,
+  .md-footer__hours span,
+  .md-footer__hours-off {
+    font-size: 0.875rem !important;
+    word-break: keep-all;
+  }
+  .md-footer__hours-note {
+    font-size: 0.75rem !important;
+    padding: 10px 12px !important;
+    line-height: 1.5;
+    word-break: keep-all;
+  }
+  .md-footer__park-item strong {
+    font-size: 0.875rem !important;
+    word-break: keep-all;
+  }
+  .md-footer__park-item span {
+    font-size: 0.75rem !important;
+    line-height: 1.5;
+    word-break: keep-all;
+  }
+  .md-footer__park-transit li {
+    font-size: 0.75rem !important;
+    word-break: keep-all;
+  }
+
+  /* 법적 표시 · 정책 링크 · 모바일 축소 */
+  .md-footer__legal-line { padding-top: 20px; }
+  .md-footer__legal-line p {
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    word-break: keep-all;
+  }
+  .md-footer__legal-line small { font-size: 0.75rem; }
+  .md-footer__policy-line {
+    font-size: 0.8125rem;
+    line-height: 1.8;
+  }
+  .md-footer__sep { display: inline-block; margin: 0 2px; }
 }
 
 /* --- 법적 표시 라인 · 상단 여백 확대 & 시각 계층 --- */
@@ -11215,19 +11273,28 @@ a.md-bot-card:hover {
   border-color: var(--color-accent);
 }
 
-/* v3.44.52 · 언어 스위처 · 좌측 하단 fixed · 모바일 최우선 노출 */
+/* v3.44.53 · 언어 스위처 · 데스크탑 좌하단 / 모바일 하단 CTA 바 위 (전화예약 버튼 위) */
 .md-lang-fab-wrap {
   position: fixed !important;
   left: 24px;
   bottom: 24px;
-  z-index: 300 !important; /* 모바일 백드롭(205) + 메뉴(210) 모두 위 · 항상 노출 */
+  z-index: 300 !important;
   display: block !important;
   visibility: visible !important;
 }
 @media (max-width: 768px) {
   .md-lang-fab-wrap {
-    left: 10px;
+    /* 하단 CTA 바(60px) 위에 · 전화예약(첫 버튼) 위쪽 왼쪽 */
+    left: 12px;
     bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  }
+}
+/* 강조 · 모바일에서 눈에 잘 띄도록 shadow 강화 · 배경 완전 불투명 */
+@media (max-width: 768px) {
+  .md-lang-fab__toggle {
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+    border: 2px solid var(--color-primary);
   }
 }
 
