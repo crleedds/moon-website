@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.65' );
+define( 'MOONDENTAL_VERSION', '3.44.66' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -680,6 +680,25 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_bot_chief_bone_v3465', 'done' );
 }, 31 );
+
+/* 일회성 마이그레이션: 셀프진단봇 10개 → 50개 (카테고리별 10문항 · v3.44.66)
+ * 사용자가 편집 안 한 v3.44.64 default 를 자동 리셋 → 새 기본값 적용
+ * 사용자 편집본은 보존 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_bot_50q_v3466' ) === 'done' ) return;
+	$stored = get_theme_mod( 'md_content_bot_questions' );
+	if ( is_string( $stored ) && $stored !== '' ) {
+		// v3.44.64 10-질문 default 시그니처: '심한 치통·부종·고름' 있고 새 '자발통 |' 없음
+		if ( strpos( $stored, '심한 치통·부종·고름·삼키기' ) !== false
+		  && strpos( $stored, '자발통 |' ) === false ) {
+			remove_theme_mod( 'md_content_bot_questions' );
+		}
+	}
+	if ( get_theme_mod( 'md_content_bot_count_template' ) === '{count}개의 Yes/No 질문 · 약 1분 소요 · 모든 진료영역 망라' ) {
+		remove_theme_mod( 'md_content_bot_count_template' );
+	}
+	update_option( 'moondental_bot_50q_v3466', 'done' );
+}, 30 );
 
 /* 일회성 마이그레이션: 셀프진단봇 · 30개 질문 → 10개 압축 (v3.44.64)
  * 사용자가 Customizer에서 편집하지 않은 옛 30-질문 기본값이면 remove_theme_mod
