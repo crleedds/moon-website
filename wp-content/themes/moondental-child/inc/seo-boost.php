@@ -194,7 +194,6 @@ function moondental_jsonld_sitenav() {
 	$nav = array(
 		array( 'name' => '의료진',        'url' => $home . '의료진/' ),
 		array( 'name' => '오시는 길',     'url' => $home . '오시는-길/' ),
-		array( 'name' => '진료항목',      'url' => $home . '진료항목/' ),
 		array( 'name' => '임플란트 센터', 'url' => $home . '진료항목/임플란트-센터/' ),
 		array( 'name' => '슈어스마일 투명교정', 'url' => $home . '진료항목/슈어스마일-투명교정/' ),
 		array( 'name' => '자연치아 살리기', 'url' => $home . '진료항목/자연치아-살리기/' ),
