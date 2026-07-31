@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.62' );
+define( 'MOONDENTAL_VERSION', '3.44.63' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -3548,9 +3548,13 @@ function moondental_primary_menu_data() {
 			array( 'label' => '신경치료', 'url' => $home . '진료항목/자연치아-살리기/#endo' ),
 			array( 'label' => '잇몸치료', 'url' => $home . '진료항목/자연치아-살리기/#perio' ),
 		) ),
-		// v3.44.62 · '진료과' (→ /진료항목/) 탭 메뉴에서 제거 (사용자 요청)
-		//         · 하위 5개 페이지 (턱관절/사랑니/소아치과/예방클리닉) 는
-		//         · '병원안내' 드롭다운으로 이관 (아래 참조)
+		array( 'label' => '진료과',           'url' => $home . '진료항목/',           'children' => array(
+			array( 'label' => '턱관절클리닉',    'url' => $home . '진료항목/턱관절-클리닉/' ),
+			array( 'label' => '이갈이·이악물기','url' => $home . '진료항목/턱관절-클리닉/' ),
+			array( 'label' => '사랑니',          'url' => $home . '진료항목/사랑니-발치/' ),
+			array( 'label' => '소아치과',        'url' => $home . '진료항목/소아치과/' ),
+			array( 'label' => '예방클리닉',      'url' => $home . '진료항목/예방클리닉/' ),
+		) ),
 		array( 'label' => '의료진',           'url' => $home . '의료진/',             'children' => array() ),
 		array( 'label' => '비용안내',         'url' => $home . '비용-안내/',          'children' => array() ),
 		array( 'label' => '병원안내',         'url' => $home . '병원소개/',           'children' => array(
