@@ -1,0 +1,276 @@
+<?php
+/**
+ * SEO Boost — 키워드 기반 title / meta description 강화
+ *  Yoast SEO가 활성이면 wpseo_title / wpseo_metadesc 필터로 오버라이드
+ *  Yoast가 없으면 document_title_parts 필터로 대체
+ *
+ * @package moondental-child
+ */
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
+/**
+ * 페이지 슬러그 → 최적화된 title / description 맵
+ *  - title 50~60자 · description 140~160자 권장
+ *  - '천안' · '문치과병원' · 서비스 키워드 앞배치
+ */
+function moondental_seo_page_map() {
+	return array(
+		// 홈 (front page)
+		'_home' => array(
+			'title' => '천안 치과 문치과병원 · 임플란트 · 투명교정 · 자연치아 살리기 30년',
+			'desc'  => '천안 문치과병원 30년 전통, 만남로 문타워. 임플란트·투명교정·자연치아 살리기·소아·교정 전문의 협진 진료. 카카오톡·네이버 24시간 예약, 041-563-2875.',
+		),
+		// 진료 페이지
+		'임플란트-센터' => array(
+			'title' => '천안 임플란트 · 네비게이션 임플란트 정밀 식립 - 문치과병원 임플란트센터',
+			'desc'  => '천안 임플란트 문치과병원. 3D CT 진단·네비게이션 가이드로 정확·안전·빠른 회복. 임플란트 상담 041-563-2875 · 카카오톡·네이버 예약.',
+		),
+		'투명교정-센터' => array(
+			'title' => '천안 투명교정 · 슈어스마일 · 브라켓 교정 - 문치과병원 교정센터',
+			'desc'  => '천안 치아교정 문치과병원 교정센터. 슈어스마일 투명교정 중부권 센터 · 브라켓 교정 · 정밀 진단 후 맞춤 계획. 교정 상담 041-563-2875.',
+		),
+		'슈어스마일-투명교정' => array(
+			'title' => '천안 슈어스마일 투명교정 · 0.1mm 정밀 중부권 센터 - 문치과병원',
+			'desc'  => '슈어스마일 중부권 센터 · 0.1mm 정밀도 · PrimeScan 구강스캐너 · 3D 시뮬레이션. 성인·직장인 투명교정 문치과병원. 상담 041-563-2875.',
+		),
+		'브라켓-치아교정' => array(
+			'title' => '천안 브라켓 치아교정 · 설측·세라믹·자가결찰 - 문치과병원 교정센터',
+			'desc'  => '천안 치아교정 문치과병원. 브라켓·설측·세라믹·자가결찰·소아·부분·양악 교정. 정밀 진단 후 맞춤 계획. 교정 상담 041-563-2875.',
+		),
+		'자연치아-살리기' => array(
+			'title' => '자연치아 살리기 · 신경치료 · 치주치료 · 재접합 - 천안 문치과병원',
+			'desc'  => '천안 문치과병원 자연치아 살리기 프로그램. 정밀 신경치료·치주치료·치아 재접합·미세 현미경 진료. 발치 전 마지막 상담 041-563-2875.',
+		),
+		'턱관절-클리닉' => array(
+			'title' => '천안 턱관절 · 이갈이 · 안면 통증 클리닉 - 문치과병원',
+			'desc'  => '천안 턱관절 클리닉 문치과병원. 턱관절 통증·이갈이·안면 근막통·스플린트 치료. 방사선 검사와 근전도 진단으로 정밀 치료. 상담 041-563-2875.',
+		),
+		'사랑니-발치' => array(
+			'title' => '천안 사랑니 발치 · 매복 사랑니 · CT 3D 진단 - 문치과병원',
+			'desc'  => '천안 사랑니 발치 문치과병원. CT 3D로 신경·매복 정밀 확인, 안전한 발치. 진정 마취 옵션. 발치 상담 041-563-2875.',
+		),
+		'심미치료' => array(
+			'title' => '천안 라미네이트 · 미백 · 심미치료 - 문치과병원 심미클리닉',
+			'desc'  => '천안 심미치료 문치과병원. 라미네이트·전문가 미백·세라믹 크라운·심미 보철 · 자연스러운 미소 디자인. 심미 상담 041-563-2875.',
+		),
+		'예방클리닉' => array(
+			'title' => '천안 치과 예방 · 정기검진 · 스케일링 · 실란트 - 문치과병원',
+			'desc'  => '천안 문치과병원 예방클리닉. 정기 검진·스케일링·불소도포·홈케어 교육·소아 실란트로 충치·잇몸 질환 예방. 검진 예약 041-563-2875.',
+		),
+		'스마일디자인센터' => array(
+			'title' => '천안 스마일 디자인 · 라미네이트·미백·치아성형 - 문치과병원',
+			'desc'  => '천안 스마일 디자인 문치과병원. 얼굴·입술·잇몸 조화 기반 자연스러운 미소 설계. 라미네이트·미백·심미 보철. 상담 041-563-2875.',
+		),
+		// 병원 소개
+		'의료진' => array(
+			'title' => '문치과병원 의료진 · 원장 · 진료과 전문의 소개 - 천안 치과',
+			'desc'  => '천안 문치과병원 의료진 소개. 원장 · 보존·보철·교정·구강외과·소아 등 진료과별 전문의 협진. 환자별 맞춤 진료 팀 문치과병원.',
+		),
+		'역사' => array(
+			'title' => '문치과병원 30년 역사 · 천안 만남로 진료 - 한아의료재단',
+			'desc'  => '1995년 개원, 천안 만남로에서 30년간 한자리 진료. 한아의료재단 문치과병원 걸어온 길과 지역 사회 진료 역사.',
+		),
+		'기술력-시설' => array(
+			'title' => '문치과병원 시설·기술력 · CT·구강스캐너·수술실 - 천안 치과',
+			'desc'  => '천안 문치과병원 시설 소개. 3D CT · PrimeScan 구강스캐너 · 무통 마취 · 감염 관리 · 수술실 · 다국어 응대. 400평 규모 대형 병원.',
+		),
+		'임상-케이스' => array(
+			'title' => '문치과병원 임상 케이스 · Before After · 실제 치료 사진',
+			'desc'  => '천안 문치과병원 실제 치료 케이스. 임플란트·투명교정·라미네이트·자연치아 살리기 Before/After 사진과 치료 계획.',
+		),
+		'상시채용' => array(
+			'title' => '문치과병원 상시채용 · 치과의사·위생사·행정 - 천안 치과',
+			'desc'  => '천안 문치과병원 상시 채용 안내. 치과의사·위생사·간호조무사·행정직 모집. 근무 조건·복리후생·지원 방법 안내.',
+		),
+		// 상단 네비게이션 페이지
+		'오시는-길' => array(
+			'title' => '문치과병원 오시는 길 · 천안 만남로 문타워 · 주차·대중교통 - 천안 치과',
+			'desc'  => '천안 문치과병원 위치·오시는 길. 만남로 52 문타워. 지하 주차장·천안IC 15분·천안아산역 10분·시내버스 노선 안내. 예약 041-563-2875.',
+		),
+		'상담예약' => array(
+			'title' => '문치과병원 상담 예약 · 카카오톡·네이버·전화 예약 - 천안 치과',
+			'desc'  => '천안 문치과병원 상담 예약 페이지. 카카오톡 채널·네이버 예약·직통 전화 041-563-2875 · 다국어 응대. 편한 시간·희망 진료 선택.',
+		),
+		'비용-안내' => array(
+			'title' => '문치과병원 진료 비용 안내 · 임플란트·교정·라미네이트 가격 - 천안',
+			'desc'  => '천안 문치과병원 비급여 진료비 안내. 임플란트·투명교정·라미네이트·크라운·심미치료 표준 가격표. 정확한 비용은 상담 후 확정.',
+		),
+		'faq' => array(
+			'title' => '문치과병원 자주 묻는 질문 (FAQ) · 진료·비용·예약 - 천안 치과',
+			'desc'  => '천안 문치과병원 자주 묻는 질문. 진료 시간·비용·주차·다국어·응급 진료·예약 방법 등 환자분들이 자주 문의하시는 내용 정리.',
+		),
+		'치과사전' => array(
+			'title' => '치과 백과사전 · 치과 용어·치료·질환 총정리 - 문치과병원',
+			'desc'  => '치과 백과사전 · 문치과병원. 임플란트·교정·신경치료·치주·심미 등 치과 용어 · 치료 방법 · 질환 · 예방까지 환자용 종합 사전.',
+		),
+	);
+}
+
+/**
+ * 현재 페이지의 SEO 키 (슬러그 or 특수 키) 반환
+ */
+function moondental_seo_current_key() {
+	if ( is_front_page() || is_home() ) return '_home';
+	if ( is_page() ) {
+		$slug_raw = get_post_field( 'post_name', get_queried_object_id() );
+		if ( ! $slug_raw ) return '';
+		$slug = urldecode( (string) $slug_raw );
+		return $slug;
+	}
+	return '';
+}
+
+/**
+ * Yoast title 오버라이드 — 우리 맵에 있는 페이지만 교체
+ */
+function moondental_wpseo_title( $title ) {
+	$key = moondental_seo_current_key();
+	if ( ! $key ) return $title;
+	$map = moondental_seo_page_map();
+	if ( isset( $map[ $key ]['title'] ) ) {
+		return $map[ $key ]['title'];
+	}
+	return $title;
+}
+add_filter( 'wpseo_title', 'moondental_wpseo_title', 20 );
+
+/**
+ * Yoast meta description 오버라이드
+ */
+function moondental_wpseo_metadesc( $desc ) {
+	$key = moondental_seo_current_key();
+	if ( ! $key ) return $desc;
+	$map = moondental_seo_page_map();
+	if ( isset( $map[ $key ]['desc'] ) ) {
+		return $map[ $key ]['desc'];
+	}
+	return $desc;
+}
+add_filter( 'wpseo_metadesc', 'moondental_wpseo_metadesc', 20 );
+
+/**
+ * Yoast OG title / description — 소셜 공유용도 동일하게 오버라이드
+ */
+add_filter( 'wpseo_opengraph_title', 'moondental_wpseo_title', 20 );
+add_filter( 'wpseo_opengraph_desc',  'moondental_wpseo_metadesc', 20 );
+add_filter( 'wpseo_twitter_title',   'moondental_wpseo_title', 20 );
+add_filter( 'wpseo_twitter_description', 'moondental_wpseo_metadesc', 20 );
+
+/**
+ * Yoast 없을 때 · document_title_parts 필터로 대체
+ */
+add_filter( 'document_title_parts', function ( $parts ) {
+	if ( defined( 'WPSEO_VERSION' ) ) return $parts;
+	$key = moondental_seo_current_key();
+	if ( ! $key ) return $parts;
+	$map = moondental_seo_page_map();
+	if ( isset( $map[ $key ]['title'] ) ) {
+		return array( 'title' => $map[ $key ]['title'] );
+	}
+	return $parts;
+}, 20 );
+
+/**
+ * Yoast 없을 때 · meta description 직접 출력
+ */
+add_action( 'wp_head', function () {
+	if ( defined( 'WPSEO_VERSION' ) ) return; // Yoast가 처리
+	$key = moondental_seo_current_key();
+	if ( ! $key ) return;
+	$map = moondental_seo_page_map();
+	if ( isset( $map[ $key ]['desc'] ) ) {
+		echo '<meta name="description" content="' . esc_attr( $map[ $key ]['desc'] ) . '" />' . "\n";
+	}
+}, 2 );
+
+/**
+ * SiteNavigationElement JSON-LD — 구글 사이트링크 유도
+ *  주요 메뉴를 구조화하여 브랜드 검색시 sitelinks 자동 노출 확률 상승
+ */
+function moondental_jsonld_sitenav() {
+	if ( ! is_front_page() ) return;
+	$home = home_url( '/' );
+	$nav = array(
+		array( 'name' => '의료진',        'url' => $home . '의료진/' ),
+		array( 'name' => '오시는 길',     'url' => $home . '오시는-길/' ),
+		array( 'name' => '진료항목',      'url' => $home . '진료항목/' ),
+		array( 'name' => '임플란트 센터', 'url' => $home . '진료항목/임플란트-센터/' ),
+		array( 'name' => '슈어스마일 투명교정', 'url' => $home . '진료항목/슈어스마일-투명교정/' ),
+		array( 'name' => '자연치아 살리기', 'url' => $home . '진료항목/자연치아-살리기/' ),
+		array( 'name' => '비용 안내',     'url' => $home . '비용-안내/' ),
+		array( 'name' => '상담 예약',     'url' => $home . '상담예약/' ),
+		array( 'name' => '치과 백과사전', 'url' => $home . '치과사전/' ),
+		array( 'name' => 'FAQ',           'url' => $home . 'faq/' ),
+	);
+	$items = array();
+	foreach ( $nav as $n ) {
+		$items[] = array(
+			'@type' => 'SiteNavigationElement',
+			'name'  => $n['name'],
+			'url'   => $n['url'],
+		);
+	}
+	$schema = array(
+		'@context' => 'https://schema.org',
+		'@graph'   => $items,
+	);
+	echo "\n<script type=\"application/ld+json\">\n";
+	echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+	echo "\n</script>\n";
+}
+add_action( 'wp_head', 'moondental_jsonld_sitenav', 51 );
+
+/**
+ * 치과사전 개별 항목 · MedicalWebPage schema (검색 결과 강화)
+ */
+function moondental_jsonld_encyclopedia() {
+	if ( is_admin() ) return;
+	if ( ! is_page() ) return;
+	$slug = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
+	if ( $slug !== '치과사전' ) return;
+	$schema = array(
+		'@context'  => 'https://schema.org',
+		'@type'     => array( 'MedicalWebPage', 'CollectionPage' ),
+		'name'      => '치과 백과사전 · 문치과병원',
+		'about'     => array(
+			'@type' => 'MedicalCondition',
+			'name'  => '치과 치료 · 용어 · 질환',
+		),
+		'audience'  => array(
+			'@type'         => 'PeopleAudience',
+			'audienceType'  => 'Patient',
+		),
+		'publisher' => array(
+			'@type' => 'Dentist',
+			'name'  => '한아의료재단 문치과병원',
+			'url'   => home_url( '/' ),
+		),
+	);
+	echo "\n<script type=\"application/ld+json\">\n";
+	echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+	echo "\n</script>\n";
+}
+add_action( 'wp_head', 'moondental_jsonld_encyclopedia', 52 );
+
+/**
+ * meta keywords · 지역+진료 키워드 확장 (일부 검색엔진용 · 네이버 참조)
+ */
+function moondental_seo_extra_keywords() {
+	$key = moondental_seo_current_key();
+	$base = '천안치과, 천안 치과, 천안 임플란트, 천안 투명교정, 천안 치아교정, 천안 라미네이트, 천안 자연치아, 천안 소아치과, 아산 치과, 아산 임플란트, 문치과병원, 천안 문치과, 만남로 치과, 문타워, 한아의료재단';
+	$per_page = array(
+		'임플란트-센터'         => '천안 임플란트, 네비게이션 임플란트, 가이드 임플란트, 3D CT 임플란트, 무절개 임플란트, 천안 임플란트 잘하는곳',
+		'슈어스마일-투명교정'   => '천안 슈어스마일, 슈어스마일 중부권, 투명교정 천안, PrimeScan, 성인 투명교정, 직장인 교정',
+		'브라켓-치아교정'       => '천안 치아교정, 브라켓 교정, 설측 교정, 세라믹 브라켓, 자가결찰 교정, 소아 교정',
+		'자연치아-살리기'       => '자연치아 살리기, 치아 재접합, 신경치료, 치주치료, 미세현미경 치료, 발치 전 상담',
+		'턱관절-클리닉'         => '천안 턱관절, 이갈이, 안면통증, 스플린트, TMJ 치료',
+		'사랑니-발치'           => '천안 사랑니, 매복 사랑니, CT 발치, 사랑니 수술',
+		'심미치료'              => '천안 라미네이트, 치아 미백, 심미 크라운, 스마일 디자인',
+		'예방클리닉'            => '천안 스케일링, 정기 검진, 실란트, 불소도포, 홈케어',
+		'치과사전'              => '치과 사전, 치과 용어, 치과 백과, 치과 정보, 치과 질환, 치과 치료',
+	);
+	$extra = isset( $per_page[ $key ] ) ? ', ' . $per_page[ $key ] : '';
+	echo '<meta name="keywords" content="' . esc_attr( $base . $extra ) . '" />' . "\n";
+}
+add_action( 'wp_head', 'moondental_seo_extra_keywords', 3 );

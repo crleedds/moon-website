@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.60' );
+define( 'MOONDENTAL_VERSION', '3.44.61' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -1147,6 +1147,7 @@ require_once MOONDENTAL_DIR . '/inc/content-defaults.php';
 require_once MOONDENTAL_DIR . '/inc/naver-importer.php';
 require_once MOONDENTAL_DIR . '/inc/reservation.php';
 require_once MOONDENTAL_DIR . '/inc/enhancements.php';
+require_once MOONDENTAL_DIR . '/inc/seo-boost.php';
 require_once MOONDENTAL_DIR . '/inc/customizer-content.php';
 require_once MOONDENTAL_DIR . '/inc/auto-translate.php'; // v3.44.0
 require_once MOONDENTAL_DIR . '/inc/strengths.php';
@@ -2370,24 +2371,25 @@ function moondental_cleanup_duplicate_pages() {
 }
 
 /**
- * v3.44.59 · 관리자가 URL로 강제 정리 실행 가능 (진단용)
- * 접근: /?_md_cleanup=RUN (한 번만 실행됨)
+ * v3.44.61 · 강제 실행 엔드포인트 제거 (보안) — 관리자만 실행 가능
+ * 접근: /?_md_cleanup=RUN · manage_options 권한 필요
  */
 add_action( 'wp_loaded', function() {
 	if ( ! isset( $_GET['_md_cleanup'] ) || $_GET['_md_cleanup'] !== 'RUN' ) return;
-	// 관리자 확인 우회 · 대신 시크릿 토큰 · URL 을 아는 사람만 실행
+	if ( ! current_user_can( 'manage_options' ) ) {
+		status_header( 403 );
+		echo 'Forbidden';
+		exit;
+	}
 	$count = moondental_cleanup_duplicate_pages();
 	flush_rewrite_rules( false );
-	delete_option( 'md_duplicate_pages_cleaned_v58' );
-	update_option( 'md_duplicate_pages_cleaned_v58', '1', false );
 	nocache_headers();
 	header( 'Content-Type: application/json; charset=utf-8' );
 	echo wp_json_encode( array(
-		'ok'           => true,
-		'trashed'      => $count,
-		'details'      => get_option( 'md_last_cleanup_details' ),
-		'time'         => get_option( 'md_last_cleanup_time' ),
-		'flushed'      => true,
+		'ok'      => true,
+		'trashed' => $count,
+		'details' => get_option( 'md_last_cleanup_details' ),
+		'time'    => get_option( 'md_last_cleanup_time' ),
 	), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
 	exit;
 }, 1 );
