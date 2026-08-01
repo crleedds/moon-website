@@ -2203,15 +2203,15 @@ function moondental_preservation_content_fields() {
 			'title'  => '01 · 충치치료',
 			'fields' => array(
 				'preservation_cavity_eyebrow' => array( 'default' => '01 · CAVITY TREATMENT', 'label' => 'eyebrow', 'type' => 'text' ),
-				'preservation_cavity_title'   => array( 'default' => '천안·아산 충치치료 — 보존적 접근으로 자연치아 최대한 살리기', 'label' => '섹션 제목', 'type' => 'text' ),
-				'preservation_cavity_lead'    => array( 'default' => '충치는 조기 발견·조기 치료가 핵심입니다. 진행 단계에 따라 가장 보존적인 방법을 선택합니다.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'preservation_cavity_title'   => array( 'default' => '천안·아산 충치치료 — 뽑아야 할 치아도 치수복조술로 살립니다', 'label' => '섹션 제목', 'type' => 'text' ),
+				'preservation_cavity_lead'    => array( 'default' => '충치는 조기 발견·조기 치료가 핵심입니다. 문치과병원은 진행 단계별로 가장 보존적인 방법을 선택하며, 신경 근접 심부 충치도 곧바로 신경치료·발치로 넘어가지 않고 치수복조술(Pulp Capping)로 신경을 살리는 시도를 먼저 합니다.', 'label' => '섹션 리드', 'type' => 'textarea' ),
 				'preservation_cavity_cards'   => array(
-					'default' => "초기 | 충치 초기 — 불소도포 · 실란트 | 치아 표면에 미세한 변색·법랑질 손상이 시작된 단계. 삭제 없이 <strong>고농도 불소도포</strong>로 재광화를 유도합니다. 어금니는 <strong>실란트(홈메우기)</strong>로 추가 충치를 예방.\n중기 | 중기 충치 — 심미 레진 충전 | 법랑질을 지나 상아질에 충치가 진행된 단계. <strong>최소 삭제 + 심미 레진 충전</strong>으로 자연치아 형태와 색을 그대로 복원. 1~2회 내원으로 완료.\n진행 | 진행 충치 — 세라믹 인레이·온레이 | 충치 범위가 넓어 레진만으로 부족한 경우 <strong>세라믹 인레이/온레이</strong>로 정밀 복원. 강도·심미·내구성 모두 우수. 13층 자체 기공실 직접 제작.\n심부 | 심부 충치 — 신경 보존 직접치수복조 | 충치가 신경에 근접했지만 살아있는 경우 <strong>직접치수복조(direct pulp capping)</strong>으로 신경을 살리는 시도. 신경치료 없이 자연치아 보존 가능성.\n광범위 | 광범위 충치 — 크라운 (지르코니아·금) | 충치로 치아 구조가 크게 손상된 경우 신경치료 후 <strong>크라운(지르코니아·금)</strong>으로 강도 회복. 자체 기공실 보철로 정밀한 적합도.\n예방 | 충치 재발 예방 | 치료 후 6개월~1년 정기 검진, 스케일링, 에어플로우, 불소도포로 재발 예방. 양치 습관과 식이 관리도 함께 안내.",
+					'default' => "초기 | 충치 초기 — 불소도포 · 실란트 | 치아 표면에 미세한 변색·법랑질 손상이 시작된 단계. 삭제 없이 <strong>고농도 불소도포</strong>로 재광화를 유도합니다. 어금니는 <strong>실란트(홈메우기)</strong>로 추가 충치를 예방.\n중기 | 중기 충치 — 심미 레진 충전 | 법랑질을 지나 상아질에 충치가 진행된 단계. <strong>최소 삭제 + 심미 레진 충전</strong>으로 자연치아 형태와 색을 그대로 복원. 1~2회 내원으로 완료.\n진행 | 진행 충치 — 세라믹 인레이·온레이 | 충치 범위가 넓어 레진만으로 부족한 경우 <strong>세라믹 인레이/온레이</strong>로 정밀 복원. 강도·심미·내구성 모두 우수. 13층 자체 기공실 직접 제작.\n★ 문치과병원 특별 술식 | 심부 충치 — 치수복조술로 신경 살리기 | 충치가 신경에 아주 근접하거나 미세 노출된 경우, 다른 곳에서는 곧바로 신경치료·발치를 권합니다. 문치과병원은 <strong>치수복조술(Pulp Capping)</strong>로 신경을 살려두는 시도를 먼저 합니다. <strong>MTA·Biodentine</strong> 등 재생 유도 재료로 상아질 다리(dentin bridge)를 형성해 <strong>신경치료 없이 자연치아를 그대로 보존</strong>. 발치 위기 치아까지 살리는 문치과병원 보존과의 강점 술식입니다.\n광범위 | 광범위 충치 — 크라운 (지르코니아·금) | 충치로 치아 구조가 크게 손상된 경우 신경치료 후 <strong>크라운(지르코니아·금)</strong>으로 강도 회복. 자체 기공실 보철로 정밀한 적합도.\n예방 | 충치 재발 예방 | 치료 후 6개월~1년 정기 검진, 스케일링, 에어플로우, 불소도포로 재발 예방. 양치 습관과 식이 관리도 함께 안내.",
 					'label' => '카드 (한 줄에 1개, 형식: 스테이지 | 제목 | 본문)',
 					'type'  => 'textarea',
 				),
-				'preservation_cavity_callout_title' => array( 'default' => '💡 충치치료 비용 안내', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
-				'preservation_cavity_callout_body'  => array( 'default' => '레진 충전·세라믹 인레이·지르코니아 크라운 등 재료별 비용은 정확한 진단 후 산정합니다. <a href="/비용-안내/">비용 안내 자세히 보기 →</a>', 'label' => '콜아웃 · 본문 (HTML 허용)', 'type' => 'textarea' ),
+				'preservation_cavity_callout_title' => array( 'default' => '★ 문치과병원의 특별함 · 치수복조술 (Pulp Capping)', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
+				'preservation_cavity_callout_body'  => array( 'default' => '충치가 신경까지 깊게 진행되면 대부분 곧바로 <strong>신경치료</strong>를 받거나 심한 경우 <strong>발치 후 임플란트</strong>를 권유받습니다. 하지만 신경이 살아있는 상태라면, 신경을 그대로 살리는 시도가 가능합니다.<br><br>문치과병원은 <strong>MTA(Mineral Trioxide Aggregate)·Biodentine</strong> 등 재생 유도 재료를 사용해 노출된 치수 위에 인공 상아질 다리를 형성하는 <strong>치수복조술(Pulp Capping)</strong>을 적극적으로 시행합니다. 성공하면 <strong>신경치료 없이 자연치아를 그대로 살릴 수 있고</strong>, 실패해도 신경치료로 단계적 전환이 가능해 <strong>치아를 잃을 위험은 없습니다</strong>.<br><br>• 대상: 심부 우식·미세 치수 노출·젊은 환자·미성숙 영구치<br>• 재료: MTA · Biodentine (재생 유도 생체친화 재료)<br>• 진료팀: 보건복지부 인증 <strong>보존과 전문의</strong> 직접 진행<br>• 실패해도 신경치료로 전환 가능 · 발치 위험 없음<br><br>발치 권유를 받으셨거나 심부 충치로 신경치료를 고민 중이라면 한 번 더 살펴봐 드리겠습니다. <a href="/상담예약/">보존 가능성 상담 예약 →</a>', 'label' => '콜아웃 · 본문 (HTML 허용)', 'type' => 'textarea' ),
 			),
 		),
 		'endo' => array(

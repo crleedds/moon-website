@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.69
+Version:      3.44.70
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -7992,20 +7992,24 @@ html { scroll-behavior: smooth; }
 /* 콜아웃 박스 */
 .md-preservation-callout {
   background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-surface) 100%);
-  border-left: 4px solid var(--color-primary);
-  padding: clamp(18px, 2.2vw, 24px);
+  border-left: 6px solid var(--color-primary);
+  padding: clamp(24px, 3vw, 36px);
   border-radius: var(--radius-md);
+  margin-top: clamp(24px, 3vw, 40px);
+  box-shadow: 0 6px 24px rgba(216, 128, 98, 0.12);
 }
 .md-preservation-callout strong {
   display: block;
-  font-size: 0.9375rem;
-  margin-bottom: 6px;
+  font-size: clamp(1.05rem, 1.7vw, 1.25rem);
+  margin-bottom: 12px;
   color: var(--color-primary-dark);
+  letter-spacing: -0.01em;
+  line-height: 1.4;
 }
 .md-preservation-callout p {
   margin: 0;
-  font-size: var(--fs-small);
-  line-height: 1.65;
+  font-size: clamp(0.95rem, 1.4vw, 1.02rem);
+  line-height: 1.75;
   color: var(--color-text);
   word-break: keep-all;
 }
@@ -8014,6 +8018,51 @@ html { scroll-behavior: smooth; }
   font-weight: 700;
   border-bottom: 1px dashed var(--color-primary);
   text-decoration: none;
+}
+
+/* v3.44.70 · '★' 로 시작하는 심부 충치 카드 강조 (문치과병원 특별 술식) */
+.md-preservation-card:has(.md-preservation-card__stage:where([data-star]), .md-preservation-card__stage:not(:empty)) {
+  /* fallback: no-op selector, real highlight below */
+}
+.md-preservation-card--highlight,
+.md-preservation-card .md-preservation-card__stage:where(:not(:empty)) {
+  /* placeholder for star card selector */
+}
+/* 별표 카드는 stage span 텍스트가 '★' 로 시작 · attribute selector 필요 없음.
+   대신 JS 없이 스테이지 텍스트에 별표가 있으면 background gradient 강조 */
+.md-preservation-card:has(> .md-preservation-card__stage:first-child) .md-preservation-card__stage[data-highlight],
+.md-preservation-card__stage:where([data-highlight]) {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: #fff;
+}
+/* Simplified · 별표 카드 강조 – 컨테이너에 modifier class 필요 */
+.md-preservation-card.is-star {
+  background: linear-gradient(135deg, #fff 0%, rgba(216, 128, 98, 0.06) 100%);
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 10px 32px rgba(216, 128, 98, 0.18);
+  transform: translateY(-2px);
+  position: relative;
+}
+.md-preservation-card.is-star::before {
+  content: '';
+  position: absolute;
+  top: -1px; right: -1px;
+  width: 60px; height: 60px;
+  background: linear-gradient(135deg, transparent 50%, var(--color-primary) 50%);
+  border-radius: 0 var(--radius-md) 0 0;
+}
+.md-preservation-card.is-star .md-preservation-card__stage {
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: 0.75rem;
+  padding: 6px 14px;
+}
+.md-preservation-card.is-star h3 {
+  color: var(--color-primary-dark);
+  font-size: 1.15rem;
 }
 
 /* 진행 흐름 (덴탈 SPA 6단계) */

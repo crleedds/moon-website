@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.69' );
+define( 'MOONDENTAL_VERSION', '3.44.70' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -307,6 +307,48 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3291', 'done' );
 }, 44 );
+
+/* 일회성 마이그레이션 v3.44.70 · 충치치료 섹션 · 치수복조술 강조 콘텐츠로 갱신
+ * Customizer 저장값이 옛 기본값이면 remove_theme_mod → 새 기본값 자동 적용
+ * 사용자가 편집한 값은 보존 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_cavity_pulpcap_v3470' ) === 'done' ) return;
+	$old_title = '천안·아산 충치치료 — 보존적 접근으로 자연치아 최대한 살리기';
+	if ( get_theme_mod( 'preservation_cavity_title' ) === $old_title
+	  || get_theme_mod( 'md_content_preservation_cavity_title' ) === $old_title ) {
+		remove_theme_mod( 'preservation_cavity_title' );
+		remove_theme_mod( 'md_content_preservation_cavity_title' );
+	}
+	$old_lead = '충치는 조기 발견·조기 치료가 핵심입니다. 진행 단계에 따라 가장 보존적인 방법을 선택합니다.';
+	if ( get_theme_mod( 'preservation_cavity_lead' ) === $old_lead
+	  || get_theme_mod( 'md_content_preservation_cavity_lead' ) === $old_lead ) {
+		remove_theme_mod( 'preservation_cavity_lead' );
+		remove_theme_mod( 'md_content_preservation_cavity_lead' );
+	}
+	$stored_cards = get_theme_mod( 'preservation_cavity_cards' );
+	if ( ! is_string( $stored_cards ) || $stored_cards === '' ) {
+		$stored_cards = get_theme_mod( 'md_content_preservation_cavity_cards' );
+	}
+	if ( is_string( $stored_cards ) && strpos( $stored_cards, '심부 | 심부 충치 — 신경 보존 직접치수복조 |' ) !== false ) {
+		remove_theme_mod( 'preservation_cavity_cards' );
+		remove_theme_mod( 'md_content_preservation_cavity_cards' );
+	}
+	$old_cot = '💡 충치치료 비용 안내';
+	if ( get_theme_mod( 'preservation_cavity_callout_title' ) === $old_cot
+	  || get_theme_mod( 'md_content_preservation_cavity_callout_title' ) === $old_cot ) {
+		remove_theme_mod( 'preservation_cavity_callout_title' );
+		remove_theme_mod( 'md_content_preservation_cavity_callout_title' );
+	}
+	$stored_body = get_theme_mod( 'preservation_cavity_callout_body' );
+	if ( ! is_string( $stored_body ) || $stored_body === '' ) {
+		$stored_body = get_theme_mod( 'md_content_preservation_cavity_callout_body' );
+	}
+	if ( is_string( $stored_body ) && strpos( $stored_body, '레진 충전·세라믹 인레이·지르코니아 크라운 등 재료별 비용' ) !== false ) {
+		remove_theme_mod( 'preservation_cavity_callout_body' );
+		remove_theme_mod( 'md_content_preservation_cavity_callout_body' );
+	}
+	update_option( 'moondental_cavity_pulpcap_v3470', 'done' );
+}, 47 );
 
 /* 일회성 마이그레이션 v3.44.69 · 같은 부서·직급 내 이름 가나다순 정렬 */
 add_action( 'after_setup_theme', function() {

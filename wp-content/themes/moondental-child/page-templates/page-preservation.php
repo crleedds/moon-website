@@ -114,8 +114,12 @@ $perio_cards        = $parse_cards( md_content( 'preservation_perio_cards', '' )
 
 		<?php if ( $cavity_cards ) : ?>
 		<div class="md-preservation-grid">
-			<?php foreach ( $cavity_cards as $c ) : ?>
-			<article class="md-preservation-card">
+			<?php foreach ( $cavity_cards as $c ) :
+				// v3.44.70 · ★ 로 시작하는 stage 는 문치과병원 특별 술식 강조 카드
+				$_is_star = ( isset( $c['stage'] ) && strpos( trim( $c['stage'] ), '★' ) === 0 );
+				$_card_class = 'md-preservation-card' . ( $_is_star ? ' is-star' : '' );
+			?>
+			<article class="<?php echo esc_attr( $_card_class ); ?>">
 				<?php if ( $c['stage'] !== '' ) : ?><span class="md-preservation-card__stage"><?php echo esc_html( $c['stage'] ); ?></span><?php endif; ?>
 				<h3><?php echo esc_html( $c['title'] ); ?></h3>
 				<p><?php echo wp_kses_post( $c['body'] ); ?></p>
