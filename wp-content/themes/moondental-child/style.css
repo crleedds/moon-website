@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.71
+Version:      3.44.72
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -7990,34 +7990,118 @@ html { scroll-behavior: smooth; }
 }
 
 /* 콜아웃 박스 */
+/* v3.44.72 · 콜아웃 완전 재설계 · 치수복조술 강조 콜아웃 */
 .md-preservation-callout {
-  background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-surface) 100%);
-  border-left: 6px solid var(--color-primary);
-  padding: clamp(24px, 3vw, 36px);
-  border-radius: var(--radius-md);
-  margin-top: clamp(24px, 3vw, 40px);
-  box-shadow: 0 6px 24px rgba(216, 128, 98, 0.12);
+  background: linear-gradient(135deg, #FFF5EC 0%, #FFFAF5 100%);
+  border: 1px solid rgba(216, 128, 98, 0.18);
+  border-left: 6px solid var(--color-primary, #D97742);
+  padding: clamp(28px, 3.5vw, 44px) clamp(24px, 3vw, 40px);
+  border-radius: var(--radius-lg, 16px);
+  margin-top: clamp(28px, 3.5vw, 44px);
+  box-shadow: 0 8px 32px rgba(216, 128, 98, 0.12);
+  position: relative;
+  overflow: hidden;
 }
-.md-preservation-callout strong {
+.md-preservation-callout::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(216, 128, 98, 0.10) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+/* 콜아웃 최상위 직계 자식 strong = 제목 */
+.md-preservation-callout > strong {
   display: block;
-  font-size: clamp(1.05rem, 1.7vw, 1.25rem);
-  margin-bottom: 12px;
-  color: var(--color-primary-dark);
-  letter-spacing: -0.01em;
-  line-height: 1.4;
+  font-size: clamp(1.15rem, 1.9vw, 1.4rem);
+  margin: 0 0 18px;
+  padding-bottom: 14px;
+  color: var(--color-primary-dark, #B45E2E);
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+  border-bottom: 2px dashed rgba(216, 128, 98, 0.25);
+  position: relative;
+  z-index: 1;
+}
+/* 본문 안 인라인 strong = 그냥 굵은 텍스트 (block 처리 X) */
+.md-preservation-callout p strong,
+.md-preservation-callout li strong {
+  display: inline;
+  font-weight: 800;
+  color: var(--color-primary-dark, #B45E2E);
+  margin: 0;
+  padding: 0;
+  border: none;
+  line-height: inherit;
 }
 .md-preservation-callout p {
-  margin: 0;
-  font-size: clamp(0.95rem, 1.4vw, 1.02rem);
-  line-height: 1.75;
-  color: var(--color-text);
+  margin: 0 0 14px;
+  font-size: clamp(0.98rem, 1.4vw, 1.05rem);
+  line-height: 1.8;
+  color: var(--color-text, #3a3a3a);
+  word-break: keep-all;
+  position: relative;
+  z-index: 1;
+}
+.md-preservation-callout p:last-child { margin-bottom: 0; }
+.md-preservation-callout ul,
+.md-preservation-callout ol {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  display: grid;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+.md-preservation-callout li {
+  background: rgba(255, 255, 255, 0.7);
+  border-left: 3px solid var(--color-primary, #D97742);
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.97rem;
+  line-height: 1.6;
+  color: var(--color-text, #3a3a3a);
   word-break: keep-all;
 }
+.md-preservation-callout li::before { display: none; }
 .md-preservation-callout a {
-  color: var(--color-primary-dark);
+  display: inline-block;
+  margin-top: 6px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--color-primary, #D97742), var(--color-primary-dark, #B45E2E));
   font-weight: 700;
-  border-bottom: 1px dashed var(--color-primary);
+  padding: 12px 24px;
+  border-radius: 999px;
   text-decoration: none;
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px rgba(216, 128, 98, 0.35);
+}
+.md-preservation-callout a:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(216, 128, 98, 0.45);
+}
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .md-preservation-callout {
+    background: linear-gradient(135deg, #2a1f18 0%, #1f1a15 100%);
+    border-color: rgba(242, 168, 120, 0.2);
+    border-left-color: #f2a878;
+  }
+  .md-preservation-callout::before {
+    background: radial-gradient(circle, rgba(242, 168, 120, 0.08) 0%, transparent 70%);
+  }
+  .md-preservation-callout > strong { color: #f2a878; border-bottom-color: rgba(242, 168, 120, 0.3); }
+  .md-preservation-callout p strong, .md-preservation-callout li strong { color: #f2a878; }
+  .md-preservation-callout p { color: #d8d8d8; }
+  .md-preservation-callout li { background: rgba(255, 255, 255, 0.04); color: #d8d8d8; border-left-color: #f2a878; }
+}
+@media (max-width: 640px) {
+  .md-preservation-callout { padding: 24px 18px; }
+  .md-preservation-callout li { padding: 10px 12px; font-size: 0.92rem; }
+  .md-preservation-callout a { padding: 10px 20px; font-size: 0.95rem; }
 }
 
 /* v3.44.70 · '★' 로 시작하는 심부 충치 카드 강조 (문치과병원 특별 술식) */

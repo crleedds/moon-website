@@ -134,7 +134,17 @@ $perio_cards        = $parse_cards( md_content( 'preservation_perio_cards', '' )
 		if ( $cvt || $cvb ) : ?>
 		<aside class="md-preservation-callout">
 			<?php if ( $cvt ) : ?><strong><?php echo esc_html( $cvt ); ?></strong><?php endif; ?>
-			<?php if ( $cvb ) : ?><p><?php echo wp_kses_post( $cvb ); ?></p><?php endif; ?>
+			<?php if ( $cvb ) :
+				// v3.44.72 · 본문이 이미 <p>/<ul> 등으로 시작하면 outer <p> 래핑 생략
+				$cvb_trim = ltrim( $cvb );
+				$has_block = ( strpos( $cvb_trim, '<p' ) === 0 || strpos( $cvb_trim, '<ul' ) === 0 || strpos( $cvb_trim, '<ol' ) === 0 || strpos( $cvb_trim, '<div' ) === 0 );
+			?>
+				<?php if ( $has_block ) : ?>
+					<div class="md-preservation-callout__body"><?php echo wp_kses_post( $cvb ); ?></div>
+				<?php else : ?>
+					<p><?php echo wp_kses_post( $cvb ); ?></p>
+				<?php endif; ?>
+			<?php endif; ?>
 		</aside>
 		<?php endif; ?>
 	</div>

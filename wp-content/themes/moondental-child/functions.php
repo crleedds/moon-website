@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.71' );
+define( 'MOONDENTAL_VERSION', '3.44.72' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -307,6 +307,25 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3291', 'done' );
 }, 44 );
+
+/* 일회성 마이그레이션 v3.44.72 · 치수복조술 콜아웃 · 구조화된 HTML 로 갱신
+ * v3.44.70~71 default (br 기반) 이 저장돼 있으면 → 새 <p>·<ul> 기반 default 로 갱신 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_pulpcap_html_v3472' ) === 'done' ) return;
+	$stored = get_theme_mod( 'preservation_cavity_callout_body' );
+	if ( ! is_string( $stored ) || $stored === '' ) {
+		$stored = get_theme_mod( 'md_content_preservation_cavity_callout_body' );
+	}
+	if ( is_string( $stored ) && $stored !== '' ) {
+		// 옛 default 시그니처: 첫 문장 + <br><br> 사용
+		if ( strpos( $stored, '충치가 신경까지 깊게 진행되면' ) === 0
+		  && strpos( $stored, '<br><br>' ) !== false ) {
+			remove_theme_mod( 'preservation_cavity_callout_body' );
+			remove_theme_mod( 'md_content_preservation_cavity_callout_body' );
+		}
+	}
+	update_option( 'moondental_pulpcap_html_v3472', 'done' );
+}, 49 );
 
 /* 일회성 마이그레이션 v3.44.71 · Customizer 저장값에 남은 '전문의' 문구 자동 치환
  * 파일 default 는 v3.44.71 에서 이미 정리됨. Customizer 에 사용자가 옛 default 를
