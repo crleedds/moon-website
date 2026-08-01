@@ -86,6 +86,12 @@ $nav_items = $parse_nav( md_content( 'prevention_nav_items', '' ) );
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( get_the_title() ?: '예방클리닉' ); ?></span>
 		</nav>
 		<span class="md-page-hero__eyebrow"><?php echo esc_html( md_content( 'prevention_hero_eyebrow', '' ) ); ?></span>
+		<?php
+		$_prev_floor = function_exists( 'moondental_slug_floor' ) ? moondental_slug_floor( '예방클리닉' ) : '';
+		if ( $_prev_floor ) :
+		?>
+			<span class="md-service-floor-badge" aria-label="위치"><span aria-hidden="true">📍</span> 문타워 <?php echo esc_html( $_prev_floor ); ?> · 예방치과</span>
+		<?php endif; ?>
 		<h1 class="md-page-hero__title">
 			<?php echo esc_html( md_content( 'prevention_hero_title_a', '' ) ); ?><br>
 			<em><?php echo esc_html( md_content( 'prevention_hero_title_b', '' ) ); ?></em>

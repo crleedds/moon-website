@@ -917,6 +917,126 @@ add_filter( 'nav_menu_css_class', 'moondental_strip_ancestor_classes_on_standalo
 function moondental_nolink_parent_menu_titles() {
 	return array( '병원안내', '병원 안내', '자연치아살리기', '자연치아 살리기', '진료과', '교정센터' );
 }
+
+/**
+ * v3.44.68 · 층별 안내 · 공식 배치 (단일 진실원)
+ *  - 오시는 길 · 병원 소개 · 시설 · 서비스 페이지에서 재사용
+ *  - 슬러그가 있는 센터는 페이지 링크 자동 생성
+ */
+function moondental_floor_guide_data() {
+	return array(
+		array(
+			'floor'   => '13F',
+			'centers' => array(
+				array( 'name' => '한아문화센터' ),
+				array( 'name' => '원내기공실' ),
+			),
+		),
+		array(
+			'floor'   => '11F',
+			'centers' => array(
+				array( 'name' => '교정센터',   'slug' => '투명교정-센터' ),
+				array( 'name' => '소아치과',   'slug' => '소아치과' ),
+				array( 'name' => '치주과' ),
+				array( 'name' => '디지털센터' ),
+			),
+		),
+		array(
+			'floor'   => '10F',
+			'centers' => array(
+				array( 'name' => '임플란트센터',      'slug' => '임플란트-센터' ),
+				array( 'name' => '스마일 디자인 센터', 'slug' => '스마일디자인센터' ),
+				array( 'name' => '구강외과' ),
+				array( 'name' => '구강내과' ),
+				array( 'name' => '턱관절클리닉',      'slug' => '턱관절-클리닉' ),
+			),
+		),
+		array(
+			'floor'   => '9F',
+			'centers' => array(
+				array( 'name' => '신환접수' ),
+				array( 'name' => '보철과' ),
+				array( 'name' => '보존과' ),
+				array( 'name' => '예방치과',   'slug' => '예방클리닉' ),
+			),
+		),
+	);
+}
+
+/**
+ * v3.44.68 · 슬러그 → 층 라벨 반환 (예: '임플란트-센터' → '10F')
+ *   서비스 페이지 히어로에 층 배지 표시용
+ */
+function moondental_slug_floor( $slug ) {
+	static $cache = null;
+	if ( $cache === null ) {
+		$cache = array();
+		foreach ( moondental_floor_guide_data() as $f ) {
+			foreach ( $f['centers'] as $c ) {
+				if ( isset( $c['slug'] ) ) $cache[ $c['slug'] ] = $f['floor'];
+			}
+		}
+		// 진료 페이지 슬러그 · 층 별칭 매핑 (실제 진료 담당 진료과의 층)
+		$aliases = array(
+			'자연치아-살리기' => '9F',  // 보존과 · 9F
+			'심미치료'         => '9F',  // 보철과 · 9F
+			'사랑니-발치'      => '10F', // 구강외과 · 10F
+			'슈어스마일-투명교정' => '11F', // 교정센터 · 11F
+			'브라켓-치아교정'  => '11F', // 교정센터 · 11F
+		);
+		foreach ( $aliases as $s => $f ) {
+			if ( ! isset( $cache[ $s ] ) ) $cache[ $s ] = $f;
+		}
+	}
+	return $cache[ $slug ] ?? '';
+}
+
+/**
+ * v3.44.68 · 층별 안내 HTML 렌더링
+ *   $variant: 'card' (기본) · 'inline' · 'sidebar'
+ */
+function moondental_render_floor_guide( $variant = 'card', $args = array() ) {
+	$defaults = array(
+		'title'      => md_content( 'floor_guide_title', '층별 안내' ),
+		'lead'       => '',
+		'link_pages' => true,
+	);
+	$args = array_merge( $defaults, $args );
+
+	$data = moondental_floor_guide_data();
+	$html  = '<aside class="md-floor-guide md-floor-guide--' . esc_attr( $variant ) . '" aria-label="' . esc_attr( $args['title'] ) . '">';
+	$html .= '<h3 class="md-floor-guide__title"><span class="md-floor-guide__title-inner">' . esc_html( $args['title'] ) . '</span></h3>';
+	if ( ! empty( $args['lead'] ) ) {
+		$html .= '<p class="md-floor-guide__lead">' . esc_html( $args['lead'] ) . '</p>';
+	}
+	$html .= '<ul class="md-floor-guide__list">';
+	foreach ( $data as $f ) {
+		$html .= '<li class="md-floor-guide__row">';
+		$html .= '<span class="md-floor-guide__floor">' . esc_html( $f['floor'] ) . '</span>';
+		$html .= '<span class="md-floor-guide__centers">';
+		$parts = array();
+		foreach ( $f['centers'] as $c ) {
+			$name = esc_html( $c['name'] );
+			if ( $args['link_pages'] && ! empty( $c['slug'] ) ) {
+				// 진료항목 하위 페이지 링크 (예: /진료항목/임플란트-센터/)
+				$url = home_url( '/진료항목/' . $c['slug'] . '/' );
+				// 스마일디자인센터는 진료항목 하위가 아니라 최상위
+				if ( $c['slug'] === '스마일디자인센터' ) {
+					$url = home_url( '/스마일디자인센터/' );
+				}
+				$parts[] = '<a class="md-floor-guide__center md-floor-guide__center--link" href="' . esc_url( $url ) . '">' . $name . '</a>';
+			} else {
+				$parts[] = '<span class="md-floor-guide__center">' . $name . '</span>';
+			}
+		}
+		$html .= implode( ' <span class="md-floor-guide__sep" aria-hidden="true">·</span> ', $parts );
+		$html .= '</span>';
+		$html .= '</li>';
+	}
+	$html .= '</ul>';
+	$html .= '</aside>';
+	return $html;
+}
 add_filter( 'nav_menu_css_class', function( $classes, $item ) {
 	$titles = moondental_nolink_parent_menu_titles();
 	if ( in_array( trim( (string) $item->title ), $titles, true ) ) {

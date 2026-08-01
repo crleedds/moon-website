@@ -1530,14 +1530,6 @@ function moondental_default_doctors_content() {
 <h2>분야별 전문 의료진이 함께합니다</h2>
 <p class="lead">한 분의 환자를 평생 보기 위해서는, 한 분의 원장만으로는 부족합니다. 문치과병원에는 <strong>구강악안면외과·보철·교정·치주·보존·턱관절·통합치의학</strong> 등 각 분야의 전문 의료진이 함께 있어 어떤 진료가 필요하더라도 한 곳에서 일관된 진료를 받으실 수 있습니다.</p>
 
-<h3>층별 전문 센터</h3>
-<ul>
-<li><strong>9F</strong> — 보철과 · 보존과 · 예방클리닉</li>
-<li><strong>10F</strong> — 임플란트센터 · 스마일디자인센터 · 구강외과 · 구강내과 · 턱관절클리닉</li>
-<li><strong>11F</strong> — 교정센터 · 소아치과 · 치주과 · 디지털센터</li>
-<li><strong>13F</strong> — 한아문화센터 · 기공실</li>
-</ul>
-
 <h3>주요 학위·자격</h3>
 <ul>
 <li>치과 보존과 전문의 (보건복지부 인증)</li>
@@ -1561,10 +1553,10 @@ function moondental_default_facility_content() {
 
 <h3>층별 전문 센터</h3>
 <ul>
-<li><strong>9F</strong> — 보철과 · 보존과 · 예방클리닉</li>
-<li><strong>10F</strong> — 임플란트센터 · 스마일디자인센터 · 구강외과 · 구강내과 · 턱관절클리닉</li>
+<li><strong>13F</strong> — 한아문화센터 · 원내기공실</li>
 <li><strong>11F</strong> — 교정센터 · 소아치과 · 치주과 · 디지털센터</li>
-<li><strong>13F</strong> — 한아문화센터 · 기공실 (보철 자체 제작)</li>
+<li><strong>10F</strong> — 임플란트센터 · 스마일 디자인 센터 · 구강외과 · 구강내과 · 턱관절클리닉</li>
+<li><strong>9F</strong> — 신환접수 · 보철과 · 보존과 · 예방치과</li>
 </ul>
 
 <h3>디지털 진단 장비</h3>
@@ -1774,10 +1766,10 @@ function moondental_default_services_overview_content() {
 
 	$html .= '<h3>층별 전문 센터</h3>';
 	$html .= '<ul>
-<li><strong>9F</strong> — 보철과 · 보존과 · 예방클리닉</li>
-<li><strong>10F</strong> — 임플란트센터 · 스마일디자인센터 · 구강외과 · 구강내과 · 턱관절클리닉</li>
+<li><strong>13F</strong> — 한아문화센터 · 원내기공실</li>
 <li><strong>11F</strong> — 교정센터 · 소아치과 · 치주과 · 디지털센터</li>
-<li><strong>13F</strong> — 한아문화센터 · 기공실</li>
+<li><strong>10F</strong> — 임플란트센터 · 스마일 디자인 센터 · 구강외과 · 구강내과 · 턱관절클리닉</li>
+<li><strong>9F</strong> — 신환접수 · 보철과 · 보존과 · 예방치과</li>
 </ul>';
 
 	$html .= '<h3>저희가 가장 신경 쓰는 것</h3>';

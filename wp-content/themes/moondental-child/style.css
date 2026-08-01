@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.67
+Version:      3.44.68
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -6804,6 +6804,148 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   padding: 10px 14px;
   font-size: var(--fs-caption);
   margin-top: auto;
+}
+
+/* =============================================================
+   38b. 층별 안내 (.md-floor-guide) · v3.44.68
+   ============================================================= */
+.md-floor-guide {
+  background: var(--color-white, #fff);
+  border: 1px solid var(--color-border, #ecdfd3);
+  border-radius: var(--radius-lg, 16px);
+  padding: clamp(20px, 3vw, 32px) clamp(18px, 3vw, 28px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  max-width: 620px;
+  margin: 0 auto;
+  text-align: left;
+}
+.md-floor-guide__title {
+  display: block;
+  text-align: center;
+  margin: 0 auto 24px;
+  font-size: 0;
+  line-height: 1;
+}
+.md-floor-guide__title-inner {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--color-primary, #E58C4E), var(--color-primary-dark, #D97742));
+  color: #fff;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  font-weight: 700;
+  padding: 10px 32px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+.md-floor-guide__lead {
+  color: var(--color-text-muted, #6b6b6b);
+  font-size: var(--fs-caption, 0.9rem);
+  text-align: center;
+  margin: -12px 0 20px;
+}
+.md-floor-guide__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.md-floor-guide__row {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: clamp(14px, 2vw, 24px);
+  padding: 14px 4px;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+  align-items: baseline;
+}
+.md-floor-guide__row:last-child { border-bottom: none; }
+.md-floor-guide__floor {
+  font-weight: 800;
+  color: var(--color-text, #222);
+  font-size: clamp(1.05rem, 1.5vw, 1.15rem);
+  letter-spacing: 0.02em;
+  text-align: right;
+  padding-right: 4px;
+}
+.md-floor-guide__centers {
+  color: var(--color-text, #333);
+  font-size: clamp(0.95rem, 1.4vw, 1.02rem);
+  line-height: 1.7;
+}
+.md-floor-guide__center {
+  display: inline-block;
+  color: inherit;
+}
+.md-floor-guide__center--link {
+  color: var(--color-primary-dark, #D97742);
+  text-decoration: none;
+  border-bottom: 1px dashed transparent;
+  transition: border-color 0.2s ease;
+}
+.md-floor-guide__center--link:hover {
+  border-bottom-color: var(--color-primary-dark, #D97742);
+}
+.md-floor-guide__sep {
+  color: rgba(0, 0, 0, 0.25);
+  margin: 0 2px;
+}
+/* Inline (compact) variant for tight spaces */
+.md-floor-guide--inline {
+  max-width: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  background: transparent;
+}
+.md-floor-guide--inline .md-floor-guide__title-inner {
+  font-size: 0.95rem;
+  padding: 6px 20px;
+}
+.md-floor-guide--inline .md-floor-guide__row {
+  padding: 8px 0;
+  grid-template-columns: 48px 1fr;
+}
+/* Sidebar variant */
+.md-floor-guide--sidebar {
+  max-width: 320px;
+  padding: 20px;
+}
+@media (max-width: 640px) {
+  .md-floor-guide { padding: 20px 16px; }
+  .md-floor-guide__row { grid-template-columns: 52px 1fr; gap: 12px; padding: 12px 0; }
+  .md-floor-guide__floor { font-size: 1rem; }
+  .md-floor-guide__centers { font-size: 0.92rem; line-height: 1.65; }
+}
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .md-floor-guide {
+    background: #1c1c1e;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .md-floor-guide__row { border-bottom-color: rgba(255, 255, 255, 0.08); }
+  .md-floor-guide__floor { color: #f2f2f2; }
+  .md-floor-guide__centers { color: #d8d8d8; }
+  .md-floor-guide__center--link { color: #f2a878; }
+  .md-floor-guide__sep { color: rgba(255, 255, 255, 0.25); }
+  .md-floor-guide__lead { color: #a0a0a0; }
+}
+
+/* Service page hero · floor badge */
+.md-service-floor-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(217, 119, 66, 0.1);
+  color: var(--color-primary-dark, #D97742);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+  letter-spacing: 0.02em;
+}
+@media (prefers-color-scheme: dark) {
+  .md-service-floor-badge {
+    background: rgba(242, 168, 120, 0.15);
+    color: #f2a878;
+  }
 }
 
 /* =============================================================

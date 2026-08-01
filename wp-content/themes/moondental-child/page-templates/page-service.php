@@ -33,6 +33,13 @@ foreach ( $services as $svc ) {
 		<?php if ( $current_svc ) : ?>
 			<div class="md-page-hero__icon" aria-hidden="true"><?php echo moondental_render_icon( $current_svc['icon'] ); ?></div>
 		<?php endif; ?>
+		<?php
+		// v3.44.68 · 층 배지 (해당 서비스가 몇 층에 있는지)
+		$_floor = function_exists( 'moondental_slug_floor' ) ? moondental_slug_floor( $slug ) : '';
+		if ( $_floor ) :
+		?>
+			<span class="md-service-floor-badge" aria-label="위치"><span aria-hidden="true">📍</span> 문타워 <?php echo esc_html( $_floor ); ?></span>
+		<?php endif; ?>
 		<h1 class="md-page-hero__title"><?php the_title(); ?></h1>
 		<?php if ( $current_svc ) : ?>
 			<p class="md-page-hero__lead"><?php echo esc_html( $current_svc['desc'] ); ?></p>

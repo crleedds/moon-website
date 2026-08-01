@@ -76,6 +76,12 @@ $perio_cards        = $parse_cards( md_content( 'preservation_perio_cards', '' )
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( get_the_title() ?: '자연치아 살리기' ); ?></span>
 		</nav>
 		<span class="md-page-hero__eyebrow"><?php echo esc_html( md_content( 'preservation_hero_eyebrow', '' ) ); ?></span>
+		<?php
+		$_pres_floor = function_exists( 'moondental_slug_floor' ) ? moondental_slug_floor( '자연치아-살리기' ) : '';
+		if ( $_pres_floor ) :
+		?>
+			<span class="md-service-floor-badge" aria-label="위치"><span aria-hidden="true">📍</span> 문타워 <?php echo esc_html( $_pres_floor ); ?> · 보존과</span>
+		<?php endif; ?>
 		<h1 class="md-page-hero__title">
 			<?php echo esc_html( md_content( 'preservation_hero_title_a', '' ) ); ?><br>
 			<em><?php echo esc_html( md_content( 'preservation_hero_title_b', '' ) ); ?></em>

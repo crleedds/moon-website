@@ -92,6 +92,13 @@ $nav_items = $parse_nav( md_content( 'smile_nav_items', '' ) );
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( get_the_title() ?: '스마일디자인센터' ); ?></span>
 		</nav>
 		<span class="md-page-hero__eyebrow"><?php echo esc_html( md_content( 'smile_hero_eyebrow', '' ) ); ?></span>
+		<?php
+		// v3.44.68 · 층 배지
+		$_smile_floor = function_exists( 'moondental_slug_floor' ) ? moondental_slug_floor( '스마일디자인센터' ) : '';
+		if ( $_smile_floor ) :
+		?>
+			<span class="md-service-floor-badge" aria-label="위치"><span aria-hidden="true">📍</span> 문타워 <?php echo esc_html( $_smile_floor ); ?></span>
+		<?php endif; ?>
 		<h1 class="md-page-hero__title">
 			<?php echo esc_html( md_content( 'smile_hero_title_a', '' ) ); ?><br>
 			<em><?php echo esc_html( md_content( 'smile_hero_title_b', '' ) ); ?></em>
