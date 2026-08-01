@@ -116,7 +116,7 @@ $bot_data = array(
 
 $bot_eyebrow  = md_content( 'bot_eyebrow',  'SELF-CHECK' );
 $bot_title    = md_content( 'bot_title',    '🦷 내 구강상태 진단받기' );
-$bot_lead     = md_content( 'bot_lead',     "몇 가지 질문에 답해주시면 가장 적합한 진료과를 추천해드립니다.\n※ 본 진단은 참고용이며, 정확한 진단은 내원 진료가 필요합니다." );
+$bot_lead     = md_content( 'bot_lead',     "환자분의 임상 증상을 확인하여 필요할 수 있는 진료 영역을 안내해드립니다.\n※ 본 자가진단은 참고용이며, 확진과 치료 계획은 임상·방사선 검사가 필요합니다." );
 $bot_start    = md_content( 'bot_start_label', '진단 시작 →' );
 $bot_count_label = str_replace( '{count}', (string) count( $questions ), md_content( 'bot_count_template', '{count}개의 Yes/No 질문 · 약 2-3분 소요 · 모든 진료영역 망라' ) );
 

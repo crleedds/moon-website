@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.66' );
+define( 'MOONDENTAL_VERSION', '3.44.67' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -680,6 +680,32 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_bot_chief_bone_v3465', 'done' );
 }, 31 );
+
+/* 일회성 마이그레이션: 셀프진단봇 · 임상 증상 기반 재설계 (v3.44.67)
+ * v3.44.66 기본값을 임상용어 기반 신규 기본값으로 자동 갱신
+ * 사용자 편집본은 보존 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_bot_clinical_v3467' ) === 'done' ) return;
+	$stored = get_theme_mod( 'md_content_bot_questions' );
+	if ( is_string( $stored ) && $stored !== '' ) {
+		// v3.44.66 시그니처: 옛 '단음식 통증 |' 있고 새 '온도 자극통 |' 없음
+		if ( strpos( $stored, '단음식 통증 |' ) !== false
+		  && strpos( $stored, '온도 자극통 |' ) === false ) {
+			remove_theme_mod( 'md_content_bot_questions' );
+		}
+	}
+	// 인트로 문구 마이그레이션
+	if ( get_theme_mod( 'md_content_bot_intro_title' ) === '간단한 자가진단 시작하기' ) {
+		remove_theme_mod( 'md_content_bot_intro_title' );
+	}
+	if ( get_theme_mod( 'md_content_bot_lead' ) === "몇 가지 질문에 답해주시면 가장 적합한 진료과를 추천해드립니다.\n※ 본 진단은 참고용이며, 정확한 진단은 내원 진료가 필요합니다." ) {
+		remove_theme_mod( 'md_content_bot_lead' );
+	}
+	if ( get_theme_mod( 'md_content_bot_result_lead' ) === '증상에 가장 부합하는 진료과를 추천해드립니다.' ) {
+		remove_theme_mod( 'md_content_bot_result_lead' );
+	}
+	update_option( 'moondental_bot_clinical_v3467', 'done' );
+}, 29 );
 
 /* 일회성 마이그레이션: 셀프진단봇 10개 → 50개 (카테고리별 10문항 · v3.44.66)
  * 사용자가 편집 안 한 v3.44.64 default 를 자동 리셋 → 새 기본값 적용
