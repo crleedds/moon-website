@@ -293,7 +293,7 @@ function moondental_encyclopedia_seed_data() {
 		array( '요양기관번호', 'general', '건강보험공단 등록 의료기관 고유번호', '<p>건강보험 청구를 위한 <strong>의료기관 고유 식별번호</strong>. 문치과병원: 34400117.</p>' ),
 		array( '치과 위생사', 'general', '스케일링·예방 치과 전문 국가자격', '<p>Dental Hygienist. <strong>스케일링·구강 위생 교육·불소 도포·기록 관리</strong>. 4년제 국가자격.</p>' ),
 		array( '치과 기공사', 'general', '보철물·교정 장치를 제작하는 전문가', '<p>Dental Technician. 치과의사 처방으로 <strong>크라운·틀니·교정 장치</strong> 등을 제작.</p>' ),
-		array( '치과 의사', 'general', '치과 진료·수술 국가면허 전문의', '<p>Dentist. 치과대학 6년 + 국가시험. <strong>일반의·전문의(11개 세부과)</strong>로 구분.</p>' ),
+		array( '치과 의사', 'general', '치과 진료·수술 국가면허 진료팀', '<p>Dentist. 치과대학 6년 + 국가시험. <strong>일반의·세부 진료과(11개)</strong>로 구분.</p>' ),
 	);
 }
 

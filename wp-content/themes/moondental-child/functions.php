@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.70' );
+define( 'MOONDENTAL_VERSION', '3.44.71' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -307,6 +307,54 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3291', 'done' );
 }, 44 );
+
+/* 일회성 마이그레이션 v3.44.71 · Customizer 저장값에 남은 '전문의' 문구 자동 치환
+ * 파일 default 는 v3.44.71 에서 이미 정리됨. Customizer 에 사용자가 옛 default 를
+ * 그대로 저장했거나 편집본에 '전문의' 가 남아있으면 동일 규칙으로 치환. */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_no_specialist_v3471' ) === 'done' ) return;
+	$rules = array(
+		'치과 보존과 전문의 (보건복지부 인증)' => '치과 보존과 진료 (보건복지부 인증)',
+		'보건복지부 인증 보존과 전문의' => '보존과 진료팀',
+		'치과 보철과 전문의 · 통합치의학 전문의' => '치과 보철과·통합치의학 진료',
+		'치과교정과 전문의·인정의' => '치과교정과·인정의',
+		'치과 교정과 전문의·인정의' => '치과 교정과·인정의',
+		'치과교정과 전문의' => '치과교정과',
+		'전문의·인정의' => '인정의',
+		'전문의 협진' => '진료과 협진',
+		'전문의 정밀 진단' => '정밀 진단',
+		'전문의의 정밀' => '진료팀의 정밀',
+		'전문의의 재근관치료' => '진료팀의 재근관치료',
+		'전문의가 직접' => '진료팀이 직접',
+		'전문의가 최적안' => '진료팀이 최적안',
+		'전문의 원장님' => '원장님',
+		'전문의로서' => '원장으로서',
+		'전문의 소개' => '진료팀 소개',
+		'보존과 전문의' => '보존과',
+		'보철과 전문의' => '보철과',
+		'치주과 전문의' => '치주과',
+		'구강외과 전문의' => '구강외과',
+		'소아치과 전문의' => '소아치과',
+		'교정 전문의' => '교정과',
+		'임플란트 전문의' => '임플란트 진료팀',
+		'전문의' => '진료팀',
+		// 발치 위험 없음 문구
+		'· 발치 위험 없음' => '',
+		'치아를 잃을 위험은 없습니다' => '단계적 치료로 이어집니다',
+	);
+	$all_mods = get_theme_mods();
+	if ( is_array( $all_mods ) ) {
+		foreach ( $all_mods as $key => $val ) {
+			if ( ! is_string( $val ) || $val === '' ) continue;
+			if ( strpos( $val, '전문의' ) === false && strpos( $val, '발치 위험 없음' ) === false && strpos( $val, '치아를 잃을 위험은 없습니다' ) === false ) continue;
+			$new = strtr( $val, $rules );
+			if ( $new !== $val ) {
+				set_theme_mod( $key, $new );
+			}
+		}
+	}
+	update_option( 'moondental_no_specialist_v3471', 'done' );
+}, 48 );
 
 /* 일회성 마이그레이션 v3.44.70 · 충치치료 섹션 · 치수복조술 강조 콘텐츠로 갱신
  * Customizer 저장값이 옛 기본값이면 remove_theme_mod → 새 기본값 자동 적용
@@ -3903,7 +3951,7 @@ function moondental_service_visual( $slug ) {
 				array( 'value' => '2가지', 'unit' => '',   'label' => '투명·브라켓 교정' ),
 			),
 			'headline' => '천안·아산 교정센터 · 라이프스타일 맞춤 진료',
-			'sub'      => '슈어스마일 투명교정과 브라켓 치아교정 · 치과교정과 전문의·인정의가 환자분께 가장 적합한 방식을 제안합니다',
+			'sub'      => '슈어스마일 투명교정과 브라켓 치아교정 · 치과교정과·인정의가 환자분께 가장 적합한 방식을 제안합니다',
 		),
 		'슈어스마일-투명교정' => array(
 			'image' => $uri . '/assets/images/services/suresmile-hero.jpg',
@@ -3922,7 +3970,7 @@ function moondental_service_visual( $slug ) {
 			'stats' => array(
 				array( 'value' => '설측·일반', 'unit' => '', 'label' => '브라켓 옵션' ),
 				array( 'value' => '±0.1', 'unit' => 'mm', 'label' => '치아 이동 정밀도' ),
-				array( 'value' => '전문의', 'unit' => '', 'label' => '치과교정과 인정의' ),
+				array( 'value' => '진료팀', 'unit' => '', 'label' => '치과교정과 인정의' ),
 			),
 			'headline' => '브라켓 치아교정 · 검증된 표준 방식으로 정확한 결과를',
 			'sub'      => '설측교정(안쪽 브라켓)·메탈·세라믹·자가결찰 브라켓·소아 성장기 교정까지 케이스에 맞게 선택',
@@ -3931,12 +3979,12 @@ function moondental_service_visual( $slug ) {
 			'image' => '',
 			'alt'   => '',
 			'stats' => array(
-				array( 'value' => '보존', 'unit' => '', 'label' => '전문의 정밀 진단' ),
+				array( 'value' => '보존', 'unit' => '', 'label' => '정밀 진단' ),
 				array( 'value' => '30+',  'unit' => '년', 'label' => '자연치아 살리기 경험' ),
 				array( 'value' => '재근관', 'unit' => '', 'label' => '치료 가능' ),
 			),
 			'headline' => '발치 권유받으셨나요? 한 번 더 살펴보세요',
-			'sub'      => '보존과·치주과 전문의가 신경치료·재근관·치주치료로 자연치아를 살립니다',
+			'sub'      => '보존과·치주과 진료팀이 신경치료·재근관·치주치료로 자연치아를 살립니다',
 		),
 	);
 	return $map[ $slug ] ?? null;
@@ -4102,19 +4150,19 @@ function moondental_get_services() {
 			'slug'  => '임플란트-센터',
 			'title' => '천안·아산 임플란트',
 			'icon'  => 'icon:implant',
-			'desc'  => '천안 만남로 10F 임플란트센터 — 단일·다수·전악 임플란트까지, CBCT 디지털 가이드 수술과 보철 전문의 협진.',
+			'desc'  => '천안 만남로 10F 임플란트센터 — 단일·다수·전악 임플란트까지, CBCT 디지털 가이드 수술과 보철 진료과 협진.',
 		),
 		array(
 			'slug'  => '투명교정-센터',
 			'title' => '교정센터',
 			'icon'  => 'icon:ortho',
-			'desc'  => '천안 만남로 11F 교정과 — 슈어스마일(SureSmile) AI 투명교정과 브라켓 치아교정 · 치과교정과 전문의·인정의 라이프스타일 맞춤 진료.',
+			'desc'  => '천안 만남로 11F 교정과 — 슈어스마일(SureSmile) AI 투명교정과 브라켓 치아교정 · 치과교정과·인정의 라이프스타일 맞춤 진료.',
 		),
 		array(
 			'slug'  => '자연치아-살리기',
 			'title' => '천안·아산 자연치아 살리기',
 			'icon'  => 'icon:preserve',
-			'desc'  => '천안·아산 신경치료·재근관치료·치주치료. 보존과 전문의의 정밀 진료 — 발치보다 보존을 먼저 고민합니다.',
+			'desc'  => '천안·아산 신경치료·재근관치료·치주치료. 보존과 진료팀의 정밀 진료 — 발치보다 보존을 먼저 고민합니다.',
 		),
 		array(
 			'slug'  => '턱관절-클리닉',
@@ -4179,7 +4227,7 @@ function moondental_get_service_areas() {
 			'slug'  => '투명교정-센터',
 			'title' => '교정센터',
 			'icon'  => 'icon:ortho',
-			'desc'  => '슈어스마일(SureSmile) AI 투명교정 + 치과교정과 전문의·인정의 진료.',
+			'desc'  => '슈어스마일(SureSmile) AI 투명교정 + 치과교정과·인정의 진료.',
 			'url'   => $home . '진료항목/투명교정-센터/',
 		),
 		array(
@@ -4293,7 +4341,7 @@ function moondental_get_team() {
 					'photo_ty'   => 3,
 					'philosophy' => '진실된 마음으로 환자분들과 함께하는 의료서비스를 제공하겠습니다.',
 					'bio'        => array(
-						'치과 보철과 전문의 · 통합치의학 전문의',
+						'치과 보철과·통합치의학 진료',
 						'조선대학교 치의학전문대학원 석사',
 						'조선대학교 치의학전문대학원 박사',
 						'조선대학교 치과병원 인턴',
@@ -4309,7 +4357,7 @@ function moondental_get_team() {
 					'photo_ty'   => 4,
 					'philosophy' => '기본에 충실하되 새로운 변화에 맞춰가며, 환자분을 가족처럼 생각하는 따뜻한 마음으로 진료에 임하겠습니다.',
 					'bio'        => array(
-						'보건복지부 인증 보존과 전문의',
+						'보존과 진료팀',
 						'단국대학교 치과대학 졸업',
 						'단국대학교 치과대학 보존과 석사',
 						'단국대학교 치과대학 보존과 레지던트 수료',
@@ -4389,7 +4437,7 @@ function moondental_get_team() {
 						'단국대 치과대학원 치의학과 석사',
 						'단국대 치과대학원 치의학과 박사',
 						'단국대 치과부속병원 교정과 인턴, 레지던트 수료',
-						'치과교정과 전문의',
+						'치과교정과',
 						'치과교정과 인정의',
 						'대한치과교정학회 정회원',
 					),
