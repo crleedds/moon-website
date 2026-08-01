@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.72' );
+define( 'MOONDENTAL_VERSION', '3.44.73' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -307,6 +307,29 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3291', 'done' );
 }, 44 );
+
+/* 일회성 마이그레이션 v3.44.73 · '보건복지부 인증 보존과' 문구 정리
+ * Customizer 저장값에서 어색한 표현 제거 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_no_mohw_cert_v3473' ) === 'done' ) return;
+	$rules = array(
+		'보건복지부 인증 보존과 직접 진행' => '보존과 진료팀 직접 진행',
+		'보건복지부 인증 보존과 진료팀 직접 진행' => '보존과 진료팀 직접 진행',
+		'보건복지부 인증 보존과' => '보존과 진료팀',
+		'보건복지부 인증 프로그램' => '',
+		'치과 보존과 진료 (보건복지부 인증)' => '치과 보존과',
+	);
+	$all_mods = get_theme_mods();
+	if ( is_array( $all_mods ) ) {
+		foreach ( $all_mods as $key => $val ) {
+			if ( ! is_string( $val ) || $val === '' ) continue;
+			if ( strpos( $val, '보건복지부' ) === false ) continue;
+			$new = strtr( $val, $rules );
+			if ( $new !== $val ) set_theme_mod( $key, $new );
+		}
+	}
+	update_option( 'moondental_no_mohw_cert_v3473', 'done' );
+}, 50 );
 
 /* 일회성 마이그레이션 v3.44.72 · 치수복조술 콜아웃 · 구조화된 HTML 로 갱신
  * v3.44.70~71 default (br 기반) 이 저장돼 있으면 → 새 <p>·<ul> 기반 default 로 갱신 */
