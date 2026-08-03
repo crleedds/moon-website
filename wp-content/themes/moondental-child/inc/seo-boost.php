@@ -185,34 +185,87 @@ add_action( 'wp_head', function () {
 }, 2 );
 
 /**
- * SiteNavigationElement JSON-LD — 구글 사이트링크 유도
- *  주요 메뉴를 구조화하여 브랜드 검색시 sitelinks 자동 노출 확률 상승
+ * SiteNavigationElement + ItemList + WebSite hasPart JSON-LD — 구글 사이트링크 유도 극대화
+ *  주요 메뉴를 여러 스키마 타입으로 중복 강조하여 브랜드 검색시 sitelinks 자동 노출 확률 상승
+ *  v3.44.75 · ItemList (설명 포함) 추가 · hasPart 로 sub-URL 명시
  */
 function moondental_jsonld_sitenav() {
 	if ( ! is_front_page() ) return;
 	$home = home_url( '/' );
+	// 각 항목 · name / url / description (구글이 사이트링크 설명 문구로 참고)
 	$nav = array(
-		array( 'name' => '의료진',        'url' => $home . '의료진/' ),
-		array( 'name' => '오시는 길',     'url' => $home . '오시는-길/' ),
-		array( 'name' => '임플란트 센터', 'url' => $home . '진료항목/임플란트-센터/' ),
-		array( 'name' => '슈어스마일 투명교정', 'url' => $home . '진료항목/슈어스마일-투명교정/' ),
-		array( 'name' => '자연치아 살리기', 'url' => $home . '진료항목/자연치아-살리기/' ),
-		array( 'name' => '비용 안내',     'url' => $home . '비용-안내/' ),
-		array( 'name' => '상담 예약',     'url' => $home . '상담예약/' ),
-		array( 'name' => '치과 백과사전', 'url' => $home . '치과사전/' ),
-		array( 'name' => 'FAQ',           'url' => $home . 'faq/' ),
+		array( 'name' => '의료진',              'url' => $home . '의료진/',              'desc' => '문치과병원 원장·진료팀 소개' ),
+		array( 'name' => '오시는 길',           'url' => $home . '오시는-길/',           'desc' => '천안 만남로 문타워 · 주차·대중교통 안내' ),
+		array( 'name' => '비용 안내',           'url' => $home . '비용-안내/',           'desc' => '임플란트·교정·라미네이트 비급여 진료비' ),
+		array( 'name' => '상담 예약',           'url' => $home . '상담예약/',           'desc' => '카카오톡·네이버·전화 예약' ),
+		array( 'name' => '임플란트 센터',       'url' => $home . '진료항목/임플란트-센터/',       'desc' => '천안 임플란트 · CBCT 3D 네비게이션' ),
+		array( 'name' => '교정 센터',           'url' => $home . '진료항목/투명교정-센터/',       'desc' => '슈어스마일 · 브라켓 치아교정' ),
+		array( 'name' => '자연치아 살리기',     'url' => $home . '진료항목/자연치아-살리기/',     'desc' => '신경치료·치주치료·치수복조술' ),
+		array( 'name' => '치과 백과사전',       'url' => $home . '치과사전/',           'desc' => '치과 용어·치료·질환 총정리' ),
 	);
-	$items = array();
+
+	$graph = array();
+
+	// 1) SiteNavigationElement · 브랜드 검색 sitelinks 후보
 	foreach ( $nav as $n ) {
-		$items[] = array(
-			'@type' => 'SiteNavigationElement',
-			'name'  => $n['name'],
-			'url'   => $n['url'],
+		$graph[] = array(
+			'@type'       => 'SiteNavigationElement',
+			'name'        => $n['name'],
+			'url'         => $n['url'],
+			'description' => $n['desc'],
 		);
 	}
+
+	// 2) ItemList · 페이지 목록으로 재차 강조
+	$list_items = array();
+	foreach ( $nav as $i => $n ) {
+		$list_items[] = array(
+			'@type'    => 'ListItem',
+			'position' => $i + 1,
+			'url'      => $n['url'],
+			'name'     => $n['name'],
+		);
+	}
+	$graph[] = array(
+		'@type'           => 'ItemList',
+		'@id'             => $home . '#nav-list',
+		'name'            => '문치과병원 주요 페이지',
+		'numberOfItems'   => count( $nav ),
+		'itemListElement' => $list_items,
+	);
+
+	// 3) WebSite hasPart · 구글이 sub-URL 을 사이트 하위 부분으로 인식
+	$has_parts = array();
+	foreach ( $nav as $n ) {
+		$has_parts[] = array(
+			'@type' => 'WebPage',
+			'@id'   => $n['url'] . '#page',
+			'url'   => $n['url'],
+			'name'  => $n['name'],
+		);
+	}
+	$graph[] = array(
+		'@type'       => 'WebSite',
+		'@id'         => $home . '#website-nav',
+		'url'         => $home,
+		'name'        => '한아의료재단 문치과병원',
+		'alternateName' => '문치과병원',
+		'inLanguage'  => 'ko-KR',
+		'publisher'   => array( '@id' => $home . '#org' ),
+		'hasPart'     => $has_parts,
+		'potentialAction' => array(
+			'@type'       => 'SearchAction',
+			'target'      => array(
+				'@type'       => 'EntryPoint',
+				'urlTemplate' => $home . '?s={search_term_string}',
+			),
+			'query-input' => 'required name=search_term_string',
+		),
+	);
+
 	$schema = array(
 		'@context' => 'https://schema.org',
-		'@graph'   => $items,
+		'@graph'   => $graph,
 	);
 	echo "\n<script type=\"application/ld+json\">\n";
 	echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
