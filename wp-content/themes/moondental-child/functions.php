@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.75' );
+define( 'MOONDENTAL_VERSION', '3.44.76' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -307,6 +307,19 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3291', 'done' );
 }, 44 );
+
+/* 일회성 마이그레이션 v3.44.76 · 지역 페이지 H1 · '추천 치과' 키워드 추가
+ * 옛 default 값이면 remove_theme_mod → 새 default 자동 적용 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_region_recommend_v3476' ) === 'done' ) return;
+	if ( get_theme_mod( 'md_content_region_hero_title_a' ) === '{region}에서 찾는' ) {
+		remove_theme_mod( 'md_content_region_hero_title_a' );
+	}
+	if ( get_theme_mod( 'md_content_region_hero_title_b' ) === '임플란트·교정 잘하는 천안·아산 치과' ) {
+		remove_theme_mod( 'md_content_region_hero_title_b' );
+	}
+	update_option( 'moondental_region_recommend_v3476', 'done' );
+}, 51 );
 
 /* 일회성 마이그레이션 v3.44.73 · '보건복지부 인증 보존과' 문구 정리
  * Customizer 저장값에서 어색한 표현 제거 */

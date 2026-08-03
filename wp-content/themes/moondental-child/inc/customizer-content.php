@@ -2623,8 +2623,8 @@ function moondental_region_content_fields() {
 			'title'  => '지역 페이지 · 히어로',
 			'fields' => array(
 				'region_hero_eyebrow'      => array( 'default' => '📍 {province} · {region_long}에서 오시는 길', 'label' => 'eyebrow (토큰: {province}, {region_long})', 'type' => 'text' ),
-				'region_hero_title_a'      => array( 'default' => '{region}에서 찾는', 'label' => '제목 첫 줄 (토큰: {region})', 'type' => 'text' ),
-				'region_hero_title_b'      => array( 'default' => '임플란트·교정 잘하는 천안·아산 치과', 'label' => '제목 강조 (em)', 'type' => 'text' ),
+				'region_hero_title_a'      => array( 'default' => '{region} 추천 치과', 'label' => '제목 첫 줄 (토큰: {region})', 'type' => 'text' ),
+				'region_hero_title_b'      => array( 'default' => '{region}에서 찾는 임플란트·교정·자연치아 살리기 · 문치과병원', 'label' => '제목 강조 (em)', 'type' => 'text' ),
 				'region_hero_lead_walking' => array(
 					'default' => "{region}에서 천안 만남로 <strong>한아의료재단 문치과병원</strong>까지 <strong>{duration_label}</strong> 거리.\n1995년부터 30여년 한자리 진료 — 분야별 전문 의료진 협진으로 통합 진료해드립니다.",
 					'label'   => '리드 (도보 지역용)',

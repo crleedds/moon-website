@@ -22,7 +22,24 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 function moondental_get_regions() {
 	return array(
 
-		/* ───────── 천안·아산 시내 (12) ─ 동·읍 단위 ───────── */
+		/* ───────── 천안·아산 시내 (14) ─ 시 전체 + 동·읍 단위 ───────── */
+		// v3.44.76 · 시 전체 대표 항목 (검색 최적화)
+		'cheonan' => array(
+			'slug' => 'cheonan', 'name' => '천안', 'name_long' => '천안시 (전 지역)', 'province' => '천안·아산 시내',
+			'distance_km' => 5.0, 'duration_min' => 15, 'icon' => '🏙️',
+			'highway' => '천안IC · 남천안IC · 시내 도로망 · 각 지역별 5~20분',
+			'ktx' => '천안역 · 천안아산역 접근성 우수',
+			'bus' => '천안종합·고속버스터미널 도보 5분 · 시내버스 다수 노선',
+			'note' => '천안 전 지역에서 만남로 문치과병원까지 편리한 접근 (동남구·서북구 모두 커버)',
+		),
+		'asan' => array(
+			'slug' => 'asan', 'name' => '아산', 'name_long' => '아산시 (전 지역)', 'province' => '천안·아산 시내',
+			'distance_km' => 12.0, 'duration_min' => 25, 'icon' => '🏙️',
+			'highway' => '국도 21호선 · 배방·탕정·신창 등에서 천안 방향',
+			'ktx' => '천안아산역(배방)에서 시내버스·택시 10~15분',
+			'bus' => '아산시외버스터미널 → 천안 다수 노선',
+			'note' => '아산 전 지역(배방·탕정·신창·온양 등)에서 천안 만남로 문치과병원까지 안정적 접근',
+		),
 		'sinbu' => array(
 			'slug' => 'sinbu', 'name' => '천안 신부동', 'name_long' => '천안 동남구 신부동', 'province' => '천안·아산 시내',
 			'distance_km' => 0.5, 'duration_min' => 5, 'duration_label' => '도보 5분', 'icon' => '🚶',

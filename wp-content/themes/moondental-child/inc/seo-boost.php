@@ -112,6 +112,9 @@ function moondental_seo_page_map() {
  */
 function moondental_seo_current_key() {
 	if ( is_front_page() || is_home() ) return '_home';
+	// v3.44.76 · 지역 페이지 · region_slug 우선 처리
+	$region_slug = get_query_var( 'region_slug' );
+	if ( $region_slug ) return '_region:' . $region_slug;
 	if ( is_page() ) {
 		$slug_raw = get_post_field( 'post_name', get_queried_object_id() );
 		if ( ! $slug_raw ) return '';
@@ -122,11 +125,34 @@ function moondental_seo_current_key() {
 }
 
 /**
+ * v3.44.76 · 지역 페이지 SEO 타이틀·설명 동적 생성 ('{region} 추천치과' 키워드 강제 포함)
+ */
+function moondental_seo_region_data( $key ) {
+	if ( strpos( $key, '_region:' ) !== 0 ) return null;
+	$slug = substr( $key, 8 );
+	if ( ! function_exists( 'moondental_get_region_by_slug' ) ) return null;
+	$region = moondental_get_region_by_slug( $slug );
+	if ( ! $region ) return null;
+	$name = $region['name'];
+	$duration = isset( $region['duration_min'] ) ? (int) $region['duration_min'] : 0;
+	return array(
+		'title' => sprintf( '%s 추천 치과 · 임플란트·교정·자연치아 - 문치과병원 (%d분)', $name, $duration ),
+		'desc'  => sprintf(
+			'%s 추천 치과 문치과병원. %s에서 만남로 문타워까지 %d분. 임플란트·투명교정·자연치아 살리기·심미치료 진료과 협진. 상담 041-563-2875.',
+			$name, $name, $duration
+		),
+	);
+}
+
+/**
  * Yoast title 오버라이드 — 우리 맵에 있는 페이지만 교체
  */
 function moondental_wpseo_title( $title ) {
 	$key = moondental_seo_current_key();
 	if ( ! $key ) return $title;
+	// v3.44.76 · 지역 페이지 동적 SEO
+	$region_seo = moondental_seo_region_data( $key );
+	if ( $region_seo ) return $region_seo['title'];
 	$map = moondental_seo_page_map();
 	if ( isset( $map[ $key ]['title'] ) ) {
 		return $map[ $key ]['title'];
@@ -141,6 +167,9 @@ add_filter( 'wpseo_title', 'moondental_wpseo_title', 20 );
 function moondental_wpseo_metadesc( $desc ) {
 	$key = moondental_seo_current_key();
 	if ( ! $key ) return $desc;
+	// v3.44.76 · 지역 페이지 동적 설명
+	$region_seo = moondental_seo_region_data( $key );
+	if ( $region_seo ) return $region_seo['desc'];
 	$map = moondental_seo_page_map();
 	if ( isset( $map[ $key ]['desc'] ) ) {
 		return $map[ $key ]['desc'];
