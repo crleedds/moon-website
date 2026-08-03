@@ -12,6 +12,18 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 $home = home_url( '/' );
 $items = array(
 	array(
+		'title' => md_content( 'quicknav_recommend_cheonan_title', '천안 추천 치과' ),
+		'desc'  => md_content( 'quicknav_recommend_cheonan_desc', '30년 진료 · 진료과별 협진 · 왜 문치과병원인가' ),
+		'url'   => $home . '천안-추천-치과/',
+		'icon'  => '🏆',
+	),
+	array(
+		'title' => md_content( 'quicknav_recommend_asan_title', '아산 추천 치과' ),
+		'desc'  => md_content( 'quicknav_recommend_asan_desc', '아산 배방·탕정 20분 · 진료과 협진 · 안심 진료' ),
+		'url'   => $home . '아산-추천-치과/',
+		'icon'  => '🏆',
+	),
+	array(
 		'title' => md_content( 'quicknav_doctors_title', '의료진 소개' ),
 		'desc'  => md_content( 'quicknav_doctors_desc',  '천안·아산 30년 진료 · 원장·진료과 협진 시스템 · 4개 층 통합 진료' ),
 		'url'   => $home . '의료진/',
