@@ -262,8 +262,9 @@ function moondental_jsonld_schema() {
 		),
 	);
 
-	/* v3.30.0 · aggregateRating + review (홈 후기 데이터 machine-readable 노출) */
-	if ( function_exists( 'moondental_get_testimonials' ) ) {
+	/* v3.30.0 · aggregateRating + review (홈 후기 데이터 machine-readable 노출)
+	 * v3.44.74 · 홈페이지에서만 출력 (모든 페이지 반복 출력 방지 · Google Search Console 리뷰 스니펫 부풀림 방지) */
+	if ( is_front_page() && function_exists( 'moondental_get_testimonials' ) ) {
 		$testimonials = moondental_get_testimonials();
 		if ( ! empty( $testimonials ) ) {
 			$count = 0;
