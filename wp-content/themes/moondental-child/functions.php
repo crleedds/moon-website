@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.84' );
+define( 'MOONDENTAL_VERSION', '3.44.85' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -307,6 +307,17 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3291', 'done' );
 }, 44 );
+
+/* 일회성 마이그레이션 v3.44.85 · 스태프 명단에서 정시연 제거 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_staff_remove_jsy_v3485' ) === 'done' ) return;
+	$stored = get_theme_mod( 'md_content_staff_list' );
+	if ( is_string( $stored ) && strpos( $stored, '정시연' ) !== false ) {
+		$new = preg_replace( '/^진료실\|주임\|정시연\r?\n?/mu', '', $stored );
+		if ( $new !== $stored ) set_theme_mod( 'md_content_staff_list', $new );
+	}
+	update_option( 'moondental_staff_remove_jsy_v3485', 'done' );
+}, 56 );
 
 /* 일회성 마이그레이션 v3.44.84 · URL 평면화 · post_parent = 0 + 부모 페이지 휴지통
  * 모든 core 페이지의 계층 구조 제거 · 최상위 URL 로 변경 */
@@ -660,7 +671,6 @@ add_action( 'after_setup_theme', function() {
 		. "진료실|주임|이하은\n"
 		. "진료실|주임|장유정\n"
 		. "진료실|주임|전서혜\n"
-		. "진료실|주임|정시연\n"
 		. "진료실|주임|최로미\n"
 		. "기공실|이사|조항수\n"
 		. "기공실|실장|맹의재\n"
@@ -724,7 +734,6 @@ add_action( 'after_setup_theme', function() {
 		. "진료실|주임|김우정\n"
 		. "진료실|주임|최로미\n"
 		. "진료실|주임|권민지\n"
-		. "진료실|주임|정시연\n"
 		. "진료실|주임|이수경\n"
 		. "기공실|이사|조항수\n"
 		. "기공실|실장|맹의재\n"
