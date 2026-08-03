@@ -145,8 +145,8 @@ add_action( 'wp_loaded',  'moondental_seed_encyclopedia_categories_v3488', 20 );
  *  파일이 존재하고 아직 실행 안 됐을 때만 동작
  */
 function moondental_seed_encyclopedia_v3488() {
-	// v3.44.89 · flag 를 신규 버전 키로 · 재실행 트리거
-	if ( get_option( 'moondental_encyclopedia_seed_v3489' ) === 'done' ) return;
+	// v3.44.90 · 재시도 · SQL 직접 삭제 (wp_delete_post 는 5000+ 포스트 처리 시 timeout)
+	if ( get_option( 'moondental_encyclopedia_seed_v3490' ) === 'done' ) return;
 	$seed_file = MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3488.php';
 	if ( ! file_exists( $seed_file ) ) return;
 
@@ -159,12 +159,16 @@ function moondental_seed_encyclopedia_v3488() {
 
 	global $wpdb;
 
-	// v3.44.89 · 기존 md_term 모든 상태 (publish·draft·pending·private·trash 등) → 완전 삭제
-	// 이전 마이그레이션이 publish 만 처리해서 draft/pending 이 살아남는 문제 해결
-	$old_ids = $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'md_term'" );
-	if ( $old_ids ) {
-		foreach ( $old_ids as $id ) {
-			wp_delete_post( (int) $id, true ); // true = force delete (bypass trash)
+	// v3.44.90 · Raw SQL · 관련 테이블 완전 정리 (postmeta·term_relationships·posts)
+	$old_ids_raw = $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'md_term'" );
+	if ( $old_ids_raw ) {
+		// 500개씩 배치 · IN 절 길이 제한 회피
+		$chunks = array_chunk( $old_ids_raw, 500 );
+		foreach ( $chunks as $chunk ) {
+			$ids_csv = implode( ',', array_map( 'intval', $chunk ) );
+			$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE post_id IN ($ids_csv)" );
+			$wpdb->query( "DELETE FROM {$wpdb->term_relationships} WHERE object_id IN ($ids_csv)" );
+			$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE ID IN ($ids_csv)" );
 		}
 	}
 
@@ -198,8 +202,8 @@ function moondental_seed_encyclopedia_v3488() {
 		}
 	}
 
-	update_option( 'moondental_encyclopedia_seed_v3489', 'done' );
-	update_option( 'moondental_encyclopedia_seed_v3489_count', $total, false );
+	update_option( 'moondental_encyclopedia_seed_v3490', 'done' );
+	update_option( 'moondental_encyclopedia_seed_v3490_count', $total, false );
 }
 add_action( 'admin_init', 'moondental_seed_encyclopedia_v3488', 40 );
 add_action( 'wp_loaded',  'moondental_seed_encyclopedia_v3488', 40 );
