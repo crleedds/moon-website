@@ -303,6 +303,52 @@ function moondental_jsonld_sitenav() {
 add_action( 'wp_head', 'moondental_jsonld_sitenav', 51 );
 
 /**
+ * v3.44.77 · 지역 페이지 30개 자동 sitemap 등록
+ *   /region-sitemap.xml · 30개 지역 URL 자동 생성 · Yoast sitemap_index.xml 에도 자동 등록
+ */
+add_action( 'init', function () {
+	add_rewrite_rule( '^region-sitemap\.xml$', 'index.php?moondental_region_sitemap=1', 'top' );
+} );
+add_filter( 'query_vars', function ( $vars ) {
+	$vars[] = 'moondental_region_sitemap';
+	return $vars;
+} );
+add_action( 'template_redirect', function () {
+	if ( ! get_query_var( 'moondental_region_sitemap' ) ) return;
+	if ( ! function_exists( 'moondental_get_regions' ) ) return;
+	$regions = moondental_get_regions();
+	$today = gmdate( 'Y-m-d' );
+	nocache_headers();
+	header( 'Content-Type: application/xml; charset=UTF-8' );
+	echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+	echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+	foreach ( $regions as $region ) {
+		if ( empty( $region['slug'] ) ) continue;
+		$url = home_url( '/오시는-길/' . $region['slug'] . '/' );
+		echo "\t<url>\n";
+		echo "\t\t<loc>" . esc_url( $url ) . "</loc>\n";
+		echo "\t\t<lastmod>" . esc_html( $today ) . "</lastmod>\n";
+		echo "\t\t<changefreq>monthly</changefreq>\n";
+		echo "\t\t<priority>0.8</priority>\n";
+		echo "\t</url>\n";
+	}
+	echo '</urlset>' . "\n";
+	exit;
+} );
+
+/**
+ * v3.44.77 · Yoast sitemap_index.xml 에 region-sitemap.xml 항목 추가
+ */
+add_filter( 'wpseo_sitemap_index', function ( $sitemap_index ) {
+	$today = gmdate( 'Y-m-d\TH:i:sP' );
+	$entry  = "\t<sitemap>\n";
+	$entry .= "\t\t<loc>" . esc_url( home_url( '/region-sitemap.xml' ) ) . "</loc>\n";
+	$entry .= "\t\t<lastmod>" . esc_html( $today ) . "</lastmod>\n";
+	$entry .= "\t</sitemap>\n";
+	return $sitemap_index . $entry;
+} );
+
+/**
  * 치과사전 개별 항목 · MedicalWebPage schema (검색 결과 강화)
  */
 function moondental_jsonld_encyclopedia() {
