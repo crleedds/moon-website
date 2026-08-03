@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.86' );
+define( 'MOONDENTAL_VERSION', '3.44.87' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -307,6 +307,53 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3291', 'done' );
 }, 44 );
+
+/* 일회성 마이그레이션 v3.44.87 · 치과 백과사전 · 마케팅 용어 md_term 휴지통 이동
+ * '천안 임플란트 잘하는 치과' 같은 지역 마케팅 문구는 백과사전에 부적합 · 제거 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_enc_clean_marketing_v3487' ) === 'done' ) return;
+	global $wpdb;
+	$bad_patterns = array(
+		'%잘하는 치과%',
+		'%잘하는 곳%',
+		'%치과 추천%',
+		'%추천 치과%',
+		'천안 임플란트%',
+		'아산 임플란트%',
+		'천안 치과%',
+		'아산 치과%',
+		'천안 소아치과',
+		'천안·아산 치과병원',
+		'천안·아산 종합 치과',
+		'천안·아산 예방 치과',
+		'천안·아산 소아치과',
+		'천안·아산 사랑니 발치',
+		'천안·아산 신경치료',
+		'천안·아산 잇몸 치료',
+		'천안·아산 어린이 치과',
+		'어린이 치과 천안',
+		'천안 대형%',
+		'천안 큰 치과',
+	);
+	$trashed = 0;
+	foreach ( $bad_patterns as $pattern ) {
+		$rows = $wpdb->get_results( $wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts}
+			 WHERE post_type = 'md_term'
+			   AND post_status = 'publish'
+			   AND post_title LIKE %s",
+			$pattern
+		) );
+		if ( $rows ) {
+			foreach ( $rows as $r ) {
+				wp_trash_post( (int) $r->ID );
+				$trashed++;
+			}
+		}
+	}
+	update_option( 'moondental_enc_clean_marketing_v3487', 'done' );
+	update_option( 'moondental_enc_marketing_trashed_count', $trashed, false );
+}, 58 );
 
 /* 일회성 마이그레이션 v3.44.86 · '치과사전' → '치과 백과사전' 표시 라벨 정리
  * Customizer 저장값의 '치과사전' 표시 텍스트를 '치과 백과사전' 으로 변환 (URL 등은 유지) */

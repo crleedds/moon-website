@@ -249,20 +249,9 @@ function moondental_encyclopedia_seed_data_v3355() {
 		array( '마약 사용자 치과', 'general', '심한 우식·구강 건조', '<p>Substance Abuse. <strong>메타암페타민 → 심한 우식 (Meth Mouth)</strong>. 재활 후 치료.</p>' ),
 
 		/* === 지역·병원 관련 SEO (신규) === */
-		array( '천안·아산 치과병원', 'general', '천안·아산 종합 치과병원 안내', '<p>Cheonan Dental. <strong>천안 만남로 문치과병원 등</strong> 종합 치과병원.</p>' ),
-		array( '아산 치과', 'general', '아산 인근 치과 안내', '<p>Asan Dental. <strong>아산·천안 인근 치과</strong>. 통합 진료.</p>' ),
-		array( '천안·아산 종합 치과', 'general', '전 진료 영역 통합', '<p>Comprehensive Dental. <strong>임플란트·교정·심미·자연치아·구강외과</strong> 통합.</p>' ),
-		array( '천안·아산 예방 치과', 'general', '스케일링·불소·정기 검진', '<p>Preventive Dental. <strong>스케일링·에어플로우·불소·실런트</strong>.</p>' ),
 		array( '천안 야간 치과', 'general', '평일 야간 20:30까지', '<p>Night Dental. 문치과병원 <strong>평일 20:30·토 14:00</strong>. 직장인 편리.</p>' ),
 		array( '천안 토요일 치과', 'general', '토요일 오전 진료', '<p>Saturday Dental. <strong>토요일 09:00~14:00</strong>. 학생·직장인 이용.</p>' ),
-		array( '천안·아산 소아치과', 'general', '아이 친화 소아치과', '<p>Pediatric Dental. <strong>소아치과·친화 환경</strong>.</p>' ),
-		array( '천안·아산 임플란트 잘하는 곳', 'implant', '30여년 임상 실적', '<p>Cheonan Implant Clinic. <strong>임상 실적·CBCT·기공소·A/S</strong> 확인.</p>' ),
-		array( '천안·아산 사랑니 발치', 'surgery', '구강외과 진료 필요', '<p>Cheonan Wisdom Tooth. <strong>구강외과·CBCT 진단</strong>.</p>' ),
-		array( '천안·아산 신경치료', 'preserve', '보존과', '<p>Cheonan Endo. <strong>보존과·마이크로스코프·CBCT</strong>.</p>' ),
-		array( '천안·아산 잇몸 치료', 'periodontics', '치주과', '<p>Cheonan Periodontics. <strong>치주과·SRP·수술</strong>.</p>' ),
-		array( '천안·아산 어린이 치과', 'pediatric', '소아치과 전문', '<p>Cheonan Kids Dental. <strong>소아치과·친화 환경</strong>.</p>' ),
 		array( '천안 야간 응급 치과', 'general', '응급 상황 대비', '<p>Emergency Night. <strong>야간 응급 치과·사전 문의</strong> 필수.</p>' ),
-		array( '아산 임플란트', 'implant', '아산·천안·아산 임플란트 전문', '<p>Asan Implant. <strong>아산 인근 임플란트 전문 병원</strong>.</p>' ),
 		array( '충남 대형 치과', 'general', '충남 지역 대형 종합 치과', '<p>Chungnam Dental. <strong>천안·아산 대형 치과</strong>. 통합 진료.</p>' ),
 
 		/* === 진료 유형 세부 (신규) === */

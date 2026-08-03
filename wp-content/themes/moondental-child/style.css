@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.86
+Version:      3.44.87
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -6918,6 +6918,212 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   }
   .md-recommend-reasons > li h3, .md-recommend-link-card strong { color: #f2a878; }
   .md-recommend-link-card span, .md-recommend-faq p { color: #d0d0d0; }
+}
+
+/* =============================================================
+   38c. 치과 백과사전 · 단일 용어 페이지 강화 (v3.44.87)
+   ============================================================= */
+.md-term-section-title {
+  display: flex; align-items: center; gap: 10px;
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  margin: clamp(20px, 3vw, 32px) 0 16px;
+  font-weight: 800;
+  color: var(--color-text, #222);
+}
+.md-term-section-title__num {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  width: 32px; height: 32px;
+  background: var(--color-primary, #D97742);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+.md-term-content h2,
+.md-term-content h3,
+.md-term-content h4 {
+  margin-top: 24px;
+  margin-bottom: 10px;
+  font-weight: 800;
+  color: var(--color-text, #222);
+}
+.md-term-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.95rem;
+}
+.md-term-content th {
+  background: rgba(216, 128, 98, 0.08);
+  color: var(--color-primary-dark);
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+.md-term-content td {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+}
+.md-term-content ul, .md-term-content ol { margin: 10px 0; padding-left: 24px; }
+.md-term-content li { margin-bottom: 6px; line-height: 1.75; }
+.md-term-content blockquote {
+  background: rgba(216, 128, 98, 0.06);
+  border-left: 4px solid var(--color-primary);
+  padding: 14px 18px;
+  margin: 16px 0;
+  border-radius: 8px;
+  color: var(--color-text);
+}
+
+/* Inline CTA · 문의 유도 */
+.md-term-inline-cta {
+  background: linear-gradient(135deg, #FFF5EC 0%, #FFEFDF 100%);
+  border: 1px solid rgba(216, 128, 98, 0.2);
+  border-radius: 16px;
+  padding: clamp(24px, 3vw, 36px);
+  margin: 32px 0 20px;
+  text-align: center;
+}
+.md-term-inline-cta__title {
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+.md-term-inline-cta__lead {
+  font-size: 0.95rem;
+  color: var(--color-text);
+  margin: 0 0 20px;
+  line-height: 1.7;
+}
+.md-term-inline-cta__actions {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+  margin-bottom: 12px;
+}
+.md-term-inline-cta__note {
+  font-size: 0.82rem;
+  color: var(--color-text-mute, #888);
+  margin: 0;
+}
+
+/* Related service link */
+.md-term-related-service {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 20px 0 32px;
+  flex-wrap: wrap;
+}
+.md-term-related-service__label {
+  display: flex; align-items: center; gap: 8px;
+  flex: 1; min-width: 240px;
+  font-size: 0.9rem;
+  color: var(--color-text-mute, #888);
+}
+.md-term-related-service__label strong {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+  margin-left: 4px;
+}
+.md-term-related-service__icon { font-size: 1.2rem; }
+
+/* FAQ · 접기/펼치기 */
+.md-term-faq { margin: 32px 0; }
+.md-term-faq__list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.md-term-faq__item {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 14px 20px;
+  transition: border-color 0.2s;
+}
+.md-term-faq__item[open] { border-color: var(--color-primary); }
+.md-term-faq__q {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--color-text);
+  list-style: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.md-term-faq__q::-webkit-details-marker { display: none; }
+.md-term-faq__q::after {
+  content: '▼';
+  font-size: 0.7rem;
+  color: var(--color-primary);
+  transition: transform 0.2s;
+}
+.md-term-faq__item[open] .md-term-faq__q::after { transform: rotate(180deg); }
+.md-term-faq__a {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--color-border);
+  color: var(--color-text);
+  line-height: 1.75;
+  font-size: 0.95rem;
+}
+
+/* Big CTA banner (하단 대형 배너) */
+.md-term-big-cta {
+  background: linear-gradient(135deg, #B45E2E, #8F4820);
+  color: #fff;
+  padding: clamp(28px, 4vw, 40px);
+  border-radius: 16px;
+  text-align: center;
+  margin: 32px 0;
+}
+.md-term-big-cta h3 {
+  font-size: clamp(1.15rem, 1.8vw, 1.4rem);
+  margin: 0 0 6px;
+  color: #fff;
+  font-weight: 800;
+}
+.md-term-big-cta p {
+  font-size: 0.9rem;
+  opacity: 0.92;
+  margin: 0 0 20px;
+}
+.md-term-big-cta__actions {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+}
+.md-term-big-cta__btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.92rem;
+  transition: all 0.2s;
+}
+.md-term-big-cta__btn--white {
+  background: #fff;
+  color: var(--color-primary-dark);
+}
+.md-term-big-cta__btn--white:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .md-term-inline-cta { background: linear-gradient(135deg, #2a1e15 0%, #241a12 100%); border-color: rgba(242, 168, 120, 0.2); }
+  .md-term-inline-cta__title { color: #f2a878; }
+  .md-term-inline-cta__lead { color: #d0d0d0; }
+  .md-term-related-service { background: #1c1c1e; border-color: rgba(255,255,255,0.1); }
+  .md-term-related-service__label { color: #a0a0a0; }
+  .md-term-related-service__label strong { color: #f2a878; }
+  .md-term-faq__item { background: #1c1c1e; border-color: rgba(255,255,255,0.1); }
+  .md-term-faq__a { color: #d0d0d0; border-top-color: rgba(255,255,255,0.08); }
+}
+
+@media (max-width: 640px) {
+  .md-term-inline-cta__actions,
+  .md-term-big-cta__actions { flex-direction: column; align-items: stretch; }
+  .md-term-inline-cta__actions .md-btn,
+  .md-term-big-cta__btn { width: 100%; justify-content: center; }
 }
 
 /* =============================================================
