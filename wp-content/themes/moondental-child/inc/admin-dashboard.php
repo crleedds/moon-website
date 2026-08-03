@@ -144,7 +144,7 @@ function moondental_render_content_dashboard() {
 			</div>
 
 			<div class="md-cm-card">
-				<h2>📖 치과사전 (Encyclopedia)<span class="md-cm-badge md-cm-badge--post">CPT</span></h2>
+				<h2>📖 치과 백과사전 (Encyclopedia)<span class="md-cm-badge md-cm-badge--post">CPT</span></h2>
 				<p class="md-cm-desc">치과 용어 사전. 카테고리·초성 필터. SEO 롱테일 키워드 확보.</p>
 				<a class="button button-primary" href="<?php echo esc_url( admin_url( 'edit.php?post_type=md_term' ) ); ?>">용어 목록 →</a>
 				<a class="button" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=md_term' ) ); ?>">새 용어 추가</a>

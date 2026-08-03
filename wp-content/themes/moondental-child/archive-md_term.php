@@ -1,6 +1,6 @@
 <?php
 /**
- * 치과사전 아카이브 · /치과사전/
+ * 치과 백과사전 아카이브 · /치과사전/
  *  카테고리 탭 · 초성 필터 · 검색 · 카드 그리드
  *
  * @package moondental-child
@@ -68,10 +68,10 @@ $total_count = array_sum( array_map( 'count', $visible_groups ) );
 <section class="md-page-hero md-page-hero--enc">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( md_content( 'breadcrumb_encyclopedia', '치과사전' ) ); ?></span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( md_content( 'breadcrumb_encyclopedia', '치과 백과사전' ) ); ?></span>
 		</nav>
-		<span class="md-page-hero__eyebrow"><?php echo esc_html( md_content( 'enc_hero_eyebrow', 'DENTAL ENCYCLOPEDIA · 치과사전' ) ); ?></span>
-		<h1 class="md-page-hero__title"><?php echo esc_html( md_content( 'enc_hero_title', '천안·아산 문치과병원 · 치과사전' ) ); ?></h1>
+		<span class="md-page-hero__eyebrow"><?php echo esc_html( md_content( 'enc_hero_eyebrow', 'DENTAL ENCYCLOPEDIA · 치과 백과사전' ) ); ?></span>
+		<h1 class="md-page-hero__title"><?php echo esc_html( md_content( 'enc_hero_title', '천안·아산 문치과병원 · 치과 백과사전' ) ); ?></h1>
 		<p class="md-page-hero__lead">
 			<?php echo esc_html( md_content( 'enc_hero_lead', '치과 진료·시술·질환에 대한 용어를 알기 쉽게 정리했습니다. 궁금한 용어를 검색하거나 카테고리·초성으로 찾아보세요.' ) ); ?>
 		</p>

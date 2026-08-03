@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.85' );
+define( 'MOONDENTAL_VERSION', '3.44.86' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -307,6 +307,23 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3291', 'done' );
 }, 44 );
+
+/* 일회성 마이그레이션 v3.44.86 · '치과사전' → '치과 백과사전' 표시 라벨 정리
+ * Customizer 저장값의 '치과사전' 표시 텍스트를 '치과 백과사전' 으로 변환 (URL 등은 유지) */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_enc_rename_v3486' ) === 'done' ) return;
+	$all_mods = get_theme_mods();
+	if ( is_array( $all_mods ) ) {
+		foreach ( $all_mods as $key => $val ) {
+			if ( ! is_string( $val ) || $val === '' ) continue;
+			if ( strpos( $val, '치과사전' ) === false ) continue;
+			// 앞뒤 슬래시/대시 없는 '치과사전' 만 치환
+			$new = preg_replace( '/(?<![\/\-])치과사전(?![\/\-])/u', '치과 백과사전', $val );
+			if ( $new !== $val ) set_theme_mod( $key, $new );
+		}
+	}
+	update_option( 'moondental_enc_rename_v3486', 'done' );
+}, 57 );
 
 /* 일회성 마이그레이션 v3.44.85 · 스태프 명단에서 정시연 제거 */
 add_action( 'after_setup_theme', function() {
@@ -2165,7 +2182,7 @@ function moondental_cta_copy( $context = null ) {
 			$copy = array(
 				'eyebrow' => '정확한 진단은 내원',
 				'title'   => md_content( 'cta_enc_title', '이 증상, 나에게 해당할까요?' ),
-				'lead'    => md_content( 'cta_enc_lead',  '치과사전은 참고용입니다. 정확한 진단·치료 계획은 의료진 상담이 필요합니다.' ),
+				'lead'    => md_content( 'cta_enc_lead',  '치과 백과사전은 참고용입니다. 정확한 진단·치료 계획은 의료진 상담이 필요합니다.' ),
 			);
 			break;
 
@@ -4028,7 +4045,7 @@ function moondental_primary_menu_data() {
 			array( 'label' => '30여년의 역사',     'url' => $home . '역사/' ),
 			array( 'label' => '기술력/시설',        'url' => $home . '기술력-시설/' ),
 			array( 'label' => '병원소식',          'url' => $home . '소식/' ),
-			array( 'label' => '치과사전',          'url' => $home . '치과사전/' ),
+			array( 'label' => '치과 백과사전',          'url' => $home . '치과사전/' ),
 			array( 'label' => '상시채용',          'url' => $home . '상시채용/' ),
 		) ),
 	);
@@ -4258,7 +4275,8 @@ function moondental_menu_label_key( $label ) {
 		'30여년의 역사'        => 'menu_history',
 		'기술력/시설'          => 'menu_facility',
 		'병원소식'             => 'menu_news',
-		'치과사전'             => 'menu_encyclopedia',
+		'치과사전' => 'menu_encyclopedia',
+		'치과 백과사전' => 'menu_encyclopedia',
 		'상시채용'             => 'menu_recruit',
 	);
 	return $map[ $label ] ?? null;

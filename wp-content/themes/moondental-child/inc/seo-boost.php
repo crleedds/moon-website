@@ -100,7 +100,7 @@ function moondental_seo_page_map() {
 			'title' => '문치과병원 자주 묻는 질문 (FAQ) · 진료·비용·예약 - 천안·아산 치과',
 			'desc'  => '천안·아산 문치과병원 자주 묻는 질문. 진료 시간·비용·주차·다국어·응급 진료·예약 방법 등 환자분들이 자주 문의하시는 내용 정리.',
 		),
-		'치과사전' => array(
+		'치과 백과사전' => array(
 			'title' => '치과 백과사전 · 치과 용어·치료·질환 총정리 - 문치과병원',
 			'desc'  => '치과 백과사전 · 문치과병원. 임플란트·교정·신경치료·치주·심미 등 치과 용어 · 치료 방법 · 질환 · 예방까지 환자용 종합 사전.',
 		),
@@ -394,13 +394,13 @@ add_filter( 'wpseo_sitemap_index', function ( $sitemap_index ) {
 } );
 
 /**
- * 치과사전 개별 항목 · MedicalWebPage schema (검색 결과 강화)
+ * 치과 백과사전 개별 항목 · MedicalWebPage schema (검색 결과 강화)
  */
 function moondental_jsonld_encyclopedia() {
 	if ( is_admin() ) return;
 	if ( ! is_page() ) return;
 	$slug = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
-	if ( $slug !== '치과사전' ) return;
+	if ( $slug !== '치과 백과사전' ) return;
 	$schema = array(
 		'@context'  => 'https://schema.org',
 		'@type'     => array( 'MedicalWebPage', 'CollectionPage' ),
@@ -440,7 +440,7 @@ function moondental_seo_extra_keywords() {
 		'사랑니-발치'           => '천안·아산 사랑니, 매복 사랑니, CT 발치, 사랑니 수술',
 		'심미치료'              => '천안·아산 라미네이트, 치아 미백, 심미 크라운, 스마일 디자인',
 		'예방클리닉'            => '천안·아산 스케일링, 정기 검진, 실란트, 불소도포, 홈케어',
-		'치과사전'              => '치과 사전, 치과 용어, 치과 백과, 치과 정보, 치과 질환, 치과 치료',
+		'치과 백과사전'              => '치과 사전, 치과 용어, 치과 백과, 치과 정보, 치과 질환, 치과 치료',
 	);
 	$extra = isset( $per_page[ $key ] ) ? ', ' . $per_page[ $key ] : '';
 	echo '<meta name="keywords" content="' . esc_attr( $base . $extra ) . '" />' . "\n";
