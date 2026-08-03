@@ -34,6 +34,9 @@ get_header();
 
 <?php get_template_part( 'template-parts/section', 'notices' ); ?>
 
+<?php /* v3.44.79 · 핵심 페이지 바로가기 · 사이트링크 유도 콘텐츠 링크 카드 */ ?>
+<?php get_template_part( 'template-parts/section', 'quicknav' ); ?>
+
 <?php get_template_part( 'template-parts/section', 'cta' ); ?>
 
 <?php
