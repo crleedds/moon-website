@@ -103,6 +103,94 @@ function moondental_seed_encyclopedia_categories() {
 	}
 	update_option( 'moondental_encyclopedia_cats_v3350', 'done' );
 }
+
+/**
+ * v3.44.88 · 신규 15개 카테고리 (백과사전 전면 재편)
+ *  기존 카테고리는 유지 · 신규만 추가
+ */
+function moondental_seed_encyclopedia_categories_v3488() {
+	if ( get_option( 'moondental_encyclopedia_cats_v3488' ) === 'done' ) return;
+	$cats = array(
+		array( 'name' => '임플란트',           'slug' => 'implant',        'desc' => '임플란트 진료 관련 학술·임상 용어' ),
+		array( 'name' => '교정',               'slug' => 'ortho',          'desc' => '교정 진단·장치·술식 관련 용어' ),
+		array( 'name' => '치료·시술',          'slug' => 'treatment',      'desc' => '충전·수복·발치·마취 등 진료 술식' ),
+		array( 'name' => '치과 질환',          'slug' => 'diseases',       'desc' => '치과 관련 각종 질환' ),
+		array( 'name' => '치수·치아 질환',     'slug' => 'pulp-tooth',     'desc' => '치수염·근단염·치아 파절 등' ),
+		array( 'name' => '치주 질환',          'slug' => 'periodontal',    'desc' => '잇몸·치주 질환·치조골 관련' ),
+		array( 'name' => '소아 치과',          'slug' => 'pediatric-new',  'desc' => '유치·성장기·소아 진료 용어' ),
+		array( 'name' => '치과 재료',          'slug' => 'materials',      'desc' => '보철·수복·인상재 등 치과 재료' ),
+		array( 'name' => '장비·기술',          'slug' => 'equipment',      'desc' => 'CBCT·스캐너·CAD/CAM·레이저 등' ),
+		array( 'name' => '전문 용어',          'slug' => 'professional',   'desc' => '의학·라틴어·국제표준 용어' ),
+		array( 'name' => '구강내과 질환',      'slug' => 'oral-medicine',  'desc' => '점막·설·타액선·미각 등 구강내과' ),
+		array( 'name' => '구강 관리',          'slug' => 'oral-care',      'desc' => '칫솔질·치실·홈케어 방법' ),
+		array( 'name' => '턱관절·구강외과',    'slug' => 'tmj-surgery',    'desc' => 'TMD·이갈이·양악·낭종·매복치 수술' ),
+		array( 'name' => '치아 구조',          'slug' => 'tooth-structure','desc' => '치아 해부·조직·치조골 구조' ),
+		array( 'name' => '보험·비용',          'slug' => 'insurance-cost', 'desc' => '건강보험·비급여·의료비 관련' ),
+	);
+	foreach ( $cats as $c ) {
+		if ( term_exists( $c['slug'], 'md_term_category' ) ) continue;
+		wp_insert_term( $c['name'], 'md_term_category', array(
+			'slug'        => $c['slug'],
+			'description' => $c['desc'],
+		) );
+	}
+	update_option( 'moondental_encyclopedia_cats_v3488', 'done' );
+}
+add_action( 'admin_init', 'moondental_seed_encyclopedia_categories_v3488', 20 );
+add_action( 'wp_loaded',  'moondental_seed_encyclopedia_categories_v3488', 20 );
+
+/**
+ * v3.44.88 · 새 시드 파일 로더 (encyclopedia-seed-v3488.php)
+ *  전체 기존 md_term 휴지통 이동 후 신규 900개 삽입
+ *  파일이 존재하고 아직 실행 안 됐을 때만 동작
+ */
+function moondental_seed_encyclopedia_v3488() {
+	if ( get_option( 'moondental_encyclopedia_seed_v3488' ) === 'done' ) return;
+	$seed_file = MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3488.php';
+	if ( ! file_exists( $seed_file ) ) return;
+
+	// 카테고리 준비
+	moondental_seed_encyclopedia_categories_v3488();
+
+	// 시드 데이터 로드 · 반환 형식: array( array( 'title'=>..., 'cat'=>slug, 'excerpt'=>..., 'body'=>..., 'aliases'=>[...] ), ... )
+	$terms = require $seed_file;
+	if ( ! is_array( $terms ) || empty( $terms ) ) return;
+
+	global $wpdb;
+
+	// 기존 md_term 전부 휴지통 이동 (SQL 대량 UPDATE)
+	$wpdb->query( "UPDATE {$wpdb->posts}
+	               SET post_status = 'trash'
+	               WHERE post_type = 'md_term'
+	                 AND post_status = 'publish'" );
+
+	// 신규 삽입
+	$total = 0;
+	foreach ( $terms as $t ) {
+		if ( empty( $t['title'] ) || empty( $t['body'] ) ) continue;
+		$post_id = wp_insert_post( array(
+			'post_type'    => 'md_term',
+			'post_status'  => 'publish',
+			'post_title'   => $t['title'],
+			'post_excerpt' => $t['excerpt'] ?? '',
+			'post_content' => $t['body'],
+		) );
+		if ( $post_id && ! is_wp_error( $post_id ) ) {
+			if ( ! empty( $t['cat'] ) ) {
+				$term = get_term_by( 'slug', $t['cat'], 'md_term_category' );
+				if ( $term ) {
+					wp_set_object_terms( $post_id, array( $term->term_id ), 'md_term_category' );
+				}
+			}
+			$total++;
+		}
+	}
+
+	update_option( 'moondental_encyclopedia_seed_v3488', 'done' );
+	update_option( 'moondental_encyclopedia_seed_v3488_count', $total, false );
+}
+add_action( 'admin_init', 'moondental_seed_encyclopedia_v3488', 40 );
+add_action( 'wp_loaded',  'moondental_seed_encyclopedia_v3488', 40 );
 // v3.37.0 · 마이그레이션은 admin_init로 (프론트 요청마다 get_option 호출 방지 + 관리자 컨텍스트에서만 실행)
 add_action( 'admin_init', 'moondental_seed_encyclopedia_categories', 20 );
 
