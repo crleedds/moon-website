@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.81' );
+define( 'MOONDENTAL_VERSION', '3.44.82' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -307,6 +307,43 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3291', 'done' );
 }, 44 );
+
+/* 일회성 마이그레이션 v3.44.82 · v3.44.81에서 생성된 랜딩 페이지 2개 휴지통 이동
+ * 기존 /오시는-길/cheonan/, /오시는-길/asan/ 로 대체 · 신설 페이지 불필요 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_remove_recommend_v3482' ) === 'done' ) return;
+	global $wpdb;
+	$slugs = array( '천안-추천-치과', '아산-추천-치과' );
+	foreach ( $slugs as $raw ) {
+		$encoded = strtolower( urlencode( $raw ) );
+		$rows = $wpdb->get_results( $wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts}
+			 WHERE post_type = 'page'
+			   AND post_status IN ('publish','draft','pending','private')
+			   AND (post_name = %s OR post_name = %s)",
+			$raw, $encoded
+		) );
+		if ( $rows ) {
+			foreach ( $rows as $r ) wp_trash_post( (int) $r->ID );
+		}
+	}
+	update_option( 'moondental_remove_recommend_v3482', 'done' );
+}, 53 );
+
+/* 일회성 마이그레이션 v3.44.82 · 지역 페이지 섹션 제목 · '추천 치과' 키워드 추가 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_region_titles_v3482' ) === 'done' ) return;
+	$old_defaults = array(
+		'md_content_region_reasons_eyebrow' => '✨ 우리 병원을 선택하는 이유',
+		'md_content_region_reasons_title'   => '{region}에서 문치과병원을 선택하시는 이유',
+		'md_content_region_popular_title'   => '{region}에서 오시는 환자분들의 인기 진료',
+		'md_content_region_faq_title'       => '{region} 환자분들이 자주 물어보시는 질문',
+	);
+	foreach ( $old_defaults as $key => $old ) {
+		if ( get_theme_mod( $key ) === $old ) remove_theme_mod( $key );
+	}
+	update_option( 'moondental_region_titles_v3482', 'done' );
+}, 54 );
 
 /* 일회성 마이그레이션 v3.44.80 · Customizer 저장값 · '천안' → '천안·아산' 확장 */
 add_action( 'after_setup_theme', function() {
@@ -2780,9 +2817,6 @@ function moondental_ensure_core_pages() {
 		// v3.44.44 · 교정센터 하위 페이지 2개 신설
 		array( 'slug' => '슈어스마일-투명교정', 'title' => '슈어스마일 투명교정', 'template' => 'page-templates/page-service.php',     'parent' => '진료항목' ),
 		array( 'slug' => '브라켓-치아교정',      'title' => '브라켓 치아교정',    'template' => 'page-templates/page-service.php',     'parent' => '진료항목' ),
-		// v3.44.81 · '천안 추천 치과' · '아산 추천 치과' 정확 매칭 랜딩 페이지
-		array( 'slug' => '천안-추천-치과', 'title' => '천안 추천 치과', 'template' => 'page-templates/page-recommend.php', 'parent' => '' ),
-		array( 'slug' => '아산-추천-치과', 'title' => '아산 추천 치과', 'template' => 'page-templates/page-recommend.php', 'parent' => '' ),
 	);
 
 	$created = false;
@@ -3277,9 +3311,6 @@ function moondental_template_router( $template ) {
 		'채용'           => 'page-templates/page-recruit.php',
 		'recruit'        => 'page-templates/page-recruit.php',
 		'careers'        => 'page-templates/page-recruit.php',
-		// v3.44.81 · 정확 매칭 랜딩 페이지
-		'천안-추천-치과'  => 'page-templates/page-recommend.php',
-		'아산-추천-치과'  => 'page-templates/page-recommend.php',
 	);
 
 	if ( isset( $map[ $slug ] ) ) {

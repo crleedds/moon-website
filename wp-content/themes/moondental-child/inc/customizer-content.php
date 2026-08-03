@@ -2663,8 +2663,8 @@ function moondental_region_content_fields() {
 		'reasons' => array(
 			'title'  => '선택 이유 6가지',
 			'fields' => array(
-				'region_reasons_eyebrow' => array( 'default' => '✨ 우리 병원을 선택하는 이유', 'label' => 'eyebrow', 'type' => 'text' ),
-				'region_reasons_title'   => array( 'default' => '{region}에서 문치과병원을 선택하시는 이유', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
+				'region_reasons_eyebrow' => array( 'default' => '✨ {region} 추천 치과 · 선택 이유', 'label' => 'eyebrow (토큰: {region})', 'type' => 'text' ),
+				'region_reasons_title'   => array( 'default' => '{region} 추천 치과 · 문치과병원을 선택하시는 이유', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
 				'region_reasons_cards'   => array(
 					'default' => "🦷 30여년 임상 경험 | {region}에서 천안까지 오시는 데는 이유가 있습니다. 1995년 개원부터 30여년 한자리 진료로 누적된 임상 경험.\n👨‍⚕️ 분야별 전문 의료진 협진 | 보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 전 분야 의료진이 한 케이스를 함께 보는 협진 시스템. {region}에서 따로따로 다닐 필요 없습니다.\n🔬 CBCT 디지털 진단 | 3D CBCT·디지털 가이드 수술·구강 스캐너 — 정확한 진단과 안전한 수술. {region}에서 정밀 진단이 필요한 케이스에 추천.\n⚙️ 자체 보철 제작 | 13층 한아 임플란트 보철연구소 원내 직접 제작. 빠른 수정·정확한 의사소통·품질 일관성 — {region}에서 오신 분들도 한 번에 끝.\n❤️ 전신질환 안심 진료 | 혈압·당검사·심전도·산소포화도 상시 측정. 고혈압·당뇨·심장질환자도 {region}에서 오셔서 안심하고 진료받으실 수 있습니다.\n🌙 평일 야간진료 | 월·화·수·금 9:00~20:30 점심시간 없이 진료 · 목 9:00~18:30 · 토 9:00~14:00. {region}에서 퇴근 후 출발하셔도 충분한 진료 시간.",
 					'label' => '이유 카드 (한 줄에 1개, 형식: 아이콘+제목 | 본문) · 토큰: {region}',
@@ -2676,7 +2676,7 @@ function moondental_region_content_fields() {
 			'title'  => '인기 진료 5개',
 			'fields' => array(
 				'region_popular_eyebrow' => array( 'default' => '🦷 인기 진료', 'label' => 'eyebrow', 'type' => 'text' ),
-				'region_popular_title'   => array( 'default' => '{region}에서 오시는 환자분들의 인기 진료', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
+				'region_popular_title'   => array( 'default' => '{region} 추천 치과 · 인기 진료 5가지', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
 				'region_popular_lead'    => array( 'default' => '{region}에서 천안까지 오시는 분들이 자주 받으시는 진료입니다.', 'label' => '섹션 리드 (토큰: {region})', 'type' => 'textarea' ),
 				'region_popular_items'   => array(
 					'default' => "임플란트-센터 | icon:implant | {region} 임플란트 | {region}에서 정밀 임플란트 — CBCT 디지털 가이드·자체 보철 제작·30여년 임상.\n투명교정-센터 | icon:ortho | {region} 투명교정 | {region}에서 슈어스마일 SureSmile 투명교정 — Dentsply Sirona AI 시뮬레이션.\n심미치료 | icon:aesthetic | {region} 라미네이트 | {region}에서 자연스러운 미소 — 최소 삭제 라미네이트·미백·심미 보철.\n자연치아-살리기 | icon:preserve | {region} 자연치아 살리기 | {region}에서 신경치료·재근관치료 — 발치보다 보존 우선.\n사랑니-발치 | icon:wisdom | {region} 사랑니 발치 | {region}에서 매복 사랑니까지 — CBCT 안전 진단 + 진정요법.",
@@ -2699,7 +2699,7 @@ function moondental_region_content_fields() {
 			'title'  => '지역 FAQ 5개',
 			'fields' => array(
 				'region_faq_eyebrow' => array( 'default' => '❓ 자주 묻는 질문', 'label' => 'eyebrow', 'type' => 'text' ),
-				'region_faq_title'   => array( 'default' => '{region} 환자분들이 자주 물어보시는 질문', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
+				'region_faq_title'   => array( 'default' => '{region} 추천 치과 · 자주 묻는 질문', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
 				'region_faq_items'   => array(
 					'default' => "{region}에서 천안·아산 문치과병원까지 얼마나 걸리나요? | 자동차로 약 <strong>{duration}분</strong>, 거리 약 {distance}km입니다. 주요 경로는 {highway} 이용. 시외버스·KTX로도 천안종합터미널 또는 천안역 도착 후 도보 5분 거리입니다.\n{region}에서 갈 만한 임플란트 잘하는 치과인가요? | 네, {region}에서 임플란트 진료받으러 오시는 환자분이 많습니다. 1995년 개원 30여년 임상, CBCT 디지털 가이드 수술, 13층 자체 한아 임플란트 보철연구소에서 보철 직접 제작 — 다른 지역에서 오셔도 한 번 방문으로 진단부터 보철까지 진행할 수 있도록 시스템이 갖춰져 있습니다.\n{region}에서 주차가 가능한가요? | 네, 본원 지하 기계식 주차장을 <strong>무료</strong>로 이용하실 수 있습니다. SUV·대형차는 인근 신부 제5공영주차장(동남구 먹거리1길 10)에 주차하시고 데스크에 접수하시면 무료 등록을 도와드립니다.\n{region}에서 야간이나 주말에도 진료 가능한가요? | 네, 평일(월·화·수·금)은 <strong>9:00~20:30</strong>까지 점심시간 없이 진료합니다. {region}에서 퇴근 후 출발하셔도 충분한 시간입니다. 토요일은 9:00~14:00, 일요일·공휴일은 휴진입니다.\n{region}에서 첫 진료 시 무엇이 필요한가요? | 신분증(또는 건강보험증)을 지참해주세요. 복용 중인 약이 있다면 약 정보, 타원 X-ray 파일(USB·이메일)이 있으면 진단 시간이 단축됩니다. 사전 예약은 네이버 예약, 전화, 카카오톡 채널로 가능합니다.",
 					'label' => 'FAQ (한 줄에 1개, 형식: 질문 | 답변) · 토큰 다 사용 가능',
