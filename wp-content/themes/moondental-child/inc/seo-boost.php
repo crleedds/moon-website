@@ -214,6 +214,41 @@ add_action( 'wp_head', function () {
 }, 2 );
 
 /**
+ * v3.44.83 · '병원소개' 페이지 검색 인덱스 제외
+ *   - <meta name="robots" content="noindex,nofollow"> 출력
+ *   - Yoast SEO sitemap 에서도 제외
+ *   - 자식 페이지는 유지 (URL 구조 유지)
+ */
+add_action( 'wp_head', function () {
+	if ( ! is_page() ) return;
+	$slug = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
+	if ( $slug === '병원소개' ) {
+		echo '<meta name="robots" content="noindex,nofollow" />' . "\n";
+	}
+}, 1 );
+
+/**
+ * Yoast SEO · '병원소개' 페이지 sitemap 에서 제외
+ */
+add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', function ( $ids ) {
+	if ( function_exists( 'moondental_page_exists_by_slug' ) ) {
+		$id = moondental_page_exists_by_slug( '병원소개' );
+		if ( $id ) $ids[] = $id;
+	}
+	return $ids;
+} );
+
+/**
+ * Yoast noindex · '병원소개' 페이지
+ */
+add_filter( 'wpseo_robots', function ( $string ) {
+	if ( ! is_page() ) return $string;
+	$slug = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
+	if ( $slug === '병원소개' ) return 'noindex,nofollow';
+	return $string;
+} );
+
+/**
  * SiteNavigationElement + ItemList + WebSite hasPart JSON-LD — 구글 사이트링크 유도 극대화
  *  주요 메뉴를 여러 스키마 타입으로 중복 강조하여 브랜드 검색시 sitelinks 자동 노출 확률 상승
  *  v3.44.75 · ItemList (설명 포함) 추가 · hasPart 로 sub-URL 명시
