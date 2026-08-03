@@ -716,41 +716,41 @@ function moondental_home_content_fields() {
 			'title'  => 'SEO 메타 태그 (검색·SNS 공유)',
 			'fields' => array(
 				// 홈
-				'seo_home_title' => array( 'default' => '천안·아산 치과 | 천안 임플란트·투명교정·자연치아살리기', 'label' => '홈 · 제목 (뒤에 병원명 자동)', 'type' => 'text' ),
+				'seo_home_title' => array( 'default' => '천안·아산 치과 | 천안·아산 임플란트·투명교정·자연치아살리기', 'label' => '홈 · 제목 (뒤에 병원명 자동)', 'type' => 'text' ),
 				'seo_home_desc'  => array( 'default' => '천안 만남로 1995년 개원 30여년 한자리 진료. 천안·아산 임플란트·투명교정·라미네이트·사랑니 발치·턱관절 치료. 분야별 전문 의료진 협진·CBCT 디지털 가이드·월·화·수·금 야간진료(20:30).', 'label' => '홈 · 설명', 'type' => 'textarea' ),
-				'seo_home_kw'    => array( 'default' => '천안 치과, 아산 치과, 천안치과, 아산치과, 천안 임플란트, 아산 임플란트, 천안 투명교정, 아산 투명교정, 천안 라미네이트, 아산 라미네이트, 천안 자연치아 살리기, 아산 자연치아 살리기, 천안 사랑니 발치, 아산 사랑니 발치, 천안 턱관절, 아산 턱관절, 천안 신경치료, 아산 신경치료, 천안 미백, 아산 미백, 천안 치과병원, 아산 치과병원, 천안 만남로 치과, 천안 신부동 치과, 천안 동남구 치과, 한아의료재단, 문치과병원, 슈어스마일 투명교정', 'label' => '홈 · 키워드', 'type' => 'textarea' ),
+				'seo_home_kw'    => array( 'default' => '천안·아산 치과, 아산 치과, 천안치과, 아산치과, 천안·아산 임플란트, 아산 임플란트, 천안·아산 투명교정, 아산 투명교정, 천안·아산 라미네이트, 아산 라미네이트, 천안·아산 자연치아 살리기, 아산 자연치아 살리기, 천안·아산 사랑니 발치, 아산 사랑니 발치, 천안·아산 턱관절, 아산 턱관절, 천안·아산 신경치료, 아산 신경치료, 천안·아산 미백, 아산 미백, 천안·아산 치과병원, 아산 치과병원, 천안 만남로 치과, 천안 신부동 치과, 천안 동남구 치과, 한아의료재단, 문치과병원, 슈어스마일 투명교정', 'label' => '홈 · 키워드', 'type' => 'textarea' ),
 				// 임플란트
 				'seo_implant_title' => array( 'default' => '천안·아산 임플란트 | CBCT 디지털 가이드 수술', 'label' => '임플란트 센터 · 제목', 'type' => 'text' ),
 				'seo_implant_desc'  => array( 'default' => '천안·아산 임플란트 시작가 85만원~. 천안 만남로 30여년 임상, 분야별 전문 의료진 협진, CBCT 디지털 가이드 수술, 전신질환 안심 진료. 자체 한아 임플란트 보철연구소.', 'label' => '임플란트 · 설명', 'type' => 'textarea' ),
-				'seo_implant_kw'    => array( 'default' => '천안 임플란트, 아산 임플란트, 천안 임플란트 가격, 아산 임플란트 가격, 천안 임플란트 전문, 아산 임플란트 전문, 천안 디지털 임플란트, 아산 디지털 임플란트, 천안 골이식 임플란트, 아산 골이식 임플란트, 천안 노인 임플란트, 아산 노인 임플란트, 천안 만남로 임플란트', 'label' => '임플란트 · 키워드', 'type' => 'textarea' ),
+				'seo_implant_kw'    => array( 'default' => '천안·아산 임플란트, 아산 임플란트, 천안·아산 임플란트 가격, 아산 임플란트 가격, 천안·아산 임플란트 전문, 아산 임플란트 전문, 천안 디지털 임플란트, 아산 디지털 임플란트, 천안 골이식 임플란트, 아산 골이식 임플란트, 천안 노인 임플란트, 아산 노인 임플란트, 천안 만남로 임플란트', 'label' => '임플란트 · 키워드', 'type' => 'textarea' ),
 				// 투명교정
 				'seo_ortho_title' => array( 'default' => '천안·아산 투명교정 | 슈어스마일 SureSmile', 'label' => '투명교정 센터 · 제목', 'type' => 'text' ),
 				'seo_ortho_desc'  => array( 'default' => '천안·아산 투명교정 슈어스마일 (Dentsply Sirona). 천안 만남로 치과교정과 진료, AI 3D 시뮬레이션, Lite·Standard·Advanced 단계별 합리적 가격(190만원~).', 'label' => '투명교정 · 설명', 'type' => 'textarea' ),
-				'seo_ortho_kw'    => array( 'default' => '천안 투명교정, 아산 투명교정, 천안 슈어스마일, 아산 슈어스마일, 천안 교정, 아산 교정, 천안 치아교정, 아산 치아교정, 천안 성인교정, 아산 성인교정, 천안 부분교정, 아산 부분교정, 천안 투명교정 가격', 'label' => '투명교정 · 키워드', 'type' => 'textarea' ),
+				'seo_ortho_kw'    => array( 'default' => '천안·아산 투명교정, 아산 투명교정, 천안·아산 슈어스마일, 아산 슈어스마일, 천안·아산 교정, 아산 교정, 천안·아산 치아교정, 아산 치아교정, 천안 성인교정, 아산 성인교정, 천안 부분교정, 아산 부분교정, 천안·아산 투명교정 가격', 'label' => '투명교정 · 키워드', 'type' => 'textarea' ),
 				// 자연치아 살리기
 				'seo_preservation_title' => array( 'default' => '천안·아산 자연치아 살리기 | 신경치료·재근관치료·치주치료', 'label' => '자연치아 · 제목', 'type' => 'text' ),
 				'seo_preservation_desc'  => array( 'default' => '천안·아산 자연치아 살리기. 발치보다 보존 우선 — 신경치료·재근관치료·치주치료로 자연치아 최대한 살리는 천안 만남로 치과병원.', 'label' => '자연치아 · 설명', 'type' => 'textarea' ),
-				'seo_preservation_kw'    => array( 'default' => '천안 신경치료, 아산 신경치료, 천안 자연치아 살리기, 아산 자연치아 살리기, 천안 치주치료, 아산 치주치료, 천안 잇몸치료, 아산 잇몸치료, 천안 재근관치료, 천안 충치치료, 아산 충치치료', 'label' => '자연치아 · 키워드', 'type' => 'textarea' ),
+				'seo_preservation_kw'    => array( 'default' => '천안·아산 신경치료, 아산 신경치료, 천안·아산 자연치아 살리기, 아산 자연치아 살리기, 천안 치주치료, 아산 치주치료, 천안·아산 잇몸치료, 아산 잇몸치료, 천안 재근관치료, 천안 충치치료, 아산 충치치료', 'label' => '자연치아 · 키워드', 'type' => 'textarea' ),
 				// 턱관절
 				'seo_tmj_title' => array( 'default' => '천안·아산 턱관절 치료 | 통증·소리·개구장애', 'label' => '턱관절 · 제목', 'type' => 'text' ),
 				'seo_tmj_desc'  => array( 'default' => '천안·아산 턱관절 클리닉. 턱 소리·통증·개구장애 진단 및 치료. 천안 만남로 치과병원에서 보존적 치료 우선, 11F 교정과 협진으로 교합 안정화.', 'label' => '턱관절 · 설명', 'type' => 'textarea' ),
-				'seo_tmj_kw'    => array( 'default' => '천안 턱관절, 아산 턱관절, 천안 턱관절 치료, 아산 턱관절 치료, 천안 턱 소리, 천안 이갈이, 아산 이갈이, 천안 턱관절 보톡스, 천안 스플린트', 'label' => '턱관절 · 키워드', 'type' => 'textarea' ),
+				'seo_tmj_kw'    => array( 'default' => '천안·아산 턱관절, 아산 턱관절, 천안·아산 턱관절 치료, 아산 턱관절 치료, 천안 턱 소리, 천안 이갈이, 아산 이갈이, 천안·아산 턱관절 보톡스, 천안 스플린트', 'label' => '턱관절 · 키워드', 'type' => 'textarea' ),
 				// 사랑니 발치
 				'seo_wisdom_title' => array( 'default' => '천안·아산 사랑니 발치 | CBCT 안전 진단', 'label' => '사랑니 · 제목', 'type' => 'text' ),
 				'seo_wisdom_desc'  => array( 'default' => '천안·아산 사랑니 발치. CBCT 3D 진단으로 신경 손상 위험 최소화, 매복 사랑니까지 천안 만남로 구강악안면외과 진료. 진정요법 가능.', 'label' => '사랑니 · 설명', 'type' => 'textarea' ),
-				'seo_wisdom_kw'    => array( 'default' => '천안 사랑니 발치, 아산 사랑니 발치, 천안 매복 사랑니, 아산 매복 사랑니, 천안 사랑니, 아산 사랑니, 천안 구강외과, 아산 구강외과', 'label' => '사랑니 · 키워드', 'type' => 'textarea' ),
+				'seo_wisdom_kw'    => array( 'default' => '천안·아산 사랑니 발치, 아산 사랑니 발치, 천안 매복 사랑니, 아산 매복 사랑니, 천안·아산 사랑니, 아산 사랑니, 천안 구강외과, 아산 구강외과', 'label' => '사랑니 · 키워드', 'type' => 'textarea' ),
 				// 심미치료
 				'seo_aesthetic_title' => array( 'default' => '천안·아산 라미네이트·미백 | 자연스러운 미소', 'label' => '심미치료 · 제목', 'type' => 'text' ),
 				'seo_aesthetic_desc'  => array( 'default' => '천안·아산 라미네이트·치아미백·심미보철. 최소 삭제 보존적 접근, 자연스러운 미소를 만드는 천안 만남로 심미치료 전문.', 'label' => '심미치료 · 설명', 'type' => 'textarea' ),
-				'seo_aesthetic_kw'    => array( 'default' => '천안 라미네이트, 아산 라미네이트, 천안 미백, 아산 미백, 천안 치아미백, 아산 치아미백, 천안 심미치료, 아산 심미치료, 천안 라미네이트 가격, 천안 앞니 라미네이트', 'label' => '심미치료 · 키워드', 'type' => 'textarea' ),
+				'seo_aesthetic_kw'    => array( 'default' => '천안·아산 라미네이트, 아산 라미네이트, 천안·아산 미백, 아산 미백, 천안 치아미백, 아산 치아미백, 천안·아산 심미치료, 아산 심미치료, 천안·아산 라미네이트 가격, 천안 앞니 라미네이트', 'label' => '심미치료 · 키워드', 'type' => 'textarea' ),
 				// 비용 안내
 				'seo_pricing_title' => array( 'default' => '천안·아산 치과 비용 안내 | 정직한 진료비', 'label' => '비용 안내 · 제목', 'type' => 'text' ),
 				'seo_pricing_desc'  => array( 'default' => '천안·아산 치과 비용 — 임플란트·투명교정·라미네이트·사랑니 발치 비용 안내. 사전 견적서 제공, 시작 후 추가 비용 0원.', 'label' => '비용 안내 · 설명', 'type' => 'textarea' ),
-				'seo_pricing_kw'    => array( 'default' => '천안 치과 비용, 아산 치과 비용, 천안 임플란트 비용, 아산 임플란트 비용, 천안 투명교정 비용, 아산 투명교정 비용, 천안 라미네이트 비용, 천안 사랑니 비용, 천안 치과 가격, 아산 치과 가격', 'label' => '비용 안내 · 키워드', 'type' => 'textarea' ),
+				'seo_pricing_kw'    => array( 'default' => '천안·아산 치과 비용, 아산 치과 비용, 천안·아산 임플란트 비용, 아산 임플란트 비용, 천안·아산 투명교정 비용, 아산 투명교정 비용, 천안·아산 라미네이트 비용, 천안·아산 사랑니 비용, 천안·아산 치과 가격, 아산 치과 가격', 'label' => '비용 안내 · 키워드', 'type' => 'textarea' ),
 				// 의료진
 				'seo_doctors_title' => array( 'default' => '천안·아산 치과 의료진 | 분야별 전문 의료진 협진', 'label' => '의료진 · 제목', 'type' => 'text' ),
 				'seo_doctors_desc'  => array( 'default' => '천안 만남로 문치과병원 의료진 — 보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 분야별 전문 의료진이 한 케이스를 함께 봅니다.', 'label' => '의료진 · 설명', 'type' => 'textarea' ),
-				'seo_doctors_kw'    => array( 'default' => '천안 치과 의사, 아산 치과 의사, 천안 치과 의료진, 아산 치과 의료진, 천안 임플란트 진료팀, 아산 임플란트 진료팀, 천안 교정과, 아산 교정과, 문치과병원 원장', 'label' => '의료진 · 키워드', 'type' => 'textarea' ),
+				'seo_doctors_kw'    => array( 'default' => '천안·아산 치과 의사, 아산 치과 의사, 천안·아산 치과 의료진, 아산 치과 의료진, 천안·아산 임플란트 진료팀, 아산 임플란트 진료팀, 천안·아산 교정과, 아산 교정과, 문치과병원 원장', 'label' => '의료진 · 키워드', 'type' => 'textarea' ),
 				// 오시는 길
 				'seo_location_title' => array( 'default' => '천안 만남로 치과 — 오시는 길 · 주차 · 진료시간', 'label' => '오시는 길 · 제목', 'type' => 'text' ),
 				'seo_location_desc'  => array( 'default' => '천안 동남구 만남로 52 문타워 9·10·11·13층. 천안종합·고속버스터미널 도보 5분, 천안역 버스 10분. 본원 지하 기계식 주차장 무료.', 'label' => '오시는 길 · 설명', 'type' => 'textarea' ),
@@ -758,31 +758,31 @@ function moondental_home_content_fields() {
 				// 상담예약
 				'seo_reservation_title' => array( 'default' => '천안·아산 치과 예약 — 네이버 예약·카카오톡 상담', 'label' => '상담예약 · 제목', 'type' => 'text' ),
 				'seo_reservation_desc'  => array( 'default' => '천안 만남로 문치과병원 예약. 네이버 예약 24시간, 전화·카카오톡 상담. 월·화·수·금 야간진료 20:30까지 (목 18:30·토 14:00).', 'label' => '상담예약 · 설명', 'type' => 'textarea' ),
-				'seo_reservation_kw'    => array( 'default' => '천안 치과 예약, 아산 치과 예약, 천안 치과 상담, 아산 치과 상담, 천안 만남로 치과 예약, 문치과병원 예약', 'label' => '상담예약 · 키워드', 'type' => 'textarea' ),
+				'seo_reservation_kw'    => array( 'default' => '천안·아산 치과 예약, 아산 치과 예약, 천안·아산 치과 상담, 아산 치과 상담, 천안 만남로 치과 예약, 문치과병원 예약', 'label' => '상담예약 · 키워드', 'type' => 'textarea' ),
 				// 30년 발자취
 				'seo_history_title' => array( 'default' => '문치과병원 30여년의 발자취 | 천안 만남로 1995년 개원', 'label' => '30년 발자취 · 제목', 'type' => 'text' ),
 				'seo_history_desc'  => array( 'default' => '천안 만남로에서 1995년부터 30여년 한자리 진료. 한아의료재단 비영리 법인의 30여년 발자취와 핵심 가치.', 'label' => '30년 발자취 · 설명', 'type' => 'textarea' ),
-				'seo_history_kw'    => array( 'default' => '문치과병원 역사, 한아의료재단, 천안 30년 치과, 아산 30년 치과, 천안 만남로 치과 1995', 'label' => '30년 발자취 · 키워드', 'type' => 'textarea' ),
+				'seo_history_kw'    => array( 'default' => '문치과병원 역사, 한아의료재단, 천안·아산 30년 치과, 아산 30년 치과, 천안 만남로 치과 1995', 'label' => '30년 발자취 · 키워드', 'type' => 'textarea' ),
 				// 기술력·시설
 				'seo_facility_title' => array( 'default' => '천안·아산 치과 시설 | CBCT·디지털 가이드·원내 기공실', 'label' => '기술력·시설 · 제목', 'type' => 'text' ),
 				'seo_facility_desc'  => array( 'default' => '천안 만남로 문치과병원 기술력·시설 — 의료기관 종별, 9·10·11·13F 4개 층 통합 진료센터, 디지털 진단·자체 보철 제작·전신질환 대응.', 'label' => '기술력·시설 · 설명', 'type' => 'textarea' ),
-				'seo_facility_kw'    => array( 'default' => '천안 치과 시설, 아산 치과 시설, 천안 디지털 치과, 아산 디지털 치과, 천안 CBCT, 아산 CBCT, 천안 임플란트 가이드, 천안 치과 장비', 'label' => '기술력·시설 · 키워드', 'type' => 'textarea' ),
+				'seo_facility_kw'    => array( 'default' => '천안·아산 치과 시설, 아산 치과 시설, 천안 디지털 치과, 아산 디지털 치과, 천안 CBCT, 아산 CBCT, 천안·아산 임플란트 가이드, 천안·아산 치과 장비', 'label' => '기술력·시설 · 키워드', 'type' => 'textarea' ),
 				// FAQ
 				'seo_faq_title' => array( 'default' => '천안·아산 치과 자주 묻는 질문 — 예약·비용·진료 안내', 'label' => 'FAQ · 제목', 'type' => 'text' ),
 				'seo_faq_desc'  => array( 'default' => '천안 만남로 문치과병원 자주 묻는 질문 — 예약·비용·진료·전신질환 대응·주차·진료시간 등.', 'label' => 'FAQ · 설명', 'type' => 'textarea' ),
-				'seo_faq_kw'    => array( 'default' => '천안 치과 FAQ, 아산 치과 FAQ, 천안 치과 문의, 아산 치과 문의, 문치과병원 FAQ', 'label' => 'FAQ · 키워드', 'type' => 'textarea' ),
+				'seo_faq_kw'    => array( 'default' => '천안·아산 치과 FAQ, 아산 치과 FAQ, 천안·아산 치과 문의, 아산 치과 문의, 문치과병원 FAQ', 'label' => 'FAQ · 키워드', 'type' => 'textarea' ),
 				// 지역 페이지 템플릿 (토큰: {region} {minutes} {km})
 				'seo_region_title_tpl' => array( 'default' => '{region}에서 천안·아산 치과 | {region} 임플란트·{region} 교정', 'label' => '지역 · 제목 템플릿 ({region})', 'type' => 'text' ),
 				'seo_region_desc_tpl'  => array( 'default' => '{region}에서 천안 만남로 문치과병원까지 자동차 약 {minutes}분 ({km}km). {region} 환자분께 천안·아산 임플란트·투명교정·라미네이트 진료. 1995년부터 30여년 한자리.', 'label' => '지역 · 설명 템플릿 ({region}·{minutes}·{km})', 'type' => 'textarea' ),
-				'seo_region_kw_tpl'    => array( 'default' => '{region} 치과, {region} 임플란트, {region} 교정, {region} 투명교정, {region} 라미네이트, {region} 사랑니 발치, {region} 신경치료, {region} 치과 추천, 천안 치과, 천안 임플란트, 문치과병원', 'label' => '지역 · 키워드 템플릿 ({region})', 'type' => 'textarea' ),
+				'seo_region_kw_tpl'    => array( 'default' => '{region} 치과, {region} 임플란트, {region} 교정, {region} 투명교정, {region} 라미네이트, {region} 사랑니 발치, {region} 신경치료, {region} 치과 추천, 천안·아산 치과, 천안·아산 임플란트, 문치과병원', 'label' => '지역 · 키워드 템플릿 ({region})', 'type' => 'textarea' ),
 				// 일반 페이지 fallback ({title} 토큰)
 				'seo_page_title_tpl' => array( 'default' => '{title} — {site} (천안·아산 치과)', 'label' => '기타 페이지 · 제목 템플릿 ({title}·{site})', 'type' => 'text' ),
 				'seo_page_desc_tpl'  => array( 'default' => '천안 만남로 {site} — {title}. 1995년부터 천안·아산에서 진료해온 종합 치과병원.', 'label' => '기타 페이지 · 설명 템플릿', 'type' => 'textarea' ),
-				'seo_page_kw_tpl'    => array( 'default' => '천안 치과, 아산 치과, 천안 {title}, 아산 {title}, {site}', 'label' => '기타 페이지 · 키워드 템플릿', 'type' => 'textarea' ),
+				'seo_page_kw_tpl'    => array( 'default' => '천안·아산 치과, 아산 치과, 천안 {title}, 아산 {title}, {site}', 'label' => '기타 페이지 · 키워드 템플릿', 'type' => 'textarea' ),
 				// 단일 글(single post) fallback
 				'seo_single_title_tpl' => array( 'default' => '{title} — {site} (천안·아산 치과)', 'label' => '소식 글 · 제목 템플릿 ({title}·{site})', 'type' => 'text' ),
 				'seo_single_desc_tpl'  => array( 'default' => '천안 만남로 {site} — {title}', 'label' => '소식 글 · 설명 fallback (요약 없을 때)', 'type' => 'text' ),
-				'seo_single_kw_tpl'    => array( 'default' => '천안 치과, 아산 치과, 천안 치과 소식, 아산 치과 소식, {site}', 'label' => '소식 글 · 키워드 템플릿', 'type' => 'textarea' ),
+				'seo_single_kw_tpl'    => array( 'default' => '천안·아산 치과, 아산 치과, 천안·아산 치과 소식, 아산 치과 소식, {site}', 'label' => '소식 글 · 키워드 템플릿', 'type' => 'textarea' ),
 				// 제목 접미어 (모든 페이지 뒤에 자동 추가)
 				'seo_title_suffix'   => array( 'default' => ' — {site}', 'label' => '제목 접미어 (모든 페이지에 자동, {site} 토큰)', 'type' => 'text' ),
 			),

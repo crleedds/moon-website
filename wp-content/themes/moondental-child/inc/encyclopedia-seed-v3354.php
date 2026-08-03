@@ -278,16 +278,16 @@ function moondental_encyclopedia_seed_data_v3354() {
 		array( '심미 지대주 색', 'aesthetic', '지르코니아 지대주로 자연스러움', '<p>Zirconia Abutment. <strong>금속 지대주 회색 비침 방지</strong>.</p>' ),
 
 		/* ==================== 사이드바 SEO 검색어 (신규) ==================== */
-		array( '천안 임플란트 잘하는 치과', 'implant', '천안 임플란트 전문 병원 찾기', '<p>천안에서 <strong>임플란트 전문 병원</strong> 선택 기준: 30여년 임상·CBCT·기공소·A/S.</p>' ),
-		array( '천안 교정 잘하는 치과', 'ortho', '천안 교정 있는 병원', '<p>교정 <strong>인정의</strong> 확인·상담 후 결정.</p>' ),
-		array( '천안 라미네이트 잘하는 치과', 'aesthetic', '천안 심미치과 선택', '<p>라미네이트 실적·<strong>최소 삭제 기술·기공소</strong> 확인.</p>' ),
+		array( '천안·아산 임플란트 잘하는 치과', 'implant', '천안·아산 임플란트 전문 병원 찾기', '<p>천안에서 <strong>임플란트 전문 병원</strong> 선택 기준: 30여년 임상·CBCT·기공소·A/S.</p>' ),
+		array( '천안·아산 교정 잘하는 치과', 'ortho', '천안·아산 교정 있는 병원', '<p>교정 <strong>인정의</strong> 확인·상담 후 결정.</p>' ),
+		array( '천안·아산 라미네이트 잘하는 치과', 'aesthetic', '천안 심미치과 선택', '<p>라미네이트 실적·<strong>최소 삭제 기술·기공소</strong> 확인.</p>' ),
 		array( '아산 임플란트 잘하는 치과', 'implant', '아산 인근 임플란트 병원', '<p>아산 인근 <strong>임플란트 전문·차로 15~20분</strong> 거리 병원.</p>' ),
 		array( '천안 야간 치과', 'general', '평일 야간 진료 치과', '<p>Night Clinic. <strong>평일 20:30까지 진료</strong> 병원. 직장인·학생 편리.</p>' ),
 		array( '천안 응급 치과', 'general', '주말·공휴일 응급 치과', '<p>Emergency Dental. <strong>주말·공휴일 응급</strong>. 사전 문의 필수.</p>' ),
-		array( '어린이 치과 천안', 'pediatric', '천안 소아치과 전문', '<p>Pediatric Dentist. <strong>소아치과</strong>. 어린이 친화 환경.</p>' ),
-		array( '천안 사랑니 발치 잘하는 치과', 'surgery', '매복 사랑니 정밀 발치', '<p>Wisdom Tooth. <strong>CBCT·전문 의료진</strong>. 신경 손상 없는 안전 발치.</p>' ),
-		array( '천안 신경치료 잘하는 치과', 'preserve', '보존과 전문 병원', '<p>Endodontics. <strong>보존과</strong>·CBCT·마이크로스코프.</p>' ),
-		array( '천안 잇몸 치료', 'periodontics', '치주과 병원', '<p>Periodontics. <strong>치주과</strong>·SRP·수술적 치료.</p>' ),
+		array( '어린이 치과 천안', 'pediatric', '천안·아산 소아치과 전문', '<p>Pediatric Dentist. <strong>소아치과</strong>. 어린이 친화 환경.</p>' ),
+		array( '천안·아산 사랑니 발치 잘하는 치과', 'surgery', '매복 사랑니 정밀 발치', '<p>Wisdom Tooth. <strong>CBCT·전문 의료진</strong>. 신경 손상 없는 안전 발치.</p>' ),
+		array( '천안·아산 신경치료 잘하는 치과', 'preserve', '보존과 전문 병원', '<p>Endodontics. <strong>보존과</strong>·CBCT·마이크로스코프.</p>' ),
+		array( '천안·아산 잇몸 치료', 'periodontics', '치주과 병원', '<p>Periodontics. <strong>치주과</strong>·SRP·수술적 치료.</p>' ),
 
 		/* ==================== 특수 술식 (신규) ==================== */
 		array( '즉시 부하 임플란트', 'implant', '식립 당일 임시 크라운', '<p>Immediate Loading. <strong>1차 안정성 35Ncm+</strong> 필수.</p>' ),

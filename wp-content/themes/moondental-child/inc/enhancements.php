@@ -55,15 +55,15 @@ function moondental_seo_meta_tags() {
 			);
 			$meta_title    = $T( strtr( md_content( 'seo_region_title_tpl', '{region}에서 천안·아산 치과 | {region} 임플란트·{region} 교정' ), $tok ) );
 			$meta_desc     = strtr( md_content( 'seo_region_desc_tpl',  '{region}에서 천안 만남로 문치과병원까지 자동차 약 {minutes}분 ({km}km). {region} 환자분께 천안·아산 임플란트·투명교정·라미네이트 진료. 1995년부터 30여년 한자리.' ), $tok );
-			$meta_keywords = strtr( md_content( 'seo_region_kw_tpl',    '{region} 치과, {region} 임플란트, {region} 교정, {region} 투명교정, {region} 라미네이트, {region} 사랑니 발치, {region} 신경치료, {region} 치과 추천, 천안 치과, 천안 임플란트, 문치과병원' ), $tok );
+			$meta_keywords = strtr( md_content( 'seo_region_kw_tpl',    '{region} 치과, {region} 임플란트, {region} 교정, {region} 투명교정, {region} 라미네이트, {region} 사랑니 발치, {region} 신경치료, {region} 치과 추천, 천안·아산 치과, 천안·아산 임플란트, 문치과병원' ), $tok );
 			$og_type = 'article';
 		}
 	}
 
 	if ( ! $meta_title && is_front_page() ) {
-		$meta_title    = $T( md_content( 'seo_home_title', '천안·아산 치과 | 천안 임플란트·투명교정·자연치아살리기' ) );
+		$meta_title    = $T( md_content( 'seo_home_title', '천안·아산 치과 | 천안·아산 임플란트·투명교정·자연치아살리기' ) );
 		$meta_desc     = md_content( 'seo_home_desc', '천안 만남로 1995년 개원 30여년 한자리 진료. 천안·아산 임플란트·투명교정·라미네이트·사랑니 발치·턱관절 치료. 분야별 전문 의료진 협진·CBCT 디지털 가이드·월·화·수·금 야간진료(20:30).' );
-		$meta_keywords = md_content( 'seo_home_kw',   '천안 치과, 아산 치과, 문치과병원' );
+		$meta_keywords = md_content( 'seo_home_kw',   '천안·아산 치과, 아산 치과, 문치과병원' );
 	} elseif ( ! $meta_title && is_page() ) {
 		$slug = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
 		$page_title = wp_strip_all_tags( get_the_title() );
@@ -94,7 +94,7 @@ function moondental_seo_meta_tags() {
 			$tok = array( '{title}' => $page_title, '{site}' => $site_name );
 			$meta_title    = strtr( md_content( 'seo_page_title_tpl', '{title} — {site} (천안·아산 치과)' ), $tok );
 			$meta_desc     = strtr( md_content( 'seo_page_desc_tpl',  '천안 만남로 {site} — {title}. 1995년부터 천안·아산에서 진료해온 종합 치과병원.' ), $tok );
-			$meta_keywords = strtr( md_content( 'seo_page_kw_tpl',    '천안 치과, 아산 치과, 천안 {title}, 아산 {title}, {site}' ), $tok );
+			$meta_keywords = strtr( md_content( 'seo_page_kw_tpl',    '천안·아산 치과, 아산 치과, 천안 {title}, 아산 {title}, {site}' ), $tok );
 		}
 		$og_type = 'article';
 	} elseif ( is_single() ) {
@@ -103,7 +103,7 @@ function moondental_seo_meta_tags() {
 		$tok = array( '{title}' => $post_title, '{site}' => $site_name );
 		$meta_title    = strtr( md_content( 'seo_single_title_tpl', '{title} — {site} (천안·아산 치과)' ), $tok );
 		$meta_desc     = $excerpt ?: strtr( md_content( 'seo_single_desc_tpl', '천안 만남로 {site} — {title}' ), $tok );
-		$meta_keywords = strtr( md_content( 'seo_single_kw_tpl', '천안 치과, 아산 치과, 천안 치과 소식, 아산 치과 소식, {site}' ), $tok );
+		$meta_keywords = strtr( md_content( 'seo_single_kw_tpl', '천안·아산 치과, 아산 치과, 천안·아산 치과 소식, 아산 치과 소식, {site}' ), $tok );
 		$og_type    = 'article';
 	}
 

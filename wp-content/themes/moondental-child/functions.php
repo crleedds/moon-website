@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.79' );
+define( 'MOONDENTAL_VERSION', '3.44.80' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -307,6 +307,63 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3291', 'done' );
 }, 44 );
+
+/* 일회성 마이그레이션 v3.44.80 · Customizer 저장값 · '천안' → '천안·아산' 확장 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_cheonan_asan_v3480' ) === 'done' ) return;
+	$rules = array(
+		'천안 임플란트'  => '천안·아산 임플란트',
+		'천안 투명교정'  => '천안·아산 투명교정',
+		'천안 교정'      => '천안·아산 교정',
+		'천안 치아교정'  => '천안·아산 치아교정',
+		'천안 슈어스마일' => '천안·아산 슈어스마일',
+		'천안 라미네이트' => '천안·아산 라미네이트',
+		'천안 심미치료'   => '천안·아산 심미치료',
+		'천안 스마일'    => '천안·아산 스마일',
+		'천안 신경치료'  => '천안·아산 신경치료',
+		'천안 잇몸치료'  => '천안·아산 잇몸치료',
+		'천안 잇몸 치료' => '천안·아산 잇몸 치료',
+		'천안 자연치아'  => '천안·아산 자연치아',
+		'천안 사랑니'   => '천안·아산 사랑니',
+		'천안 소아치과' => '천안·아산 소아치과',
+		'천안 어린이'   => '천안·아산 어린이',
+		'천안 턱관절'   => '천안·아산 턱관절',
+		'천안 스케일링' => '천안·아산 스케일링',
+		'천안 미백'     => '천안·아산 미백',
+		'천안 크라운'   => '천안·아산 크라운',
+		'천안 틀니'     => '천안·아산 틀니',
+		'천안 예방'     => '천안·아산 예방',
+		'천안 정기검진' => '천안·아산 정기검진',
+		'천안 정기 검진' => '천안·아산 정기 검진',
+		'천안 종합 치과' => '천안·아산 종합 치과',
+		'천안 종합치과'  => '천안·아산 종합치과',
+		'천안 대형 치과' => '천안·아산 대형 치과',
+		'천안 대형치과'  => '천안·아산 대형치과',
+		'천안 큰 치과'  => '천안·아산 큰 치과',
+		'천안 치과 추천' => '천안·아산 치과 추천',
+		'천안 추천 치과' => '천안·아산 추천 치과',
+		'천안 치과 잘하는' => '천안·아산 치과 잘하는',
+		'천안 잘하는 치과' => '천안·아산 잘하는 치과',
+		'천안 치과병원' => '천안·아산 치과병원',
+		'천안 치과'    => '천안·아산 치과',
+		'천안 30여년' => '천안·아산 30여년',
+		'천안 30년'   => '천안·아산 30년',
+		'천안에서 30여년' => '천안·아산에서 30여년',
+		'천안에서 30년' => '천안·아산에서 30년',
+		'천안 지역'   => '천안·아산 지역',
+		'천안·아산·아산' => '천안·아산',
+	);
+	$all_mods = get_theme_mods();
+	if ( is_array( $all_mods ) ) {
+		foreach ( $all_mods as $key => $val ) {
+			if ( ! is_string( $val ) || $val === '' ) continue;
+			if ( strpos( $val, '천안 ' ) === false ) continue;
+			$new = strtr( $val, $rules );
+			if ( $new !== $val ) set_theme_mod( $key, $new );
+		}
+	}
+	update_option( 'moondental_cheonan_asan_v3480', 'done' );
+}, 52 );
 
 /* 일회성 마이그레이션 v3.44.76 · 지역 페이지 H1 · '추천 치과' 키워드 추가
  * 옛 default 값이면 remove_theme_mod → 새 default 자동 적용 */
@@ -704,7 +761,7 @@ add_action( 'after_setup_theme', function() {
 			'new' => '천안·아산 대표 치과병원 · 전국에서 찾아오시는 병원',
 		),
 		'md_content_notices_title' => array(
-			'old' => array( '공지사항', '천안·아산 문치과병원 소식', '천안 문치과병원 소식' ),
+			'old' => array( '공지사항', '천안·아산 문치과병원 소식', '천안·아산 문치과병원 소식' ),
 			'new' => '천안·아산 대표 치과병원 · 문치과병원 소식',
 		),
 	);
@@ -954,10 +1011,10 @@ add_action( 'after_setup_theme', function() {
 	update_option( 'moondental_bot_10q_v3464', 'done' );
 }, 32 );
 
-/* 일회성 마이그레이션: '천안 문치과병원' → '천안·아산 문치과병원' notices_title 정리 (v3.23.3) */
+/* 일회성 마이그레이션: '천안·아산 문치과병원' → '천안·아산 문치과병원' notices_title 정리 (v3.23.3) */
 add_action( 'after_setup_theme', function() {
 	if ( get_option( 'moondental_cheonan_asan_brand_v3233' ) === 'done' ) return;
-	if ( get_theme_mod( 'md_content_notices_title' ) === '천안 문치과병원 소식' ) {
+	if ( get_theme_mod( 'md_content_notices_title' ) === '천안·아산 문치과병원 소식' ) {
 		remove_theme_mod( 'md_content_notices_title' );
 	}
 	update_option( 'moondental_cheonan_asan_brand_v3233', 'done' );
@@ -969,13 +1026,13 @@ add_action( 'after_setup_theme', function() {
 add_action( 'after_setup_theme', function() {
 	if ( get_option( 'moondental_cheonan_asan_v3230' ) === 'done' ) return;
 	$cleanups = array(
-		'moondental_hero_title_a'  => '천안에서 30여년,',
-		'moondental_hero_lead'     => "천안 임플란트·천안 투명교정·천안 라미네이트·천안 자연치아 살리기까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다.",
+		'moondental_hero_title_a'  => '천안·아산에서 30여년,',
+		'moondental_hero_lead'     => "천안·아산 임플란트·천안·아산 투명교정·천안·아산 라미네이트·천안·아산 자연치아 살리기까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다.",
 		'moondental_doctor_lead'   => '1995년부터 천안에서, 한 분의 환자를 가족처럼 오래 보아왔습니다. 진료실 밖에서도 지역사회와 함께 가는 치과를 꿈꿉니다.',
 		'md_content_why_title'         => '천안에서 왜 문치과병원을 찾으시나요?',
 		'md_content_services_title'    => '천안에서 한 곳에서, 평생 치아 건강을',
 		'md_content_services_eyebrow'  => 'CLINICAL SERVICES · 천안 진료항목',
-		'md_content_services_lead'     => '천안 임플란트·천안 투명교정·천안 라미네이트·천안 자연치아 살리기·천안 사랑니 발치까지 — 한 분의 환자를 오래 보는 천안 만남로 치과의 마음으로 진료합니다.',
+		'md_content_services_lead'     => '천안·아산 임플란트·천안·아산 투명교정·천안·아산 라미네이트·천안·아산 자연치아 살리기·천안·아산 사랑니 발치까지 — 한 분의 환자를 오래 보는 천안 만남로 치과의 마음으로 진료합니다.',
 	);
 	foreach ( $cleanups as $mod_key => $old_default ) {
 		if ( get_theme_mod( $mod_key ) === $old_default ) {

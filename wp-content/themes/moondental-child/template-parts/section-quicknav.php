@@ -13,7 +13,7 @@ $home = home_url( '/' );
 $items = array(
 	array(
 		'title' => md_content( 'quicknav_doctors_title', '의료진 소개' ),
-		'desc'  => md_content( 'quicknav_doctors_desc',  '천안 30년 진료 · 원장·진료과 협진 시스템 · 4개 층 통합 진료' ),
+		'desc'  => md_content( 'quicknav_doctors_desc',  '천안·아산 30년 진료 · 원장·진료과 협진 시스템 · 4개 층 통합 진료' ),
 		'url'   => $home . '의료진/',
 		'icon'  => '👨‍⚕️',
 	),
@@ -30,13 +30,13 @@ $items = array(
 		'icon'  => '💰',
 	),
 	array(
-		'title' => md_content( 'quicknav_implant_title', '천안 임플란트' ),
+		'title' => md_content( 'quicknav_implant_title', '천안·아산 임플란트' ),
 		'desc'  => md_content( 'quicknav_implant_desc',  'CBCT 3D 진단 · 네비게이션 가이드 · 단일·다수·전악 임플란트' ),
 		'url'   => $home . '진료항목/임플란트-센터/',
 		'icon'  => '🦷',
 	),
 	array(
-		'title' => md_content( 'quicknav_ortho_title', '천안 투명교정 · 슈어스마일' ),
+		'title' => md_content( 'quicknav_ortho_title', '천안·아산 투명교정 · 슈어스마일' ),
 		'desc'  => md_content( 'quicknav_ortho_desc',  '중부권 슈어스마일 센터 · 0.1mm 정밀도 · 성인·직장인 투명교정' ),
 		'url'   => $home . '진료항목/슈어스마일-투명교정/',
 		'icon'  => '✨',
