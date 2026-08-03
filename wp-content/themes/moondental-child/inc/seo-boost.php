@@ -303,43 +303,51 @@ function moondental_jsonld_sitenav() {
 add_action( 'wp_head', 'moondental_jsonld_sitenav', 51 );
 
 /**
- * v3.44.77 · 지역 페이지 30개 자동 sitemap 등록
- *   /region-sitemap.xml · 30개 지역 URL 자동 생성 · Yoast sitemap_index.xml 에도 자동 등록
+ * v3.44.78 · 지역 페이지 30개 자동 sitemap · Yoast SEO 네이티브 API 사용
+ *   /region-sitemap.xml (Yoast가 관리) · sitemap_index.xml 자동 포함
  */
 add_action( 'init', function () {
-	add_rewrite_rule( '^region-sitemap\.xml$', 'index.php?moondental_region_sitemap=1', 'top' );
-} );
-add_filter( 'query_vars', function ( $vars ) {
-	$vars[] = 'moondental_region_sitemap';
-	return $vars;
-} );
-add_action( 'template_redirect', function () {
-	if ( ! get_query_var( 'moondental_region_sitemap' ) ) return;
-	if ( ! function_exists( 'moondental_get_regions' ) ) return;
-	$regions = moondental_get_regions();
-	$today = gmdate( 'Y-m-d' );
-	nocache_headers();
-	header( 'Content-Type: application/xml; charset=UTF-8' );
-	echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-	echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
-	foreach ( $regions as $region ) {
-		if ( empty( $region['slug'] ) ) continue;
-		$url = home_url( '/오시는-길/' . $region['slug'] . '/' );
-		echo "\t<url>\n";
-		echo "\t\t<loc>" . esc_url( $url ) . "</loc>\n";
-		echo "\t\t<lastmod>" . esc_html( $today ) . "</lastmod>\n";
-		echo "\t\t<changefreq>monthly</changefreq>\n";
-		echo "\t\t<priority>0.8</priority>\n";
-		echo "\t</url>\n";
+	// Yoast 활성 시 · Yoast 시스템에 sitemap 등록 (정공법)
+	if ( class_exists( 'WPSEO_Sitemaps' ) ) {
+		global $wpseo_sitemaps;
+		if ( isset( $wpseo_sitemaps ) && is_callable( array( $wpseo_sitemaps, 'register_sitemap' ) ) ) {
+			$wpseo_sitemaps->register_sitemap( 'region', 'moondental_render_region_sitemap_yoast' );
+		}
 	}
-	echo '</urlset>' . "\n";
-	exit;
-} );
+}, 15 );
 
 /**
- * v3.44.77 · Yoast sitemap_index.xml 에 region-sitemap.xml 항목 추가
+ * Yoast 네이티브 · region-sitemap.xml 콘텐츠 생성
+ */
+function moondental_render_region_sitemap_yoast() {
+	global $wpseo_sitemaps;
+	if ( ! isset( $wpseo_sitemaps ) ) return;
+	if ( ! function_exists( 'moondental_get_regions' ) ) return;
+	$regions = moondental_get_regions();
+	$today   = gmdate( 'Y-m-d\TH:i:sP' );
+	$sitemap = '';
+	foreach ( $regions as $region ) {
+		if ( empty( $region['slug'] ) ) continue;
+		$loc = home_url( '/오시는-길/' . $region['slug'] . '/' );
+		$sitemap .= "\t<url>\n";
+		$sitemap .= "\t\t<loc>" . esc_url( $loc ) . "</loc>\n";
+		$sitemap .= "\t\t<lastmod>" . esc_html( $today ) . "</lastmod>\n";
+		$sitemap .= "\t\t<changefreq>monthly</changefreq>\n";
+		$sitemap .= "\t\t<priority>0.8</priority>\n";
+		$sitemap .= "\t</url>\n";
+	}
+	if ( is_callable( array( $wpseo_sitemaps, 'set_sitemap' ) ) ) {
+		$wpseo_sitemaps->set_sitemap( $sitemap );
+	}
+}
+
+/**
+ * v3.44.78 · Yoast sitemap_index.xml 에 region-sitemap.xml 항목 추가
+ *          Yoast register_sitemap 이 자동 포함 안 하는 경우 대비
  */
 add_filter( 'wpseo_sitemap_index', function ( $sitemap_index ) {
+	// 이미 포함돼 있으면 중복 회피
+	if ( strpos( $sitemap_index, 'region-sitemap.xml' ) !== false ) return $sitemap_index;
 	$today = gmdate( 'Y-m-d\TH:i:sP' );
 	$entry  = "\t<sitemap>\n";
 	$entry .= "\t\t<loc>" . esc_url( home_url( '/region-sitemap.xml' ) ) . "</loc>\n";
