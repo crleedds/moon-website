@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.83' );
+define( 'MOONDENTAL_VERSION', '3.44.84' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -307,6 +307,86 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3291', 'done' );
 }, 44 );
+
+/* 일회성 마이그레이션 v3.44.84 · URL 평면화 · post_parent = 0 + 부모 페이지 휴지통
+ * 모든 core 페이지의 계층 구조 제거 · 최상위 URL 로 변경 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_flatten_urls_v3484' ) === 'done' ) return;
+	global $wpdb;
+
+	// 1. 모든 child 페이지 post_parent = 0 으로 (최상위화)
+	$child_slugs = array(
+		'의료진', '역사', '기술력-시설', '임상-케이스', '상시채용',
+		'임플란트-센터', '투명교정-센터', '자연치아-살리기', '턱관절-클리닉',
+		'사랑니-발치', '심미치료', '예방클리닉',
+		'슈어스마일-투명교정', '브라켓-치아교정',
+	);
+	foreach ( $child_slugs as $raw ) {
+		$encoded = strtolower( urlencode( $raw ) );
+		$wpdb->query( $wpdb->prepare(
+			"UPDATE {$wpdb->posts}
+			 SET post_parent = 0
+			 WHERE post_type = 'page'
+			   AND post_status = 'publish'
+			   AND (post_name = %s OR post_name = %s)
+			   AND post_parent > 0",
+			$raw, $encoded
+		) );
+	}
+
+	// 2. 빈 부모 페이지 (병원소개, 진료항목) 휴지통
+	$parent_slugs = array( '병원소개', '진료항목' );
+	foreach ( $parent_slugs as $raw ) {
+		$encoded = strtolower( urlencode( $raw ) );
+		$rows = $wpdb->get_results( $wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts}
+			 WHERE post_type = 'page'
+			   AND post_status IN ('publish','draft','pending','private')
+			   AND (post_name = %s OR post_name = %s)",
+			$raw, $encoded
+		) );
+		if ( $rows ) {
+			foreach ( $rows as $r ) wp_trash_post( (int) $r->ID );
+		}
+	}
+
+	// 3. rewrite rules 재생성
+	flush_rewrite_rules( false );
+
+	update_option( 'moondental_flatten_urls_v3484', 'done' );
+}, 55 );
+
+/**
+ * v3.44.84 · 301 리디렉션 · 이전 계층 URL → 새 평면 URL (SEO 보존)
+ */
+add_action( 'template_redirect', function () {
+	if ( is_admin() ) return;
+	$uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
+	// query string 분리
+	$path = strtok( $uri, '?' );
+	$path_decoded = urldecode( $path );
+
+	// /진료항목/xxx/ → /xxx/
+	if ( preg_match( '#^/진료항목/([^/]+)/?$#u', $path_decoded, $m ) ) {
+		wp_safe_redirect( home_url( '/' . $m[1] . '/' ), 301 );
+		exit;
+	}
+	// /병원소개/xxx/ → /xxx/
+	if ( preg_match( '#^/병원소개/([^/]+)/?$#u', $path_decoded, $m ) ) {
+		wp_safe_redirect( home_url( '/' . $m[1] . '/' ), 301 );
+		exit;
+	}
+	// /진료항목/ (부모) → 홈
+	if ( $path_decoded === '/진료항목/' || $path_decoded === '/진료항목' ) {
+		wp_safe_redirect( home_url( '/' ), 301 );
+		exit;
+	}
+	// /병원소개/ (부모) → /의료진/
+	if ( $path_decoded === '/병원소개/' || $path_decoded === '/병원소개' ) {
+		wp_safe_redirect( home_url( '/의료진/' ), 301 );
+		exit;
+	}
+}, 1 );
 
 /* 일회성 마이그레이션 v3.44.82 · v3.44.81에서 생성된 랜딩 페이지 2개 휴지통 이동
  * 기존 /오시는-길/cheonan/, /오시는-길/asan/ 로 대체 · 신설 페이지 불필요 */
@@ -2606,29 +2686,28 @@ function moondental_get_doctor_zoom( $name, $fallback = 1.00 ) {
  * 사이트 운영에 필요한 페이지 정의. 슬러그·제목·템플릿·정렬을 한 곳에서 관리.
  */
 function moondental_default_pages() {
-	// 슬러그는 사용자가 만든 한글 슬러그와 일치 — 이미 있는 페이지는 건드리지 않음.
+	// v3.44.84 · URL 평면화 · 모든 페이지 최상위 (parent 없음)
 	return array(
-		array( 'slug' => '홈',              'title' => '홈',           'template' => '',                                 'order' => 0,  'parent' => '' ),
-		array( 'slug' => '병원소개',         'title' => '병원소개',      'template' => '',                                 'order' => 1,  'parent' => '' ),
-		array( 'slug' => '의료진',           'title' => '의료진',        'template' => 'page-templates/page-doctors.php',  'order' => 1,  'parent' => '병원소개' ),
-		array( 'slug' => '역사',             'title' => '역사',          'template' => 'page-templates/page-history.php',  'order' => 2,  'parent' => '병원소개' ),
-		array( 'slug' => '기술력-시설',       'title' => '기술력/시설',   'template' => 'page-templates/page-wide.php',     'order' => 3,  'parent' => '병원소개' ),
-		array( 'slug' => '임상-케이스',       'title' => '임상 케이스',    'template' => 'page-templates/page-wide.php',     'order' => 4,  'parent' => '병원소개' ),
-		array( 'slug' => '진료항목',         'title' => '진료항목',      'template' => '',                                 'order' => 2,  'parent' => '' ),
-		array( 'slug' => '임플란트-센터',     'title' => '임플란트 센터',  'template' => 'page-templates/page-service.php',  'order' => 1,  'parent' => '진료항목' ),
-		array( 'slug' => '투명교정-센터',     'title' => '투명교정 센터',  'template' => 'page-templates/page-service.php',  'order' => 2,  'parent' => '진료항목' ),
-		array( 'slug' => '자연치아-살리기',   'title' => '자연치아 살리기','template' => 'page-templates/page-service.php',  'order' => 3,  'parent' => '진료항목' ),
-		array( 'slug' => '턱관절-클리닉',     'title' => '턱관절 클리닉',  'template' => 'page-templates/page-service.php',  'order' => 4,  'parent' => '진료항목' ),
-		array( 'slug' => '사랑니-발치',       'title' => '사랑니 발치',   'template' => 'page-templates/page-service.php',  'order' => 5,  'parent' => '진료항목' ),
-		array( 'slug' => '심미치료',         'title' => '심미치료',      'template' => 'page-templates/page-service.php',  'order' => 6,  'parent' => '진료항목' ),
-		array( 'slug' => '스마일디자인센터', 'title' => '스마일디자인센터', 'template' => 'page-templates/page-smile-design.php', 'order' => 7, 'parent' => '' ),
-		array( 'slug' => '예방클리닉',       'title' => '예방클리닉',     'template' => 'page-templates/page-prevention.php', 'order' => 8, 'parent' => '진료항목' ),
-		array( 'slug' => '상시채용',         'title' => '상시채용',       'template' => 'page-templates/page-recruit.php',    'order' => 6, 'parent' => '병원소개' ),
-		array( 'slug' => '소식',             'title' => '소식',         'template' => '',                                 'order' => 3,  'parent' => '' ),
-		array( 'slug' => '오시는-길',         'title' => '오시는 길',     'template' => 'page-templates/page-location.php', 'order' => 4,  'parent' => '' ),
-		array( 'slug' => '상담예약',         'title' => '상담 예약',     'template' => 'page-templates/page-reservation.php', 'order' => 5, 'parent' => '' ),
-		array( 'slug' => '비용-안내',        'title' => '비용 안내',     'template' => 'page-templates/page-pricing.php',     'order' => 6, 'parent' => '' ),
-		array( 'slug' => '기술력-시설',       'title' => '기술력/시설',   'template' => 'page-templates/page-facility.php',    'order' => 7, 'parent' => '병원소개' ),
+		array( 'slug' => '홈',              'title' => '홈',           'template' => '',                                     'order' => 0,  'parent' => '' ),
+		array( 'slug' => '의료진',           'title' => '의료진',        'template' => 'page-templates/page-doctors.php',      'order' => 1,  'parent' => '' ),
+		array( 'slug' => '역사',             'title' => '역사',          'template' => 'page-templates/page-history.php',      'order' => 2,  'parent' => '' ),
+		array( 'slug' => '기술력-시설',       'title' => '기술력/시설',   'template' => 'page-templates/page-facility.php',     'order' => 3,  'parent' => '' ),
+		array( 'slug' => '임상-케이스',       'title' => '임상 케이스',    'template' => 'page-templates/page-wide.php',         'order' => 4,  'parent' => '' ),
+		array( 'slug' => '임플란트-센터',     'title' => '임플란트 센터',  'template' => 'page-templates/page-service.php',      'order' => 5,  'parent' => '' ),
+		array( 'slug' => '투명교정-센터',     'title' => '투명교정 센터',  'template' => 'page-templates/page-service.php',      'order' => 6,  'parent' => '' ),
+		array( 'slug' => '자연치아-살리기',   'title' => '자연치아 살리기','template' => 'page-templates/page-service.php',      'order' => 7,  'parent' => '' ),
+		array( 'slug' => '턱관절-클리닉',     'title' => '턱관절 클리닉',  'template' => 'page-templates/page-service.php',      'order' => 8,  'parent' => '' ),
+		array( 'slug' => '사랑니-발치',       'title' => '사랑니 발치',   'template' => 'page-templates/page-service.php',      'order' => 9,  'parent' => '' ),
+		array( 'slug' => '심미치료',         'title' => '심미치료',      'template' => 'page-templates/page-service.php',      'order' => 10, 'parent' => '' ),
+		array( 'slug' => '예방클리닉',       'title' => '예방클리닉',     'template' => 'page-templates/page-prevention.php',   'order' => 11, 'parent' => '' ),
+		array( 'slug' => '스마일디자인센터', 'title' => '스마일디자인센터', 'template' => 'page-templates/page-smile-design.php', 'order' => 12, 'parent' => '' ),
+		array( 'slug' => '슈어스마일-투명교정', 'title' => '슈어스마일 투명교정', 'template' => 'page-templates/page-service.php', 'order' => 13, 'parent' => '' ),
+		array( 'slug' => '브라켓-치아교정',   'title' => '브라켓 치아교정', 'template' => 'page-templates/page-service.php',     'order' => 14, 'parent' => '' ),
+		array( 'slug' => '상시채용',         'title' => '상시채용',       'template' => 'page-templates/page-recruit.php',      'order' => 15, 'parent' => '' ),
+		array( 'slug' => '소식',             'title' => '소식',         'template' => '',                                     'order' => 16, 'parent' => '' ),
+		array( 'slug' => '오시는-길',         'title' => '오시는 길',     'template' => 'page-templates/page-location.php',     'order' => 17, 'parent' => '' ),
+		array( 'slug' => '상담예약',         'title' => '상담 예약',     'template' => 'page-templates/page-reservation.php',  'order' => 18, 'parent' => '' ),
+		array( 'slug' => '비용-안내',        'title' => '비용 안내',     'template' => 'page-templates/page-pricing.php',      'order' => 19, 'parent' => '' ),
 		array( 'slug' => '개인정보처리방침', 'title' => '개인정보처리방침', 'template' => '', 'order' => 90, 'parent' => '' ),
 		array( 'slug' => '이용약관',         'title' => '이용약관',       'template' => '', 'order' => 91, 'parent' => '' ),
 	);
@@ -2809,14 +2888,14 @@ function moondental_ensure_core_pages() {
 		}
 	}
 
+	// v3.44.84 · URL 평면화 · 모든 core 페이지 최상위 (parent 없음)
 	$core_pages = array(
-		array( 'slug' => '의료진',              'title' => '의료진',            'template' => 'page-templates/page-doctors.php',     'parent' => '병원소개' ),
+		array( 'slug' => '의료진',              'title' => '의료진',            'template' => 'page-templates/page-doctors.php',     'parent' => '' ),
 		array( 'slug' => '오시는-길',           'title' => '오시는 길',          'template' => 'page-templates/page-location.php',    'parent' => '' ),
 		array( 'slug' => '상담예약',            'title' => '상담 예약',          'template' => 'page-templates/page-reservation.php', 'parent' => '' ),
 		array( 'slug' => '비용-안내',           'title' => '비용 안내',          'template' => 'page-templates/page-pricing.php',     'parent' => '' ),
-		// v3.44.44 · 교정센터 하위 페이지 2개 신설
-		array( 'slug' => '슈어스마일-투명교정', 'title' => '슈어스마일 투명교정', 'template' => 'page-templates/page-service.php',     'parent' => '진료항목' ),
-		array( 'slug' => '브라켓-치아교정',      'title' => '브라켓 치아교정',    'template' => 'page-templates/page-service.php',     'parent' => '진료항목' ),
+		array( 'slug' => '슈어스마일-투명교정', 'title' => '슈어스마일 투명교정', 'template' => 'page-templates/page-service.php',     'parent' => '' ),
+		array( 'slug' => '브라켓-치아교정',      'title' => '브라켓 치아교정',    'template' => 'page-templates/page-service.php',     'parent' => '' ),
 	);
 
 	$created = false;
@@ -3632,24 +3711,24 @@ function moondental_setup_primary_menu( $force = false ) {
 	$home = home_url( '/' );
 
 	$structure = array(
-		array( 'title'=>'임플란트센터',     'url'=>$home.'진료항목/임플란트-센터/' ),
-		array( 'title'=>'교정센터',         'url'=>$home.'진료항목/투명교정-센터/' ),
+		array( 'title'=>'임플란트센터',     'url'=>$home.'임플란트-센터/' ),
+		array( 'title'=>'교정센터',         'url'=>$home.'투명교정-센터/' ),
 		array( 'title'=>'스마일디자인센터', 'url'=>$home.'스마일디자인센터/' ),
-		array( 'title'=>'자연치아살리기',   'url'=>$home.'진료항목/자연치아-살리기/', 'children'=>array(
-			array( 'title'=>'충치치료', 'url'=>$home.'진료항목/자연치아-살리기/#cavity' ),
-			array( 'title'=>'신경치료', 'url'=>$home.'진료항목/자연치아-살리기/#endo' ),
-			array( 'title'=>'잇몸치료', 'url'=>$home.'진료항목/자연치아-살리기/#perio' ),
+		array( 'title'=>'자연치아살리기',   'url'=>$home.'자연치아-살리기/', 'children'=>array(
+			array( 'title'=>'충치치료', 'url'=>$home.'자연치아-살리기/#cavity' ),
+			array( 'title'=>'신경치료', 'url'=>$home.'자연치아-살리기/#endo' ),
+			array( 'title'=>'잇몸치료', 'url'=>$home.'자연치아-살리기/#perio' ),
 		)),
-		array( 'title'=>'진료과', 'url'=>$home.'진료항목/', 'children'=>array(
-			array( 'title'=>'턱관절클리닉',      'url'=>$home.'진료항목/턱관절-클리닉/' ),
-			array( 'title'=>'이갈이·이악물기', 'url'=>$home.'진료항목/턱관절-클리닉/' ),
-			array( 'title'=>'사랑니',           'url'=>$home.'진료항목/사랑니-발치/' ),
-			array( 'title'=>'소아치과',         'url'=>$home.'진료항목/소아치과/' ),
-			array( 'title'=>'예방클리닉',       'url'=>$home.'진료항목/예방클리닉/' ),
+		array( 'title'=>'진료과', 'url'=>'#', 'children'=>array(
+			array( 'title'=>'턱관절클리닉',      'url'=>$home.'턱관절-클리닉/' ),
+			array( 'title'=>'이갈이·이악물기', 'url'=>$home.'턱관절-클리닉/' ),
+			array( 'title'=>'사랑니',           'url'=>$home.'사랑니-발치/' ),
+			array( 'title'=>'소아치과',         'url'=>$home.'소아치과/' ),
+			array( 'title'=>'예방클리닉',       'url'=>$home.'예방클리닉/' ),
 		)),
 		array( 'title'=>'의료진',   'url'=>$home.'의료진/' ),
 		array( 'title'=>'비용안내', 'url'=>$home.'비용-안내/' ),
-		array( 'title'=>'병원안내', 'url'=>$home.'병원소개/', 'children'=>array(
+		array( 'title'=>'병원안내', 'url'=>'#', 'children'=>array(
 			array( 'title'=>'오시는길·진료시간', 'url'=>$home.'오시는-길/' ),
 			array( 'title'=>'30여년의 역사',    'url'=>$home.'역사/' ),
 			array( 'title'=>'기술력/시설',       'url'=>$home.'기술력-시설/' ),
@@ -3915,27 +3994,27 @@ function moondental_recategorize_posts() {
 function moondental_primary_menu_data() {
 	$home = home_url( '/' );
 	return array(
-		array( 'label' => '임플란트센터',     'url' => $home . '진료항목/임플란트-센터/',     'children' => array() ),
-		array( 'label' => '교정센터',         'url' => $home . '진료항목/투명교정-센터/',     'children' => array(
-			array( 'label' => '슈어스마일 투명교정', 'url' => $home . '진료항목/슈어스마일-투명교정/' ),
-			array( 'label' => '브라켓 치아교정',     'url' => $home . '진료항목/브라켓-치아교정/' ),
+		array( 'label' => '임플란트센터',     'url' => $home . '임플란트-센터/',     'children' => array() ),
+		array( 'label' => '교정센터',         'url' => $home . '투명교정-센터/',     'children' => array(
+			array( 'label' => '슈어스마일 투명교정', 'url' => $home . '슈어스마일-투명교정/' ),
+			array( 'label' => '브라켓 치아교정',     'url' => $home . '브라켓-치아교정/' ),
 		) ),
 		array( 'label' => '스마일디자인센터', 'url' => $home . '스마일디자인센터/',  'children' => array() ),
-		array( 'label' => '자연치아살리기',   'url' => $home . '진료항목/자연치아-살리기/',   'children' => array(
-			array( 'label' => '충치치료', 'url' => $home . '진료항목/자연치아-살리기/#cavity' ),
-			array( 'label' => '신경치료', 'url' => $home . '진료항목/자연치아-살리기/#endo' ),
-			array( 'label' => '잇몸치료', 'url' => $home . '진료항목/자연치아-살리기/#perio' ),
+		array( 'label' => '자연치아살리기',   'url' => $home . '자연치아-살리기/',   'children' => array(
+			array( 'label' => '충치치료', 'url' => $home . '자연치아-살리기/#cavity' ),
+			array( 'label' => '신경치료', 'url' => $home . '자연치아-살리기/#endo' ),
+			array( 'label' => '잇몸치료', 'url' => $home . '자연치아-살리기/#perio' ),
 		) ),
-		array( 'label' => '진료과',           'url' => $home . '진료항목/',           'children' => array(
-			array( 'label' => '턱관절클리닉',    'url' => $home . '진료항목/턱관절-클리닉/' ),
-			array( 'label' => '이갈이·이악물기','url' => $home . '진료항목/턱관절-클리닉/' ),
-			array( 'label' => '사랑니',          'url' => $home . '진료항목/사랑니-발치/' ),
-			array( 'label' => '소아치과',        'url' => $home . '진료항목/소아치과/' ),
-			array( 'label' => '예방클리닉',      'url' => $home . '진료항목/예방클리닉/' ),
+		array( 'label' => '진료과',           'url' => '#',           'children' => array(
+			array( 'label' => '턱관절클리닉',    'url' => $home . '턱관절-클리닉/' ),
+			array( 'label' => '이갈이·이악물기','url' => $home . '턱관절-클리닉/' ),
+			array( 'label' => '사랑니',          'url' => $home . '사랑니-발치/' ),
+			array( 'label' => '소아치과',        'url' => $home . '소아치과/' ),
+			array( 'label' => '예방클리닉',      'url' => $home . '예방클리닉/' ),
 		) ),
 		array( 'label' => '의료진',           'url' => $home . '의료진/',             'children' => array() ),
 		array( 'label' => '비용안내',         'url' => $home . '비용-안내/',          'children' => array() ),
-		array( 'label' => '병원안내',         'url' => $home . '병원소개/',           'children' => array(
+		array( 'label' => '병원안내',         'url' => '#',           'children' => array(
 			array( 'label' => '오시는길·진료시간', 'url' => $home . '오시는-길/' ),
 			array( 'label' => '30여년의 역사',     'url' => $home . '역사/' ),
 			array( 'label' => '기술력/시설',        'url' => $home . '기술력-시설/' ),
@@ -4263,7 +4342,6 @@ add_filter( 'pre_wp_nav_menu', 'moondental_force_primary_menu', 10, 2 );
  */
 function moondental_footer_menu_fallback() {
 	$items = array(
-		'병원소개'         => '/병원소개/',
 		'의료진'           => '/의료진/',
 		'30여년의 발자취'  => '/역사/',
 		'기술력/시설'      => '/기술력-시설/',
@@ -4370,14 +4448,14 @@ function moondental_get_service_areas() {
 			'title' => '임플란트센터',
 			'icon'  => 'icon:implant',
 			'desc'  => '진단·수술·보철·평생 관리까지 — 임플란트 전 과정을 원내 협진 체계로.',
-			'url'   => $home . '진료항목/임플란트-센터/',
+			'url'   => $home . '임플란트-센터/',
 		),
 		array(
 			'slug'  => '투명교정-센터',
 			'title' => '교정센터',
 			'icon'  => 'icon:ortho',
 			'desc'  => '슈어스마일(SureSmile) AI 투명교정 + 치과교정과·인정의 진료.',
-			'url'   => $home . '진료항목/투명교정-센터/',
+			'url'   => $home . '투명교정-센터/',
 		),
 		array(
 			'slug'  => '스마일디자인센터',
@@ -4391,14 +4469,14 @@ function moondental_get_service_areas() {
 			'title' => '자연치아 살리기',
 			'icon'  => 'icon:preserve',
 			'desc'  => '충치치료·신경치료·잇몸치료 — 발치보다 보존을 먼저 고민합니다.',
-			'url'   => $home . '진료항목/자연치아-살리기/',
+			'url'   => $home . '자연치아-살리기/',
 		),
 		array(
 			'slug'  => '진료항목',
 			'title' => '진료과',
 			'icon'  => 'icon:general',
 			'desc'  => '턱관절·이갈이·사랑니·소아치과·예방클리닉 — 전 진료과 협진 체계.',
-			'url'   => $home . '진료항목/',
+			'url'   => '#',
 		),
 	);
 }

@@ -251,7 +251,7 @@ function moondental_service_content_default_map() {
 
 <div class="md-track-grid">
 
-<a class="md-track md-track--featured" href="/진료항목/슈어스마일-투명교정/">
+<a class="md-track md-track--featured" href="/슈어스마일-투명교정/">
 <span class="md-track__badge">FDA 승인</span>
 <h4>슈어스마일 투명교정</h4>
 <p>미국 FDA 승인 · Dentsply Sirona AI 얼라이너. 프라임스캐너 정밀 스캔 + 3D 시뮬레이션으로 최종 치열 미리 확인. 문치과병원은 <strong>중부권 슈어스마일 센터병원</strong>으로 지정되어 있습니다.</p>
@@ -263,7 +263,7 @@ function moondental_service_content_default_map() {
 <span class="md-track__more">자세히 보기 →</span>
 </a>
 
-<a class="md-track" href="/진료항목/브라켓-치아교정/">
+<a class="md-track" href="/브라켓-치아교정/">
 <h4>브라켓 치아교정</h4>
 <p>가장 오래 검증된 표준 방식. <strong>설측교정</strong>·<strong>메탈</strong>·<strong>세라믹</strong>·<strong>자가결찰 브라켓</strong>·<strong>소아 성장기 교정</strong>·<strong>부분 교정</strong>·<strong>양악 협진 교정</strong>까지 케이스에 맞게 선택합니다.</p>
 <ul>

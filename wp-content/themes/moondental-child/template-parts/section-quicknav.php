@@ -44,19 +44,19 @@ $items = array(
 	array(
 		'title' => md_content( 'quicknav_implant_title', '천안·아산 임플란트' ),
 		'desc'  => md_content( 'quicknav_implant_desc',  'CBCT 3D 진단 · 네비게이션 가이드 · 단일·다수·전악 임플란트' ),
-		'url'   => $home . '진료항목/임플란트-센터/',
+		'url'   => $home . '임플란트-센터/',
 		'icon'  => '🦷',
 	),
 	array(
 		'title' => md_content( 'quicknav_ortho_title', '천안·아산 투명교정 · 슈어스마일' ),
 		'desc'  => md_content( 'quicknav_ortho_desc',  '중부권 슈어스마일 센터 · 0.1mm 정밀도 · 성인·직장인 투명교정' ),
-		'url'   => $home . '진료항목/슈어스마일-투명교정/',
+		'url'   => $home . '슈어스마일-투명교정/',
 		'icon'  => '✨',
 	),
 	array(
 		'title' => md_content( 'quicknav_preserve_title', '자연치아 살리기' ),
 		'desc'  => md_content( 'quicknav_preserve_desc',  '신경치료·치주치료·치수복조술 · 발치 권유받으신 치아 다시 검토' ),
-		'url'   => $home . '진료항목/자연치아-살리기/',
+		'url'   => $home . '자연치아-살리기/',
 		'icon'  => '🌿',
 	),
 	array(
