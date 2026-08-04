@@ -332,6 +332,17 @@ if ( function_exists( 'moondental_get_info' ) ) {
 			closeModal();
 		}
 	});
+	// v3.44.93 · 카드 hover 시 prefetch (클릭 전 데이터 미리 로드 · 클릭 시 즉시 열림)
+	document.addEventListener('mouseenter', function(e){
+		var card = e.target.closest && e.target.closest('[data-md-enc-modal]');
+		if ( ! card ) return;
+		var id = card.getAttribute('data-md-enc-id');
+		if ( ! id || cache[id] ) return;
+		fetch( AJAX + '?action=md_term_get&id=' + encodeURIComponent(id) )
+			.then(function(r){ return r.json(); })
+			.then(function(res){ if ( res && res.success && res.data ) cache[id] = res.data; })
+			.catch(function(){});
+	}, true);
 	document.addEventListener('keydown', function(e){
 		if ( e.key === 'Escape' && ! modal.hidden ) closeModal();
 	});

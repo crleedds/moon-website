@@ -153,7 +153,10 @@ function moondental_ajax_md_term_get() {
 	$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
 	if ( ! $id ) { wp_send_json_error( array( 'msg' => 'no id' ), 400 ); }
 
-	// v3.44.92 · 24시간 transient 캐시 · 속도 개선
+	// v3.44.93 · 브라우저 캐시 · 1시간 (재방문 시 fetch 없음)
+	header( 'Cache-Control: public, max-age=3600' );
+
+	// 24시간 transient 캐시 · 서버 측
 	$cache_key = 'md_term_json_' . $id;
 	$cached = get_transient( $cache_key );
 	if ( $cached && is_array( $cached ) ) {
@@ -229,8 +232,8 @@ add_action( 'save_post_md_term', function( $post_id ) {
 } );
 
 function moondental_seed_encyclopedia_v3488() {
-	// v3.44.90 · 재시도 · SQL 직접 삭제 (wp_delete_post 는 5000+ 포스트 처리 시 timeout)
-	if ( get_option( 'moondental_encyclopedia_seed_v3490' ) === 'done' ) return;
+	// v3.44.93 · 카테고리 재분류 · 새 flag 로 재실행 (기존 데이터 완전 재생성)
+	if ( get_option( 'moondental_encyclopedia_seed_v3493' ) === 'done' ) return;
 	$seed_file = MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3488.php';
 	if ( ! file_exists( $seed_file ) ) return;
 
@@ -286,8 +289,12 @@ function moondental_seed_encyclopedia_v3488() {
 		}
 	}
 
-	update_option( 'moondental_encyclopedia_seed_v3490', 'done' );
-	update_option( 'moondental_encyclopedia_seed_v3490_count', $total, false );
+	// v3.44.93 · 기존 AJAX transient 캐시 모두 무효화
+	global $wpdb;
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_md\\_term\\_json\\_%' OR option_name LIKE '\\_transient\\_timeout\\_md\\_term\\_json\\_%'" );
+
+	update_option( 'moondental_encyclopedia_seed_v3493', 'done' );
+	update_option( 'moondental_encyclopedia_seed_v3493_count', $total, false );
 }
 add_action( 'admin_init', 'moondental_seed_encyclopedia_v3488', 40 );
 add_action( 'wp_loaded',  'moondental_seed_encyclopedia_v3488', 40 );

@@ -231,24 +231,7 @@ while ( have_posts() ) : the_post();
 		</section>
 		<?php endif; ?>
 
-		<!-- 5. 큰 CTA 배너 -->
-		<aside class="md-term-big-cta">
-			<h3><?php the_title(); ?>에 대해 더 궁금하신가요?</h3>
-			<p>문치과병원 진료팀이 직접 상담해 드립니다</p>
-			<div class="md-term-big-cta__actions">
-				<a class="md-term-big-cta__btn md-term-big-cta__btn--white" href="<?php echo esc_url( $info['naver_place'] ?? home_url( '/상담예약/' ) ); ?>" target="_blank" rel="noopener">
-					🗓️ 예약하기
-				</a>
-				<?php if ( $related_service ) : ?>
-				<a class="md-term-big-cta__btn md-term-big-cta__btn--white" href="<?php echo esc_url( home_url( $related_service['url'] ) ); ?>">
-					🗓️ 진료 안내
-				</a>
-				<?php endif; ?>
-				<a class="md-term-big-cta__btn md-term-big-cta__btn--white" href="tel:041-563-2875">
-					📞 041-563-2875
-				</a>
-			</div>
-		</aside>
+		<?php /* v3.44.93 · 큰 CTA 배너 제거 (인라인 CTA 와 중복) */ ?>
 
 		<div class="md-term-actions">
 			<a class="md-btn md-btn-ghost" href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>">
