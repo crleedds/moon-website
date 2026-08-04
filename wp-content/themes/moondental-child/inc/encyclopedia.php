@@ -152,6 +152,14 @@ add_action( 'wp_ajax_nopriv_md_term_get', 'moondental_ajax_md_term_get' );
 function moondental_ajax_md_term_get() {
 	$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
 	if ( ! $id ) { wp_send_json_error( array( 'msg' => 'no id' ), 400 ); }
+
+	// v3.44.92 · 24시간 transient 캐시 · 속도 개선
+	$cache_key = 'md_term_json_' . $id;
+	$cached = get_transient( $cache_key );
+	if ( $cached && is_array( $cached ) ) {
+		wp_send_json_success( $cached );
+	}
+
 	$post = get_post( $id );
 	if ( ! $post || $post->post_type !== 'md_term' || $post->post_status !== 'publish' ) {
 		wp_send_json_error( array( 'msg' => 'not found' ), 404 );
@@ -161,15 +169,64 @@ function moondental_ajax_md_term_get() {
 	if ( is_array( $cats ) ) {
 		foreach ( $cats as $c ) $cats_out[] = array( 'name' => $c->name, 'slug' => $c->slug );
 	}
-	wp_send_json_success( array(
-		'id'      => $id,
-		'title'   => $post->post_title,
-		'excerpt' => $post->post_excerpt,
-		'body'    => apply_filters( 'the_content', $post->post_content ),
-		'url'     => get_permalink( $post ),
-		'cats'    => $cats_out,
-	) );
+
+	// v3.44.92 · 같은 카테고리 관련 용어 6개 함께 반환
+	$related = array();
+	if ( ! empty( $cats ) ) {
+		$cat_ids = wp_list_pluck( $cats, 'term_id' );
+		$rel_q = new WP_Query( array(
+			'post_type'      => 'md_term',
+			'posts_per_page' => 6,
+			'post__not_in'   => array( $id ),
+			'orderby'        => 'rand',
+			'no_found_rows'  => true,
+			'tax_query'      => array( array(
+				'taxonomy' => 'md_term_category',
+				'field'    => 'id',
+				'terms'    => $cat_ids,
+			) ),
+		) );
+		if ( $rel_q->have_posts() ) {
+			while ( $rel_q->have_posts() ) {
+				$rel_q->the_post();
+				$related[] = array(
+					'title' => get_the_title(),
+					'url'   => get_permalink(),
+					'id'    => get_the_ID(),
+				);
+			}
+			wp_reset_postdata();
+		}
+	}
+
+	// v3.44.92 · 네이버 예약 URL
+	$naver = '';
+	if ( function_exists( 'moondental_get_info' ) ) {
+		$info = moondental_get_info();
+		$naver = $info['naver_place'] ?? '';
+	}
+
+	$data = array(
+		'id'          => $id,
+		'title'       => $post->post_title,
+		'excerpt'     => $post->post_excerpt,
+		'body'        => apply_filters( 'the_content', $post->post_content ),
+		'url'         => get_permalink( $post ),
+		'cats'        => $cats_out,
+		'related'     => $related,
+		'naver_book'  => $naver,
+	);
+
+	set_transient( $cache_key, $data, DAY_IN_SECONDS );
+	wp_send_json_success( $data );
 }
+
+/**
+ * v3.44.92 · 용어 수정 시 캐시 자동 삭제
+ */
+add_action( 'save_post_md_term', function( $post_id ) {
+	delete_transient( 'md_term_json_' . (int) $post_id );
+} );
 
 function moondental_seed_encyclopedia_v3488() {
 	// v3.44.90 · 재시도 · SQL 직접 삭제 (wp_delete_post 는 5000+ 포스트 처리 시 timeout)

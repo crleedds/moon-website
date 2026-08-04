@@ -101,6 +101,9 @@ function moondental_md_term_faq_question( $title, $section ) {
 	return $title . ' — ' . $section . '?';
 }
 
+// v3.44.92 · 병원 정보 (네이버 예약 URL 등)
+$info = function_exists( 'moondental_get_info' ) ? moondental_get_info() : array();
+
 while ( have_posts() ) : the_post();
 	$cats = get_the_terms( get_the_ID(), 'md_term_category' );
 	if ( is_wp_error( $cats ) ) $cats = array();
@@ -187,7 +190,8 @@ while ( have_posts() ) : the_post();
 					문치과병원 진료팀이 <strong>정밀 검진</strong>으로 직접 확인해드립니다.
 				</p>
 				<div class="md-term-inline-cta__actions">
-					<a class="md-btn md-btn-primary" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>">
+					<?php $_naver_book = $info['naver_place'] ?? ''; ?>
+					<a class="md-btn md-btn-primary" href="<?php echo esc_url( $_naver_book ?: home_url( '/상담예약/' ) ); ?>" target="_blank" rel="noopener">
 						🗓️ 내 치아 검진 예약하기
 					</a>
 					<a class="md-btn md-btn-ghost" href="tel:041-563-2875">
@@ -232,7 +236,7 @@ while ( have_posts() ) : the_post();
 			<h3><?php the_title(); ?>에 대해 더 궁금하신가요?</h3>
 			<p>문치과병원 진료팀이 직접 상담해 드립니다</p>
 			<div class="md-term-big-cta__actions">
-				<a class="md-term-big-cta__btn md-term-big-cta__btn--white" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>">
+				<a class="md-term-big-cta__btn md-term-big-cta__btn--white" href="<?php echo esc_url( $info['naver_place'] ?? home_url( '/상담예약/' ) ); ?>" target="_blank" rel="noopener">
 					🗓️ 예약하기
 				</a>
 				<?php if ( $related_service ) : ?>
@@ -254,21 +258,88 @@ while ( have_posts() ) : the_post();
 	</div>
 </section>
 
+<?php
+// v3.44.92 · 이전/다음 용어 (같은 카테고리 내 · 알파벳 순)
+$prev_next = array( 'prev' => null, 'next' => null );
+if ( ! empty( $cats ) ) {
+	$cat_ids = wp_list_pluck( $cats, 'term_id' );
+	$all_in_cat = get_posts( array(
+		'post_type'      => 'md_term',
+		'posts_per_page' => -1,
+		'orderby'        => 'title',
+		'order'          => 'ASC',
+		'no_found_rows'  => true,
+		'fields'         => 'ids',
+		'tax_query'      => array( array(
+			'taxonomy' => 'md_term_category',
+			'field'    => 'id',
+			'terms'    => $cat_ids,
+		) ),
+	) );
+	$curr_id = get_the_ID();
+	$idx = array_search( $curr_id, $all_in_cat );
+	if ( $idx !== false ) {
+		if ( $idx > 0 && isset( $all_in_cat[ $idx - 1 ] ) ) {
+			$prev_next['prev'] = array( 'title' => get_the_title( $all_in_cat[ $idx - 1 ] ), 'url' => get_permalink( $all_in_cat[ $idx - 1 ] ) );
+		}
+		if ( isset( $all_in_cat[ $idx + 1 ] ) ) {
+			$prev_next['next'] = array( 'title' => get_the_title( $all_in_cat[ $idx + 1 ] ), 'url' => get_permalink( $all_in_cat[ $idx + 1 ] ) );
+		}
+	}
+}
+?>
+
 <?php if ( $related ) : ?>
-<section class="md-section md-section--surface md-section--sm">
+<!-- 함께 알면 좋은 용어 (pill list) -->
+<section class="md-section md-section--sm">
 	<div class="md-container md-container--narrow">
-		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">🧩 같은 카테고리<?php if ( ! empty( $cats ) ) echo ' · ' . esc_html( $cats[0]->name ); ?></span>
-			<h2 class="md-section-head__title">함께 알면 좋은 용어</h2>
-		</header>
-		<div class="md-enc-grid">
-			<?php foreach ( $related as $r ) : ?>
-				<a class="md-enc-card" href="<?php echo esc_url( $r['url'] ); ?>">
-					<h3 class="md-enc-card__title"><?php echo esc_html( $r['title'] ); ?></h3>
-					<p class="md-enc-card__excerpt"><?php echo esc_html( $r['excerpt'] ); ?></p>
+		<h2 class="md-term-related-title">🔗 함께 알면 좋은 용어</h2>
+		<div class="md-term-related-pills">
+			<?php foreach ( array_slice( $related, 0, 6 ) as $r ) : ?>
+				<a class="md-term-related-pill" href="<?php echo esc_url( $r['url'] ); ?>">
+					<span class="md-term-related-pill__name"><?php echo esc_html( $r['title'] ); ?></span>
+					<?php if ( ! empty( $cats ) ) : ?>
+						<span class="md-term-related-pill__cat"><?php echo esc_html( $cats[0]->name ); ?></span>
+					<?php endif; ?>
 				</a>
 			<?php endforeach; ?>
 		</div>
+	</div>
+</section>
+
+<!-- 같은 카테고리 카드 그리드 -->
+<section class="md-section md-section--surface md-section--sm">
+	<div class="md-container md-container--narrow">
+		<h2 class="md-term-samecat-title">📂 같은 카테고리<?php if ( ! empty( $cats ) ) echo ': ' . esc_html( $cats[0]->name ); ?></h2>
+		<div class="md-term-samecat-grid">
+			<?php foreach ( array_slice( $related, 0, 8 ) as $r ) : ?>
+				<a class="md-term-samecat-card" href="<?php echo esc_url( $r['url'] ); ?>">
+					<strong><?php echo esc_html( $r['title'] ); ?></strong>
+					<span><?php echo esc_html( $r['excerpt'] ); ?></span>
+				</a>
+			<?php endforeach; ?>
+		</div>
+	</div>
+</section>
+<?php endif; ?>
+
+<?php if ( $prev_next['prev'] || $prev_next['next'] ) : ?>
+<!-- 이전 / 전체 / 다음 네비게이션 -->
+<section class="md-section md-section--sm">
+	<div class="md-container md-container--narrow">
+		<nav class="md-term-nav" aria-label="이전 다음 용어">
+			<?php if ( $prev_next['prev'] ) : ?>
+				<a class="md-term-nav__prev" href="<?php echo esc_url( $prev_next['prev']['url'] ); ?>">
+					<span aria-hidden="true">←</span> <span><?php echo esc_html( $prev_next['prev']['title'] ); ?></span>
+				</a>
+			<?php else : ?><span></span><?php endif; ?>
+			<a class="md-term-nav__all" href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>">📖 전체 보기</a>
+			<?php if ( $prev_next['next'] ) : ?>
+				<a class="md-term-nav__next" href="<?php echo esc_url( $prev_next['next']['url'] ); ?>">
+					<span><?php echo esc_html( $prev_next['next']['title'] ); ?></span> <span aria-hidden="true">→</span>
+				</a>
+			<?php else : ?><span></span><?php endif; ?>
+		</nav>
 	</div>
 </section>
 <?php endif; ?>

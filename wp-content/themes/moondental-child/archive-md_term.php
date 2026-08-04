@@ -158,7 +158,14 @@ $total_count = array_sum( array_map( 'count', $visible_groups ) );
 	</div>
 </section>
 
-<!-- v3.44.91 · 백과사전 모달 팝업 · 카드 클릭 시 열림 -->
+<?php
+$_naver_book = '';
+if ( function_exists( 'moondental_get_info' ) ) {
+	$_info = moondental_get_info();
+	$_naver_book = $_info['naver_place'] ?? '';
+}
+?>
+<!-- v3.44.92 · 백과사전 모달 팝업 · 카드 클릭 시 열림 -->
 <div class="md-enc-modal" id="md-enc-modal" role="dialog" aria-modal="true" aria-labelledby="md-enc-modal-title" hidden>
 	<div class="md-enc-modal__backdrop" data-md-enc-close></div>
 	<div class="md-enc-modal__panel" role="document">
@@ -172,13 +179,28 @@ $total_count = array_sum( array_map( 'count', $visible_groups ) );
 				<h2 class="md-enc-modal__title" id="md-enc-modal-title" data-md-enc-title></h2>
 				<div class="md-enc-modal__excerpt" data-md-enc-excerpt></div>
 				<div class="md-enc-modal__article" data-md-enc-article></div>
+
+				<!-- v3.44.92 · 함께 알면 좋은 용어 -->
+				<div class="md-enc-modal__related" data-md-enc-related-wrap hidden>
+					<h4 class="md-enc-modal__related-title">🔗 함께 알면 좋은 용어</h4>
+					<div class="md-enc-modal__related-list" data-md-enc-related></div>
+				</div>
+
+				<!-- v3.44.92 · 같은 카테고리 -->
+				<div class="md-enc-modal__same-cat" data-md-enc-samecat-wrap hidden>
+					<h4 class="md-enc-modal__samecat-title" data-md-enc-samecat-title>📂 같은 카테고리</h4>
+					<div class="md-enc-modal__samecat-grid" data-md-enc-samecat></div>
+				</div>
+
 				<div class="md-enc-modal__link-full">
 					<a class="md-enc-modal__link-full-btn" data-md-enc-fullpage href="#">🔗 이 용어 전용 페이지 보기 →</a>
 				</div>
 			</div>
 		</div>
 		<div class="md-enc-modal__actions">
-			<a class="md-btn md-btn-primary" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>">🗓️ 상담 예약</a>
+			<a class="md-btn md-btn-primary"
+			   href="<?php echo esc_url( $_naver_book ?: home_url( '/상담예약/' ) ); ?>"
+			   target="_blank" rel="noopener">🗓️ 상담 예약</a>
 			<a class="md-btn md-btn-ghost" href="tel:041-563-2875">📞 전화 문의</a>
 		</div>
 	</div>
@@ -223,6 +245,12 @@ $total_count = array_sum( array_map( 'count', $visible_groups ) );
 				content.hidden = false;
 			});
 	}
+	var relatedWrap = modal.querySelector('[data-md-enc-related-wrap]');
+	var relatedEl = modal.querySelector('[data-md-enc-related]');
+	var samecatWrap = modal.querySelector('[data-md-enc-samecat-wrap]');
+	var samecatEl = modal.querySelector('[data-md-enc-samecat]');
+	var samecatTitleEl = modal.querySelector('[data-md-enc-samecat-title]');
+
 	function render(data) {
 		titleEl.textContent = data.title || '';
 		excerptEl.textContent = data.excerpt || '';
@@ -235,10 +263,55 @@ $total_count = array_sum( array_map( 'count', $visible_groups ) );
 				s.textContent = c.name;
 				catsEl.appendChild(s);
 			});
+			if ( samecatTitleEl && data.cats[0] ) {
+				samecatTitleEl.textContent = '📂 같은 카테고리 · ' + data.cats[0].name;
+			}
+		}
+		// 함께 알면 좋은 용어 (pill list · 최대 4개)
+		if ( relatedEl && data.related && data.related.length ) {
+			relatedEl.innerHTML = '';
+			data.related.slice(0, 4).forEach(function(r){
+				var a = document.createElement('a');
+				a.className = 'md-enc-modal__related-item';
+				a.setAttribute('data-md-enc-modal', '1');
+				a.setAttribute('data-md-enc-id', r.id);
+				a.setAttribute('data-md-enc-url', r.url);
+				a.href = r.url;
+				a.textContent = r.title;
+				relatedEl.appendChild(a);
+			});
+			relatedWrap.hidden = false;
+		} else if ( relatedWrap ) {
+			relatedWrap.hidden = true;
+		}
+		// 같은 카테고리 카드 (동일 데이터, 그리드 스타일)
+		if ( samecatEl && data.related && data.related.length ) {
+			samecatEl.innerHTML = '';
+			data.related.slice(0, 6).forEach(function(r){
+				var a = document.createElement('a');
+				a.className = 'md-enc-modal__samecat-card';
+				a.setAttribute('data-md-enc-modal', '1');
+				a.setAttribute('data-md-enc-id', r.id);
+				a.setAttribute('data-md-enc-url', r.url);
+				a.href = r.url;
+				a.innerHTML = '<strong>' + escapeHtml(r.title) + '</strong>';
+				samecatEl.appendChild(a);
+			});
+			samecatWrap.hidden = false;
+		} else if ( samecatWrap ) {
+			samecatWrap.hidden = true;
 		}
 		fullpageBtn.href = data.url || '#';
 		loading.hidden = true;
 		content.hidden = false;
+		// 모달 스크롤 최상단
+		var body = modal.querySelector('.md-enc-modal__body');
+		if ( body ) body.scrollTop = 0;
+	}
+	function escapeHtml(s) {
+		return String(s).replace(/[&<>"']/g, function(c){
+			return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+		});
 	}
 	function closeModal() {
 		modal.hidden = true;
