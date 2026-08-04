@@ -231,13 +231,7 @@ while ( have_posts() ) : the_post();
 		</section>
 		<?php endif; ?>
 
-		<?php /* v3.44.93 · 큰 CTA 배너 제거 (인라인 CTA 와 중복) */ ?>
-
-		<div class="md-term-actions">
-			<a class="md-btn md-btn-ghost" href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>">
-				← 전체 치과 백과사전으로
-			</a>
-		</div>
+		<?php /* v3.44.94 · 큰 CTA 배너 + '전체 백과사전으로' 버튼 제거 (하단 네비게이션에서 '전체 보기' 제공) */ ?>
 	</div>
 </section>
 
