@@ -5,7 +5,7 @@ Description:  Astra 자식 테마 — 한아의료재단 문치과병원 (천안
 Author:       Moon Dental Hospital
 Author URI:   https://moondentalhospital.local
 Template:     astra
-Version:      3.44.99
+Version:      3.44.100
 License:      GNU General Public License v2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  moondental-child
@@ -11965,39 +11965,43 @@ html { scroll-behavior: smooth; }
   padding: 4px 10px;
   border-radius: 999px;
 }
-/* v3.44.85 · 스태프 · 수직 상하관계 대신 가로 흐름 (수평적 · 평등한 느낌) */
+/* v3.44.100 · 스태프 · 원래 수직 배치 복원 (직급별 세로 스택) */
 .md-staff-dept__roles {
   margin: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px 4px;
-  align-items: baseline;
-  line-height: 2;
+  flex-direction: column;
+  gap: 10px;
 }
 .md-staff-role {
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  gap: 10px;
   align-items: baseline;
-  gap: 6px;
-  padding-right: 8px;
+}
+@media (max-width: 480px) {
+  .md-staff-role { grid-template-columns: 64px 1fr; gap: 8px; }
 }
 .md-staff-role__title {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-primary-dark);
   background: rgba(216, 128, 98, 0.10);
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-align: center;
   letter-spacing: -0.01em;
   margin: 0;
-  white-space: nowrap;
-  flex-shrink: 0;
+  height: fit-content;
 }
 .md-staff-role__names {
   margin: 0;
-  display: inline;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
   font-size: 0.9rem;
   color: var(--color-text);
-  word-break: keep-all;
+  line-height: 1.7;
 }
 .md-staff-name {
   font-weight: 500;
@@ -12005,26 +12009,8 @@ html { scroll-behavior: smooth; }
 }
 .md-staff-sep {
   color: var(--color-text-mute, #b0b0b0);
-  margin: 0 3px;
+  margin: 0 2px;
   font-size: 0.7rem;
-}
-/* 직급 그룹 간 구분자 */
-.md-staff-role + .md-staff-role::before {
-  content: '';
-  display: inline-block;
-  width: 1px;
-  height: 12px;
-  background: rgba(0, 0, 0, 0.1);
-  margin: 0 8px 0 0;
-  vertical-align: middle;
-}
-@media (prefers-color-scheme: dark) {
-  .md-staff-role + .md-staff-role::before { background: rgba(255, 255, 255, 0.15); }
-}
-@media (max-width: 480px) {
-  .md-staff-role { padding-right: 4px; }
-  .md-staff-role__title { font-size: 0.65rem; padding: 2px 6px; }
-  .md-staff-role__names { font-size: 0.82rem; }
 }
 
 /* ── 진료 전문과 ── */
