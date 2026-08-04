@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.97' );
+define( 'MOONDENTAL_VERSION', '3.44.98' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -4194,6 +4194,12 @@ add_action( 'wp_loaded', function() {
 	// v3.44.58 · rewrite rules 완전 재생성 (한글 슬러그 페이지 404 방지)
 	if ( function_exists( 'flush_rewrite_rules' ) ) {
 		flush_rewrite_rules( false );
+	}
+	// v3.44.98 · WP Super Cache 도 함께 자동 무효화 (배포 후 페이지 즉시 반영)
+	if ( function_exists( 'wp_cache_clear_cache' ) ) {
+		wp_cache_clear_cache();
+	} elseif ( function_exists( 'wpsc_delete_files' ) ) {
+		wpsc_delete_files( ABSPATH );
 	}
 	update_option( 'md_cache_version', MOONDENTAL_VERSION );
 }, 5 );
