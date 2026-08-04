@@ -229,7 +229,70 @@ function moondental_ajax_md_term_get() {
  */
 add_action( 'save_post_md_term', function( $post_id ) {
 	delete_transient( 'md_term_json_' . (int) $post_id );
+	delete_transient( 'md_term_all_terms_v1' );
 } );
+
+/**
+ * v3.44.95 · 전체 용어 데이터 캐시 (아카이브 페이지 인라인 embed 용)
+ *   모든 published md_term 을 하나의 JSON 배열로 반환 · 12시간 캐시
+ *   모달이 이 데이터를 사용하면 fetch 없이 즉시 열림
+ */
+function moondental_md_term_all_cached() {
+	$key = 'md_term_all_terms_v1';
+	$cached = get_transient( $key );
+	if ( $cached && is_array( $cached ) ) return $cached;
+
+	$posts = get_posts( array(
+		'post_type'      => 'md_term',
+		'posts_per_page' => -1,
+		'post_status'    => 'publish',
+		'orderby'        => 'title',
+		'order'          => 'ASC',
+		'no_found_rows'  => true,
+	) );
+
+	$naver = '';
+	if ( function_exists( 'moondental_get_info' ) ) {
+		$info = moondental_get_info();
+		$naver = $info['naver_place'] ?? '';
+	}
+
+	// term_id → post_ids 매핑 (같은 카테고리 관련 용어 빠르게 찾기)
+	$data = array();
+	$by_cat = array();
+	foreach ( $posts as $p ) {
+		$cats = get_the_terms( $p->ID, 'md_term_category' );
+		$cats_out = array();
+		$cat_slugs = array();
+		if ( is_array( $cats ) ) {
+			foreach ( $cats as $c ) {
+				$cats_out[] = array( 'name' => $c->name, 'slug' => $c->slug );
+				$cat_slugs[] = $c->slug;
+			}
+		}
+		$data[ $p->ID ] = array(
+			'id'    => $p->ID,
+			'title' => $p->post_title,
+			'ex'    => $p->post_excerpt,
+			'body'  => apply_filters( 'the_content', $p->post_content ),
+			'url'   => get_permalink( $p ),
+			'cats'  => $cats_out,
+			'cs'    => $cat_slugs, // 짧은 키
+		);
+		foreach ( $cat_slugs as $cs ) {
+			if ( ! isset( $by_cat[ $cs ] ) ) $by_cat[ $cs ] = array();
+			$by_cat[ $cs ][] = $p->ID;
+		}
+	}
+
+	$out = array(
+		'terms'  => array_values( $data ),
+		'by_cat' => $by_cat,
+		'naver'  => $naver,
+	);
+	set_transient( $key, $out, 12 * HOUR_IN_SECONDS );
+	return $out;
+}
 
 function moondental_seed_encyclopedia_v3488() {
 	// v3.44.93 · 카테고리 재분류 · 새 flag 로 재실행 (기존 데이터 완전 재생성)

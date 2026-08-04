@@ -164,7 +164,33 @@ if ( function_exists( 'moondental_get_info' ) ) {
 	$_info = moondental_get_info();
 	$_naver_book = $_info['naver_place'] ?? '';
 }
+
+// v3.44.95 · 모든 용어 데이터 인라인 embed (모달 즉시 열림)
+$_all_terms_json = '';
+if ( function_exists( 'moondental_md_term_all_cached' ) ) {
+	$_all = moondental_md_term_all_cached();
+	// 크기 최적화: title/excerpt 만 인덱스에 embed, body 는 필요 시만
+	$mini = array();
+	foreach ( $_all['terms'] as $t ) {
+		$mini[ $t['id'] ] = array(
+			'id'    => $t['id'],
+			'title' => $t['title'],
+			'ex'    => $t['ex'],
+			'body'  => $t['body'],
+			'url'   => $t['url'],
+			'cats'  => $t['cats'],
+			'cs'    => $t['cs'],
+		);
+	}
+	$_all_terms_json = wp_json_encode( array(
+		'terms'  => $mini,
+		'by_cat' => $_all['by_cat'],
+	), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+}
 ?>
+<?php if ( $_all_terms_json ) : ?>
+<script id="md-enc-preload" type="application/json"><?php echo $_all_terms_json; ?></script>
+<?php endif; ?>
 <!-- v3.44.92 · 백과사전 모달 팝업 · 카드 클릭 시 열림 -->
 <div class="md-enc-modal" id="md-enc-modal" role="dialog" aria-modal="true" aria-labelledby="md-enc-modal-title" hidden>
 	<div class="md-enc-modal__backdrop" data-md-enc-close></div>
@@ -220,13 +246,63 @@ if ( function_exists( 'moondental_get_info' ) ) {
 	var fullpageBtn = modal.querySelector('[data-md-enc-fullpage]');
 	var cache = {};
 
+	// v3.44.95 · 페이지 로드 시 모든 용어 데이터 인라인 preload · 모달 즉시 열림
+	var PRELOAD = null;
+	var preloadEl = document.getElementById('md-enc-preload');
+	if ( preloadEl ) {
+		try { PRELOAD = JSON.parse( preloadEl.textContent ); } catch(e) {}
+	}
+	function getRelated(id, catSlugs) {
+		if ( ! PRELOAD || ! PRELOAD.by_cat || ! catSlugs ) return [];
+		var seen = { }; seen[id] = 1;
+		var out = [];
+		for ( var i = 0; i < catSlugs.length && out.length < 6; i++ ) {
+			var ids = PRELOAD.by_cat[ catSlugs[i] ];
+			if ( ! ids ) continue;
+			for ( var j = 0; j < ids.length && out.length < 6; j++ ) {
+				var rid = ids[j];
+				if ( seen[rid] ) continue;
+				seen[rid] = 1;
+				var t = PRELOAD.terms[ rid ];
+				if ( t ) out.push({ id: t.id, title: t.title, url: t.url });
+			}
+		}
+		return out;
+	}
+	function fromPreload(id) {
+		if ( ! PRELOAD || ! PRELOAD.terms ) return null;
+		var t = PRELOAD.terms[id];
+		if ( ! t ) return null;
+		return {
+			id:      t.id,
+			title:   t.title,
+			excerpt: t.ex,
+			body:    t.body,
+			url:     t.url,
+			cats:    t.cats,
+			related: getRelated( id, t.cs ),
+		};
+	}
+
 	function openModal(id, url) {
 		modal.hidden = false;
 		document.body.style.overflow = 'hidden';
-		loading.hidden = false;
 		content.hidden = true;
+		loading.hidden = false;
 		fullpageBtn.href = url || '#';
+
+		// 1. 캐시 확인
 		if ( cache[id] ) { render(cache[id]); return; }
+
+		// 2. Preload 데이터 사용 (즉시)
+		var pre = fromPreload(id);
+		if ( pre ) {
+			cache[id] = pre;
+			render(pre);
+			return;
+		}
+
+		// 3. Fallback · AJAX
 		fetch( AJAX + '?action=md_term_get&id=' + encodeURIComponent(id) )
 			.then(function(r){ return r.json(); })
 			.then(function(res){
@@ -234,7 +310,7 @@ if ( function_exists( 'moondental_get_info' ) ) {
 					cache[id] = res.data;
 					render(res.data);
 				} else {
-					articleEl.innerHTML = '<p>정보를 불러오지 못했습니다. 전용 페이지를 확인해주세요.</p>';
+					articleEl.innerHTML = '<p>정보를 불러오지 못했습니다.</p>';
 					loading.hidden = true;
 					content.hidden = false;
 				}
@@ -332,17 +408,7 @@ if ( function_exists( 'moondental_get_info' ) ) {
 			closeModal();
 		}
 	});
-	// v3.44.93 · 카드 hover 시 prefetch (클릭 전 데이터 미리 로드 · 클릭 시 즉시 열림)
-	document.addEventListener('mouseenter', function(e){
-		var card = e.target.closest && e.target.closest('[data-md-enc-modal]');
-		if ( ! card ) return;
-		var id = card.getAttribute('data-md-enc-id');
-		if ( ! id || cache[id] ) return;
-		fetch( AJAX + '?action=md_term_get&id=' + encodeURIComponent(id) )
-			.then(function(r){ return r.json(); })
-			.then(function(res){ if ( res && res.success && res.data ) cache[id] = res.data; })
-			.catch(function(){});
-	}, true);
+	// v3.44.95 · hover prefetch 제거 (preload 로 대체)
 	document.addEventListener('keydown', function(e){
 		if ( e.key === 'Escape' && ! modal.hidden ) closeModal();
 	});

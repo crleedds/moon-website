@@ -266,10 +266,11 @@ if ( ! empty( $cats ) ) {
 }
 ?>
 
-<?php if ( $related ) : ?>
-<!-- 함께 알면 좋은 용어 (pill list) -->
-<section class="md-section md-section--sm">
-	<div class="md-container md-container--narrow">
+<?php if ( $related || $prev_next['prev'] || $prev_next['next'] ) : ?>
+<!-- v3.44.95 · 하단 관련 섹션들 · 컴팩트 레이아웃 (공백 최소) -->
+<div class="md-container md-container--narrow md-term-bottom">
+	<?php if ( $related ) : ?>
+	<div class="md-term-bottom__block">
 		<h2 class="md-term-related-title">🔗 함께 알면 좋은 용어</h2>
 		<div class="md-term-related-pills">
 			<?php foreach ( array_slice( $related, 0, 6 ) as $r ) : ?>
@@ -282,11 +283,8 @@ if ( ! empty( $cats ) ) {
 			<?php endforeach; ?>
 		</div>
 	</div>
-</section>
 
-<!-- 같은 카테고리 카드 그리드 -->
-<section class="md-section md-section--surface md-section--sm">
-	<div class="md-container md-container--narrow">
+	<div class="md-term-bottom__block md-term-bottom__block--samecat">
 		<h2 class="md-term-samecat-title">📂 같은 카테고리<?php if ( ! empty( $cats ) ) echo ': ' . esc_html( $cats[0]->name ); ?></h2>
 		<div class="md-term-samecat-grid">
 			<?php foreach ( array_slice( $related, 0, 8 ) as $r ) : ?>
@@ -297,13 +295,10 @@ if ( ! empty( $cats ) ) {
 			<?php endforeach; ?>
 		</div>
 	</div>
-</section>
-<?php endif; ?>
+	<?php endif; ?>
 
-<?php if ( $prev_next['prev'] || $prev_next['next'] ) : ?>
-<!-- 이전 / 전체 / 다음 네비게이션 -->
-<section class="md-section md-section--sm">
-	<div class="md-container md-container--narrow">
+	<?php if ( $prev_next['prev'] || $prev_next['next'] ) : ?>
+	<div class="md-term-bottom__block">
 		<nav class="md-term-nav" aria-label="이전 다음 용어">
 			<?php if ( $prev_next['prev'] ) : ?>
 				<a class="md-term-nav__prev" href="<?php echo esc_url( $prev_next['prev']['url'] ); ?>">
@@ -318,7 +313,8 @@ if ( ! empty( $cats ) ) {
 			<?php else : ?><span></span><?php endif; ?>
 		</nav>
 	</div>
-</section>
+	<?php endif; ?>
+</div>
 <?php endif; ?>
 
 <?php endwhile; get_footer(); ?>
