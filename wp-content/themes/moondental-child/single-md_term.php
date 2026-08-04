@@ -23,90 +23,82 @@ function moondental_md_term_related_service( $cat_slug ) {
 	return $map[ $cat_slug ] ?? null;
 }
 
-// 카테고리별 공통 FAQ (템플릿에서 자동 표시)
-function moondental_md_term_common_faq( $cat_slug ) {
-	$faqs = array(
-		'implant' => array(
-			array( '임플란트 수명은 얼마나 되나요?',
-			       '평균 10~20년 이상 사용 가능하며, 정기 관리 시 평생 사용도 가능합니다. 흡연·잇몸 관리 소홀은 수명 단축 요인입니다.' ),
-			array( '통증이 심한가요?',
-			       '국소마취 후 진행되어 시술 중 통증은 거의 없습니다. 시술 후 2~3일 둔한 통증은 진통제로 조절 가능합니다.' ),
-			array( '뼈가 부족해도 가능한가요?',
-			       '뼈이식(GBR)·상악동 거상술 등으로 가능합니다. CBCT 3D 진단으로 정확히 판단합니다.' ),
-			array( '당뇨·고혈압이 있어도 되나요?',
-			       '조절된 상태라면 대부분 가능합니다. 혈당·혈압을 진료 전 확인 후 안전하게 진행합니다.' ),
-			array( '수술 후 관리는 어떻게?',
-			       '수술 당일 얼음찜질, 자극적 음식 회피, 처방 약 복용, 정기 소독·검진 필수.' ),
-		),
-		'ortho' => array(
-			array( '성인도 교정 가능한가요?',
-			       '잇몸이 건강하면 50~60대도 가능합니다. 뼈 이동은 나이와 무관.' ),
-			array( '치료 기간은 얼마나?',
-			       '단순 부분교정 6~12개월, 전체 교정 18~30개월. 케이스에 따라 다릅니다.' ),
-			array( '발치 없이 가능한가요?',
-			       '정밀 진단 후 비발치 우선 검토. 부분교정으로 해결 가능한 경우도 많습니다.' ),
-			array( '통증이 심한가요?',
-			       '초기 3~5일 압박감·둔통이 있으나 진통제로 조절됩니다. 이후 익숙해집니다.' ),
-			array( '교정 후 유지장치는?',
-			       '평생 야간 착용 권장. 착용하지 않으면 재발(회귀) 가능성.' ),
-		),
-		'preserve' => array(
-			array( '신경치료 vs 발치 임플란트?',
-			       '자연치아 살릴 수 있으면 무조건 보존이 우선. 신경치료 성공률 높으며 비용·시간 절약.' ),
-			array( '통증이 심한가요?',
-			       '국소마취 하에 진행. 시술 중 통증 거의 없음. 시술 후 2~3일 둔한 통증 가능.' ),
-			array( '몇 번 방문해야 하나요?',
-			       '통상 2~4회. 염증 정도와 근관 복잡도에 따라 달라집니다.' ),
-			array( '치아 크라운 꼭 씌워야?',
-			       '신경 치료 후 치아는 약해져 파절 위험. 크라운 보호 필수.' ),
-			array( '재신경치료 가능한가요?',
-			       '기존 신경치료 실패 케이스도 재근관치료로 자연치 보존 가능. 70~80% 성공률.' ),
-		),
-		'periodontics' => array(
-			array( '스케일링 얼마나 자주?',
-			       '6개월~1년 1회 권장. 잇몸 문제 있으면 3~4개월 1회.' ),
-			array( '잇몸 수술은 언제?',
-			       '중증 치주염(치주낭 5mm+·치조골 흡수)에서 시행. 조직 재생술 병행 가능.' ),
-			array( '잇몸 재생 가능한가요?',
-			       '치조골 흡수 부위 재생술(GBR·GTR) 로 일부 회복 가능.' ),
-			array( '치석 제거 아프나요?',
-			       '표층은 통증 거의 없음. 깊은 치주 SRP 는 마취 하 진행.' ),
-			array( '잇몸 관리 습관은?',
-			       '치실·치간칫솔 매일 사용. 부드러운 칫솔로 45° 각도 회전 브러싱.' ),
-		),
-		'aesthetic' => array(
-			array( '라미네이트 몇 개면 되나요?',
-			       '앞니 6~8개가 표준. 얼굴형·미소선 고려해 결정.' ),
-			array( '치아를 얼마나 삭제하나요?',
-			       '최소 삭제 (0.3~0.5mm). 무삭제 라미네이트도 가능.' ),
-			array( '수명은 얼마나?',
-			       '10~15년 이상. 관리 잘하면 20년+ 가능.' ),
-			array( '변색되나요?',
-			       '세라믹은 변색 거의 없음. 커피·와인은 여전히 주의.' ),
-			array( '떨어질 수 있나요?',
-			       '드물게 접착 실패 가능. 재접착으로 회복.' ),
-		),
-		'surgery' => array(
-			array( '사랑니 꼭 뽑아야?',
-			       '증상·매복 정도·인접치 영향에 따라. CBCT 진단 후 결정.' ),
-			array( '수술 시간은?',
-			       '단순 발치 5~10분, 매복 30~60분. 케이스별 차이.' ),
-			array( '수술 후 관리는?',
-			       '당일 얼음찜질·처방 약 복용. 격한 운동 3일 회피.' ),
-			array( '신경 손상 위험은?',
-			       'CBCT 3D 진단으로 신경 위치 확인 · 위험 최소화.' ),
-			array( '진정 요법 가능한가요?',
-			       '가능. 두려움이 큰 환자분 사전 상담 후 진행.' ),
-		),
+/**
+ * v3.44.91 · 용어별 FAQ 자동 생성 · 본문 h3 섹션에서 파싱
+ *   각 h3 는 하나의 FAQ Q/A 쌍이 됨. Q는 h3 텍스트 기반으로 자연스러운 질문화.
+ */
+function moondental_md_term_generated_faq( $title, $body ) {
+	$faqs = array();
+	// h3 (제목) 다음의 콘텐츠를 다음 h3 전까지 추출
+	if ( ! preg_match_all( '#<h3[^>]*>(.*?)</h3>(.*?)(?=<h3|$)#is', $body, $matches ) ) {
+		return $faqs;
+	}
+	for ( $i = 0; $i < count( $matches[1] ); $i++ ) {
+		$section_title = trim( wp_strip_all_tags( $matches[1][ $i ] ) );
+		$section_body  = trim( $matches[2][ $i ] );
+		if ( ! $section_title || ! $section_body ) continue;
+		// section_title 을 자연 질문화
+		$q = moondental_md_term_faq_question( $title, $section_title );
+		// 답변은 HTML 유지 · 길면 첫 500자로 축약
+		$a_plain = trim( wp_strip_all_tags( $section_body ) );
+		if ( mb_strlen( $a_plain ) > 500 ) {
+			$a_plain = mb_substr( $a_plain, 0, 480 ) . '…';
+		}
+		$faqs[] = array( $q, $a_plain );
+	}
+	// FAQ 가 3개 미만이면 공통 질문 하나 추가
+	if ( count( $faqs ) < 3 ) {
+		$faqs[] = array(
+			$title . ' 관련 상담은 어디서 받을 수 있나요?',
+			'문치과병원에서 ' . $title . ' 관련 정밀 진단과 상담을 받으실 수 있습니다. 온라인 상담 예약 · 카카오톡 채널 · 전화 041-563-2875 로 편하게 문의 가능합니다.'
+		);
+	}
+	return $faqs;
+}
+
+/**
+ * v3.44.91 · h3 섹션 제목 → 자연 질문화
+ */
+function moondental_md_term_faq_question( $title, $section ) {
+	$section = trim( $section );
+	// 알려진 섹션 패턴 매핑
+	$patterns = array(
+		'#^정의$#u'                => $title . '(이)란 무엇인가요?',
+		'#^개념$#u'                => $title . '(이)란 무엇인가요?',
+		'#^원인#u'                 => $title . '의 원인은 무엇인가요?',
+		'#^병인#u'                 => $title . '의 병인은 무엇인가요?',
+		'#^증상#u'                 => $title . '이(가) 있으면 어떤 증상이 나타나나요?',
+		'#^진단#u'                 => $title . '은(는) 어떻게 진단하나요?',
+		'#^검사#u'                 => $title . '은(는) 어떻게 검사하나요?',
+		'#^치료#u'                 => $title . '은(는) 어떻게 치료하나요?',
+		'#^수술#u'                 => $title . ' 수술은 어떻게 진행되나요?',
+		'#^관리#u'                 => $title . ' 후 관리는 어떻게 해야 하나요?',
+		'#^예방#u'                 => $title . '은(는) 어떻게 예방하나요?',
+		'#^주의사항#u'             => $title . ' 관련 주의사항은 무엇인가요?',
+		'#^적응증#u'               => $title . '의 적응증은 무엇인가요?',
+		'#^종류#u'                 => $title . '의 종류에는 어떤 것이 있나요?',
+		'#^분류#u'                 => $title . '은(는) 어떻게 분류되나요?',
+		'#^특징#u'                 => $title . '의 특징은 무엇인가요?',
+		'#^구성#u'                 => $title . '은(는) 무엇으로 구성되어 있나요?',
+		'#^구조#u'                 => $title . '의 구조는 어떻게 되어 있나요?',
+		'#^임상 적용#u'            => $title . '의 임상 적용은 어떻게 되나요?',
+		'#^임상적 의의#u'          => $title . '의 임상적 의의는 무엇인가요?',
+		'#^시술 과정#u'            => $title . ' 시술은 어떻게 진행되나요?',
+		'#^시술#u'                 => $title . ' 시술은 어떻게 진행되나요?',
+		'#^장점#u'                 => $title . '의 장점은 무엇인가요?',
+		'#^단점#u'                 => $title . '의 단점은 무엇인가요?',
+		'#^기능#u'                 => $title . '은(는) 어떤 기능을 하나요?',
+		'#^위치#u'                 => $title . '은(는) 어디에 위치하나요?',
+		'#^역할#u'                 => $title . '의 역할은 무엇인가요?',
+		'#^발달#u'                 => $title . '은(는) 어떻게 발달하나요?',
+		'#^발생#u'                 => $title . '은(는) 왜 발생하나요?',
+		'#^등급#u'                 => $title . '의 등급 분류는 어떻게 되나요?',
 	);
-	return $faqs[ $cat_slug ] ?? array(
-		array( '진료 시간이 어떻게 되나요?',
-		       '월·화·수·금 09:00-20:30 · 목 09:00-18:30 · 토 09:00-14:00 · 일/공휴일 휴진.' ),
-		array( '예약은 어떻게?',
-		       '카카오톡 채널·네이버 예약·전화 041-563-2875 · 홈페이지 상담 예약.' ),
-		array( '주차 가능한가요?',
-		       '본원 지하 기계식 무료 · SUV·대형차는 신부 제5공영주차장(무료 등록).' ),
-	);
+	foreach ( $patterns as $regex => $q ) {
+		if ( preg_match( $regex, $section ) ) return $q;
+	}
+	// fallback: 섹션 제목 그대로 질문화
+	return $title . ' — ' . $section . '?';
 }
 
 while ( have_posts() ) : the_post();
@@ -115,7 +107,8 @@ while ( have_posts() ) : the_post();
 
 	$first_cat_slug = ! empty( $cats ) ? $cats[0]->slug : 'general';
 	$related_service = moondental_md_term_related_service( $first_cat_slug );
-	$common_faqs = moondental_md_term_common_faq( $first_cat_slug );
+	// v3.44.91 · 용어별 FAQ 자동 생성 (본문 h3 파싱)
+	$common_faqs = moondental_md_term_generated_faq( get_the_title(), get_the_content() );
 
 	// 관련 용어 (같은 카테고리 · 6개)
 	$related = array();

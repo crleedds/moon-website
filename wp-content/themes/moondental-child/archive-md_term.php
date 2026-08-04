@@ -134,7 +134,11 @@ $total_count = array_sum( array_map( 'count', $visible_groups ) );
 					<h2 class="md-enc-group__title"><?php echo esc_html( $group ); ?></h2>
 					<div class="md-enc-grid">
 						<?php foreach ( $items as $item ) : ?>
-							<a class="md-enc-card" href="<?php echo esc_url( $item['url'] ); ?>">
+							<a class="md-enc-card"
+							   href="<?php echo esc_url( $item['url'] ); ?>"
+							   data-md-enc-modal="1"
+							   data-md-enc-id="<?php echo esc_attr( $item['id'] ); ?>"
+							   data-md-enc-url="<?php echo esc_url( $item['url'] ); ?>">
 								<h3 class="md-enc-card__title"><?php echo esc_html( $item['title'] ); ?></h3>
 								<p class="md-enc-card__excerpt"><?php echo esc_html( $item['excerpt'] ); ?></p>
 								<?php if ( ! empty( $item['cats'] ) && ! is_wp_error( $item['cats'] ) ) : ?>
@@ -153,6 +157,113 @@ $total_count = array_sum( array_map( 'count', $visible_groups ) );
 
 	</div>
 </section>
+
+<!-- v3.44.91 · 백과사전 모달 팝업 · 카드 클릭 시 열림 -->
+<div class="md-enc-modal" id="md-enc-modal" role="dialog" aria-modal="true" aria-labelledby="md-enc-modal-title" hidden>
+	<div class="md-enc-modal__backdrop" data-md-enc-close></div>
+	<div class="md-enc-modal__panel" role="document">
+		<button type="button" class="md-enc-modal__close" data-md-enc-close aria-label="닫기">×</button>
+		<div class="md-enc-modal__body">
+			<div class="md-enc-modal__loading" data-md-enc-loading>
+				<p>불러오는 중...</p>
+			</div>
+			<div class="md-enc-modal__content" data-md-enc-content hidden>
+				<div class="md-enc-modal__cats" data-md-enc-cats></div>
+				<h2 class="md-enc-modal__title" id="md-enc-modal-title" data-md-enc-title></h2>
+				<div class="md-enc-modal__excerpt" data-md-enc-excerpt></div>
+				<div class="md-enc-modal__article" data-md-enc-article></div>
+				<div class="md-enc-modal__link-full">
+					<a class="md-enc-modal__link-full-btn" data-md-enc-fullpage href="#">🔗 이 용어 전용 페이지 보기 →</a>
+				</div>
+			</div>
+		</div>
+		<div class="md-enc-modal__actions">
+			<a class="md-btn md-btn-primary" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>">🗓️ 상담 예약</a>
+			<a class="md-btn md-btn-ghost" href="tel:041-563-2875">📞 전화 문의</a>
+		</div>
+	</div>
+</div>
+
+<script>
+(function(){
+	var AJAX = '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>';
+	var modal = document.getElementById('md-enc-modal');
+	if ( ! modal ) return;
+	var loading = modal.querySelector('[data-md-enc-loading]');
+	var content = modal.querySelector('[data-md-enc-content]');
+	var titleEl = modal.querySelector('[data-md-enc-title]');
+	var excerptEl = modal.querySelector('[data-md-enc-excerpt]');
+	var articleEl = modal.querySelector('[data-md-enc-article]');
+	var catsEl = modal.querySelector('[data-md-enc-cats]');
+	var fullpageBtn = modal.querySelector('[data-md-enc-fullpage]');
+	var cache = {};
+
+	function openModal(id, url) {
+		modal.hidden = false;
+		document.body.style.overflow = 'hidden';
+		loading.hidden = false;
+		content.hidden = true;
+		fullpageBtn.href = url || '#';
+		if ( cache[id] ) { render(cache[id]); return; }
+		fetch( AJAX + '?action=md_term_get&id=' + encodeURIComponent(id) )
+			.then(function(r){ return r.json(); })
+			.then(function(res){
+				if ( res && res.success && res.data ) {
+					cache[id] = res.data;
+					render(res.data);
+				} else {
+					articleEl.innerHTML = '<p>정보를 불러오지 못했습니다. 전용 페이지를 확인해주세요.</p>';
+					loading.hidden = true;
+					content.hidden = false;
+				}
+			})
+			.catch(function(){
+				articleEl.innerHTML = '<p>정보를 불러오지 못했습니다.</p>';
+				loading.hidden = true;
+				content.hidden = false;
+			});
+	}
+	function render(data) {
+		titleEl.textContent = data.title || '';
+		excerptEl.textContent = data.excerpt || '';
+		articleEl.innerHTML = data.body || '';
+		catsEl.innerHTML = '';
+		if ( data.cats && data.cats.length ) {
+			data.cats.forEach(function(c){
+				var s = document.createElement('span');
+				s.className = 'md-enc-modal__cat';
+				s.textContent = c.name;
+				catsEl.appendChild(s);
+			});
+		}
+		fullpageBtn.href = data.url || '#';
+		loading.hidden = true;
+		content.hidden = false;
+	}
+	function closeModal() {
+		modal.hidden = true;
+		document.body.style.overflow = '';
+	}
+
+	document.addEventListener('click', function(e){
+		var card = e.target.closest('[data-md-enc-modal]');
+		if ( card ) {
+			e.preventDefault();
+			var id = card.getAttribute('data-md-enc-id');
+			var url = card.getAttribute('data-md-enc-url');
+			openModal(id, url);
+			return;
+		}
+		if ( e.target.closest('[data-md-enc-close]') ) {
+			e.preventDefault();
+			closeModal();
+		}
+	});
+	document.addEventListener('keydown', function(e){
+		if ( e.key === 'Escape' && ! modal.hidden ) closeModal();
+	});
+})();
+</script>
 
 <?php get_template_part( 'template-parts/section', 'cta' ); ?>
 

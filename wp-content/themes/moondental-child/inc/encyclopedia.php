@@ -144,6 +144,33 @@ add_action( 'wp_loaded',  'moondental_seed_encyclopedia_categories_v3488', 20 );
  *  전체 기존 md_term 휴지통 이동 후 신규 900개 삽입
  *  파일이 존재하고 아직 실행 안 됐을 때만 동작
  */
+/**
+ * v3.44.91 · AJAX 엔드포인트 · 용어 데이터 반환 (모달용)
+ */
+add_action( 'wp_ajax_md_term_get',        'moondental_ajax_md_term_get' );
+add_action( 'wp_ajax_nopriv_md_term_get', 'moondental_ajax_md_term_get' );
+function moondental_ajax_md_term_get() {
+	$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
+	if ( ! $id ) { wp_send_json_error( array( 'msg' => 'no id' ), 400 ); }
+	$post = get_post( $id );
+	if ( ! $post || $post->post_type !== 'md_term' || $post->post_status !== 'publish' ) {
+		wp_send_json_error( array( 'msg' => 'not found' ), 404 );
+	}
+	$cats = get_the_terms( $id, 'md_term_category' );
+	$cats_out = array();
+	if ( is_array( $cats ) ) {
+		foreach ( $cats as $c ) $cats_out[] = array( 'name' => $c->name, 'slug' => $c->slug );
+	}
+	wp_send_json_success( array(
+		'id'      => $id,
+		'title'   => $post->post_title,
+		'excerpt' => $post->post_excerpt,
+		'body'    => apply_filters( 'the_content', $post->post_content ),
+		'url'     => get_permalink( $post ),
+		'cats'    => $cats_out,
+	) );
+}
+
 function moondental_seed_encyclopedia_v3488() {
 	// v3.44.90 · 재시도 · SQL 직접 삭제 (wp_delete_post 는 5000+ 포스트 처리 시 timeout)
 	if ( get_option( 'moondental_encyclopedia_seed_v3490' ) === 'done' ) return;
