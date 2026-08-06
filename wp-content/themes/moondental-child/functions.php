@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.101' );
+define( 'MOONDENTAL_VERSION', '3.44.102' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -463,7 +463,7 @@ add_action( 'template_redirect', function () {
 	}
 
 	// v3.44.101 · 삭제된 옛 백과사전 SEO 스팸 URL · 410 Gone 응답
-	// (구글이 인덱스에서 빠르게 제거하도록 · 404보다 강력한 시그널)
+	// v3.44.102 · X-Robots-Tag HTTP 헤더 추가 · 완전한 검색 제외 (강화)
 	$dead_encyclopedia_slugs = array(
 		'천안-치과병원', '천안치과병원', '천안-치과', '천안치과',
 		'아산-치과병원', '아산치과병원', '아산-치과', '아산치과',
@@ -475,12 +475,32 @@ add_action( 'template_redirect', function () {
 		if ( preg_match( '#^/치과사전/' . preg_quote( $dead_slug, '#' ) . '/?$#u', $path_decoded ) ) {
 			status_header( 410 );
 			nocache_headers();
+			// v3.44.102 · HTTP 헤더 · noindex,nofollow (모든 검색엔진에 인덱싱 금지 신호)
+			header( 'X-Robots-Tag: noindex, nofollow, noarchive, nosnippet', true );
 			header( 'Content-Type: text/html; charset=UTF-8' );
-			echo '<!doctype html><html lang="ko"><head><meta charset="UTF-8"><title>410 Gone · 삭제된 페이지</title><meta name="robots" content="noindex,nofollow"></head><body style="font-family:sans-serif;text-align:center;padding:60px 20px;"><h1>410 Gone</h1><p>이 페이지는 영구적으로 삭제되었습니다.</p><p><a href="' . esc_url( home_url( '/치과사전/' ) ) . '">치과 백과사전으로 이동</a> · <a href="' . esc_url( home_url( '/' ) ) . '">홈으로 이동</a></p></body></html>';
+			echo '<!doctype html><html lang="ko"><head><meta charset="UTF-8"><title>410 Gone · 삭제된 페이지</title><meta name="robots" content="noindex,nofollow,noarchive,nosnippet"></head><body style="font-family:sans-serif;text-align:center;padding:60px 20px;"><h1>410 Gone</h1><p>이 페이지는 영구적으로 삭제되었습니다.</p><p><a href="' . esc_url( home_url( '/치과사전/' ) ) . '">치과 백과사전으로 이동</a> · <a href="' . esc_url( home_url( '/' ) ) . '">홈으로 이동</a></p></body></html>';
 			exit;
 		}
 	}
 }, 1 );
+
+/* v3.44.102 · robots.txt Disallow · 삭제된 스팸 URL 크롤링 자체 차단 */
+add_filter( 'robots_txt', function( $output, $public ) {
+	if ( ! $public ) return $output;
+	$dead_slugs = array(
+		'천안-치과병원', '천안치과병원', '천안-치과', '천안치과',
+		'아산-치과병원', '아산치과병원', '아산-치과', '아산치과',
+		'천안-임플란트', '천안임플란트', '아산-임플란트', '아산임플란트',
+		'천안-교정', '아산-교정', '천안-소아치과', '아산-소아치과',
+		'천안-치과-추천', '아산-치과-추천', '천안치과추천', '아산치과추천',
+	);
+	$block = "\n# START MOONDENTAL BLOCK · 삭제된 스팸 URL 크롤링 차단\nUser-agent: *\n";
+	foreach ( $dead_slugs as $s ) {
+		$block .= "Disallow: /치과사전/" . $s . "/\n";
+	}
+	$block .= "# END MOONDENTAL BLOCK\n";
+	return $output . $block;
+}, 10, 2 );
 
 /* 일회성 마이그레이션 v3.44.101 · 옛 백과사전 SEO 스팸 md_term 강제 삭제
  * (v3.44.88 개편 이전에 남아있을 수 있는 지역명 조합 슬러그 정리) */
