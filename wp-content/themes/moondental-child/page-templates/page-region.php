@@ -128,6 +128,42 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 	</div>
 </section>
 
+<!-- ============ 0. 치료 키워드 SEO 섹션 (v3.44.103) ============ -->
+<section class="md-section md-section--sm md-region-keywords">
+	<div class="md-container">
+		<header class="md-section-head">
+			<h2 class="md-section-head__title"><?php echo esc_html( $region_name ); ?>에서 임플란트·교정·자연치아 살리기 잘하는 곳</h2>
+			<p class="md-section-head__lead">
+				<?php echo esc_html( $region_name ); ?> 환자분들이 <?php echo esc_html( $duration ); ?>분 거리 천안 문치과병원을 선택하시는 이유입니다.
+				<?php echo esc_html( $province ); ?> <?php echo esc_html( $region_long ); ?>에서 전문 진료과 협진이 필요할 때 30년 진료 문치과병원을 찾아주세요.
+			</p>
+		</header>
+		<div class="md-region-tk-grid">
+			<article class="md-region-tk-card">
+				<h3><?php echo esc_html( $region_name ); ?>에서 임플란트 잘하는 치과</h3>
+				<p>CBCT 3D 정밀 진단·네비게이션 가이드 임플란트로 <?php echo esc_html( $region_name ); ?>에서 오시는 환자분께 정확·안전한 식립. 30년 임상 노하우 임플란트 센터 운영.</p>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/임플란트-센터/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 임플란트 자세히 →</a>
+			</article>
+			<article class="md-region-tk-card">
+				<h3><?php echo esc_html( $region_name ); ?>에서 투명교정 잘하는 치과</h3>
+				<p>슈어스마일 투명교정 중부권 센터·PrimeScan 구강스캐너·3D 시뮬레이션. <?php echo esc_html( $region_name ); ?> 성인·직장인 환자 맞춤 교정 계획.</p>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/투명교정-센터/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 투명교정 자세히 →</a>
+			</article>
+			<article class="md-region-tk-card">
+				<h3><?php echo esc_html( $region_name ); ?>에서 자연치아 살리기</h3>
+				<p>발치 전 마지막 상담. 미세 현미경 신경치료·치주치료·치수복조술로 <?php echo esc_html( $region_name ); ?> 환자분의 자연치아를 살립니다.</p>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/자연치아-살리기/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 자연치아 살리기 →</a>
+			</article>
+			<article class="md-region-tk-card">
+				<h3><?php echo esc_html( $region_name ); ?>에서 사랑니 발치·심미치료</h3>
+				<p>CT 3D로 신경·매복 정밀 확인 안전한 사랑니 발치. 라미네이트·전문가 미백·스마일 디자인 센터 (10F) 운영. <?php echo esc_html( $region_name ); ?>에서 오시는 환자분 편리하게.</p>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/사랑니-발치/' ) ); ?>">사랑니 발치</a>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/심미치료/' ) ); ?>">심미치료</a>
+			</article>
+		</div>
+	</div>
+</section>
+
 <!-- ============ 1. 교통 안내 ============ -->
 <section class="md-section md-section--surface">
 	<div class="md-container">

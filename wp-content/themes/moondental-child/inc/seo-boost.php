@@ -126,6 +126,7 @@ function moondental_seo_current_key() {
 
 /**
  * v3.44.76 · 지역 페이지 SEO 타이틀·설명 동적 생성 ('{region} 추천치과' 키워드 강제 포함)
+ * v3.44.103 · 강화 · '{region} 임플란트 잘하는 곳' 등 치료 키워드 명시적 포함
  */
 function moondental_seo_region_data( $key ) {
 	if ( strpos( $key, '_region:' ) !== 0 ) return null;
@@ -136,9 +137,9 @@ function moondental_seo_region_data( $key ) {
 	$name = $region['name'];
 	$duration = isset( $region['duration_min'] ) ? (int) $region['duration_min'] : 0;
 	return array(
-		'title' => sprintf( '%s 추천 치과 · 임플란트·교정·자연치아 - 문치과병원 (%d분)', $name, $duration ),
+		'title' => sprintf( '%s 임플란트·교정 잘하는 곳 · 추천 치과 문치과병원 · 천안 %d분', $name, $duration ),
 		'desc'  => sprintf(
-			'%s 추천 치과 문치과병원. %s에서 만남로 문타워까지 %d분. 임플란트·투명교정·자연치아 살리기·심미치료 진료과 협진. 상담 041-563-2875.',
+			'%s 임플란트·투명교정·자연치아 살리기 잘하는 곳 문치과병원. %s에서 천안 만남로 문타워 %d분. 30년 진료·CBCT·네비게이션 임플란트·슈어스마일 교정. 상담 041-563-2875.',
 			$name, $name, $duration
 		),
 	);
@@ -442,7 +443,85 @@ function moondental_seo_extra_keywords() {
 		'예방클리닉'            => '천안·아산 스케일링, 정기 검진, 실란트, 불소도포, 홈케어',
 		'치과 백과사전'              => '치과 사전, 치과 용어, 치과 백과, 치과 정보, 치과 질환, 치과 치료',
 	);
+	// v3.44.103 · 지역 페이지 · 지역명 + 치료 키워드 조합
+	$region_extra = '';
+	if ( strpos( $key, '_region:' ) === 0 && function_exists( 'moondental_get_region_by_slug' ) ) {
+		$rslug = substr( $key, 8 );
+		$r = moondental_get_region_by_slug( $rslug );
+		if ( $r ) {
+			$n = $r['name'];
+			$region_extra = sprintf(
+				', %s 임플란트, %s 임플란트 잘하는 곳, %s 치과, %s 치과 추천, %s 투명교정, %s 교정, %s 치아교정, %s 사랑니, %s 라미네이트, %s 자연치아 살리기, %s 스케일링, %s 소아치과, %s 치과병원',
+				$n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n
+			);
+		}
+	}
 	$extra = isset( $per_page[ $key ] ) ? ', ' . $per_page[ $key ] : '';
-	echo '<meta name="keywords" content="' . esc_attr( $base . $extra ) . '" />' . "\n";
+	echo '<meta name="keywords" content="' . esc_attr( $base . $extra . $region_extra ) . '" />' . "\n";
 }
 add_action( 'wp_head', 'moondental_seo_extra_keywords', 3 );
+
+/**
+ * v3.44.103 · Dentist 스키마에 areaServed (진료 지역 배열) 추가 · 지역 SEO 강화
+ *   Google이 "이 병원은 {지역명} 환자를 진료한다"고 명시적으로 인식하게 함.
+ *   홈페이지·지역 페이지·주요 진료 페이지에 노출.
+ */
+function moondental_jsonld_area_served() {
+	if ( is_admin() ) return;
+	if ( ! function_exists( 'moondental_get_regions_by_province' ) ) return;
+	if ( ! ( is_front_page() || is_page( '오시는-길' ) || is_page( '의료진' ) || is_page( '임플란트-센터' ) || is_page( '투명교정-센터' ) || is_page( '자연치아-살리기' ) || ( function_exists( 'get_query_var' ) && get_query_var( 'region_slug' ) ) ) ) {
+		return;
+	}
+	$provinces = moondental_get_regions_by_province();
+	$area_served = array();
+	$medical_specialty = array( '임플란트', '치아교정', '투명교정', '자연치아 살리기', '신경치료', '치주치료', '라미네이트', '심미치료', '사랑니 발치', '턱관절 치료', '소아치과', '예방치과' );
+	foreach ( $provinces as $prov => $regions ) {
+		foreach ( $regions as $r ) {
+			$area_served[] = array(
+				'@type'          => 'City',
+				'name'           => $r['name_long'],
+				'containedInPlace' => array(
+					'@type' => 'AdministrativeArea',
+					'name'  => $prov,
+				),
+			);
+		}
+	}
+	$schema = array(
+		'@context'            => 'https://schema.org',
+		'@type'               => 'Dentist',
+		'name'                => '한아의료재단 문치과병원',
+		'alternateName'       => array( '문치과병원', 'Moon Dental Hospital' ),
+		'url'                 => home_url( '/' ),
+		'telephone'           => '+82-41-563-2875',
+		'address'             => array(
+			'@type'           => 'PostalAddress',
+			'streetAddress'   => '만남로 52 문타워 9·10·11·13층',
+			'addressLocality' => '천안시 동남구',
+			'addressRegion'   => '충청남도',
+			'postalCode'      => '31159',
+			'addressCountry'  => 'KR',
+		),
+		'geo'                 => array(
+			'@type'     => 'GeoCoordinates',
+			'latitude'  => 36.816,
+			'longitude' => 127.152,
+		),
+		'areaServed'          => $area_served,
+		'medicalSpecialty'    => $medical_specialty,
+		'availableService'    => array(
+			array( '@type' => 'MedicalProcedure', 'name' => '임플란트', 'procedureType' => 'https://schema.org/SurgicalProcedure' ),
+			array( '@type' => 'MedicalProcedure', 'name' => '투명교정 · 슈어스마일', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
+			array( '@type' => 'MedicalProcedure', 'name' => '치아교정 · 브라켓', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
+			array( '@type' => 'MedicalProcedure', 'name' => '자연치아 살리기 · 신경치료', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
+			array( '@type' => 'MedicalProcedure', 'name' => '사랑니 발치', 'procedureType' => 'https://schema.org/SurgicalProcedure' ),
+			array( '@type' => 'MedicalProcedure', 'name' => '라미네이트 · 심미치료', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
+			array( '@type' => 'MedicalProcedure', 'name' => '턱관절 클리닉', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
+			array( '@type' => 'MedicalProcedure', 'name' => '소아치과', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
+		),
+	);
+	echo "\n<script type=\"application/ld+json\">\n";
+	echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+	echo "\n</script>\n";
+}
+add_action( 'wp_head', 'moondental_jsonld_area_served', 53 );
