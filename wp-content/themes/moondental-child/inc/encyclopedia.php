@@ -364,6 +364,76 @@ add_action( 'wp_loaded',  'moondental_seed_encyclopedia_v3488', 40 );
 // v3.37.0 · 마이그레이션은 admin_init로 (프론트 요청마다 get_option 호출 방지 + 관리자 컨텍스트에서만 실행)
 add_action( 'admin_init', 'moondental_seed_encyclopedia_categories', 20 );
 
+/**
+ * v3.44.109 · 백과사전 확장 · 163개 신규 용어 APPEND
+ *   기존 190개 (v3488) 유지 + 신규 삽입만 수행 (delete 없음)
+ *   중복 title 체크 후 존재하지 않는 것만 insert
+ */
+function moondental_seed_encyclopedia_v34109() {
+	if ( get_option( 'moondental_encyclopedia_seed_v34109' ) === 'done' ) return;
+	$seed_file = MOONDENTAL_DIR . '/inc/encyclopedia-seed-v34109.php';
+	if ( ! file_exists( $seed_file ) ) return;
+
+	moondental_seed_encyclopedia_categories_v3488();
+
+	$terms = require $seed_file;
+	if ( ! is_array( $terms ) || empty( $terms ) ) return;
+
+	global $wpdb;
+
+	// 기존 md_term title 목록 (중복 방지)
+	$existing_titles = $wpdb->get_col( "SELECT post_title FROM {$wpdb->posts} WHERE post_type = 'md_term' AND post_status = 'publish'" );
+	$existing_set = array();
+	foreach ( (array) $existing_titles as $t ) $existing_set[ trim( (string) $t ) ] = true;
+
+	$inserted = 0;
+	$skipped_dup = 0;
+
+	foreach ( $terms as $t ) {
+		if ( empty( $t['title'] ) || empty( $t['body'] ) ) continue;
+		$title = trim( (string) $t['title'] );
+		if ( isset( $existing_set[ $title ] ) ) {
+			$skipped_dup++;
+			continue;
+		}
+		$post_id = wp_insert_post( array(
+			'post_type'    => 'md_term',
+			'post_status'  => 'publish',
+			'post_title'   => $title,
+			'post_excerpt' => $t['excerpt'] ?? '',
+			'post_content' => $t['body'],
+		) );
+		if ( $post_id && ! is_wp_error( $post_id ) ) {
+			if ( ! empty( $t['cat'] ) ) {
+				$term = get_term_by( 'slug', $t['cat'], 'md_term_category' );
+				if ( $term ) {
+					wp_set_object_terms( $post_id, array( $term->term_id ), 'md_term_category' );
+				}
+			}
+			$existing_set[ $title ] = true;
+			$inserted++;
+		}
+	}
+
+	// 카테고리 count 캐시 재계산
+	if ( function_exists( 'wp_update_term_count' ) ) {
+		$all_cats = get_terms( array( 'taxonomy' => 'md_term_category', 'hide_empty' => false, 'fields' => 'ids' ) );
+		if ( is_array( $all_cats ) ) {
+			wp_update_term_count( $all_cats, 'md_term_category', true );
+		}
+	}
+
+	// AJAX transient 캐시 무효화
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_md\\_term\\_json\\_%' OR option_name LIKE '\\_transient\\_timeout\\_md\\_term\\_json\\_%'" );
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_md\\_terms\\_all\\_%' OR option_name LIKE '\\_transient\\_timeout\\_md\\_terms\\_all\\_%'" );
+
+	update_option( 'moondental_encyclopedia_seed_v34109', 'done' );
+	update_option( 'moondental_encyclopedia_seed_v34109_count', $inserted, false );
+	update_option( 'moondental_encyclopedia_seed_v34109_skipped', $skipped_dup, false );
+}
+add_action( 'admin_init', 'moondental_seed_encyclopedia_v34109', 45 );
+add_action( 'wp_loaded',  'moondental_seed_encyclopedia_v34109', 45 );
+
 
 /* ============================================================
  * 3. 초성 헬퍼 · 한글 초성 추출 (아카이브 필터용)
