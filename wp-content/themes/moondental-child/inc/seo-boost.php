@@ -128,6 +128,7 @@ function moondental_seo_current_key() {
  * v3.44.76 · 지역 페이지 SEO 타이틀·설명 동적 생성 ('{region} 추천치과' 키워드 강제 포함)
  * v3.44.103 · 강화 · '{region} 임플란트 잘하는 곳' 등 치료 키워드 명시적 포함
  * v3.44.104 · 실제 검색 빈도 높은 키워드로 재정비 (충치·신경치료·잇몸치료·사랑니·라미네이트·소아치과·턱관절)
+ * v3.44.105 · '{region} {치료} 추천' 패턴 명시 추가
  */
 function moondental_seo_region_data( $key ) {
 	if ( strpos( $key, '_region:' ) !== 0 ) return null;
@@ -138,9 +139,9 @@ function moondental_seo_region_data( $key ) {
 	$name = $region['name'];
 	$duration = isset( $region['duration_min'] ) ? (int) $region['duration_min'] : 0;
 	return array(
-		'title' => sprintf( '%s 임플란트·충치·잇몸치료 잘하는 곳 · 문치과병원 · 천안 %d분', $name, $duration ),
+		'title' => sprintf( '%s 임플란트·충치·잇몸치료 추천 · 잘하는 치과 문치과병원 · 천안 %d분', $name, $duration ),
 		'desc'  => sprintf(
-			'%s 임플란트·충치·신경치료·잇몸치료·사랑니·라미네이트·소아치과·턱관절 잘하는 곳 문치과병원. %s에서 천안 만남로 문타워 %d분. 30년 진료·CBCT·네비게이션 임플란트. 상담 041-563-2875.',
+			'%s 임플란트·충치·신경치료·잇몸치료·사랑니·라미네이트·소아치과·턱관절 추천 문치과병원. %s에서 천안 만남로 문타워 %d분. 30년 진료·CBCT·네비게이션 임플란트 · 잘하는 곳 추천. 상담 041-563-2875.',
 			$name, $name, $duration
 		),
 	);
@@ -446,16 +447,28 @@ function moondental_seo_extra_keywords() {
 	);
 	// v3.44.103 · 지역 페이지 · 지역명 + 치료 키워드 조합
 	// v3.44.104 · 실제 검색 빈도 높은 키워드 위주로 재편 (충치·신경치료·잇몸치료·사랑니·소아치과·턱관절 등)
+	// v3.44.105 · '{region} {치료} 추천' 패턴 명시 추가 (검색 유형 4종: {치료}, {치료} 추천, {치료} 잘하는 곳, {치료} 잘하는 치과)
 	$region_extra = '';
 	if ( strpos( $key, '_region:' ) === 0 && function_exists( 'moondental_get_region_by_slug' ) ) {
 		$rslug = substr( $key, 8 );
 		$r = moondental_get_region_by_slug( $rslug );
 		if ( $r ) {
 			$n = $r['name'];
-			$region_extra = sprintf(
-				', %s 임플란트, %s 임플란트 잘하는 곳, %s 치과, %s 치과 추천, %s 충치치료, %s 신경치료, %s 잇몸치료, %s 치주치료, %s 사랑니, %s 사랑니 발치, %s 라미네이트, %s 치아미백, %s 심미치료, %s 치아교정, %s 투명교정, %s 소아치과, %s 어린이 치과, %s 턱관절, %s 이갈이, %s 스케일링, %s 치과병원',
-				$n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n
+			$treatments = array(
+				'임플란트', '충치치료', '신경치료', '잇몸치료', '치주치료',
+				'사랑니', '사랑니 발치', '라미네이트', '치아미백', '심미치료',
+				'치아교정', '투명교정', '소아치과', '어린이 치과',
+				'턱관절', '이갈이', '스케일링', '치과',
 			);
+			$parts = array();
+			foreach ( $treatments as $t ) {
+				$parts[] = sprintf( '%s %s', $n, $t );
+				$parts[] = sprintf( '%s %s 추천', $n, $t );
+				$parts[] = sprintf( '%s %s 잘하는 곳', $n, $t );
+			}
+			$parts[] = sprintf( '%s 치과 추천', $n );
+			$parts[] = sprintf( '%s 치과병원', $n );
+			$region_extra = ', ' . implode( ', ', $parts );
 		}
 	}
 	$extra = isset( $per_page[ $key ] ) ? ', ' . $per_page[ $key ] : '';

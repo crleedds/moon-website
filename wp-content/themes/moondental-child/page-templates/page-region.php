@@ -128,56 +128,56 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 	</div>
 </section>
 
-<!-- ============ 0. 치료 키워드 SEO 섹션 (v3.44.103 · v3.44.104 재편) ============ -->
+<!-- ============ 0. 치료 키워드 SEO 섹션 (v3.44.103 · v3.44.104 재편 · v3.44.105 '추천' 명시) ============ -->
 <section class="md-section md-section--sm md-region-keywords">
 	<div class="md-container">
 		<header class="md-section-head">
-			<h2 class="md-section-head__title"><?php echo esc_html( $region_name ); ?>에서 임플란트·충치·잇몸치료 잘하는 치과</h2>
+			<h2 class="md-section-head__title"><?php echo esc_html( $region_name ); ?> 임플란트·충치·잇몸치료 추천 · 잘하는 치과</h2>
 			<p class="md-section-head__lead">
-				<?php echo esc_html( $region_name ); ?> 환자분들이 <?php echo esc_html( $duration ); ?>분 거리 천안 문치과병원을 선택하시는 이유입니다.
+				<?php echo esc_html( $region_name ); ?> 환자분들이 <?php echo esc_html( $duration ); ?>분 거리 천안 문치과병원을 추천 치과로 선택하시는 이유입니다.
 				<?php echo esc_html( $province ); ?> <?php echo esc_html( $region_long ); ?>에서 임플란트·충치·신경치료·잇몸치료·사랑니·라미네이트·소아치과·턱관절 전문 진료과 협진이 필요할 때 30년 진료 문치과병원을 찾아주세요.
 			</p>
 		</header>
 		<div class="md-region-tk-grid">
 			<article class="md-region-tk-card">
-				<h3><?php echo esc_html( $region_name ); ?> 임플란트 잘하는 치과</h3>
-				<p>CBCT 3D 정밀 진단·네비게이션 가이드 임플란트로 <?php echo esc_html( $region_name ); ?>에서 오시는 환자분께 정확·안전한 식립. 30년 임상 노하우 임플란트 센터 운영.</p>
-				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/임플란트-센터/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 임플란트 자세히 →</a>
+				<h3><?php echo esc_html( $region_name ); ?> 임플란트 추천 · 잘하는 치과</h3>
+				<p>CBCT 3D 정밀 진단·네비게이션 가이드 임플란트로 <?php echo esc_html( $region_name ); ?>에서 오시는 환자분께 정확·안전한 식립. 30년 임상 노하우 임플란트 센터 · <?php echo esc_html( $region_name ); ?> 임플란트 추천 문치과병원.</p>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/임플란트-센터/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 임플란트 추천 자세히 →</a>
 			</article>
 			<article class="md-region-tk-card">
-				<h3><?php echo esc_html( $region_name ); ?> 충치치료·신경치료 잘하는 치과</h3>
-				<p>미세 현미경 정밀 신경치료·치수복조술로 최대한 발치 없이 자연치아 보존. <?php echo esc_html( $region_name ); ?> 환자분 재신경치료·크라운까지 원스톱.</p>
-				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/자연치아-살리기/' ) ); ?>">충치·신경치료 자세히 →</a>
+				<h3><?php echo esc_html( $region_name ); ?> 충치치료·신경치료 추천 · 잘하는 치과</h3>
+				<p>미세 현미경 정밀 신경치료·치수복조술로 최대한 발치 없이 자연치아 보존. <?php echo esc_html( $region_name ); ?> 환자분 재신경치료·크라운까지 원스톱 · <?php echo esc_html( $region_name ); ?> 충치치료 추천 문치과병원.</p>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/자연치아-살리기/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 충치·신경치료 추천 →</a>
 			</article>
 			<article class="md-region-tk-card">
-				<h3><?php echo esc_html( $region_name ); ?> 잇몸치료·치주치료 잘하는 치과</h3>
-				<p>스케일링·잇몸 소파술·치주 수술까지 잇몸 상태에 따른 단계별 치료. <?php echo esc_html( $region_name ); ?>에서 정기 검진·치주 관리 원스톱.</p>
-				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/자연치아-살리기/' ) ); ?>">잇몸·치주치료 자세히 →</a>
+				<h3><?php echo esc_html( $region_name ); ?> 잇몸치료·치주치료 추천 · 잘하는 치과</h3>
+				<p>스케일링·잇몸 소파술·치주 수술까지 잇몸 상태에 따른 단계별 치료. <?php echo esc_html( $region_name ); ?>에서 정기 검진·치주 관리 원스톱 · <?php echo esc_html( $region_name ); ?> 잇몸치료 추천 문치과병원.</p>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/자연치아-살리기/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 잇몸·치주치료 추천 →</a>
 			</article>
 			<article class="md-region-tk-card">
-				<h3><?php echo esc_html( $region_name ); ?> 사랑니 발치 잘하는 치과</h3>
-				<p>CT 3D로 신경·매복 정밀 확인 후 안전한 사랑니 발치. <?php echo esc_html( $region_name ); ?> 환자분 매복 사랑니·부분 마취·진정 마취 옵션 제공.</p>
-				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/사랑니-발치/' ) ); ?>">사랑니 발치 자세히 →</a>
+				<h3><?php echo esc_html( $region_name ); ?> 사랑니 발치 추천 · 잘하는 치과</h3>
+				<p>CT 3D로 신경·매복 정밀 확인 후 안전한 사랑니 발치. <?php echo esc_html( $region_name ); ?> 환자분 매복 사랑니·부분 마취·진정 마취 옵션 · <?php echo esc_html( $region_name ); ?> 사랑니 추천 문치과병원.</p>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/사랑니-발치/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 사랑니 발치 추천 →</a>
 			</article>
 			<article class="md-region-tk-card">
-				<h3><?php echo esc_html( $region_name ); ?> 라미네이트·치아미백 잘하는 치과</h3>
-				<p>스마일 디자인 센터 (10F) 라미네이트·전문가 치아미백·심미 크라운·세라믹. <?php echo esc_html( $region_name ); ?>에서 오시는 성인·직장인 환자 자연스러운 미소 설계.</p>
-				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/심미치료/' ) ); ?>">라미네이트·미백 자세히 →</a>
+				<h3><?php echo esc_html( $region_name ); ?> 라미네이트·치아미백 추천 · 잘하는 치과</h3>
+				<p>스마일 디자인 센터 (10F) 라미네이트·전문가 치아미백·심미 크라운·세라믹. <?php echo esc_html( $region_name ); ?>에서 오시는 성인·직장인 환자 자연스러운 미소 설계 · <?php echo esc_html( $region_name ); ?> 라미네이트 추천 문치과병원.</p>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/심미치료/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 라미네이트·미백 추천 →</a>
 			</article>
 			<article class="md-region-tk-card">
-				<h3><?php echo esc_html( $region_name ); ?> 소아치과·어린이 치과</h3>
-				<p>어린이 눈높이 진료·실란트·불소도포·소아 교정 상담. <?php echo esc_html( $region_name ); ?> 부모님과 아이 모두 안심하고 진료받는 소아치과.</p>
-				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/예방클리닉/' ) ); ?>">소아치과 자세히 →</a>
+				<h3><?php echo esc_html( $region_name ); ?> 소아치과·어린이 치과 추천</h3>
+				<p>어린이 눈높이 진료·실란트·불소도포·소아 교정 상담. <?php echo esc_html( $region_name ); ?> 부모님과 아이 모두 안심하고 진료받는 소아치과 · <?php echo esc_html( $region_name ); ?> 어린이 치과 추천 문치과병원.</p>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/예방클리닉/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 소아치과 추천 →</a>
 			</article>
 			<article class="md-region-tk-card">
-				<h3><?php echo esc_html( $region_name ); ?> 턱관절·이갈이 클리닉</h3>
-				<p>턱관절 통증·이갈이·안면 근막통·스플린트 치료. 방사선 검사와 근전도 진단으로 <?php echo esc_html( $region_name ); ?> 환자분 정밀 치료.</p>
-				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/턱관절-클리닉/' ) ); ?>">턱관절·이갈이 자세히 →</a>
+				<h3><?php echo esc_html( $region_name ); ?> 턱관절·이갈이 클리닉 추천</h3>
+				<p>턱관절 통증·이갈이·안면 근막통·스플린트 치료. 방사선 검사와 근전도 진단으로 <?php echo esc_html( $region_name ); ?> 환자분 정밀 치료 · <?php echo esc_html( $region_name ); ?> 턱관절 추천 문치과병원.</p>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/턱관절-클리닉/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 턱관절·이갈이 추천 →</a>
 			</article>
 			<article class="md-region-tk-card">
-				<h3><?php echo esc_html( $region_name ); ?> 치아교정·투명교정 잘하는 치과</h3>
-				<p>슈어스마일 투명교정 중부권 센터·브라켓 교정·설측 교정. <?php echo esc_html( $region_name ); ?> 성인·직장인·소아 환자 맞춤 교정 계획.</p>
-				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/투명교정-센터/' ) ); ?>">치아교정 자세히 →</a>
+				<h3><?php echo esc_html( $region_name ); ?> 치아교정·투명교정 추천 · 잘하는 치과</h3>
+				<p>슈어스마일 투명교정 중부권 센터·브라켓 교정·설측 교정. <?php echo esc_html( $region_name ); ?> 성인·직장인·소아 환자 맞춤 교정 계획 · <?php echo esc_html( $region_name ); ?> 치아교정 추천 문치과병원.</p>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/투명교정-센터/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 치아교정 추천 →</a>
 			</article>
 		</div>
 	</div>
