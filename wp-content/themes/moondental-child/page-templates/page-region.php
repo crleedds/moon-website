@@ -52,18 +52,29 @@ $ktx            = $region['ktx'] ?? '';
 $bus            = $region['bus'] ?? '';
 $note           = $region['note'] ?? '';
 
-/* 토큰 치환 헬퍼 */
+/* 토큰 치환 헬퍼 · v3.44.106 · 대소문자 모두 허용 ({region}, {REGION}, {Region}) */
 $tokens = array(
 	'{region}'         => $region_name,
+	'{REGION}'         => $region_name,
+	'{Region}'         => $region_name,
 	'{region_long}'    => $region_long,
+	'{REGION_LONG}'    => $region_long,
 	'{province}'       => $province,
+	'{PROVINCE}'       => $province,
 	'{duration}'       => (string) $duration,
+	'{DURATION}'       => (string) $duration,
 	'{duration_label}' => $duration_label,
+	'{DURATION_LABEL}' => $duration_label,
 	'{distance}'       => (string) $distance,
+	'{DISTANCE}'       => (string) $distance,
 	'{highway}'        => $highway,
+	'{HIGHWAY}'        => $highway,
 	'{ktx}'            => $ktx,
+	'{KTX}'            => $ktx,
 	'{bus}'            => $bus,
+	'{BUS}'            => $bus,
 	'{note}'           => $note,
+	'{NOTE}'           => $note,
 );
 $replace = function( $text ) use ( $tokens ) {
 	return strtr( (string) $text, $tokens );
@@ -187,16 +198,16 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 <section class="md-section md-section--surface">
 	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'region_traffic_eyebrow', '' ) ); ?></span>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( $replace( md_content( 'region_traffic_eyebrow', '' ) ) ); ?></span>
 			<h2 class="md-section-head__title"><?php echo esc_html( $replace( md_content( 'region_traffic_title', '' ) ) ); ?></h2>
-			<p class="md-section-head__lead"><?php echo esc_html( md_content( 'region_traffic_lead', '' ) ); ?></p>
+			<p class="md-section-head__lead"><?php echo esc_html( $replace( md_content( 'region_traffic_lead', '' ) ) ); ?></p>
 		</header>
 
 		<div class="md-region-routes">
 			<article class="md-region-route">
 				<div class="md-region-route__head">
 					<span class="md-region-route__icon" aria-hidden="true">🚗</span>
-					<h3><?php echo esc_html( md_content( 'region_traffic_car_title', '' ) ); ?></h3>
+					<h3><?php echo esc_html( $replace( md_content( 'region_traffic_car_title', '' ) ) ); ?></h3>
 					<span class="md-region-route__time"><?php echo esc_html( $duration ); ?>분</span>
 				</div>
 				<p><?php echo wp_kses_post( $replace( md_content( 'region_traffic_car_body', '' ) ) ); ?></p>
@@ -208,11 +219,11 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 			<article class="md-region-route">
 				<div class="md-region-route__head">
 					<span class="md-region-route__icon" aria-hidden="true">🚆</span>
-					<h3><?php echo esc_html( md_content( 'region_traffic_ktx_title', '' ) ); ?></h3>
+					<h3><?php echo esc_html( $replace( md_content( 'region_traffic_ktx_title', '' ) ) ); ?></h3>
 					<span class="md-region-route__time md-region-route__time--alt">기차</span>
 				</div>
 				<p><?php echo esc_html( $ktx ); ?>.</p>
-				<p class="md-region-route__detail"><?php echo esc_html( md_content( 'region_traffic_ktx_detail', '' ) ); ?></p>
+				<p class="md-region-route__detail"><?php echo esc_html( $replace( md_content( 'region_traffic_ktx_detail', '' ) ) ); ?></p>
 			</article>
 			<?php endif; ?>
 
@@ -220,11 +231,11 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 			<article class="md-region-route">
 				<div class="md-region-route__head">
 					<span class="md-region-route__icon" aria-hidden="true">🚌</span>
-					<h3><?php echo esc_html( md_content( 'region_traffic_bus_title', '' ) ); ?></h3>
+					<h3><?php echo esc_html( $replace( md_content( 'region_traffic_bus_title', '' ) ) ); ?></h3>
 					<span class="md-region-route__time md-region-route__time--alt">버스</span>
 				</div>
 				<p><?php echo esc_html( $bus ); ?>.</p>
-				<p class="md-region-route__detail"><?php echo esc_html( md_content( 'region_traffic_bus_detail', '' ) ); ?></p>
+				<p class="md-region-route__detail"><?php echo esc_html( $replace( md_content( 'region_traffic_bus_detail', '' ) ) ); ?></p>
 			</article>
 			<?php endif; ?>
 		</div>
@@ -241,7 +252,7 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 <section class="md-section">
 	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'region_reasons_eyebrow', '' ) ); ?></span>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( $replace( md_content( 'region_reasons_eyebrow', '' ) ) ); ?></span>
 			<h2 class="md-section-head__title"><?php echo esc_html( $replace( md_content( 'region_reasons_title', '' ) ) ); ?></h2>
 		</header>
 
@@ -263,7 +274,7 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 <section class="md-section md-section--surface">
 	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'region_popular_eyebrow', '' ) ); ?></span>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( $replace( md_content( 'region_popular_eyebrow', '' ) ) ); ?></span>
 			<h2 class="md-section-head__title"><?php echo esc_html( $replace( md_content( 'region_popular_title', '' ) ) ); ?></h2>
 			<p class="md-section-head__lead"><?php echo esc_html( $replace( md_content( 'region_popular_lead', '' ) ) ); ?></p>
 		</header>
@@ -298,7 +309,7 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 <section class="md-section">
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'region_faq_eyebrow', '' ) ); ?></span>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( $replace( md_content( 'region_faq_eyebrow', '' ) ) ); ?></span>
 			<h2 class="md-section-head__title"><?php echo esc_html( $replace( md_content( 'region_faq_title', '' ) ) ); ?></h2>
 		</header>
 
@@ -319,8 +330,8 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 <section class="md-section md-section--surface md-section--sm">
 	<div class="md-container">
 		<header class="md-section-head">
-			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'region_other_eyebrow', '' ) ); ?></span>
-			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'region_other_title', '' ) ); ?></h2>
+			<span class="md-section-head__eyebrow"><?php echo esc_html( $replace( md_content( 'region_other_eyebrow', '' ) ) ); ?></span>
+			<h2 class="md-section-head__title"><?php echo esc_html( $replace( md_content( 'region_other_title', '' ) ) ); ?></h2>
 		</header>
 		<div class="md-region-grid">
 			<?php
