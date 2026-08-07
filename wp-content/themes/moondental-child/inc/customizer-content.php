@@ -2196,7 +2196,7 @@ function moondental_preservation_content_fields() {
 				'preservation_hero_title_a' => array( 'default' => '천안·아산 자연치아 살리기', 'label' => '히어로 · 제목 첫 줄', 'type' => 'text' ),
 				'preservation_hero_title_b' => array( 'default' => '발치보다 보존이 먼저입니다', 'label' => '히어로 · 제목 강조 (em)', 'type' => 'text' ),
 				'preservation_hero_lead'    => array( 'default' => "충치치료·신경치료·잇몸치료 — 보존과·치주과 전문 진료로 환자분의 자연치아를 최대한 살립니다.\n천안 만남로 1995년 개원 30여년 임상.", 'label' => '히어로 · 리드 (줄바꿈 유지)', 'type' => 'textarea' ),
-				'preservation_nav_items'    => array( 'default' => "🦷 | 충치치료 | #cavity\n⚡ | 신경치료 | #endo\n🌿 | 잇몸치료 | #perio", 'label' => '앵커 네비 항목 (한 줄에 1개, 형식: 아이콘 | 라벨 | 앵커)', 'type' => 'textarea' ),
+				'preservation_nav_items'    => array( 'default' => "🦷 | 충치치료 | #cavity\n⭐ | 치수복조술 | #pulpcap\n⚡ | 신경치료 | #endo\n🌿 | 잇몸치료 | #perio", 'label' => '앵커 네비 항목 (한 줄에 1개, 형식: 아이콘 | 라벨 | 앵커)', 'type' => 'textarea' ),
 			),
 		),
 		'cavity' => array(
@@ -2212,6 +2212,28 @@ function moondental_preservation_content_fields() {
 				),
 				'preservation_cavity_callout_title' => array( 'default' => '★ 문치과병원의 특별함 · 치수복조술 (Pulp Capping)', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
 				'preservation_cavity_callout_body'  => array( 'default' => '<p>충치가 신경까지 깊게 진행되면 대부분 곧바로 <strong>신경치료</strong>를 받거나, 심한 경우 <strong>발치 후 임플란트</strong>를 권유받습니다. 하지만 신경이 살아있는 상태라면 신경을 그대로 살리는 시도가 가능합니다.</p><p>문치과병원은 <strong>MTA(Mineral Trioxide Aggregate)·Biodentine</strong> 등 재생 유도 재료로 노출된 치수 위에 인공 상아질 다리(dentin bridge)를 형성하는 <strong>치수복조술(Pulp Capping)</strong>을 적극적으로 시행합니다. 성공 시 <strong>신경치료 없이 자연치아를 그대로 보존</strong>할 수 있으며, 실패해도 신경치료로 단계적 전환이 가능합니다.</p><ul><li><strong>대상</strong> — 심부 우식 · 미세 치수 노출 · 젊은 환자 · 미성숙 영구치</li><li><strong>재료</strong> — MTA · Biodentine (재생 유도 생체친화 재료)</li><li><strong>진료팀</strong> — 보존과 진료팀 직접 진행</li><li><strong>안전성</strong> — 실패 시에도 신경치료로 단계적 전환 가능</li></ul><p>발치 권유를 받으셨거나 심부 충치로 신경치료를 고민 중이라면 한 번 더 살펴봐 드리겠습니다. <a href="/상담예약/">보존 가능성 상담 예약 →</a></p>', 'label' => '콜아웃 · 본문 (HTML 허용 · <p>·<ul>·<strong>·<a>)', 'type' => 'textarea' ),
+			),
+		),
+		'pulpcap' => array(
+			'title'  => '01.5 · 치수복조술 (Pulp Capping) · ⭐ 문치과병원 특별 술식',
+			'fields' => array(
+				'preservation_pulpcap_eyebrow' => array( 'default' => '⭐ 문치과병원 특별 술식 · PULP CAPPING', 'label' => 'eyebrow', 'type' => 'text' ),
+				'preservation_pulpcap_title'   => array( 'default' => '치수복조술 — 신경을 제거하지 않고 살리는 최선의 방법', 'label' => '섹션 제목', 'type' => 'text' ),
+				'preservation_pulpcap_lead'    => array( 'default' => '충치가 신경 근처까지 도달했거나 노출됐을 때, 대부분의 치과에서는 곧바로 신경치료를 시작합니다. 문치과병원은 다릅니다. 치수복조술(Pulp Capping)로 신경(치수)을 그대로 보존해, 환자분의 자연치아 원래 감각과 수명을 최대한 지킵니다.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'preservation_pulpcap_when_title' => array( 'default' => '언제 치수복조술이 가능한가요?', 'label' => '적응증 리스트 · 소제목', 'type' => 'text' ),
+				'preservation_pulpcap_when_list'  => array(
+					'default' => "<strong>깊은 충치를 제거하다 신경이 노출되기 직전(간접 치수복조술)</strong> 상태\n<strong>충치 제거 중 신경이 미세하게 노출(직접 치수복조술)</strong>됐지만 감염이 없는 경우\n<strong>외상이나 파절로 치수가 소량 노출</strong>된 젊은 영구치\n<strong>치아 신경이 아직 살아있고(생활 치수)</strong> 자발통이 없는 경우\n<strong>어린이·청소년의 미성숙 영구치</strong> — 신경을 살려야 치근이 완성됩니다",
+					'label' => '적응증 리스트 (한 줄에 1개, HTML 허용)',
+					'type'  => 'textarea',
+				),
+				'preservation_pulpcap_strength_title' => array( 'default' => '문치과병원 치수복조술의 강점', 'label' => '강점 카드 · 소제목', 'type' => 'text' ),
+				'preservation_pulpcap_strength_cards' => array(
+					'default' => "🔬 미세 현미경 진단 | 신경 노출 부위와 감염 여부를 미세 현미경으로 정밀 확인. \"살릴 수 있는 신경인가\"를 정확히 판단합니다.\n💠 MTA · Biodentine™ 사용 | 최신 생체적합성 재료(MTA, Biodentine)로 신경을 밀봉·재생 유도. 기존 수산화칼슘 대비 성공률 크게 향상.\n🎯 30년 임상 노하우 | 치수복조술의 성패는 \"살릴 수 있는지\" 판단에서 결정됩니다. 30여년 보존과 임상 경력으로 케이스 판단.\n⏱️ 단계별 경과 관찰 | 시술 후 3·6·12개월 정기 관찰로 신경 생존 여부 확인. 만약 실패하면 최소 침습 신경치료로 즉시 전환.",
+					'label' => '강점 카드 (한 줄에 1개, 형식: 아이콘 + 제목 | 본문)',
+					'type'  => 'textarea',
+				),
+				'preservation_pulpcap_callout_title' => array( 'default' => '💡 치수복조술 vs 신경치료 — 무엇이 다른가?', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
+				'preservation_pulpcap_callout_body'  => array( 'default' => '<strong>치수복조술</strong>: 신경 그대로 유지 → 자연치아 감각·경도·수명 최대 유지 · 크라운이 필요 없을 수 있음. <strong>신경치료</strong>: 신경 완전 제거 → 치아가 부러지기 쉬워져 크라운 필수 · 시간이 지나면 뿌리 흡수·재감염 위험. <strong>살릴 수 있는 신경은 살리는 것</strong>이 가장 보존적인 치료이며 문치과병원의 원칙입니다.', 'label' => '콜아웃 · 본문 (HTML 허용)', 'type' => 'textarea' ),
 			),
 		),
 		'endo' => array(

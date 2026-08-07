@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.106' );
+define( 'MOONDENTAL_VERSION', '3.44.107' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -534,6 +534,19 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_purge_spam_terms_v34101', 'done' );
 }, 52 );
+
+/* 일회성 마이그레이션 v3.44.107 · 자연치아 살리기 앵커 네비에 치수복조술 추가
+ * 사용자가 커스터마이징 안 했거나 옛 기본값 그대로면 새 기본값으로 갱신 (직접 편집한 경우 유지) */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_pulpcap_nav_v34107' ) === 'done' ) return;
+	$old_default = "🦷 | 충치치료 | #cavity\n⚡ | 신경치료 | #endo\n🌿 | 잇몸치료 | #perio";
+	$new_default = "🦷 | 충치치료 | #cavity\n⭐ | 치수복조술 | #pulpcap\n⚡ | 신경치료 | #endo\n🌿 | 잇몸치료 | #perio";
+	$current = get_theme_mod( 'md_content_preservation_nav_items', null );
+	if ( $current === null || trim( (string) $current ) === '' || trim( (string) $current ) === $old_default ) {
+		set_theme_mod( 'md_content_preservation_nav_items', $new_default );
+	}
+	update_option( 'moondental_pulpcap_nav_v34107', 'done' );
+}, 54 );
 
 /* 일회성 마이그레이션 v3.44.82 · v3.44.81에서 생성된 랜딩 페이지 2개 휴지통 이동
  * 기존 /오시는-길/cheonan/, /오시는-길/asan/ 로 대체 · 신설 페이지 불필요 */

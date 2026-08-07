@@ -8826,6 +8826,49 @@ html { scroll-behavior: smooth; }
   font-size: 1.15rem;
 }
 
+/* v3.44.107 · 치수복조술 섹션 · 문치과병원 특별 술식 강조 */
+.md-section--pulpcap {
+  background: linear-gradient(180deg, rgba(216, 128, 98, 0.04) 0%, rgba(216, 128, 98, 0.10) 100%);
+  border-top: 3px solid var(--color-primary);
+  border-bottom: 3px solid var(--color-primary);
+  position: relative;
+}
+.md-section--pulpcap .md-section-head__title {
+  color: var(--color-primary-dark);
+}
+.md-eyebrow--star {
+  background: var(--color-primary);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  display: inline-block;
+}
+.md-preservation-callout--star {
+  border: 2px solid var(--color-primary);
+  background: linear-gradient(135deg, #fff 0%, rgba(216, 128, 98, 0.08) 100%);
+  box-shadow: 0 8px 24px rgba(216, 128, 98, 0.15);
+}
+.md-preservation-callout--star > strong {
+  color: var(--color-primary-dark);
+  border-bottom-color: rgba(216, 128, 98, 0.35);
+}
+@media (prefers-color-scheme: dark) {
+  .md-section--pulpcap {
+    background: linear-gradient(180deg, rgba(242, 168, 120, 0.06) 0%, rgba(242, 168, 120, 0.13) 100%);
+    border-top-color: #f2a878;
+    border-bottom-color: #f2a878;
+  }
+  .md-section--pulpcap .md-section-head__title { color: #f2a878; }
+  .md-eyebrow--star { background: #f2a878; color: #1B1310; }
+  .md-preservation-callout--star {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(242, 168, 120, 0.10) 100%);
+    border-color: #f2a878;
+  }
+  .md-preservation-callout--star > strong { color: #f2a878; border-bottom-color: rgba(242, 168, 120, 0.35); }
+}
+
 /* 진행 흐름 (덴탈 SPA 6단계) */
 .md-preservation-steps {
   list-style: none;

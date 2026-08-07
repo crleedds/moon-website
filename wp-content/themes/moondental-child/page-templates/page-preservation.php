@@ -64,6 +64,8 @@ $parse_nav = function( $text ) {
 
 $nav_items          = $parse_nav( md_content( 'preservation_nav_items', '' ) );
 $cavity_cards       = $parse_cards( md_content( 'preservation_cavity_cards', '' ) );
+$pulpcap_when_list  = md_parse_lines( md_content( 'preservation_pulpcap_when_list', '' ) );
+$pulpcap_strength_pair = $parse_pair( md_content( 'preservation_pulpcap_strength_cards', '' ) );
 $endo_when_list     = md_parse_lines( md_content( 'preservation_endo_when_list', '' ) );
 $endo_strength_pair = $parse_pair( md_content( 'preservation_endo_strength_cards', '' ) );
 $perio_cards        = $parse_cards( md_content( 'preservation_perio_cards', '' ) );
@@ -149,6 +151,55 @@ $perio_cards        = $parse_cards( md_content( 'preservation_perio_cards', '' )
 		<?php endif; ?>
 	</div>
 </section>
+
+<!-- ============ 1.5 치수복조술 · v3.44.107 ============ -->
+<?php
+$pcp_eb   = md_content( 'preservation_pulpcap_eyebrow', '' );
+$pcp_ttl  = md_content( 'preservation_pulpcap_title', '' );
+$pcp_lead = md_content( 'preservation_pulpcap_lead', '' );
+if ( $pcp_eb || $pcp_ttl || $pcp_lead || $pulpcap_when_list || $pulpcap_strength_pair ) :
+?>
+<section class="md-section md-section--pulpcap" id="pulpcap">
+	<div class="md-container md-container--narrow">
+		<header class="md-section-head">
+			<?php if ( $pcp_eb )   : ?><span class="md-section-head__eyebrow md-eyebrow--star"><?php echo esc_html( $pcp_eb ); ?></span><?php endif; ?>
+			<?php if ( $pcp_ttl )  : ?><h2 class="md-section-head__title"><?php echo esc_html( $pcp_ttl ); ?></h2><?php endif; ?>
+			<?php if ( $pcp_lead ) : ?><p class="md-section-head__lead"><?php echo esc_html( $pcp_lead ); ?></p><?php endif; ?>
+		</header>
+
+		<?php if ( $pulpcap_when_list ) : ?>
+		<h3 class="md-preservation-h3"><?php echo esc_html( md_content( 'preservation_pulpcap_when_title', '' ) ); ?></h3>
+		<ul class="md-preservation-list">
+			<?php foreach ( $pulpcap_when_list as $item ) : ?>
+				<li><?php echo wp_kses_post( $item ); ?></li>
+			<?php endforeach; ?>
+		</ul>
+		<?php endif; ?>
+
+		<?php if ( $pulpcap_strength_pair ) : ?>
+		<h3 class="md-preservation-h3"><?php echo esc_html( md_content( 'preservation_pulpcap_strength_title', '' ) ); ?></h3>
+		<div class="md-preservation-grid">
+			<?php foreach ( $pulpcap_strength_pair as $s ) : ?>
+			<article class="md-preservation-card is-star">
+				<h3><?php echo esc_html( $s['title'] ); ?></h3>
+				<p><?php echo wp_kses_post( $s['body'] ); ?></p>
+			</article>
+			<?php endforeach; ?>
+		</div>
+		<?php endif; ?>
+
+		<?php
+		$pcct = md_content( 'preservation_pulpcap_callout_title', '' );
+		$pccb = md_content( 'preservation_pulpcap_callout_body', '' );
+		if ( $pcct || $pccb ) : ?>
+		<aside class="md-preservation-callout md-preservation-callout--star">
+			<?php if ( $pcct ) : ?><strong><?php echo esc_html( $pcct ); ?></strong><?php endif; ?>
+			<?php if ( $pccb ) : ?><p><?php echo wp_kses_post( $pccb ); ?></p><?php endif; ?>
+		</aside>
+		<?php endif; ?>
+	</div>
+</section>
+<?php endif; ?>
 
 <!-- ============ 2. 신경치료 ============ -->
 <section class="md-section" id="endo">
