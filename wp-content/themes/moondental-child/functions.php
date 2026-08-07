@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.107' );
+define( 'MOONDENTAL_VERSION', '3.44.108' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -547,6 +547,56 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_pulpcap_nav_v34107', 'done' );
 }, 54 );
+
+/* 일회성 마이그레이션 v3.44.108 · 상단 메뉴 · 자연치아살리기 하위에 '치수복조술' 추가
+ * '주 메뉴 (자동 생성)' 메뉴에서 자연치아살리기 부모를 찾아 그 하위에 치수복조술을 삽입.
+ * 이미 치수복조술이 있으면 건너뜀. */
+add_action( 'wp_loaded', function() {
+	if ( get_option( 'moondental_menu_pulpcap_v34108' ) === 'done' ) return;
+	if ( ! function_exists( 'wp_get_nav_menu_object' ) ) return;
+	$menu_obj = wp_get_nav_menu_object( '주 메뉴 (자동 생성)' );
+	if ( ! $menu_obj ) { update_option( 'moondental_menu_pulpcap_v34108', 'done' ); return; }
+	$menu_id = (int) $menu_obj->term_id;
+	$items = wp_get_nav_menu_items( $menu_id );
+	if ( ! $items ) { update_option( 'moondental_menu_pulpcap_v34108', 'done' ); return; }
+
+	// 자연치아살리기 부모 항목 찾기
+	$parent_id = 0;
+	$pulpcap_exists = false;
+	$after_position = 0;
+	foreach ( $items as $it ) {
+		$t = trim( (string) $it->title );
+		if ( $t === '자연치아살리기' || $t === '자연치아 살리기' ) {
+			$parent_id = (int) $it->ID;
+		}
+		if ( $t === '치수복조술' ) {
+			$pulpcap_exists = true;
+		}
+	}
+	if ( $pulpcap_exists || ! $parent_id ) {
+		update_option( 'moondental_menu_pulpcap_v34108', 'done' );
+		return;
+	}
+	// 부모 아래의 '충치치료' 위치와 하위 항목 최대 position 계산
+	$cavity_pos = 0; $max_child_pos = 0;
+	foreach ( $items as $it ) {
+		if ( (int) $it->menu_item_parent !== $parent_id ) continue;
+		$max_child_pos = max( $max_child_pos, (int) $it->menu_order );
+		if ( trim( (string) $it->title ) === '충치치료' ) {
+			$cavity_pos = (int) $it->menu_order;
+		}
+	}
+	$new_pos = $cavity_pos > 0 ? $cavity_pos + 5 : ( $max_child_pos + 10 );
+	wp_update_nav_menu_item( $menu_id, 0, array(
+		'menu-item-title'     => '치수복조술',
+		'menu-item-url'       => home_url( '/자연치아-살리기/#pulpcap' ),
+		'menu-item-type'      => 'custom',
+		'menu-item-status'    => 'publish',
+		'menu-item-position'  => $new_pos,
+		'menu-item-parent-id' => $parent_id,
+	) );
+	update_option( 'moondental_menu_pulpcap_v34108', 'done' );
+}, 20 );
 
 /* 일회성 마이그레이션 v3.44.82 · v3.44.81에서 생성된 랜딩 페이지 2개 휴지통 이동
  * 기존 /오시는-길/cheonan/, /오시는-길/asan/ 로 대체 · 신설 페이지 불필요 */
@@ -3873,9 +3923,10 @@ function moondental_setup_primary_menu( $force = false ) {
 		array( 'title'=>'교정센터',         'url'=>$home.'투명교정-센터/' ),
 		array( 'title'=>'스마일디자인센터', 'url'=>$home.'스마일디자인센터/' ),
 		array( 'title'=>'자연치아살리기',   'url'=>$home.'자연치아-살리기/', 'children'=>array(
-			array( 'title'=>'충치치료', 'url'=>$home.'자연치아-살리기/#cavity' ),
-			array( 'title'=>'신경치료', 'url'=>$home.'자연치아-살리기/#endo' ),
-			array( 'title'=>'잇몸치료', 'url'=>$home.'자연치아-살리기/#perio' ),
+			array( 'title'=>'충치치료',   'url'=>$home.'자연치아-살리기/#cavity' ),
+			array( 'title'=>'치수복조술', 'url'=>$home.'자연치아-살리기/#pulpcap' ),
+			array( 'title'=>'신경치료',   'url'=>$home.'자연치아-살리기/#endo' ),
+			array( 'title'=>'잇몸치료',   'url'=>$home.'자연치아-살리기/#perio' ),
 		)),
 		array( 'title'=>'진료과', 'url'=>'#', 'children'=>array(
 			array( 'title'=>'턱관절클리닉',      'url'=>$home.'턱관절-클리닉/' ),
@@ -4159,9 +4210,10 @@ function moondental_primary_menu_data() {
 		) ),
 		array( 'label' => '스마일디자인센터', 'url' => $home . '스마일디자인센터/',  'children' => array() ),
 		array( 'label' => '자연치아살리기',   'url' => $home . '자연치아-살리기/',   'children' => array(
-			array( 'label' => '충치치료', 'url' => $home . '자연치아-살리기/#cavity' ),
-			array( 'label' => '신경치료', 'url' => $home . '자연치아-살리기/#endo' ),
-			array( 'label' => '잇몸치료', 'url' => $home . '자연치아-살리기/#perio' ),
+			array( 'label' => '충치치료',   'url' => $home . '자연치아-살리기/#cavity' ),
+			array( 'label' => '치수복조술', 'url' => $home . '자연치아-살리기/#pulpcap' ),
+			array( 'label' => '신경치료',   'url' => $home . '자연치아-살리기/#endo' ),
+			array( 'label' => '잇몸치료',   'url' => $home . '자연치아-살리기/#perio' ),
 		) ),
 		array( 'label' => '진료과',           'url' => '#',           'children' => array(
 			array( 'label' => '턱관절클리닉',    'url' => $home . '턱관절-클리닉/' ),
