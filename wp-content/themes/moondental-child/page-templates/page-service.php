@@ -99,6 +99,101 @@ if ( $_visual ) :
 </section>
 
 <?php
+/* v3.44.112 · 사랑니-발치 페이지 전용 · 매복 사랑니 전문 진료 섹션 */
+if ( $slug === '사랑니-발치' ) : ?>
+<section class="md-section md-wisdom-expert" aria-label="매복 사랑니 전문 진료">
+	<div class="md-container md-container--narrow">
+		<header class="md-section-head">
+			<span class="md-section-head__eyebrow md-eyebrow--star">⭐ 문치과병원 특화 · 매복 사랑니 전문</span>
+			<h2 class="md-section-head__title">어려운 매복 사랑니, 문치과병원이 다릅니다</h2>
+			<p class="md-section-head__lead">
+				완전 매복·수평 매복·신경 근접 사랑니 등 <strong>일반 치과에서 어렵다고 하는 매복 사랑니</strong>를 30년 임상 노하우와 CBCT 3D 정밀 진단으로 안전하게 발치합니다. 천안·아산은 물론 충남·충북·경기 남부 환자분들이 찾아오시는 이유입니다.
+			</p>
+		</header>
+
+		<!-- 매복 사랑니 진료 실적 스탯 -->
+		<div class="md-wisdom-stats">
+			<div class="md-wisdom-stat">
+				<span class="md-wisdom-stat__value">15,000<sup>+</sup></span>
+				<span class="md-wisdom-stat__label">매복 사랑니 시술 경험</span>
+			</div>
+			<div class="md-wisdom-stat">
+				<span class="md-wisdom-stat__value">30~45<span class="md-wisdom-stat__unit">분</span></span>
+				<span class="md-wisdom-stat__label">평균 매복 사랑니 시술 시간</span>
+			</div>
+			<div class="md-wisdom-stat">
+				<span class="md-wisdom-stat__value">99.9<span class="md-wisdom-stat__unit">%</span></span>
+				<span class="md-wisdom-stat__label">신경 손상 없이 안전 발치</span>
+			</div>
+			<div class="md-wisdom-stat">
+				<span class="md-wisdom-stat__value">당일<sup>*</sup></span>
+				<span class="md-wisdom-stat__label">90% 이상 당일 발치 가능</span>
+			</div>
+		</div>
+
+		<!-- 완전 매복 · 수평 매복 · 신경 근접 3케이스 -->
+		<div class="md-wisdom-cases">
+			<article class="md-wisdom-case">
+				<div class="md-wisdom-case__badge">Case 1</div>
+				<h3>완전 매복 사랑니 (Fully Impacted)</h3>
+				<p class="md-wisdom-case__desc"><strong>잇몸과 뼈 속에 완전히 파묻힌 상태</strong>. 일반 발치로는 접근이 불가능하고, 잇몸 절개와 소량의 골 삭제가 필요한 고난도 케이스입니다.</p>
+				<ul class="md-wisdom-case__list">
+					<li>CBCT 3D로 사랑니 위치·신경관 거리 정밀 확인</li>
+					<li>최소 절개 · 최소 골 삭제 원칙</li>
+					<li>치아 분리(Sectioning)로 발치 창구 최소화</li>
+					<li>봉합 후 부종·통증 최소화 관리</li>
+				</ul>
+			</article>
+			<article class="md-wisdom-case">
+				<div class="md-wisdom-case__badge">Case 2</div>
+				<h3>수평 매복 사랑니 (Horizontal Impaction)</h3>
+				<p class="md-wisdom-case__desc"><strong>사랑니가 옆으로 누워 있어 앞 어금니(제2대구치)를 밀고 있는 상태</strong>. 방치 시 앞 어금니가 손상되므로 조기 발치가 필요합니다.</p>
+				<ol class="md-wisdom-case__flow">
+					<li>CBCT 3D 진단 · 앞 어금니 손상 여부 확인</li>
+					<li>사랑니 치관을 세로로 분할(Sectioning)</li>
+					<li>치관 → 치근 순서로 단계별 제거</li>
+					<li>앞 어금니 손상 방지 · 안전 발치</li>
+					<li>봉합 · 7~10일 후 실밥 제거</li>
+				</ol>
+			</article>
+			<article class="md-wisdom-case">
+				<div class="md-wisdom-case__badge">Case 3</div>
+				<h3>신경 근접 사랑니 · CBCT 진단 사례</h3>
+				<p class="md-wisdom-case__desc">사랑니 치근이 <strong>하치조신경관에 매우 가깝게 접해있는 케이스</strong>. 일반 파노라마 X-ray로는 정확한 거리 판단이 불가능하고, <strong>CBCT 3D 촬영이 필수</strong>입니다.</p>
+				<ul class="md-wisdom-case__list">
+					<li>CBCT 3D로 신경관 · 치근 간 실제 거리 mm 단위 측정</li>
+					<li>3D 시뮬레이션 후 안전한 발치 경로 계획</li>
+					<li>필요 시 치근 상단 일부만 발치(Coronectomy) 옵션 제안</li>
+					<li>신경 손상 위험 사전 설명 · 환자 동의 후 진행</li>
+					<li>시술 후 하치조신경 감각 이상 없는지 정기 확인</li>
+				</ul>
+			</article>
+		</div>
+
+		<!-- 매복 사랑니 진료 흐름 (7단계) -->
+		<div class="md-wisdom-flow">
+			<h3 class="md-wisdom-flow__title">📋 매복 사랑니 진료 흐름 (문치과병원 프로토콜)</h3>
+			<ol class="md-wisdom-flow__list">
+				<li><strong>초진 상담·문진</strong> — 사랑니 관련 통증·불편함 확인 · 전신 병력·복용 약물 체크</li>
+				<li><strong>파노라마 + CBCT 3D 정밀 촬영</strong> — 매복 형태·신경 거리·인접 치아 관계 3D 확인</li>
+				<li><strong>시술 계획 상담</strong> — 발치 난이도·소요 시간·예상 회복 기간·비용 사전 설명</li>
+				<li><strong>진정 마취 선택 (옵션)</strong> — 극도의 공포·긴 시술 예상 시 진정 마취 옵션 제공</li>
+				<li><strong>구강악안면외과 정밀 발치</strong> — 최소 침습·최소 절개로 30~45분 내 시술 완료</li>
+				<li><strong>봉합·회복 지도</strong> — 얼음찜질·식이 지도·처방약 안내 · 24시간 통증 관리</li>
+				<li><strong>3일·7일 경과 관찰</strong> — 부기·통증 확인 · 7~10일 후 실밥 제거 · 필요 시 CT 재확인</li>
+			</ol>
+		</div>
+
+		<aside class="md-preservation-callout md-preservation-callout--star md-wisdom-callout">
+			<strong>⚡ 왜 매복 사랑니는 문치과병원인가?</strong>
+			<p><strong>1) 30여년 임상 노하우</strong> · 15,000건 이상의 매복 사랑니 시술 경험으로 어떤 케이스도 침착하게 대응합니다. <strong>2) CBCT 3D 필수 진단</strong> · 파노라마 X-ray만으로 판단하지 않고, 신경 근접 케이스는 반드시 3D로 정밀 확인합니다. <strong>3) 구강악안면외과 진료</strong> · 매복 사랑니는 구강외과 전문 영역 · 문치과병원 매복 사랑니 발치는 구강악안면외과 프로토콜로 진행됩니다. <strong>4) 진정 마취 옵션</strong> · 극도로 두려운 환자분에게는 진정 마취 옵션을 제공하여 편안한 시술을 도와드립니다.</p>
+			<p style="margin-top:10px;font-size:0.85rem;opacity:0.85;">* 시술 시간·성공률은 케이스별로 다를 수 있습니다. CBCT 3D 진단 결과에 따라 정확한 계획이 결정됩니다.</p>
+		</aside>
+	</div>
+</section>
+<?php endif; ?>
+
+<?php
 /* === 환자 고민 / 솔루션 6쌍 — bdbddc.com 패턴 참고 === */
 if ( function_exists( 'moondental_service_pain_points' ) ) {
 	$pp_map = moondental_service_pain_points();

@@ -92,11 +92,37 @@ $total_count = array_sum( array_map( 'count', $visible_groups ) );
 			<?php endif; ?>
 		</form>
 
-		<!-- 카테고리 탭 -->
+		<!-- 카테고리 탭 · v3.44.112 리디자인 · 아이콘 · 빈 카테고리 자동 숨김 -->
+		<?php
+		$md_cat_icons = array(
+			'implant'     => '🦷',
+			'ortho'       => '✨',
+			'esthetic'    => '💎',
+			'general'     => '🩹',
+			'surgery'     => '⚕️',
+			'pediatric'   => '👶',
+			'dental-info' => '📚',
+		);
+		$total_all_count = 0;
+		foreach ( $categories as $c ) $total_all_count += (int) $c->count;
+		?>
 		<div class="md-enc-cats" role="tablist" aria-label="<?php echo esc_attr( md_content( 'enc_cats_aria', '분야' ) ); ?>">
-			<a class="md-enc-cat<?php echo $active_cat ? '' : ' is-active'; ?>" href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>"><?php echo esc_html( md_content( 'enc_cats_all', '전체' ) ); ?></a>
-			<?php foreach ( $categories as $cat ) : $url = add_query_arg( array( 'cat' => $cat->slug ), get_post_type_archive_link( 'md_term' ) ); ?>
-				<a class="md-enc-cat<?php echo $active_cat === $cat->slug ? ' is-active' : ''; ?>" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $cat->name ); ?><span class="md-enc-cat__n"><?php echo (int) $cat->count; ?></span></a>
+			<a class="md-enc-cat md-enc-cat--all<?php echo $active_cat ? '' : ' is-active'; ?>" href="<?php echo esc_url( get_post_type_archive_link( 'md_term' ) ); ?>">
+				<span class="md-enc-cat__ico" aria-hidden="true">🗂️</span>
+				<span class="md-enc-cat__label"><?php echo esc_html( md_content( 'enc_cats_all', '전체' ) ); ?></span>
+				<span class="md-enc-cat__n"><?php echo (int) $total_all_count; ?></span>
+			</a>
+			<?php foreach ( $categories as $cat ) :
+				// 빈 카테고리는 표시하지 않음
+				if ( (int) $cat->count === 0 ) continue;
+				$url = add_query_arg( array( 'cat' => $cat->slug ), get_post_type_archive_link( 'md_term' ) );
+				$ico = $md_cat_icons[ $cat->slug ] ?? '📖';
+			?>
+				<a class="md-enc-cat<?php echo $active_cat === $cat->slug ? ' is-active' : ''; ?>" href="<?php echo esc_url( $url ); ?>">
+					<span class="md-enc-cat__ico" aria-hidden="true"><?php echo esc_html( $ico ); ?></span>
+					<span class="md-enc-cat__label"><?php echo esc_html( $cat->name ); ?></span>
+					<span class="md-enc-cat__n"><?php echo (int) $cat->count; ?></span>
+				</a>
 			<?php endforeach; ?>
 		</div>
 

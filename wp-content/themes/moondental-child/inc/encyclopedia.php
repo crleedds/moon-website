@@ -542,6 +542,60 @@ function moondental_seed_encyclopedia_categories_v34110() {
 add_action( 'admin_init', 'moondental_seed_encyclopedia_categories_v34110', 50 );
 add_action( 'wp_loaded',  'moondental_seed_encyclopedia_categories_v34110', 50 );
 
+/**
+ * v3.44.112 · 카테고리 정리 · 이름 갱신 + 옛 빈 카테고리 삭제
+ *   v34110 마이그레이션이 term_exists() 로 인해 이름 갱신 못한 부분 처리
+ *   옛 v3350 카테고리 중 매핑 대상 아닌 빈 카테고리 삭제
+ */
+function moondental_seed_encyclopedia_categories_v34112() {
+	if ( get_option( 'moondental_encyclopedia_cats_v34112' ) === 'done' ) return;
+
+	// 이름 갱신 (기존 slug 그대로 · 표시 이름만 수정)
+	$rename_map = array(
+		'general' => array( 'name' => '일반진료 (충치·신경·잇몸)', 'desc' => '충치치료·신경치료·잇몸치료·발치·마취·홈케어' ),
+		// 'surgery' 는 '구강외과·사랑니' 이름 유지 (매복 사랑니 SEO에 유리)
+	);
+	foreach ( $rename_map as $slug => $info ) {
+		$t = get_term_by( 'slug', $slug, 'md_term_category' );
+		if ( $t ) {
+			wp_update_term( (int) $t->term_id, 'md_term_category', array(
+				'name'        => $info['name'],
+				'description' => $info['desc'],
+			) );
+		}
+	}
+
+	// v3350 잔재 카테고리 · 빈 것만 삭제
+	$legacy_slugs = array( 'preserve', 'periodontics', 'aesthetic', 'prosthetics', 'tmj', 'prevention' );
+	$deleted = 0;
+	foreach ( $legacy_slugs as $slug ) {
+		$t = get_term_by( 'slug', $slug, 'md_term_category' );
+		if ( ! $t ) continue;
+		// 안전 · 포스트 있으면 삭제하지 않음
+		if ( (int) $t->count > 0 ) continue;
+		wp_delete_term( (int) $t->term_id, 'md_term_category' );
+		$deleted++;
+	}
+
+	// count 재계산
+	if ( function_exists( 'wp_update_term_count' ) ) {
+		$all_cats = get_terms( array( 'taxonomy' => 'md_term_category', 'hide_empty' => false, 'fields' => 'ids' ) );
+		if ( is_array( $all_cats ) ) {
+			wp_update_term_count( $all_cats, 'md_term_category', true );
+		}
+	}
+
+	// 캐시 무효화
+	global $wpdb;
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_md\\_term\\_json\\_%' OR option_name LIKE '\\_transient\\_timeout\\_md\\_term\\_json\\_%'" );
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_md\\_terms\\_all\\_%' OR option_name LIKE '\\_transient\\_timeout\\_md\\_terms\\_all\\_%'" );
+
+	update_option( 'moondental_encyclopedia_cats_v34112', 'done' );
+	update_option( 'moondental_encyclopedia_cats_v34112_deleted', $deleted, false );
+}
+add_action( 'admin_init', 'moondental_seed_encyclopedia_categories_v34112', 55 );
+add_action( 'wp_loaded',  'moondental_seed_encyclopedia_categories_v34112', 55 );
+
 
 /* ============================================================
  * 3. 초성 헬퍼 · 한글 초성 추출 (아카이브 필터용)
