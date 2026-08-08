@@ -8,17 +8,16 @@
 get_header();
 
 // 카테고리 → 관련 진료 페이지 매핑
+// v3.44.110 · 7개 새 슬러그에 맞춰 재정비
 function moondental_md_term_related_service( $cat_slug ) {
 	$map = array(
-		'implant'      => array( 'name' => '임플란트 센터', 'url' => '/임플란트-센터/', 'icon' => '🦷' ),
-		'ortho'        => array( 'name' => '슈어스마일 투명교정', 'url' => '/슈어스마일-투명교정/', 'icon' => '✨' ),
-		'preserve'     => array( 'name' => '자연치아 살리기', 'url' => '/자연치아-살리기/', 'icon' => '🌿' ),
-		'periodontics' => array( 'name' => '자연치아 살리기 (치주치료)', 'url' => '/자연치아-살리기/', 'icon' => '💧' ),
-		'aesthetic'    => array( 'name' => '스마일 디자인 센터', 'url' => '/스마일디자인센터/', 'icon' => '✨' ),
-		'surgery'      => array( 'name' => '사랑니 발치', 'url' => '/사랑니-발치/', 'icon' => '🦷' ),
-		'pediatric'    => array( 'name' => '예방클리닉', 'url' => '/예방클리닉/', 'icon' => '👶' ),
-		'jaw'          => array( 'name' => '턱관절 클리닉', 'url' => '/턱관절-클리닉/', 'icon' => '😬' ),
-		'general'      => array( 'name' => '예방클리닉', 'url' => '/예방클리닉/', 'icon' => '🛡️' ),
+		'implant'     => array( 'name' => '임플란트 센터',     'url' => '/임플란트-센터/',     'icon' => '🦷' ),
+		'ortho'       => array( 'name' => '교정 센터',         'url' => '/투명교정-센터/',     'icon' => '✨' ),
+		'esthetic'    => array( 'name' => '스마일 디자인 센터', 'url' => '/스마일디자인센터/', 'icon' => '💎' ),
+		'general'     => array( 'name' => '자연치아 살리기',   'url' => '/자연치아-살리기/',   'icon' => '🌿' ),
+		'surgery'     => array( 'name' => '사랑니·턱관절',     'url' => '/사랑니-발치/',       'icon' => '🦷' ),
+		'pediatric'   => array( 'name' => '예방·소아 클리닉',  'url' => '/예방클리닉/',         'icon' => '👶' ),
+		'dental-info' => array( 'name' => '진료비 안내',       'url' => '/비용-안내/',         'icon' => '🛡️' ),
 	);
 	return $map[ $cat_slug ] ?? null;
 }

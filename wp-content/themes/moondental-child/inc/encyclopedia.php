@@ -434,6 +434,114 @@ function moondental_seed_encyclopedia_v34109() {
 add_action( 'admin_init', 'moondental_seed_encyclopedia_v34109', 45 );
 add_action( 'wp_loaded',  'moondental_seed_encyclopedia_v34109', 45 );
 
+/**
+ * v3.44.110 · 카테고리 대통합 · 15개 → 7개
+ *   1) 새 카테고리 7개 생성
+ *   2) 기존 카테고리별 all md_term 포스트 → 새 카테고리로 재배정
+ *   3) 옛 카테고리 삭제
+ */
+function moondental_seed_encyclopedia_categories_v34110() {
+	if ( get_option( 'moondental_encyclopedia_cats_v34110' ) === 'done' ) return;
+
+	$new_cats = array(
+		array( 'name' => '임플란트',           'slug' => 'implant',      'desc' => '임플란트 식립·상악동거상·주위염 등 임플란트 진료 전 과정' ),
+		array( 'name' => '교정',               'slug' => 'ortho',        'desc' => '투명교정·브라켓·소아 교정 등 교정 진단·장치·술식' ),
+		array( 'name' => '심미·보철',          'slug' => 'esthetic',     'desc' => '라미네이트·크라운·인레이·치아 구조·치과 재료' ),
+		array( 'name' => '충치·신경·잇몸치료', 'slug' => 'general',      'desc' => '충치치료·신경치료·잇몸치료·발치·마취·홈케어' ),
+		array( 'name' => '구강외과·턱관절',    'slug' => 'surgery',      'desc' => '사랑니·턱관절·구강 질환·구강암·타액선' ),
+		array( 'name' => '소아치과',           'slug' => 'pediatric',    'desc' => '유치·소아 진료·실란트·공간유지장치·소아 교정 상담' ),
+		array( 'name' => '치과 상식·비용',     'slug' => 'dental-info',  'desc' => '건강보험·본인부담·CBCT·구강스캐너·치과 전문용어' ),
+	);
+	foreach ( $new_cats as $c ) {
+		if ( term_exists( $c['slug'], 'md_term_category' ) ) continue;
+		wp_insert_term( $c['name'], 'md_term_category', array(
+			'slug'        => $c['slug'],
+			'description' => $c['desc'],
+		) );
+	}
+
+	// 옛 슬러그 → 새 슬러그 매핑
+	$remap = array(
+		'implant'         => 'implant',
+		'ortho'           => 'ortho',
+		'tooth-structure' => 'esthetic',
+		'materials'       => 'esthetic',
+		'treatment'       => 'general',
+		'pulp-tooth'      => 'general',
+		'periodontal'     => 'general',
+		'oral-care'       => 'general',
+		'tmj-surgery'     => 'surgery',
+		'oral-medicine'   => 'surgery',
+		'diseases'        => 'surgery',
+		'pediatric-new'   => 'pediatric',
+		'equipment'       => 'dental-info',
+		'professional'    => 'dental-info',
+		'insurance-cost'  => 'dental-info',
+	);
+
+	// 새 카테고리 term_id 조회
+	$new_term_ids = array();
+	foreach ( $new_cats as $c ) {
+		$t = get_term_by( 'slug', $c['slug'], 'md_term_category' );
+		if ( $t ) $new_term_ids[ $c['slug'] ] = (int) $t->term_id;
+	}
+
+	// 모든 md_term 포스트 순회 후 카테고리 재배정
+	$reassigned = 0;
+	$posts = get_posts( array(
+		'post_type'      => 'md_term',
+		'post_status'    => 'publish',
+		'posts_per_page' => -1,
+		'fields'         => 'ids',
+	) );
+	foreach ( $posts as $pid ) {
+		$cur_terms = wp_get_object_terms( $pid, 'md_term_category', array( 'fields' => 'slugs' ) );
+		if ( is_wp_error( $cur_terms ) || empty( $cur_terms ) ) continue;
+		$new_slugs = array();
+		foreach ( $cur_terms as $slug ) {
+			$mapped = $remap[ $slug ] ?? null;
+			if ( $mapped && isset( $new_term_ids[ $mapped ] ) ) {
+				$new_slugs[] = $new_term_ids[ $mapped ];
+			}
+		}
+		if ( ! empty( $new_slugs ) ) {
+			$new_slugs = array_values( array_unique( $new_slugs ) );
+			wp_set_object_terms( $pid, $new_slugs, 'md_term_category', false );
+			$reassigned++;
+		}
+	}
+
+	// 옛 카테고리 삭제
+	$old_slugs = array( 'tooth-structure', 'materials', 'treatment', 'pulp-tooth', 'periodontal', 'oral-care', 'tmj-surgery', 'oral-medicine', 'diseases', 'pediatric-new', 'equipment', 'professional', 'insurance-cost' );
+	$deleted = 0;
+	foreach ( $old_slugs as $slug ) {
+		$t = get_term_by( 'slug', $slug, 'md_term_category' );
+		if ( $t ) {
+			wp_delete_term( (int) $t->term_id, 'md_term_category' );
+			$deleted++;
+		}
+	}
+
+	// term count 재계산
+	if ( function_exists( 'wp_update_term_count' ) ) {
+		$all_cats = get_terms( array( 'taxonomy' => 'md_term_category', 'hide_empty' => false, 'fields' => 'ids' ) );
+		if ( is_array( $all_cats ) ) {
+			wp_update_term_count( $all_cats, 'md_term_category', true );
+		}
+	}
+
+	// AJAX/preload transient 캐시 무효화
+	global $wpdb;
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_md\\_term\\_json\\_%' OR option_name LIKE '\\_transient\\_timeout\\_md\\_term\\_json\\_%'" );
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_md\\_terms\\_all\\_%' OR option_name LIKE '\\_transient\\_timeout\\_md\\_terms\\_all\\_%'" );
+
+	update_option( 'moondental_encyclopedia_cats_v34110', 'done' );
+	update_option( 'moondental_encyclopedia_cats_v34110_reassigned', $reassigned, false );
+	update_option( 'moondental_encyclopedia_cats_v34110_deleted', $deleted, false );
+}
+add_action( 'admin_init', 'moondental_seed_encyclopedia_categories_v34110', 50 );
+add_action( 'wp_loaded',  'moondental_seed_encyclopedia_categories_v34110', 50 );
+
 
 /* ============================================================
  * 3. 초성 헬퍼 · 한글 초성 추출 (아카이브 필터용)
