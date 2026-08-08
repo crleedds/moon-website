@@ -74,7 +74,7 @@ $cards = array(
 		'title'=> $mc( 'clinic_intro_dept_title', '진료과' ),
 		'lead' => $mc( 'clinic_intro_dept_lead', '전 분과 전문 의료진이 분야별 진료를 한 자리에서 협진합니다.' ),
 		'list' => $md_intro_list( 'clinic_intro_dept_list',
-			"턱관절 — 통증·기능 장애 진료\n이갈이 · 이악물기\n매복 사랑니 발치\n소아치과\n예방클리닉 — 전문예방치료실 · 덴탈 스파 프로그램" ),
+			"턱관절 클리닉 — 통증·기능 장애 진료\n이갈이 · 이악물기\n매복 사랑니 발치\n소아치과\n예방클리닉 — 전문예방치료실 · 덴탈 스파 프로그램" ),
 		'more_label' => $mc( 'clinic_intro_dept_more', '예방클리닉 자세히 →' ),
 		'more_url'   => home_url( '/예방클리닉/' ),
 	),

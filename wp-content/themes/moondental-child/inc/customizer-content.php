@@ -359,7 +359,7 @@ function moondental_home_content_fields() {
 				'clinic_intro_dept_icon'  => array( 'default' => '🏥', 'label' => '⑤ 진료과 · 아이콘', 'type' => 'text' ),
 				'clinic_intro_dept_title' => array( 'default' => '진료과', 'label' => '⑤ 진료과 · 제목', 'type' => 'text' ),
 				'clinic_intro_dept_lead'  => array( 'default' => '전 분과 전문 의료진이 분야별 진료를 한 자리에서 협진합니다.', 'label' => '⑤ 진료과 · 리드', 'type' => 'textarea' ),
-				'clinic_intro_dept_list'  => array( 'default' => "턱관절 — 통증·기능 장애 진료\n이갈이 · 이악물기\n매복 사랑니 발치\n소아치과\n예방클리닉 — 전문예방치료실 · 덴탈 스파 프로그램", 'label' => '⑤ 진료과 · 리스트', 'type' => 'textarea' ),
+				'clinic_intro_dept_list'  => array( 'default' => "턱관절 클리닉 — 통증·기능 장애 진료\n이갈이 · 이악물기\n매복 사랑니 발치\n소아치과\n예방클리닉 — 전문예방치료실 · 덴탈 스파 프로그램", 'label' => '⑤ 진료과 · 리스트', 'type' => 'textarea' ),
 				'clinic_intro_dept_more'  => array( 'default' => '예방클리닉 자세히 →', 'label' => '⑤ 진료과 · 링크 라벨', 'type' => 'text' ),
 
 				/* 06 기술력/시설 */
@@ -1285,8 +1285,9 @@ function moondental_subpage_content_fields() {
 				'loc_park_2_addr'     => array( 'default' => '동남구 먹거리1길 10', 'label' => '②번 항목 — 클릭 가능한 주소 문구 (위 설명 안의 일치 문자열이 자동으로 링크 처리됨)', 'type' => 'text' ),
 				'loc_park_2_addr_url' => array( 'default' => 'https://map.naver.com/p/search/%EC%8B%A0%EB%B6%80%20%EC%A0%9C5%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5', 'label' => '②번 항목 — 주소 클릭 시 이동할 URL (기본: 네이버 지도 검색)', 'type' => 'text' ),
 
-				'loc_park_walk'    => array( 'default' => '🚌 천안종합·고속버스터미널에서 도보 약 5분', 'label' => '하단 도보 안내 ①', 'type' => 'text' ),
-				'loc_park_train'   => array( 'default' => '🚆 천안역에서 버스로 약 10분', 'label' => '하단 도보 안내 ② (비우면 숨김)', 'type' => 'text' ),
+				'loc_park_walk'    => array( 'default' => '🚌 천안종합버스터미널·천안고속버스터미널에서 도보 약 5분', 'label' => '하단 안내 ① (터미널)', 'type' => 'text' ),
+				'loc_park_train'   => array( 'default' => '🚆 천안역에서 버스로 약 10분', 'label' => '하단 안내 ② 천안역 (비우면 숨김)', 'type' => 'text' ),
+				'loc_park_ktx'     => array( 'default' => '🚄 천안아산역에서 버스로 약 20분', 'label' => '하단 안내 ③ 천안아산역 (비우면 숨김)', 'type' => 'text' ),
 
 				'loc_hours_badge'  => array( 'default' => '🕐 진료시간', 'label' => '진료시간 카드 — 배지', 'type' => 'text' ),
 				'loc_hours_title'  => array( 'default' => '진료 가능 시간', 'label' => '진료시간 카드 — 제목', 'type' => 'text' ),

@@ -5994,6 +5994,32 @@ a.md-team-card:hover .md-team-card__more {
   font-weight: 700;
 }
 
+/* v3.44.116 · 역·터미널 네이버 지도 링크 · 밑줄 강조 */
+.md-station-link {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+  text-decoration-color: rgba(216, 128, 98, 0.45);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  font-weight: 700;
+  transition: all 0.18s ease;
+}
+.md-station-link:hover {
+  color: var(--color-primary);
+  text-decoration-color: var(--color-primary);
+  text-decoration-thickness: 2px;
+}
+@media (prefers-color-scheme: dark) {
+  .md-station-link {
+    color: #f2a878;
+    text-decoration-color: rgba(242, 168, 120, 0.55);
+  }
+  .md-station-link:hover {
+    color: #ffd0b0;
+    text-decoration-color: #f2a878;
+  }
+}
+
 @media (max-width: 480px) {
   .md-park__list li {
     grid-template-columns: 36px 1fr;

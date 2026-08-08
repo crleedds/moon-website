@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.115' );
+define( 'MOONDENTAL_VERSION', '3.44.116' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -547,6 +547,42 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_pulpcap_nav_v34107', 'done' );
 }, 54 );
+
+/* 일회성 마이그레이션 v3.44.116 · Customizer 값 갱신 (예방치과→예방클리닉, 턱관절→턱관절 클리닉, 터미널/역 링크)
+ * 사용자가 편집하지 않았거나 옛 기본값 그대로면 새 기본값으로 안전 갱신 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_customizer_rename_v34116' ) === 'done' ) return;
+
+	// clinic_intro_dept_list · 턱관절 → 턱관절 클리닉
+	$old_dept = "턱관절 — 통증·기능 장애 진료\n이갈이 · 이악물기\n매복 사랑니 발치\n소아치과\n예방클리닉 — 전문예방치료실 · 덴탈 스파 프로그램";
+	$new_dept = "턱관절 클리닉 — 통증·기능 장애 진료\n이갈이 · 이악물기\n매복 사랑니 발치\n소아치과\n예방클리닉 — 전문예방치료실 · 덴탈 스파 프로그램";
+	$cur_dept = get_theme_mod( 'md_content_clinic_intro_dept_list', null );
+	if ( $cur_dept === null || trim( (string) $cur_dept ) === '' || trim( (string) $cur_dept ) === $old_dept ) {
+		set_theme_mod( 'md_content_clinic_intro_dept_list', $new_dept );
+	} elseif ( strpos( (string) $cur_dept, '턱관절 클리닉' ) === false && strpos( (string) $cur_dept, '턱관절' ) !== false ) {
+		// 사용자 수정본에도 턱관절만 있으면 안전 치환 (라인 첫머리에 정확히 매칭)
+		$updated = preg_replace( '/(^|\n)턱관절(?! 클리닉)/', '$1턱관절 클리닉', (string) $cur_dept );
+		if ( $updated !== null && $updated !== $cur_dept ) {
+			set_theme_mod( 'md_content_clinic_intro_dept_list', $updated );
+		}
+	}
+
+	// loc_park_walk · 옛 · 병합 → 분리
+	$old_walk = '🚌 천안종합·고속버스터미널에서 도보 약 5분';
+	$new_walk = '🚌 천안종합버스터미널·천안고속버스터미널에서 도보 약 5분';
+	$cur_walk = get_theme_mod( 'md_content_loc_park_walk', null );
+	if ( $cur_walk === null || trim( (string) $cur_walk ) === '' || trim( (string) $cur_walk ) === $old_walk ) {
+		set_theme_mod( 'md_content_loc_park_walk', $new_walk );
+	}
+
+	// loc_park_ktx · 신규 필드 · 기본값 세팅 (기존 없으면 신규 저장)
+	$cur_ktx = get_theme_mod( 'md_content_loc_park_ktx', null );
+	if ( $cur_ktx === null ) {
+		set_theme_mod( 'md_content_loc_park_ktx', '🚄 천안아산역에서 버스로 약 20분' );
+	}
+
+	update_option( 'moondental_customizer_rename_v34116', 'done' );
+}, 56 );
 
 /* 일회성 마이그레이션 v3.44.108 · 상단 메뉴 · 자연치아살리기 하위에 '치수복조술' 추가
  * '주 메뉴 (자동 생성)' 메뉴에서 자연치아살리기 부모를 찾아 그 하위에 치수복조술을 삽입.

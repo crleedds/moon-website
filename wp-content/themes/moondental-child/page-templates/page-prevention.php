@@ -90,7 +90,7 @@ $nav_items = $parse_nav( md_content( 'prevention_nav_items', '' ) );
 		$_prev_floor = function_exists( 'moondental_slug_floor' ) ? moondental_slug_floor( '예방클리닉' ) : '';
 		if ( $_prev_floor ) :
 		?>
-			<span class="md-service-floor-badge" aria-label="위치"><span aria-hidden="true">📍</span> 문타워 <?php echo esc_html( $_prev_floor ); ?> · 예방치과</span>
+			<span class="md-service-floor-badge" aria-label="위치"><span aria-hidden="true">📍</span> 문타워 <?php echo esc_html( $_prev_floor ); ?> · 예방클리닉</span>
 		<?php endif; ?>
 		<h1 class="md-page-hero__title">
 			<?php echo esc_html( md_content( 'prevention_hero_title_a', '' ) ); ?><br>

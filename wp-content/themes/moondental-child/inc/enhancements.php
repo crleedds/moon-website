@@ -920,6 +920,38 @@ function moondental_nolink_parent_menu_titles() {
 }
 
 /**
+ * v3.44.116 · 네이버 지도 자동 링크 · 역·터미널 키워드 감지 후 링크화
+ *   HTML 안전 (a 태그 내부·href 속성 안 침범)
+ *   긴 키워드 먼저 매칭 (천안아산역 vs 천안역 충돌 방지)
+ */
+function moondental_auto_link_stations( $text ) {
+	if ( empty( $text ) || strpos( $text, '자동링크제외' ) !== false ) return $text;
+	$stations = array(
+		// 긴 키워드 먼저
+		'천안종합버스터미널' => 'https://map.naver.com/p/search/천안종합버스터미널',
+		'천안고속버스터미널' => 'https://map.naver.com/p/search/천안고속버스터미널',
+		'천안아산역'          => 'https://map.naver.com/p/search/천안아산역',
+		'천안역'              => 'https://map.naver.com/p/search/천안역',
+	);
+	// placeholder 로 매칭된 부분 임시 치환 후 최종 렌더 · 중복·재매칭 방지
+	$placeholders = array();
+	$idx = 0;
+	foreach ( $stations as $keyword => $url ) {
+		$re = '#(?<![>=/\w"\'])' . preg_quote( $keyword, '#' ) . '(?![^<]*</a>)#u';
+		$text = preg_replace_callback( $re, function( $m ) use ( &$placeholders, &$idx, $keyword, $url ) {
+			$token = "\x1F__MDSTA_{$idx}__\x1F";
+			$placeholders[ $token ] = '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer" class="md-station-link">' . esc_html( $keyword ) . '</a>';
+			$idx++;
+			return $token;
+		}, $text );
+	}
+	if ( $placeholders ) {
+		$text = strtr( $text, $placeholders );
+	}
+	return $text;
+}
+
+/**
  * v3.44.68 · 층별 안내 · 공식 배치 (단일 진실원)
  *  - 오시는 길 · 병원 소개 · 시설 · 서비스 페이지에서 재사용
  *  - 슬러그가 있는 센터는 페이지 링크 자동 생성
@@ -949,7 +981,7 @@ function moondental_floor_guide_data() {
 				array( 'name' => '스마일 디자인 센터', 'slug' => '스마일디자인센터' ),
 				array( 'name' => '구강외과' ),
 				array( 'name' => '구강내과' ),
-				array( 'name' => '턱관절클리닉',      'slug' => '턱관절-클리닉' ),
+				array( 'name' => '턱관절 클리닉',      'slug' => '턱관절-클리닉' ),
 			),
 		),
 		array(
@@ -958,7 +990,7 @@ function moondental_floor_guide_data() {
 				array( 'name' => '신환접수' ),
 				array( 'name' => '보철과' ),
 				array( 'name' => '보존과' ),
-				array( 'name' => '예방치과',   'slug' => '예방클리닉' ),
+				array( 'name' => '예방클리닉',   'slug' => '예방클리닉' ),
 			),
 		),
 	);
