@@ -7759,11 +7759,11 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
 .md-pain__concern,
 .md-pain__solution {
   position: relative;
-  padding: 16px clamp(18px, 2.2vw, 24px);
+  padding: 11px clamp(14px, 1.8vw, 20px);
 }
 .md-pain__concern {
   background: linear-gradient(180deg, rgba(216, 128, 98, 0.035) 0%, rgba(216, 128, 98, 0.075) 100%);
-  padding-bottom: 20px;
+  padding-bottom: 14px;
 }
 /* 대화 꼬리 (concern → solution 잇는 시각 요소) */
 .md-pain__concern::after {
@@ -7772,14 +7772,14 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   left: 50%;
   bottom: -1px;
   transform: translateX(-50%);
-  width: 32px;
-  height: 14px;
+  width: 26px;
+  height: 10px;
   background:
-    radial-gradient(circle at 50% 0%, transparent 7px, #fff 7.5px);
+    radial-gradient(circle at 50% 0%, transparent 5px, #fff 5.5px);
 }
 .md-pain__solution {
   background: #fff;
-  padding-top: 14px;
+  padding-top: 10px;
 }
 
 /* 인용 부호 · concern 좌상단 큰 따옴표 장식 */
@@ -7843,15 +7843,15 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
 .md-pain__tag {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.68rem;
+  gap: 5px;
+  font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   color: var(--color-primary-dark);
   background: rgba(216, 128, 98, 0.12);
-  padding: 5px 11px 5px 8px;
+  padding: 4px 10px 4px 7px;
   border-radius: 999px;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   border: 1px solid rgba(216, 128, 98, 0.20);
 }
 .md-pain__tag::before {
@@ -7914,9 +7914,9 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
 /* 모바일 조정 */
 @media (max-width: 560px) {
   .md-pain__concern,
-  .md-pain__solution { padding: 14px 16px; }
-  .md-pain__concern { padding-bottom: 18px; }
-  .md-pain__solution { padding-top: 12px; }
+  .md-pain__solution { padding: 10px 14px; }
+  .md-pain__concern { padding-bottom: 13px; }
+  .md-pain__solution { padding-top: 9px; }
   .md-pain__concern p { font-size: 0.94rem; }
   .md-pain__solution p { font-size: 0.88rem; padding-left: 20px; }
 }
