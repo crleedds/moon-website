@@ -7718,6 +7718,7 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
 
 /* =============================================================
    39. 진료 페이지 — 환자 고민 / 솔루션 6쌍 (.md-pain)
+   v3.44.113 · 리디자인 · 대화형(Q&A) 카드 · 인용 부호 · 아이콘 강조
    ============================================================= */
 .md-pain {
   list-style: none;
@@ -7725,68 +7726,195 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   margin: 0;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: clamp(14px, 2vw, 22px);
+  gap: clamp(18px, 2.4vw, 28px);
   max-width: 1080px;
   margin-inline: auto;
 }
 @media (max-width: 880px) { .md-pain { grid-template-columns: 1fr; } }
 
 .md-pain__pair {
-  display: grid;
-  grid-template-rows: auto auto;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  position: relative;
+  background: #fff;
+  border: 1px solid rgba(216, 128, 98, 0.14);
+  border-radius: 20px;
   overflow: hidden;
-  transition: all 0.3s var(--ease);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+.md-pain__pair::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, rgba(216, 128, 98, 0.15) 0%, var(--color-primary) 100%);
 }
 .md-pain__pair:hover {
-  border-color: var(--color-primary-light);
-  box-shadow: var(--shadow-soft);
-  transform: translateY(-3px);
+  border-color: var(--color-primary);
+  box-shadow: 0 14px 36px rgba(216, 128, 98, 0.18);
+  transform: translateY(-4px);
 }
+
 .md-pain__concern,
 .md-pain__solution {
-  padding: clamp(18px, 2.3vw, 24px);
+  position: relative;
+  padding: clamp(22px, 2.6vw, 30px) clamp(22px, 2.6vw, 28px);
 }
 .md-pain__concern {
-  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-alt));
-  border-bottom: 1px dashed var(--color-border);
+  background: linear-gradient(180deg, rgba(216, 128, 98, 0.035) 0%, rgba(216, 128, 98, 0.075) 100%);
+}
+/* 대화 꼬리 (concern → solution 잇는 시각 요소) */
+.md-pain__concern::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 20px;
+  background:
+    radial-gradient(circle at 50% 0%, transparent 10px, #fff 10.5px);
 }
 .md-pain__solution {
-  background: var(--color-white);
+  background: #fff;
 }
-.md-pain__concern p,
-.md-pain__solution p {
-  margin: 0;
-  font-size: var(--fs-small);
-  line-height: 1.7;
-  word-break: keep-all;
+
+/* 인용 부호 · concern 좌상단 큰 따옴표 장식 */
+.md-pain__concern p::before {
+  content: '\201C';
+  display: inline-block;
+  font-family: Georgia, serif;
+  font-size: 1.6em;
+  line-height: 0;
+  color: var(--color-primary);
+  opacity: 0.55;
+  vertical-align: -0.28em;
+  margin-right: 6px;
+  font-weight: 700;
+}
+.md-pain__concern p::after {
+  content: '\201D';
+  display: inline-block;
+  font-family: Georgia, serif;
+  font-size: 1.6em;
+  line-height: 0;
+  color: var(--color-primary);
+  opacity: 0.55;
+  vertical-align: -0.28em;
+  margin-left: 4px;
+  font-weight: 700;
 }
 .md-pain__concern p {
+  margin: 0;
   color: var(--color-text);
   font-weight: 600;
-  font-size: 1rem;
-  letter-spacing: -0.01em;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  letter-spacing: -0.015em;
+  word-break: keep-all;
+  font-style: italic;
 }
 .md-pain__solution p {
+  margin: 0;
   color: var(--color-text);
-  line-height: 1.75;
+  font-size: 0.95rem;
+  line-height: 1.72;
+  word-break: keep-all;
+  padding-left: 22px;
+  position: relative;
 }
+/* 해결책 앞 체크마크 아이콘 */
+.md-pain__solution p::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 14px;
+  height: 14px;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23D88062' d='M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-1 15l-5-5 1.41-1.41L9 12.17l7.59-7.59L18 6l-9 9z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+/* 태그 리디자인 · 아이콘 포함 필 배지 */
 .md-pain__tag {
-  display: inline-block;
-  font-size: 0.625rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
   font-weight: 800;
-  letter-spacing: 0.16em;
-  color: var(--color-text-mute);
-  background: rgba(0, 0, 0, 0.06);
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  margin-bottom: 8px;
+  letter-spacing: 0.06em;
+  color: var(--color-primary-dark);
+  background: rgba(216, 128, 98, 0.12);
+  padding: 6px 12px 6px 8px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(216, 128, 98, 0.20);
+}
+.md-pain__tag::before {
+  content: '💭';
+  font-size: 0.9em;
+  line-height: 1;
 }
 .md-pain__tag--alt {
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #c56a4d 100%);
   color: #fff;
+  border-color: var(--color-primary-dark);
+  box-shadow: 0 3px 8px rgba(216, 128, 98, 0.28);
+}
+.md-pain__tag--alt::before {
+  content: '✓';
+  font-size: 0.85em;
+  font-weight: 900;
+}
+
+/* 다크모드 대응 */
+@media (prefers-color-scheme: dark) {
+  .md-pain__pair {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(242, 168, 120, 0.22);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+  .md-pain__pair::before {
+    background: linear-gradient(180deg, rgba(242, 168, 120, 0.20) 0%, #f2a878 100%);
+  }
+  .md-pain__pair:hover {
+    border-color: #f2a878;
+    box-shadow: 0 14px 36px rgba(242, 168, 120, 0.22);
+  }
+  .md-pain__concern {
+    background: linear-gradient(180deg, rgba(242, 168, 120, 0.05) 0%, rgba(242, 168, 120, 0.09) 100%);
+  }
+  .md-pain__concern::after {
+    background: radial-gradient(circle at 50% 0%, transparent 10px, rgba(30, 22, 20, 1) 10.5px);
+  }
+  .md-pain__solution { background: rgba(30, 22, 20, 1); }
+  .md-pain__concern p,
+  .md-pain__solution p { color: #ececec; }
+  .md-pain__concern p::before,
+  .md-pain__concern p::after { color: #f2a878; }
+  .md-pain__solution p::before {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23f2a878' d='M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-1 15l-5-5 1.41-1.41L9 12.17l7.59-7.59L18 6l-9 9z'/%3E%3C/svg%3E");
+  }
+  .md-pain__tag {
+    background: rgba(242, 168, 120, 0.15);
+    color: #f2a878;
+    border-color: rgba(242, 168, 120, 0.30);
+  }
+  .md-pain__tag--alt {
+    background: linear-gradient(135deg, #f2a878 0%, #d88062 100%);
+    color: #1B1310;
+    border-color: #f2a878;
+  }
+}
+
+/* 모바일 조정 */
+@media (max-width: 560px) {
+  .md-pain__concern,
+  .md-pain__solution { padding: 20px 18px; }
+  .md-pain__concern p { font-size: 0.96rem; }
+  .md-pain__solution p { font-size: 0.9rem; padding-left: 20px; }
 }
 
 /* =============================================================
