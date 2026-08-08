@@ -18,8 +18,8 @@ function moondental_seo_page_map() {
 	return array(
 		// 홈 (front page)
 		'_home' => array(
-			'title' => '천안·아산 치과 문치과병원 · 임플란트·충치·잇몸·교정·소아 30년',
-			'desc'  => '천안·아산 문치과병원 30년 전통. 임플란트·충치·신경치료·잇몸치료·사랑니·라미네이트·소아치과·턱관절·교정 진료과 협진. 카카오톡·네이버 24시간 예약, 041-563-2875.',
+			'title' => '천안·아산 치과 문치과병원 · 임플란트·매복 사랑니·충치·교정 30년',
+			'desc'  => '천안·아산 문치과병원 30년 전통. 임플란트·매복 사랑니 잘 뽑는 치과·충치·신경치료·잇몸치료·라미네이트·소아치과·턱관절·교정 진료과 협진. 카카오톡·네이버 24시간 예약, 041-563-2875.',
 		),
 		// 진료 페이지
 		'임플란트-센터' => array(
@@ -47,8 +47,8 @@ function moondental_seo_page_map() {
 			'desc'  => '천안·아산 턱관절 클리닉 문치과병원. 턱관절 통증·이갈이·안면 근막통·스플린트 치료. 방사선 검사와 근전도 진단으로 정밀 치료. 상담 041-563-2875.',
 		),
 		'사랑니-발치' => array(
-			'title' => '천안·아산 사랑니 발치 · 매복 사랑니 · CT 3D 진단 - 문치과병원',
-			'desc'  => '천안·아산 사랑니 발치 문치과병원. CT 3D로 신경·매복 정밀 확인, 안전한 발치. 진정 마취 옵션. 발치 상담 041-563-2875.',
+			'title' => '천안·아산 매복 사랑니 잘 뽑는 치과 · 어려운 사랑니 전문 - 문치과병원',
+			'desc'  => '천안·아산 매복 사랑니 잘 뽑는 치과 문치과병원. 완전 매복·수평 매복·신경 근접 등 어려운 사랑니 CBCT 3D 정밀 진단·구강악안면외과 안전 발치. 진정 마취 가능. 상담 041-563-2875.',
 		),
 		'심미치료' => array(
 			'title' => '천안·아산 라미네이트 · 미백 · 심미치료 - 문치과병원 스마일 디자인 센터 (10F)',
@@ -440,7 +440,7 @@ function moondental_seo_extra_keywords() {
 		'브라켓-치아교정'       => '천안·아산 치아교정, 브라켓 교정, 설측 교정, 세라믹 브라켓, 자가결찰 교정, 소아 교정',
 		'자연치아-살리기'       => '자연치아 살리기, 치아 재접합, 신경치료, 치주치료, 미세현미경 치료, 발치 전 상담',
 		'턱관절-클리닉'         => '천안·아산 턱관절, 이갈이, 안면통증, 스플린트, TMJ 치료',
-		'사랑니-발치'           => '천안·아산 사랑니, 매복 사랑니, CT 발치, 사랑니 수술',
+		'사랑니-발치'           => '천안 매복 사랑니, 아산 매복 사랑니, 천안 매복 사랑니 잘 뽑는 치과, 아산 매복 사랑니 잘 뽑는 치과, 완전 매복 사랑니, 수평 매복 사랑니, 신경 근접 사랑니, 어려운 사랑니, 사랑니 매복, 매복치 발치, 매복 사랑니 수술, 진정 마취 사랑니, CBCT 사랑니, 구강악안면외과, 천안 사랑니, 아산 사랑니, 사랑니 뽑는 곳',
 		'심미치료'              => '천안·아산 라미네이트, 치아 미백, 심미 크라운, 스마일 디자인',
 		'예방클리닉'            => '천안·아산 스케일링, 정기 검진, 실란트, 불소도포, 홈케어',
 		'치과 백과사전'              => '치과 사전, 치과 용어, 치과 백과, 치과 정보, 치과 질환, 치과 치료',
@@ -456,7 +456,8 @@ function moondental_seo_extra_keywords() {
 			$n = $r['name'];
 			$treatments = array(
 				'임플란트', '충치치료', '신경치료', '잇몸치료', '치주치료',
-				'사랑니', '사랑니 발치', '라미네이트', '치아미백', '심미치료',
+				'사랑니', '사랑니 발치', '매복 사랑니', '매복 사랑니 발치', '어려운 사랑니',
+				'라미네이트', '치아미백', '심미치료',
 				'치아교정', '투명교정', '소아치과', '어린이 치과',
 				'턱관절', '이갈이', '스케일링', '치과',
 			);
@@ -466,6 +467,13 @@ function moondental_seo_extra_keywords() {
 				$parts[] = sprintf( '%s %s 추천', $n, $t );
 				$parts[] = sprintf( '%s %s 잘하는 곳', $n, $t );
 			}
+			// 매복 사랑니 특화 추가 조합
+			$parts[] = sprintf( '%s 매복 사랑니 잘 뽑는 치과', $n );
+			$parts[] = sprintf( '%s 완전 매복 사랑니', $n );
+			$parts[] = sprintf( '%s 수평 매복 사랑니', $n );
+			$parts[] = sprintf( '%s 사랑니 잘 뽑는 곳', $n );
+			$parts[] = sprintf( '%s 사랑니 뽑는 곳', $n );
+			$parts[] = sprintf( '%s 구강외과', $n );
 			$parts[] = sprintf( '%s 치과 추천', $n );
 			$parts[] = sprintf( '%s 치과병원', $n );
 			$region_extra = ', ' . implode( ', ', $parts );
@@ -489,7 +497,7 @@ function moondental_jsonld_area_served() {
 	}
 	$provinces = moondental_get_regions_by_province();
 	$area_served = array();
-	$medical_specialty = array( '임플란트', '충치치료', '신경치료', '잇몸치료', '치주치료', '사랑니 발치', '라미네이트', '치아미백', '심미치료', '치아교정', '투명교정', '소아치과', '어린이치과', '턱관절 치료', '이갈이 치료', '스케일링', '예방치과' );
+	$medical_specialty = array( '임플란트', '충치치료', '신경치료', '잇몸치료', '치주치료', '매복 사랑니 발치', '어려운 사랑니 발치', '사랑니 발치', '구강악안면외과', '라미네이트', '치아미백', '심미치료', '치아교정', '투명교정', '소아치과', '어린이치과', '턱관절 치료', '이갈이 치료', '스케일링', '예방치과' );
 	foreach ( $provinces as $prov => $regions ) {
 		foreach ( $regions as $r ) {
 			$area_served[] = array(
@@ -529,7 +537,8 @@ function moondental_jsonld_area_served() {
 			array( '@type' => 'MedicalProcedure', 'name' => '충치치료', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
 			array( '@type' => 'MedicalProcedure', 'name' => '신경치료', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
 			array( '@type' => 'MedicalProcedure', 'name' => '잇몸치료 · 치주치료', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
-			array( '@type' => 'MedicalProcedure', 'name' => '사랑니 발치', 'procedureType' => 'https://schema.org/SurgicalProcedure' ),
+			array( '@type' => 'MedicalProcedure', 'name' => '매복 사랑니 발치 (완전 매복·수평 매복·신경 근접)', 'procedureType' => 'https://schema.org/SurgicalProcedure' ),
+			array( '@type' => 'MedicalProcedure', 'name' => '사랑니 발치 · 구강악안면외과', 'procedureType' => 'https://schema.org/SurgicalProcedure' ),
 			array( '@type' => 'MedicalProcedure', 'name' => '라미네이트 · 심미치료', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
 			array( '@type' => 'MedicalProcedure', 'name' => '치아미백', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
 			array( '@type' => 'MedicalProcedure', 'name' => '치아교정 · 투명교정', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),

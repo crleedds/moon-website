@@ -146,7 +146,7 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 			<h2 class="md-section-head__title"><?php echo esc_html( $region_name ); ?> 임플란트·충치·잇몸치료 추천 · 잘하는 치과</h2>
 			<p class="md-section-head__lead">
 				<?php echo esc_html( $region_name ); ?> 환자분들이 <?php echo esc_html( $duration ); ?>분 거리 천안 문치과병원을 추천 치과로 선택하시는 이유입니다.
-				<?php echo esc_html( $province ); ?> <?php echo esc_html( $region_long ); ?>에서 임플란트·충치·신경치료·잇몸치료·사랑니·라미네이트·소아치과·턱관절 전문 진료과 협진이 필요할 때 30년 진료 문치과병원을 찾아주세요.
+				<?php echo esc_html( $province ); ?> <?php echo esc_html( $region_long ); ?>에서 임플란트·충치·신경치료·잇몸치료·매복 사랑니·라미네이트·소아치과·턱관절 전문 진료과 협진이 필요할 때 30년 진료 문치과병원을 찾아주세요.
 			</p>
 		</header>
 		<div class="md-region-tk-grid">
@@ -166,9 +166,9 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/자연치아-살리기/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 잇몸·치주치료 추천 →</a>
 			</article>
 			<article class="md-region-tk-card">
-				<h3><?php echo esc_html( $region_name ); ?> 사랑니 발치 추천 · 잘하는 치과</h3>
-				<p>CT 3D로 신경·매복 정밀 확인 후 안전한 사랑니 발치. <?php echo esc_html( $region_name ); ?> 환자분 매복 사랑니·부분 마취·진정 마취 옵션 · <?php echo esc_html( $region_name ); ?> 사랑니 추천 문치과병원.</p>
-				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/사랑니-발치/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 사랑니 발치 추천 →</a>
+				<h3><?php echo esc_html( $region_name ); ?> 매복 사랑니 잘 뽑는 치과 · 어려운 사랑니 전문</h3>
+				<p>완전 매복·수평 매복·신경 근접 사랑니 등 <strong>어려운 사랑니</strong>도 CBCT 3D 정밀 진단 후 구강악안면외과 안전 발치. <?php echo esc_html( $region_name ); ?> 환자분 매복 사랑니 진정 마취 옵션 · <?php echo esc_html( $region_name ); ?> 매복 사랑니 추천 문치과병원.</p>
+				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/사랑니-발치/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 매복 사랑니 자세히 →</a>
 			</article>
 			<article class="md-region-tk-card">
 				<h3><?php echo esc_html( $region_name ); ?> 라미네이트·치아미백 추천 · 잘하는 치과</h3>
