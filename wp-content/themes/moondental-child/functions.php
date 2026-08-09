@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.118' );
+define( 'MOONDENTAL_VERSION', '3.44.119' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -482,7 +482,29 @@ add_action( 'template_redirect', function () {
 			exit;
 		}
 	}
+
+	// v3.44.119 · Polylang 자동 생성 · 존재 안 하는 다국어 duplicate 슬러그 · 410 Gone
+	// (/홈-english/, /홈-中文/, /홈-日本語/, /홈-Tiếng Việt/, /홈-Русский/, /홈-Монгол/ 등)
+	if ( preg_match( '#^/(홈|home)-([a-zA-Z가-힣一-龥ぁ-んァ-ヶ]|Tiếng|Việt|Русский|Монгол|中文|日本語|English)#u', $path_decoded ) ) {
+		status_header( 410 );
+		nocache_headers();
+		header( 'X-Robots-Tag: noindex, nofollow, noarchive, nosnippet', true );
+		header( 'Content-Type: text/html; charset=UTF-8' );
+		echo '<!doctype html><html lang="ko"><head><meta charset="UTF-8"><title>410 Gone · 삭제된 페이지</title><meta name="robots" content="noindex,nofollow,noarchive,nosnippet"></head><body style="font-family:sans-serif;text-align:center;padding:60px 20px;"><h1>410 Gone</h1><p>이 페이지는 영구적으로 삭제되었습니다.</p><p><a href="' . esc_url( home_url( '/' ) ) . '">홈으로 이동</a></p></body></html>';
+		exit;
+	}
 }, 1 );
+
+/* v3.44.119 · 404 페이지 · X-Robots-Tag noindex HTTP 헤더 강제 (WP는 meta tag만 세팅)
+ * 존재하지 않는 페이지가 구글 인덱스에 남는 문제 해결 */
+add_action( 'template_redirect', function () {
+	if ( is_admin() ) return;
+	if ( is_404() ) {
+		if ( ! headers_sent() ) {
+			header( 'X-Robots-Tag: noindex, nofollow, noarchive, nosnippet', true );
+		}
+	}
+}, 2 );
 
 /* v3.44.102 · robots.txt Disallow · 삭제된 스팸 URL 크롤링 자체 차단 */
 add_filter( 'robots_txt', function( $output, $public ) {
@@ -498,6 +520,8 @@ add_filter( 'robots_txt', function( $output, $public ) {
 	foreach ( $dead_slugs as $s ) {
 		$block .= "Disallow: /치과사전/" . $s . "/\n";
 	}
+	// v3.44.119 · Polylang 자동 생성 duplicate 슬러그 크롤링 차단
+	$block .= "Disallow: /홈-english/\nDisallow: /홈-中文/\nDisallow: /홈-日本語/\nDisallow: /홈-Русский/\nDisallow: /홈-Монгол/\nDisallow: /home-english/\nDisallow: /*-english/\n";
 	$block .= "# END MOONDENTAL BLOCK\n";
 	return $output . $block;
 }, 10, 2 );
