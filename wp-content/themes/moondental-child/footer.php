@@ -209,16 +209,21 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				</ul>
 				<?php
 				/* v3.44.18 · 대중교통 안내 · 주차 리스트 하단 */
-				$park_walk_txt  = $mc( 'footer_park_walk',  '🚌 천안종합·고속버스터미널에서 도보 약 5분' );
+				/* v3.44.117 · 3줄로 분리 (터미널·천안역·천안아산역) + 네이버 지도 자동 링크 */
+				$park_walk_txt  = $mc( 'footer_park_walk',  '🚌 천안종합버스터미널·천안고속버스터미널에서 도보 약 5분' );
 				$park_train_txt = $mc( 'footer_park_train', '🚆 천안역에서 버스로 약 10분' );
-				if ( $park_walk_txt || $park_train_txt ) :
+				$park_ktx_txt   = $mc( 'footer_park_ktx',   '🚄 천안아산역에서 버스로 약 20분' );
+				if ( $park_walk_txt || $park_train_txt || $park_ktx_txt ) :
 				?>
 					<ul class="md-footer__park-transit" aria-label="<?php echo esc_attr( $mc( 'footer_park_transit_aria', '대중교통 안내' ) ); ?>">
 						<?php if ( $park_walk_txt ) : ?>
-							<li><?php echo esc_html( $park_walk_txt ); ?></li>
+							<li><?php echo wp_kses_post( function_exists( 'moondental_auto_link_stations' ) ? moondental_auto_link_stations( $park_walk_txt ) : $park_walk_txt ); ?></li>
 						<?php endif; ?>
 						<?php if ( $park_train_txt ) : ?>
-							<li><?php echo esc_html( $park_train_txt ); ?></li>
+							<li><?php echo wp_kses_post( function_exists( 'moondental_auto_link_stations' ) ? moondental_auto_link_stations( $park_train_txt ) : $park_train_txt ); ?></li>
+						<?php endif; ?>
+						<?php if ( $park_ktx_txt ) : ?>
+							<li><?php echo wp_kses_post( function_exists( 'moondental_auto_link_stations' ) ? moondental_auto_link_stations( $park_ktx_txt ) : $park_ktx_txt ); ?></li>
 						<?php endif; ?>
 					</ul>
 				<?php endif; ?>

@@ -180,16 +180,20 @@ $off_text = $info['hours_off'] ?: '휴진';
 					</li>
 				</ul>
 				<?php
-				$park_walk  = function_exists( 'md_content' ) ? md_content( 'loc_park_walk',  '🚌 천안종합·고속버스터미널에서 도보 약 5분' ) : '🚌 천안종합·고속버스터미널에서 도보 약 5분';
+				$park_walk  = function_exists( 'md_content' ) ? md_content( 'loc_park_walk',  '🚌 천안종합버스터미널·천안고속버스터미널에서 도보 약 5분' ) : '🚌 천안종합버스터미널·천안고속버스터미널에서 도보 약 5분';
 				$park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '🚆 천안역에서 버스로 약 10분' )                : '🚆 천안역에서 버스로 약 10분';
-				if ( $park_walk || $park_train ) :
+				$park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '🚄 천안아산역에서 버스로 약 20분' )              : '🚄 천안아산역에서 버스로 약 20분';
+				if ( $park_walk || $park_train || $park_ktx ) :
 				?>
 				<p class="md-park__walk">
 					<?php if ( $park_walk ) : ?>
-						<span><?php echo esc_html( $park_walk ); ?></span>
+						<span><?php echo wp_kses_post( moondental_auto_link_stations( $park_walk ) ); ?></span>
 					<?php endif; ?>
 					<?php if ( $park_train ) : ?>
-						<span><?php echo esc_html( $park_train ); ?></span>
+						<span><?php echo wp_kses_post( moondental_auto_link_stations( $park_train ) ); ?></span>
+					<?php endif; ?>
+					<?php if ( $park_ktx ) : ?>
+						<span><?php echo wp_kses_post( moondental_auto_link_stations( $park_ktx ) ); ?></span>
 					<?php endif; ?>
 				</p>
 				<?php endif; ?>
