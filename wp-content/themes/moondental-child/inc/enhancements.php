@@ -928,7 +928,7 @@ function moondental_auto_link_stations( $text ) {
 	if ( empty( $text ) || strpos( $text, '자동링크제외' ) !== false ) return $text;
 	$stations = array(
 		// 긴 키워드 먼저
-		'천안종합버스터미널' => 'https://map.naver.com/p/search/천안종합버스터미널',
+		'천안시외버스터미널' => 'https://map.naver.com/p/search/천안시외버스터미널',
 		'천안고속버스터미널' => 'https://map.naver.com/p/search/천안고속버스터미널',
 		'천안아산역'          => 'https://map.naver.com/p/search/천안아산역',
 		'천안역'              => 'https://map.naver.com/p/search/천안역',

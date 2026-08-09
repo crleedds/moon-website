@@ -1853,7 +1853,7 @@ function moondental_default_location_content() {
 
 <h3>🚌 대중교통</h3>
 <ul>
-<li>천안종합버스터미널 / 천안고속버스터미널에서 도보 약 5분</li>
+<li>천안시외버스터미널 / 천안고속버스터미널에서 도보 약 5분</li>
 <li>신부동 일대 시내버스 다수 정차</li>
 </ul>
 

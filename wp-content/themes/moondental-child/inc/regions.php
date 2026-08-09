@@ -29,7 +29,7 @@ function moondental_get_regions() {
 			'distance_km' => 5.0, 'duration_min' => 15, 'icon' => '🏙️',
 			'highway' => '천안IC · 남천안IC · 시내 도로망 · 각 지역별 5~20분',
 			'ktx' => '천안역 · 천안아산역 접근성 우수',
-			'bus' => '천안종합·고속버스터미널 도보 5분 · 시내버스 다수 노선',
+			'bus' => '천안시외·고속버스터미널 도보 5분 · 시내버스 다수 노선',
 			'note' => '천안 전 지역에서 만남로 문치과병원까지 편리한 접근 (동남구·서북구 모두 커버)',
 		),
 		'asan' => array(
@@ -44,7 +44,7 @@ function moondental_get_regions() {
 			'slug' => 'sinbu', 'name' => '천안 신부동', 'name_long' => '천안 동남구 신부동', 'province' => '천안·아산 시내',
 			'distance_km' => 0.5, 'duration_min' => 5, 'duration_label' => '도보 5분', 'icon' => '🚶',
 			'highway' => '도보 — 신부동 일대 어디서든 5~10분 이내',
-			'ktx' => '천안종합·고속버스터미널에서 도보 5분',
+			'ktx' => '천안시외·고속버스터미널에서 도보 5분',
 			'bus' => '신부동 일대 시내버스 다수 정차 (신세계백화점·터미널 인근)',
 			'note' => '신부동 일대 도보 5분 — 문치과병원이 자리한 동네',
 		),

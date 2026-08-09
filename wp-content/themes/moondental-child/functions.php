@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.117' );
+define( 'MOONDENTAL_VERSION', '3.44.118' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -551,7 +551,7 @@ add_action( 'after_setup_theme', function() {
 /* 일회성 마이그레이션 v3.44.116 · Customizer 값 갱신 (예방치과→예방클리닉, 턱관절→턱관절 클리닉, 터미널/역 링크)
  * 사용자가 편집하지 않았거나 옛 기본값 그대로면 새 기본값으로 안전 갱신 */
 add_action( 'after_setup_theme', function() {
-	if ( get_option( 'moondental_customizer_rename_v34117' ) === 'done' ) return;
+	if ( get_option( 'moondental_customizer_rename_v34118' ) === 'done' ) return;
 
 	// clinic_intro_dept_list · 턱관절 → 턱관절 클리닉
 	$old_dept = "턱관절 — 통증·기능 장애 진료\n이갈이 · 이악물기\n매복 사랑니 발치\n소아치과\n예방클리닉 — 전문예방치료실 · 덴탈 스파 프로그램";
@@ -567,13 +567,16 @@ add_action( 'after_setup_theme', function() {
 		}
 	}
 
-	// loc_park_walk · 옛 · 병합 → 분리
-	$old_walk = '🚌 천안종합·고속버스터미널에서 도보 약 5분';
-	$new_walk = '🚌 천안종합버스터미널·천안고속버스터미널에서 도보 약 5분';
+	// loc_park_walk · 옛 · 병합 → 분리 + 종합 → 시외 리네이밍 (v3.44.118)
+	$old_walk_a = '🚌 천안종합·고속버스터미널에서 도보 약 5분';
+	$old_walk_b = '🚌 천안종합버스터미널·천안고속버스터미널에서 도보 약 5분';
+	$new_walk   = '🚌 천안시외버스터미널·천안고속버스터미널에서 도보 약 5분';
 	$cur_walk = get_theme_mod( 'md_content_loc_park_walk', null );
-	if ( $cur_walk === null || trim( (string) $cur_walk ) === '' || trim( (string) $cur_walk ) === $old_walk ) {
+	if ( $cur_walk === null || trim( (string) $cur_walk ) === '' || trim( (string) $cur_walk ) === $old_walk_a || trim( (string) $cur_walk ) === $old_walk_b ) {
 		set_theme_mod( 'md_content_loc_park_walk', $new_walk );
 	}
+	// 변수 재정의 · 아래 footer 마이그레이션도 같은 로직
+	$old_walk = $old_walk_a; // for backward reference below
 
 	// loc_park_ktx · 신규 필드 · 기본값 세팅 (기존 없으면 신규 저장)
 	$cur_ktx = get_theme_mod( 'md_content_loc_park_ktx', null );
@@ -583,7 +586,7 @@ add_action( 'after_setup_theme', function() {
 
 	// footer_park_walk · 옛 값이면 새 값으로 갱신
 	$cur_fw = get_theme_mod( 'md_content_footer_park_walk', null );
-	if ( $cur_fw === null || trim( (string) $cur_fw ) === '' || trim( (string) $cur_fw ) === $old_walk ) {
+	if ( $cur_fw === null || trim( (string) $cur_fw ) === '' || trim( (string) $cur_fw ) === $old_walk_a || trim( (string) $cur_fw ) === $old_walk_b ) {
 		set_theme_mod( 'md_content_footer_park_walk', $new_walk );
 	}
 	// footer_park_ktx · 신규 필드
@@ -592,7 +595,7 @@ add_action( 'after_setup_theme', function() {
 		set_theme_mod( 'md_content_footer_park_ktx', '🚄 천안아산역에서 버스로 약 20분' );
 	}
 
-	update_option( 'moondental_customizer_rename_v34117', 'done' );
+	update_option( 'moondental_customizer_rename_v34118', 'done' );
 }, 56 );
 
 /* 일회성 마이그레이션 v3.44.108 · 상단 메뉴 · 자연치아살리기 하위에 '치수복조술' 추가

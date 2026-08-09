@@ -54,7 +54,7 @@ $time_sat = function_exists( 'moondental_extract_time_range' )
 	? moondental_extract_time_range( $info['hours_sat'] ?? '' )
 	: ( $info['hours_sat'] ?? '' );
 
-$park_walk  = function_exists( 'md_content' ) ? md_content( 'loc_park_walk',  '🚌 천안종합버스터미널·천안고속버스터미널에서 도보 약 5분' ) : '🚌 천안종합버스터미널·천안고속버스터미널에서 도보 약 5분';
+$park_walk  = function_exists( 'md_content' ) ? md_content( 'loc_park_walk',  '🚌 천안시외버스터미널·천안고속버스터미널에서 도보 약 5분' ) : '🚌 천안시외버스터미널·천안고속버스터미널에서 도보 약 5분';
 $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '🚆 천안역에서 버스로 약 10분' )                : '🚆 천안역에서 버스로 약 10분';
 $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '🚄 천안아산역에서 버스로 약 20분' )              : '🚄 천안아산역에서 버스로 약 20분';
 ?>
