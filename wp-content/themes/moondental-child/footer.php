@@ -211,7 +211,7 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				/* v3.44.18 · 대중교통 안내 · 주차 리스트 하단 */
 				/* v3.44.117 · 3줄로 분리 (터미널·천안역·천안아산역) + 네이버 지도 자동 링크 */
 				$park_walk_txt  = $mc( 'footer_park_walk',  '🚌 천안시외버스터미널·천안고속버스터미널에서 도보 약 5분' );
-				$park_train_txt = $mc( 'footer_park_train', '🚆 천안역에서 버스로 약 10분' );
+				$park_train_txt = $mc( 'footer_park_train', '🚆 천안역·두정역에서 버스로 약 10분' );
 				$park_ktx_txt   = $mc( 'footer_park_ktx',   '🚄 천안아산역에서 버스로 약 20분' );
 				if ( $park_walk_txt || $park_train_txt || $park_ktx_txt ) :
 				?>

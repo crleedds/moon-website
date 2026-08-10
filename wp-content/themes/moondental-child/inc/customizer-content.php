@@ -1286,7 +1286,7 @@ function moondental_subpage_content_fields() {
 				'loc_park_2_addr_url' => array( 'default' => 'https://map.naver.com/p/search/%EC%8B%A0%EB%B6%80%20%EC%A0%9C5%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5', 'label' => '②번 항목 — 주소 클릭 시 이동할 URL (기본: 네이버 지도 검색)', 'type' => 'text' ),
 
 				'loc_park_walk'    => array( 'default' => '🚌 천안시외버스터미널·천안고속버스터미널에서 도보 약 5분', 'label' => '하단 안내 ① (터미널)', 'type' => 'text' ),
-				'loc_park_train'   => array( 'default' => '🚆 천안역에서 버스로 약 10분', 'label' => '하단 안내 ② 천안역 (비우면 숨김)', 'type' => 'text' ),
+				'loc_park_train'   => array( 'default' => '🚆 천안역·두정역에서 버스로 약 10분', 'label' => '하단 안내 ② 천안역·두정역 (비우면 숨김)', 'type' => 'text' ),
 				'loc_park_ktx'     => array( 'default' => '🚄 천안아산역에서 버스로 약 20분', 'label' => '하단 안내 ③ 천안아산역 (비우면 숨김)', 'type' => 'text' ),
 
 				'loc_hours_badge'  => array( 'default' => '🕐 진료시간', 'label' => '진료시간 카드 — 배지', 'type' => 'text' ),

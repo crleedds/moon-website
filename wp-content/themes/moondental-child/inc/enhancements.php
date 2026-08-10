@@ -926,12 +926,14 @@ function moondental_nolink_parent_menu_titles() {
  */
 function moondental_auto_link_stations( $text ) {
 	if ( empty( $text ) || strpos( $text, '자동링크제외' ) !== false ) return $text;
+	// v3.44.120 · 정확한 네이버 플레이스 short URL 로 교체 + 두정역 추가
 	$stations = array(
-		// 긴 키워드 먼저
-		'천안시외버스터미널' => 'https://map.naver.com/p/search/천안시외버스터미널',
-		'천안고속버스터미널' => 'https://map.naver.com/p/search/천안고속버스터미널',
-		'천안아산역'          => 'https://map.naver.com/p/search/천안아산역',
-		'천안역'              => 'https://map.naver.com/p/search/천안역',
+		// 긴 키워드 먼저 (짧은 키워드와 부분매칭 방지)
+		'천안시외버스터미널' => 'https://naver.me/5GhgHbJV',
+		'천안고속버스터미널' => 'https://naver.me/5GhgHbJV',
+		'천안아산역'          => 'https://naver.me/G0lVLWTs',
+		'두정역'              => 'https://naver.me/5hJghQ3f',
+		'천안역'              => 'https://naver.me/GRmMc1vX',
 	);
 	// placeholder 로 매칭된 부분 임시 치환 후 최종 렌더 · 중복·재매칭 방지
 	$placeholders = array();
