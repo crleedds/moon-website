@@ -11121,14 +11121,11 @@ html { scroll-behavior: smooth; }
   .md-header__cta-label { transition: none; }
 }
 
-/* v3.44.135 · 기본 안전장치 · 모든 요소 visible + 로고·CTA 절대 축소 안 됨 */
-/* v3.44.143 · 로고 우측에 여백 확보 (nav 첫 항목 겹침 방지) */
+/* v3.44.135 · 기본 안전장치 · 로고·CTA 절대 축소 안 됨 */
+/* v3.44.144 · Grid로 전환 · brand margin 제거 (grid gap 이 담당) */
 .md-header__brand,
 .md-header__cta,
 .md-header__cta-btn { flex-shrink: 0 !important; }
-@media (min-width: 1081px) {
-  .md-header__brand { margin-right: clamp(20px, 2vw, 40px); }
-}
 /* 모든 헤더 컨테이너 · overflow visible (nav 항목 절대 안 잘림) */
 .md-site-header,
 .md-header,
@@ -11147,15 +11144,17 @@ html { scroll-behavior: smooth; }
  *     · 1600+ : 전화+시간 풀 표시
  * ============================================================ */
 
-/* --- 데스크탑 (1081+) 공통 · clamp() 유연 스케일링 --- */
-/* v3.44.141 · nav 와 CTA 사이 여백 강화 (margin-left on aside) */
+/* --- 데스크탑 (1081+) · CSS GRID 3열 (겹침 근본 차단) --- */
+/* v3.44.144 · display:grid · [brand] [nav] [aside] · gap 강제 · 겹침 불가능 */
 @media (min-width: 1081px) {
   .md-header__inner {
-    gap: clamp(12px, 1.2vw, 28px);
-    padding-inline: clamp(10px, 1.2vw, 22px);
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: clamp(24px, 2.5vw, 56px);
+    padding-inline: clamp(14px, 1.5vw, 24px);
     align-items: center;
   }
-  .md-header__nav { min-width: 0; flex: 1 1 auto; overflow: visible; }
+  .md-header__nav { min-width: 0; overflow: hidden; }
   .md-header__nav > ul {
     gap: 4px 2px;
     flex-wrap: wrap;
@@ -11171,9 +11170,8 @@ html { scroll-behavior: smooth; }
   .md-header__aside {
     gap: clamp(6px, 0.7vw, 14px);
     padding-right: 0;
-    flex-shrink: 0;
-    margin-left: clamp(32px, 3vw, 72px) !important; /* !important · 옛 auto 규칙 덮음 */
-    padding-left: clamp(16px, 1.5vw, 32px);          /* 추가 여백 */
+    margin-left: 0 !important;      /* grid gap 이 여백 담당 · margin 제거 */
+    padding-left: 0;
   }
   .md-header__info {
     gap: clamp(6px, 0.7vw, 12px);
