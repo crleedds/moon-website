@@ -11168,7 +11168,8 @@ html { scroll-behavior: smooth; }
     gap: clamp(6px, 0.7vw, 14px);
     padding-right: 0;
     flex-shrink: 0;
-    margin-left: clamp(24px, 2.5vw, 60px); /* nav 와 CTA 사이 여백 확보 */
+    margin-left: clamp(32px, 3vw, 72px) !important; /* !important · 옛 auto 규칙 덮음 */
+    padding-left: clamp(16px, 1.5vw, 32px);          /* 추가 여백 */
   }
   .md-header__info {
     gap: clamp(6px, 0.7vw, 12px);
