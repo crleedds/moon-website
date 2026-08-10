@@ -11144,22 +11144,25 @@ html { scroll-behavior: smooth; }
  * ============================================================ */
 
 /* --- 데스크탑 (881+) 공통 · clamp() 유연 스케일링 --- */
+/* v3.44.137 · flex-wrap 활성화 · 공간 부족 시 각 항목이 다음 줄로 wrap */
 @media (min-width: 881px) {
   .md-header__inner {
     gap: clamp(8px, 0.9vw, 22px);
     padding-inline: clamp(10px, 1.2vw, 22px);
-    /* v3.44.135 · overflow visible (nav 항목 절대 안 잘림) */
+    align-items: center;
   }
   .md-header__nav { min-width: 0; flex: 1 1 auto; overflow: visible; }
   .md-header__nav > ul {
-    gap: 0;
-    flex-wrap: nowrap;
+    gap: 4px 2px;
+    flex-wrap: wrap;                       /* v3.44.137 · 공간 부족 시 wrap */
+    justify-content: center;
   }
   .md-header__nav > ul > li > a {
-    padding: 8px clamp(3px, 0.45vw, 13px);
-    font-size: clamp(0.7rem, 0.82vw, 0.95rem);
+    padding: 10px clamp(6px, 0.6vw, 14px); /* 세로 패딩 늘려서 wrap 시에도 시각 균형 */
+    font-size: clamp(0.78rem, 0.85vw, 0.95rem);
     letter-spacing: -0.015em;
     white-space: nowrap;
+    line-height: 1.2;
   }
   .md-header__aside {
     gap: clamp(6px, 0.7vw, 14px);
