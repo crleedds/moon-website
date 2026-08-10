@@ -11144,54 +11144,56 @@ html { scroll-behavior: smooth; }
 /* --- 데스크탑 (881+) 공통 · clamp() 유연 스케일링 --- */
 @media (min-width: 881px) {
   .md-header__inner {
-    gap: clamp(10px, 1vw, 24px);
-    padding-inline: clamp(12px, 1.5vw, 24px);
+    gap: clamp(8px, 0.9vw, 22px);
+    padding-inline: clamp(10px, 1.2vw, 22px);
+    overflow: hidden !important;
   }
-  .md-header__nav { min-width: 0; flex-shrink: 1; }
+  .md-header__nav { min-width: 0; flex: 1 1 auto; overflow: hidden; }
   .md-header__nav > ul {
-    gap: clamp(0px, 0.3vw, 8px);
+    gap: 0;
     flex-wrap: nowrap;
   }
   .md-header__nav > ul > li > a {
-    padding: 8px clamp(4px, 0.55vw, 14px);
-    font-size: clamp(0.72rem, 0.85vw, 0.95rem);
-    letter-spacing: clamp(-0.03em, 0em, 0em);
+    padding: 8px clamp(3px, 0.45vw, 13px);
+    font-size: clamp(0.7rem, 0.82vw, 0.95rem);
+    letter-spacing: -0.015em;
     white-space: nowrap;
   }
   .md-header__aside {
-    gap: clamp(6px, 0.8vw, 14px);
+    gap: clamp(6px, 0.7vw, 14px);
     padding-right: 0;
     flex-shrink: 0;
   }
   .md-header__info {
-    gap: clamp(6px, 0.8vw, 12px);
-    padding-right: clamp(6px, 0.8vw, 14px);
+    gap: clamp(6px, 0.7vw, 12px);
+    padding-right: clamp(6px, 0.7vw, 14px);
   }
   .md-header__phone {
     font-size: clamp(0.82rem, 0.9vw, 1rem);
   }
   .md-header__cta-btn {
-    padding: clamp(7px, 0.8vw, 12px) clamp(11px, 1.2vw, 22px);
-    font-size: clamp(0.75rem, 0.88vw, 0.95rem);
+    padding: clamp(7px, 0.8vw, 12px) clamp(10px, 1.1vw, 22px);
+    font-size: clamp(0.72rem, 0.85vw, 0.95rem);
     letter-spacing: -0.01em;
     white-space: nowrap;
   }
   .md-header__cta-btn--cycle { min-width: auto; }
 }
 
-/* --- (881~1200px) 좁은 데스크탑 · 정보 완전 숨김 --- */
-@media (min-width: 881px) and (max-width: 1200px) {
-  .md-header__info { display: none; }
+/* --- 정보 영역 단계별 숨김 · 겹침 방지 (881~1699px 모두 숨김) --- */
+@media (min-width: 881px) and (max-width: 1699px) {
+  .md-header__info { display: none !important; }
 }
-/* --- (1201~1400px) 중간 데스크탑 · 전화만 숨김 --- */
-@media (min-width: 1201px) and (max-width: 1400px) {
-  .md-header__info { display: none; }
+/* --- (1700~1899px) 전화 표시 · 시간 숨김 --- */
+@media (min-width: 1700px) and (max-width: 1899px) {
+  .md-header__info { display: flex !important; }
+  .md-header__hours { display: none !important; }
 }
-/* --- (1401~1599px) 넓은 데스크탑 · 전화 표시 · 시간 숨김 --- */
-@media (min-width: 1401px) and (max-width: 1599px) {
-  .md-header__hours { display: none; }
+/* --- (1900px+) 풀 데스크탑 · 모든 요소 표시 --- */
+@media (min-width: 1900px) {
+  .md-header__info { display: flex !important; }
+  .md-header__hours { display: inline !important; }
 }
-/* --- (1600px+) 풀 데스크탑 · 모든 요소 표시 --- */
 
 /* --- (≤880px) 모바일 · 햄버거 · CTA 유지 --- */
 @media (max-width: 880px) {
