@@ -11152,21 +11152,24 @@ html { scroll-behavior: smooth; }
     align-items: center;
   }
   .md-header__nav { min-width: 0; overflow: visible; }
+  /* v3.44.146 · nav 항목은 반드시 한 줄에 · 각 항목 내부 텍스트만 여러 줄 허용 */
   .md-header__nav > ul {
-    gap: 4px 2px;
-    flex-wrap: wrap !important;         /* !important · 반드시 wrap */
+    gap: clamp(2px, 0.3vw, 8px);
+    flex-wrap: nowrap !important;       /* 한 줄 강제 */
     justify-content: center;
     max-width: 100%;
     width: 100%;
     box-sizing: border-box;
   }
-  .md-header__nav > ul > li { max-width: 100%; }
+  .md-header__nav > ul > li { min-width: 0; }
   .md-header__nav > ul > li > a {
-    padding: 10px clamp(6px, 0.6vw, 14px);
-    font-size: clamp(0.78rem, 0.85vw, 0.95rem);
-    letter-spacing: -0.015em;
-    white-space: nowrap;
+    padding: 8px clamp(4px, 0.5vw, 14px);
+    font-size: clamp(0.75rem, 0.82vw, 0.95rem);
+    letter-spacing: -0.02em;
+    white-space: normal !important;     /* 항목 내부 텍스트 wrap 허용 */
+    word-break: keep-all;
     line-height: 1.2;
+    text-align: center;
   }
   .md-header__aside {
     gap: clamp(6px, 0.7vw, 14px);
