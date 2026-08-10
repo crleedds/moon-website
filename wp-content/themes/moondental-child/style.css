@@ -11122,17 +11122,14 @@ html { scroll-behavior: smooth; }
 }
 
 /* v3.44.135 · 기본 안전장치 · 로고·CTA 절대 축소 안 됨 */
-/* v3.44.144 · Grid로 전환 · brand margin 제거 (grid gap 이 담당) */
+/* v3.44.144/145 · Grid로 전환 · overflow는 각 규칙에서 개별 제어 */
 .md-header__brand,
 .md-header__cta,
 .md-header__cta-btn { flex-shrink: 0 !important; }
-/* 모든 헤더 컨테이너 · overflow visible (nav 항목 절대 안 잘림) */
+/* v3.44.145 · site-header/header 만 overflow visible (드롭다운 나올 자리)
+   nav/inner/aside 는 overflow 개별 제어 (겹침 방지) */
 .md-site-header,
-.md-header,
-.md-header__inner,
-.md-header__nav,
-.md-header__nav > ul,
-.md-header__aside { overflow: visible !important; }
+.md-header { overflow: visible !important; }
 
 /* ============================================================
  * v3.44.133 · 헤더 반응형 · 데스크탑 항상 nav · 유연 clamp() 스케일링
@@ -11154,12 +11151,16 @@ html { scroll-behavior: smooth; }
     padding-inline: clamp(14px, 1.5vw, 24px);
     align-items: center;
   }
-  .md-header__nav { min-width: 0; overflow: hidden; }
+  .md-header__nav { min-width: 0; overflow: visible; }
   .md-header__nav > ul {
     gap: 4px 2px;
-    flex-wrap: wrap;
+    flex-wrap: wrap !important;         /* !important · 반드시 wrap */
     justify-content: center;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
   }
+  .md-header__nav > ul > li { max-width: 100%; }
   .md-header__nav > ul > li > a {
     padding: 10px clamp(6px, 0.6vw, 14px);
     font-size: clamp(0.78rem, 0.85vw, 0.95rem);
