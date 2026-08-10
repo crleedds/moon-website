@@ -31,6 +31,9 @@ function moondental_seo_meta_tags() {
 	$site_name = $info['name_full'] ?: '문치과병원';
 	$site_url  = home_url( '/' );
 	$default_image = MOONDENTAL_URI . '/assets/images/logo/logo-square.png';
+	// v3.44.128 · Customizer 사용자 지정 OG 이미지 있으면 최우선 사용
+	$cust_og_image = function_exists( 'md_content' ) ? md_content( 'seo_og_image_default', '' ) : '';
+	if ( $cust_og_image ) $default_image = $cust_og_image;
 
 	// v3.38.1 · 제목 접미어 (모든 페이지 뒤에 자동 붙음)
 	$title_suffix = str_replace( '{site}', $site_name,
@@ -144,6 +147,15 @@ function moondental_seo_meta_tags() {
 	if ( $google_verify ) {
 		echo '<meta name="google-site-verification" content="' . esc_attr( $google_verify ) . '">' . "\n";
 	}
+	// v3.44.128 · 추가 검색엔진 verification (Bing, Yandex, Daum, Pinterest)
+	$bing_verify      = function_exists( 'md_content' ) ? md_content( 'seo_bing_verify', '' )      : '';
+	$yandex_verify    = function_exists( 'md_content' ) ? md_content( 'seo_yandex_verify', '' )    : '';
+	$daum_verify      = function_exists( 'md_content' ) ? md_content( 'seo_daum_verify', '' )      : '';
+	$pinterest_verify = function_exists( 'md_content' ) ? md_content( 'seo_pinterest_verify', '' ) : '';
+	if ( $bing_verify )      echo '<meta name="msvalidate.01" content="' . esc_attr( $bing_verify ) . '">' . "\n";
+	if ( $yandex_verify )    echo '<meta name="yandex-verification" content="' . esc_attr( $yandex_verify ) . '">' . "\n";
+	if ( $daum_verify )      echo '<meta name="daum-site-verification" content="' . esc_attr( $daum_verify ) . '">' . "\n";
+	if ( $pinterest_verify ) echo '<meta name="p:domain_verify" content="' . esc_attr( $pinterest_verify ) . '">' . "\n";
 
 	if ( ! $yoast ) {
 		// Open Graph
@@ -156,20 +168,104 @@ function moondental_seo_meta_tags() {
 		echo '<meta property="og:locale" content="ko_KR">' . "\n";
 
 		// Twitter Card
-		echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
+		// v3.44.128 · Customizer 커스텀 값 반영
+		$tw_card   = function_exists( 'md_content' ) ? md_content( 'seo_twitter_card_type', 'summary_large_image' ) : 'summary_large_image';
+		$tw_handle = function_exists( 'md_content' ) ? md_content( 'seo_twitter_handle', '' ) : '';
+		echo '<meta name="twitter:card" content="' . esc_attr( $tw_card ) . '">' . "\n";
 		echo '<meta name="twitter:title" content="' . esc_attr( $meta_title ) . '">' . "\n";
 		echo '<meta name="twitter:description" content="' . esc_attr( $meta_desc ) . '">' . "\n";
 		echo '<meta name="twitter:image" content="' . esc_url( $og_image ) . '">' . "\n";
+		if ( $tw_handle ) {
+			echo '<meta name="twitter:site" content="' . esc_attr( $tw_handle ) . '">' . "\n";
+			echo '<meta name="twitter:creator" content="' . esc_attr( $tw_handle ) . '">' . "\n";
+		}
+		// Facebook App ID
+		$fb_app = function_exists( 'md_content' ) ? md_content( 'seo_fb_app_id', '' ) : '';
+		if ( $fb_app ) echo '<meta property="fb:app_id" content="' . esc_attr( $fb_app ) . '">' . "\n";
 	}
 
-	// 지역 SEO (Yoast Local이 없으면 항상 출력 — 무해)
-	echo '<meta name="geo.region" content="KR-44">' . "\n"; // 충청남도
-	echo '<meta name="geo.placename" content="천안시 동남구 신부동">' . "\n";
-	echo '<meta name="geo.position" content="36.8210;127.1572">' . "\n";
-	echo '<meta name="ICBM" content="36.8210, 127.1572">' . "\n";
+	// 지역 SEO — Customizer 값 반영 (v3.44.128)
+	$geo_region    = function_exists( 'md_content' ) ? md_content( 'seo_geo_region',    'KR-44' )                : 'KR-44';
+	$geo_placename = function_exists( 'md_content' ) ? md_content( 'seo_geo_placename', '천안시 동남구 신부동' ) : '천안시 동남구 신부동';
+	$geo_lat       = function_exists( 'md_content' ) ? md_content( 'seo_geo_lat',       '36.8210' )             : '36.8210';
+	$geo_lng       = function_exists( 'md_content' ) ? md_content( 'seo_geo_lng',       '127.1572' )            : '127.1572';
+	echo '<meta name="geo.region" content="' . esc_attr( $geo_region ) . '">' . "\n";
+	echo '<meta name="geo.placename" content="' . esc_attr( $geo_placename ) . '">' . "\n";
+	echo '<meta name="geo.position" content="' . esc_attr( $geo_lat ) . ';' . esc_attr( $geo_lng ) . '">' . "\n";
+	echo '<meta name="ICBM" content="' . esc_attr( $geo_lat ) . ', ' . esc_attr( $geo_lng ) . '">' . "\n";
 	echo '<!-- /moondental SEO meta -->' . "\n\n";
 }
 add_action( 'wp_head', 'moondental_seo_meta_tags', 5 );
+
+/**
+ * v3.44.128 · 소셜 프로필 sameAs 스키마 + 분석 도구 자동 삽입
+ */
+function moondental_seo_sameas_organization_schema() {
+	if ( ! function_exists( 'md_content' ) ) return;
+	if ( ! is_front_page() && ! is_home() ) return;
+	$profiles = array();
+	foreach ( array( 'naver', 'kakao', 'facebook', 'instagram', 'youtube', 'blog', 'kakao_ch' ) as $k ) {
+		$url = md_content( 'seo_profile_' . $k, '' );
+		if ( $url ) $profiles[] = esc_url_raw( $url );
+	}
+	if ( ! $profiles ) return;
+	$name    = md_content( 'seo_publisher_name', '한아의료재단 문치과병원' );
+	$alt     = md_content( 'seo_publisher_alt', '문치과병원' );
+	$logo    = md_content( 'seo_publisher_logo', '' );
+	$founding= md_content( 'seo_publisher_founding', '1995' );
+	$schema = array(
+		'@context'      => 'https://schema.org',
+		'@type'         => 'Organization',
+		'name'          => $name,
+		'alternateName' => $alt,
+		'url'           => home_url( '/' ),
+		'sameAs'        => array_values( $profiles ),
+	);
+	if ( $logo ) $schema['logo'] = $logo;
+	if ( $founding ) $schema['foundingDate'] = $founding;
+	echo "\n<script type=\"application/ld+json\">";
+	echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+	echo "</script>\n";
+}
+add_action( 'wp_head', 'moondental_seo_sameas_organization_schema', 55 );
+
+/**
+ * v3.44.128 · 분석 도구 스니펫 자동 삽입 (GA4·GTM·Naver Analytics·Kakao Pixel·Meta Pixel)
+ */
+function moondental_seo_analytics_snippets() {
+	if ( ! function_exists( 'md_content' ) ) return;
+	if ( is_admin() ) return;
+	$ga4     = trim( (string) md_content( 'seo_ga4_id', '' ) );
+	$gtm     = trim( (string) md_content( 'seo_gtm_id', '' ) );
+	$nva     = trim( (string) md_content( 'seo_naver_analytics', '' ) );
+	$kakao   = trim( (string) md_content( 'seo_kakao_pixel_id', '' ) );
+	$meta    = trim( (string) md_content( 'seo_meta_pixel_id', '' ) );
+
+	if ( $ga4 && preg_match( '/^G-[A-Z0-9]{6,}$/i', $ga4 ) ) {
+		echo "\n<!-- GA4 (auto) -->\n";
+		echo '<script async src="https://www.googletagmanager.com/gtag/js?id=' . esc_attr( $ga4 ) . '"></script>' . "\n";
+		echo '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config",' . wp_json_encode( $ga4 ) . ');</script>' . "\n";
+	}
+	if ( $gtm && preg_match( '/^GTM-[A-Z0-9]{5,}$/i', $gtm ) ) {
+		echo "\n<!-- GTM (auto) -->\n";
+		echo "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer'," . wp_json_encode( $gtm ) . ");</script>\n";
+	}
+	if ( $nva ) {
+		echo "\n<!-- Naver Analytics (auto) -->\n";
+		echo '<script src="//wcs.naver.net/wcslog.js"></script>' . "\n";
+		echo "<script>if(!wcs_add)var wcs_add={};wcs_add['wa']=" . wp_json_encode( $nva ) . ";if(window.wcs){wcs_do();}</script>\n";
+	}
+	if ( $meta && preg_match( '/^\d{8,}$/', $meta ) ) {
+		echo "\n<!-- Meta Pixel (auto) -->\n";
+		echo "<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init'," . wp_json_encode( $meta ) . ");fbq('track','PageView');</script>\n";
+	}
+	if ( $kakao ) {
+		echo "\n<!-- Kakao Pixel (auto) -->\n";
+		echo '<script src="//t1.daumcdn.net/kas/static/kp.js"></script>' . "\n";
+		echo '<script>kakaoPixel(' . wp_json_encode( $kakao ) . ').pageView();</script>' . "\n";
+	}
+}
+add_action( 'wp_head', 'moondental_seo_analytics_snippets', 6 );
 
 /**
  * <title> 태그도 SEO 친화적으로 재정의.

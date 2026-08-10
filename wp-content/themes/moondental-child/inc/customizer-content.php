@@ -1490,10 +1490,69 @@ function moondental_chrome_content_fields() {
 			),
 		),
 		'seo_verification' => array(
-			'title'  => 'SEO — 검색엔진 등록 인증',
+			'title'  => '🔐 SEO · 검색엔진 등록 인증 (사이트 소유 확인 코드)',
 			'fields' => array(
-				'seo_naver_verify'  => array( 'default' => '', 'label' => '네이버 웹마스터도구 인증 코드 (content 값만)', 'type' => 'text' ),
-				'seo_google_verify' => array( 'default' => '', 'label' => 'Google Search Console 인증 코드 (content 값만)', 'type' => 'text' ),
+				'seo_google_verify' => array( 'default' => '', 'label' => 'Google Search Console (content 값만)',       'type' => 'text', 'description' => '예: 6ub1J8fBmPXH... · Search Console에서 HTML 태그 방식 선택 후 content="" 안의 값' ),
+				'seo_naver_verify'  => array( 'default' => '', 'label' => '네이버 서치어드바이저 (content 값만)',       'type' => 'text', 'description' => 'searchadvisor.naver.com 에서 HTML 태그 방식 인증 후 content="" 값' ),
+				'seo_bing_verify'   => array( 'default' => '', 'label' => 'Bing Webmaster Tools (content 값만)',        'type' => 'text' ),
+				'seo_yandex_verify' => array( 'default' => '', 'label' => 'Yandex Webmaster (content 값만)',            'type' => 'text' ),
+				'seo_daum_verify'   => array( 'default' => '', 'label' => 'Daum 검색등록 (content 값만)',               'type' => 'text' ),
+				'seo_pinterest_verify' => array( 'default' => '', 'label' => 'Pinterest 인증 (content 값만)',           'type' => 'text' ),
+			),
+		),
+		'seo_social' => array(
+			'title'  => '📱 SEO · 소셜 공유 (OG · Twitter Card · Naver)',
+			'fields' => array(
+				'seo_og_image_default'   => array( 'default' => '', 'label' => '기본 공유 이미지 URL (1200×630 권장)',   'type' => 'url', 'description' => '카톡·페이스북·트위터 공유 시 표시될 대표 이미지 · 개별 페이지 이미지 없을 때 사용' ),
+				'seo_twitter_handle'     => array( 'default' => '', 'label' => 'Twitter 계정 (@ 포함, 예: @moondental)', 'type' => 'text' ),
+				'seo_twitter_card_type'  => array( 'default' => 'summary_large_image', 'label' => 'Twitter Card 유형',    'type' => 'text', 'description' => 'summary_large_image (큰 이미지) 또는 summary (작은 썸네일)' ),
+				'seo_fb_app_id'          => array( 'default' => '', 'label' => 'Facebook App ID (있는 경우)',            'type' => 'text' ),
+				'seo_naver_og_image'     => array( 'default' => '', 'label' => '네이버 검색 대표 이미지 URL',              'type' => 'url', 'description' => '네이버 검색 결과 스니펫에 표시될 이미지' ),
+			),
+		),
+		'seo_analytics' => array(
+			'title'  => '📊 SEO · 분석 도구 ID',
+			'fields' => array(
+				'seo_ga4_id'         => array( 'default' => '', 'label' => 'Google Analytics 4 측정 ID (G-XXXXXXXX)',   'type' => 'text' ),
+				'seo_gtm_id'         => array( 'default' => '', 'label' => 'Google Tag Manager ID (GTM-XXXXXXX)',       'type' => 'text' ),
+				'seo_naver_analytics'=> array( 'default' => '', 'label' => '네이버 애널리틱스 계정 ID',                   'type' => 'text' ),
+				'seo_kakao_pixel_id' => array( 'default' => '', 'label' => 'Kakao Pixel ID (있는 경우)',                 'type' => 'text' ),
+				'seo_meta_pixel_id'  => array( 'default' => '', 'label' => 'Meta(Facebook) Pixel ID (있는 경우)',        'type' => 'text' ),
+			),
+		),
+		'seo_robots' => array(
+			'title'  => '🤖 SEO · 로봇/색인 세밀 설정',
+			'fields' => array(
+				'seo_robots_home'      => array( 'default' => 'index, follow', 'label' => '홈 페이지 robots',              'type' => 'text', 'description' => '기본: index, follow · noindex 필요 시 변경' ),
+				'seo_robots_archives'  => array( 'default' => 'index, follow', 'label' => '카테고리·아카이브 robots',      'type' => 'text' ),
+				'seo_robots_search'    => array( 'default' => 'noindex, follow', 'label' => '검색 결과 페이지 robots',     'type' => 'text', 'description' => '검색결과는 통상 noindex 권장' ),
+				'seo_robots_author'    => array( 'default' => 'noindex, follow', 'label' => '작성자 페이지 robots',        'type' => 'text' ),
+				'seo_robots_404'       => array( 'default' => 'noindex, nofollow, noarchive, nosnippet', 'label' => '404 페이지 robots', 'type' => 'text', 'description' => '존재하지 않는 페이지 · noindex 필수' ),
+			),
+		),
+		'seo_publisher' => array(
+			'title'  => '🏥 SEO · 병원 정보 (스키마 · 지식 그래프)',
+			'fields' => array(
+				'seo_publisher_name'   => array( 'default' => '한아의료재단 문치과병원', 'label' => '병원 정식 명칭 (구글 지식 그래프용)',  'type' => 'text' ),
+				'seo_publisher_alt'    => array( 'default' => '문치과병원',              'label' => '병원 약칭 (alternateName)',           'type' => 'text' ),
+				'seo_publisher_logo'   => array( 'default' => '',                       'label' => '로고 이미지 URL (정사각 · 512×512 권장)', 'type' => 'url' ),
+				'seo_publisher_founding' => array( 'default' => '1995',                 'label' => '개원 연도 (foundingDate)',              'type' => 'text' ),
+				'seo_geo_region'       => array( 'default' => 'KR-44',                   'label' => 'geo.region (충남=KR-44)',              'type' => 'text' ),
+				'seo_geo_placename'    => array( 'default' => '천안시 동남구 신부동',      'label' => 'geo.placename',                         'type' => 'text' ),
+				'seo_geo_lat'          => array( 'default' => '36.8210',                 'label' => '위도',                                  'type' => 'text' ),
+				'seo_geo_lng'          => array( 'default' => '127.1572',                'label' => '경도',                                  'type' => 'text' ),
+			),
+		),
+		'seo_social_profiles' => array(
+			'title'  => '🔗 SEO · 소셜 프로필 (sameAs 스키마 · 지식 그래프)',
+			'fields' => array(
+				'seo_profile_naver'    => array( 'default' => '', 'label' => '네이버 플레이스 URL',        'type' => 'url' ),
+				'seo_profile_kakao'    => array( 'default' => '', 'label' => '카카오맵 URL',              'type' => 'url' ),
+				'seo_profile_facebook' => array( 'default' => '', 'label' => 'Facebook 페이지 URL',       'type' => 'url' ),
+				'seo_profile_instagram'=> array( 'default' => '', 'label' => 'Instagram 프로필 URL',      'type' => 'url' ),
+				'seo_profile_youtube'  => array( 'default' => '', 'label' => 'YouTube 채널 URL',         'type' => 'url' ),
+				'seo_profile_blog'     => array( 'default' => '', 'label' => '네이버 블로그 URL',         'type' => 'url' ),
+				'seo_profile_kakao_ch' => array( 'default' => '', 'label' => '카카오톡 채널 URL',         'type' => 'url' ),
 			),
 		),
 	);
@@ -1821,17 +1880,28 @@ function moondental_register_home_content_customizer( $wp_customize ) {
 
 	$groups = moondental_home_content_fields();
 	$prio = 10;
+	$seo_prio = 10;
 	foreach ( $groups as $group_key => $group ) {
-		// v3.44.126 · seo 그룹은 별도 최상위 SEO 패널로 배치
-		$target_panel = ( $group_key === 'seo' ) ? $seo_panel_id : $panel_id;
-		$section_id   = ( $group_key === 'seo' ) ? 'md_section_seo_meta' : 'md_section_content_' . $group_key;
-		$section_title = ( $group_key === 'seo' ) ? '📄 페이지별 검색 제목·설명·키워드' : $group['title'];
+		// v3.44.126 · seo* 그룹은 모두 최상위 SEO 패널로 배치
+		// v3.44.128 · seo_verification, seo_social, seo_analytics, seo_robots, seo_publisher, seo_social_profiles 도 포함
+		$is_seo = ( $group_key === 'seo' || strpos( $group_key, 'seo_' ) === 0 );
+		$target_panel = $is_seo ? $seo_panel_id : $panel_id;
+		if ( $is_seo ) {
+			$section_id = 'md_section_' . $group_key;
+			$section_title = ( $group_key === 'seo' ) ? '📄 페이지별 검색 제목·설명·키워드' : $group['title'];
+			$section_prio = $seo_prio;
+			$seo_prio += 10;
+		} else {
+			$section_id = 'md_section_content_' . $group_key;
+			$section_title = $group['title'];
+			$section_prio = $prio;
+			$prio += 10;
+		}
 		$wp_customize->add_section( $section_id, array(
 			'title'    => $section_title,
 			'panel'    => $target_panel,
-			'priority' => ( $group_key === 'seo' ) ? 10 : $prio,
+			'priority' => $section_prio,
 		) );
-		if ( $group_key !== 'seo' ) $prio += 10;
 
 		foreach ( $group['fields'] as $key => $field ) {
 			$setting_id = 'md_content_' . $key;

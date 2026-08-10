@@ -1108,7 +1108,7 @@ button.elementor-button {
 .md-header__nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .md-header__nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-@media (max-width: 880px) {
+@media (max-width: 1180px) {
   .md-header__nav-toggle { display: flex; position: relative; z-index: 220; }
 
   /* v3.44.52 · 모바일 메뉴 · 우측에서 슬라이드 인 · 부분 너비 · 백드롭 */
@@ -1190,12 +1190,13 @@ button.elementor-button {
 }
 
 /* v3.31.7 · 모바일 메뉴 열림 시 body 스크롤 잠금 (선택적 · JS 없이 CSS만) */
-@media (max-width: 880px) {
+/* v3.44.128 · 브레이크포인트 880→1180 (태블릿까지 햄버거 · CTA 겹침 방지) */
+@media (max-width: 1180px) {
   body:has(.md-header__nav.is-open) { overflow: hidden; }
 }
 
 /* v3.31.7 · 다크모드 모바일 메뉴 · 서브 메뉴 항목 대비 확보 */
-@media (prefers-color-scheme: dark) and (max-width: 880px) {
+@media (prefers-color-scheme: dark) and (max-width: 1180px) {
   .md-header__nav { background: #1F1810; border-bottom-color: rgba(244, 177, 149, 0.15); }
   .md-header__nav > ul > li > a,
   .md-nav > li > a { border-bottom-color: rgba(244, 177, 149, 0.12); }
@@ -11152,7 +11153,8 @@ html { scroll-behavior: smooth; }
   .md-header__cta-btn--cycle { min-width: 84px; }
   .md-header__nav > ul > li > a { padding-inline: 4px; font-size: 0.78rem; }
 }
-@media (max-width: 880px) {
+/* v3.44.128 · 브레이크포인트 880→1180 (태블릿까지 햄버거 메뉴) */
+@media (max-width: 1180px) {
   .md-header__info { display: none; }
   .md-header__cta { display: inline-flex; }
   .md-header__inner { gap: 12px; min-height: 72px; padding-block: 10px; }
