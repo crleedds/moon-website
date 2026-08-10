@@ -1077,30 +1077,39 @@ button.elementor-button {
 }
 
 /* Mobile toggle — 우리 테마의 햄버거 (3줄 메뉴 버튼) */
+/* v3.44.129 · 햄버거 버튼 · 명확한 시각 개선 */
 .md-header__nav-toggle {
   display: none;
   flex-direction: column;
   justify-content: center;
-  width: 44px; height: 44px;
-  background-color: transparent;
-  border: 1px solid var(--color-border);
+  align-items: center;
+  width: 46px; height: 46px;
+  background-color: var(--color-surface);
+  border: 1.5px solid var(--color-primary);
   border-radius: 10px;
   cursor: pointer;
-  padding: 10px;
+  padding: 12px 10px;
   gap: 5px;
   -webkit-appearance: none;
   appearance: none;
   color: var(--color-text);
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 .md-header__nav-toggle:hover,
 .md-header__nav-toggle:focus-visible {
-  background-color: var(--color-surface);
-  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+  border-color: var(--color-primary-dark);
+}
+.md-header__nav-toggle:hover span,
+.md-header__nav-toggle:focus-visible span {
+  background-color: #fff;
 }
 .md-header__nav-toggle span {
   display: block;
-  height: 2px;
-  background-color: var(--color-text);
+  width: 22px;
+  height: 2.5px;
+  background-color: var(--color-primary-dark);
   border-radius: 2px;
   transition: all 0.25s var(--ease);
 }
@@ -11124,48 +11133,30 @@ html { scroll-behavior: smooth; }
 .md-header__inner,
 .md-header__aside { overflow: visible !important; }
 
-/* v3.44.127 · 헤더 반응형 강화 · 태블릿 전 구간 CTA 잘림 방지 */
-/* 넓은 태블릿·좁은 노트북 (1101~1280px): 시간·전화 숨김 검토 + 약간 컴팩트 */
-@media (max-width: 1280px) {
+/* v3.44.129 · 데스크탑 전용 (1181px+) · 시간 숨김만 유지 */
+@media (min-width: 1181px) and (max-width: 1280px) {
   .md-header__hours { display: none; }
   .md-header__info { padding-right: 10px; gap: 8px; }
   .md-header__inner { gap: 14px; padding-inline: 14px; }
   .md-header__nav > ul > li > a { padding-inline: 10px; }
 }
-/* 좁은 노트북·태블릿 (1024~1200px): 전화도 숨기고 CTA 살짝 축소 */
-@media (min-width: 881px) and (max-width: 1200px) {
-  .md-header__info { display: none; }
-  .md-header__cta-btn { padding: 10px 14px; font-size: 0.85rem; letter-spacing: -0.01em; white-space: nowrap; }
-  .md-header__cta-btn--cycle { min-width: 116px; }
-  .md-header__nav > ul > li > a { padding-inline: 8px; font-size: 0.88rem; letter-spacing: -0.015em; }
-  .md-header__aside { padding-right: 4px; }
-}
-/* 좁은 태블릿 (881~1024px): CTA·nav 더 컴팩트 */
-@media (min-width: 881px) and (max-width: 1024px) {
-  .md-header__inner { gap: 10px; padding-inline: 12px; }
-  .md-header__cta-btn { padding: 9px 12px; font-size: 0.8rem; }
-  .md-header__cta-btn--cycle { min-width: 100px; }
-  .md-header__nav > ul > li > a { padding-inline: 6px; font-size: 0.83rem; }
-}
-/* 가장 좁은 태블릿 (881~960px): 최소 사이즈 */
-@media (min-width: 881px) and (max-width: 960px) {
-  .md-header__cta-btn { padding: 8px 10px; font-size: 0.75rem; }
-  .md-header__cta-btn--cycle { min-width: 84px; }
-  .md-header__nav > ul > li > a { padding-inline: 4px; font-size: 0.78rem; }
-}
-/* v3.44.128 · 브레이크포인트 880→1180 (태블릿까지 햄버거 메뉴) */
+/* v3.44.128/129 · 태블릿·모바일 (≤1180px) · 햄버거 메뉴 · CTA 유지 */
 @media (max-width: 1180px) {
-  .md-header__info { display: none; }
-  .md-header__cta { display: inline-flex; }
-  .md-header__inner { gap: 12px; min-height: 72px; padding-block: 10px; }
-  .md-header__aside { gap: 8px; }
-  /* 햄버거를 맨 오른쪽으로 — flex order로 시각적 순서 변경
+  .md-header__info { display: none !important; }
+  .md-header__hours { display: none !important; }
+  .md-header__cta { display: inline-flex !important; }
+  .md-header__inner { gap: 12px !important; min-height: 72px !important; padding-block: 10px !important; padding-inline: 14px !important; }
+  .md-header__aside { gap: 8px !important; }
+  /* 햄버거를 맨 오른쪽으로 — flex order 시각적 순서 변경
      DOM 순서: [로고] [햄버거] [nav] [aside(CTA)]
      화면 표시: [로고] [공간] [CTA] [햄버거] */
-  .md-header__brand       { order: 1; }
-  .md-header__nav         { order: 2; }
-  .md-header__aside       { order: 3; margin-left: auto; }
-  .md-header__nav-toggle  { order: 4; margin-left: 4px; }
+  .md-header__brand       { order: 1 !important; }
+  .md-header__nav         { order: 2 !important; }
+  .md-header__aside       { order: 3 !important; margin-left: auto !important; }
+  .md-header__nav-toggle  { order: 4 !important; margin-left: 4px !important; }
+  /* CTA 컴팩트 사이즈 */
+  .md-header__cta-btn { padding: 9px 14px; font-size: 0.85rem; letter-spacing: -0.01em; white-space: nowrap; }
+  .md-header__cta-btn--cycle { min-width: auto; }
 }
 @media (max-width: 540px) {
   .md-header__cta-btn {
