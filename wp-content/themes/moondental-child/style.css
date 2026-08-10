@@ -11112,23 +11112,45 @@ html { scroll-behavior: smooth; }
 }
 
 /* 반응형 — 정보 영역 단계별 숨김 */
-@media (max-width: 1100px) {
+/* v3.44.127 · 헤더 기본 안전장치 · flex-shrink 우선순위 명시 */
+.md-header__brand,
+.md-header__aside,
+.md-header__cta,
+.md-header__cta-btn { flex-shrink: 0 !important; }
+.md-header__nav { flex-shrink: 1 !important; min-width: 0; }
+.md-site-header,
+.md-header,
+.md-header__inner,
+.md-header__aside { overflow: visible !important; }
+
+/* v3.44.127 · 헤더 반응형 강화 · 태블릿 전 구간 CTA 잘림 방지 */
+/* 넓은 태블릿·좁은 노트북 (1101~1280px): 시간·전화 숨김 검토 + 약간 컴팩트 */
+@media (max-width: 1280px) {
   .md-header__hours { display: none; }
   .md-header__info { padding-right: 10px; gap: 8px; }
+  .md-header__inner { gap: 14px; padding-inline: 14px; }
+  .md-header__nav > ul > li > a { padding-inline: 10px; }
 }
-/* v3.44.125 · 태블릿 (881~1100px) · 최우측 CTA 버튼 잘림 방지 */
-@media (min-width: 881px) and (max-width: 1100px) {
-  .md-header__inner { gap: 8px; padding-inline: 12px; overflow: hidden; }
-  .md-header__info { display: none; }                /* 전화·시간 숨김 · 공간 확보 */
-  .md-header__cta { flex-shrink: 0; }
-  .md-header__cta-btn { padding: 10px 14px; font-size: 0.85rem; letter-spacing: -0.01em; }
+/* 좁은 노트북·태블릿 (1024~1200px): 전화도 숨기고 CTA 살짝 축소 */
+@media (min-width: 881px) and (max-width: 1200px) {
+  .md-header__info { display: none; }
+  .md-header__cta-btn { padding: 10px 14px; font-size: 0.85rem; letter-spacing: -0.01em; white-space: nowrap; }
   .md-header__cta-btn--cycle { min-width: 116px; }
   .md-header__nav > ul > li > a { padding-inline: 8px; font-size: 0.88rem; letter-spacing: -0.015em; }
+  .md-header__aside { padding-right: 4px; }
 }
+/* 좁은 태블릿 (881~1024px): CTA·nav 더 컴팩트 */
+@media (min-width: 881px) and (max-width: 1024px) {
+  .md-header__inner { gap: 10px; padding-inline: 12px; }
+  .md-header__cta-btn { padding: 9px 12px; font-size: 0.8rem; }
+  .md-header__cta-btn--cycle { min-width: 100px; }
+  .md-header__nav > ul > li > a { padding-inline: 6px; font-size: 0.83rem; }
+}
+/* 가장 좁은 태블릿 (881~960px): 최소 사이즈 */
 @media (min-width: 881px) and (max-width: 960px) {
-  .md-header__cta-btn { padding: 8px 12px; font-size: 0.8rem; }
-  .md-header__cta-btn--cycle { min-width: 96px; }
-  .md-header__nav > ul > li > a { padding-inline: 6px; font-size: 0.82rem; }
+  .md-header__cta-btn { padding: 8px 10px; font-size: 0.75rem; }
+  .md-header__cta-btn--cycle { min-width: 84px; }
+  .md-header__nav > ul > li > a { padding-inline: 4px; font-size: 0.78rem; }
 }
 @media (max-width: 880px) {
   .md-header__info { display: none; }
