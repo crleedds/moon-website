@@ -1117,7 +1117,7 @@ button.elementor-button {
 .md-header__nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .md-header__nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-@media (max-width: 1366px) {
+@media (max-width: 1500px) {
   .md-header__nav-toggle { display: flex; position: relative; z-index: 220; }
 
   /* v3.44.52 · 모바일 메뉴 · 우측에서 슬라이드 인 · 부분 너비 · 백드롭 */
@@ -1199,13 +1199,13 @@ button.elementor-button {
 }
 
 /* v3.31.7 · 모바일 메뉴 열림 시 body 스크롤 잠금 */
-/* v3.44.131 · 브레이크포인트 1180→1366 (iPad Pro 12.9 landscape 포함) */
-@media (max-width: 1366px) {
+/* v3.44.132 · 브레이크포인트 1366→1500 (좁은 데스크탑 겹침 완전 방지) */
+@media (max-width: 1500px) {
   body:has(.md-header__nav.is-open) { overflow: hidden; }
 }
 
 /* v3.31.7 · 다크모드 모바일 메뉴 · 서브 메뉴 항목 대비 확보 */
-@media (prefers-color-scheme: dark) and (max-width: 1366px) {
+@media (prefers-color-scheme: dark) and (max-width: 1500px) {
   .md-header__nav { background: #1F1810; border-bottom-color: rgba(244, 177, 149, 0.15); }
   .md-header__nav > ul > li > a,
   .md-nav > li > a { border-bottom-color: rgba(244, 177, 149, 0.12); }
@@ -11134,28 +11134,28 @@ html { scroll-behavior: smooth; }
 .md-header__aside { overflow: visible !important; }
 
 /* ============================================================
- * v3.44.131 · 헤더 반응형 · iPad Pro 12.9 landscape (1366px) 까지 햄버거
+ * v3.44.132 · 헤더 반응형 · 좁은 데스크탑까지 햄버거 · 겹침 완전 방지
  * 기기별 breakpoint:
  *   - ≤400px : 최소 폰 · 초컴팩트
  *   - 401~540px : 일반 폰
  *   - 541~880px : 폰 가로 · 소형 태블릿 세로
- *   - 881~1366px : 태블릿 전 기종 (iPad Pro 12.9 landscape 포함)
- *      → 모두 햄버거 메뉴 + CTA 유지 (오버플로우 완전 방지)
- *   - 1367~1500px : 좁은 노트북 · 데스크탑 nav 컴팩트
- *   - 1501px+ : 풀 데스크탑
+ *   - 881~1500px : 태블릿·좁은 노트북/데스크탑
+ *      → 모두 햄버거 메뉴 + CTA 유지 (겹침 완전 방지)
+ *   - 1501~1700px : 중간 데스크탑 · 데스크탑 nav 컴팩트
+ *   - 1701px+ : 풀 데스크탑 (여유 있음)
  * ============================================================ */
 
-/* --- (1367~1500px) 좁은 노트북 · 데스크탑 nav 컴팩트 --- */
-@media (min-width: 1367px) and (max-width: 1500px) {
+/* --- (1501~1700px) 중간 데스크탑 · nav 컴팩트 · 전화 숨김 --- */
+@media (min-width: 1501px) and (max-width: 1700px) {
   .md-header__hours { display: none; }
-  .md-header__info { padding-right: 10px; gap: 8px; }
-  .md-header__inner { gap: 16px; padding-inline: 16px; }
+  .md-header__info { display: none; }
+  .md-header__inner { gap: 18px; padding-inline: 20px; }
   .md-header__nav > ul > li > a { padding-inline: 10px; font-size: 0.92rem; }
-  .md-header__cta-btn { padding: 10px 16px; font-size: 0.88rem; }
+  .md-header__cta-btn { padding: 10px 18px; font-size: 0.9rem; }
 }
 
-/* --- (≤1366px) 태블릿·모바일 · 햄버거 메뉴 + CTA 유지 --- */
-@media (max-width: 1366px) {
+/* --- (≤1500px) 태블릿·모바일·좁은 데스크탑 · 햄버거 메뉴 + CTA 유지 --- */
+@media (max-width: 1500px) {
   .md-header__info { display: none !important; }
   .md-header__hours { display: none !important; }
   .md-header__cta { display: inline-flex !important; }
