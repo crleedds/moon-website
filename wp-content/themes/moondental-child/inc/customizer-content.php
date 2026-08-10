@@ -753,7 +753,7 @@ function moondental_home_content_fields() {
 				'seo_doctors_kw'    => array( 'default' => '천안·아산 치과 의사, 아산 치과 의사, 천안·아산 치과 의료진, 아산 치과 의료진, 천안·아산 임플란트 진료팀, 아산 임플란트 진료팀, 천안·아산 교정과, 아산 교정과, 문치과병원 원장', 'label' => '의료진 · 키워드', 'type' => 'textarea' ),
 				// 오시는 길
 				'seo_location_title' => array( 'default' => '천안 만남로 치과 — 오시는 길 · 주차 · 진료시간', 'label' => '오시는 길 · 제목', 'type' => 'text' ),
-				'seo_location_desc'  => array( 'default' => '천안 동남구 만남로 52 문타워 9·10·11·13층. 천안시외·고속버스터미널 도보 5분, 천안역 버스 10분, 천안아산역 버스 20분. 본원 지하 기계식 주차장 무료.', 'label' => '오시는 길 · 설명', 'type' => 'textarea' ),
+				'seo_location_desc'  => array( 'default' => '천안 동남구 만남로 52 문타워 9·10·11·13층. 천안시외·고속버스터미널 도보 5분, 천안역 버스 10분, 천안아산역 버스 25분. 본원 지하 기계식 주차장 무료.', 'label' => '오시는 길 · 설명', 'type' => 'textarea' ),
 				'seo_location_kw'    => array( 'default' => '천안 만남로 치과, 천안 신부동 치과, 천안 동남구 치과, 천안 버스터미널 치과, 문치과병원 위치', 'label' => '오시는 길 · 키워드', 'type' => 'textarea' ),
 				// 상담예약
 				'seo_reservation_title' => array( 'default' => '천안·아산 치과 예약 — 네이버 예약·카카오톡 상담', 'label' => '상담예약 · 제목', 'type' => 'text' ),
@@ -1287,7 +1287,7 @@ function moondental_subpage_content_fields() {
 
 				'loc_park_walk'    => array( 'default' => "🚌 천안시외버스터미널에서 도보 5분\n🚌 천안고속버스터미널에서 도보 5분", 'label' => '하단 안내 ① (터미널 · 한 줄에 하나)', 'type' => 'textarea' ),
 				'loc_park_train'   => array( 'default' => '🚆 천안역·두정역에서 버스로 약 10분', 'label' => '하단 안내 ② 천안역·두정역 (비우면 숨김)', 'type' => 'text' ),
-				'loc_park_ktx'     => array( 'default' => '🚄 천안아산역에서 버스로 약 20분', 'label' => '하단 안내 ③ 천안아산역 (비우면 숨김)', 'type' => 'text' ),
+				'loc_park_ktx'     => array( 'default' => '🚄 천안아산역에서 버스로 약 25분', 'label' => '하단 안내 ③ 천안아산역 (비우면 숨김)', 'type' => 'text' ),
 
 				'loc_hours_badge'  => array( 'default' => '🕐 진료시간', 'label' => '진료시간 카드 — 배지', 'type' => 'text' ),
 				'loc_hours_title'  => array( 'default' => '진료 가능 시간', 'label' => '진료시간 카드 — 제목', 'type' => 'text' ),
