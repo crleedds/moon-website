@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.139' );
+define( 'MOONDENTAL_VERSION', '3.44.140' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -4832,7 +4832,7 @@ function moondental_get_team() {
 			'members' => array(
 				array(
 					'name'       => '문은수',
-					'role'       => '치의학 박사 · 대표 병원장',
+					'role'       => '대표 병원장',
 					'photo'      => 'doctor-04.png',
 					'photo_zoom' => 1.00,
 					'photo_ty'   => 0,
