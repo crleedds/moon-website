@@ -1117,7 +1117,7 @@ button.elementor-button {
 .md-header__nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .md-header__nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-@media (max-width: 880px) {
+@media (max-width: 1080px) {
   .md-header__nav-toggle { display: flex; position: relative; z-index: 220; }
 
   /* v3.44.52 · 모바일 메뉴 · 우측에서 슬라이드 인 · 부분 너비 · 백드롭 */
@@ -1199,13 +1199,13 @@ button.elementor-button {
 }
 
 /* v3.31.7 · 모바일 메뉴 열림 시 body 스크롤 잠금 */
-/* v3.44.133 · 브레이크포인트 880 복귀 (모바일만 햄버거 · 데스크탑은 유연 스케일링) */
-@media (max-width: 880px) {
+/* v3.44.138 · 브레이크포인트 1080 · iPad Pro 12.9 portrait(1024) 도 햄버거 */
+@media (max-width: 1080px) {
   body:has(.md-header__nav.is-open) { overflow: hidden; }
 }
 
 /* v3.31.7 · 다크모드 모바일 메뉴 · 서브 메뉴 항목 대비 확보 */
-@media (prefers-color-scheme: dark) and (max-width: 880px) {
+@media (prefers-color-scheme: dark) and (max-width: 1080px) {
   .md-header__nav { background: #1F1810; border-bottom-color: rgba(244, 177, 149, 0.15); }
   .md-header__nav > ul > li > a,
   .md-nav > li > a { border-bottom-color: rgba(244, 177, 149, 0.12); }
@@ -11143,9 +11143,9 @@ html { scroll-behavior: smooth; }
  *     · 1600+ : 전화+시간 풀 표시
  * ============================================================ */
 
-/* --- 데스크탑 (881+) 공통 · clamp() 유연 스케일링 --- */
-/* v3.44.137 · flex-wrap 활성화 · 공간 부족 시 각 항목이 다음 줄로 wrap */
-@media (min-width: 881px) {
+/* --- 데스크탑 (1081+) 공통 · clamp() 유연 스케일링 --- */
+/* v3.44.138 · 데스크탑 시작점을 1081px 로 상향 (iPad Pro 12.9 portrait 은 햄버거) */
+@media (min-width: 1081px) {
   .md-header__inner {
     gap: clamp(8px, 0.9vw, 22px);
     padding-inline: clamp(10px, 1.2vw, 22px);
@@ -11187,13 +11187,13 @@ html { scroll-behavior: smooth; }
 
 /* v3.44.136 · 데스크탑 헤더 · 전화 정보 완전 제거 (겹침 원인 원천 차단)
    전화는 우측 하단 플로팅 [전화 상담] 버튼으로 대체됨 · 항상 접근 가능 */
-@media (min-width: 881px) {
+@media (min-width: 1081px) {
   .md-header__info { display: none !important; }
   .md-header__hours { display: none !important; }
 }
 
-/* --- (≤880px) 모바일 · 햄버거 · CTA 유지 --- */
-@media (max-width: 880px) {
+/* --- (≤1080px) 모바일·소태블릿 · 햄버거 · CTA 유지 --- */
+@media (max-width: 1080px) {
   .md-header__info { display: none !important; }
   .md-header__hours { display: none !important; }
   .md-header__cta { display: inline-flex !important; }
