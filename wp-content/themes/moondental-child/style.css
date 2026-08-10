@@ -11182,20 +11182,11 @@ html { scroll-behavior: smooth; }
   .md-header__cta-btn--cycle { min-width: auto; }
 }
 
-/* --- 정보 영역 단계별 숨김 · 겹침 방지 --- */
-/* (881~1799px) 전화·시간 숨김 · nav + CTA 만 (모든 nav 항목 보임) */
-@media (min-width: 881px) and (max-width: 1799px) {
+/* v3.44.136 · 데스크탑 헤더 · 전화 정보 완전 제거 (겹침 원인 원천 차단)
+   전화는 우측 하단 플로팅 [전화 상담] 버튼으로 대체됨 · 항상 접근 가능 */
+@media (min-width: 881px) {
   .md-header__info { display: none !important; }
-}
-/* (1800~1999px) 전화 표시 · 시간 숨김 */
-@media (min-width: 1800px) and (max-width: 1999px) {
-  .md-header__info { display: flex !important; }
   .md-header__hours { display: none !important; }
-}
-/* (2000px+) 풀 데스크탑 · 모든 요소 */
-@media (min-width: 2000px) {
-  .md-header__info { display: flex !important; }
-  .md-header__hours { display: inline !important; }
 }
 
 /* --- (≤880px) 모바일 · 햄버거 · CTA 유지 --- */
