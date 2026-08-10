@@ -11121,14 +11121,16 @@ html { scroll-behavior: smooth; }
   .md-header__cta-label { transition: none; }
 }
 
-/* v3.44.133 · 기본 안전장치 · 오버플로우 방지 + 로고·CTA 절대 축소 안 됨 */
+/* v3.44.135 · 기본 안전장치 · 모든 요소 visible + 로고·CTA 절대 축소 안 됨 */
 .md-header__brand,
 .md-header__cta,
 .md-header__cta-btn { flex-shrink: 0 !important; }
-/* nav 와 aside 는 미디어쿼리로 개별 제어 (여기서 flex-shrink 강제 안 함) */
+/* 모든 헤더 컨테이너 · overflow visible (nav 항목 절대 안 잘림) */
 .md-site-header,
 .md-header,
 .md-header__inner,
+.md-header__nav,
+.md-header__nav > ul,
 .md-header__aside { overflow: visible !important; }
 
 /* ============================================================
@@ -11146,9 +11148,9 @@ html { scroll-behavior: smooth; }
   .md-header__inner {
     gap: clamp(8px, 0.9vw, 22px);
     padding-inline: clamp(10px, 1.2vw, 22px);
-    overflow: hidden !important;
+    /* v3.44.135 · overflow visible (nav 항목 절대 안 잘림) */
   }
-  .md-header__nav { min-width: 0; flex: 1 1 auto; overflow: hidden; }
+  .md-header__nav { min-width: 0; flex: 1 1 auto; overflow: visible; }
   .md-header__nav > ul {
     gap: 0;
     flex-wrap: nowrap;
@@ -11180,17 +11182,18 @@ html { scroll-behavior: smooth; }
   .md-header__cta-btn--cycle { min-width: auto; }
 }
 
-/* --- 정보 영역 단계별 숨김 · 겹침 방지 (881~1699px 모두 숨김) --- */
-@media (min-width: 881px) and (max-width: 1699px) {
+/* --- 정보 영역 단계별 숨김 · 겹침 방지 --- */
+/* (881~1799px) 전화·시간 숨김 · nav + CTA 만 (모든 nav 항목 보임) */
+@media (min-width: 881px) and (max-width: 1799px) {
   .md-header__info { display: none !important; }
 }
-/* --- (1700~1899px) 전화 표시 · 시간 숨김 --- */
-@media (min-width: 1700px) and (max-width: 1899px) {
+/* (1800~1999px) 전화 표시 · 시간 숨김 */
+@media (min-width: 1800px) and (max-width: 1999px) {
   .md-header__info { display: flex !important; }
   .md-header__hours { display: none !important; }
 }
-/* --- (1900px+) 풀 데스크탑 · 모든 요소 표시 --- */
-@media (min-width: 1900px) {
+/* (2000px+) 풀 데스크탑 · 모든 요소 */
+@media (min-width: 2000px) {
   .md-header__info { display: flex !important; }
   .md-header__hours { display: inline !important; }
 }
