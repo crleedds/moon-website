@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.148' );
+define( 'MOONDENTAL_VERSION', '3.44.149' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -646,6 +646,40 @@ add_action( 'after_setup_theme', function() {
 
 	update_option( 'moondental_customizer_rename_v34147', 'done' );
 }, 56 );
+
+/* 일회성 마이그레이션 v3.44.149 · 상단 메뉴 · 항목 이름에 공백 추가 (wrap 자연스럽게) */
+add_action( 'wp_loaded', function() {
+	if ( get_option( 'moondental_menu_spaces_v34149' ) === 'done' ) return;
+	if ( ! function_exists( 'wp_get_nav_menu_object' ) ) return;
+	$menu_obj = wp_get_nav_menu_object( '주 메뉴 (자동 생성)' );
+	if ( ! $menu_obj ) { update_option( 'moondental_menu_spaces_v34149', 'done' ); return; }
+	$menu_id = (int) $menu_obj->term_id;
+	$items = wp_get_nav_menu_items( $menu_id );
+	if ( ! $items ) { update_option( 'moondental_menu_spaces_v34149', 'done' ); return; }
+
+	$rename_map = array(
+		'임플란트센터'     => '임플란트 센터',
+		'교정센터'         => '교정 센터',
+		'스마일디자인센터' => '스마일디자인 센터',
+		'자연치아살리기'   => '자연치아 살리기',
+		'비용안내'         => '비용 안내',
+		'병원안내'         => '병원 안내',
+	);
+	foreach ( $items as $it ) {
+		$old = trim( (string) $it->title );
+		if ( isset( $rename_map[ $old ] ) ) {
+			wp_update_nav_menu_item( $menu_id, (int) $it->ID, array(
+				'menu-item-title'     => $rename_map[ $old ],
+				'menu-item-url'       => $it->url,
+				'menu-item-type'      => $it->type,
+				'menu-item-status'    => 'publish',
+				'menu-item-position'  => $it->menu_order,
+				'menu-item-parent-id' => (int) $it->menu_item_parent,
+			) );
+		}
+	}
+	update_option( 'moondental_menu_spaces_v34149', 'done' );
+}, 22 );
 
 /* 일회성 마이그레이션 v3.44.108 · 상단 메뉴 · 자연치아살리기 하위에 '치수복조술' 추가
  * '주 메뉴 (자동 생성)' 메뉴에서 자연치아살리기 부모를 찾아 그 하위에 치수복조술을 삽입.
@@ -4018,10 +4052,10 @@ function moondental_setup_primary_menu( $force = false ) {
 	$home = home_url( '/' );
 
 	$structure = array(
-		array( 'title'=>'임플란트센터',     'url'=>$home.'임플란트-센터/' ),
-		array( 'title'=>'교정센터',         'url'=>$home.'투명교정-센터/' ),
-		array( 'title'=>'스마일디자인센터', 'url'=>$home.'스마일디자인센터/' ),
-		array( 'title'=>'자연치아살리기',   'url'=>$home.'자연치아-살리기/', 'children'=>array(
+		array( 'title'=>'임플란트 센터',     'url'=>$home.'임플란트-센터/' ),
+		array( 'title'=>'교정 센터',         'url'=>$home.'투명교정-센터/' ),
+		array( 'title'=>'스마일디자인 센터', 'url'=>$home.'스마일디자인센터/' ),
+		array( 'title'=>'자연치아 살리기',   'url'=>$home.'자연치아-살리기/', 'children'=>array(
 			array( 'title'=>'충치치료',   'url'=>$home.'자연치아-살리기/#cavity' ),
 			array( 'title'=>'치수복조술', 'url'=>$home.'자연치아-살리기/#pulpcap' ),
 			array( 'title'=>'신경치료',   'url'=>$home.'자연치아-살리기/#endo' ),
@@ -4034,9 +4068,9 @@ function moondental_setup_primary_menu( $force = false ) {
 			array( 'title'=>'소아치과',         'url'=>$home.'소아치과/' ),
 			array( 'title'=>'예방클리닉',       'url'=>$home.'예방클리닉/' ),
 		)),
-		array( 'title'=>'의료진',   'url'=>$home.'의료진/' ),
-		array( 'title'=>'비용안내', 'url'=>$home.'비용-안내/' ),
-		array( 'title'=>'병원안내', 'url'=>'#', 'children'=>array(
+		array( 'title'=>'의료진',    'url'=>$home.'의료진/' ),
+		array( 'title'=>'비용 안내', 'url'=>$home.'비용-안내/' ),
+		array( 'title'=>'병원 안내', 'url'=>'#', 'children'=>array(
 			array( 'title'=>'오시는길·진료시간', 'url'=>$home.'오시는-길/' ),
 			array( 'title'=>'30여년의 역사',    'url'=>$home.'역사/' ),
 			array( 'title'=>'기술력/시설',       'url'=>$home.'기술력-시설/' ),
