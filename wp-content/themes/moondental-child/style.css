@@ -11122,9 +11122,13 @@ html { scroll-behavior: smooth; }
 }
 
 /* v3.44.135 · 기본 안전장치 · 모든 요소 visible + 로고·CTA 절대 축소 안 됨 */
+/* v3.44.143 · 로고 우측에 여백 확보 (nav 첫 항목 겹침 방지) */
 .md-header__brand,
 .md-header__cta,
 .md-header__cta-btn { flex-shrink: 0 !important; }
+@media (min-width: 1081px) {
+  .md-header__brand { margin-right: clamp(20px, 2vw, 40px); }
+}
 /* 모든 헤더 컨테이너 · overflow visible (nav 항목 절대 안 잘림) */
 .md-site-header,
 .md-header,
@@ -11184,7 +11188,14 @@ html { scroll-behavior: smooth; }
     letter-spacing: -0.01em;
     white-space: nowrap;
   }
-  .md-header__cta-btn--cycle { min-width: auto; }
+  /* v3.44.143 · CTA 고정 폭 · 라벨 바뀌어도 크기 안 변함 (layout shift 방지) */
+  .md-header__cta-btn--cycle {
+    min-width: clamp(200px, 15vw, 240px) !important;
+    width: clamp(200px, 15vw, 240px);
+    justify-content: center;
+    text-align: center;
+  }
+  .md-header__cta-label { display: inline-block; text-align: center; }
 }
 
 /* v3.44.136 · 데스크탑 헤더 · 전화 정보 완전 제거 (겹침 원인 원천 차단)
