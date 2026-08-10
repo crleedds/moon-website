@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.146' );
+define( 'MOONDENTAL_VERSION', '3.44.147' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -575,7 +575,7 @@ add_action( 'after_setup_theme', function() {
 /* 일회성 마이그레이션 v3.44.116 · Customizer 값 갱신 (예방치과→예방클리닉, 턱관절→턱관절 클리닉, 터미널/역 링크)
  * 사용자가 편집하지 않았거나 옛 기본값 그대로면 새 기본값으로 안전 갱신 */
 add_action( 'after_setup_theme', function() {
-	if ( get_option( 'moondental_customizer_rename_v34124' ) === 'done' ) return;
+	if ( get_option( 'moondental_customizer_rename_v34147' ) === 'done' ) return;
 
 	// clinic_intro_dept_list · 턱관절 → 턱관절 클리닉
 	$old_dept = "턱관절 — 통증·기능 장애 진료\n이갈이 · 이악물기\n매복 사랑니 발치\n소아치과\n예방클리닉 — 전문예방치료실 · 덴탈 스파 프로그램";
@@ -636,7 +636,15 @@ add_action( 'after_setup_theme', function() {
 		set_theme_mod( 'md_content_footer_park_ktx', $new_ktx );
 	}
 
-	update_option( 'moondental_customizer_rename_v34124', 'done' );
+	// v3.44.147 · CTA 사이클 라벨 축소 (긴 라벨 → 짧은 라벨)
+	$old_cta = "✨ 편리한 상담 | #5C8B82 | #FFFFFF | 92,139,130\n🦷 내 구강상태 진단받기 | #E37B5C | #FFFFFF | 227,123,92\n💬 지금 카톡 상담 | #FEE500 | #181600 | 254,229,0\n📅 상담 예약하기 | #D88062 | #FFFFFF | 216,128,98";
+	$new_cta = "✨ 편리한 상담 | #5C8B82 | #FFFFFF | 92,139,130\n🦷 구강상태 진단 | #E37B5C | #FFFFFF | 227,123,92\n💬 카톡 상담 | #FEE500 | #181600 | 254,229,0\n📅 상담 예약 | #D88062 | #FFFFFF | 216,128,98";
+	$cur_cta = get_theme_mod( 'md_content_header_cta_cycle', null );
+	if ( $cur_cta === null || trim( (string) $cur_cta ) === '' || trim( (string) $cur_cta ) === $old_cta ) {
+		set_theme_mod( 'md_content_header_cta_cycle', $new_cta );
+	}
+
+	update_option( 'moondental_customizer_rename_v34147', 'done' );
 }, 56 );
 
 /* 일회성 마이그레이션 v3.44.108 · 상단 메뉴 · 자연치아살리기 하위에 '치수복조술' 추가

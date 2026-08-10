@@ -11152,23 +11152,24 @@ html { scroll-behavior: smooth; }
     align-items: center;
   }
   .md-header__nav { min-width: 0; overflow: visible; }
-  /* v3.44.146 · nav 항목은 반드시 한 줄에 · 각 항목 내부 텍스트만 여러 줄 허용 */
+  /* v3.44.147 · nav 한 줄 · 항목 사이 여백 확보 · 텍스트만 wrap */
   .md-header__nav > ul {
-    gap: clamp(2px, 0.3vw, 8px);
-    flex-wrap: nowrap !important;       /* 한 줄 강제 */
+    gap: clamp(10px, 1vw, 22px);        /* 항목 사이 확실한 여백 */
+    flex-wrap: nowrap !important;
     justify-content: center;
     max-width: 100%;
     width: 100%;
     box-sizing: border-box;
+    align-items: center;
   }
-  .md-header__nav > ul > li { min-width: 0; }
+  .md-header__nav > ul > li { min-width: 0; flex: 0 1 auto; }
   .md-header__nav > ul > li > a {
-    padding: 8px clamp(4px, 0.5vw, 14px);
-    font-size: clamp(0.75rem, 0.82vw, 0.95rem);
+    padding: 8px 4px;                    /* 좌우 padding 최소 · gap 이 여백 담당 */
+    font-size: clamp(0.78rem, 0.85vw, 0.95rem);
     letter-spacing: -0.02em;
     white-space: normal !important;     /* 항목 내부 텍스트 wrap 허용 */
     word-break: keep-all;
-    line-height: 1.2;
+    line-height: 1.25;
     text-align: center;
   }
   .md-header__aside {
@@ -11190,10 +11191,10 @@ html { scroll-behavior: smooth; }
     letter-spacing: -0.01em;
     white-space: nowrap;
   }
-  /* v3.44.143 · CTA 고정 폭 · 라벨 바뀌어도 크기 안 변함 (layout shift 방지) */
+  /* v3.44.147 · CTA 고정 폭 축소 (라벨 짧아짐 · 편리한 상담 / 구강상태 진단 / 카톡 상담 / 상담 예약) */
   .md-header__cta-btn--cycle {
-    min-width: clamp(200px, 15vw, 240px) !important;
-    width: clamp(200px, 15vw, 240px);
+    min-width: clamp(150px, 11vw, 180px) !important;
+    width: clamp(150px, 11vw, 180px);
     justify-content: center;
     text-align: center;
   }
