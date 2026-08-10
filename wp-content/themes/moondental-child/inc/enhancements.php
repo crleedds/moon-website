@@ -926,7 +926,7 @@ function moondental_nolink_parent_menu_titles() {
  */
 function moondental_auto_link_stations( $text ) {
 	if ( empty( $text ) || strpos( $text, '자동링크제외' ) !== false ) return $text;
-	// v3.44.121 · 네이버 지도 링크 · 검증된 URL만 사용
+	// v3.44.122 · 네이버 지도 링크 + 시외버스/고속버스 하이라이트 강조
 	// (사용자 제공 터미널 short URL 5GhgHbJV가 홈페이지로만 리다이렉트 · 검색 URL로 fallback)
 	$stations = array(
 		// 긴 키워드 먼저 (짧은 키워드와 부분매칭 방지)
@@ -936,14 +936,26 @@ function moondental_auto_link_stations( $text ) {
 		'두정역'              => 'https://naver.me/5hJghQ3f',
 		'천안역'              => 'https://naver.me/GRmMc1vX',
 	);
+	// 링크 앵커 텍스트 내부에서 특정 부분을 span 으로 강조 (색상 차별화)
+	$highlight_map = array(
+		'천안시외버스터미널' => array( '시외버스', 'md-station-hl md-station-hl--intercity' ),
+		'천안고속버스터미널' => array( '고속버스', 'md-station-hl md-station-hl--express' ),
+	);
 	// placeholder 로 매칭된 부분 임시 치환 후 최종 렌더 · 중복·재매칭 방지
 	$placeholders = array();
 	$idx = 0;
 	foreach ( $stations as $keyword => $url ) {
 		$re = '#(?<![>=/\w"\'])' . preg_quote( $keyword, '#' ) . '(?![^<]*</a>)#u';
-		$text = preg_replace_callback( $re, function( $m ) use ( &$placeholders, &$idx, $keyword, $url ) {
+		$text = preg_replace_callback( $re, function( $m ) use ( &$placeholders, &$idx, $keyword, $url, $highlight_map ) {
 			$token = "\x1F__MDSTA_{$idx}__\x1F";
-			$placeholders[ $token ] = '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer" class="md-station-link">' . esc_html( $keyword ) . '</a>';
+			// 앵커 텍스트 · 하이라이트 대상이면 span 삽입
+			if ( isset( $highlight_map[ $keyword ] ) ) {
+				list( $hl_part, $hl_class ) = $highlight_map[ $keyword ];
+				$anchor_text = str_replace( $hl_part, '<span class="' . esc_attr( $hl_class ) . '">' . esc_html( $hl_part ) . '</span>', esc_html( $keyword ) );
+			} else {
+				$anchor_text = esc_html( $keyword );
+			}
+			$placeholders[ $token ] = '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer" class="md-station-link">' . $anchor_text . '</a>';
 			$idx++;
 			return $token;
 		}, $text );
