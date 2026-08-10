@@ -11144,21 +11144,21 @@ html { scroll-behavior: smooth; }
  * ============================================================ */
 
 /* --- 데스크탑 (1081+) 공통 · clamp() 유연 스케일링 --- */
-/* v3.44.138 · 데스크탑 시작점을 1081px 로 상향 (iPad Pro 12.9 portrait 은 햄버거) */
+/* v3.44.141 · nav 와 CTA 사이 여백 강화 (margin-left on aside) */
 @media (min-width: 1081px) {
   .md-header__inner {
-    gap: clamp(8px, 0.9vw, 22px);
+    gap: clamp(12px, 1.2vw, 28px);
     padding-inline: clamp(10px, 1.2vw, 22px);
     align-items: center;
   }
   .md-header__nav { min-width: 0; flex: 1 1 auto; overflow: visible; }
   .md-header__nav > ul {
     gap: 4px 2px;
-    flex-wrap: wrap;                       /* v3.44.137 · 공간 부족 시 wrap */
+    flex-wrap: wrap;
     justify-content: center;
   }
   .md-header__nav > ul > li > a {
-    padding: 10px clamp(6px, 0.6vw, 14px); /* 세로 패딩 늘려서 wrap 시에도 시각 균형 */
+    padding: 10px clamp(6px, 0.6vw, 14px);
     font-size: clamp(0.78rem, 0.85vw, 0.95rem);
     letter-spacing: -0.015em;
     white-space: nowrap;
@@ -11168,6 +11168,7 @@ html { scroll-behavior: smooth; }
     gap: clamp(6px, 0.7vw, 14px);
     padding-right: 0;
     flex-shrink: 0;
+    margin-left: clamp(24px, 2.5vw, 60px); /* nav 와 CTA 사이 여백 확보 */
   }
   .md-header__info {
     gap: clamp(6px, 0.7vw, 12px);
