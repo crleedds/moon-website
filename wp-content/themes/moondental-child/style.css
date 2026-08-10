@@ -1117,7 +1117,7 @@ button.elementor-button {
 .md-header__nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .md-header__nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-@media (max-width: 1500px) {
+@media (max-width: 880px) {
   .md-header__nav-toggle { display: flex; position: relative; z-index: 220; }
 
   /* v3.44.52 · 모바일 메뉴 · 우측에서 슬라이드 인 · 부분 너비 · 백드롭 */
@@ -1199,13 +1199,13 @@ button.elementor-button {
 }
 
 /* v3.31.7 · 모바일 메뉴 열림 시 body 스크롤 잠금 */
-/* v3.44.132 · 브레이크포인트 1366→1500 (좁은 데스크탑 겹침 완전 방지) */
-@media (max-width: 1500px) {
+/* v3.44.133 · 브레이크포인트 880 복귀 (모바일만 햄버거 · 데스크탑은 유연 스케일링) */
+@media (max-width: 880px) {
   body:has(.md-header__nav.is-open) { overflow: hidden; }
 }
 
 /* v3.31.7 · 다크모드 모바일 메뉴 · 서브 메뉴 항목 대비 확보 */
-@media (prefers-color-scheme: dark) and (max-width: 1500px) {
+@media (prefers-color-scheme: dark) and (max-width: 880px) {
   .md-header__nav { background: #1F1810; border-bottom-color: rgba(244, 177, 149, 0.15); }
   .md-header__nav > ul > li > a,
   .md-nav > li > a { border-bottom-color: rgba(244, 177, 149, 0.12); }
@@ -11121,41 +11121,80 @@ html { scroll-behavior: smooth; }
   .md-header__cta-label { transition: none; }
 }
 
-/* 반응형 — 정보 영역 단계별 숨김 */
-/* v3.44.127 · 헤더 기본 안전장치 · flex-shrink 우선순위 명시 */
+/* v3.44.133 · 기본 안전장치 · 오버플로우 방지 + 로고·CTA 절대 축소 안 됨 */
 .md-header__brand,
-.md-header__aside,
 .md-header__cta,
 .md-header__cta-btn { flex-shrink: 0 !important; }
-.md-header__nav { flex-shrink: 1 !important; min-width: 0; }
+/* nav 와 aside 는 미디어쿼리로 개별 제어 (여기서 flex-shrink 강제 안 함) */
 .md-site-header,
 .md-header,
 .md-header__inner,
 .md-header__aside { overflow: visible !important; }
 
 /* ============================================================
- * v3.44.132 · 헤더 반응형 · 좁은 데스크탑까지 햄버거 · 겹침 완전 방지
- * 기기별 breakpoint:
- *   - ≤400px : 최소 폰 · 초컴팩트
- *   - 401~540px : 일반 폰
- *   - 541~880px : 폰 가로 · 소형 태블릿 세로
- *   - 881~1500px : 태블릿·좁은 노트북/데스크탑
- *      → 모두 햄버거 메뉴 + CTA 유지 (겹침 완전 방지)
- *   - 1501~1700px : 중간 데스크탑 · 데스크탑 nav 컴팩트
- *   - 1701px+ : 풀 데스크탑 (여유 있음)
+ * v3.44.133 · 헤더 반응형 · 데스크탑 항상 nav · 유연 clamp() 스케일링
+ *   - ≤880px : 모바일 · 햄버거
+ *   - 881px+ : 데스크탑 · 항상 풀 nav · clamp()로 자동 스케일
+ *     · 881~1200 : nav만 표시 · 정보 완전 숨김
+ *     · 1201~1400 : 전화 숨김 · nav 컴팩트
+ *     · 1401~1599 : 전화만 표시 · 시간 숨김
+ *     · 1600+ : 전화+시간 풀 표시
  * ============================================================ */
 
-/* --- (1501~1700px) 중간 데스크탑 · nav 컴팩트 · 전화 숨김 --- */
-@media (min-width: 1501px) and (max-width: 1700px) {
-  .md-header__hours { display: none; }
-  .md-header__info { display: none; }
-  .md-header__inner { gap: 18px; padding-inline: 20px; }
-  .md-header__nav > ul > li > a { padding-inline: 10px; font-size: 0.92rem; }
-  .md-header__cta-btn { padding: 10px 18px; font-size: 0.9rem; }
+/* --- 데스크탑 (881+) 공통 · clamp() 유연 스케일링 --- */
+@media (min-width: 881px) {
+  .md-header__inner {
+    gap: clamp(10px, 1vw, 24px);
+    padding-inline: clamp(12px, 1.5vw, 24px);
+  }
+  .md-header__nav { min-width: 0; flex-shrink: 1; }
+  .md-header__nav > ul {
+    gap: clamp(0px, 0.3vw, 8px);
+    flex-wrap: nowrap;
+  }
+  .md-header__nav > ul > li > a {
+    padding: 8px clamp(4px, 0.55vw, 14px);
+    font-size: clamp(0.72rem, 0.85vw, 0.95rem);
+    letter-spacing: clamp(-0.03em, 0em, 0em);
+    white-space: nowrap;
+  }
+  .md-header__aside {
+    gap: clamp(6px, 0.8vw, 14px);
+    padding-right: 0;
+    flex-shrink: 0;
+  }
+  .md-header__info {
+    gap: clamp(6px, 0.8vw, 12px);
+    padding-right: clamp(6px, 0.8vw, 14px);
+  }
+  .md-header__phone {
+    font-size: clamp(0.82rem, 0.9vw, 1rem);
+  }
+  .md-header__cta-btn {
+    padding: clamp(7px, 0.8vw, 12px) clamp(11px, 1.2vw, 22px);
+    font-size: clamp(0.75rem, 0.88vw, 0.95rem);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .md-header__cta-btn--cycle { min-width: auto; }
 }
 
-/* --- (≤1500px) 태블릿·모바일·좁은 데스크탑 · 햄버거 메뉴 + CTA 유지 --- */
-@media (max-width: 1500px) {
+/* --- (881~1200px) 좁은 데스크탑 · 정보 완전 숨김 --- */
+@media (min-width: 881px) and (max-width: 1200px) {
+  .md-header__info { display: none; }
+}
+/* --- (1201~1400px) 중간 데스크탑 · 전화만 숨김 --- */
+@media (min-width: 1201px) and (max-width: 1400px) {
+  .md-header__info { display: none; }
+}
+/* --- (1401~1599px) 넓은 데스크탑 · 전화 표시 · 시간 숨김 --- */
+@media (min-width: 1401px) and (max-width: 1599px) {
+  .md-header__hours { display: none; }
+}
+/* --- (1600px+) 풀 데스크탑 · 모든 요소 표시 --- */
+
+/* --- (≤880px) 모바일 · 햄버거 · CTA 유지 --- */
+@media (max-width: 880px) {
   .md-header__info { display: none !important; }
   .md-header__hours { display: none !important; }
   .md-header__cta { display: inline-flex !important; }
@@ -11166,17 +11205,11 @@ html { scroll-behavior: smooth; }
   .md-header__nav         { order: 2 !important; }
   .md-header__aside       { order: 3 !important; margin-left: auto !important; }
   .md-header__nav-toggle  { order: 4 !important; margin-left: 4px !important; }
-  .md-header__cta-btn { padding: 9px 14px; font-size: 0.85rem; letter-spacing: -0.01em; white-space: nowrap; }
+  .md-header__cta-btn { padding: 8px 12px !important; font-size: 0.8rem !important; letter-spacing: -0.01em !important; white-space: nowrap !important; }
   .md-header__cta-btn--cycle { min-width: auto !important; }
 }
 
-/* --- (≤880px) 폰 세로·가로 · CTA 좀 더 축소 --- */
-@media (max-width: 880px) {
-  .md-header__inner { padding-inline: 12px !important; }
-  .md-header__cta-btn { padding: 8px 12px !important; font-size: 0.8rem !important; }
-}
-
-/* --- (≤540px) 작은 폰 · 매우 컴팩트 --- */
+/* --- (≤540px) 작은 폰 --- */
 @media (max-width: 540px) {
   .md-header__inner { padding-inline: 10px !important; gap: 8px !important; }
   .md-header__aside { gap: 6px !important; }
@@ -11185,7 +11218,7 @@ html { scroll-behavior: smooth; }
   .md-header__brand-sub { font-size: 0.7rem !important; }
 }
 
-/* --- (≤400px) 최소 폰 · CTA 초컴팩트 --- */
+/* --- (≤400px) 최소 폰 --- */
 @media (max-width: 400px) {
   .md-header__inner { padding-inline: 8px !important; gap: 6px !important; }
   .md-header__cta-btn { padding: 6px 9px !important; font-size: 0.7rem !important; }
