@@ -1800,6 +1800,7 @@ function moondental_history_content_fields() {
 
 /**
  * 모든 홈 콘텐츠 필드를 Customizer에 일괄 등록.
+ * v3.44.126 · 'seo' 그룹은 별도 최상위 패널 'SEO — 구글 검색 문구'로 승격
  */
 function moondental_register_home_content_customizer( $wp_customize ) {
 	// 부모 패널 — 기존 "문치과병원 설정" 패널 안에 새 섹션들 묶음
@@ -1810,16 +1811,27 @@ function moondental_register_home_content_customizer( $wp_customize ) {
 		'priority'    => 25,
 	) );
 
+	// v3.44.126 · SEO 전용 최상위 패널
+	$seo_panel_id = 'md_panel_seo';
+	$wp_customize->add_panel( $seo_panel_id, array(
+		'title'       => '🔍 SEO · Google 검색 문구',
+		'description' => 'Google·네이버 검색 결과에 표시되는 각 페이지 제목·설명·키워드를 편집할 수 있습니다. 저장 후 Google Search Console에서 재인덱싱 요청하면 1~7일 안에 반영됩니다.',
+		'priority'    => 24,
+	) );
+
 	$groups = moondental_home_content_fields();
 	$prio = 10;
 	foreach ( $groups as $group_key => $group ) {
-		$section_id = 'md_section_content_' . $group_key;
+		// v3.44.126 · seo 그룹은 별도 최상위 SEO 패널로 배치
+		$target_panel = ( $group_key === 'seo' ) ? $seo_panel_id : $panel_id;
+		$section_id   = ( $group_key === 'seo' ) ? 'md_section_seo_meta' : 'md_section_content_' . $group_key;
+		$section_title = ( $group_key === 'seo' ) ? '📄 페이지별 검색 제목·설명·키워드' : $group['title'];
 		$wp_customize->add_section( $section_id, array(
-			'title'    => $group['title'],
-			'panel'    => $panel_id,
-			'priority' => $prio,
+			'title'    => $section_title,
+			'panel'    => $target_panel,
+			'priority' => ( $group_key === 'seo' ) ? 10 : $prio,
 		) );
-		$prio += 10;
+		if ( $group_key !== 'seo' ) $prio += 10;
 
 		foreach ( $group['fields'] as $key => $field ) {
 			$setting_id = 'md_content_' . $key;
