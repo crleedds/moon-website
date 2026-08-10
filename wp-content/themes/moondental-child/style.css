@@ -11116,6 +11116,20 @@ html { scroll-behavior: smooth; }
   .md-header__hours { display: none; }
   .md-header__info { padding-right: 10px; gap: 8px; }
 }
+/* v3.44.125 · 태블릿 (881~1100px) · 최우측 CTA 버튼 잘림 방지 */
+@media (min-width: 881px) and (max-width: 1100px) {
+  .md-header__inner { gap: 8px; padding-inline: 12px; overflow: hidden; }
+  .md-header__info { display: none; }                /* 전화·시간 숨김 · 공간 확보 */
+  .md-header__cta { flex-shrink: 0; }
+  .md-header__cta-btn { padding: 10px 14px; font-size: 0.85rem; letter-spacing: -0.01em; }
+  .md-header__cta-btn--cycle { min-width: 116px; }
+  .md-header__nav > ul > li > a { padding-inline: 8px; font-size: 0.88rem; letter-spacing: -0.015em; }
+}
+@media (min-width: 881px) and (max-width: 960px) {
+  .md-header__cta-btn { padding: 8px 12px; font-size: 0.8rem; }
+  .md-header__cta-btn--cycle { min-width: 96px; }
+  .md-header__nav > ul > li > a { padding-inline: 6px; font-size: 0.82rem; }
+}
 @media (max-width: 880px) {
   .md-header__info { display: none; }
   .md-header__cta { display: inline-flex; }

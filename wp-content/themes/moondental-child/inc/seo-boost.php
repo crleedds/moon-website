@@ -148,7 +148,32 @@ function moondental_seo_region_data( $key ) {
 }
 
 /**
+ * v3.44.125 · Customizer SEO override 매핑
+ *   페이지 슬러그 → seo_{page}_title/desc Customizer 키
+ *   사용자가 사용자정의하기에서 편집한 값을 최우선으로 사용
+ */
+function moondental_seo_customizer_key_map() {
+	return array(
+		'_home'              => 'home',
+		'임플란트-센터'      => 'implant',
+		'투명교정-센터'      => 'ortho',
+		'자연치아-살리기'    => 'preservation',
+		'턱관절-클리닉'      => 'tmj',
+		'사랑니-발치'        => 'wisdom',
+		'심미치료'           => 'aesthetic',
+		'비용-안내'          => 'pricing',
+		'의료진'             => 'doctors',
+		'오시는-길'          => 'location',
+		'상담예약'           => 'reservation',
+		'역사'               => 'history',
+		'기술력-시설'        => 'facility',
+		'faq'                => 'faq',
+	);
+}
+
+/**
  * Yoast title 오버라이드 — 우리 맵에 있는 페이지만 교체
+ * v3.44.125 · Customizer 값이 있으면 최우선 사용 (사용자가 직접 편집 가능)
  */
 function moondental_wpseo_title( $title ) {
 	$key = moondental_seo_current_key();
@@ -156,6 +181,12 @@ function moondental_wpseo_title( $title ) {
 	// v3.44.76 · 지역 페이지 동적 SEO
 	$region_seo = moondental_seo_region_data( $key );
 	if ( $region_seo ) return $region_seo['title'];
+	// v3.44.125 · Customizer 값 최우선
+	$cust_map = moondental_seo_customizer_key_map();
+	if ( isset( $cust_map[ $key ] ) && function_exists( 'md_content' ) ) {
+		$cust_val = md_content( 'seo_' . $cust_map[ $key ] . '_title', '' );
+		if ( is_string( $cust_val ) && $cust_val !== '' ) return $cust_val;
+	}
 	$map = moondental_seo_page_map();
 	if ( isset( $map[ $key ]['title'] ) ) {
 		return $map[ $key ]['title'];
@@ -166,6 +197,7 @@ add_filter( 'wpseo_title', 'moondental_wpseo_title', 20 );
 
 /**
  * Yoast meta description 오버라이드
+ * v3.44.125 · Customizer 값이 있으면 최우선 사용
  */
 function moondental_wpseo_metadesc( $desc ) {
 	$key = moondental_seo_current_key();
@@ -173,6 +205,12 @@ function moondental_wpseo_metadesc( $desc ) {
 	// v3.44.76 · 지역 페이지 동적 설명
 	$region_seo = moondental_seo_region_data( $key );
 	if ( $region_seo ) return $region_seo['desc'];
+	// v3.44.125 · Customizer 값 최우선
+	$cust_map = moondental_seo_customizer_key_map();
+	if ( isset( $cust_map[ $key ] ) && function_exists( 'md_content' ) ) {
+		$cust_val = md_content( 'seo_' . $cust_map[ $key ] . '_desc', '' );
+		if ( is_string( $cust_val ) && $cust_val !== '' ) return $cust_val;
+	}
 	$map = moondental_seo_page_map();
 	if ( isset( $map[ $key ]['desc'] ) ) {
 		return $map[ $key ]['desc'];
