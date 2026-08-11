@@ -1117,7 +1117,7 @@ button.elementor-button {
 .md-header__nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .md-header__nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-@media (max-width: 1440px) {
+@media (max-width: 1600px) {
   .md-header__nav-toggle { display: flex; position: relative; z-index: 220; }
 
   /* v3.44.52 · 모바일 메뉴 · 우측에서 슬라이드 인 · 부분 너비 · 백드롭 */
@@ -1199,13 +1199,13 @@ button.elementor-button {
 }
 
 /* v3.31.7 · 모바일 메뉴 열림 시 body 스크롤 잠금 */
-/* v3.44.152 · 브레이크포인트 1440 · 8개 nav 한 줄 못 들어가면 햄버거 */
-@media (max-width: 1440px) {
+/* v3.44.153 · 브레이크포인트 1600 · 8개 nav 안전하게 표시될 폭 이상만 데스크탑 */
+@media (max-width: 1600px) {
   body:has(.md-header__nav.is-open) { overflow: hidden; }
 }
 
 /* v3.31.7 · 다크모드 모바일 메뉴 · 서브 메뉴 항목 대비 확보 */
-@media (prefers-color-scheme: dark) and (max-width: 1440px) {
+@media (prefers-color-scheme: dark) and (max-width: 1600px) {
   .md-header__nav { background: #1F1810; border-bottom-color: rgba(244, 177, 149, 0.15); }
   .md-header__nav > ul > li > a,
   .md-nav > li > a { border-bottom-color: rgba(244, 177, 149, 0.12); }
@@ -11141,9 +11141,9 @@ html { scroll-behavior: smooth; }
  *     · 1600+ : 전화+시간 풀 표시
  * ============================================================ */
 
-/* --- 데스크탑 (1441+) · CSS GRID 3열 (겹침 근본 차단) --- */
-/* v3.44.152 · 데스크탑 시작점 1441px · 이하는 햄버거 */
-@media (min-width: 1441px) {
+/* --- 데스크탑 (1601+) · CSS GRID 3열 · 8개 nav 안전 표시 --- */
+/* v3.44.153 · 데스크탑 시작점 1601px · 이하는 햄버거 */
+@media (min-width: 1601px) {
   .md-header__inner {
     display: grid !important;
     grid-template-columns: auto minmax(0, 1fr) auto;
@@ -11199,14 +11199,14 @@ html { scroll-behavior: smooth; }
   .md-header__cta-label { display: inline-block; text-align: center; }
 }
 
-/* v3.44.136/152 · 데스크탑 헤더 · 전화·시간 정보 완전 숨김 */
-@media (min-width: 1441px) {
+/* v3.44.136/153 · 데스크탑 헤더 · 전화·시간 정보 완전 숨김 */
+@media (min-width: 1601px) {
   .md-header__info { display: none !important; }
   .md-header__hours { display: none !important; }
 }
 
-/* --- (≤1440px) 모바일·태블릿·좁은 데스크탑 · 햄버거 · CTA 유지 --- */
-@media (max-width: 1440px) {
+/* --- (≤1600px) 모바일·태블릿·중간 데스크탑 · 햄버거 · CTA 유지 --- */
+@media (max-width: 1600px) {
   .md-header__info { display: none !important; }
   .md-header__hours { display: none !important; }
   .md-header__cta { display: inline-flex !important; }
