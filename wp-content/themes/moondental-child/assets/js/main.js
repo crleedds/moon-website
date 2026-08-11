@@ -614,62 +614,6 @@
 
   });
 
-  /* v3.44.154 · 헤더 nav 오버플로우 동적 감지
-     실제 nav 가 header 안에 안 들어가면 <html> 에 is-mobile-menu 부여 → 햄버거
-     들어가면 클래스 제거 → 데스크탑 nav 표시 */
-  (function () {
-    var html = document.documentElement;
-    function measure() {
-      // ≤1080 은 이미 CSS 미디어쿼리로 햄버거 → JS 처리 스킵
-      if ( window.innerWidth <= 1080 ) {
-        html.classList.remove('is-mobile-menu');
-        return;
-      }
-      var inner = document.querySelector('.md-header__inner');
-      var nav   = document.querySelector('.md-header__nav');
-      var brand = document.querySelector('.md-header__brand');
-      var aside = document.querySelector('.md-header__aside');
-      if ( ! inner || ! nav || ! brand || ! aside ) return;
-
-      // 측정 전 · 데스크탑 상태로 만들기 (햄버거 상태에서 측정하면 nav 가 fixed 라 정확한 크기 안 나옴)
-      var wasMobile = html.classList.contains('is-mobile-menu');
-      if ( wasMobile ) html.classList.remove('is-mobile-menu');
-
-      // 레이아웃 반영 대기
-      requestAnimationFrame(function () {
-        var innerW = inner.clientWidth;
-        var brandW = brand.offsetWidth;
-        var asideW = aside.offsetWidth;
-        var ul = nav.querySelector('ul');
-        var navContent = ul ? ul.scrollWidth : 0;
-        // grid 는 [brand]gap[nav]gap[aside] · gap 은 clamp(24,2.5vw,56) · padding 도 있음
-        var reservedGap = 80;    // 2 gaps
-        var padding = 40;
-        var available = innerW - brandW - asideW - reservedGap - padding;
-        // 30px 안전 마진 (실제로 조금이라도 겹칠 가능성 방지)
-        if ( navContent > available - 30 ) {
-          html.classList.add('is-mobile-menu');
-        } else {
-          html.classList.remove('is-mobile-menu');
-        }
-      });
-    }
-
-    var resizeTimer = null;
-    function debounceMeasure() {
-      clearTimeout( resizeTimer );
-      resizeTimer = setTimeout( measure, 80 );
-    }
-
-    if ( document.readyState === 'loading' ) {
-      document.addEventListener( 'DOMContentLoaded', measure );
-    } else {
-      measure();
-    }
-    window.addEventListener( 'resize', debounceMeasure );
-    window.addEventListener( 'load', measure );
-    if ( document.fonts && document.fonts.ready ) {
-      document.fonts.ready.then( measure );
-    }
-  })();
+  /* v3.44.155 · JS 오버플로우 감지 제거 · 데스크탑은 항상 풀 nav 표시 (사용자 요청) */
+  document.documentElement.classList.remove('is-mobile-menu');
 })();
