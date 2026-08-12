@@ -7833,20 +7833,12 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   padding: 0 clamp(12px, 1.5vw, 24px);
   align-items: start;
 }
+/* v3.44.160 · 좌측 사이드바 · 페이지와 함께 스크롤 (독립 스크롤 아님) */
 .md-home-2col__side {
-  position: sticky;
-  top: 90px;
-  max-height: calc(100vh - 110px);
-  overflow-y: auto;
+  position: static;
+  overflow: visible;
+  max-height: none;
   padding: 12px 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-primary-dark) transparent;
-}
-.md-home-2col__side::-webkit-scrollbar { width: 6px; }
-.md-home-2col__side::-webkit-scrollbar-track { background: transparent; }
-.md-home-2col__side::-webkit-scrollbar-thumb {
-  background: rgba(216, 128, 98, 0.35);
-  border-radius: 3px;
 }
 .md-home-2col__main { min-width: 0; }
 /* 태블릿 이하 · 사이드바 상단으로 · 접기 */
