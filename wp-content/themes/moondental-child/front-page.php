@@ -16,29 +16,22 @@ get_header();
 <?php /* v3.34.6 · 히어로+사명+지표 3개 섹션을 통합 · 한 화면 첫 임팩트 */ ?>
 <?php get_template_part( 'template-parts/section', 'hero-combined' ); ?>
 
-<?php get_template_part( 'template-parts/section', 'why' ); ?>
-
-<?php get_template_part( 'template-parts/section', 'clinic-intro' ); ?>
-
-<?php get_template_part( 'template-parts/section', 'services' ); ?>
-
-<?php /* section-process(첫 방문부터 사후관리까지)는 홈에서 제거 — v3.12.2 */ ?>
-
-<?php get_template_part( 'template-parts/section', 'facility' ); ?>
-
-<?php /* v3.44.158 · 30여년 발자취 사진 스트립 · 클릭 시 /역사/#앵커 로 이동 */ ?>
-<?php get_template_part( 'template-parts/section', 'history-strip' ); ?>
-
-<?php get_template_part( 'template-parts/section', 'testimonials' ); ?>
-
-<?php get_template_part( 'template-parts/section', 'faq-home' ); ?>
-
-<?php /* section-info(진료시간 & 오시는 길 3컬럼)는 푸터 위 section-location과 중복되어 제거됨 — v3.12.1 */ ?>
-
-<?php get_template_part( 'template-parts/section', 'notices' ); ?>
-
-<?php /* v3.44.79 · 핵심 페이지 바로가기 · 사이트링크 유도 콘텐츠 링크 카드 */ ?>
-<?php get_template_part( 'template-parts/section', 'quicknav' ); ?>
+<?php /* v3.44.159 · 히어로 아래부터 2컬럼 (좌측: 30여년 사이드바 · 우측: 나머지 섹션) */ ?>
+<div class="md-home-2col">
+	<aside class="md-home-2col__side">
+		<?php get_template_part( 'template-parts/section', 'history-rail' ); ?>
+	</aside>
+	<main class="md-home-2col__main">
+		<?php get_template_part( 'template-parts/section', 'why' ); ?>
+		<?php get_template_part( 'template-parts/section', 'clinic-intro' ); ?>
+		<?php get_template_part( 'template-parts/section', 'services' ); ?>
+		<?php get_template_part( 'template-parts/section', 'facility' ); ?>
+		<?php get_template_part( 'template-parts/section', 'testimonials' ); ?>
+		<?php get_template_part( 'template-parts/section', 'faq-home' ); ?>
+		<?php get_template_part( 'template-parts/section', 'notices' ); ?>
+		<?php get_template_part( 'template-parts/section', 'quicknav' ); ?>
+	</main>
+</div>
 
 <?php get_template_part( 'template-parts/section', 'cta' ); ?>
 

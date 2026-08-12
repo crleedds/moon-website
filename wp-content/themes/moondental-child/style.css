@@ -7823,7 +7823,171 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   .md-floor-guide__lead { color: #a0a0a0; }
 }
 
-/* v3.44.158 · 홈 · 30여년 발자취 사진 스트립 */
+/* v3.44.159 · 홈 · 2컬럼 레이아웃 (좌측 사이드바: 30여년 · 우측: 본문) */
+.md-home-2col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);   /* 좌 1 : 우 3 비율 */
+  gap: clamp(16px, 2vw, 32px);
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 clamp(12px, 1.5vw, 24px);
+  align-items: start;
+}
+.md-home-2col__side {
+  position: sticky;
+  top: 90px;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  padding: 12px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary-dark) transparent;
+}
+.md-home-2col__side::-webkit-scrollbar { width: 6px; }
+.md-home-2col__side::-webkit-scrollbar-track { background: transparent; }
+.md-home-2col__side::-webkit-scrollbar-thumb {
+  background: rgba(216, 128, 98, 0.35);
+  border-radius: 3px;
+}
+.md-home-2col__main { min-width: 0; }
+/* 태블릿 이하 · 사이드바 상단으로 · 접기 */
+@media (max-width: 1080px) {
+  .md-home-2col { display: block; padding: 0; }
+  .md-home-2col__side {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+  .md-home-2col__side .md-history-rail__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+}
+
+/* 좌측 사이드바 스타일 */
+.md-history-rail {
+  background: #fff;
+  border: 1px solid rgba(216, 128, 98, 0.15);
+  border-radius: 14px;
+  padding: 18px 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.md-history-rail__head {
+  border-bottom: 1px solid rgba(216, 128, 98, 0.15);
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+.md-history-rail__eyebrow {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--color-primary-dark);
+  background: rgba(216, 128, 98, 0.12);
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+}
+.md-history-rail__title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  margin: 0 0 4px 0;
+}
+.md-history-rail__lead {
+  font-size: 0.72rem;
+  color: var(--color-text-mute);
+  margin: 0;
+}
+.md-history-rail__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.md-history-rail__item { list-style: none; }
+.md-history-rail__link {
+  display: flex;
+  gap: 10px;
+  padding: 6px;
+  background: transparent;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s ease, transform 0.2s ease;
+  align-items: flex-start;
+}
+.md-history-rail__link:hover {
+  background: rgba(216, 128, 98, 0.06);
+  transform: translateX(2px);
+}
+.md-history-rail__photo {
+  flex: 0 0 60px;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+.md-history-rail__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.md-history-rail__link:hover .md-history-rail__photo img { transform: scale(1.08); }
+.md-history-rail__meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 2px;
+}
+.md-history-rail__date {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  letter-spacing: -0.005em;
+}
+.md-history-rail__title-txt {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.35;
+  word-break: keep-all;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.md-history-rail__more {
+  margin: 16px 0 0 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(216, 128, 98, 0.15);
+  text-align: center;
+}
+@media (prefers-color-scheme: dark) {
+  .md-history-rail {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(242, 168, 120, 0.22);
+  }
+  .md-history-rail__head { border-bottom-color: rgba(242, 168, 120, 0.22); }
+  .md-history-rail__eyebrow {
+    background: rgba(242, 168, 120, 0.15);
+    color: #f2a878;
+  }
+  .md-history-rail__title { color: #f2a878; }
+  .md-history-rail__date { color: #f2a878; }
+  .md-history-rail__title-txt { color: #ececec; }
+  .md-history-rail__link:hover { background: rgba(242, 168, 120, 0.08); }
+  .md-history-rail__more { border-top-color: rgba(242, 168, 120, 0.22); }
+}
+
+/* v3.44.158 · 홈 · 30여년 발자취 사진 스트립 (구 · 유지) */
 .md-home-history__scroll {
   margin-top: clamp(20px, 2.5vw, 36px);
   overflow-x: auto;
