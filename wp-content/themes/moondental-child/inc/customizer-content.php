@@ -2400,8 +2400,8 @@ function moondental_smile_content_fields() {
 					'label' => '추천 대상 리스트 (한 줄에 1개)',
 					'type'  => 'textarea',
 				),
-				'smile_laminate_callout_title' => array( 'default' => '💎 라미네이트 비용', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
-				'smile_laminate_callout_body'  => array( 'default' => '정확한 견적은 진단 후 산정. <a href="/비용-안내/">비용 안내 →</a>', 'label' => '콜아웃 · 본문 (HTML 허용)', 'type' => 'textarea' ),
+				'smile_laminate_callout_title' => array( 'default' => '', 'label' => '콜아웃 · 제목 (비우면 숨김)', 'type' => 'text' ),
+				'smile_laminate_callout_body'  => array( 'default' => '', 'label' => '콜아웃 · 본문 (비우면 숨김)', 'type' => 'textarea' ),
 			),
 		),
 		'aesthetic_resin' => array(
