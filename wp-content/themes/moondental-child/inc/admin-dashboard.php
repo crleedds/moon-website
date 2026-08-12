@@ -162,7 +162,7 @@ function moondental_render_content_dashboard() {
 
 			<div class="md-cm-card">
 				<h2>홈 신뢰 stat 4개<span class="md-cm-badge md-cm-badge--customizer">Customizer</span></h2>
-				<p class="md-cm-desc">30년·11개·4개층·1:1 등 숫자 표시 카드.</p>
+				<p class="md-cm-desc">30여년·11개·4개층·1:1 등 숫자 표시 카드.</p>
 				<a class="button button-primary" href="<?php echo esc_url( $section_link( 'md_section_trust' ) ); ?>">편집 →</a>
 			</div>
 

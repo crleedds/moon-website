@@ -1,6 +1,6 @@
 <?php
 /**
- * Section: 30년 이상 한자리에서 + 6개 진료 영역 카드
+ * Section: 30여년 이상 한자리에서 + 6개 진료 영역 카드
  *  사용자 제공 콘텐츠 — 메뉴 구조에 맞춰 6 카드로 정렬.
  *  순서: 임플란트센터 · 교정센터 · 스마일디자인센터 · 자연치아살리기 · 진료과 · 기술력/시설
  *
@@ -92,8 +92,8 @@ $cards = array(
 );
 
 $section_eyebrow = $mc( 'clinic_intro_eyebrow', 'CLINIC SYSTEM · 진료 시스템' );
-$section_title   = $mc( 'clinic_intro_title',   '30년 이상 한자리에서, 문치과병원' );
-$section_lead    = $mc( 'clinic_intro_lead',    "문치과병원은 각 분과의 원장님들이 다양한 임상경험을 바탕으로\n대학병원식 협진 시스템을 통해 30년 이상 한자리에서 전문적이고 정직하게 진료합니다." );
+$section_title   = $mc( 'clinic_intro_title',   '30여년 이상 한자리에서, 문치과병원' );
+$section_lead    = $mc( 'clinic_intro_lead',    "문치과병원은 각 분과의 원장님들이 다양한 임상경험을 바탕으로\n대학병원식 협진 시스템을 통해 30여년 이상 한자리에서 전문적이고 정직하게 진료합니다." );
 
 $night_title = $mc( 'clinic_intro_night_title', '야간 진료 운영' );
 $night_desc  = $mc( 'clinic_intro_night_desc',  '천안시 신부동에 위치한 문치과병원은 바쁜 일상 속에서도 원하는 시간에 진료받으실 수 있도록 월·화·수·금요일 저녁 8시 30분까지 야간진료를 운영합니다.' );

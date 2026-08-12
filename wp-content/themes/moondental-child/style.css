@@ -7823,6 +7823,116 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   .md-floor-guide__lead { color: #a0a0a0; }
 }
 
+/* v3.44.158 · 홈 · 30여년 발자취 사진 스트립 */
+.md-home-history__scroll {
+  margin-top: clamp(20px, 2.5vw, 36px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary-dark) transparent;
+}
+.md-home-history__scroll::-webkit-scrollbar { height: 8px; }
+.md-home-history__scroll::-webkit-scrollbar-track { background: transparent; }
+.md-home-history__scroll::-webkit-scrollbar-thumb {
+  background: rgba(216, 128, 98, 0.35);
+  border-radius: 4px;
+}
+.md-home-history__scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-dark);
+}
+.md-home-history__grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: clamp(160px, 16vw, 220px);
+  gap: clamp(12px, 1.4vw, 20px);
+  align-items: stretch;
+}
+.md-home-history__item { list-style: none; scroll-snap-align: start; }
+.md-home-history__link {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid rgba(216, 128, 98, 0.15);
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+.md-home-history__link:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(216, 128, 98, 0.20);
+  border-color: var(--color-primary);
+}
+.md-home-history__photo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+.md-home-history__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.md-home-history__link:hover .md-home-history__photo img { transform: scale(1.05); }
+.md-home-history__meta {
+  padding: 10px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.md-home-history__date {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  letter-spacing: -0.01em;
+}
+.md-home-history__title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.35;
+  word-break: keep-all;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.md-home-history__more {
+  text-align: center;
+  margin-top: clamp(18px, 2vw, 28px);
+}
+@media (prefers-color-scheme: dark) {
+  .md-home-history__link {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(242, 168, 120, 0.22);
+  }
+  .md-home-history__link:hover {
+    border-color: #f2a878;
+    box-shadow: 0 12px 28px rgba(242, 168, 120, 0.22);
+  }
+  .md-home-history__date { color: #f2a878; }
+  .md-home-history__title { color: #ececec; }
+}
+@media (max-width: 560px) {
+  .md-home-history__grid { grid-auto-columns: clamp(140px, 60vw, 180px); }
+}
+
 /* Service page hero · floor badge */
 .md-service-floor-badge {
   display: inline-flex;

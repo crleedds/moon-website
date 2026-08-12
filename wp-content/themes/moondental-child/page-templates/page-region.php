@@ -146,13 +146,13 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 			<h2 class="md-section-head__title"><?php echo esc_html( $region_name ); ?> 임플란트·충치·잇몸치료 추천 · 잘하는 치과</h2>
 			<p class="md-section-head__lead">
 				<?php echo esc_html( $region_name ); ?> 환자분들이 <?php echo esc_html( $duration ); ?>분 거리 천안 문치과병원을 추천 치과로 선택하시는 이유입니다.
-				<?php echo esc_html( $province ); ?> <?php echo esc_html( $region_long ); ?>에서 임플란트·충치·신경치료·잇몸치료·매복 사랑니·라미네이트·소아치과·턱관절 전문 진료과 협진이 필요할 때 30년 진료 문치과병원을 찾아주세요.
+				<?php echo esc_html( $province ); ?> <?php echo esc_html( $region_long ); ?>에서 임플란트·충치·신경치료·잇몸치료·매복 사랑니·라미네이트·소아치과·턱관절 전문 진료과 협진이 필요할 때 30여년 진료 문치과병원을 찾아주세요.
 			</p>
 		</header>
 		<div class="md-region-tk-grid">
 			<article class="md-region-tk-card">
 				<h3><?php echo esc_html( $region_name ); ?> 임플란트 추천 · 잘하는 치과</h3>
-				<p>CBCT 3D 정밀 진단·네비게이션 가이드 임플란트로 <?php echo esc_html( $region_name ); ?>에서 오시는 환자분께 정확·안전한 식립. 30년 임상 노하우 임플란트 센터 · <?php echo esc_html( $region_name ); ?> 임플란트 추천 문치과병원.</p>
+				<p>CBCT 3D 정밀 진단·네비게이션 가이드 임플란트로 <?php echo esc_html( $region_name ); ?>에서 오시는 환자분께 정확·안전한 식립. 30여년 임상 노하우 임플란트 센터 · <?php echo esc_html( $region_name ); ?> 임플란트 추천 문치과병원.</p>
 				<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/임플란트-센터/' ) ); ?>"><?php echo esc_html( $region_name ); ?> 임플란트 추천 자세히 →</a>
 			</article>
 			<article class="md-region-tk-card">

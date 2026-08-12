@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.157' );
+define( 'MOONDENTAL_VERSION', '3.44.158' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -827,9 +827,9 @@ add_action( 'after_setup_theme', function() {
 		'천안 치과병원' => '천안·아산 치과병원',
 		'천안 치과'    => '천안·아산 치과',
 		'천안 30여년' => '천안·아산 30여년',
-		'천안 30년'   => '천안·아산 30년',
+		'천안 30여년'   => '천안·아산 30여년',
 		'천안에서 30여년' => '천안·아산에서 30여년',
-		'천안에서 30년' => '천안·아산에서 30년',
+		'천안에서 30여년' => '천안·아산에서 30여년',
 		'천안 지역'   => '천안·아산 지역',
 		'천안·아산·아산' => '천안·아산',
 	);
@@ -1231,7 +1231,7 @@ add_action( 'after_setup_theme', function() {
 			'new' => '전국에서 찾아오는 30여년',
 		),
 		'md_content_clinic_intro_title' => array(
-			'old' => array( '30년 이상 한자리에서, 문치과병원' ),
+			'old' => array( '30여년 이상 한자리에서, 문치과병원' ),
 			'new' => '천안·아산 대표 치과병원 · 전국에서 찾아오는 통합 진료',
 		),
 		'md_content_cta_title' => array(
@@ -2405,7 +2405,7 @@ function moondental_cta_copy( $context = null ) {
 	if ( ! $context ) $context = moondental_cta_context();
 
 	$shared_eyebrow = md_content( 'cta_eyebrow', '상담 예약' );
-	$shared_title   = md_content( 'cta_title',   '30년 임상 · 정직한 견적을 지금 확인하세요' );
+	$shared_title   = md_content( 'cta_title',   '30여년 임상 · 정직한 견적을 지금 확인하세요' );
 	$shared_lead    = md_content( 'cta_lead',    "환자분의 상황을 먼저 듣고, 꼭 필요한 치료만 권합니다.\n지금 상담을 신청하시면 진료시간 내 빠르게 연락드릴게요." );
 
 	switch ( $context ) {
@@ -2523,8 +2523,8 @@ function moondental_cta_copy( $context = null ) {
 
 		case 'history':
 			$copy = array(
-				'eyebrow' => '30년 문치과',
-				'title'   => md_content( 'cta_history_title', '30년 임상, 지금 만나보세요' ),
+				'eyebrow' => '30여년 문치과',
+				'title'   => md_content( 'cta_history_title', '30여년 임상, 지금 만나보세요' ),
 				'lead'    => md_content( 'cta_history_lead',  '오랜 시간 축적된 진료 노하우로 정직하게 상담드립니다.' ),
 			);
 			break;
@@ -2542,7 +2542,7 @@ function moondental_cta_copy( $context = null ) {
 		case 'home':
 			$copy = array(
 				'eyebrow' => md_content( 'cta_home_eyebrow', '첫 방문 환영' ),
-				'title'   => md_content( 'cta_home_title',   "천안·아산 30년 임상,\n오늘 첫 상담 예약하세요" ),
+				'title'   => md_content( 'cta_home_title',   "천안·아산 30여년 임상,\n오늘 첫 상담 예약하세요" ),
 				'lead'    => md_content( 'cta_home_lead',    "환자분께 꼭 필요한 치료만 정직하게 권합니다.\n지금 예약하시면 편하신 시간에 상세히 상담해드립니다." ),
 			);
 			break;
@@ -2581,7 +2581,7 @@ function moondental_cta_copy( $context = null ) {
 
 		default:
 			/* v3.44.8 · 미분류 페이지 · 사용자 옛 cta_title 커스터마이저 override
-			 * ('30년 임상 · 정직한 견적') 로부터 격리 · 새 키 cta_generic_* 사용 */
+			 * ('30여년 임상 · 정직한 견적') 로부터 격리 · 새 키 cta_generic_* 사용 */
 			$copy = array(
 				'eyebrow' => md_content( 'cta_generic_eyebrow', '상담 안내' ),
 				'title'   => md_content( 'cta_generic_title',   '궁금한 점이 있으신가요?' ),

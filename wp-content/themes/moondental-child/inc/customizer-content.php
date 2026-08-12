@@ -572,8 +572,8 @@ function moondental_home_content_fields() {
 				'cta_news_lead'      => array( 'default' => '관련 상담을 원하시면 부담 없이 연락주세요. 진료시간 내 빠르게 답변드립니다.', 'label' => '병원 소식 · 설명', 'type' => 'textarea' ),
 				'cta_enc_title'      => array( 'default' => '이 증상, 나에게 해당할까요?', 'label' => '치과 백과사전 · 제목', 'type' => 'text' ),
 				'cta_enc_lead'       => array( 'default' => '치과 백과사전은 참고용입니다. 정확한 진단·치료 계획은 의료진 상담이 필요합니다.', 'label' => '치과 백과사전 · 설명', 'type' => 'textarea' ),
-				'cta_history_title'  => array( 'default' => '30년 임상, 지금 만나보세요', 'label' => '30년 발자취 · 제목', 'type' => 'text' ),
-				'cta_history_lead'   => array( 'default' => '오랜 시간 축적된 진료 노하우로 정직하게 상담드립니다.', 'label' => '30년 발자취 · 설명', 'type' => 'textarea' ),
+				'cta_history_title'  => array( 'default' => '30여년 임상, 지금 만나보세요', 'label' => '30여년 발자취 · 제목', 'type' => 'text' ),
+				'cta_history_lead'   => array( 'default' => '오랜 시간 축적된 진료 노하우로 정직하게 상담드립니다.', 'label' => '30여년 발자취 · 설명', 'type' => 'textarea' ),
 				'cta_service_title'  => array( 'default' => '나에게 맞는지 상담받아보세요', 'label' => '진료 영역 페이지 · 제목 (앞에 진료명 자동 붙음)', 'type' => 'text' ),
 				'cta_service_lead'   => array( 'default' => '진단부터 치료 계획까지 부담 없이 안내드립니다. 시작 전에 궁금한 점을 다 여쭤보세요.', 'label' => '진료 영역 페이지 · 설명', 'type' => 'textarea' ),
 			),
@@ -716,8 +716,8 @@ function moondental_home_content_fields() {
 			'title'  => 'SEO 메타 태그 (검색·SNS 공유)',
 			'fields' => array(
 				// 홈
-				'seo_home_title' => array( 'default' => '천안·아산 치과 문치과병원 · 임플란트·매복사랑니·교정 30년', 'label' => '홈 · Google 검색 제목 (구글 파란 링크 문구)', 'type' => 'text' ),
-				'seo_home_desc'  => array( 'default' => '천안·아산 30년 문치과병원. 임플란트·매복 사랑니 잘 뽑는 치과·충치·신경치료·잇몸·라미네이트·소아·턱관절·교정 협진. 카카오톡·네이버 예약, 041-563-2875.', 'label' => '홈 · Google 검색 설명 (구글 검은 요약 문구)', 'type' => 'textarea' ),
+				'seo_home_title' => array( 'default' => '천안·아산 치과 문치과병원 · 임플란트·매복사랑니·교정 30여년', 'label' => '홈 · Google 검색 제목 (구글 파란 링크 문구)', 'type' => 'text' ),
+				'seo_home_desc'  => array( 'default' => '천안·아산 30여년 문치과병원. 임플란트·매복 사랑니 잘 뽑는 치과·충치·신경치료·잇몸·라미네이트·소아·턱관절·교정 협진. 카카오톡·네이버 예약, 041-563-2875.', 'label' => '홈 · Google 검색 설명 (구글 검은 요약 문구)', 'type' => 'textarea' ),
 				'seo_home_kw'    => array( 'default' => '천안·아산 치과, 아산 치과, 천안치과, 아산치과, 천안·아산 임플란트, 아산 임플란트, 천안·아산 투명교정, 아산 투명교정, 천안·아산 라미네이트, 아산 라미네이트, 천안·아산 자연치아 살리기, 아산 자연치아 살리기, 천안·아산 사랑니 발치, 아산 사랑니 발치, 천안·아산 턱관절, 아산 턱관절, 천안·아산 신경치료, 아산 신경치료, 천안·아산 미백, 아산 미백, 천안·아산 치과병원, 아산 치과병원, 천안 만남로 치과, 천안 신부동 치과, 천안 동남구 치과, 한아의료재단, 문치과병원, 슈어스마일 투명교정', 'label' => '홈 · 키워드', 'type' => 'textarea' ),
 				// 임플란트
 				'seo_implant_title' => array( 'default' => '천안·아산 임플란트 | CBCT 디지털 가이드 수술', 'label' => '임플란트 센터 · 제목', 'type' => 'text' ),
@@ -759,10 +759,10 @@ function moondental_home_content_fields() {
 				'seo_reservation_title' => array( 'default' => '천안·아산 치과 예약 — 네이버 예약·카카오톡 상담', 'label' => '상담예약 · 제목', 'type' => 'text' ),
 				'seo_reservation_desc'  => array( 'default' => '천안 만남로 문치과병원 예약. 네이버 예약 24시간, 전화·카카오톡 상담. 월·화·수·금 야간진료 20:30까지 (목 18:30·토 14:00).', 'label' => '상담예약 · 설명', 'type' => 'textarea' ),
 				'seo_reservation_kw'    => array( 'default' => '천안·아산 치과 예약, 아산 치과 예약, 천안·아산 치과 상담, 아산 치과 상담, 천안 만남로 치과 예약, 문치과병원 예약', 'label' => '상담예약 · 키워드', 'type' => 'textarea' ),
-				// 30년 발자취
-				'seo_history_title' => array( 'default' => '문치과병원 30여년의 발자취 | 천안 만남로 1995년 개원', 'label' => '30년 발자취 · 제목', 'type' => 'text' ),
-				'seo_history_desc'  => array( 'default' => '천안 만남로에서 1995년부터 30여년 한자리 진료. 한아의료재단 비영리 법인의 30여년 발자취와 핵심 가치.', 'label' => '30년 발자취 · 설명', 'type' => 'textarea' ),
-				'seo_history_kw'    => array( 'default' => '문치과병원 역사, 한아의료재단, 천안·아산 30년 치과, 아산 30년 치과, 천안 만남로 치과 1995', 'label' => '30년 발자취 · 키워드', 'type' => 'textarea' ),
+				// 30여년 발자취
+				'seo_history_title' => array( 'default' => '문치과병원 30여년의 발자취 | 천안 만남로 1995년 개원', 'label' => '30여년 발자취 · 제목', 'type' => 'text' ),
+				'seo_history_desc'  => array( 'default' => '천안 만남로에서 1995년부터 30여년 한자리 진료. 한아의료재단 비영리 법인의 30여년 발자취와 핵심 가치.', 'label' => '30여년 발자취 · 설명', 'type' => 'textarea' ),
+				'seo_history_kw'    => array( 'default' => '문치과병원 역사, 한아의료재단, 천안·아산 30여년 치과, 아산 30여년 치과, 천안 만남로 치과 1995', 'label' => '30여년 발자취 · 키워드', 'type' => 'textarea' ),
 				// 기술력·시설
 				'seo_facility_title' => array( 'default' => '천안·아산 치과 시설 | CBCT·디지털 가이드·원내 기공실', 'label' => '기술력·시설 · 제목', 'type' => 'text' ),
 				'seo_facility_desc'  => array( 'default' => '천안 만남로 문치과병원 기술력·시설 — 의료기관 종별, 9·10·11·13F 4개 층 통합 진료센터, 디지털 진단·자체 보철 제작·전신질환 대응.', 'label' => '기술력·시설 · 설명', 'type' => 'textarea' ),
@@ -2311,7 +2311,7 @@ function moondental_preservation_content_fields() {
 				),
 				'preservation_pulpcap_strength_title' => array( 'default' => '문치과병원 치수복조술의 강점', 'label' => '강점 카드 · 소제목', 'type' => 'text' ),
 				'preservation_pulpcap_strength_cards' => array(
-					'default' => "🔬 미세 현미경 진단 | 신경 노출 부위와 감염 여부를 미세 현미경으로 정밀 확인. \"살릴 수 있는 신경인가\"를 정확히 판단합니다.\n💠 MTA · Biodentine™ 사용 | 최신 생체적합성 재료(MTA, Biodentine)로 신경을 밀봉·재생 유도. 기존 수산화칼슘 대비 성공률 크게 향상.\n🎯 30년 임상 노하우 | 치수복조술의 성패는 \"살릴 수 있는지\" 판단에서 결정됩니다. 30여년 보존과 임상 경력으로 케이스 판단.\n⏱️ 단계별 경과 관찰 | 시술 후 3·6·12개월 정기 관찰로 신경 생존 여부 확인. 만약 실패하면 최소 침습 신경치료로 즉시 전환.",
+					'default' => "🔬 미세 현미경 진단 | 신경 노출 부위와 감염 여부를 미세 현미경으로 정밀 확인. \"살릴 수 있는 신경인가\"를 정확히 판단합니다.\n💠 MTA · Biodentine™ 사용 | 최신 생체적합성 재료(MTA, Biodentine)로 신경을 밀봉·재생 유도. 기존 수산화칼슘 대비 성공률 크게 향상.\n🎯 30여년 임상 노하우 | 치수복조술의 성패는 \"살릴 수 있는지\" 판단에서 결정됩니다. 30여년 보존과 임상 경력으로 케이스 판단.\n⏱️ 단계별 경과 관찰 | 시술 후 3·6·12개월 정기 관찰로 신경 생존 여부 확인. 만약 실패하면 최소 침습 신경치료로 즉시 전환.",
 					'label' => '강점 카드 (한 줄에 1개, 형식: 아이콘 + 제목 | 본문)',
 					'type'  => 'textarea',
 				),

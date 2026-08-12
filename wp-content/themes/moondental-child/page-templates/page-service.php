@@ -107,7 +107,7 @@ if ( $slug === '사랑니-발치' ) : ?>
 			<span class="md-section-head__eyebrow md-eyebrow--star">⭐ 문치과병원 특화 · 매복 사랑니 전문</span>
 			<h2 class="md-section-head__title">어려운 매복 사랑니, 문치과병원이 다릅니다</h2>
 			<p class="md-section-head__lead">
-				완전 매복·수평 매복·신경 근접 사랑니 등 <strong>일반 치과에서 어렵다고 하는 매복 사랑니</strong>를 30년 임상 노하우와 CBCT 3D 정밀 진단으로 안전하게 발치합니다. 천안·아산은 물론 충남·충북·경기 남부 환자분들이 찾아오시는 이유입니다.
+				완전 매복·수평 매복·신경 근접 사랑니 등 <strong>일반 치과에서 어렵다고 하는 매복 사랑니</strong>를 30여년 임상 노하우와 CBCT 3D 정밀 진단으로 안전하게 발치합니다. 천안·아산은 물론 충남·충북·경기 남부 환자분들이 찾아오시는 이유입니다.
 			</p>
 		</header>
 

@@ -26,6 +26,9 @@ get_header();
 
 <?php get_template_part( 'template-parts/section', 'facility' ); ?>
 
+<?php /* v3.44.158 · 30여년 발자취 사진 스트립 · 클릭 시 /역사/#앵커 로 이동 */ ?>
+<?php get_template_part( 'template-parts/section', 'history-strip' ); ?>
+
 <?php get_template_part( 'template-parts/section', 'testimonials' ); ?>
 
 <?php get_template_part( 'template-parts/section', 'faq-home' ); ?>

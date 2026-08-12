@@ -115,8 +115,10 @@ for ( $i = 1; $i <= 4; $i++ ) {
 								$title = isset( $row['title'] ) ? $row['title'] : '';
 								$desc  = isset( $row['desc'] )  ? $row['desc']  : '';
 								$photo = isset( $row['photo'] ) ? moondental_history_photo_url( $row['photo'] ) : false;
+								// v3.44.158 · 앵커 ID · 홈 스트립에서 링크로 이동 대상
+								$anchor_id = ! empty( $row['photo'] ) ? 'h-' . sanitize_title( pathinfo( $row['photo'], PATHINFO_FILENAME ) ) : '';
 							?>
-								<li class="md-timeline__item<?php echo $photo ? ' has-photo' : ''; ?>">
+								<li class="md-timeline__item<?php echo $photo ? ' has-photo' : ''; ?>"<?php echo $anchor_id ? ' id="' . esc_attr( $anchor_id ) . '"' : ''; ?>>
 									<div class="md-timeline__month"><?php echo $month ? esc_html( ltrim( $month, '0' ) ) . '월' : ''; ?></div>
 									<div class="md-timeline__dot" aria-hidden="true"></div>
 									<div class="md-timeline__body">

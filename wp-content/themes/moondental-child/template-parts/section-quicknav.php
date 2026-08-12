@@ -13,7 +13,7 @@ $home = home_url( '/' );
 $items = array(
 	array(
 		'title' => md_content( 'quicknav_recommend_cheonan_title', '천안 추천 치과' ),
-		'desc'  => md_content( 'quicknav_recommend_cheonan_desc', '천안 전 지역에서 오시는 길 · 30년 진료 · 진료과 협진' ),
+		'desc'  => md_content( 'quicknav_recommend_cheonan_desc', '천안 전 지역에서 오시는 길 · 30여년 진료 · 진료과 협진' ),
 		'url'   => $home . '오시는-길/cheonan/',
 		'icon'  => '🏆',
 	),
@@ -25,7 +25,7 @@ $items = array(
 	),
 	array(
 		'title' => md_content( 'quicknav_doctors_title', '의료진 소개' ),
-		'desc'  => md_content( 'quicknav_doctors_desc',  '천안·아산 30년 진료 · 원장·진료과 협진 시스템 · 4개 층 통합 진료' ),
+		'desc'  => md_content( 'quicknav_doctors_desc',  '천안·아산 30여년 진료 · 원장·진료과 협진 시스템 · 4개 층 통합 진료' ),
 		'url'   => $home . '의료진/',
 		'icon'  => '👨‍⚕️',
 	),
