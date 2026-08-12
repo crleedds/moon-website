@@ -7761,12 +7761,20 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   color: inherit;
 }
 .md-floor-guide__center--link {
-  color: var(--color-primary-dark, #D97742);
+  color: inherit;                      /* v3.44.156 · 기본은 검은색 · highlight 만 브랜드 컬러 */
   text-decoration: none;
   border-bottom: 1px dashed transparent;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, color 0.2s ease;
 }
 .md-floor-guide__center--link:hover {
+  color: var(--color-primary-dark, #D97742);
+  border-bottom-color: var(--color-primary-dark, #D97742);
+}
+/* v3.44.156 · 하이라이트 3개 (임플란트·교정·스마일디자인) · 브랜드 컬러 */
+.md-floor-guide__center--highlight {
+  color: var(--color-primary-dark, #D97742) !important;
+}
+.md-floor-guide__center--highlight:hover {
   border-bottom-color: var(--color-primary-dark, #D97742);
 }
 .md-floor-guide__sep {
@@ -7809,7 +7817,8 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   .md-floor-guide__row { border-bottom-color: rgba(255, 255, 255, 0.08); }
   .md-floor-guide__floor { color: #f2f2f2; }
   .md-floor-guide__centers { color: #d8d8d8; }
-  .md-floor-guide__center--link { color: #f2a878; }
+  .md-floor-guide__center--link { color: inherit; }
+  .md-floor-guide__center--highlight { color: #f2a878 !important; }
   .md-floor-guide__sep { color: rgba(255, 255, 255, 0.25); }
   .md-floor-guide__lead { color: #a0a0a0; }
 }

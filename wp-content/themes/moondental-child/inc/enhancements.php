@@ -1159,16 +1159,19 @@ function moondental_render_floor_guide( $variant = 'card', $args = array() ) {
 		$html .= '<span class="md-floor-guide__floor">' . esc_html( $f['floor'] ) . '</span>';
 		$html .= '<span class="md-floor-guide__centers">';
 		$parts = array();
+		// v3.44.156 · 브랜드 컬러 하이라이트 대상 (사용자 요청 · 3개만)
+		$highlight_slugs = array( '임플란트-센터', '투명교정-센터', '스마일디자인센터' );
 		foreach ( $f['centers'] as $c ) {
 			$name = esc_html( $c['name'] );
+			$is_highlight = ! empty( $c['slug'] ) && in_array( $c['slug'], $highlight_slugs, true );
 			if ( $args['link_pages'] && ! empty( $c['slug'] ) ) {
-				// 진료항목 하위 페이지 링크 (예: /임플란트-센터/)
 				$url = home_url( '/진료항목/' . $c['slug'] . '/' );
-				// 스마일디자인센터는 진료항목 하위가 아니라 최상위
 				if ( $c['slug'] === '스마일디자인센터' ) {
 					$url = home_url( '/스마일디자인센터/' );
 				}
-				$parts[] = '<a class="md-floor-guide__center md-floor-guide__center--link" href="' . esc_url( $url ) . '">' . $name . '</a>';
+				$cls = 'md-floor-guide__center md-floor-guide__center--link';
+				if ( $is_highlight ) $cls .= ' md-floor-guide__center--highlight';
+				$parts[] = '<a class="' . esc_attr( $cls ) . '" href="' . esc_url( $url ) . '">' . $name . '</a>';
 			} else {
 				$parts[] = '<span class="md-floor-guide__center">' . $name . '</span>';
 			}

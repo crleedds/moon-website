@@ -213,7 +213,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 	<div class="md-container">
 		<?php echo moondental_render_floor_guide( 'card', array(
 			'title' => md_content( 'floor_guide_title', '층별 안내' ),
-			'lead'  => md_content( 'floor_guide_lead', '만남로 문타워 9·10·11·13층 · 각 층 전용 전문 진료실 운영' ),
+			'lead'  => md_content( 'floor_guide_lead', '문타워 9·10·11·13층 · 각 층 전용 전문 진료실 운영' ),
 		) ); ?>
 	</div>
 </section>
