@@ -24,6 +24,8 @@ get_header();
 		<?php get_template_part( 'template-parts/section', 'news-rail' ); ?>
 		<?php /* v3.44.163 · 치아이야기 아래 환자분들의 이야기 */ ?>
 		<?php get_template_part( 'template-parts/section', 'testimonials-rail' ); ?>
+		<?php /* v3.44.166 · 환자분들의 이야기 아래 층별 안내 */ ?>
+		<?php get_template_part( 'template-parts/section', 'floor-rail' ); ?>
 	</aside>
 	<main class="md-home-2col__main">
 		<?php get_template_part( 'template-parts/section', 'why' ); ?>

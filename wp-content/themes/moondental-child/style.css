@@ -8237,6 +8237,114 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   }
 }
 
+/* v3.44.166 · 홈 좌측 사이드바 · 층별 안내 (컴팩트) */
+.md-floor-rail {
+  background: #fff;
+  border: 1px solid rgba(216, 128, 98, 0.15);
+  border-radius: 14px;
+  padding: 18px 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-top: 20px;
+}
+.md-floor-rail__head {
+  border-bottom: 1px solid rgba(216, 128, 98, 0.15);
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+.md-floor-rail__eyebrow {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--color-primary-dark);
+  background: rgba(216, 128, 98, 0.12);
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+}
+.md-floor-rail__title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  margin: 0 0 4px 0;
+}
+.md-floor-rail__lead {
+  font-size: 0.72rem;
+  color: var(--color-text-mute);
+  margin: 0;
+  line-height: 1.4;
+}
+.md-floor-rail__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.md-floor-rail__row {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(216, 128, 98, 0.15);
+}
+.md-floor-rail__row:last-child { border-bottom: none; }
+.md-floor-rail__floor {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: var(--color-primary-dark);
+  letter-spacing: -0.02em;
+}
+.md-floor-rail__centers {
+  font-size: 0.76rem;
+  color: var(--color-text);
+  line-height: 1.5;
+  word-break: keep-all;
+}
+.md-floor-rail__center {
+  display: inline;
+  color: inherit;
+}
+.md-floor-rail__center--link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dashed transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.md-floor-rail__center--link:hover {
+  color: var(--color-primary-dark);
+  border-bottom-color: var(--color-primary-dark);
+}
+.md-floor-rail__center--highlight {
+  color: var(--color-primary-dark) !important;
+  font-weight: 700;
+}
+.md-floor-rail__sep {
+  color: rgba(0, 0, 0, 0.25);
+  margin: 0 2px;
+}
+@media (prefers-color-scheme: dark) {
+  .md-floor-rail {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(242, 168, 120, 0.22);
+  }
+  .md-floor-rail__head { border-bottom-color: rgba(242, 168, 120, 0.22); }
+  .md-floor-rail__eyebrow {
+    background: rgba(242, 168, 120, 0.15);
+    color: #f2a878;
+  }
+  .md-floor-rail__title { color: #f2a878; }
+  .md-floor-rail__lead { color: #a0a0a0; }
+  .md-floor-rail__floor { color: #f2a878; }
+  .md-floor-rail__centers { color: #d8d8d8; }
+  .md-floor-rail__center--highlight { color: #f2a878 !important; }
+  .md-floor-rail__row { border-bottom-color: rgba(242, 168, 120, 0.15); }
+  .md-floor-rail__sep { color: rgba(255, 255, 255, 0.25); }
+}
+
 /* v3.44.158 · 홈 · 30여년 발자취 사진 스트립 (구 · 유지) */
 .md-home-history__scroll {
   margin-top: clamp(20px, 2.5vw, 36px);
