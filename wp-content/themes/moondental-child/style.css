@@ -8197,6 +8197,16 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   font-weight: 600;
   font-size: 0.66rem;
 }
+.md-testi-rail__more {
+  margin: 16px 0 0 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(216, 128, 98, 0.15);
+  text-align: center;
+}
+.md-testi-rail__more .md-btn { font-size: 0.78rem; }
+@media (prefers-color-scheme: dark) {
+  .md-testi-rail__more { border-top-color: rgba(242, 168, 120, 0.22); }
+}
 @media (prefers-color-scheme: dark) {
   .md-testi-rail {
     background: rgba(255, 255, 255, 0.04);

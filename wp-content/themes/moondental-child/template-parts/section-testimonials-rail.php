@@ -10,6 +10,12 @@ $items = moondental_get_testimonials();
 if ( empty( $items ) ) return;
 
 $show = array_slice( $items, 0, 6 );
+
+// v3.44.165 · 네이버 플레이스 리뷰 URL
+$info = function_exists( 'moondental_get_info' ) ? moondental_get_info() : array();
+$naver_review_url = ! empty( $info['naver_map_url'] )
+	? $info['naver_map_url'] . '?placePath=/review'
+	: 'https://map.naver.com/p/entry/place/12772165?placePath=/review';
 ?>
 
 <div class="md-testi-rail" aria-label="환자분들의 이야기">
@@ -41,4 +47,9 @@ $show = array_slice( $items, 0, 6 );
 			</li>
 		<?php endforeach; ?>
 	</ol>
+	<p class="md-testi-rail__more">
+		<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( $naver_review_url ); ?>" target="_blank" rel="noopener noreferrer">
+			<span aria-hidden="true">Ⓝ</span> 더 많은 후기 보기 →
+		</a>
+	</p>
 </div>
