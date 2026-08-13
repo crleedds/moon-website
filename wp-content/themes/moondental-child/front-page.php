@@ -16,10 +16,12 @@ get_header();
 <?php /* v3.34.6 · 히어로+사명+지표 3개 섹션을 통합 · 한 화면 첫 임팩트 */ ?>
 <?php get_template_part( 'template-parts/section', 'hero-combined' ); ?>
 
-<?php /* v3.44.159 · 히어로 아래부터 2컬럼 (좌측: 30여년 사이드바 · 우측: 나머지 섹션) */ ?>
+<?php /* v3.44.159/161 · 히어로 아래부터 2컬럼 (좌측 사이드바 · 우측 메인) */ ?>
 <div class="md-home-2col">
 	<aside class="md-home-2col__side">
 		<?php get_template_part( 'template-parts/section', 'history-rail' ); ?>
+		<?php /* v3.44.161 · 30여년 발자취 아래에 소식·치아이야기 세로 리스트 */ ?>
+		<?php get_template_part( 'template-parts/section', 'news-rail' ); ?>
 	</aside>
 	<main class="md-home-2col__main">
 		<?php get_template_part( 'template-parts/section', 'why' ); ?>
@@ -28,7 +30,6 @@ get_header();
 		<?php get_template_part( 'template-parts/section', 'facility' ); ?>
 		<?php get_template_part( 'template-parts/section', 'testimonials' ); ?>
 		<?php get_template_part( 'template-parts/section', 'faq-home' ); ?>
-		<?php get_template_part( 'template-parts/section', 'notices' ); ?>
 		<?php get_template_part( 'template-parts/section', 'quicknav' ); ?>
 	</main>
 </div>
