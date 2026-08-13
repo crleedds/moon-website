@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.161' );
+define( 'MOONDENTAL_VERSION', '3.44.162' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -5009,7 +5009,7 @@ function moondental_get_team() {
 						'미국 UCLA 구강암센터 연구원',
 						'미국 UCSF 치과대학 졸업',
 						'미국 UCSF 치과대학 교정과 임상연수',
-						'서울대학교 치의학대학원 박사과정',
+						'서울대학교 치의학 박사과정',
 						'미국 & 한국 치과의사 면허 보유',
 						'미국 치과의사 협회(ADA) 정회원',
 						'대한턱관절교합학회 이사',

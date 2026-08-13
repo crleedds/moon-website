@@ -13,20 +13,20 @@ foreach ( array( 'notice', '공지사항', 'announcement' ) as $slug ) {
 	if ( $c ) $notice_cats[] = $c->term_id;
 }
 
-// 공지사항 (최대 5)
+// 공지사항 (최대 7)
 $notice_q = new WP_Query( array(
 	'post_type'      => 'post',
-	'posts_per_page' => 5,
+	'posts_per_page' => 7,
 	'category_name'  => 'notice,공지사항,announcement',
 	'orderby'        => 'date',
 	'order'          => 'DESC',
 	'no_found_rows'  => true,
 ) );
 
-// 치아이야기 (최대 8)
+// 치아이야기 (최대 3)
 $story_args = array(
 	'post_type'           => 'post',
-	'posts_per_page'      => 8,
+	'posts_per_page'      => 3,
 	'orderby'             => 'date',
 	'order'               => 'DESC',
 	'ignore_sticky_posts' => true,
