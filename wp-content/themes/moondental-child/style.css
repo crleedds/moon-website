@@ -8112,6 +8112,121 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   }
 }
 
+/* v3.44.163 · 홈 좌측 사이드바 · 환자분들의 이야기 (컴팩트) */
+.md-testi-rail {
+  background: #fff;
+  border: 1px solid rgba(216, 128, 98, 0.15);
+  border-radius: 14px;
+  padding: 18px 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-top: 20px;
+}
+.md-testi-rail__head {
+  border-bottom: 1px solid rgba(216, 128, 98, 0.15);
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+.md-testi-rail__eyebrow {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--color-primary-dark);
+  background: rgba(216, 128, 98, 0.12);
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+}
+.md-testi-rail__title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  margin: 0;
+}
+.md-testi-rail__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.md-testi-rail__item {
+  list-style: none;
+  padding: 10px 8px;
+  background: rgba(216, 128, 98, 0.04);
+  border-radius: 10px;
+  border-left: 3px solid var(--color-primary);
+}
+.md-testi-rail__stars {
+  display: flex;
+  gap: 1px;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+}
+.md-testi-rail__star {
+  color: rgba(0, 0, 0, 0.15);
+  letter-spacing: -1px;
+}
+.md-testi-rail__star.is-filled { color: #f5b842; }
+.md-testi-rail__text {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-text);
+  line-height: 1.5;
+  margin: 0 0 8px 0;
+  word-break: keep-all;
+  font-style: italic;
+}
+.md-testi-rail__meta {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.7rem;
+  flex-wrap: wrap;
+}
+.md-testi-rail__name {
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+.md-testi-rail__service {
+  padding: 2px 7px;
+  background: rgba(216, 128, 98, 0.12);
+  color: var(--color-primary-dark);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.66rem;
+}
+@media (prefers-color-scheme: dark) {
+  .md-testi-rail {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(242, 168, 120, 0.22);
+  }
+  .md-testi-rail__head { border-bottom-color: rgba(242, 168, 120, 0.22); }
+  .md-testi-rail__eyebrow {
+    background: rgba(242, 168, 120, 0.15);
+    color: #f2a878;
+  }
+  .md-testi-rail__title { color: #f2a878; }
+  .md-testi-rail__item {
+    background: rgba(242, 168, 120, 0.05);
+    border-left-color: #f2a878;
+  }
+  .md-testi-rail__text { color: #d8d8d8; }
+  .md-testi-rail__name { color: #f2a878; }
+  .md-testi-rail__service {
+    background: rgba(242, 168, 120, 0.15);
+    color: #f2a878;
+  }
+}
+@media (max-width: 1080px) {
+  .md-testi-rail__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+  }
+}
+
 /* v3.44.158 · 홈 · 30여년 발자취 사진 스트립 (구 · 유지) */
 .md-home-history__scroll {
   margin-top: clamp(20px, 2.5vw, 36px);

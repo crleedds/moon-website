@@ -22,6 +22,8 @@ get_header();
 		<?php get_template_part( 'template-parts/section', 'history-rail' ); ?>
 		<?php /* v3.44.161 · 30여년 발자취 아래에 소식·치아이야기 세로 리스트 */ ?>
 		<?php get_template_part( 'template-parts/section', 'news-rail' ); ?>
+		<?php /* v3.44.163 · 치아이야기 아래 환자분들의 이야기 */ ?>
+		<?php get_template_part( 'template-parts/section', 'testimonials-rail' ); ?>
 	</aside>
 	<main class="md-home-2col__main">
 		<?php get_template_part( 'template-parts/section', 'why' ); ?>
