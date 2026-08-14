@@ -58,13 +58,13 @@ $stats = array(
 ?>
 
 <?php
-/* v3.44.168 · Customizer 배경 이미지 (문타워 야경 등) */
+/* v3.44.168/169 · Customizer 배경 이미지 · 사진 최대한 살리는 부드러운 오버레이 */
 $_hero_bg      = get_theme_mod( 'moondental_home_hero_bg', '' );
-$_hero_opacity = (int) get_theme_mod( 'moondental_home_hero_bg_opacity', 55 );
+$_hero_opacity = (int) get_theme_mod( 'moondental_home_hero_bg_opacity', 35 );
 if ( $_hero_opacity < 0 ) $_hero_opacity = 0;
 if ( $_hero_opacity > 100 ) $_hero_opacity = 100;
 $_hero_style   = $_hero_bg
-	? sprintf( '--md-hero-bg:url(%s); --md-hero-overlay:%.2f;', esc_url( $_hero_bg ), $_hero_opacity / 100 )
+	? sprintf( '--md-hero-bg:url("%s"); --md-hero-overlay:%.2f;', esc_url( $_hero_bg ), $_hero_opacity / 100 )
 	: '';
 ?>
 <section class="md-hero-combined<?php echo $_hero_bg ? ' md-hero-combined--has-bg' : ''; ?>" style="<?php echo esc_attr( $_hero_style ); ?>" aria-label="<?php echo esc_attr( md_content( 'aria_sec_hero_combined', '문치과병원 첫 화면' ) ); ?>">

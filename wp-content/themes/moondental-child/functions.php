@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.168' );
+define( 'MOONDENTAL_VERSION', '3.44.169' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2980,13 +2980,13 @@ function moondental_customize_register( $wp_customize ) {
 		)
 	) );
 	$wp_customize->add_setting( 'moondental_home_hero_bg_opacity', array(
-		'default'           => 55,
+		'default'           => 35,
 		'sanitize_callback' => 'absint',
 		'transport'         => 'refresh',
 	) );
 	$wp_customize->add_control( 'moondental_home_hero_bg_opacity_ctrl', array(
-		'label'   => '어두운 오버레이 강도 (0=투명 · 100=완전 검정)',
-		'description' => '기본 55 · 사진이 밝으면 60~70, 어두우면 40~50',
+		'label'   => '텍스트 뒤 어두움 강도 (0=사진 그대로 · 100=매우 어둡게)',
+		'description' => '기본 35 · 사진은 최대한 잘 보이면서 텍스트만 읽기 좋게. 원본 살리려면 20~30, 사진이 밝으면 40~50',
 		'section' => 'md_section_home_hero_bg',
 		'settings'=> 'moondental_home_hero_bg_opacity',
 		'type'    => 'number',
