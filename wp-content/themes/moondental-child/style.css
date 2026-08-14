@@ -1590,37 +1590,21 @@ html.is-mobile-menu:has(.md-header__nav.is-open) { overflow: hidden; }
     var(--color-bg);
 }
 
-/* v3.44.168/169 · 배경 이미지 · 사진 잘 보이도록 오버레이 최소화 */
+/* v3.44.170 · 배경 이미지 · section 에 직접 적용 (단순화 · 확실히 로드) */
 .md-hero-combined--has-bg {
   padding-top: clamp(80px, 9vw, 140px);
   padding-bottom: clamp(72px, 7vw, 110px);
-  background: #1a1410;         /* 이미지 로드 실패 시 fallback (어두운 톤) */
-  isolation: isolate;
-}
-.md-hero-combined--has-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: var(--md-hero-bg);
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  z-index: -2;
-  transform: scale(1.03);
-  filter: saturate(1.15) contrast(1.05) brightness(1.02);
-}
-/* 상·하만 살짝 어둡게 · 가운데는 원본 유지 (사진이 잘 보이도록) */
-.md-hero-combined--has-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
+  background-image:
     linear-gradient(180deg,
-      rgba(15, 10, 6, calc(var(--md-hero-overlay, 0.35) * 0.9)) 0%,
+      rgba(15, 10, 6, calc(var(--md-hero-overlay, 0.35) * 0.75)) 0%,
       rgba(15, 10, 6, calc(var(--md-hero-overlay, 0.35) * 0.15)) 25%,
       rgba(15, 10, 6, calc(var(--md-hero-overlay, 0.35) * 0.15)) 75%,
-      rgba(15, 10, 6, calc(var(--md-hero-overlay, 0.35) * 1.0)) 100%);
+      rgba(15, 10, 6, calc(var(--md-hero-overlay, 0.35) * 0.95)) 100%),
+    var(--md-hero-bg);
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+  background-color: #2a1e18;   /* 로드 실패 시만 표시되는 fallback */
 }
 /* 텍스트 뒤에만 살짝 어두운 vignette · 사진 자체는 최대한 살림 */
 .md-hero-combined--has-bg .md-container {
@@ -1630,7 +1614,7 @@ html.is-mobile-menu:has(.md-header__nav.is-open) { overflow: hidden; }
   content: '';
   position: absolute;
   inset: -40px -100px;
-  background: radial-gradient(ellipse 70% 65% at 50% 50%, rgba(15, 10, 6, 0.42) 0%, rgba(15, 10, 6, 0.15) 55%, transparent 85%);
+  background: radial-gradient(ellipse 70% 65% at 50% 50%, rgba(15, 10, 6, 0.35) 0%, rgba(15, 10, 6, 0.10) 55%, transparent 85%);
   z-index: -1;
   pointer-events: none;
   border-radius: 40px;
