@@ -1589,6 +1589,104 @@ html.is-mobile-menu:has(.md-header__nav.is-open) { overflow: hidden; }
     radial-gradient(ellipse 55% 40% at 85% 85%, rgba(143, 174, 146, 0.10), transparent 60%),
     var(--color-bg);
 }
+
+/* v3.44.168 · 배경 이미지 있을 때 · 세련된 오버레이 처리 (문타워 야경 등) */
+.md-hero-combined--has-bg {
+  padding-top: clamp(64px, 8vw, 120px);
+  padding-bottom: clamp(56px, 6vw, 96px);
+  background: transparent;
+  isolation: isolate;
+}
+.md-hero-combined--has-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--md-hero-bg);
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
+  z-index: -2;
+  transform: scale(1.02);
+  filter: saturate(1.05) contrast(1.02);
+}
+.md-hero-combined--has-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg,
+      rgba(20, 12, 8, calc(var(--md-hero-overlay, 0.55) * 0.9)) 0%,
+      rgba(20, 12, 8, calc(var(--md-hero-overlay, 0.55) * 0.7)) 45%,
+      rgba(20, 12, 8, calc(var(--md-hero-overlay, 0.55) * 1.1)) 100%),
+    radial-gradient(ellipse 70% 60% at 50% 40%, transparent 0%, rgba(20, 12, 8, 0.25) 100%);
+}
+/* 텍스트 대비 확보 (배경 이미지 있을 때) */
+.md-hero-combined--has-bg .md-hero-combined__eyebrow {
+  color: #fff8ec !important;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  padding: 6px 14px;
+  border-radius: 999px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+.md-hero-combined--has-bg .md-hero-combined__title {
+  color: #fff !important;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+.md-hero-combined--has-bg .md-hero-combined__title em {
+  color: #ffd0b0 !important;
+  background: linear-gradient(135deg, #ffd0b0 0%, #f2a878 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.35));
+}
+.md-hero-combined--has-bg .md-hero-combined__title em::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 208, 176, 0.7), transparent);
+}
+.md-hero-combined--has-bg .md-hero-combined__quote {
+  color: rgba(255, 250, 240, 0.92) !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+.md-hero-combined--has-bg .md-hero-combined__quote p { color: inherit !important; }
+.md-hero-combined--has-bg .md-hero-combined__certs li {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  color: #fff8ec !important;
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.md-hero-combined--has-bg .md-hero-combined__stats {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  padding: clamp(14px, 1.8vw, 22px);
+}
+.md-hero-combined--has-bg .md-hero-combined__stat-value,
+.md-hero-combined--has-bg .md-hero-combined__stat-unit {
+  color: #ffd0b0 !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+.md-hero-combined--has-bg .md-hero-combined__stat-label {
+  color: rgba(255, 250, 240, 0.88) !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .md-hero-combined--has-bg::before {
+    animation: mdHeroBgFloat 24s ease-in-out infinite alternate;
+  }
+  @keyframes mdHeroBgFloat {
+    0%   { transform: scale(1.02) translateY(0); }
+    100% { transform: scale(1.05) translateY(-14px); }
+  }
+}
+
 .md-hero-combined .md-container {
   position: relative;
   z-index: 1;

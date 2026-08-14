@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.167' );
+define( 'MOONDENTAL_VERSION', '3.44.168' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2958,6 +2958,40 @@ function moondental_customize_register( $wp_customize ) {
 			),
 		) );
 	}
+
+	/* v3.44.168 · 홈 히어로 배경 이미지 (문타워 야경 등) */
+	$wp_customize->add_section( 'md_section_home_hero_bg', array(
+		'title'    => '🏙️ 홈 히어로 배경 이미지',
+		'priority' => 22,
+		'description' => '홈 화면 상단 히어로 섹션의 배경 이미지를 업로드하세요 (권장: 1920×1080 이상 · JPG/WebP · 어두운 이미지 권장).',
+	) );
+	$wp_customize->add_setting( 'moondental_home_hero_bg', array(
+		'default'           => '',
+		'sanitize_callback' => 'esc_url_raw',
+		'transport'         => 'refresh',
+	) );
+	$wp_customize->add_control( new WP_Customize_Image_Control(
+		$wp_customize, 'moondental_home_hero_bg_ctrl',
+		array(
+			'label'       => '배경 이미지',
+			'description' => '문타워 야경 사진 등. 자동으로 어두운 오버레이가 적용되어 텍스트가 잘 보입니다.',
+			'section'     => 'md_section_home_hero_bg',
+			'settings'    => 'moondental_home_hero_bg',
+		)
+	) );
+	$wp_customize->add_setting( 'moondental_home_hero_bg_opacity', array(
+		'default'           => 55,
+		'sanitize_callback' => 'absint',
+		'transport'         => 'refresh',
+	) );
+	$wp_customize->add_control( 'moondental_home_hero_bg_opacity_ctrl', array(
+		'label'   => '어두운 오버레이 강도 (0=투명 · 100=완전 검정)',
+		'description' => '기본 55 · 사진이 밝으면 60~70, 어두우면 40~50',
+		'section' => 'md_section_home_hero_bg',
+		'settings'=> 'moondental_home_hero_bg_opacity',
+		'type'    => 'number',
+		'input_attrs' => array( 'min' => 0, 'max' => 100, 'step' => 5 ),
+	) );
 }
 add_action( 'customize_register', 'moondental_customize_register' );
 
