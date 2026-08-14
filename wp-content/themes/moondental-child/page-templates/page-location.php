@@ -104,10 +104,10 @@ $off_text = $info['hours_off'] ?: '휴진';
 	</div>
 </section>
 
-<!-- ============ 2. 진료시간 + 주차 안내 (2-col 그리드) ============ -->
+<!-- ============ 2. 진료시간 + 층별 안내 + 주차 안내 (3-col 그리드 · v3.44.167) ============ -->
 <section class="md-section" id="hours">
 	<div class="md-container">
-		<div class="md-info-pair">
+		<div class="md-info-pair md-info-pair--3col">
 
 			<!-- 진료시간 카드 · v3.44.11 · 네이버 플레이스 링크 -->
 			<?php
@@ -148,6 +148,14 @@ $off_text = $info['hours_off'] ?: '휴진';
 					<p class="md-hours__note-naver"><?php echo esc_html( $_hours_note ); ?></p>
 				<?php endif; ?>
 			<?php echo $_hours_close; ?>
+
+			<!-- v3.44.167 · 층별 안내 카드 (진료시간과 주차 안내 사이) -->
+			<?php if ( function_exists( 'moondental_render_floor_guide' ) ) : ?>
+				<?php echo moondental_render_floor_guide( 'card', array(
+					'title' => md_content( 'floor_guide_title', '층별 안내' ),
+					'lead'  => md_content( 'floor_guide_lead', '문타워 9·10·11·13층 · 각 층 전용 전문 진료실 운영' ),
+				) ); ?>
+			<?php endif; ?>
 
 			<!-- 주차 안내 카드 -->
 			<aside class="md-park md-park--compact">
@@ -207,17 +215,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 	</div>
 </section>
 
-<!-- ============ 2b. 층별 안내 · v3.44.68 ============ -->
-<?php if ( function_exists( 'moondental_render_floor_guide' ) ) : ?>
-<section class="md-section md-section--surface" aria-label="층별 안내">
-	<div class="md-container">
-		<?php echo moondental_render_floor_guide( 'card', array(
-			'title' => md_content( 'floor_guide_title', '층별 안내' ),
-			'lead'  => md_content( 'floor_guide_lead', '문타워 9·10·11·13층 · 각 층 전용 전문 진료실 운영' ),
-		) ); ?>
-	</div>
-</section>
-<?php endif; ?>
+<?php /* v3.44.167 · 층별 안내는 이제 진료시간·주차 사이 3열 그리드 내부로 이동 (아래 별도 섹션 제거) */ ?>
 
 <!-- ============ 3. 각 지역에서 문치과병원까지 (28개 지역 SEO 그리드) ============ -->
 <?php if ( function_exists( 'moondental_get_regions_by_province' ) ) : ?>

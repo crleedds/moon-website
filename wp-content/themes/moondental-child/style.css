@@ -6770,8 +6770,18 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
   gap: clamp(18px, 2.4vw, 28px);
   align-items: stretch;
 }
+/* v3.44.167 · 3열 그리드 (진료시간 · 층별 안내 · 주차 안내) */
+.md-info-pair--3col {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+@media (max-width: 1180px) {
+  .md-info-pair--3col { grid-template-columns: 1fr 1fr; }
+  .md-info-pair--3col .md-floor-guide { grid-column: 1 / -1; }
+}
 @media (max-width: 880px) {
   .md-info-pair { grid-template-columns: 1fr; }
+  .md-info-pair--3col { grid-template-columns: 1fr; }
+  .md-info-pair--3col .md-floor-guide { grid-column: auto; }
 }
 
 /* ── 진료시간 카드 ── */
