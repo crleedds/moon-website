@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.174' );
+define( 'MOONDENTAL_VERSION', '3.44.175' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -1979,6 +1979,7 @@ require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3352.php';
 require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3353.php';
 require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3354.php';
 require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3355.php';
+require_once MOONDENTAL_DIR . '/inc/guides/guides.php'; // v3.44.175 · 종합 안내서 (임플란트·투명교정·라미네이트)
 
 
 /* ============================================================

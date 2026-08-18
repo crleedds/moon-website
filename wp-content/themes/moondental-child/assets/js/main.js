@@ -38,26 +38,65 @@
       });
     });
 
-    // 1. Mobile nav toggle
+    // 1. Mobile nav toggle · v3.44.175 · 스크롤 락 + ESC 닫기 + 링크 클릭 시 닫기
     var toggle = document.querySelector('.md-header__nav-toggle');
     var nav    = document.getElementById('md-primary-menu');
     if (toggle && nav) {
-      toggle.addEventListener('click', function () {
+      var scrollLockY = 0;
+      var lockScroll = function () {
+        scrollLockY = window.scrollY || window.pageYOffset || 0;
+        document.documentElement.classList.add('is-menu-open');
+        document.body.style.position = 'fixed';
+        document.body.style.top = '-' + scrollLockY + 'px';
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+      };
+      var unlockScroll = function () {
+        document.documentElement.classList.remove('is-menu-open');
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollLockY);
+      };
+      var closeMenu = function () {
+        if (!nav.classList.contains('is-open')) return;
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', toggle.dataset.openLabel || '메뉴 열기');
+        nav.classList.remove('is-open');
+        unlockScroll();
+      };
+      var openMenu = function () {
+        toggle.setAttribute('aria-expanded', 'true');
+        toggle.setAttribute('aria-label', toggle.dataset.closeLabel || '메뉴 닫기');
+        nav.classList.add('is-open');
+        lockScroll();
+      };
+      toggle.addEventListener('click', function (e) {
+        e.stopPropagation();
         var expanded = toggle.getAttribute('aria-expanded') === 'true';
-        toggle.setAttribute('aria-expanded', String(!expanded));
-        nav.classList.toggle('is-open', !expanded);
-        // v3.38.2 · aria 라벨은 헤더 templates에서 data-open-label / data-close-label로 주입 (Customizer 편집)
-        toggle.setAttribute('aria-label', expanded
-          ? (toggle.dataset.openLabel || '메뉴 열기')
-          : (toggle.dataset.closeLabel || '메뉴 닫기'));
+        if (expanded) closeMenu(); else openMenu();
       });
-
-      // Close on outside click
+      // 메뉴 내부 링크 클릭 시 닫기 (같은 페이지 내 앵커 이동 후에도 정리)
+      nav.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a');
+        if (a && a.href && !a.hasAttribute('data-md-nav-keep-open')) closeMenu();
+      });
+      // ESC 키로 닫기
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' || e.key === 'Esc') closeMenu();
+      });
+      // 백드롭 클릭·외부 클릭 닫기
       document.addEventListener('click', function (e) {
         if (!nav.classList.contains('is-open')) return;
         if (toggle.contains(e.target) || nav.contains(e.target)) return;
-        toggle.setAttribute('aria-expanded', 'false');
-        nav.classList.remove('is-open');
+        closeMenu();
+      });
+      // 창 리사이즈로 데스크탑 폭 넘어가면 락 해제
+      window.addEventListener('resize', function () {
+        if (window.innerWidth > 1080 && nav.classList.contains('is-open')) closeMenu();
       });
     }
 
