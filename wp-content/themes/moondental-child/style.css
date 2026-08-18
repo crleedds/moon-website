@@ -151,8 +151,8 @@ body {
   .md-news-card__category,
   .md-nav-hero__crumbs { background: rgba(42, 33, 26, 0.94); color: var(--color-text); }
 
-  /* 헤더 다크 배경 */
-  .md-site-header { background: rgba(26, 20, 14, 0.92); backdrop-filter: blur(10px); }
+  /* 헤더 다크 배경 · v3.44.176 · blur 제거 */
+  .md-site-header { background: rgba(26, 20, 14, 0.96); }
 
   /* v3.31.5 · 다크모드 모바일·히어로 콘트라스트 개선 */
 
@@ -803,17 +803,40 @@ button.elementor-button {
   background-color: #FFFAF4 !important;
   color: #3D2F26 !important;
   box-shadow: 0 2px 8px rgba(61, 47, 38, 0.06);
-  transition: box-shadow 0.25s var(--ease);
+  transition: box-shadow 0.25s var(--ease), background-color 0.28s var(--ease);
 }
-/* v3.41.0 · 스크롤 시 헤더 축소 + blur + 더 강한 shadow */
-.md-site-header {
-  transition: box-shadow 0.28s var(--ease), background-color 0.28s var(--ease), backdrop-filter 0.28s var(--ease);
-}
+/* v3.44.176 · 스크롤 시 · blur 완전 제거 · 불투명 배경으로 대체 */
 .md-site-header.is-scrolled {
   box-shadow: 0 6px 24px rgba(61, 47, 38, 0.14);
-  background-color: rgba(253, 246, 236, 0.88) !important;
-  -webkit-backdrop-filter: saturate(180%) blur(14px);
-  backdrop-filter: saturate(180%) blur(14px);
+  background-color: #FFFAF4 !important;
+}
+/* v3.44.176 · 모바일에서 sticky 대신 fixed 로 확실히 상단 고정
+   (일부 모바일 브라우저에서 조상 transform·overflow 로 sticky 파괴됨) */
+@media (max-width: 1080px) {
+  .md-site-header {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 100;
+  }
+  /* 고정 헤더 아래 콘텐츠가 가려지지 않도록 body 상단 여백 */
+  body {
+    padding-top: 72px;
+  }
+  /* WP admin bar 있을 때 보정 */
+  body.admin-bar {
+    padding-top: calc(72px + 46px);
+  }
+  body.admin-bar .md-site-header {
+    top: 46px;
+  }
+}
+@media (max-width: 782px) {
+  body.admin-bar {
+    padding-top: calc(72px + 46px);
+  }
 }
 .md-site-header .md-header {
   transition: padding 0.28s var(--ease);
@@ -831,10 +854,10 @@ button.elementor-button {
 .md-site-header.is-scrolled .custom-logo {
   transform: scale(0.88);
 }
-/* 다크모드 스크롤 헤더 · 어두운 반투명 */
+/* 다크모드 스크롤 헤더 · v3.44.176 · 불투명 배경 · blur 없음 */
 @media (prefers-color-scheme: dark) {
   .md-site-header.is-scrolled {
-    background-color: rgba(28, 22, 18, 0.85) !important;
+    background-color: #1B1310 !important;
   }
 }
 
