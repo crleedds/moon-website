@@ -31,13 +31,16 @@ if ( ! empty( $data['code'] ) && preg_match( '/(\d+)/', $data['code'], $mm ) ) {
 	$num_watermark = str_pad( $mm[1], 2, '0', STR_PAD_LEFT );
 }
 ?>
-<section class="md-guide-rail md-guide-rail--<?php echo esc_attr( $slug ); ?>" aria-label="<?php echo esc_attr( $data['title'] ?? '종합안내서' ); ?>">
+<section class="md-guide-rail md-guide-rail--<?php echo esc_attr( $slug ); ?>" aria-label="<?php echo esc_attr( ( $data['center'] ?? '' ) . ' ' . ( $data['title'] ?? '' ) ); ?>">
 	<a class="md-guide-rail__card" href="<?php echo esc_url( home_url( $href ) ); ?>" data-num="<?php echo esc_attr( $num_watermark ); ?>">
 		<div class="md-guide-rail__head">
 			<span class="md-guide-rail__icon" aria-hidden="true"><?php echo esc_html( $data['icon'] ?? '📖' ); ?></span>
 			<span class="md-guide-rail__code"><?php echo esc_html( $data['code'] ?? '' ); ?></span>
 		</div>
-		<h3 class="md-guide-rail__title"><?php echo esc_html( $data['title'] ?? '' ); ?></h3>
+		<?php if ( ! empty( $data['center'] ) ) : ?>
+			<h3 class="md-guide-rail__center"><?php echo esc_html( $data['center'] ); ?></h3>
+		<?php endif; ?>
+		<p class="md-guide-rail__title"><?php echo esc_html( $data['title'] ?? '' ); ?></p>
 		<?php if ( ! empty( $data['subtitle'] ) ) : ?>
 			<p class="md-guide-rail__subtitle"><?php echo esc_html( $data['subtitle'] ); ?></p>
 		<?php endif; ?>
@@ -48,6 +51,6 @@ if ( ! empty( $data['code'] ) && preg_match( '/(\d+)/', $data['code'], $mm ) ) {
 				<?php endforeach; ?>
 			</div>
 		<?php endif; ?>
-		<span class="md-guide-rail__read">가이드 읽기 <span aria-hidden="true">→</span></span>
+		<span class="md-guide-rail__read">자세히 보기 <span aria-hidden="true">→</span></span>
 	</a>
 </section>

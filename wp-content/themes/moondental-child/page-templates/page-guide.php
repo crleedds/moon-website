@@ -12,7 +12,7 @@ get_header();
 $data = isset( $GLOBALS['md_guide_data'] ) ? $GLOBALS['md_guide_data'] : null;
 
 if ( ! $data ) {
-	echo '<div class="md-container" style="padding:80px 20px;text-align:center;"><h1>가이드를 찾을 수 없습니다</h1><p><a href="' . esc_url( home_url( '/' ) ) . '">홈으로 돌아가기</a></p></div>';
+	echo '<div class="md-container" style="padding:80px 20px;text-align:center;"><h1>종합안내서를 찾을 수 없습니다</h1><p><a href="' . esc_url( home_url( '/' ) ) . '">홈으로 돌아가기</a></p></div>';
 	get_footer();
 	return;
 }
@@ -31,7 +31,12 @@ if ( ! $data ) {
 				<?php if ( ! empty( $data['eyebrow'] ) ) : ?>
 					<div class="md-guide__hero-eyebrow"><?php echo esc_html( $data['eyebrow'] ); ?></div>
 				<?php endif; ?>
-				<h1 class="md-guide__hero-title" itemprop="headline"><?php echo esc_html( $data['title'] ); ?></h1>
+				<?php if ( ! empty( $data['center'] ) ) : ?>
+					<h1 class="md-guide__hero-center" itemprop="headline"><?php echo esc_html( $data['center'] ); ?></h1>
+					<p class="md-guide__hero-title"><?php echo esc_html( $data['title'] ); ?></p>
+				<?php else : ?>
+					<h1 class="md-guide__hero-title" itemprop="headline"><?php echo esc_html( $data['title'] ); ?></h1>
+				<?php endif; ?>
 				<?php if ( ! empty( $data['subtitle'] ) ) : ?>
 					<p class="md-guide__hero-sub"><?php echo esc_html( $data['subtitle'] ); ?></p>
 				<?php endif; ?>
@@ -96,10 +101,10 @@ if ( ! $data ) {
 						</div>
 					</section>
 
-					<!-- 관련 가이드 -->
+					<!-- 관련 안내서 -->
 					<?php if ( ! empty( $data['related'] ) ) : ?>
 						<section class="md-guide__related">
-							<h3>📚 함께 보면 좋은 가이드</h3>
+							<h3>📚 함께 보면 좋은 안내서</h3>
 							<div class="md-guide__related-grid">
 								<?php foreach ( $data['related'] as $r ) : ?>
 									<a class="md-guide__related-card" href="<?php echo esc_url( home_url( $r['href'] ) ); ?>">

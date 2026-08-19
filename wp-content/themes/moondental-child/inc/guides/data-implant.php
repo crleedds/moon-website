@@ -10,10 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 return array(
 	'slug'         => 'implant',
-	'code'         => 'GUIDE 01',
+	'code'         => 'NO. 01',
 	'icon'         => '🦷',
 	'eyebrow'      => '천안·아산 대표 치과병원 · 30여년 임상',
-	'title'        => '임플란트센터 종합안내서',
+	'center'       => '임플란트센터',
+	'title'        => '임플란트 종합안내서',
 	'subtitle'     => '임플란트 종류·비용·과정·수명·부작용을 학술 근거와 문치과병원 임플란트센터 30여년 임상 경험으로 정리',
 	'reading'      => '약 25분',
 	'updated'      => '2026.08',
@@ -35,7 +36,7 @@ return array(
 		array( 'id' => 'risks',     'label' => '부작용과 실패 원인' ),
 		array( 'id' => 'insurance', 'label' => '건강보험·실비보험' ),
 		array( 'id' => 'compare',   'label' => '임플란트 vs 브릿지 vs 틀니' ),
-		array( 'id' => 'special',   'label' => '특수 케이스별 가이드' ),
+		array( 'id' => 'special',   'label' => '특수 케이스별 안내' ),
 		array( 'id' => 'graft',     'label' => '골이식·상악동거상술' ),
 		array( 'id' => 'digital',   'label' => '디지털·네비게이션 임플란트' ),
 		array( 'id' => 'evidence',  'label' => '임상 데이터·학술 근거' ),
@@ -255,7 +256,7 @@ return array(
 					<tr><td>수술 필요</td><td>O</td><td>X</td><td>X</td></tr>
 				</tbody>
 			</table></div>
-			<h3>선택 가이드</h3>
+			<h3>선택 안내</h3>
 			<ul>
 				<li><strong>임플란트</strong> · 인접 치아 건강, 장기 경제성, 자연스러운 저작감 원할 때</li>
 				<li><strong>브릿지</strong> · 수술 회피, 인접 치아 이미 크라운 있을 때, 빠른 치료</li>
@@ -265,7 +266,7 @@ return array(
 
 		array(
 			'id'    => 'special',
-			'title' => '10 · 특수 케이스별 임플란트 가이드',
+			'title' => '10 · 특수 케이스별 안내',
 			'body'  => '<h3>당뇨 환자</h3>
 			<ul>
 				<li>혈당 조절 필수 · <strong>HbA1c 7% 이하</strong>가 안전</li>

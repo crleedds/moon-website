@@ -8,11 +8,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 return array(
 	'slug'         => 'laminate',
-	'code'         => 'GUIDE 03',
+	'code'         => 'NO. 03',
 	'icon'         => '✨',
 	'eyebrow'      => '천안·아산 대표 치과병원 · 30여년 임상',
-	'title'        => '스마일디자인센터 라미네이트 종합안내서',
-	'subtitle'     => 'emax·empress·지르코니아 비교부터 무삭제 라미네이트의 진실, 디지털 정밀 라미네이트까지 · 문치과병원 스마일디자인센터',
+	'center'       => '스마일디자인센터',
+	'title'        => '최소삭제 라미네이트 종합안내서',
+	'subtitle'     => 'emax·empress·지르코니아 비교부터 무삭제·최소삭제 라미네이트의 진실, 디지털 정밀 라미네이트까지 · 문치과병원 스마일디자인센터',
 	'reading'      => '약 20분',
 	'updated'      => '2026.08',
 	'tags'         => array( '30+ FAQ', '16 섹션', '디지털 정밀' ),
@@ -37,7 +38,7 @@ return array(
 		array( 'id' => 'vs',         'label' => '라미네이트 vs 미백 vs 교정' ),
 		array( 'id' => 'vs-crown',   'label' => '라미네이트 vs 크라운' ),
 		array( 'id' => 'digital',    'label' => '디지털 정밀 라미네이트' ),
-		array( 'id' => 'age',        'label' => '연령별·직업별 가이드' ),
+		array( 'id' => 'age',        'label' => '연령별·직업별 안내' ),
 		array( 'id' => 'daily',      'label' => '일상 관리·주의사항' ),
 		array( 'id' => 'clinic',     'label' => '좋은 치과 고르는 법' ),
 		array( 'id' => 'moon',       'label' => '문치과병원 스마일디자인센터' ),
@@ -345,7 +346,7 @@ return array(
 
 		array(
 			'id'    => 'age',
-			'title' => '14 · 연령별·직업별 가이드',
+			'title' => '14 · 연령별·직업별 안내',
 			'body'  => '<h3>연령별</h3>
 			<ul>
 				<li><strong>20대 (사회 진출)</strong> · 20세 미만 성장 미완료 주의. emax 또는 디지털 정밀 추천.</li>

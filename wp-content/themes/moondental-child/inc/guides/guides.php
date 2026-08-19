@@ -97,6 +97,7 @@ function md_guide_index() {
 			'slug'     => $key,
 			'code'     => $data['code']    ?? '',
 			'icon'     => $data['icon']    ?? '',
+			'center'   => $data['center']  ?? '',
 			'title'    => $data['title']   ?? '',
 			'subtitle' => $data['subtitle'] ?? '',
 			'summary'  => $data['summary'] ?? '',
@@ -173,7 +174,10 @@ add_filter( 'pre_get_document_title', function ( $title ) {
 	if ( empty( $GLOBALS['md_guide_data'] ) ) return $title;
 	$d = $GLOBALS['md_guide_data'];
 	$hospital = function_exists( 'moondental_get_info' ) ? moondental_get_info( 'name_short' ) : '문치과병원';
-	return ( $d['title'] ?? '가이드' ) . ' | ' . $hospital;
+	$center = $d['center'] ?? '';
+	$title  = $d['title']  ?? '종합안내서';
+	$head   = $center ? ( $center . ' · ' . $title ) : $title;
+	return $head . ' | ' . $hospital;
 }, 20 );
 
 /**
