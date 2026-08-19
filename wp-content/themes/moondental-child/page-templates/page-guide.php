@@ -100,7 +100,12 @@ $data = array_merge( array(
 						<section class="md-guide__section" id="<?php echo esc_attr( $sec['id'] ); ?>">
 							<h2 class="md-guide__section-title"><?php echo esc_html( $sec['title'] ); ?></h2>
 							<div class="md-guide__section-body">
-								<?php echo wp_kses_post( $sec['body'] ); ?>
+								<?php
+								// v3.44.185 · 테마 내부 데이터 (data-*.php) 이므로 신뢰 출력.
+								// wp_kses_post 는 <script type="application/ld+json"> 을 벗겨서
+								// FAQPage schema JSON 을 그대로 화면에 노출시킴 (버그).
+								echo $sec['body']; // phpcs:ignore WordPress.Security.EscapeOutput
+								?>
 							</div>
 						</section>
 					<?php endforeach; ?>
