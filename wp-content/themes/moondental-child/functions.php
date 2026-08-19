@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.177' );
+define( 'MOONDENTAL_VERSION', '3.44.178' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2037,9 +2037,12 @@ function moondental_enqueue_styles() {
 	);
 
 	// 3. 자식 테마 스타일 — 프로덕션 미니파이 · 로그인/디버그 시 원본 (v3.44.31)
+	// v3.44.178 · min.css 가 style.css 보다 오래됐으면 원본 style.css 사용 (스테일 min 방지)
 	$min_path  = MOONDENTAL_DIR . '/style.min.css';
 	$full_path = MOONDENTAL_DIR . '/style.css';
-	$use_min   = file_exists( $min_path )
+	$min_fresh = file_exists( $min_path ) && file_exists( $full_path )
+		&& filemtime( $min_path ) >= filemtime( $full_path );
+	$use_min   = $min_fresh
 		&& ( ! defined( 'SCRIPT_DEBUG' ) || ! SCRIPT_DEBUG )
 		&& ! is_user_logged_in();
 	$css_path  = $use_min ? $min_path : $full_path;
