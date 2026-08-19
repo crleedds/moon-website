@@ -11,8 +11,8 @@ return array(
 	'code'         => 'GUIDE 03',
 	'icon'         => '✨',
 	'eyebrow'      => '천안·아산 대표 치과병원 · 30여년 임상',
-	'title'        => '천안 라미네이트 종합 안내서',
-	'subtitle'     => 'emax·empress·지르코니아 비교부터 무삭제 라미네이트의 진실, 디지털 정밀 라미네이트까지',
+	'title'        => '스마일디자인센터 라미네이트 종합안내서',
+	'subtitle'     => 'emax·empress·지르코니아 비교부터 무삭제 라미네이트의 진실, 디지털 정밀 라미네이트까지 · 문치과병원 스마일디자인센터',
 	'reading'      => '약 20분',
 	'updated'      => '2026.08',
 	'tags'         => array( '30+ FAQ', '16 섹션', '디지털 정밀' ),
@@ -20,8 +20,8 @@ return array(
 	'cta_page'     => '/라미네이트/',
 	'cta_label'    => '문치과병원 라미네이트 진료 페이지',
 	'related'      => array(
-		array( 'label' => '천안 임플란트 종합 안내서', 'href' => '/가이드/임플란트/', 'icon' => '🦷' ),
-		array( 'label' => '천안 투명교정 종합 안내서', 'href' => '/가이드/투명교정/', 'icon' => '😁' ),
+		array( 'label' => '임플란트센터 종합안내서',    'href' => '/guide/implant/',   'icon' => '🦷' ),
+		array( 'label' => '교정센터 투명교정 종합안내서', 'href' => '/guide/suresmile/', 'icon' => '😁' ),
 	),
 	'toc' => array(
 		array( 'id' => 'what',       'label' => '라미네이트란' ),
@@ -40,7 +40,7 @@ return array(
 		array( 'id' => 'age',        'label' => '연령별·직업별 가이드' ),
 		array( 'id' => 'daily',      'label' => '일상 관리·주의사항' ),
 		array( 'id' => 'clinic',     'label' => '좋은 치과 고르는 법' ),
-		array( 'id' => 'moon',       'label' => '문치과병원 라미네이트' ),
+		array( 'id' => 'moon',       'label' => '문치과병원 스마일디자인센터' ),
 		array( 'id' => 'faq',        'label' => '자주 묻는 질문 30선' ),
 	),
 	'sections' => array(
@@ -444,7 +444,7 @@ return array(
 
 		array(
 			'id'    => 'moon',
-			'title' => '17 · 문치과병원 라미네이트',
+			'title' => '17 · 문치과병원 스마일디자인센터',
 			'body'  => '<h3>천안·아산 30여년 심미 진료</h3>
 			<p>한아의료재단 <strong>문치과병원</strong>은 통합 진료센터와 다학제 협진 시스템을 갖춘 천안·아산 대표 치과병원입니다. 라미네이트는 <strong>보철과·구강외과 협진</strong>으로 잇몸·교합·심미를 종합 판단합니다.</p>
 			<h3>진료 강점</h3>

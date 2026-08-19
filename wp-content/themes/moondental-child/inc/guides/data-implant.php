@@ -13,8 +13,8 @@ return array(
 	'code'         => 'GUIDE 01',
 	'icon'         => '🦷',
 	'eyebrow'      => '천안·아산 대표 치과병원 · 30여년 임상',
-	'title'        => '천안 임플란트 종합 안내서',
-	'subtitle'     => '천안·아산 임플란트 종류·비용·과정·수명·부작용을 학술 근거와 문치과병원 30여년 경험으로 정리',
+	'title'        => '임플란트센터 종합안내서',
+	'subtitle'     => '임플란트 종류·비용·과정·수명·부작용을 학술 근거와 문치과병원 임플란트센터 30여년 임상 경험으로 정리',
 	'reading'      => '약 25분',
 	'updated'      => '2026.08',
 	'tags'         => array( '35+ FAQ', '17 섹션', '학술 근거' ),
@@ -22,8 +22,8 @@ return array(
 	'cta_page'     => '/임플란트/',
 	'cta_label'    => '문치과병원 임플란트 진료 페이지',
 	'related'      => array(
-		array( 'label' => '천안 투명교정 종합 안내서', 'href' => '/가이드/투명교정/', 'icon' => '😁' ),
-		array( 'label' => '천안 라미네이트 종합 안내서', 'href' => '/가이드/라미네이트/', 'icon' => '✨' ),
+		array( 'label' => '교정센터 투명교정 종합안내서',      'href' => '/guide/suresmile/', 'icon' => '😁' ),
+		array( 'label' => '스마일디자인센터 라미네이트 종합안내서', 'href' => '/guide/laminate/',  'icon' => '✨' ),
 	),
 	'toc' => array(
 		array( 'id' => 'what',      'label' => '임플란트란 무엇인가' ),
@@ -40,7 +40,7 @@ return array(
 		array( 'id' => 'digital',   'label' => '디지털·네비게이션 임플란트' ),
 		array( 'id' => 'evidence',  'label' => '임상 데이터·학술 근거' ),
 		array( 'id' => 'clinic',    'label' => '좋은 치과 고르는 법' ),
-		array( 'id' => 'moon',      'label' => '문치과병원 임플란트' ),
+		array( 'id' => 'moon',      'label' => '문치과병원 임플란트센터' ),
 		array( 'id' => 'faq',       'label' => '자주 묻는 질문 30선' ),
 	),
 	'sections' => array(
@@ -421,7 +421,7 @@ return array(
 
 		array(
 			'id'    => 'moon',
-			'title' => '15 · 문치과병원 임플란트',
+			'title' => '15 · 문치과병원 임플란트센터',
 			'body'  => '<h3>천안·아산 30여년 임플란트 진료</h3>
 			<p>한아의료재단 <strong>문치과병원</strong>은 1995년 개원 이후 천안·아산 지역에서 30여 년간 임플란트 진료를 이어왔습니다. 국가지정 구강검진 치과, 외국인환자 유치 의료기관, 삼성서울병원 협력병원 등 <strong>공신력 있는 인증</strong>과 함께 통합 진료 환경을 갖추고 있습니다.</p>
 			<h3>진료 강점</h3>

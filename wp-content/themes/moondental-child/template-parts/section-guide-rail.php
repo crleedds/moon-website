@@ -19,14 +19,20 @@ $data = md_guide_load( $slug );
 if ( ! $data ) return;
 
 $path_map = array(
-	'implant'    => '/가이드/임플란트/',
-	'invisalign' => '/가이드/투명교정/',
-	'laminate'   => '/가이드/라미네이트/',
+	'implant'   => '/guide/implant/',
+	'suresmile' => '/guide/suresmile/',
+	'laminate'  => '/guide/laminate/',
 );
 $href = isset( $path_map[ $slug ] ) ? $path_map[ $slug ] : '/';
+
+// 넘버 워터마크 (01·02·03) — code 필드에서 숫자만 추출
+$num_watermark = '';
+if ( ! empty( $data['code'] ) && preg_match( '/(\d+)/', $data['code'], $mm ) ) {
+	$num_watermark = str_pad( $mm[1], 2, '0', STR_PAD_LEFT );
+}
 ?>
-<section class="md-guide-rail md-guide-rail--<?php echo esc_attr( $slug ); ?>" aria-label="<?php echo esc_attr( $data['title'] ?? '종합 안내서' ); ?>">
-	<a class="md-guide-rail__card" href="<?php echo esc_url( home_url( $href ) ); ?>">
+<section class="md-guide-rail md-guide-rail--<?php echo esc_attr( $slug ); ?>" aria-label="<?php echo esc_attr( $data['title'] ?? '종합안내서' ); ?>">
+	<a class="md-guide-rail__card" href="<?php echo esc_url( home_url( $href ) ); ?>" data-num="<?php echo esc_attr( $num_watermark ); ?>">
 		<div class="md-guide-rail__head">
 			<span class="md-guide-rail__icon" aria-hidden="true"><?php echo esc_html( $data['icon'] ?? '📖' ); ?></span>
 			<span class="md-guide-rail__code"><?php echo esc_html( $data['code'] ?? '' ); ?></span>

@@ -26,10 +26,10 @@ get_header();
 		<?php get_template_part( 'template-parts/section', 'testimonials-rail' ); ?>
 		<?php /* v3.44.166 · 환자분들의 이야기 아래 층별 안내 */ ?>
 		<?php get_template_part( 'template-parts/section', 'floor-rail' ); ?>
-		<?php /* v3.44.181 · 층별안내 아래 · 종합 안내서 3개 별도 섹션 */ ?>
-		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'implant'    ) ); ?>
-		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'invisalign' ) ); ?>
-		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'laminate'   ) ); ?>
+		<?php /* v3.44.182 · 층별안내 아래 · 종합안내서 3개 별도 섹션 (임플란트센터·교정센터·스마일디자인센터) */ ?>
+		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'implant'   ) ); ?>
+		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'suresmile' ) ); ?>
+		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'laminate'  ) ); ?>
 	</aside>
 	<main class="md-home-2col__main">
 		<?php get_template_part( 'template-parts/section', 'why' ); ?>

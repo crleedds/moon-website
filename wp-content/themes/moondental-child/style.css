@@ -15282,101 +15282,152 @@ a.md-team-card:hover .md-team-card__photo img,
 }
 
 /* =============================================================
-   v3.44.181 · 사이드바 · 종합 안내서 개별 카드 (guide-rail)
+   v3.44.182 · 사이드바 · 종합안내서 개별 카드 (guide-rail) · 에디토리얼 리디자인
+   - 좌측 컬러 액센트 스트라이프 (카테고리별)
+   - 큰 넘버 배지 (01/02/03)
+   - 미묘한 그라디언트 · 서브틀한 그림자
+   - 심플하고 세련된 타이포그래피
    ============================================================= */
 .md-guide-rail {
-  margin-top: 14px;
+  --md-rail-accent: #E37B5C;       /* 기본: 살구색 */
+  --md-rail-accent-2: #F2A878;
+  margin-top: 16px;
 }
+.md-guide-rail--implant {
+  --md-rail-accent: #5C8B82;       /* 임플란트: 세이지 그린 */
+  --md-rail-accent-2: #7BAD9E;
+}
+.md-guide-rail--suresmile {
+  --md-rail-accent: #E37B5C;       /* 교정: 브랜드 살구색 */
+  --md-rail-accent-2: #F2A878;
+}
+.md-guide-rail--laminate {
+  --md-rail-accent: #B29CC7;       /* 라미네이트: 소프트 퍼플 */
+  --md-rail-accent-2: #D2BFE0;
+}
+
 .md-guide-rail__card {
   display: block;
   position: relative;
-  padding: 18px 18px 20px;
+  padding: 22px 22px 22px 26px;
   background: #FFFFFF;
-  border: 1px solid rgba(30, 20, 14, 0.08);
-  border-radius: 14px;
+  border: 1px solid rgba(30, 20, 14, 0.06);
+  border-radius: 16px;
   text-decoration: none;
   color: inherit;
-  box-shadow: 0 2px 10px rgba(30, 20, 14, 0.05);
+  box-shadow: 0 2px 8px rgba(30, 20, 14, 0.04);
   overflow: hidden;
   isolation: isolate;
-  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
+/* 좌측 컬러 액센트 스트라이프 */
 .md-guide-rail__card::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 68px;
-  background: linear-gradient(160deg, #221912 0%, #2E211A 100%);
-  z-index: -1;
+  top: 0; left: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--md-rail-accent), var(--md-rail-accent-2));
+  z-index: 1;
+}
+/* 우측 하단 큰 넘버 워터마크 (은은한 배경 장식) */
+.md-guide-rail__card::after {
+  content: attr(data-num);
+  position: absolute;
+  right: -8px;
+  bottom: -28px;
+  font-size: 8rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--md-rail-accent);
+  opacity: 0.06;
+  z-index: 0;
+  letter-spacing: -0.05em;
+  pointer-events: none;
 }
 .md-guide-rail__card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(30, 20, 14, 0.12);
-  border-color: rgba(227, 123, 92, 0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(30, 20, 14, 0.10);
+  border-color: color-mix(in srgb, var(--md-rail-accent) 45%, transparent);
+}
+.md-guide-rail__card:hover::after {
+  opacity: 0.10;
 }
 .md-guide-rail__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #F5EEE6;
-  margin-bottom: 40px;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 2;
 }
 .md-guide-rail__icon {
-  font-size: 1.6rem;
+  font-size: 1.7rem;
   line-height: 1;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.06));
 }
 .md-guide-rail__code {
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  font-weight: 700;
-  padding: 4px 10px;
-  background: rgba(255, 240, 220, 0.14);
-  border: 1px solid rgba(255, 240, 220, 0.22);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  font-weight: 800;
+  padding: 5px 11px;
+  background: color-mix(in srgb, var(--md-rail-accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--md-rail-accent) 25%, transparent);
   border-radius: 999px;
-  color: #F5EEE6;
+  color: var(--md-rail-accent);
 }
 .md-guide-rail__title {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   line-height: 1.35;
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   color: var(--color-text, #2A1E18);
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 2;
 }
 .md-guide-rail__subtitle {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   line-height: 1.55;
   color: var(--color-text-sub, #6B554A);
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  position: relative;
+  z-index: 2;
 }
 .md-guide-rail__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 12px;
+  gap: 5px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 2;
 }
 .md-guide-rail__tag {
   font-size: 0.68rem;
   font-weight: 600;
-  padding: 3px 8px;
+  padding: 3px 9px;
   border-radius: 999px;
-  background: rgba(227, 123, 92, 0.10);
-  color: var(--color-primary, #E37B5C);
+  background: rgba(30, 20, 14, 0.05);
+  color: var(--color-text-sub, #6B554A);
 }
 .md-guide-rail__read {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 700;
   font-size: 0.82rem;
-  color: var(--color-primary, #E37B5C);
-  transition: transform 0.2s ease;
+  color: var(--md-rail-accent);
+  transition: gap 0.2s ease;
+  position: relative;
+  z-index: 2;
 }
 .md-guide-rail__card:hover .md-guide-rail__read {
-  transform: translateX(4px);
+  gap: 10px;
 }
-/* 태블릿 이하 · 사이드바가 상단으로 오면 3개 카드를 그리드로 표시 */
+/* 태블릿 이하 · 사이드바가 상단으로 올 때 3개 카드 가로 3열 */
 @media (max-width: 1080px) {
   .md-home-2col__side .md-guide-rail {
     display: inline-block;
@@ -15399,12 +15450,15 @@ a.md-team-card:hover .md-team-card__photo img,
 @media (prefers-color-scheme: dark) {
   .md-guide-rail__card {
     background: #241914;
-    border-color: rgba(255, 240, 220, 0.10);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    border-color: rgba(255, 240, 220, 0.08);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   }
   .md-guide-rail__title { color: #F5EEE6; }
   .md-guide-rail__subtitle { color: rgba(245, 238, 230, 0.72); }
-  .md-guide-rail__tag { background: rgba(227, 123, 92, 0.18); color: #F2A878; }
-  .md-guide-rail__read { color: #F2A878; }
+  .md-guide-rail__tag {
+    background: rgba(255, 240, 220, 0.06);
+    color: rgba(245, 238, 230, 0.75);
+  }
+  .md-guide-rail__card::after { opacity: 0.10; }
 }
 

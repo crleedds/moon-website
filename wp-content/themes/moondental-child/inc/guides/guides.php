@@ -14,13 +14,15 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 function md_guide_slug_map() {
 	return array(
-		'임플란트' => 'implant',
-		'implant'  => 'implant',
-		'투명교정' => 'invisalign',
-		'인비절라인' => 'invisalign',
-		'invisalign' => 'invisalign',
-		'라미네이트' => 'laminate',
+		// 영문 (권장 · 안정적)
+		'implant'    => 'implant',
+		'suresmile'  => 'suresmile',
 		'laminate'   => 'laminate',
+		// 한글 (호환)
+		'임플란트'   => 'implant',
+		'투명교정'   => 'suresmile',
+		'슈어스마일' => 'suresmile',
+		'라미네이트' => 'laminate',
 	);
 }
 
@@ -83,13 +85,13 @@ function md_guide_index() {
 	static $cache = null;
 	if ( $cache !== null ) return $cache;
 	$cache = array();
-	foreach ( array( 'implant', 'invisalign', 'laminate' ) as $key ) {
+	foreach ( array( 'implant', 'suresmile', 'laminate' ) as $key ) {
 		$data = md_guide_load( $key );
 		if ( ! $data ) continue;
 		$path_map = array(
-			'implant'    => '/가이드/임플란트/',
-			'invisalign' => '/가이드/투명교정/',
-			'laminate'   => '/가이드/라미네이트/',
+			'implant'   => '/guide/implant/',
+			'suresmile' => '/guide/suresmile/',
+			'laminate'  => '/guide/laminate/',
 		);
 		$cache[] = array(
 			'slug'     => $key,
@@ -107,9 +109,17 @@ function md_guide_index() {
 }
 
 /**
- * Rewrite rule 등록 · /가이드/{slug}/ 를 캐치.
+ * Rewrite rule 등록 · /guide/{slug}/ (권장) · /가이드/{slug}/ (호환).
+ * v3.44.182 · 영문 URL 을 기본으로 (한글 URL 은 서버 환경에 따라 encoding 이슈 있음)
  */
 add_action( 'init', function () {
+	// 영문 (권장 · 확실히 작동)
+	add_rewrite_rule(
+		'^guide/([^/]+)/?$',
+		'index.php?md_guide=$matches[1]',
+		'top'
+	);
+	// 한글 (호환)
 	add_rewrite_rule(
 		'^가이드/([^/]+)/?$',
 		'index.php?md_guide=$matches[1]',
@@ -124,12 +134,21 @@ add_filter( 'query_vars', function ( $vars ) {
 
 /**
  * template_include · 가이드 요청 시 템플릿 로드.
+ * v3.44.182 · rewrite 실패 시 URL 직접 파싱 폴백
  */
 add_filter( 'template_include', function ( $template ) {
 	$slug = get_query_var( 'md_guide' );
+
+	// 폴백: query var 가 비었으면 URL 에서 직접 추출 (rewrite flush 지연 대응)
+	if ( ! $slug ) {
+		$req = isset( $_SERVER['REQUEST_URI'] ) ? rawurldecode( $_SERVER['REQUEST_URI'] ) : '';
+		$path = parse_url( $req, PHP_URL_PATH ) ?: '';
+		if ( preg_match( '#/(guide|가이드)/([^/]+)/?$#u', $path, $m ) ) {
+			$slug = $m[2];
+		}
+	}
 	if ( ! $slug ) return $template;
 
-	// 한글 슬러그가 URL 디코딩된 상태로 전달됨
 	$slug = rawurldecode( $slug );
 	$data = md_guide_load( $slug );
 	if ( ! $data ) return $template;
@@ -138,7 +157,7 @@ add_filter( 'template_include', function ( $template ) {
 
 	// 404 방지: WP 에 200 응답이라고 알려주기
 	global $wp_query;
-	$wp_query->is_404 = false;
+	$wp_query->is_404  = false;
 	$wp_query->is_page = true;
 	status_header( 200 );
 
@@ -170,10 +189,11 @@ add_filter( 'body_class', function ( $classes ) {
 
 /**
  * 활성화 시 rewrite flush · MOONDENTAL_VERSION 옵션과 함께 관리.
+ * v3.44.182 · 영문 URL 추가로 강제 flush
  */
 add_action( 'init', function () {
 	$key = 'md_guide_rewrites_v';
-	$now = defined( 'MOONDENTAL_VERSION' ) ? MOONDENTAL_VERSION : '1';
+	$now = ( defined( 'MOONDENTAL_VERSION' ) ? MOONDENTAL_VERSION : '1' ) . '-r2';
 	if ( get_option( $key ) !== $now ) {
 		flush_rewrite_rules( false );
 		update_option( $key, $now );
