@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.188' );
+define( 'MOONDENTAL_VERSION', '3.44.189' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -86,6 +86,28 @@ add_action( 'init', function() {
 		remove_theme_mod( 'md_content_trust_1_value' );
 	}
 	update_option( 'moondental_trust1_v34188', 'done' );
+} );
+
+/* v3.44.189 · 1990년대부터 임플란트 헤리티지 반영 · 옛 기본값 정리 (사용자 커스텀은 보존) */
+add_action( 'init', function() {
+	if ( get_option( 'moondental_1990s_v34189' ) === 'done' ) return;
+	// hero eyebrow · 옛 기본값이면 새 기본값 사용하도록 삭제
+	if ( get_theme_mod( 'md_content_hero_eyebrow' ) === '천안·아산 대표 치과병원 · 전국에서 찾아오는' ) {
+		remove_theme_mod( 'md_content_hero_eyebrow' );
+	}
+	// why 1 · 옛 기본값이면 새 기본값 사용하도록 삭제
+	if ( get_theme_mod( 'md_content_why_1_title' ) === '전국에서 찾아오는 30여년' ) {
+		remove_theme_mod( 'md_content_why_1_title' );
+	}
+	if ( strpos( (string) get_theme_mod( 'md_content_why_1_desc', '' ), '1995년부터 천안 만남로' ) === 0 ) {
+		remove_theme_mod( 'md_content_why_1_desc' );
+	}
+	// mission_certs · '1990년대부터 임플란트' 가 없으면 새 기본값 사용하도록 정리
+	$_certs = (string) get_theme_mod( 'md_content_mission_certs', '' );
+	if ( $_certs && strpos( $_certs, '1990년대부터 임플란트' ) === false ) {
+		remove_theme_mod( 'md_content_mission_certs' );
+	}
+	update_option( 'moondental_1990s_v34189', 'done' );
 } );
 
 /* v3.42.4 · 충치·레진 탭 강제 sync 마이그레이션 (init 훅 · 프론트에서도 실행)

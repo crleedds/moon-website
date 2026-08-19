@@ -9,8 +9,8 @@
 $points = array(
 	array(
 		'icon'  => md_content( 'why_1_icon',  '🏥' ),
-		'title' => md_content( 'why_1_title', '30여년, 한자리에서' ),
-		'desc'  => md_content( 'why_1_desc',  '1995년부터 천안 만남로 한자리에서 진료해온 동네 치과. 환자 한 분의 평생 치아를 길게 봅니다.' ),
+		'title' => md_content( 'why_1_title', '1990년대부터 임플란트' ),
+		'desc'  => md_content( 'why_1_desc',  '한국에 임플란트가 본격 도입된 1990년대 초부터 30여년 이어온 임플란트 진료. 초기 브랜드부터 최신 디지털 임플란트까지 세대별 특성·장기 예후를 실제 케이스로 검증한 임상 노하우입니다.' ),
 	),
 	array(
 		'icon'  => md_content( 'why_2_icon',  '🏢' ),

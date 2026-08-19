@@ -302,8 +302,8 @@ function moondental_home_content_fields() {
 				'why_lead'    => array( 'default' => '1995년 개원 30여년 · 천안 만남로에서 전국 환자분들이 문치과병원을 선택하시는 4가지 이유', 'label' => '섹션 — 설명', 'type' => 'textarea' ),
 
 				'why_1_icon'  => array( 'default' => '🏥', 'label' => '①번 — 아이콘(이모지)', 'type' => 'text' ),
-				'why_1_title' => array( 'default' => '전국에서 찾아오는 30여년', 'label' => '①번 — 제목', 'type' => 'text' ),
-				'why_1_desc'  => array( 'default' => '1995년부터 천안 만남로 한자리에서 진료해온 동네 치과. 지역 환자분과 함께 전국에서 찾아오시는 분들의 평생 치아를 길게 봅니다.', 'label' => '①번 — 설명', 'type' => 'textarea' ),
+				'why_1_title' => array( 'default' => '1990년대부터 임플란트', 'label' => '①번 — 제목', 'type' => 'text' ),
+				'why_1_desc'  => array( 'default' => '한국에 임플란트가 본격 도입된 1990년대 초부터 30여년 이어온 임플란트 진료. 초기 브랜드부터 최신 디지털 임플란트까지 세대별 특성·장기 예후를 실제 케이스로 검증한 임상 노하우입니다.', 'label' => '①번 — 설명', 'type' => 'textarea' ),
 
 				'why_2_icon'  => array( 'default' => '🏢', 'label' => '②번 — 아이콘', 'type' => 'text' ),
 				'why_2_title' => array( 'default' => '통합 진료센터', 'label' => '②번 — 제목', 'type' => 'text' ),
@@ -388,7 +388,7 @@ function moondental_home_content_fields() {
 					'type' => 'textarea',
 				),
 				'mission_certs' => array(
-					'default' => "🏥|국가지정 구강검진 치과\n🌐|외국인환자 유치 의료기관\n🪖|미군 및 가족 치료기관\n🦷|천안시 치아사랑사업 협력병원\n🔗|삼성서울병원 협력병원\n➕|대한적십자사 협력병원",
+					'default' => "⭐|1990년대부터 임플란트 식립\n🏥|국가지정 구강검진 치과\n🌐|외국인환자 유치 의료기관\n🪖|미군 및 가족 치료기관\n🦷|천안시 치아사랑사업 협력병원\n🔗|삼성서울병원 협력병원\n➕|대한적십자사 협력병원",
 					'label' => '사명 · 협력·지정 의료기관 (한 줄에 "이모지|라벨")',
 					'type' => 'textarea',
 				),

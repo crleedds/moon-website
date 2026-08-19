@@ -11,7 +11,7 @@ $info = moondental_get_info();
 
 /* Hero title · v3.34.8 · SEO 강도 강 (지역+전국 신뢰)
  * v3.38.5 · md_content 우선, 기존 theme_mod 폴백 (사용자 정의값 안전 보존) */
-$eyebrow = md_content( 'hero_eyebrow', get_theme_mod( 'moondental_hero_eyebrow', '천안·아산 대표 치과병원 · 전국에서 찾아오는' ) );
+$eyebrow = md_content( 'hero_eyebrow', get_theme_mod( 'moondental_hero_eyebrow', '천안·아산 대표 치과병원 · 1990년대부터 임플란트 식립' ) );
 $title_a = md_content( 'hero_title_a', get_theme_mod( 'moondental_hero_title_a', '천안·아산에서 30여년,' ) );
 $title_b = md_content( 'hero_title_b', get_theme_mod( 'moondental_hero_title_b', '전국 환자가 신뢰하는 통합 진료' ) );
 
@@ -21,7 +21,7 @@ $mission_text    = md_content( 'mission_band_text',
 	'한아의료재단 문치과병원의 사명은 품격 있는 진료와 서비스로 환자의 신뢰를 받으며, 나눔과 봉사를 통해 사회에 공헌하는 가장 인정받는 병원이 되는 것입니다.'
 );
 $certs_raw = md_content( 'mission_certs',
-	"🏥|국가지정 구강검진 치과\n🌐|외국인환자 유치 의료기관\n🪖|미군 및 가족 치료기관\n🦷|천안시 치아사랑사업 협력병원\n🔗|삼성서울병원 협력병원\n➕|대한적십자사 협력병원"
+	"⭐|1990년대부터 임플란트 식립\n🏥|국가지정 구강검진 치과\n🌐|외국인환자 유치 의료기관\n🪖|미군 및 가족 치료기관\n🦷|천안시 치아사랑사업 협력병원\n🔗|삼성서울병원 협력병원\n➕|대한적십자사 협력병원"
 );
 $certifications = array();
 foreach ( preg_split( "/\r\n|\r|\n/", (string) $certs_raw ) as $line ) {
