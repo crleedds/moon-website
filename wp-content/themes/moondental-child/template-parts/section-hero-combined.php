@@ -35,7 +35,7 @@ foreach ( preg_split( "/\r\n|\r|\n/", (string) $certs_raw ) as $line ) {
 /* Trust stats */
 $stats = array(
 	array(
-		'value' => md_content( 'trust_1_value', '30' ),
+		'value' => md_content( 'trust_1_value', '30여' ),
 		'unit'  => md_content( 'trust_1_unit',  '년' ),
 		'label' => md_content( 'trust_1_label', '1995년 개원' ),
 	),

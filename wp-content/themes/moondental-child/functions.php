@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.186' );
+define( 'MOONDENTAL_VERSION', '3.44.187' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -77,6 +77,16 @@ add_filter( 'redirect_canonical', function ( $redirect_url, $requested_url ) {
 add_filter( 'wpml_pll_seo_permalink', '__return_null' );
 define( 'MOONDENTAL_DIR',     get_stylesheet_directory() );
 define( 'MOONDENTAL_URI',     get_stylesheet_directory_uri() );
+
+/* v3.44.187 · trust_1_value · 사용자가 이전에 저장한 '30' → '30여' 로 마이그레이션 */
+add_action( 'init', function() {
+	if ( get_option( 'moondental_trust1_v34187' ) === 'done' ) return;
+	$stored = get_theme_mod( 'md_content_trust_1_value', null );
+	if ( $stored === '30' || $stored === '30년' ) {
+		set_theme_mod( 'md_content_trust_1_value', '30여' );
+	}
+	update_option( 'moondental_trust1_v34187', 'done' );
+} );
 
 /* v3.42.4 · 충치·레진 탭 강제 sync 마이그레이션 (init 훅 · 프론트에서도 실행)
  * 저장된 price_tabs_all 안 '충치·레진' 탭 rows가 3줄 미만이거나

@@ -1700,55 +1700,80 @@ html.is-mobile-menu:has(.md-header__nav.is-open) { overflow: hidden; }
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
-/* 텍스트 대비 · text-shadow 만으로 (약한 검정 그림자 · 이전 상태) */
+/* v3.44.187 · 히어로 텍스트 · 따뜻한 크림/피치 톤 + 두꺼운 다층 그림자
+   · 밝은 하늘·어두운 건물 어디에서도 잘 보이도록 · 반투명 어두운 배경은 최소 */
 .md-hero-combined--has-bg .md-hero-combined__eyebrow {
-  color: #fff8ec !important;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  padding: 6px 14px;
+  color: #fff !important;
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(255, 220, 180, 0.35);
+  padding: 7px 16px;
   border-radius: 999px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
 }
 .md-hero-combined--has-bg .md-hero-combined__title {
-  color: #fff !important;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
+  color: #FFF6E5 !important;                              /* 따뜻한 크림색 */
+  font-weight: 800;
+  text-shadow:
+    0 1px 0  rgba(0, 0, 0, 0.6),
+    0 2px 6px rgba(0, 0, 0, 0.85),
+    0 4px 18px rgba(0, 0, 0, 0.65),
+    0 8px 40px rgba(0, 0, 0, 0.45);
 }
 .md-hero-combined--has-bg .md-hero-combined__title em {
-  color: #ffd0b0 !important;
-  background: linear-gradient(135deg, #ffd0b0 0%, #f2a878 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: none;
-  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.35));
+  color: #FFC48A !important;                              /* 피치·골드 · 그라디언트 대신 단색 */
+  font-style: normal;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #FFC48A !important;
+  background-clip: unset !important;
+  text-shadow:
+    0 1px 0  rgba(0, 0, 0, 0.7),
+    0 2px 6px rgba(0, 0, 0, 0.9),
+    0 4px 18px rgba(0, 0, 0, 0.7),
+    0 0 24px rgba(255, 120, 50, 0.35);                    /* 웜 글로우 */
+  filter: none !important;
 }
 .md-hero-combined--has-bg .md-hero-combined__title em::after {
-  background: linear-gradient(90deg, transparent, rgba(255, 208, 176, 0.7), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 196, 138, 0.9), transparent);
 }
 .md-hero-combined--has-bg .md-hero-combined__quote {
-  color: rgba(255, 250, 240, 0.92) !important;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  color: #FFF6E5 !important;
+  font-weight: 500;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.85),
+    0 2px 12px rgba(0, 0, 0, 0.7);
 }
 .md-hero-combined--has-bg .md-hero-combined__quote p { color: inherit !important; }
+
 .md-hero-combined--has-bg .md-hero-combined__certs li {
-  background: rgba(255, 255, 255, 0.14) !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
-  color: #fff8ec !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.50) !important;
+  border: 1px solid rgba(255, 220, 180, 0.28) !important;
+  color: #fff !important;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.30);
 }
+
 .md-hero-combined--has-bg .md-hero-combined__stats {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.48) !important;
+  border: 1px solid rgba(255, 220, 180, 0.22) !important;
   border-radius: 16px;
   padding: clamp(14px, 1.8vw, 22px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.30);
 }
 .md-hero-combined--has-bg .md-hero-combined__stat-value,
 .md-hero-combined--has-bg .md-hero-combined__stat-unit {
-  color: #ffd0b0 !important;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  color: #FFC48A !important;                              /* 피치·골드 · 통계 강조 */
+  font-weight: 800;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.85),
+    0 2px 10px rgba(0, 0, 0, 0.6);
 }
 .md-hero-combined--has-bg .md-hero-combined__stat-label {
-  color: rgba(255, 250, 240, 0.88) !important;
+  color: #FFF6E5 !important;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
 }
 /* v3.44.173 · ::before 애니메이션 rule 제거 (::before 미사용) */
 
