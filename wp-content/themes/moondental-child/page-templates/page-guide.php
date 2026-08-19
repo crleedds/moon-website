@@ -1,9 +1,8 @@
 <?php
 /**
- * Template: 종합 안내서 (Guide)
+ * Template: 종합안내서 (Guide)
  *
- * v3.44.175 · md_guide 쿼리 변수 기반 · /가이드/{slug}/ 라우팅.
- * 데이터: inc/guides/data-*.php
+ * v3.44.184 · /guide/{slug}/ 라우팅 · 안전한 데이터 접근
  *
  * @package moondental-child
  */
@@ -11,11 +10,30 @@ get_header();
 
 $data = isset( $GLOBALS['md_guide_data'] ) ? $GLOBALS['md_guide_data'] : null;
 
+// 폴백: 글로벌이 비었으면 URL 에서 직접 로드 (필터 순서 이슈 대응)
+if ( ! $data && function_exists( 'md_guide_load' ) ) {
+	$uri = isset( $_SERVER['REQUEST_URI'] ) ? rawurldecode( $_SERVER['REQUEST_URI'] ) : '';
+	if ( preg_match( '#/(guide|가이드)/([^/]+)/?$#u', $uri, $mm ) ) {
+		$data = md_guide_load( $mm[2] );
+	}
+}
+
+echo "\n<!-- md-guide-template v3.44.184 · data=" . ( $data ? esc_html( $data['slug'] ?? '?' ) : 'null' ) . " -->\n";
+
 if ( ! $data ) {
-	echo '<div class="md-container" style="padding:80px 20px;text-align:center;"><h1>종합안내서를 찾을 수 없습니다</h1><p><a href="' . esc_url( home_url( '/' ) ) . '">홈으로 돌아가기</a></p></div>';
+	echo '<div class="md-container" style="padding:80px 20px;text-align:center;"><h1>종합안내서를 찾을 수 없습니다</h1><p>요청하신 안내서를 불러올 수 없습니다.</p><p><a href="' . esc_url( home_url( '/' ) ) . '">홈으로 돌아가기</a></p></div>';
 	get_footer();
 	return;
 }
+
+// 각 필드 기본값
+$data = array_merge( array(
+	'slug' => '', 'code' => '', 'icon' => '📖', 'eyebrow' => '',
+	'center' => '', 'title' => '종합안내서', 'subtitle' => '',
+	'reading' => '', 'updated' => '', 'tags' => array(),
+	'toc' => array(), 'sections' => array(), 'related' => array(),
+	'cta_page' => '', 'cta_label' => '',
+), $data );
 ?>
 
 <article class="md-guide" itemscope itemtype="https://schema.org/Article">
@@ -90,7 +108,8 @@ if ( ! $data ) {
 					<!-- CTA -->
 					<section class="md-guide__cta">
 						<div class="md-guide__cta-inner">
-							<h3>천안·아산에서 <?php echo esc_html( strtok( $data['title'], ' ' ) === '천안' ? mb_substr( $data['title'], 3 ) : $data['title'] ); ?> 상담이 필요하신가요?</h3>
+							<?php $_cta_head = $data['center'] ?: $data['title']; ?>
+							<h3>천안·아산 <?php echo esc_html( $_cta_head ); ?> 상담이 필요하신가요?</h3>
 							<p>30여년 임상 경험과 다학제 협진으로 <strong>1:1 충분한 사전 상담</strong>부터 시작합니다.</p>
 							<div class="md-guide__cta-btns">
 								<a class="md-btn md-btn-primary" href="<?php echo esc_url( home_url( '/상담예약/' ) ); ?>">📅 상담 예약하기</a>

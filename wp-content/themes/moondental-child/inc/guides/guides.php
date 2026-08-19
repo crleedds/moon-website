@@ -134,15 +134,32 @@ add_filter( 'query_vars', function ( $vars ) {
 } );
 
 /**
+ * v3.44.184 · parse_request · rewrite 실패 대응 · 400 이전 조기 개입
+ * WP 가 404 판정하기 전에 query var 를 세팅해 정상 페이지로 처리되게 만듦
+ */
+add_action( 'parse_request', function ( $wp ) {
+	if ( ! ( $wp instanceof WP ) ) return;
+	$req = $wp->request;
+	if ( empty( $req ) ) {
+		// request 가 비어있으면 REQUEST_URI 직접 파싱
+		$uri = isset( $_SERVER['REQUEST_URI'] ) ? rawurldecode( $_SERVER['REQUEST_URI'] ) : '';
+		$req = trim( parse_url( $uri, PHP_URL_PATH ) ?: '', '/' );
+	}
+	if ( preg_match( '#^(guide|가이드)/([^/]+)/?$#u', $req, $m ) ) {
+		$wp->query_vars['md_guide'] = rawurldecode( $m[2] );
+	}
+} );
+
+/**
  * template_include · 가이드 요청 시 템플릿 로드.
- * v3.44.182 · rewrite 실패 시 URL 직접 파싱 폴백
+ * v3.44.184 · priority 999 로 최후에 실행 (Astra 등 부모 필터 override)
  */
 add_filter( 'template_include', function ( $template ) {
 	$slug = get_query_var( 'md_guide' );
 
-	// 폴백: query var 가 비었으면 URL 에서 직접 추출 (rewrite flush 지연 대응)
+	// 폴백: query var 가 비었으면 URL 에서 직접 추출
 	if ( ! $slug ) {
-		$req = isset( $_SERVER['REQUEST_URI'] ) ? rawurldecode( $_SERVER['REQUEST_URI'] ) : '';
+		$req  = isset( $_SERVER['REQUEST_URI'] ) ? rawurldecode( $_SERVER['REQUEST_URI'] ) : '';
 		$path = parse_url( $req, PHP_URL_PATH ) ?: '';
 		if ( preg_match( '#/(guide|가이드)/([^/]+)/?$#u', $path, $m ) ) {
 			$slug = $m[2];
@@ -158,14 +175,18 @@ add_filter( 'template_include', function ( $template ) {
 
 	// 404 방지: WP 에 200 응답이라고 알려주기
 	global $wp_query;
-	$wp_query->is_404  = false;
-	$wp_query->is_page = true;
+	$wp_query->is_404       = false;
+	$wp_query->is_page      = true;
+	$wp_query->is_singular  = true;
+	$wp_query->is_home      = false;
+	$wp_query->is_front_page = false;
+	$wp_query->query_vars['md_guide'] = $slug;
 	status_header( 200 );
 
 	$custom = get_stylesheet_directory() . '/page-templates/page-guide.php';
 	if ( file_exists( $custom ) ) return $custom;
 	return $template;
-} );
+}, 999 );
 
 /**
  * 문서 타이틀 · Yoast/기본 title 대응.

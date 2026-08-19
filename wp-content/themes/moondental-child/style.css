@@ -15482,3 +15482,26 @@ a.md-team-card:hover .md-team-card__photo img,
   .md-guide-rail__card::after { opacity: 0.10; }
 }
 
+/* =============================================================
+   v3.44.184 · 상단 메뉴 · 3개 센터명 · 홈 안내서 카드 컬러와 통일
+   ============================================================= */
+.md-nav-center--implant   > a { color: #5C8B82 !important; }        /* 임플란트: 세이지 그린 */
+.md-nav-center--suresmile > a { color: #E37B5C !important; }        /* 교정:     브랜드 살구색 */
+.md-nav-center--laminate  > a { color: #B29CC7 !important; }        /* 라미네이트: 소프트 퍼플 */
+
+.md-nav-center > a {
+  font-weight: 800 !important;
+  letter-spacing: -0.01em;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+.md-nav-center--implant   > a:hover { color: #4A7A72 !important; background: rgba(92, 139, 130, 0.08); }
+.md-nav-center--suresmile > a:hover { color: #C86B50 !important; background: rgba(227, 123, 92, 0.08); }
+.md-nav-center--laminate  > a:hover { color: #9C86B2 !important; background: rgba(178, 156, 199, 0.10); }
+
+/* 다크모드에서 살짝 밝게 */
+@media (prefers-color-scheme: dark) {
+  .md-nav-center--implant   > a { color: #8FBFB6 !important; }
+  .md-nav-center--suresmile > a { color: #F2A878 !important; }
+  .md-nav-center--laminate  > a { color: #D2BFE0 !important; }
+}
+

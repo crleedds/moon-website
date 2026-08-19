@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.183' );
+define( 'MOONDENTAL_VERSION', '3.44.184' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -4678,6 +4678,11 @@ function moondental_render_primary_menu() {
 		if ( untrailingslashit( $item['url'] ) === untrailingslashit( $current ) ) {
 			$classes[] = 'current-menu-item';
 		}
+		// v3.44.184 · 센터 라벨별 컬러 클래스 (홈 안내서 카드 컬러와 통일)
+		$_lbl_flat = str_replace( ' ', '', trim( (string) $item['label'] ) );
+		if ( $_lbl_flat === '임플란트센터' )      $classes[] = 'md-nav-center md-nav-center--implant';
+		elseif ( $_lbl_flat === '교정센터' )      $classes[] = 'md-nav-center md-nav-center--suresmile';
+		elseif ( $_lbl_flat === '스마일디자인센터' ) $classes[] = 'md-nav-center md-nav-center--laminate';
 		// v3.44.22 · 라벨 번역 (파일 → API → 원본)
 		$_key   = function_exists( 'moondental_menu_label_key' ) ? moondental_menu_label_key( $item['label'] ) : null;
 		$_label = ( $_key && function_exists( 'md_content' ) ) ? md_content( $_key, $item['label'] ) : $item['label'];
@@ -4739,6 +4744,18 @@ function moondental_force_primary_menu( $output, $args ) {
 	return '<' . tag_escape( $container ) . $attrs . '>' . $inner . '</' . tag_escape( $container ) . '>';
 }
 add_filter( 'pre_wp_nav_menu', 'moondental_force_primary_menu', 10, 2 );
+
+/**
+ * v3.44.184 · nav_menu_css_class · DB 기반 메뉴에서도 센터 컬러 클래스 부여 (안전망)
+ */
+add_filter( 'nav_menu_css_class', function ( $classes, $item ) {
+	if ( ! isset( $item->title ) ) return $classes;
+	$t = str_replace( ' ', '', trim( wp_strip_all_tags( $item->title ) ) );
+	if ( $t === '임플란트센터' )      { $classes[] = 'md-nav-center'; $classes[] = 'md-nav-center--implant'; }
+	elseif ( $t === '교정센터' )      { $classes[] = 'md-nav-center'; $classes[] = 'md-nav-center--suresmile'; }
+	elseif ( $t === '스마일디자인센터' ) { $classes[] = 'md-nav-center'; $classes[] = 'md-nav-center--laminate'; }
+	return $classes;
+}, 10, 2 );
 
 /**
  * 푸터 메뉴 fallback.
