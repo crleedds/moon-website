@@ -106,7 +106,8 @@
     if (toTop) toTop.removeAttribute('hidden'); // CSS로 visibility 제어
     var showAt = 320; // px
 
-    // v3.44.177 · 모바일에서 헤더 fixed 를 JS 로 강제 (CSS override 불문 항상 보임)
+    // v3.44.177/179 · 모바일에서 헤더 fixed 를 JS 로 강제 (CSS override 불문 항상 보임)
+    //                 + 드로어 padding-top 을 실측 헤더 높이로 세팅 (메뉴 잘림 방지)
     var applyFixedHeader = function () {
       if (!header) return;
       var mobile = window.innerWidth <= 1080;
@@ -123,6 +124,8 @@
         var abH = adminBar ? adminBar.offsetHeight : 0;
         document.body.style.paddingTop = (h + abH) + 'px';
         if (adminBar) header.style.top = abH + 'px';
+        // CSS var 로 드로어·기타 요소에서 재사용 (헤더 실측 높이 + admin bar)
+        document.documentElement.style.setProperty('--md-header-h', (h + abH) + 'px');
       } else {
         header.style.position = '';
         header.style.top = '';
@@ -131,6 +134,7 @@
         header.style.width = '';
         header.style.zIndex = '';
         document.body.style.paddingTop = '';
+        document.documentElement.style.removeProperty('--md-header-h');
       }
     };
     applyFixedHeader();

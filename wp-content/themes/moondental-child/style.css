@@ -1148,7 +1148,7 @@ html.is-mobile-menu .md-header__nav-toggle { display: flex !important; position:
     background: var(--color-bg);
     border-left: 1px solid var(--color-border);
     box-shadow: -12px 0 32px rgba(0, 0, 0, 0.2);
-    padding: 76px 20px calc(120px + env(safe-area-inset-bottom, 0px));
+    padding: calc(var(--md-header-h, 76px) + 20px) 20px calc(120px + env(safe-area-inset-bottom, 0px));
     z-index: 210;
     overflow-y: auto;
     overscroll-behavior: contain;                         /* 스크롤 체이닝 방지 (drawer 스크롤이 body로 새지 않음) */
