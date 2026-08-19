@@ -1650,13 +1650,23 @@ html.is-mobile-menu:has(.md-header__nav.is-open) { overflow: hidden; }
   content: none !important;
   background: none !important;
 }
-/* v3.44.177 · ::after 오버레이도 제거 (선명한 이미지 유지) */
+/* v3.44.180 · ::after 로 텍스트 영역만 부드럽게 어둡게 (blur X, 라디얼 그림자로 가독성 확보) */
 .md-hero-combined--has-bg::after {
-  display: none !important;
-  content: none !important;
+  content: '' !important;
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%,
+      rgba(15, 10, 6, 0.55) 0%,
+      rgba(15, 10, 6, 0.35) 35%,
+      rgba(15, 10, 6, 0.12) 65%,
+      rgba(15, 10, 6, 0) 90%);
 }
 /* v3.44.178 · 텍스트 뒤 패널 완전 제거 · 배경 사진 그대로 보이도록
-   · 텍스트 가독성은 text-shadow 로만 확보 */
+   · 텍스트 가독성은 text-shadow + 라디얼 그림자로만 확보 */
 .md-hero-combined--has-bg .md-container {
   position: relative;
   z-index: 2;
@@ -1666,55 +1676,75 @@ html.is-mobile-menu:has(.md-header__nav.is-open) { overflow: hidden; }
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
-/* 텍스트 대비 확보 (배경 이미지 있을 때) */
+/* v3.44.180 · 텍스트 대비 대폭 강화 · 삼중 text-shadow · 하드 + 소프트 그림자 */
 .md-hero-combined--has-bg .md-hero-combined__eyebrow {
-  color: #fff8ec !important;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
   padding: 6px 14px;
   border-radius: 999px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.6);
+  font-weight: 700;
 }
 .md-hero-combined--has-bg .md-hero-combined__title {
   color: #fff !important;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
+  font-weight: 800;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.85),
+    0 4px 12px rgba(0, 0, 0, 0.7),
+    0 8px 32px rgba(0, 0, 0, 0.5);
 }
 .md-hero-combined--has-bg .md-hero-combined__title em {
-  color: #ffd0b0 !important;
-  background: linear-gradient(135deg, #ffd0b0 0%, #f2a878 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: none;
-  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.35));
+  color: #ffd8b8 !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #ffd8b8 !important;
+  background-clip: unset !important;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.9),
+    0 4px 14px rgba(0, 0, 0, 0.7),
+    0 0 24px rgba(227, 123, 92, 0.35);
+  filter: none !important;
 }
 .md-hero-combined--has-bg .md-hero-combined__title em::after {
-  background: linear-gradient(90deg, transparent, rgba(255, 208, 176, 0.7), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 216, 184, 0.9), transparent);
 }
 .md-hero-combined--has-bg .md-hero-combined__quote {
-  color: rgba(255, 250, 240, 0.92) !important;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  color: #fff !important;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.9),
+    0 2px 10px rgba(0, 0, 0, 0.7),
+    0 4px 20px rgba(0, 0, 0, 0.5);
+  font-weight: 500;
 }
 .md-hero-combined--has-bg .md-hero-combined__quote p { color: inherit !important; }
 .md-hero-combined--has-bg .md-hero-combined__certs li {
-  background: rgba(255, 255, 255, 0.14) !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
-  color: #fff8ec !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.30) !important;
+  color: #fff !important;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 .md-hero-combined--has-bg .md-hero-combined__stats {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
   border-radius: 16px;
   padding: clamp(14px, 1.8vw, 22px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 .md-hero-combined--has-bg .md-hero-combined__stat-value,
 .md-hero-combined--has-bg .md-hero-combined__stat-unit {
-  color: #ffd0b0 !important;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  color: #ffd8b8 !important;
+  font-weight: 800;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.9),
+    0 2px 10px rgba(0, 0, 0, 0.6);
 }
 .md-hero-combined--has-bg .md-hero-combined__stat-label {
-  color: rgba(255, 250, 240, 0.88) !important;
+  color: #fff !important;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
 }
 /* v3.44.173 · ::before 애니메이션 rule 제거 (::before 미사용) */
 
