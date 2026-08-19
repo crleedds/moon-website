@@ -106,33 +106,24 @@
     if (toTop) toTop.removeAttribute('hidden'); // CSS로 visibility 제어
     var showAt = 320; // px
 
-    // v3.44.177/179 · 모바일에서 헤더 fixed 를 JS 로 강제 (CSS override 불문 항상 보임)
-    //                 + 드로어 padding-top 을 실측 헤더 높이로 세팅 (메뉴 잘림 방지)
+    // v3.44.186 · CSS 만으로 헤더 fixed 강제 (JS 는 실측 높이만 CSS var 로 세팅)
+    // 인라인 style 로 CSS 와 충돌하지 않도록 최소 개입
     var applyFixedHeader = function () {
       if (!header) return;
       var mobile = window.innerWidth <= 1080;
       if (mobile) {
-        header.style.position = 'fixed';
-        header.style.top = '0';
-        header.style.left = '0';
-        header.style.right = '0';
-        header.style.width = '100%';
-        header.style.zIndex = '100';
-        // body padding-top (한 번만 계산, resize·orientationchange 시 재계산)
         var h = header.offsetHeight || 72;
         var adminBar = document.getElementById('wpadminbar');
         var abH = adminBar ? adminBar.offsetHeight : 0;
+        // body padding-top · 헤더 아래로 콘텐츠 밀어넣기 (CSS 기본값 72 보다 정확)
         document.body.style.paddingTop = (h + abH) + 'px';
+        // admin bar 있으면 헤더도 그만큼 내려줌
         if (adminBar) header.style.top = abH + 'px';
-        // CSS var 로 드로어·기타 요소에서 재사용 (헤더 실측 높이 + admin bar)
+        else header.style.top = '';
+        // 드로어에서 헤더 높이 만큼 padding 확보용 CSS var
         document.documentElement.style.setProperty('--md-header-h', (h + abH) + 'px');
       } else {
-        header.style.position = '';
         header.style.top = '';
-        header.style.left = '';
-        header.style.right = '';
-        header.style.width = '';
-        header.style.zIndex = '';
         document.body.style.paddingTop = '';
         document.documentElement.style.removeProperty('--md-header-h');
       }

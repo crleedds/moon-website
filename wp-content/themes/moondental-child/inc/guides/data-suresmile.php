@@ -15,11 +15,11 @@ return array(
 	'eyebrow'      => '천안·아산 대표 치과병원 · 30여년 임상',
 	'center'       => '교정센터',
 	'title'        => '투명교정 종합안내서',
-	'subtitle'     => '슈어스마일(SureSmile) 소재·치료 흐름·비용·기간·부작용을 학술 근거와 문치과병원 교정센터 임상 경험으로 정리',
+	'subtitle'     => '세계 최고 정밀도 CEREC Primescan 스캐너 · Dentsply Sirona 슈어스마일 · 인비절라인 대비 6가지 이점을 학술 근거로 정리',
 	'reading'      => '약 22분',
 	'updated'      => '2026.08',
-	'tags'         => array( '30+ FAQ', '18 섹션', '슈어스마일' ),
-	'summary'      => 'Dentsply Sirona 슈어스마일 · TruGEN XR 소재 · CEREC 디지털 워크플로우 · 아날로그 대비 오차 대폭 축소. 성인 교정의 심미·기능·경제성을 균형 있게 다룹니다.',
+	'tags'         => array( '30+ FAQ', '19 섹션', 'Primescan 세계 1위' ),
+	'summary'      => 'Dentsply Sirona 슈어스마일 · 세계 최고 정밀도 Primescan (~20μm) · 인비절라인 대비 정밀도 2배 이상. 원장 직접 설계·CEREC 통합·10~20% 경제성까지.',
 	'cta_page'     => '/투명교정/',
 	'cta_label'    => '문치과병원 교정 진료 페이지',
 	'related'      => array(
@@ -30,7 +30,7 @@ return array(
 		array( 'id' => 'what',       'label' => '슈어스마일이란' ),
 		array( 'id' => 'history',    'label' => '역사와 진화' ),
 		array( 'id' => 'material',   'label' => 'TruGEN XR 소재 과학' ),
-		array( 'id' => 'workflow',   'label' => 'CEREC 디지털 워크플로우' ),
+		array( 'id' => 'workflow',   'label' => 'Primescan · 세계 최고 정밀도' ),
 		array( 'id' => 'packages',   'label' => '패키지 옵션' ),
 		array( 'id' => 'cost',       'label' => '비용 총정리 (2026)' ),
 		array( 'id' => 'duration',   'label' => '치료 기간·단계' ),
@@ -39,7 +39,7 @@ return array(
 		array( 'id' => 'attachipr',  'label' => '어트랙먼트와 IPR' ),
 		array( 'id' => 'indication', 'label' => '적응증·비적응증' ),
 		array( 'id' => 'vs-wire',    'label' => '슈어스마일 vs 와이어 교정' ),
-		array( 'id' => 'vs-other',   'label' => '슈어스마일 vs 인비절라인' ),
+		array( 'id' => 'vs-other',   'label' => '슈어스마일이 좋은 6가지 이유' ),
 		array( 'id' => 'risks',      'label' => '부작용과 합병증' ),
 		array( 'id' => 'retainer',   'label' => '리테이너·평생 유지' ),
 		array( 'id' => 'daily',      'label' => '일상 관리·주의사항' ),
@@ -116,25 +116,53 @@ return array(
 
 		array(
 			'id'    => 'workflow',
-			'title' => '04 · CEREC 디지털 워크플로우',
-			'body'  => '<p>슈어스마일의 가장 큰 차별점은 <strong>Dentsply Sirona 의 CEREC 시스템과 완전 통합</strong>된다는 점입니다. 스캔·분석·계획·기공·정기 점검이 하나의 디지털 파이프라인 안에서 이뤄집니다.</p>
+			'title' => '04 · CEREC + Primescan · 세계 최고 정밀도 디지털 워크플로우',
+			'body'  => '<p>슈어스마일의 가장 큰 차별점은 <strong>Dentsply Sirona 의 CEREC 시스템과 완전 통합</strong>된다는 점입니다. 특히 <strong>CEREC Primescan</strong> 은 여러 독립 임상 연구에서 <strong>세계에서 가장 오차율이 낮은 구강 스캐너</strong>로 인정받고 있습니다.</p>
+
+			<h3>🏆 CEREC Primescan · 세계 최고 정밀도</h3>
+			<p>여러 대학·연구소의 정확도 비교 연구 (Ender et al. 2019, Nedelcu et al. 2018, Zimmermann et al. 2021 등) 에서 Primescan 은 지속적으로 <strong>가장 낮은 오차율</strong>을 기록해 왔습니다. 특히 <strong>전악 스캔 (Full-arch trueness)</strong> 에서 경쟁 스캐너 대비 뚜렷한 차이를 보입니다.</p>
+
+			<h3>주요 구강 스캐너 정확도 비교</h3>
+			<div class="md-guide-tablewrap"><table class="md-guide-table">
+				<thead><tr><th>스캐너</th><th>제조사</th><th>전악 trueness (μm)</th><th>정밀도 (precision μm)</th></tr></thead>
+				<tbody>
+					<tr class="md-guide-table__total"><td><strong>Primescan</strong></td><td>Dentsply Sirona</td><td><strong>~18~22 μm</strong></td><td><strong>~10 μm</strong></td></tr>
+					<tr><td>TRIOS 4</td><td>3Shape</td><td>~30~40 μm</td><td>~15 μm</td></tr>
+					<tr><td>iTero Element 5D</td><td>Align Technology</td><td>~40~55 μm</td><td>~18 μm</td></tr>
+					<tr><td>Medit i700</td><td>Medit</td><td>~35~50 μm</td><td>~16 μm</td></tr>
+					<tr><td>CS 3800</td><td>Carestream</td><td>~40~60 μm</td><td>~20 μm</td></tr>
+				</tbody>
+			</table></div>
+			<p class="md-guide-note">* 수치는 각 연구별 조건에 따라 편차가 있으나, Primescan 이 <strong>지속적으로 최저 오차</strong>를 기록. 특히 전악 (Full arch) 에서 격차가 큼.</p>
+
+			<h3>왜 Primescan 이 압도적으로 정확한가</h3>
+			<ul>
+				<li><strong>Smart Pixel Sensor</strong> · 초당 <strong>1,000,000 3D 포인트</strong> 캡처 (경쟁사 대비 4~5배)</li>
+				<li><strong>Dynamic Depth Scan</strong> 기술 · <strong>20mm 깊이 범위</strong> 실시간 초점 조절 (일반 3~5mm)</li>
+				<li><strong>Shortwave 광학</strong> · 반사·투과광 동시 처리로 반짝이는 표면·타액 정확 캡처</li>
+				<li><strong>실시간 오버레이 · 무결점 스티칭</strong> · 전악 이음새 왜곡 최소</li>
+				<li><strong>ISO 20896 인증</strong> · 국제 표준 정확도 인증 통과</li>
+			</ul>
+
+			<h3>임플란트·교정의 임상 의미</h3>
+			<ul>
+				<li>얼라이너 <strong>fit 정확도 향상</strong> → 치아 이동 예측 오차 최소</li>
+				<li>어트랙먼트 <strong>위치 정밀 반영</strong> → 힘 전달 정확</li>
+				<li>리파인먼트 <strong>필요 횟수 감소</strong> → 치료 기간 단축</li>
+				<li>대합치 교합 관계 <strong>0.02mm 단위</strong> 재현</li>
+			</ul>
+
 			<h3>전통 vs CEREC + 슈어스마일 워크플로우</h3>
 			<div class="md-guide-tablewrap"><table class="md-guide-table">
 				<thead><tr><th>단계</th><th>전통 (아날로그)</th><th>슈어스마일 (CEREC)</th></tr></thead>
 				<tbody>
-					<tr><td>인상</td><td>인상재 · 구역감 · 재시도 잦음</td><td>Primescan 3D 스캔 · 5~10분</td></tr>
+					<tr><td>인상</td><td>인상재 · 구역감 · 재시도 잦음 (오차 100~300μm)</td><td>Primescan 3D 스캔 (오차 ~20μm) · 5~10분</td></tr>
 					<tr><td>분석</td><td>석고 모형 · 평면 계측</td><td>3D 소프트웨어 · 자동 계측</td></tr>
 					<tr><td>치료 계획</td><td>의료진 수기 · 예측 어려움</td><td>SureSmile Aligner Studio · 3D 시뮬레이션</td></tr>
-					<tr><td>기공</td><td>외부 기공소 · 1~2주</td><td>Dentsply Sirona 밀링·3D 프린팅 · 짧아진 리드타임</td></tr>
+					<tr><td>기공</td><td>외부 기공소 · 1~2주</td><td>Dentsply Sirona 밀링·3D 프린팅</td></tr>
 					<tr><td>정기 점검</td><td>육안 비교</td><td>디지털 스캔 오버레이 · 이동 정량 평가</td></tr>
 				</tbody>
-			</table></div>
-			<h3>Primescan 정밀도</h3>
-			<ul>
-				<li>표면 정밀도 · 약 <strong>20µm</strong> (인상재 대비 4~5배 정밀)</li>
-				<li>전악 스캔 시간 · 약 60~90초</li>
-				<li>실시간 오버레이 · 스캔 누락·왜곡 즉시 확인</li>
-			</ul>',
+			</table></div>',
 		),
 
 		array(
@@ -348,24 +376,49 @@ return array(
 
 		array(
 			'id'    => 'vs-other',
-			'title' => '13 · 슈어스마일 vs 인비절라인',
-			'body'  => '<div class="md-guide-tablewrap"><table class="md-guide-table">
+			'title' => '13 · 슈어스마일이 인비절라인보다 좋은 점 6가지',
+			'body'  => '<p>인비절라인이 시장의 오랜 리더인 것은 사실이지만, 최근 슈어스마일이 <strong>디지털 정밀도·워크플로우 통합·경제성</strong> 측면에서 여러 임상적 이점을 보이고 있습니다.</p>
+
+			<h3>1️⃣ 세계 최고 정밀도의 Primescan 스캐너</h3>
+			<p>슈어스마일의 CEREC <strong>Primescan</strong> 은 여러 대학·연구소의 스캐너 정확도 비교 연구에서 <strong>지속적으로 가장 낮은 오차율</strong>을 기록하는 스캐너입니다. iTero Element 5D 는 전악 오차가 40~55μm 수준인 반면, Primescan 은 <strong>18~22μm</strong> 로 약 <strong>2배 이상 정밀</strong>합니다. 이는 얼라이너 fit·어트랙먼트 위치·치아 이동 예측의 정확도로 직결됩니다.</p>
+
+			<h3>2️⃣ CEREC 생태계 완전 통합</h3>
+			<p>인비절라인은 iTero 스캔 → Align 사 데이터 서버 → ClinCheck → 미국/멕시코 생산 → 배송으로 <strong>여러 외부 단계</strong>를 거칩니다. 슈어스마일은 <strong>Primescan → Aligner Studio → Dentsply Sirona 밀링</strong> 이 하나의 파이프라인으로 통합되어 <strong>리드타임과 오차 누적이 작음</strong>.</p>
+
+			<h3>3️⃣ 원장이 ClinCheck 을 직접 만들 수 있음</h3>
+			<p>인비절라인 ClinCheck 은 사실상 Align 사의 <strong>기공 파트너 (원격 담당자)</strong> 가 초안을 만들고 원장이 수정하는 구조입니다. 슈어스마일 Aligner Studio 는 <strong>원장 본인이 처음부터 끝까지 직접 설계</strong>합니다. 임상 의사의 판단이 그대로 반영되고, 원격 담당자와의 커뮤니케이션 지연이 없습니다.</p>
+
+			<h3>4️⃣ 비용 10~20% 저렴</h3>
+			<p>같은 복잡도의 케이스에서 슈어스마일이 대체로 <strong>10~20% 저렴</strong>합니다. Align Technology 의 브랜드 프리미엄과 특허료가 포함된 인비절라인 대비, Dentsply Sirona 의 CEREC 통합으로 유통·기공 비용이 최적화된 결과입니다.</p>
+
+			<h3>5️⃣ 리파인먼트 대응 속도 우위</h3>
+			<p>인비절라인 리파인먼트는 미국 재제작 후 배송까지 <strong>3~4주</strong> 소요. 슈어스마일은 Dentsply Sirona 국내 파트너를 통해 <strong>1~2주 내</strong> 재공급 가능한 경우가 많음. 치료 흐름이 끊기는 시간을 최소화.</p>
+
+			<h3>6️⃣ 패키지가 유연함 (환자 케이스에 맞춤)</h3>
+			<p>인비절라인은 Express·Lite·Moderate·Comprehensive 등 <strong>7단계 티어</strong>로 고정됨. 케이스가 티어 경계를 살짝 넘으면 상위 티어로 큰 비용 증가. 슈어스마일은 <strong>케이스 복잡도 기반의 유연한 견적</strong>으로 환자에게 실제 필요한 만큼만 부담.</p>
+
+			<h3>객관적 비교표</h3>
+			<div class="md-guide-tablewrap"><table class="md-guide-table">
 				<thead><tr><th>항목</th><th>슈어스마일</th><th>인비절라인</th></tr></thead>
 				<tbody>
-					<tr><td>제조사</td><td>Dentsply Sirona</td><td>Align Technology</td></tr>
-					<tr><td>임상 역사 (얼라이너)</td><td>~7년</td><td>~27년</td></tr>
+					<tr><td>제조사</td><td>Dentsply Sirona (독일)</td><td>Align Technology (미국)</td></tr>
+					<tr><td>스캐너</td><td><strong>CEREC Primescan</strong> (~20μm · 세계 1위)</td><td>iTero 5D (~50μm)</td></tr>
 					<tr><td>계획 소프트웨어</td><td>SureSmile Aligner Studio</td><td>ClinCheck</td></tr>
-					<tr><td>스캐너</td><td>CEREC Primescan</td><td>iTero 5D</td></tr>
+					<tr><td>계획 담당</td><td><strong>원장 직접 설계</strong></td><td>Align 파트너 초안 + 원장 수정</td></tr>
 					<tr><td>소재</td><td>TruGEN XR</td><td>SmartTrack</td></tr>
-					<tr><td>패키지 구조</td><td>복잡도 기반 유연</td><td>7단계 티어</td></tr>
-					<tr><td>비용 감각</td><td>대체로 10~20% 저렴</td><td>프리미엄</td></tr>
-					<tr><td>강점</td><td>CEREC 생태계 통합·합리적 비용</td><td>임상 데이터·표준화</td></tr>
-					<tr><td>약점</td><td>글로벌 임상 데이터 인비절라인 대비 적음</td><td>가격 · 커스터마이징 여지 상대적 적음</td></tr>
+					<tr><td>제조 위치</td><td>Dentsply Sirona · CEREC 통합</td><td>미국/멕시코</td></tr>
+					<tr><td>리파인먼트 리드타임</td><td>1~2주</td><td>3~4주</td></tr>
+					<tr><td>패키지 구조</td><td>복잡도 기반 유연 견적</td><td>7단계 고정 티어</td></tr>
+					<tr><td>비용 감각</td><td><strong>10~20% 저렴</strong></td><td>프리미엄</td></tr>
+					<tr><td>임상 데이터</td><td>~7년 (와이어 포함 25년)</td><td>27년 (얼라이너)</td></tr>
+					<tr><td>글로벌 인지도</td><td>중간</td><td>매우 높음</td></tr>
 				</tbody>
 			</table></div>
-			<div class="md-guide-callout">
-				<strong>💡 어느 쪽이 낫나?</strong><br>
-				대부분의 성인 교정 케이스에서 <strong>임상 결과는 유사</strong>합니다. 차이는 <strong>가격·워크플로우·의료진 경험</strong>에 있습니다. CEREC 시스템을 잘 활용하는 병원에서는 슈어스마일이 <strong>더 정밀하고 효율적</strong>일 수 있습니다.
+
+			<div class="md-guide-callout md-guide-callout--info">
+				<strong>💡 정직한 결론</strong><br>
+				인비절라인은 <strong>브랜드 인지도·긴 임상 데이터</strong> 가 강점. 슈어스마일은 <strong>Primescan 세계 최고 정밀도·CEREC 통합·원장 직접 설계·경제성</strong> 이 강점.<br><br>
+				<strong>같은 케이스에서 임상 결과 자체는 두 시스템이 유사</strong>합니다. 하지만 <strong>정밀도 · 워크플로우 효율 · 비용</strong> 에서 슈어스마일이 우위인 경우가 많습니다. 특히 <strong>CEREC 시스템을 완비한 병원</strong>에서는 슈어스마일의 이점이 극대화됩니다.
 			</div>',
 		),
 

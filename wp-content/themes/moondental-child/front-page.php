@@ -22,14 +22,14 @@ get_header();
 		<?php get_template_part( 'template-parts/section', 'history-rail' ); ?>
 		<?php /* v3.44.161 · 30여년 발자취 아래에 소식·치아이야기 세로 리스트 */ ?>
 		<?php get_template_part( 'template-parts/section', 'news-rail' ); ?>
-		<?php /* v3.44.163 · 치아이야기 아래 환자분들의 이야기 */ ?>
-		<?php get_template_part( 'template-parts/section', 'testimonials-rail' ); ?>
-		<?php /* v3.44.166 · 환자분들의 이야기 아래 층별 안내 */ ?>
+		<?php /* v3.44.166 · 소식 아래 층별 안내 */ ?>
 		<?php get_template_part( 'template-parts/section', 'floor-rail' ); ?>
 		<?php /* v3.44.182 · 층별안내 아래 · 종합안내서 3개 별도 섹션 (임플란트센터·교정센터·스마일디자인센터) */ ?>
 		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'implant'   ) ); ?>
 		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'suresmile' ) ); ?>
 		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'laminate'  ) ); ?>
+		<?php /* v3.44.186 · 종합안내서 아래 · 환자분들의 이야기 (기존 위치에서 이동) */ ?>
+		<?php get_template_part( 'template-parts/section', 'testimonials-rail' ); ?>
 	</aside>
 	<main class="md-home-2col__main">
 		<?php get_template_part( 'template-parts/section', 'why' ); ?>
