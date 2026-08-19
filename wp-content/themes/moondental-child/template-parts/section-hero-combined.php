@@ -33,9 +33,12 @@ foreach ( preg_split( "/\r\n|\r|\n/", (string) $certs_raw ) as $line ) {
 }
 
 /* Trust stats */
+// v3.44.188 · 1995년 개원 → 현재까지 년수 자동 계산 (매년 자동 갱신)
+$md_years_since_open = max( 1, (int) current_time( 'Y' ) - 1995 );
+
 $stats = array(
 	array(
-		'value' => md_content( 'trust_1_value', '30여' ),
+		'value' => md_content( 'trust_1_value', (string) $md_years_since_open ),
 		'unit'  => md_content( 'trust_1_unit',  '년' ),
 		'label' => md_content( 'trust_1_label', '1995년 개원' ),
 	),

@@ -271,7 +271,7 @@ function moondental_home_content_fields() {
 		'trust' => array(
 			'title'  => '홈 — 신뢰 stat 4개',
 			'fields' => array(
-				'trust_1_value' => array( 'default' => '30여', 'label' => '①번 — 숫자',     'type' => 'text' ),
+				'trust_1_value' => array( 'default' => (string) max( 1, (int) date( 'Y' ) - 1995 ), 'label' => '①번 — 숫자 (자동: 현재년-1995)', 'type' => 'text' ),
 				'trust_1_unit'  => array( 'default' => '년',     'label' => '①번 — 단위',     'type' => 'text' ),
 				'trust_1_label' => array( 'default' => '1995년 개원', 'label' => '①번 — 라벨', 'type' => 'text' ),
 				'trust_1_sub'   => array( 'default' => '전국에서 찾아오는 30여년 신뢰', 'label' => '①번 — 부제', 'type' => 'text' ),
