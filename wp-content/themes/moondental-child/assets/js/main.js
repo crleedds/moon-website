@@ -106,6 +106,40 @@
     if (toTop) toTop.removeAttribute('hidden'); // CSS로 visibility 제어
     var showAt = 320; // px
 
+    // v3.44.177 · 모바일에서 헤더 fixed 를 JS 로 강제 (CSS override 불문 항상 보임)
+    var applyFixedHeader = function () {
+      if (!header) return;
+      var mobile = window.innerWidth <= 1080;
+      if (mobile) {
+        header.style.position = 'fixed';
+        header.style.top = '0';
+        header.style.left = '0';
+        header.style.right = '0';
+        header.style.width = '100%';
+        header.style.zIndex = '100';
+        // body padding-top (한 번만 계산, resize·orientationchange 시 재계산)
+        var h = header.offsetHeight || 72;
+        var adminBar = document.getElementById('wpadminbar');
+        var abH = adminBar ? adminBar.offsetHeight : 0;
+        document.body.style.paddingTop = (h + abH) + 'px';
+        if (adminBar) header.style.top = abH + 'px';
+      } else {
+        header.style.position = '';
+        header.style.top = '';
+        header.style.left = '';
+        header.style.right = '';
+        header.style.width = '';
+        header.style.zIndex = '';
+        document.body.style.paddingTop = '';
+      }
+    };
+    applyFixedHeader();
+    window.addEventListener('resize', applyFixedHeader, { passive: true });
+    window.addEventListener('orientationchange', applyFixedHeader);
+    if ('ResizeObserver' in window && header) {
+      try { new ResizeObserver(applyFixedHeader).observe(header); } catch (e) {}
+    }
+
     var onScroll = function () {
       var y = window.scrollY;
       if (header) header.classList.toggle('is-scrolled', y > 12);
