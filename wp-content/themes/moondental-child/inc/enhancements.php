@@ -1079,6 +1079,7 @@ function moondental_floor_guide_data() {
 		array(
 			'floor'   => '11F',
 			'centers' => array(
+				array( 'name' => '교정센터',   'slug' => '투명교정-센터', 'center' => 'suresmile' ),
 				array( 'name' => '소아치과',   'slug' => '소아치과' ),
 				array( 'name' => '치주과' ),
 				array( 'name' => '디지털센터' ),
@@ -1087,7 +1088,7 @@ function moondental_floor_guide_data() {
 		array(
 			'floor'   => '10F',
 			'centers' => array(
-				array( 'name' => '임플란트센터',      'slug' => '임플란트-센터' ),
+				array( 'name' => '임플란트센터',      'slug' => '임플란트-센터', 'center' => 'implant' ),
 				array( 'name' => '슈어스마일 투명교정', 'slug' => '투명교정-센터' ),
 				array( 'name' => '구강외과' ),
 				array( 'name' => '구강내과' ),
@@ -1097,7 +1098,7 @@ function moondental_floor_guide_data() {
 		array(
 			'floor'   => '9F',
 			'centers' => array(
-				array( 'name' => '스마일디자인센터', 'slug' => '스마일디자인센터' ),
+				array( 'name' => '스마일디자인센터', 'slug' => '스마일디자인센터', 'center' => 'laminate' ),
 				array( 'name' => '신환접수' ),
 				array( 'name' => '보철과' ),
 				array( 'name' => '보존과' ),
@@ -1154,12 +1155,6 @@ function moondental_render_floor_guide( $variant = 'card', $args = array() ) {
 		$html .= '<p class="md-floor-guide__lead">' . esc_html( $args['lead'] ) . '</p>';
 	}
 	$html .= '<ul class="md-floor-guide__list">';
-	// v3.44.190 · 센터별 컬러 클래스 (홈 안내서·상단 메뉴 컬러와 통일)
-	$center_color_map = array(
-		'임플란트-센터'   => 'md-center-color--implant',
-		'투명교정-센터'   => 'md-center-color--suresmile',
-		'스마일디자인센터' => 'md-center-color--laminate',
-	);
 	foreach ( $data as $f ) {
 		$html .= '<li class="md-floor-guide__row">';
 		$html .= '<span class="md-floor-guide__floor">' . esc_html( $f['floor'] ) . '</span>';
@@ -1167,7 +1162,8 @@ function moondental_render_floor_guide( $variant = 'card', $args = array() ) {
 		$parts = array();
 		foreach ( $f['centers'] as $c ) {
 			$name = esc_html( $c['name'] );
-			$color_cls = ! empty( $c['slug'] ) && isset( $center_color_map[ $c['slug'] ] ) ? ' ' . $center_color_map[ $c['slug'] ] : '';
+			// v3.44.191 · 센터 컬러 · 'center' 키가 있는 항목만 (센터명 아닌 항목은 색 안 넣음)
+			$color_cls = ! empty( $c['center'] ) ? ' md-center-color--' . $c['center'] : '';
 			if ( $args['link_pages'] && ! empty( $c['slug'] ) ) {
 				$url = home_url( '/진료항목/' . $c['slug'] . '/' );
 				if ( $c['slug'] === '스마일디자인센터' ) {
@@ -1177,7 +1173,7 @@ function moondental_render_floor_guide( $variant = 'card', $args = array() ) {
 				if ( $color_cls ) $cls .= ' md-floor-guide__center--highlight';
 				$parts[] = '<a class="' . esc_attr( $cls ) . '" href="' . esc_url( $url ) . '">' . $name . '</a>';
 			} else {
-				$parts[] = '<span class="md-floor-guide__center">' . $name . '</span>';
+				$parts[] = '<span class="md-floor-guide__center' . $color_cls . '">' . $name . '</span>';
 			}
 		}
 		$html .= implode( ' <span class="md-floor-guide__sep" aria-hidden="true">·</span> ', $parts );

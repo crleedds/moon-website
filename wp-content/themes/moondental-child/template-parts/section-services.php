@@ -18,12 +18,11 @@ $services = moondental_get_services();
 		</header>
 
 		<?php
-		// v3.44.190 · 센터별 컬러 클래스 매핑
+		// v3.44.191 · 센터 카드만 컬러 (센터 아닌 항목은 색 안 넣음)
 		$svc_color_map = array(
-			'임플란트-센터'   => 'md-service-card--implant',
-			'투명교정-센터'   => 'md-service-card--suresmile',
-			'심미치료'        => 'md-service-card--laminate',
-			'스마일디자인센터' => 'md-service-card--laminate',
+			'임플란트-센터'   => 'md-service-card--implant',   // 임플란트센터
+			'투명교정-센터'   => 'md-service-card--suresmile', // 교정센터
+			'스마일디자인센터' => 'md-service-card--laminate',  // 스마일디자인센터
 		);
 		?>
 		<div class="md-service-grid">

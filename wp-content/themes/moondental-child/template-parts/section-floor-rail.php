@@ -12,12 +12,7 @@ if ( empty( $data ) ) return;
 $title = function_exists( 'md_content' ) ? md_content( 'floor_guide_title', '층별 안내' ) : '층별 안내';
 $lead  = function_exists( 'md_content' ) ? md_content( 'floor_guide_lead',  '문타워 9·10·11·13층 · 각 층 전용 전문 진료실 운영' ) : '문타워 9·10·11·13층 · 각 층 전용 전문 진료실 운영';
 
-// v3.44.190 · 센터별 컬러 클래스 매핑 (홈 안내서 카드·상단 메뉴와 통일)
-$center_color_map = array(
-	'임플란트-센터'   => 'md-center-color--implant',   // 세이지 그린
-	'투명교정-센터'   => 'md-center-color--suresmile', // 브랜드 살구
-	'스마일디자인센터' => 'md-center-color--laminate',  // 소프트 퍼플
-);
+// v3.44.191 · 색상은 'center' 필드가 있는 항목만 (센터 아닌 항목은 색 안 넣음)
 ?>
 
 <div class="md-floor-rail" aria-label="층별 안내">
@@ -35,7 +30,7 @@ $center_color_map = array(
 					$parts = array();
 					foreach ( $f['centers'] as $c ) {
 						$name = esc_html( $c['name'] );
-						$color_cls = ! empty( $c['slug'] ) && isset( $center_color_map[ $c['slug'] ] ) ? ' ' . $center_color_map[ $c['slug'] ] : '';
+						$color_cls = ! empty( $c['center'] ) ? ' md-center-color--' . $c['center'] : '';
 						if ( ! empty( $c['slug'] ) ) {
 							$url = home_url( '/진료항목/' . $c['slug'] . '/' );
 							if ( $c['slug'] === '스마일디자인센터' ) $url = home_url( '/스마일디자인센터/' );
@@ -43,7 +38,7 @@ $center_color_map = array(
 							if ( $color_cls ) $cls .= ' md-floor-rail__center--highlight';
 							$parts[] = '<a class="' . esc_attr( $cls ) . '" href="' . esc_url( $url ) . '">' . $name . '</a>';
 						} else {
-							$parts[] = '<span class="md-floor-rail__center">' . $name . '</span>';
+							$parts[] = '<span class="md-floor-rail__center' . $color_cls . '">' . $name . '</span>';
 						}
 					}
 					echo implode( ' <span class="md-floor-rail__sep" aria-hidden="true">·</span> ', $parts );
