@@ -17,6 +17,15 @@ $services = moondental_get_services();
 			</p>
 		</header>
 
+		<?php
+		// v3.44.190 · 센터별 컬러 클래스 매핑
+		$svc_color_map = array(
+			'임플란트-센터'   => 'md-service-card--implant',
+			'투명교정-센터'   => 'md-service-card--suresmile',
+			'심미치료'        => 'md-service-card--laminate',
+			'스마일디자인센터' => 'md-service-card--laminate',
+		);
+		?>
 		<div class="md-service-grid">
 			<?php foreach ( $services as $idx => $svc ) :
 				// v3.44.44 · hidden=true 카드는 홈 그리드에서 스킵
@@ -25,8 +34,9 @@ $services = moondental_get_services();
 				$page = get_page_by_path( $svc['slug'] );
 				$url  = $page ? get_permalink( $page ) : home_url( '/' . rawurlencode( $svc['slug'] ) . '/' );
 				$num  = sprintf( '%02d', $idx + 1 );
+				$svc_color_cls = isset( $svc_color_map[ $svc['slug'] ] ) ? ' ' . $svc_color_map[ $svc['slug'] ] : '';
 			?>
-				<article class="md-service-card md-reveal">
+				<article class="md-service-card md-reveal<?php echo esc_attr( $svc_color_cls ); ?>">
 					<span class="md-service-card__num" aria-hidden="true"><?php echo esc_html( $num ); ?></span>
 					<div class="md-service-card__icon" aria-hidden="true"><?php echo moondental_render_icon( $svc['icon'] ); ?></div>
 					<h3 class="md-service-card__title"><?php echo esc_html( $svc['title'] ); ?></h3>

@@ -15566,3 +15566,94 @@ a.md-team-card:hover .md-team-card__photo img,
   .md-nav-center--laminate  > a { color: #D2BFE0 !important; }
 }
 
+/* =============================================================
+   v3.44.190 · 사이트 전반 · 3개 센터 컬러 통일 유틸리티 클래스
+   ============================================================= */
+.md-center-color--implant   { color: #5C8B82 !important; }        /* 세이지 그린 */
+.md-center-color--suresmile { color: #E37B5C !important; }        /* 브랜드 살구 */
+.md-center-color--laminate  { color: #B29CC7 !important; }        /* 소프트 퍼플 */
+
+/* 링크·hover · 살짝 어둡게 */
+a.md-center-color--implant:hover   { color: #4A7A72 !important; }
+a.md-center-color--suresmile:hover { color: #C86B50 !important; }
+a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
+
+/* 다크모드에서 살짝 밝게 */
+@media (prefers-color-scheme: dark) {
+  .md-center-color--implant   { color: #8FBFB6 !important; }
+  .md-center-color--suresmile { color: #F2A878 !important; }
+  .md-center-color--laminate  { color: #D2BFE0 !important; }
+}
+
+/* 층별안내 · md-center-color 가 있으면 기존 highlight 컬러 override */
+.md-floor-rail__center--highlight.md-center-color--implant,
+.md-floor-guide__center--highlight.md-center-color--implant { color: #5C8B82 !important; font-weight: 700; }
+.md-floor-rail__center--highlight.md-center-color--suresmile,
+.md-floor-guide__center--highlight.md-center-color--suresmile { color: #E37B5C !important; font-weight: 700; }
+.md-floor-rail__center--highlight.md-center-color--laminate,
+.md-floor-guide__center--highlight.md-center-color--laminate { color: #B29CC7 !important; font-weight: 700; }
+
+/* 홈 서비스 카드 · 3개 센터 컬러 반영 (아이콘·제목·좌측 액센트) */
+.md-service-card--implant   .md-service-card__title { color: #5C8B82; }
+.md-service-card--suresmile .md-service-card__title { color: #E37B5C; }
+.md-service-card--laminate  .md-service-card__title { color: #9C86B2; }
+.md-service-card--implant   .md-service-card__icon svg,
+.md-service-card--implant   .md-service-card__icon { color: #5C8B82; }
+.md-service-card--suresmile .md-service-card__icon svg,
+.md-service-card--suresmile .md-service-card__icon { color: #E37B5C; }
+.md-service-card--laminate  .md-service-card__icon svg,
+.md-service-card--laminate  .md-service-card__icon { color: #9C86B2; }
+.md-service-card--implant   { border-top: 3px solid #5C8B82; }
+.md-service-card--suresmile { border-top: 3px solid #E37B5C; }
+.md-service-card--laminate  { border-top: 3px solid #B29CC7; }
+@media (prefers-color-scheme: dark) {
+  .md-service-card--implant   .md-service-card__title { color: #8FBFB6; }
+  .md-service-card--suresmile .md-service-card__title { color: #F2A878; }
+  .md-service-card--laminate  .md-service-card__title { color: #D2BFE0; }
+}
+
+/* =============================================================
+   v3.44.190 · 모바일 햄버거 드로어 · 항상 밝게·읽기 쉽게
+   ============================================================= */
+@media (max-width: 1080px) {
+  html body .md-header__nav {
+    background: #FFFAF4 !important;                       /* 항상 밝은 크림 배경 */
+    color: #2A1E18 !important;
+  }
+  html body .md-header__nav > ul > li > a,
+  html body .md-header__nav .md-nav > li > a {
+    color: #2A1E18 !important;                            /* 진한 브라운 텍스트 */
+    background: transparent !important;
+    font-weight: 700 !important;
+  }
+  html body .md-header__nav > ul > li > a:hover,
+  html body .md-header__nav .md-nav > li > a:hover {
+    color: #E37B5C !important;                            /* hover · 브랜드 살구 */
+    background: rgba(227, 123, 92, 0.06) !important;
+  }
+  html body .md-header__nav .sub-menu > li > a {
+    color: #6B554A !important;                            /* 서브메뉴 · 미디엄 브라운 */
+  }
+  html body .md-header__nav .sub-menu > li > a:hover {
+    color: #E37B5C !important;
+  }
+  /* 센터 컬러는 유지 */
+  html body .md-header__nav .md-nav-center--implant   > a { color: #5C8B82 !important; }
+  html body .md-header__nav .md-nav-center--suresmile > a { color: #E37B5C !important; }
+  html body .md-header__nav .md-nav-center--laminate  > a { color: #B29CC7 !important; }
+  /* 다크모드에서도 드로어는 밝게 유지 (모바일 가독성 우선) */
+  @media (prefers-color-scheme: dark) {
+    html body .md-header__nav {
+      background: #FFFAF4 !important;
+      color: #2A1E18 !important;
+    }
+    html body .md-header__nav > ul > li > a,
+    html body .md-header__nav .md-nav > li > a {
+      color: #2A1E18 !important;
+    }
+    html body .md-header__nav .sub-menu > li > a {
+      color: #6B554A !important;
+    }
+  }
+}
+
