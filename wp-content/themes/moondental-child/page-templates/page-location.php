@@ -149,13 +149,63 @@ $off_text = $info['hours_off'] ?: '휴진';
 				<?php endif; ?>
 			<?php echo $_hours_close; ?>
 
-			<!-- v3.44.167 · 층별 안내 카드 (진료시간과 주차 안내 사이) -->
-			<?php if ( function_exists( 'moondental_render_floor_guide' ) ) : ?>
-				<?php echo moondental_render_floor_guide( 'card', array(
-					'title' => md_content( 'floor_guide_title', '층별 안내' ),
-					'lead'  => md_content( 'floor_guide_lead', '문타워 9·10·11·13층 · 각 층 전용 전문 진료실 운영' ),
-				) ); ?>
-			<?php endif; ?>
+			<!-- v3.44.194 · 층별 안내 카드 (진료시간과 주차 안내 사이) · 인라인 렌더 -->
+			<aside class="md-floor-guide md-floor-guide--card" aria-label="층별 안내">
+				<header class="md-hours__head">
+					<span class="md-hours__badge">🏥 층별 안내</span>
+				</header>
+				<p class="md-floor-guide__lead" style="margin:0 0 14px;color:var(--color-text-sub);font-size:0.85rem;">문타워 9·10·11·13층 · 각 층 전용 전문 진료실</p>
+				<ul class="md-floor-guide__list">
+					<li class="md-floor-guide__row">
+						<span class="md-floor-guide__floor">13F</span>
+						<span class="md-floor-guide__centers">
+							<span class="md-floor-guide__center">원내기공실</span>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<span class="md-floor-guide__center">한아문화센터</span>
+						</span>
+					</li>
+					<li class="md-floor-guide__row">
+						<span class="md-floor-guide__floor">11F</span>
+						<span class="md-floor-guide__centers">
+							<a class="md-floor-guide__center md-floor-guide__center--link md-floor-guide__center--highlight md-center-color--suresmile" href="<?php echo esc_url( home_url( '/진료항목/투명교정-센터/' ) ); ?>">교정센터</a>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<a class="md-floor-guide__center md-floor-guide__center--link" href="<?php echo esc_url( home_url( '/진료항목/소아치과/' ) ); ?>">소아치과</a>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<span class="md-floor-guide__center">치주과</span>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<span class="md-floor-guide__center">디지털센터</span>
+						</span>
+					</li>
+					<li class="md-floor-guide__row">
+						<span class="md-floor-guide__floor">10F</span>
+						<span class="md-floor-guide__centers">
+							<a class="md-floor-guide__center md-floor-guide__center--link md-floor-guide__center--highlight md-center-color--implant" href="<?php echo esc_url( home_url( '/진료항목/임플란트-센터/' ) ); ?>">임플란트센터</a>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<a class="md-floor-guide__center md-floor-guide__center--link" href="<?php echo esc_url( home_url( '/진료항목/투명교정-센터/' ) ); ?>">슈어스마일 투명교정</a>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<span class="md-floor-guide__center">구강외과</span>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<span class="md-floor-guide__center">구강내과</span>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<a class="md-floor-guide__center md-floor-guide__center--link" href="<?php echo esc_url( home_url( '/진료항목/턱관절-클리닉/' ) ); ?>">턱관절 클리닉</a>
+						</span>
+					</li>
+					<li class="md-floor-guide__row">
+						<span class="md-floor-guide__floor">9F</span>
+						<span class="md-floor-guide__centers">
+							<a class="md-floor-guide__center md-floor-guide__center--link md-floor-guide__center--highlight md-center-color--laminate" href="<?php echo esc_url( home_url( '/스마일디자인센터/' ) ); ?>">스마일디자인센터</a>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<span class="md-floor-guide__center">신환접수</span>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<span class="md-floor-guide__center">보철과</span>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<span class="md-floor-guide__center">보존과</span>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<a class="md-floor-guide__center md-floor-guide__center--link" href="<?php echo esc_url( home_url( '/진료항목/예방클리닉/' ) ); ?>">예방클리닉</a>
+						</span>
+					</li>
+				</ul>
+			</aside>
 
 			<!-- 주차 안내 카드 -->
 			<aside class="md-park md-park--compact">
