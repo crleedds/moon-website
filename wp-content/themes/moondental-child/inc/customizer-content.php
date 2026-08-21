@@ -307,7 +307,7 @@ function moondental_home_content_fields() {
 
 				'why_2_icon'  => array( 'default' => '🏢', 'label' => '②번 — 아이콘', 'type' => 'text' ),
 				'why_2_title' => array( 'default' => '통합 진료센터', 'label' => '②번 — 제목', 'type' => 'text' ),
-				'why_2_desc'  => array( 'default' => '9F 보철·보존 · 10F 임플란트·외과 · 11F 교정·소아 · 13F 기공 — 분야별 전문 의료진의 협진을 한 곳에서 받으실 수 있습니다.', 'label' => '②번 — 설명', 'type' => 'textarea' ),
+				'why_2_desc'  => array( 'default' => '9F 스마일디자인·보철·보존 · 10F 임플란트·구강외과·턱관절 · 11F 교정·소아·치주 · 13F 원내기공실 — 분야별 전문 의료진의 협진을 한 곳에서 받으실 수 있습니다.', 'label' => '②번 — 설명', 'type' => 'textarea' ),
 
 				'why_3_icon'  => array( 'default' => '❤️', 'label' => '③번 — 아이콘', 'type' => 'text' ),
 				'why_3_title' => array( 'default' => '전신질환 안심 진료', 'label' => '③번 — 제목', 'type' => 'text' ),

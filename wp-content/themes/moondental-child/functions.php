@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.192' );
+define( 'MOONDENTAL_VERSION', '3.44.193' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -87,6 +87,20 @@ add_action( 'init', function() {
 	}
 	update_option( 'moondental_trust1_v34188', 'done' );
 } );
+
+/* v3.44.193 · 홈 히어로 배경 이미지 preload · 홈페이지 로딩 시 우선 fetch */
+add_action( 'wp_head', function() {
+	if ( ! ( is_front_page() || is_home() ) ) return;
+	$bg = get_theme_mod( 'moondental_home_hero_bg', '' );
+	if ( ! $bg ) return;
+	// 한글·특수문자 URL 인코딩
+	$encoded = preg_replace_callback(
+		'/[^\x21-\x7E]/u',
+		function ( $m ) { return rawurlencode( $m[0] ); },
+		$bg
+	);
+	echo "\n<link rel=\"preload\" as=\"image\" href=\"" . esc_url( $encoded ) . "\" fetchpriority=\"high\">\n";
+}, 1 );
 
 /* v3.44.189 · 1990년대부터 임플란트 헤리티지 반영 · 옛 기본값 정리 (사용자 커스텀은 보존) */
 add_action( 'init', function() {
@@ -2069,12 +2083,11 @@ function moondental_enqueue_styles() {
 	);
 
 	// 3. 자식 테마 스타일
-	// v3.44.179 · min.css 사용 완전 중단 · 최신 style.css 만 사용 (스테일 min 이슈 원천 차단)
-	// git deploy 시 파일 mtime 동일화로 filemtime 비교가 신뢰 안 됨
+	// v3.44.193 · MOONDENTAL_VERSION 사용해 배포마다 확실히 캐시 무효화
 	$full_path = MOONDENTAL_DIR . '/style.css';
 	$css_path  = $full_path;
 	$css_url   = MOONDENTAL_URI . '/style.css';
-	$css_ver   = file_exists( $css_path ) ? filemtime( $css_path ) : MOONDENTAL_VERSION;
+	$css_ver   = MOONDENTAL_VERSION;
 	wp_enqueue_style(
 		'moondental-child-style',
 		$css_url,

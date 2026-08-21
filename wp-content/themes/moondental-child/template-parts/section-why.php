@@ -15,7 +15,7 @@ $points = array(
 	array(
 		'icon'  => md_content( 'why_2_icon',  '🏢' ),
 		'title' => md_content( 'why_2_title', '통합 진료센터' ),
-		'desc'  => md_content( 'why_2_desc',  '9F 보철·보존 · 10F 임플란트·외과 · 11F 교정·소아 · 13F 기공 — 분야별 전문 의료진의 협진을 한 곳에서 받으실 수 있습니다.' ),
+		'desc'  => md_content( 'why_2_desc',  '9F 스마일디자인·보철·보존 · 10F 임플란트·구강외과·턱관절 · 11F 교정·소아·치주 · 13F 원내기공실 — 분야별 전문 의료진의 협진을 한 곳에서 받으실 수 있습니다.' ),
 	),
 	array(
 		'icon'  => md_content( 'why_3_icon',  '❤️' ),

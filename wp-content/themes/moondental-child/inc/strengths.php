@@ -154,6 +154,8 @@ function moondental_get_strengths() {
 
 <h3>9F</h3>
 <ul>
+<li>스마일디자인센터</li>
+<li>신환접수</li>
 <li>보철과</li>
 <li>보존과</li>
 <li>예방클리닉</li>
@@ -162,7 +164,7 @@ function moondental_get_strengths() {
 <h3>10F</h3>
 <ul>
 <li>임플란트센터</li>
-<li>스마일디자인센터</li>
+<li>슈어스마일 투명교정</li>
 <li>구강외과</li>
 <li>구강내과</li>
 <li>턱관절클리닉</li>
@@ -176,11 +178,10 @@ function moondental_get_strengths() {
 <li>디지털센터</li>
 </ul>
 
-<h3>13F · 한아문화센터 + 기공실</h3>
+<h3>13F · 원내기공실 + 한아문화센터</h3>
 <ul>
+<li>원내기공실 — 한아 임플란트 보철연구소 · 보철 자체 제작 (지르코니아·금·세라믹)</li>
 <li>한아의료재단 부속 한아문화센터</li>
-<li>원내 기공실 — 한아 임플란트 보철연구소</li>
-<li>보철 자체 제작 (지르코니아·금·세라믹)</li>
 </ul>
 
 <p class="lead">엘리베이터로 층 간 이동이 자유로워, 협진이 필요한 케이스도 환자분의 동선 부담 없이 진행됩니다.</p>',

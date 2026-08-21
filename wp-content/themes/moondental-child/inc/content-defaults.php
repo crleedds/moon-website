@@ -1553,10 +1553,10 @@ function moondental_default_facility_content() {
 
 <h3>층별 전문 센터</h3>
 <ul>
-<li><strong>13F</strong> — 한아문화센터 · 원내기공실</li>
+<li><strong>13F</strong> — 원내기공실 · 한아문화센터</li>
 <li><strong>11F</strong> — 교정센터 · 소아치과 · 치주과 · 디지털센터</li>
-<li><strong>10F</strong> — 임플란트센터 · 스마일 디자인 센터 · 구강외과 · 구강내과 · 턱관절 클리닉</li>
-<li><strong>9F</strong> — 신환접수 · 보철과 · 보존과 · 예방클리닉</li>
+<li><strong>10F</strong> — 임플란트센터 · 슈어스마일 투명교정 · 구강외과 · 구강내과 · 턱관절 클리닉</li>
+<li><strong>9F</strong> — 스마일디자인센터 · 신환접수 · 보철과 · 보존과 · 예방클리닉</li>
 </ul>
 
 <h3>디지털 진단 장비</h3>
@@ -1766,10 +1766,10 @@ function moondental_default_services_overview_content() {
 
 	$html .= '<h3>층별 전문 센터</h3>';
 	$html .= '<ul>
-<li><strong>13F</strong> — 한아문화센터 · 원내기공실</li>
+<li><strong>13F</strong> — 원내기공실 · 한아문화센터</li>
 <li><strong>11F</strong> — 교정센터 · 소아치과 · 치주과 · 디지털센터</li>
-<li><strong>10F</strong> — 임플란트센터 · 스마일 디자인 센터 · 구강외과 · 구강내과 · 턱관절 클리닉</li>
-<li><strong>9F</strong> — 신환접수 · 보철과 · 보존과 · 예방클리닉</li>
+<li><strong>10F</strong> — 임플란트센터 · 슈어스마일 투명교정 · 구강외과 · 구강내과 · 턱관절 클리닉</li>
+<li><strong>9F</strong> — 스마일디자인센터 · 신환접수 · 보철과 · 보존과 · 예방클리닉</li>
 </ul>';
 
 	$html .= '<h3>저희가 가장 신경 쓰는 것</h3>';

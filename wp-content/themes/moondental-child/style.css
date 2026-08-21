@@ -1198,19 +1198,11 @@ html.is-mobile-menu .md-header__nav-toggle { display: flex !important; position:
     transform: translateX(0);
     visibility: visible;
   }
-  /* v3.44.175 · 백드롭 살짝 추가 (은은한 어둠) · 스크롤 락과 함께 모달성 명확 */
-  .md-header__nav::before {
-    content: '';
-    position: fixed;
-    top: 0; right: 0; bottom: 0; left: -100vw;
-    background: rgba(15, 10, 6, 0);
-    transition: background 0.32s ease;
-    pointer-events: none;
-    z-index: -1;
-  }
+  /* v3.44.193 · 백드롭 완전 제거 · 화면 어두워지는 현상 방지 */
+  .md-header__nav::before,
   .md-header__nav.is-open::before {
-    background: rgba(15, 10, 6, 0.35);
-    pointer-events: auto;
+    content: none !important;
+    display: none !important;
   }
 
   /* v3.44.175 · 스크롤 락 · 배경 이동 방지 */
@@ -1351,12 +1343,12 @@ html.is-mobile-menu:has(.md-header__nav.is-open) { overflow: hidden; }
   body:has(.md-header__nav.is-open) { overflow: hidden; }
 }
 
-/* v3.31.7 · 다크모드 모바일 메뉴 · 서브 메뉴 항목 대비 확보 */
+/* v3.44.193 · 다크모드 모바일 메뉴 · 배경 다크 → 밝게 override (모바일 가독성 우선) */
 @media (prefers-color-scheme: dark) and (max-width: 1080px) {
-  .md-header__nav { background: #1F1810; border-bottom-color: rgba(244, 177, 149, 0.15); }
+  .md-header__nav { background: #FFFAF4 !important; border-bottom-color: rgba(30, 20, 14, 0.10) !important; }
   .md-header__nav > ul > li > a,
-  .md-nav > li > a { border-bottom-color: rgba(244, 177, 149, 0.12); }
-  .md-header__nav .sub-menu > li > a { color: #C9BAA8; }
+  .md-nav > li > a { border-bottom-color: rgba(30, 20, 14, 0.10) !important; color: #2A1E18 !important; }
+  .md-header__nav .sub-menu > li > a { color: #6B554A !important; }
 }
 
 /* v3.34.1 · 상위 메뉴 클릭 비활성 (병원안내·자연치아살리기·진료과)
@@ -7902,6 +7894,12 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   max-width: 620px;
   margin: 0 auto;
   text-align: left;
+  width: 100%;
+}
+/* v3.44.193 · 3-col 그리드에서 정상 렌더 · flex-align stretch */
+.md-info-pair--3col > .md-floor-guide {
+  max-width: 100%;
+  align-self: stretch;
 }
 .md-floor-guide__title {
   display: block;
@@ -15618,7 +15616,12 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
 @media (max-width: 1080px) {
   html body .md-header__nav {
     background: #FFFAF4 !important;                       /* 항상 밝은 크림 배경 */
+    background-color: #FFFAF4 !important;
     color: #2A1E18 !important;
+    color-scheme: only light !important;                  /* iOS/브라우저 다크모드 강제 오버라이드 방지 */
+  }
+  html body .md-header__nav * {
+    color-scheme: only light !important;
   }
   html body .md-header__nav > ul > li > a,
   html body .md-header__nav .md-nav > li > a {
