@@ -154,8 +154,8 @@ $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '�
 		}
 		if ( $_show_hp_pair ) :
 		?>
-		<!-- 진료시간 + 주차 안내 (2-col) · 오시는 길·상담예약 페이지 한정 -->
-		<div class="md-info-pair md-flocation__pair">
+		<!-- v3.44.192 · 진료시간 + 층별 안내 + 주차 안내 (3-col) · 층별안내 신규 추가 -->
+		<div class="md-info-pair md-info-pair--3col md-flocation__pair">
 
 			<?php
 			// v3.44.11 · 진료시간 카드 전체를 네이버 플레이스 링크로 감쌈
@@ -195,6 +195,14 @@ $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '�
 					<p class="md-hours__note-naver"><?php echo esc_html( $_hours_note ); ?></p>
 				<?php endif; ?>
 			<?php echo $_hours_close; ?>
+
+			<!-- v3.44.192 · 층별 안내 카드 (진료시간과 주차 안내 사이) -->
+			<?php if ( function_exists( 'moondental_render_floor_guide' ) ) : ?>
+				<?php echo moondental_render_floor_guide( 'card', array(
+					'title' => md_content( 'floor_guide_title', '층별 안내' ),
+					'lead'  => md_content( 'floor_guide_lead', '문타워 9·10·11·13층 · 각 층 전용 전문 진료실 운영' ),
+				) ); ?>
+			<?php endif; ?>
 
 			<aside class="md-park md-park--compact">
 				<?php
