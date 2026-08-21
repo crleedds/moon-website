@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.194' );
+define( 'MOONDENTAL_VERSION', '3.44.195' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -87,6 +87,26 @@ add_action( 'init', function() {
 	}
 	update_option( 'moondental_trust1_v34188', 'done' );
 } );
+
+/* v3.44.195 · 버전 변경 시 서버 캐시 강제 무효화 (OPcache · WP object cache · 페이지 캐시) */
+add_action( 'init', function() {
+	$key = 'moondental_deploy_ver';
+	if ( get_option( $key ) === MOONDENTAL_VERSION ) return;
+	// OPcache reset (Cafe24 openresty PHP-FPM 에서 낡은 바이트코드 서빙 방지)
+	if ( function_exists( 'opcache_reset' ) ) {
+		@opcache_reset();
+	}
+	// WordPress object cache flush
+	if ( function_exists( 'wp_cache_flush' ) ) {
+		wp_cache_flush();
+	}
+	// 일부 페이지 캐시 플러그인 지원
+	if ( function_exists( 'rocket_clean_domain' ) )         @rocket_clean_domain();
+	if ( function_exists( 'w3tc_flush_all' ) )              @w3tc_flush_all();
+	if ( function_exists( 'wp_cache_clear_cache' ) )        @wp_cache_clear_cache();
+	if ( function_exists( 'wpfc_clear_all_cache' ) )        @wpfc_clear_all_cache( true );
+	update_option( $key, MOONDENTAL_VERSION );
+}, 1 );
 
 /* v3.44.193 · 홈 히어로 배경 이미지 preload · 홈페이지 로딩 시 우선 fetch */
 add_action( 'wp_head', function() {

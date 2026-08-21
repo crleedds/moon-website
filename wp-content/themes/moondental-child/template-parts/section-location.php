@@ -196,8 +196,8 @@ $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '�
 				<?php endif; ?>
 			<?php echo $_hours_close; ?>
 
-			<!-- v3.44.194 · 층별 안내 카드 (진료시간과 주차 안내 사이) · 인라인 렌더 · 함수 의존 X -->
-			<aside class="md-floor-guide md-floor-guide--card" aria-label="층별 안내">
+			<!-- FLOOR-GUIDE-INJECTION-CHECK-V195 · 이 텍스트가 view-source 에 있는지 확인 -->
+			<aside class="md-floor-guide md-floor-guide--card" aria-label="층별 안내" data-md-version="v3.44.195" style="display:block !important;visibility:visible !important;opacity:1 !important;">
 				<header class="md-hours__head">
 					<span class="md-hours__badge">🏥 층별 안내</span>
 				</header>
