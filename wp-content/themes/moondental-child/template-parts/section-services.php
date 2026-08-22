@@ -39,6 +39,14 @@ $services = moondental_get_services();
 					<span class="md-service-card__num" aria-hidden="true"><?php echo esc_html( $num ); ?></span>
 					<div class="md-service-card__icon" aria-hidden="true"><?php echo moondental_render_icon( $svc['icon'] ); ?></div>
 					<h3 class="md-service-card__title"><?php echo esc_html( $svc['title'] ); ?></h3>
+					<?php
+					/* v3.44.203 · 진료 층 배지 · 층별 안내 단일 진실원에서 도출
+					 *   환자가 카드만 보고도 몇 층으로 가면 되는지 알 수 있게 한다. */
+					$_svc_floor = function_exists( 'moondental_slug_floor' ) ? moondental_slug_floor( $svc['slug'] ) : '';
+					if ( $_svc_floor && function_exists( 'moondental_floor_badge' ) ) {
+						echo moondental_floor_badge( $_svc_floor, 'md-floor-badge md-floor-badge--card' );
+					}
+					?>
 					<p class="md-service-card__desc"><?php echo esc_html( $svc['desc'] ); ?></p>
 					<span class="md-service-card__more" aria-hidden="true"><?php echo esc_html( md_content( 'micro_more_label', '자세히 보기 →' ) ); ?></span>
 					<a class="md-service-card__link" href="<?php echo esc_url( $url ); ?>">

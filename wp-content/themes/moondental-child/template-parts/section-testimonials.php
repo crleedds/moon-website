@@ -36,6 +36,13 @@ $info = moondental_get_info();
 						if ( $_sub ) : ?>
 							<span class="md-testimonial__sub"><?php echo esc_html( $_sub ); ?></span>
 						<?php endif; ?>
+						<?php
+						/* v3.44.203 · 진료받은 층 배지 · 층별 안내 데이터에서 자동 도출 */
+						$_floor = function_exists( 'moondental_text_floor' ) ? moondental_text_floor( $_svc ) : '';
+						if ( $_floor && function_exists( 'moondental_floor_badge' ) ) {
+							echo moondental_floor_badge( $_floor, 'md-floor-badge md-floor-badge--testi' );
+						}
+						?>
 					</footer>
 				</article>
 			<?php endforeach; ?>

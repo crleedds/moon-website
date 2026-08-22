@@ -43,6 +43,13 @@ $naver_review_url = ! empty( $info['naver_map_url'] )
 					<?php if ( $service ) : ?>
 						<span class="md-testi-rail__service"><?php echo esc_html( $service ); ?></span>
 					<?php endif; ?>
+					<?php
+					/* v3.44.203 · 진료받은 층 배지 · 층별 안내 데이터에서 자동 도출 */
+					$_rail_floor = function_exists( 'moondental_text_floor' ) ? moondental_text_floor( $service ) : '';
+					if ( $_rail_floor && function_exists( 'moondental_floor_badge' ) ) {
+						echo moondental_floor_badge( $_rail_floor, 'md-floor-badge md-floor-badge--rail' );
+					}
+					?>
 				</div>
 			</li>
 		<?php endforeach; ?>

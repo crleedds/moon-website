@@ -1135,7 +1135,9 @@ function moondental_slug_floor( $slug ) {
 			'자연치아-살리기' => '9F',  // 보존과 · 9F
 			'심미치료'         => '9F',  // 스마일디자인센터 · 9F (v3.44.199 · 층별 안내 기준으로 10F→9F 정정)
 			'사랑니-발치'      => '10F', // 구강외과 · 10F
-			'슈어스마일-투명교정' => '11F', // 교정센터 · 11F
+			// v3.44.203 · 슈어스마일 투명교정 진료는 10F 에서 진행 (사용자 확인).
+			//   교정센터(11F)와 층이 다르므로 별칭을 분리해 둔다.
+			'슈어스마일-투명교정' => '10F',
 			'브라켓-치아교정'  => '11F', // 교정센터 · 11F
 		);
 		foreach ( $aliases as $s => $f ) {
@@ -1143,6 +1145,71 @@ function moondental_slug_floor( $slug ) {
 		}
 	}
 	return $cache[ $slug ] ?? '';
+}
+
+/**
+ * v3.44.203 · 자유 텍스트 진료명 → 층 라벨
+ *
+ *   후기의 'service' 처럼 슬러그가 없는 자유 텍스트에도 층을 붙이기 위한 매핑.
+ *   층 값 자체는 moondental_floor_guide_data() 에서 읽으므로,
+ *   층이 바뀌면 층별 안내 한 곳만 고치면 후기·카드까지 따라온다.
+ *
+ *   @return string '10F' 형태 · 매칭 실패 시 빈 문자열
+ */
+function moondental_text_floor( $text ) {
+	$text = trim( (string) $text );
+	if ( $text === '' || ! function_exists( 'moondental_floor_guide_data' ) ) return '';
+
+	// 키워드 → 층별 안내에 등재된 항목 이름 (앞에 나온 것이 우선)
+	$alias = array(
+		'슈어스마일'   => '슈어스마일 투명교정',
+		'투명교정'     => '슈어스마일 투명교정',
+		'브라켓'       => '교정센터',
+		'교정'         => '교정센터',
+		'임플란트'     => '임플란트센터',
+		'사랑니'       => '구강외과',
+		'매복'         => '구강외과',
+		'턱관절'       => '턱관절 클리닉',
+		'소아'         => '소아치과',
+		'어린이'       => '소아치과',
+		'예방'         => '예방클리닉',
+		'스케일링'     => '예방클리닉',
+		'잇몸'         => '치주과',
+		'치주'         => '치주과',
+		'라미네이트'   => '스마일디자인센터',
+		'심미'         => '스마일디자인센터',
+		'미백'         => '스마일디자인센터',
+		'보철'         => '보철과',
+		'크라운'       => '보철과',
+		'틀니'         => '보철과',
+		'자연치아'     => '보존과',
+		'신경'         => '보존과',
+		'충치'         => '보존과',
+	);
+
+	$target = '';
+	foreach ( $alias as $kw => $name ) {
+		if ( strpos( $text, $kw ) !== false ) { $target = $name; break; }
+	}
+	if ( $target === '' ) $target = $text; // 층별 안내의 이름을 그대로 쓴 경우
+
+	foreach ( moondental_floor_guide_data() as $fl ) {
+		foreach ( $fl['centers'] as $c ) {
+			if ( $c['name'] === $target ) return $fl['floor'];
+		}
+	}
+	return '';
+}
+
+/**
+ * v3.44.203 · 층 배지 HTML (핀 아이콘 + 층)
+ *   이모지는 일부 윈도우 환경에서 글리프가 없어 SVG 로 그린다.
+ */
+function moondental_floor_badge( $floor, $class = 'md-floor-badge' ) {
+	$floor = trim( (string) $floor );
+	if ( $floor === '' ) return '';
+	$svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+	return '<span class="' . esc_attr( $class ) . '">' . $svg . '<span>' . esc_html( $floor ) . '</span></span>';
 }
 
 /**
@@ -1411,7 +1478,8 @@ function moondental_get_testimonials() {
 			'age'     => '30대',
 			'service' => '투명교정',
 			'rating'  => 5,
-			'text'    => '슈어스마일 투명교정 받았는데 처음에 걱정했던 것보다 훨씬 편했어요. 11F 교정과 원장님이 사진 시뮬레이션으로 결과를 미리 보여주셨고, 6개월 만에 만족스러운 결과를 얻었습니다.',
+			// v3.44.203 · 본문에 박아 둔 층 표기 제거 (슈어스마일은 10F · 층은 배지로 표시)
+			'text'    => '슈어스마일 투명교정 받았는데 처음에 걱정했던 것보다 훨씬 편했어요. 원장님이 사진 시뮬레이션으로 결과를 미리 보여주셨고, 6개월 만에 만족스러운 결과를 얻었습니다.',
 		),
 		array(
 			'name'    => '최○○',

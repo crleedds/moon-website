@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.202' );
+define( 'MOONDENTAL_VERSION', '3.44.203' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -4868,7 +4868,9 @@ function moondental_get_services() {
 			'slug'  => '투명교정-센터',
 			'title' => '교정센터',
 			'icon'  => 'icon:ortho',
-			'desc'  => '천안 만남로 11F 교정과 — 슈어스마일(SureSmile) AI 투명교정과 브라켓 치아교정 · 치과교정과·인정의 라이프스타일 맞춤 진료.',
+			// v3.44.203 · 교정센터는 11F, 슈어스마일 진료는 10F 라 한 문장에 층을 못 박으면 어긋난다.
+			//   층은 각 페이지 히어로 배지(moondental_slug_floor)가 정확히 표시하므로 desc 에서는 뺀다.
+			'desc'  => '천안 만남로 문타워 교정센터 — 슈어스마일(SureSmile) AI 투명교정과 브라켓 치아교정 · 치과교정과·인정의 라이프스타일 맞춤 진료.',
 		),
 		array(
 			'slug'  => '자연치아-살리기',

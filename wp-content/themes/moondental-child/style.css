@@ -15826,3 +15826,58 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
   .md-footer__floor-row { grid-template-columns: 38px 1fr; padding: 9px 0; }
   .md-footer__floor-centers { font-size: 0.84rem; }
 }
+
+/* =============================================================
+   v3.44.203 · 층 배지 (.md-floor-badge) · 후기·카드에서 진료 층 표시
+   층 값은 moondental_floor_guide_data() 단일 진실원에서 도출된다.
+   ============================================================= */
+.md-floor-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px 3px 7px;
+  border-radius: 999px;
+  background: rgba(216, 128, 98, 0.12);
+  border: 1px solid rgba(216, 128, 98, 0.22);
+  color: var(--color-primary, #d88062);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.md-floor-badge svg { width: 12px; height: 12px; flex: 0 0 12px; }
+
+/* 후기 카드 (홈 하단 그리드) */
+.md-floor-badge--testi { margin-left: 8px; }
+/* 후기 레일 (홈 사이드바) · 폭이 좁아 더 작게 */
+.md-floor-badge--rail {
+  margin-left: 6px;
+  padding: 2px 7px 2px 5px;
+  font-size: 0.7rem;
+}
+.md-floor-badge--rail svg { width: 10px; height: 10px; flex: 0 0 10px; }
+
+/* 어두운 배경 위에서는 밝은 톤으로 */
+.md-footer .md-floor-badge,
+.md-testi-rail .md-floor-badge {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.75);
+}
+@media (prefers-color-scheme: dark) {
+  .md-floor-badge {
+    background: rgba(242, 168, 120, 0.14);
+    border-color: rgba(242, 168, 120, 0.26);
+    color: #f2a878;
+  }
+}
+
+/* 홈 서비스 카드 · 제목 아래 층 배지 */
+.md-floor-badge--card {
+  margin: 0 0 10px;
+  padding: 2px 8px 2px 6px;
+  font-size: 0.72rem;
+}
+.md-floor-badge--card svg { width: 11px; height: 11px; flex: 0 0 11px; }
