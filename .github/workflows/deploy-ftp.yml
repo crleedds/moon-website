@@ -28,31 +28,24 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lftp
 
-      - name: Test FTP connection (verbose)
+      - name: Check secrets are present
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_PORT: ${{ secrets.FTP_PORT }}
         run: |
-          echo "★ 접속 정보 확인 (마스킹됨)"
-          echo "HOST 길이: ${#FTP_HOST}"
-          echo "USER 길이: ${#FTP_USER}"
-          echo "PASS 길이: ${#FTP_PASS}"
-          echo "PORT: $FTP_PORT (secret이 아니면 여기 보임)"
-          echo ""
-          echo "★ 접속 시도 (에러 상세 표시)"
-          lftp -d -c "
-            set ftp:ssl-allow no;
-            set ftp:passive-mode true;
-            set net:timeout 15;
-            open -u '$FTP_USER','$FTP_PASS' -p $FTP_PORT ftp://$FTP_HOST;
-            pwd;
-            ls;
-            bye;
-          " || echo "★ 접속 자체가 실패했습니다"
+          MISSING=""
+          [ -z "$FTP_HOST" ] && MISSING="$MISSING FTP_HOST"
+          [ -z "$FTP_USER" ] && MISSING="$MISSING FTP_USERNAME"
+          [ -z "$FTP_PASS" ] && MISSING="$MISSING FTP_PASSWORD"
+          if [ -n "$MISSING" ]; then
+            echo "❌ 비어 있는 secret:$MISSING"
+            echo "   GitHub → Settings → Secrets and variables → Actions 에서 등록하세요."
+            exit 1
+          fi
+          echo "✓ secret 3종 존재 (HOST ${#FTP_HOST}자 · USER ${#FTP_USER}자 · PASS ${#FTP_PASS}자)"
 
-      - name: Try multiple CD strategies and deploy
+      - name: Connect, locate theme dir, and deploy
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
@@ -60,73 +53,107 @@ jobs:
           FTP_PORT: ${{ secrets.FTP_PORT }}
           DRY_RUN: ${{ github.event.inputs.dry_run }}
         run: |
-          DRY_FLAG=""
-          if [ "$DRY_RUN" = "true" ]; then
-            DRY_FLAG="--dry-run"
-            echo "★ Dry run mode"
+          set -uo pipefail
+
+          PORT="${FTP_PORT:-}"
+          [ -z "$PORT" ] && PORT=21
+
+          # 비밀번호를 lftp 스크립트 문자열에 넣지 않는다 (쉼표·따옴표 등 특수문자 안전)
+          export LFTP_PASSWORD="$FTP_PASS"
+
+          SSL_OFF='set ftp:ssl-allow no;'
+          SSL_ON='set ftp:ssl-allow yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no;'
+
+          # $1 = SSL 설정 · $2 = 실행할 lftp 명령
+          # cmd:fail-exit 로 명령 실패 시 lftp 가 0 이 아닌 코드로 종료 → 텍스트 파싱 불필요
+          run_lftp() {
+            lftp -u "$FTP_USER" --env-password -p "$PORT" "ftp://$FTP_HOST" -e "
+              $1
+              set ftp:passive-mode true;
+              set net:timeout 20;
+              set net:max-retries 2;
+              set net:reconnect-interval-base 5;
+              set cmd:fail-exit true;
+              $2
+              bye;
+            "
+          }
+
+          # ── 1. 접속 모드 확정 (평문 FTP → 실패 시 FTPS) ──────────────
+          echo "════════ 1. FTP 접속 ════════"
+          SSL_MODE=""
+          for MODE in OFF ON; do
+            if [ "$MODE" = "OFF" ]; then S="$SSL_OFF"; else S="$SSL_ON"; fi
+            echo "── 시도: FTPS=$MODE (포트 $PORT)"
+            if run_lftp "$S" "pwd;" > /tmp/conn.log 2>&1; then
+              echo "✓ 접속 성공 (FTPS=$MODE)"
+              cat /tmp/conn.log
+              SSL_MODE="$S"
+              break
+            fi
+            echo "✗ 실패"
+            cat /tmp/conn.log
+          done
+
+          if [ -z "$SSL_MODE" ]; then
+            echo ""
+            echo "❌ FTP 접속 자체가 실패했습니다."
+            echo "   Cafe24 FTP 호스트·아이디·비밀번호·포트를 재확인하세요."
+            echo "   (Cafe24 는 비밀번호 변경 시 FTP 비밀번호가 함께 바뀝니다)"
+            exit 1
           fi
 
-          # 전략 후보 (Cafe24 FTP 다양한 초기 CWD 대응)
+          # ── 2. 테마 폴더 탐색 ────────────────────────────────────────
+          echo ""
+          echo "════════ 2. 테마 폴더 탐색 ════════"
           STRATEGIES=(
             "wp-content/themes/moondental-child"
             "/www/wp-content/themes/moondental-child"
             "www/wp-content/themes/moondental-child"
             "/wp-content/themes/moondental-child"
+            "public_html/wp-content/themes/moondental-child"
+            "/html/wp-content/themes/moondental-child"
             "moondental-child"
           )
 
           WORKING_PATH=""
           for TARGET in "${STRATEGIES[@]}"; do
-            echo ""
-            echo "════════════════════════════════════════════════"
-            echo "★ 시도: cd $TARGET"
-            echo "════════════════════════════════════════════════"
-
-            RESULT=$(lftp -c "
-              set ftp:ssl-allow no;
-              set ftp:passive-mode true;
-              set net:timeout 15;
-              open -u '$FTP_USER','$FTP_PASS' -p $FTP_PORT ftp://$FTP_HOST;
-              cd $TARGET;
-              pwd;
-              bye;
-            " 2>&1) || true
-
-            echo "$RESULT"
-            echo "--- 판정 ---"
-
-            if echo "$RESULT" | grep -qE 'Access failed|550|No such file|Login failed|Fatal error'; then
-              echo "✗ 실패"
-            elif echo "$RESULT" | grep -qE '^/'; then
-              echo "✓ 성공! 이 경로로 접근 가능"
-              WORKING_PATH="$TARGET"
-              break
+            echo "── 시도: cd $TARGET"
+            if run_lftp "$SSL_MODE" "cd \"$TARGET\"; pwd; cls -1;" > /tmp/probe.log 2>&1; then
+              # 안전장치: 실제 테마 폴더인지 확인한 뒤에만 --delete 미러링 허용
+              if grep -qx 'style.css' /tmp/probe.log && grep -qx 'functions.php' /tmp/probe.log; then
+                WORKING_PATH="$TARGET"
+                echo "✓ 확정 — style.css · functions.php 확인됨"
+                break
+              fi
+              echo "? cd 는 성공했으나 테마 파일이 없음 → 건너뜀"
+              head -20 /tmp/probe.log
             else
-              echo "? 불명확 (건너뜀)"
+              echo "✗ 접근 불가"
+              tail -5 /tmp/probe.log
             fi
           done
 
           if [ -z "$WORKING_PATH" ]; then
             echo ""
-            echo "❌ 모든 경로 실패. FTP 접속 자체 문제 가능성. 로그인·비밀번호 재확인 필요."
+            echo "❌ moondental-child 테마 폴더를 찾지 못했습니다."
+            echo "   FTP 로그인은 되지만 경로가 다릅니다. 위 목록에 실제 경로를 추가하세요."
             exit 1
           fi
 
-          echo ""
-          echo "════════════════════════════════════════════════"
-          echo "★ 확정 경로: $WORKING_PATH"
-          echo "★ 배포 시작..."
-          echo "════════════════════════════════════════════════"
+          # ── 3. 배포 ─────────────────────────────────────────────────
+          DRY_FLAG=""
+          if [ "${DRY_RUN:-}" = "true" ]; then
+            DRY_FLAG="--dry-run"
+            echo ""
+            echo "★ Dry run 모드 — 실제 파일은 바뀌지 않습니다"
+          fi
 
-          lftp -c "
-            set ftp:ssl-allow no;
-            set ftp:passive-mode true;
-            set net:timeout 20;
-            set net:max-retries 3;
-            set net:reconnect-interval-base 5;
+          echo ""
+          echo "════════ 3. 배포: $WORKING_PATH ════════"
+          if ! run_lftp "$SSL_MODE" "
             set mirror:parallel-transfer-count 3;
-            open -u '$FTP_USER','$FTP_PASS' -p $FTP_PORT ftp://$FTP_HOST;
-            cd $WORKING_PATH;
+            cd \"$WORKING_PATH\";
             mirror --reverse --delete --verbose --no-perms $DRY_FLAG \
               --exclude-glob '.git*' \
               --exclude-glob '.github/**' \
@@ -136,7 +163,16 @@ jobs:
               --exclude-glob '.ftp-deploy-sync-state.json' \
               wp-content/themes/moondental-child/ \
               .;
-            bye;
-          "
+          "; then
+            echo ""
+            echo "❌ 업로드 중 오류가 발생했습니다 (위 로그 확인)."
+            exit 1
+          fi
+
+          # ── 4. 검증 ─────────────────────────────────────────────────
+          echo ""
+          echo "════════ 4. 업로드 검증 ════════"
+          run_lftp "$SSL_MODE" "cd \"$WORKING_PATH\"; cls -l style.css functions.php page-templates/page-location.php;" || true
+
           echo ""
           echo "★ Deploy complete."
