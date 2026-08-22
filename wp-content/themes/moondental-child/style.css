@@ -15667,8 +15667,13 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
 /* 컨테이너가 1200px 이라 4열은 폭이 빠듯하다.
    층별 안내와 주차 안내가 긴 텍스트를 담으므로 폭을 크게, 진료시간은 값이 짧으니 작게.
    v3.44.201 · 주차 카드 제목이 3줄로 접히던 것을 2줄로 줄이기 위해 폭 확대. */
+/* v3.44.202 · 진료시간 카드가 좁아 '목요일9:00' 처럼 요일과 시간이 붙었다.
+   본문 컨테이너(1200px) 안에서 4열을 나누면 어느 한 카드를 넓힐 때 다른 카드가
+   좁아지는 제로섬이 된다. 푸터는 독립된 띠이므로 컨테이너만 넓혀 총량을 늘린다. */
+.md-footer > .md-container { max-width: 1330px; }
 .md-footer__grid {
-  grid-template-columns: 0.9fr 0.78fr 1.3fr 1.18fr;
+  max-width: 1330px;
+  grid-template-columns: 0.85fr 0.95fr 1.3fr 1.1fr;
   gap: clamp(18px, 2vw, 28px);
   /* v3.44.201 · 카드마다 담는 양이 달라 높이를 강제로 맞추면 안쪽에 빈 구멍이 생긴다.
      내용 높이만큼만 차지하게 두는 편이 카드 그리드로 자연스럽게 읽힌다. */
@@ -15752,13 +15757,15 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
 }
 .md-footer__floor-badge svg { width: 15px; height: 15px; }
 
-.md-footer__floor-lead {
-  margin: -6px 0 14px;
-  font-size: 0.8rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.5);
-}
 .md-footer__floor-list { list-style: none; margin: 0; padding: 0; }
+
+/* 요일과 시간이 절대 붙지 않도록 최소 간격 확보 (space-between 만으로는 부족) */
+.md-footer__hours {
+  gap: 14px;
+  flex-wrap: nowrap;
+}
+.md-footer__hours strong { white-space: nowrap; }
+.md-footer__hours span { white-space: nowrap; }
 .md-footer__floor-row {
   display: grid;
   grid-template-columns: 34px 1fr;
@@ -15796,26 +15803,6 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
   font-weight: 400;
 }
 .md-footer__floor-sep { display: none; }
-
-/* v3.44.201 · 층별 카드 하단 링크 · 카드 높이 균형 + 오시는 길 동선 */
-.md-footer__col--floors { display: flex; flex-direction: column; }
-.md-footer__floor-more {
-  margin-top: auto;
-  padding-top: 16px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.83rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.62);
-  text-decoration: none;
-  transition: color 0.2s var(--ease), gap 0.2s var(--ease);
-}
-.md-footer__floor-more:hover {
-  color: #fff;
-  gap: 10px;
-}
-.md-footer__floor-more span { transition: transform 0.2s var(--ease); }
 
 /* 어두운 푸터 위에서는 센터 컬러를 밝은 톤으로 (라이트 팔레트는 대비 부족) */
 .md-footer__col--floors .md-center-color--implant   { color: #8fbfb6 !important; font-weight: 700; }

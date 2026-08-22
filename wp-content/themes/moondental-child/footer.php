@@ -200,12 +200,6 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 					</span>
 					<?php echo esc_html( $mc( 'footer_floor_title', '층별 안내' ) ); ?>
 				</h4>
-				<?php
-				$_floor_lead = $mc( 'footer_floor_lead', '문타워 9·10·11·13층 · 각 층 전용 전문 진료실' );
-				if ( $_floor_lead ) :
-				?>
-					<p class="md-footer__floor-lead"><?php echo esc_html( $_floor_lead ); ?></p>
-				<?php endif; ?>
 				<ul class="md-footer__floor-list">
 					<?php foreach ( $footer_floors as $f ) : ?>
 						<li class="md-footer__floor-row">
@@ -235,11 +229,6 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 						</li>
 					<?php endforeach; ?>
 				</ul>
-				<?php /* v3.44.201 · 카드 하단 고정 링크 · 주차 카드와 높이 균형을 맞추고 동선도 이어 준다 */ ?>
-				<a class="md-footer__floor-more" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>" data-track="cta-footer-floor-map">
-					<?php echo esc_html( $mc( 'footer_floor_more', '오시는 길 · 층별 상세 보기' ) ); ?>
-					<span aria-hidden="true">→</span>
-				</a>
 			</div>
 			<?php endif; ?>
 
