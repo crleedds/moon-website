@@ -1552,12 +1552,7 @@ function moondental_default_facility_content() {
 <p class="lead">한아의료재단 문치과병원은 만남로 문타워 9·10·11·13층, 총 <strong>4개 층</strong>을 사용하는 종합 치과병원입니다. 진단·임플란트·교정·종합진료 영역을 층별 전문 센터로 분리하고, 13층에 한아문화센터와 원내 기공실을 직접 운영해 환자분이 필요한 진료를 가장 깊이 있게 받으실 수 있도록 설계했습니다.</p>
 
 <h3>층별 전문 센터</h3>
-<ul>
-<li><strong>13F</strong> — 원내기공실 · 한아문화센터</li>
-<li><strong>11F</strong> — 교정센터 · 소아치과 · 치주과 · 디지털센터</li>
-<li><strong>10F</strong> — 임플란트센터 · 슈어스마일 투명교정 · 구강외과 · 구강내과 · 턱관절 클리닉</li>
-<li><strong>9F</strong> — 스마일디자인센터 · 신환접수 · 보철과 · 보존과 · 예방클리닉</li>
-</ul>
+' . ( function_exists( 'moondental_floor_guide_list_html' ) ? moondental_floor_guide_list_html() : '' ) . '
 
 <h3>디지털 진단 장비</h3>
 <ul>
@@ -1765,12 +1760,9 @@ function moondental_default_services_overview_content() {
 	$html .= '</ul>';
 
 	$html .= '<h3>층별 전문 센터</h3>';
-	$html .= '<ul>
-<li><strong>13F</strong> — 원내기공실 · 한아문화센터</li>
-<li><strong>11F</strong> — 교정센터 · 소아치과 · 치주과 · 디지털센터</li>
-<li><strong>10F</strong> — 임플란트센터 · 슈어스마일 투명교정 · 구강외과 · 구강내과 · 턱관절 클리닉</li>
-<li><strong>9F</strong> — 스마일디자인센터 · 신환접수 · 보철과 · 보존과 · 예방클리닉</li>
-</ul>';
+	if ( function_exists( 'moondental_floor_guide_list_html' ) ) {
+		$html .= moondental_floor_guide_list_html();
+	}
 
 	$html .= '<h3>저희가 가장 신경 쓰는 것</h3>';
 	$html .= '<ul>

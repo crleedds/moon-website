@@ -1116,15 +1116,24 @@ function moondental_slug_floor( $slug ) {
 	static $cache = null;
 	if ( $cache === null ) {
 		$cache = array();
+		// v3.44.199 · 같은 슬러그가 두 층에 나올 수 있다.
+		//   예: '투명교정-센터' 는 11F 교정센터 · 10F 슈어스마일 투명교정 양쪽에 등장한다.
+		//   이때는 'center' 키를 가진 항목(= 그 센터의 본거지)을 층으로 삼는다.
+		//   기존에는 뒤에 나온 항목이 무조건 덮어써서 교정센터 페이지가 10F 로 표시되고,
+		//   같은 페이지의 지표(‘11F 교정 전용층’)와 서로 모순됐다.
 		foreach ( moondental_floor_guide_data() as $f ) {
 			foreach ( $f['centers'] as $c ) {
-				if ( isset( $c['slug'] ) ) $cache[ $c['slug'] ] = $f['floor'];
+				if ( empty( $c['slug'] ) ) continue;
+				$s = $c['slug'];
+				if ( ! isset( $cache[ $s ] ) || ! empty( $c['center'] ) ) {
+					$cache[ $s ] = $f['floor'];
+				}
 			}
 		}
 		// 진료 페이지 슬러그 · 층 별칭 매핑 (실제 진료 담당 진료과의 층)
 		$aliases = array(
 			'자연치아-살리기' => '9F',  // 보존과 · 9F
-			'심미치료'         => '10F', // 스마일디자인센터 · 10F (사용자 확인 v3.44.69)
+			'심미치료'         => '9F',  // 스마일디자인센터 · 9F (v3.44.199 · 층별 안내 기준으로 10F→9F 정정)
 			'사랑니-발치'      => '10F', // 구강외과 · 10F
 			'슈어스마일-투명교정' => '11F', // 교정센터 · 11F
 			'브라켓-치아교정'  => '11F', // 교정센터 · 11F
@@ -1134,6 +1143,31 @@ function moondental_slug_floor( $slug ) {
 		}
 	}
 	return $cache[ $slug ] ?? '';
+}
+
+/**
+ * v3.44.199 · 층별 안내 · 본문용 <ul> 목록 (단일 진실원)
+ *   시설·진료안내 등 기본 본문에 하드코딩돼 있던 층 목록을 대체한다.
+ *   슬러그가 있는 센터는 해당 페이지로 링크한다.
+ */
+function moondental_floor_guide_list_html( $link = true ) {
+	$out = '<ul class="md-floor-lines">';
+	foreach ( moondental_floor_guide_data() as $f ) {
+		$parts = array();
+		foreach ( $f['centers'] as $c ) {
+			$name = esc_html( $c['name'] );
+			if ( $link && ! empty( $c['slug'] ) ) {
+				$url = ( $c['slug'] === '스마일디자인센터' )
+					? home_url( '/스마일디자인센터/' )
+					: home_url( '/진료항목/' . $c['slug'] . '/' );
+				$parts[] = '<a href="' . esc_url( $url ) . '">' . $name . '</a>';
+			} else {
+				$parts[] = $name;
+			}
+		}
+		$out .= '<li><strong>' . esc_html( $f['floor'] ) . '</strong> — ' . implode( ' · ', $parts ) . '</li>';
+	}
+	return $out . '</ul>';
 }
 
 /**

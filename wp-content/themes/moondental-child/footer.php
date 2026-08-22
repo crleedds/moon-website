@@ -185,6 +185,12 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 					</span>
 					<?php echo esc_html( $mc( 'footer_floor_title', '층별 안내' ) ); ?>
 				</h4>
+				<?php
+				$_floor_lead = $mc( 'footer_floor_lead', '문타워 9·10·11·13층 · 각 층 전용 전문 진료실' );
+				if ( $_floor_lead ) :
+				?>
+					<p class="md-footer__floor-lead"><?php echo esc_html( $_floor_lead ); ?></p>
+				<?php endif; ?>
 				<ul class="md-footer__floor-list">
 					<?php foreach ( $footer_floors as $f ) : ?>
 						<li class="md-footer__floor-row">
@@ -206,7 +212,9 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 										$_parts[] = '<span class="' . esc_attr( $_cls ) . '">' . $_name . '</span>';
 									}
 								}
-								echo implode( ' <span class="md-footer__floor-sep" aria-hidden="true">·</span> ', $_parts );
+								// 구분점은 CSS ::after 로 붙인다 — 앞 단어에 붙여야 줄바꿈 때
+								// '· 예방클리닉' 처럼 점이 다음 줄 맨 앞으로 떨어지지 않는다.
+								echo implode( ' ', $_parts );
 								?>
 							</span>
 						</li>

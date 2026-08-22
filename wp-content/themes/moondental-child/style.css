@@ -15664,15 +15664,27 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
 /* =============================================================
    v3.44.198 · 푸터 층별 안내 컬럼 (진료시간 · 주차 안내 사이)
    ============================================================= */
+/* 컨테이너가 1200px 이라 4열은 폭이 빠듯하다.
+   층별 안내가 가장 긴 텍스트를 담으므로 폭을 크게, 진료시간은 값이 짧으니 작게. */
 .md-footer__grid {
-  grid-template-columns: 1.15fr 0.95fr 1.2fr 1.15fr;
+  grid-template-columns: 0.95fr 0.85fr 1.35fr 1.05fr;
+  gap: clamp(18px, 2vw, 30px);
+}
+
+/* 한글이 단어 중간에서 끊기는 것 방지 ('슈어스마일 투/명교정' · '제5공/영주차장') */
+.md-footer__col--hours,
+.md-footer__col--floors,
+.md-footer__col--parking,
+.md-footer__brand {
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .md-footer__col--floors {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 14px;
-  padding: 24px 22px;
+  padding: 22px 20px;
   transition: background 0.25s var(--ease), border-color 0.25s var(--ease);
 }
 .md-footer__col--floors:hover {
@@ -15705,13 +15717,19 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
 }
 .md-footer__floor-badge svg { width: 15px; height: 15px; }
 
+.md-footer__floor-lead {
+  margin: -6px 0 14px;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.5);
+}
 .md-footer__floor-list { list-style: none; margin: 0; padding: 0; }
 .md-footer__floor-row {
   display: grid;
-  grid-template-columns: 42px 1fr;
-  gap: 10px;
+  grid-template-columns: 34px 1fr;
+  gap: 8px;
   align-items: baseline;
-  padding: 10px 0;
+  padding: 11px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 .md-footer__floor-row:last-child { border-bottom: none; }
@@ -15736,7 +15754,13 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
   color: #fff;
   border-bottom-color: rgba(255, 255, 255, 0.35);
 }
-.md-footer__floor-sep { color: rgba(255, 255, 255, 0.25); }
+/* 구분점을 앞 단어에 nbsp 로 붙여 줄바꿈 시 점만 떨어지는 것을 막는다 */
+.md-footer__floor-center:not(:last-child)::after {
+  content: '\00a0·';
+  color: rgba(255, 255, 255, 0.25);
+  font-weight: 400;
+}
+.md-footer__floor-sep { display: none; }
 
 /* 어두운 푸터 위에서는 센터 컬러를 밝은 톤으로 (라이트 팔레트는 대비 부족) */
 .md-footer__col--floors .md-center-color--implant   { color: #8fbfb6 !important; font-weight: 700; }

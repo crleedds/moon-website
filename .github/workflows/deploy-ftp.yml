@@ -28,6 +28,28 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lftp
 
+      # v3.44.199 · 업로드 전에 구문 검사. 여기서 걸리면 서버에는 올라가지 않는다.
+      - name: PHP syntax check
+        run: |
+          php -v > /dev/null 2>&1 || { sudo apt-get update -qq && sudo apt-get install -y -qq php-cli; }
+          echo "PHP $(php -r 'echo PHP_VERSION;')"
+          ERR=0
+          COUNT=0
+          while IFS= read -r F; do
+            COUNT=$((COUNT + 1))
+            if ! php -l "$F" > /tmp/lint.out 2>&1; then
+              echo "❌ $F"
+              cat /tmp/lint.out
+              ERR=1
+            fi
+          done < <(find wp-content/themes/moondental-child -name '*.php')
+          if [ "$ERR" -ne 0 ]; then
+            echo ""
+            echo "❌ PHP 구문 오류 — 배포를 중단합니다 (서버 파일은 그대로입니다)."
+            exit 1
+          fi
+          echo "✓ PHP 구문 검사 통과 ($COUNT개 파일)"
+
       - name: Check secrets are present
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
