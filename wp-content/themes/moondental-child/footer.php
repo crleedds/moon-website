@@ -60,10 +60,19 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 					<p class="md-footer__tag"><?php echo esc_html( $tagline ); ?></p>
 				<?php endif; ?>
 
-				<?php if ( ! empty( $info['phone'] ) ) : ?>
+				<?php
+				/* v3.44.201 · 이모지(📞 ✉️) → 인라인 SVG.
+				 * ✉️ 는 일부 윈도우 환경에서 글리프가 없어 빈 네모로 표시됐고,
+				 * 카드 헤더가 이미 SVG 배지를 쓰고 있어 아이콘 언어도 어긋났다. */
+				if ( ! empty( $info['phone'] ) ) : ?>
 					<p class="md-footer__phone">
 						<a href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-footer-call">
-							📞 <?php echo esc_html( $info['phone'] ); ?>
+							<span class="md-footer__cicon" aria-hidden="true">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>
+								</svg>
+							</span>
+							<?php echo esc_html( $info['phone'] ); ?>
 						</a>
 					</p>
 				<?php endif; ?>
@@ -73,7 +82,13 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				if ( $footer_email ) : ?>
 					<p class="md-footer__email">
 						<a href="mailto:<?php echo esc_attr( $footer_email ); ?>" data-track="cta-footer-email">
-							✉️ <?php echo esc_html( $footer_email ); ?>
+							<span class="md-footer__cicon" aria-hidden="true">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/>
+									<path d="M3 6.5l9 6 9-6"/>
+								</svg>
+							</span>
+							<?php echo esc_html( $footer_email ); ?>
 						</a>
 					</p>
 				<?php endif; ?>
@@ -220,6 +235,11 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 						</li>
 					<?php endforeach; ?>
 				</ul>
+				<?php /* v3.44.201 · 카드 하단 고정 링크 · 주차 카드와 높이 균형을 맞추고 동선도 이어 준다 */ ?>
+				<a class="md-footer__floor-more" href="<?php echo esc_url( home_url( '/오시는-길/' ) ); ?>" data-track="cta-footer-floor-map">
+					<?php echo esc_html( $mc( 'footer_floor_more', '오시는 길 · 층별 상세 보기' ) ); ?>
+					<span aria-hidden="true">→</span>
+				</a>
 			</div>
 			<?php endif; ?>
 
@@ -231,8 +251,10 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 
 			$park_1_title = $mc( 'footer_park_1_title', '본원 지하 기계식 주차장' );
 			$park_1_desc  = $mc( 'footer_park_1_desc',  '주차 후 데스크에 접수 → 무료 등록' );
-			$park_2_title = $mc( 'footer_park_2_title', 'SUV·대형차 — 신부 제5공영주차장 (동남구 먹거리1길 10)' );
-			$park_2_desc  = $mc( 'footer_park_2_desc',  '인근 신부 제5공영주차장 주차 후 데스크에 접수 → 무료 등록' );
+			/* v3.44.201 · 제목이 3줄로 접혀 카드가 불필요하게 길어졌다.
+			 * 주소는 설명줄로 옮겨 제목을 2줄 이내로 줄인다 (정보 손실 없음). */
+			$park_2_title = $mc( 'footer_park_2_title', 'SUV·대형차 — 신부 제5공영주차장' );
+			$park_2_desc  = $mc( 'footer_park_2_desc',  '동남구 먹거리1길 10 · 주차 후 데스크에 접수 → 무료 등록' );
 			?>
 			<div class="md-footer__col md-footer__col--parking">
 				<h4>

@@ -15665,11 +15665,46 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
    v3.44.198 · 푸터 층별 안내 컬럼 (진료시간 · 주차 안내 사이)
    ============================================================= */
 /* 컨테이너가 1200px 이라 4열은 폭이 빠듯하다.
-   층별 안내가 가장 긴 텍스트를 담으므로 폭을 크게, 진료시간은 값이 짧으니 작게. */
+   층별 안내와 주차 안내가 긴 텍스트를 담으므로 폭을 크게, 진료시간은 값이 짧으니 작게.
+   v3.44.201 · 주차 카드 제목이 3줄로 접히던 것을 2줄로 줄이기 위해 폭 확대. */
 .md-footer__grid {
-  grid-template-columns: 0.95fr 0.85fr 1.35fr 1.05fr;
-  gap: clamp(18px, 2vw, 30px);
+  grid-template-columns: 0.9fr 0.78fr 1.3fr 1.18fr;
+  gap: clamp(18px, 2vw, 28px);
+  /* v3.44.201 · 카드마다 담는 양이 달라 높이를 강제로 맞추면 안쪽에 빈 구멍이 생긴다.
+     내용 높이만큼만 차지하게 두는 편이 카드 그리드로 자연스럽게 읽힌다. */
+  align-items: start;
 }
+
+/* v3.44.201 · 브랜드 연락처 아이콘 · 이모지 대신 SVG (윈도우 글리프 누락 대응) */
+.md-footer__cicon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--color-primary-light, #e8a487);
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
+}
+.md-footer__cicon svg { width: 15px; height: 15px; }
+.md-footer__phone a:hover .md-footer__cicon,
+.md-footer__email a:hover .md-footer__cicon {
+  background: rgba(216, 128, 98, 0.22);
+  color: #fff;
+}
+/* 아이콘과 텍스트가 분리되어 줄바꿈되지 않도록 */
+.md-footer__phone a,
+.md-footer__email a { align-items: center; }
+
+/* v3.44.201 · 진료시간 안내문을 카드 하단에 고정 · 중간에 끊긴 느낌 제거 */
+.md-footer__col--hours .md-footer__hours-link {
+  display: flex !important;
+  flex-direction: column;
+  height: 100%;
+}
+.md-footer__hours-note { margin-top: auto !important; }
 
 /* 한글이 단어 중간에서 끊기는 것 방지 ('슈어스마일 투/명교정' · '제5공/영주차장') */
 .md-footer__col--hours,
@@ -15761,6 +15796,26 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
   font-weight: 400;
 }
 .md-footer__floor-sep { display: none; }
+
+/* v3.44.201 · 층별 카드 하단 링크 · 카드 높이 균형 + 오시는 길 동선 */
+.md-footer__col--floors { display: flex; flex-direction: column; }
+.md-footer__floor-more {
+  margin-top: auto;
+  padding-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.62);
+  text-decoration: none;
+  transition: color 0.2s var(--ease), gap 0.2s var(--ease);
+}
+.md-footer__floor-more:hover {
+  color: #fff;
+  gap: 10px;
+}
+.md-footer__floor-more span { transition: transform 0.2s var(--ease); }
 
 /* 어두운 푸터 위에서는 센터 컬러를 밝은 톤으로 (라이트 팔레트는 대비 부족) */
 .md-footer__col--floors .md-center-color--implant   { color: #8fbfb6 !important; font-weight: 700; }
