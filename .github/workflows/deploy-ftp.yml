@@ -65,7 +65,12 @@ jobs:
           SSL_ON='set ftp:ssl-allow yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no;'
 
           # $1 = SSL 설정 · $2 = 실행할 lftp 명령
-          # cmd:fail-exit 로 명령 실패 시 lftp 가 0 이 아닌 코드로 종료 → 텍스트 파싱 불필요
+          #
+          # v3.44.197 · $2 안에서 경로를 따옴표로 감싸지 말 것.
+          #   lftp 는 -e 문자열의 따옴표를 벗기지 않고 경로 일부로 서버에 보낸다.
+          #   cd "wp-content" → 서버는 ~/"wp-content 를 찾아 550 으로 실패하고,
+          #   절대경로 "/www/... 조차 앞의 " 때문에 홈 기준 상대경로가 된다.
+          #   run #322~#328 이 전부 이 이유로 실패했다.
           run_lftp() {
             lftp -u "$FTP_USER" --env-password -p "$PORT" "ftp://$FTP_HOST" -e "
               $1
@@ -103,45 +108,96 @@ jobs:
             exit 1
           fi
 
-          # ── 2. 테마 폴더 탐색 ────────────────────────────────────────
+          # ── 2. FTP 홈 최상위 확인 ────────────────────────────────────
+          # 경로를 추측하지 않는다. 서버가 알려주는 실제 목록에서 후보를 만든다.
           echo ""
-          echo "════════ 2. 테마 폴더 탐색 ════════"
-          STRATEGIES=(
+          echo "════════ 2. FTP 홈 최상위 ════════"
+          run_lftp "$SSL_MODE" "cls -1 --classify;" > /tmp/home.log 2>&1 || true
+          cat /tmp/home.log
+
+          # cls --classify 는 디렉터리 이름 끝에 / 를 붙인다 → 디렉터리만 후보로 수집
+          ROOTS=(".")
+          while IFS= read -r NAME; do
+            case "$NAME" in
+              */) NAME="${NAME%/}" ;;
+              *)  continue ;;
+            esac
+            case "$NAME" in
+              ""|"."|"..") continue ;;
+              *\ *)        continue ;;
+            esac
+            ROOTS+=("$NAME")
+          done < /tmp/home.log
+
+          # 홈 목록을 못 읽었을 때 대비한 고정 후보 (중복은 TRIED 로 걸러진다)
+          ROOTS+=(www public_html html htdocs web wordpress)
+
+          SUFFIXES=(
             "wp-content/themes/moondental-child"
-            "/www/wp-content/themes/moondental-child"
-            "www/wp-content/themes/moondental-child"
-            "/wp-content/themes/moondental-child"
-            "public_html/wp-content/themes/moondental-child"
-            "/html/wp-content/themes/moondental-child"
+            "themes/moondental-child"
             "moondental-child"
           )
 
+          # ── 3. 테마 폴더 탐색 ────────────────────────────────────────
+          echo ""
+          echo "════════ 3. 테마 폴더 탐색 ════════"
           WORKING_PATH=""
-          for TARGET in "${STRATEGIES[@]}"; do
-            echo "── 시도: cd $TARGET"
-            if run_lftp "$SSL_MODE" "cd \"$TARGET\"; pwd; cls -1;" > /tmp/probe.log 2>&1; then
-              # 안전장치: 실제 테마 폴더인지 확인한 뒤에만 --delete 미러링 허용
-              if grep -qx 'style.css' /tmp/probe.log && grep -qx 'functions.php' /tmp/probe.log; then
-                WORKING_PATH="$TARGET"
-                echo "✓ 확정 — style.css · functions.php 확인됨"
-                break
+          TRIED=" "
+          for ROOT in "${ROOTS[@]}"; do
+            for SUF in "${SUFFIXES[@]}"; do
+              if [ "$ROOT" = "." ]; then TARGET="$SUF"; else TARGET="$ROOT/$SUF"; fi
+              case "$TRIED" in *" $TARGET "*) continue ;; esac
+              TRIED="$TRIED$TARGET "
+
+              echo "── 시도: cd $TARGET"
+              # 따옴표 없이 전달 (run_lftp 주석 참고)
+              if run_lftp "$SSL_MODE" "cd $TARGET; pwd; cls -1;" > /tmp/probe.log 2>&1; then
+                # 안전장치: 실제 테마 폴더인지 확인한 뒤에만 --delete 미러링 허용
+                if grep -qx 'style.css' /tmp/probe.log && grep -qx 'functions.php' /tmp/probe.log; then
+                  WORKING_PATH="$TARGET"
+                  echo "✓ 확정 — style.css · functions.php 확인됨"
+                  break 2
+                fi
+                echo "? cd 는 성공했으나 테마 파일이 없음 → 건너뜀"
+                head -20 /tmp/probe.log
+              else
+                echo "✗ 접근 불가"
+                tail -3 /tmp/probe.log
               fi
-              echo "? cd 는 성공했으나 테마 파일이 없음 → 건너뜀"
-              head -20 /tmp/probe.log
-            else
-              echo "✗ 접근 불가"
-              tail -5 /tmp/probe.log
-            fi
+            done
           done
+
+          # ── 3-b. 최후 수단: 서버에서 직접 찾는다 ──────────────────────
+          if [ -z "$WORKING_PATH" ]; then
+            echo ""
+            echo "════════ 3-b. find 로 직접 탐색 ════════"
+            run_lftp "$SSL_MODE" "find -d 4 .;" > /tmp/find.log 2>&1 || true
+            echo "── moondental 을 포함한 경로:"
+            grep -i 'moondental' /tmp/find.log | head -30
+            echo "── wp-content/themes 를 포함한 경로:"
+            grep -i 'wp-content/themes' /tmp/find.log | head -30
+
+            CAND="$(grep -iE 'moondental-child/?$' /tmp/find.log | head -1 | sed -e 's#^\./##' -e 's#/$##')"
+            if [ -n "$CAND" ]; then
+              echo "── find 가 찾은 후보: $CAND"
+              if run_lftp "$SSL_MODE" "cd $CAND; cls -1;" > /tmp/probe.log 2>&1 \
+                 && grep -qx 'style.css' /tmp/probe.log \
+                 && grep -qx 'functions.php' /tmp/probe.log; then
+                WORKING_PATH="$CAND"
+                echo "✓ 확정 — style.css · functions.php 확인됨"
+              fi
+            fi
+          fi
 
           if [ -z "$WORKING_PATH" ]; then
             echo ""
             echo "❌ moondental-child 테마 폴더를 찾지 못했습니다."
-            echo "   FTP 로그인은 되지만 경로가 다릅니다. 위 목록에 실제 경로를 추가하세요."
+            echo "   FTP 로그인은 되지만 경로가 다릅니다."
+            echo "   위 '2. FTP 홈 최상위' 와 '3-b. find' 출력에서 실제 경로를 확인하세요."
             exit 1
           fi
 
-          # ── 3. 배포 ─────────────────────────────────────────────────
+          # ── 4. 배포 ─────────────────────────────────────────────────
           DRY_FLAG=""
           if [ "${DRY_RUN:-}" = "true" ]; then
             DRY_FLAG="--dry-run"
@@ -150,10 +206,10 @@ jobs:
           fi
 
           echo ""
-          echo "════════ 3. 배포: $WORKING_PATH ════════"
+          echo "════════ 4. 배포: $WORKING_PATH ════════"
           if ! run_lftp "$SSL_MODE" "
             set mirror:parallel-transfer-count 3;
-            cd \"$WORKING_PATH\";
+            cd $WORKING_PATH;
             mirror --reverse --delete --verbose --no-perms $DRY_FLAG \
               --exclude-glob '.git*' \
               --exclude-glob '.github/**' \
@@ -169,10 +225,10 @@ jobs:
             exit 1
           fi
 
-          # ── 4. 검증 ─────────────────────────────────────────────────
+          # ── 5. 검증 ─────────────────────────────────────────────────
           echo ""
-          echo "════════ 4. 업로드 검증 ════════"
-          run_lftp "$SSL_MODE" "cd \"$WORKING_PATH\"; cls -l style.css functions.php page-templates/page-location.php;" || true
+          echo "════════ 5. 업로드 검증 ════════"
+          run_lftp "$SSL_MODE" "cd $WORKING_PATH; cls -l style.css functions.php page-templates/page-location.php;" || true
 
           echo ""
-          echo "★ Deploy complete."
+          echo "★ Deploy complete. (경로: $WORKING_PATH)"
