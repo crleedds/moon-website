@@ -168,6 +168,54 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			</div>
 
 			<?php
+			/* v3.44.198 · 층별 안내 컬럼 (진료시간 · 주차 안내 사이)
+			 * 데이터는 moondental_floor_guide_data() 단일 진실원을 그대로 사용 —
+			 * 층 정보가 바뀌면 inc/enhancements.php 한 곳만 고치면 전 사이트에 반영된다. */
+			$footer_floors = function_exists( 'moondental_floor_guide_data' ) ? moondental_floor_guide_data() : array();
+			if ( $footer_floors ) :
+			?>
+			<div class="md-footer__col md-footer__col--floors">
+				<h4>
+					<span class="md-footer__floor-badge" aria-hidden="true">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M3 21h18"/>
+							<path d="M5 21V7l7-4 7 4v14"/>
+							<path d="M10 21v-5h4v5"/>
+						</svg>
+					</span>
+					<?php echo esc_html( $mc( 'footer_floor_title', '층별 안내' ) ); ?>
+				</h4>
+				<ul class="md-footer__floor-list">
+					<?php foreach ( $footer_floors as $f ) : ?>
+						<li class="md-footer__floor-row">
+							<span class="md-footer__floor-num"><?php echo esc_html( $f['floor'] ); ?></span>
+							<span class="md-footer__floor-centers">
+								<?php
+								$_parts = array();
+								foreach ( $f['centers'] as $c ) {
+									$_name  = esc_html( $c['name'] );
+									$_color = ! empty( $c['center'] ) ? ' md-center-color--' . $c['center'] : '';
+									if ( ! empty( $c['slug'] ) ) {
+										$_url = ( $c['slug'] === '스마일디자인센터' )
+											? home_url( '/스마일디자인센터/' )
+											: home_url( '/진료항목/' . $c['slug'] . '/' );
+										$_cls = 'md-footer__floor-center md-footer__floor-center--link' . $_color;
+										$_parts[] = '<a class="' . esc_attr( $_cls ) . '" href="' . esc_url( $_url ) . '">' . $_name . '</a>';
+									} else {
+										$_cls = 'md-footer__floor-center' . $_color;
+										$_parts[] = '<span class="' . esc_attr( $_cls ) . '">' . $_name . '</span>';
+									}
+								}
+								echo implode( ' <span class="md-footer__floor-sep" aria-hidden="true">·</span> ', $_parts );
+								?>
+							</span>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			</div>
+			<?php endif; ?>
+
+			<?php
 			/* v3.44.13 · 주차 안내 컬럼 (진료시간 오른편)
 			 * v3.44.14 · 항목별 링크: 01 → 문치과병원 네이버지도 · 02 → 신부제5공영주차장 네이버지도 */
 			$park_1_url = $mc( 'footer_park_1_url', $info['naver_map_url'] ?? 'https://map.naver.com/p/entry/place/12772165' );
