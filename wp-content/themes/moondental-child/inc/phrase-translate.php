@@ -123,12 +123,39 @@ function moondental_translate_html( $html, $map ) {
  * 비한국어 페이지에서 출력 버퍼를 잡아 번역 적용.
  *   template_redirect 에서 시작해 shutdown 에서 정리한다.
  */
+/**
+ * v3.44.218 · 번역에서 제외할 화면인가
+ *
+ *   치과 백과사전은 652개 항목 각각이 정의·분류표·임상 주의사항까지 담은
+ *   긴 학술 문서다. 일부만 번역되면 오히려 읽기 나빠지고, 전부 번역하는 것은
+ *   현실적이지 않다. 원문(한국어) 그대로 두는 편이 정확하다.
+ *
+ * @return bool
+ */
+function moondental_skip_translation() {
+	// 백과사전 개별 항목 · 목록 · 분야별 아카이브
+	if ( is_singular( 'md_term' ) )            return true;
+	if ( is_post_type_archive( 'md_term' ) )   return true;
+	if ( is_tax( 'md_term_category' ) )        return true;
+
+	// rewrite 가 아직 반영되지 않은 경우까지 대비해 경로로도 확인
+	$path = isset( $_SERVER['REQUEST_URI'] )
+		? urldecode( (string) wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ) )
+		: '';
+	if ( $path !== '' && strpos( $path, '/치과사전' ) !== false ) return true;
+
+	return (bool) apply_filters( 'moondental_skip_translation', false );
+}
+
 add_action( 'template_redirect', function () {
 	if ( is_admin() || is_feed() || is_robots() ) return;
 	if ( ! function_exists( 'moondental_current_language' ) ) return;
 
 	$lang = moondental_current_language();
 	if ( $lang === 'ko' || $lang === '' ) return;
+
+	// v3.44.218 · 백과사전은 번역 대상에서 제외
+	if ( moondental_skip_translation() ) return;
 
 	$map = moondental_phrase_map( $lang );
 	if ( empty( $map ) ) return;
