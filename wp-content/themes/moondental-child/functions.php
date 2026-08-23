@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.216' );
+define( 'MOONDENTAL_VERSION', '3.44.217' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2035,6 +2035,7 @@ require_once MOONDENTAL_DIR . '/inc/enhancements.php';
 require_once MOONDENTAL_DIR . '/inc/seo-boost.php';
 require_once MOONDENTAL_DIR . '/inc/customizer-content.php';
 require_once MOONDENTAL_DIR . '/inc/auto-translate.php'; // v3.44.0
+require_once MOONDENTAL_DIR . '/inc/phrase-translate.php'; // v3.44.217 · 문구 기반 번역
 require_once MOONDENTAL_DIR . '/inc/strengths.php';
 require_once MOONDENTAL_DIR . '/inc/regions.php';
 require_once MOONDENTAL_DIR . '/inc/icons.php';
