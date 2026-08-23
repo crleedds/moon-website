@@ -210,7 +210,9 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 								foreach ( $f['centers'] as $c ) {
 									$_name  = esc_html( $c['name'] );
 									$_color = ! empty( $c['center'] ) ? ' md-center-color--' . $c['center'] : '';
-									if ( ! empty( $c['slug'] ) ) {
+									// v3.44.211 · 링크는 3개 센터(임플란트·교정·스마일디자인)만.
+									//   'center' 키가 있는 항목이 곧 그 3개다.
+									if ( ! empty( $c['center'] ) && ! empty( $c['slug'] ) ) {
 										$_url = ( $c['slug'] === '스마일디자인센터' )
 											? home_url( '/스마일디자인센터/' )
 											: home_url( '/진료항목/' . $c['slug'] . '/' );

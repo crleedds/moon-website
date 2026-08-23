@@ -31,7 +31,8 @@ $lead  = function_exists( 'md_content' ) ? md_content( 'floor_guide_lead',  '문
 					foreach ( $f['centers'] as $c ) {
 						$name = esc_html( $c['name'] );
 						$color_cls = ! empty( $c['center'] ) ? ' md-center-color--' . $c['center'] : '';
-						if ( ! empty( $c['slug'] ) ) {
+						// v3.44.211 · 링크는 3개 센터만 ('center' 키 보유 항목)
+						if ( ! empty( $c['center'] ) && ! empty( $c['slug'] ) ) {
 							$url = home_url( '/진료항목/' . $c['slug'] . '/' );
 							if ( $c['slug'] === '스마일디자인센터' ) $url = home_url( '/스마일디자인센터/' );
 							$cls = 'md-floor-rail__center md-floor-rail__center--link' . $color_cls;

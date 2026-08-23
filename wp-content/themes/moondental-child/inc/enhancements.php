@@ -358,6 +358,71 @@ function moondental_jsonld_schema() {
 		),
 	);
 
+	/* ------------------------------------------------------------------
+	 * v3.44.211 · 개체(entity) 식별 정보 보강
+	 *   답변 엔진은 어떤 곳인지 명확히 식별되는 개체를 인용한다.
+	 *   아래 항목은 모두 사이트에 이미 게시된 사실만 사용한다.
+	 * ---------------------------------------------------------------- */
+
+	$schema['foundingDate']           = '1995';
+	$schema['isAcceptingNewPatients'] = true;
+	$schema['currenciesAccepted']     = 'KRW';
+	$schema['paymentAccepted']        = '현금, 신용카드, 계좌이체';
+	$schema['availableLanguage']      = array( '한국어', 'English', '中文', '日本語', 'Русский', 'Монгол', 'Tiếng Việt' );
+
+	if ( ! empty( $info['naver_map_url'] ) ) {
+		$schema['hasMap'] = $info['naver_map_url'];
+	}
+
+	/* 층별 전문 센터를 department 로 모델링.
+	 *   '어떤 진료를 어느 층에서 하는가' 는 이 병원 고유의 사실이라
+	 *   동명 기관과 구분되는 식별 정보가 된다. 층별 안내 단일 진실원에서 생성. */
+	if ( function_exists( 'moondental_floor_guide_data' ) ) {
+		$departments = array();
+		foreach ( moondental_floor_guide_data() as $fl ) {
+			foreach ( $fl['centers'] as $c ) {
+				if ( empty( $c['name'] ) ) continue;
+				$dept = array(
+					'@type' => array( 'MedicalClinic', 'Dentist' ),
+					'name'  => $c['name'],
+					'floorLevel' => $fl['floor'],
+					'parentOrganization' => array( '@id' => $site . '#org' ),
+				);
+				if ( ! empty( $c['slug'] ) ) {
+					$dept['url'] = ( $c['slug'] === '스마일디자인센터' )
+						? home_url( '/스마일디자인센터/' )
+						: home_url( '/진료항목/' . $c['slug'] . '/' );
+				}
+				$departments[] = $dept;
+			}
+		}
+		if ( $departments ) $schema['department'] = $departments;
+	}
+
+	/* 제공 진료를 MedicalProcedure 로 명시 */
+	if ( function_exists( 'moondental_get_services' ) ) {
+		$procedures = array();
+		foreach ( (array) moondental_get_services() as $svc ) {
+			if ( empty( $svc['title'] ) ) continue;
+			$proc = array(
+				'@type' => 'MedicalProcedure',
+				'name'  => $svc['title'],
+			);
+			if ( ! empty( $svc['desc'] ) ) $proc['description'] = wp_strip_all_tags( $svc['desc'] );
+			if ( ! empty( $svc['slug'] ) ) {
+				$page = get_page_by_path( $svc['slug'] );
+				$proc['url'] = $page ? get_permalink( $page ) : home_url( '/' . rawurlencode( $svc['slug'] ) . '/' );
+			}
+			$procedures[] = $proc;
+		}
+		if ( $procedures ) $schema['availableService'] = $procedures;
+	}
+
+	$schema['knowsAbout'] = array(
+		'임플란트', '치아교정', '투명교정', '소아치과', '치주치료',
+		'근관치료', '구강악안면외과', '턱관절장애', '심미보철', '예방치과',
+	);
+
 	/* v3.30.0 · aggregateRating + review (홈 후기 데이터 machine-readable 노출)
 	 * v3.44.74 · 홈페이지에서만 출력 (모든 페이지 반복 출력 방지 · Google Search Console 리뷰 스니펫 부풀림 방지) */
 	/* v3.44.207 · 기본 비활성화.
@@ -1295,7 +1360,8 @@ function moondental_render_floor_guide( $variant = 'card', $args = array() ) {
 			$name = esc_html( $c['name'] );
 			// v3.44.191 · 센터 컬러 · 'center' 키가 있는 항목만 (센터명 아닌 항목은 색 안 넣음)
 			$color_cls = ! empty( $c['center'] ) ? ' md-center-color--' . $c['center'] : '';
-			if ( $args['link_pages'] && ! empty( $c['slug'] ) ) {
+			// v3.44.211 · 링크는 3개 센터만 ('center' 키 보유 항목)
+			if ( $args['link_pages'] && ! empty( $c['center'] ) && ! empty( $c['slug'] ) ) {
 				$url = home_url( '/진료항목/' . $c['slug'] . '/' );
 				if ( $c['slug'] === '스마일디자인센터' ) {
 					$url = home_url( '/스마일디자인센터/' );
@@ -1921,6 +1987,21 @@ function moondental_clinic_comparison() {
  */
 function moondental_get_faqs() {
 	return array(
+		/* v3.44.211 · 실제 검색 의도에 직접 답하는 항목.
+		 *   '어디가 좋냐' 가 아니라 '무엇을 기준으로 고르냐' 에 사실로 답한다.
+		 *   FAQPage 스키마로 함께 출력되어 답변 엔진이 인용할 수 있다. */
+		'치과 선택 기준' => array(
+			array( 'q' => '천안에서 치과를 고를 때 무엇을 확인해야 하나요?',
+				   'a' => '첫째, 필요한 진료 영역을 다루는지와 복합 치료 시 원내 협진이 가능한지 확인하세요. 둘째, CBCT 등 진단 장비로 상태를 직접 보여주며 설명하는지 보세요. 셋째, 치료 전에 선택지와 비용을 서면으로 안내하는지 확인하세요. 넷째, 생활 패턴에 맞는 진료시간과 주차·대중교통 접근성을 고려하세요. 다섯째, 치료 후 정기 관리와 사후 대응 체계가 있는지 물어보세요. 여섯째, 비급여 진료비를 게시하고 설명하는지 확인하세요.' ),
+			array( 'q' => '치과병원과 치과의원은 무엇이 다른가요?',
+				   'a' => '의료법상 종별이 다릅니다. 치과병원은 병상·진료과목·인력 등 병원급 기준을 충족한 의료기관으로, 진료 영역이 나뉘어 원내 협진이 가능한 경우가 많습니다. 치과의원은 일반 진료 중심의 소규모 기관입니다. 단순 충치나 정기검진은 접근성이 좋은 곳이면 충분하고, 임플란트·교정·보철이 함께 필요한 복합 케이스는 협진이 가능한 곳이 유리합니다. 한아의료재단 문치과병원은 치과병원(병원급)으로 등록되어 있습니다.' ),
+			array( 'q' => '여러 진료가 동시에 필요한데 한 곳에서 받을 수 있나요?',
+				   'a' => '임플란트·교정·보철·신경치료가 얽힌 경우에는 순서를 정하는 계획이 결과를 좌우합니다. 각 영역이 따로 판단하지 않고 하나의 계획으로 조율되는 환경이 유리합니다. 문치과병원은 만남로 문타워 9·10·11·13층 4개 층에 진료 영역을 나누어 운영하며, 13층에 원내 기공실을 직접 두고 있습니다.' ),
+			array( 'q' => '직장인이라 낮에 시간을 내기 어렵습니다. 야간이나 토요일 진료가 되나요?',
+				   'a' => '문치과병원은 평일(월·화·수·금) 20:30까지, 토요일 14:00까지 진료합니다. 목요일은 18:30까지이며 일요일은 휴진입니다. 평일은 점심시간 없이 진료합니다. 공휴일 운영은 변동될 수 있어 방문 전 전화나 네이버 플레이스 확인을 권합니다.' ),
+			array( 'q' => '치료비가 병원마다 다른데 어떻게 비교해야 하나요?',
+				   'a' => '금액만 비교하면 포함 범위의 차이를 놓치기 쉽습니다. 낮아 보이는 견적이 골이식이나 최종 보철을 제외한 것일 수 있고, 높아 보이는 견적이 사후 관리를 포함한 것일 수 있습니다. 무엇이 포함되고 무엇이 빠져 있는지, 추가 비용이 생기는 조건은 무엇인지, 사용 재료와 총 내원 횟수는 어떻게 되는지를 함께 확인하세요. 비급여 진료비는 게시하도록 되어 있어 사전 확인이 가능합니다.' ),
+		),
 		'예약·내원' => array(
 			array( 'q' => '예약 없이 방문해도 진료가 가능한가요?',
 				   'a' => '가능하지만 대기 시간이 발생할 수 있습니다. 가급적 전화(<a href="tel:0415632875">041-563-2875</a>) 또는 카카오톡으로 사전 예약 후 방문해주세요.' ),

@@ -216,7 +216,7 @@ $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '�
 						<span class="md-floor-guide__centers">
 							<a class="md-floor-guide__center md-floor-guide__center--link md-floor-guide__center--highlight md-center-color--suresmile" href="<?php echo esc_url( home_url( '/진료항목/투명교정-센터/' ) ); ?>">교정센터</a>
 							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<a class="md-floor-guide__center md-floor-guide__center--link" href="<?php echo esc_url( home_url( '/진료항목/소아치과/' ) ); ?>">소아치과</a>
+							<span class="md-floor-guide__center">소아치과</span>
 							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
 							<span class="md-floor-guide__center">치주과</span>
 							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
@@ -228,13 +228,13 @@ $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '�
 						<span class="md-floor-guide__centers">
 							<a class="md-floor-guide__center md-floor-guide__center--link md-floor-guide__center--highlight md-center-color--implant" href="<?php echo esc_url( home_url( '/진료항목/임플란트-센터/' ) ); ?>">임플란트센터</a>
 							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<a class="md-floor-guide__center md-floor-guide__center--link" href="<?php echo esc_url( home_url( '/진료항목/투명교정-센터/' ) ); ?>">슈어스마일 투명교정</a>
+							<span class="md-floor-guide__center">슈어스마일 투명교정</span>
 							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
 							<span class="md-floor-guide__center">구강외과</span>
 							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
 							<span class="md-floor-guide__center">구강내과</span>
 							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<a class="md-floor-guide__center md-floor-guide__center--link" href="<?php echo esc_url( home_url( '/진료항목/턱관절-클리닉/' ) ); ?>">턱관절 클리닉</a>
+							<span class="md-floor-guide__center">턱관절 클리닉</span>
 						</span>
 					</li>
 					<li class="md-floor-guide__row">
@@ -248,7 +248,7 @@ $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '�
 							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
 							<span class="md-floor-guide__center">보존과</span>
 							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<a class="md-floor-guide__center md-floor-guide__center--link" href="<?php echo esc_url( home_url( '/진료항목/예방클리닉/' ) ); ?>">예방클리닉</a>
+							<span class="md-floor-guide__center">예방클리닉</span>
 						</span>
 					</li>
 				</ul>
