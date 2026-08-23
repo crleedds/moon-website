@@ -16070,3 +16070,38 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
   .md-fab { width: auto; padding: 12px 18px; gap: 8px; transition: none; }
   .md-fab__label { max-width: 160px; opacity: 1; transition: none; }
 }
+
+/* =============================================================
+   v3.44.216 · 히어로 인증 배지 배치 정리
+   ---------------------------------------------------------------
+   기존: flex-wrap 으로 7개가 4+3 으로 갈라지고 아래 줄만 가운데 정렬되어
+   위아래가 어긋나 보였다. 줄 구성이 화면 폭에 따라 매번 달라지기도 했다.
+
+   변경: 가장 핵심 문구인 첫 배지를 단독 줄에 두고,
+   나머지 6개를 3+3 그리드로 고정해 어느 폭에서도 줄이 흐트러지지 않게 한다.
+   ============================================================= */
+.md-hero-combined__certs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, auto));
+  justify-content: center;
+  align-items: stretch;
+  gap: 8px 10px;
+  max-width: 900px;
+}
+/* 첫 배지(1990년대부터 임플란트를 식립해온 병원) · 단독 줄 · 강조 */
+.md-hero-combined__certs li:first-child {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+.md-hero-combined--has-bg .md-hero-combined__certs li:first-child {
+  background: rgba(0, 0, 0, 0.58) !important;
+  border-color: rgba(255, 220, 180, 0.45) !important;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .md-hero-combined__certs { grid-template-columns: repeat(2, minmax(0, auto)); }
+}
+@media (max-width: 560px) {
+  .md-hero-combined__certs { grid-template-columns: minmax(0, auto); }
+}
