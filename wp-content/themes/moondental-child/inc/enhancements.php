@@ -359,21 +359,8 @@ function moondental_jsonld_schema() {
 	);
 
 	/* v3.30.0 · aggregateRating + review (홈 후기 데이터 machine-readable 노출)
-	 * v3.44.74 · 홈페이지에서만 출력
-	 *
-	 * v3.44.206 · 기본 비활성화.
-	 *   Google 구조화 데이터 정책상 LocalBusiness 계열은 자사 사이트에서 수집한
-	 *   후기(self-serving review)를 리치 결과 대상으로 인정하지 않는다.
-	 *   현재 출력되던 후기는 Customizer 기본값(마스킹 이름 + 예시 문안)이라
-	 *   실제 검증된 후기로 보기 어렵고, 이 상태의 마크업은 수동 조치 위험이 있다.
-	 *   검색 노출을 늘리려는 목적과 정반대 결과가 되므로 기본값을 끈다.
-	 *
-	 *   네이버 등 제3자 플랫폼의 검증된 평점·후기 수를 확보했다면 아래 필터로 켠다:
-	 *     add_filter( 'moondental_enable_review_schema', '__return_true' );
-	 *   이때 ratingValue·reviewCount 는 반드시 실제 수집된 값이어야 한다. */
-	$md_review_schema_on = (bool) apply_filters( 'moondental_enable_review_schema', false );
-
-	if ( $md_review_schema_on && is_front_page() && function_exists( 'moondental_get_testimonials' ) ) {
+	 * v3.44.74 · 홈페이지에서만 출력 (모든 페이지 반복 출력 방지 · Google Search Console 리뷰 스니펫 부풀림 방지) */
+	if ( is_front_page() && function_exists( 'moondental_get_testimonials' ) ) {
 		$testimonials = moondental_get_testimonials();
 		if ( ! empty( $testimonials ) ) {
 			$count = 0;
