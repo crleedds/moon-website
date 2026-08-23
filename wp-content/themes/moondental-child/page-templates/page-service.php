@@ -265,6 +265,22 @@ if ( function_exists( 'moondental_service_ideal_candidates' ) ) {
 ?>
 
 <?php
+/* v3.44.212 · 해당 센터의 종합안내서 배너
+ *   홈 사이드바에만 있던 안내서를 각 센터 페이지에서도 바로 닿게 한다.
+ *   3개 센터에만 안내서가 있으므로 매핑에 없는 진료항목은 출력되지 않는다. */
+$md_guide_for_service = array(
+	'임플란트-센터'       => 'implant',
+	'투명교정-센터'       => 'suresmile',
+	'슈어스마일-투명교정' => 'suresmile',
+	'브라켓-치아교정'     => 'suresmile',
+	'심미치료'            => 'laminate',
+);
+if ( isset( $md_guide_for_service[ $slug ] ) && function_exists( 'md_guide_load' ) ) {
+	get_template_part( 'template-parts/section', 'guide-cta', array( 'slug' => $md_guide_for_service[ $slug ] ) );
+}
+?>
+
+<?php
 /* 해당 service slug의 자동 FAQ 출력 */
 if ( function_exists( 'moondental_get_faqs_by_service' ) ) {
 	$faqs_map = moondental_get_faqs_by_service();

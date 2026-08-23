@@ -10,7 +10,6 @@ $data = moondental_floor_guide_data();
 if ( empty( $data ) ) return;
 
 $title = function_exists( 'md_content' ) ? md_content( 'floor_guide_title', '층별 안내' ) : '층별 안내';
-$lead  = function_exists( 'md_content' ) ? md_content( 'floor_guide_lead',  '문타워 9·10·11·13층 · 각 층 전용 전문 진료실 운영' ) : '문타워 9·10·11·13층 · 각 층 전용 전문 진료실 운영';
 
 // v3.44.191 · 색상은 'center' 필드가 있는 항목만 (센터 아닌 항목은 색 안 넣음)
 ?>
@@ -19,7 +18,6 @@ $lead  = function_exists( 'md_content' ) ? md_content( 'floor_guide_lead',  '문
 	<header class="md-floor-rail__head">
 		<span class="md-floor-rail__eyebrow">FLOOR</span>
 		<h3 class="md-floor-rail__title">🏥 <?php echo esc_html( $title ); ?></h3>
-		<p class="md-floor-rail__lead"><?php echo esc_html( $lead ); ?></p>
 	</header>
 	<ul class="md-floor-rail__list">
 		<?php foreach ( $data as $f ) : ?>

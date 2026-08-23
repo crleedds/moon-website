@@ -201,7 +201,6 @@ $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '�
 				<header class="md-hours__head">
 					<span class="md-hours__badge">🏥 층별 안내</span>
 				</header>
-				<p class="md-floor-guide__lead" style="margin:0 0 14px;color:var(--color-text-sub);font-size:0.85rem;">문타워 9·10·11·13층 · 각 층 전용 전문 진료실</p>
 				<ul class="md-floor-guide__list">
 					<li class="md-floor-guide__row">
 						<span class="md-floor-guide__floor">13F</span>

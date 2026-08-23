@@ -222,6 +222,9 @@ $nav_items = $parse_nav( md_content( 'smile_nav_items', '' ) );
 	</div>
 </section>
 
+<?php /* v3.44.212 · 스마일디자인센터 종합안내서 (라미네이트) */ ?>
+<?php get_template_part( 'template-parts/section', 'guide-cta', array( 'slug' => 'laminate' ) ); ?>
+
 <?php get_template_part( 'template-parts/section', 'cta' ); ?>
 
 <?php

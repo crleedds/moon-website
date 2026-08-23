@@ -15881,3 +15881,128 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
   font-size: 0.72rem;
 }
 .md-floor-badge--card svg { width: 11px; height: 11px; flex: 0 0 11px; }
+
+/* =============================================================
+   v3.44.212 · 센터 페이지 종합안내서 CTA 배너 (.md-guide-cta)
+   ============================================================= */
+.md-guide-cta-sec { padding-top: 0; }
+
+.md-guide-cta {
+  --md-cta-accent: #e37b5c;
+  --md-cta-accent-2: #f2a878;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: clamp(14px, 2vw, 24px);
+  padding: clamp(20px, 2.6vw, 28px) clamp(20px, 2.6vw, 30px);
+  border-radius: 18px;
+  background: var(--color-white, #fff);
+  border: 1px solid rgba(30, 20, 14, 0.08);
+  box-shadow: 0 2px 10px rgba(30, 20, 14, 0.05);
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.md-guide-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: linear-gradient(180deg, var(--md-cta-accent), var(--md-cta-accent-2));
+}
+.md-guide-cta::after {
+  content: attr(data-num);
+  position: absolute;
+  right: -10px;
+  bottom: -34px;
+  font-size: 8rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--md-cta-accent);
+  opacity: 0.06;
+  z-index: 0;
+  pointer-events: none;
+}
+.md-guide-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(30, 20, 14, 0.11);
+  border-color: color-mix(in srgb, var(--md-cta-accent) 45%, transparent);
+}
+
+/* 센터별 색 — 층별안내·서비스 카드와 동일 계열 */
+.md-guide-cta--implant   { --md-cta-accent: #5c8b82; --md-cta-accent-2: #8fbfb6; }
+.md-guide-cta--suresmile { --md-cta-accent: #e37b5c; --md-cta-accent-2: #f2a878; }
+.md-guide-cta--laminate  { --md-cta-accent: #b29cc7; --md-cta-accent-2: #d2bfe0; }
+
+.md-guide-cta__icon {
+  font-size: 2rem;
+  line-height: 1;
+  flex: 0 0 auto;
+  z-index: 1;
+}
+.md-guide-cta__body { display: block; min-width: 0; z-index: 1; }
+.md-guide-cta__code {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--md-cta-accent);
+  margin-bottom: 6px;
+}
+.md-guide-cta__title {
+  display: block;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--color-text, #1e140e);
+  word-break: keep-all;
+}
+.md-guide-cta__subtitle {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-text-sub, #6b5d55);
+  word-break: keep-all;
+}
+.md-guide-cta__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.md-guide-cta__tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--md-cta-accent) 10%, transparent);
+  color: var(--md-cta-accent);
+  white-space: nowrap;
+}
+.md-guide-cta__read {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--md-cta-accent);
+  white-space: nowrap;
+  z-index: 1;
+  transition: gap 0.2s var(--ease);
+}
+.md-guide-cta:hover .md-guide-cta__read { gap: 11px; }
+
+@media (max-width: 720px) {
+  .md-guide-cta {
+    grid-template-columns: auto 1fr;
+    row-gap: 14px;
+  }
+  .md-guide-cta__read { grid-column: 1 / -1; justify-content: flex-end; }
+  .md-guide-cta::after { font-size: 6rem; bottom: -24px; }
+}
