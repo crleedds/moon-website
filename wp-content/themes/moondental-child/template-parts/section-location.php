@@ -248,6 +248,8 @@ $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '�
 							<span class="md-floor-guide__center">보존과</span>
 							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
 							<span class="md-floor-guide__center">예방클리닉</span>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<span class="md-floor-guide__center">경영지원실</span>
 						</span>
 					</li>
 				</ul>

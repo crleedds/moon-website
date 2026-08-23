@@ -1198,6 +1198,7 @@ function moondental_floor_guide_data() {
 				array( 'name' => '보철과' ),
 				array( 'name' => '보존과' ),
 				array( 'name' => '예방클리닉',   'slug' => '예방클리닉' ),
+				array( 'name' => '경영지원실' ), // v3.44.213
 			),
 		),
 	);
