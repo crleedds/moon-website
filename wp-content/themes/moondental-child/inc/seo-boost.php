@@ -705,3 +705,11 @@ function moondental_llms_txt() {
 
 	return $out;
 }
+
+/* v3.44.210 · 실제 로드된 템플릿 파일 기록
+ *   is_page_template() 로는 판별되지 않는 경우(template_include 지정)를 위해
+ *   스키마 출력 쪽에서 참조한다. wp_head 보다 먼저 실행된다. */
+add_filter( 'template_include', function ( $template ) {
+	$GLOBALS['md_current_template'] = $template;
+	return $template;
+}, 999 );

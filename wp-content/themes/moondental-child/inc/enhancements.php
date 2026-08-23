@@ -488,7 +488,13 @@ add_action( 'wp_head', 'moondental_jsonld_breadcrumb', 55 );
 function moondental_jsonld_faq() {
 	$faqs = array();
 
-	if ( is_page_template( 'page-templates/page-faq.php' ) && function_exists( 'moondental_get_faqs' ) ) {
+	/* v3.44.210 · is_page_template() 는 페이지 속성(_wp_page_template)만 본다.
+	 *   템플릿이 template_include 필터로 지정되면 false 가 되어 FAQ 페이지에서
+	 *   스키마가 출력되지 않았다(기존부터 누락). 실제 로드된 템플릿으로 판별한다. */
+	$md_tpl = isset( $GLOBALS['md_current_template'] ) ? basename( (string) $GLOBALS['md_current_template'] ) : '';
+	$is_faq_page = is_page_template( 'page-templates/page-faq.php' ) || $md_tpl === 'page-faq.php';
+
+	if ( $is_faq_page && function_exists( 'moondental_get_faqs' ) ) {
 		$faqs = moondental_get_faqs();
 	}
 

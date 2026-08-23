@@ -625,6 +625,67 @@ add_action( 'admin_init', 'moondental_seed_encyclopedia_v344205', 64 );
 add_action( 'wp_loaded',  'moondental_seed_encyclopedia_v344205', 64 );
 
 /**
+ * v3.44.210 · 백과사전 확장 5차 · 42개 신규 용어 APPEND
+ *   기존 560개 유지 · 중복 title 은 건너뛰고 신규만 insert.
+ *   중점: 전신질환 연계 · 노년 치의학 · 수면호흡 · 디지털 보철
+ */
+function moondental_seed_encyclopedia_v344207() {
+	if ( get_option( 'moondental_encyclopedia_seed_v344207' ) === 'done' ) return;
+	$seed_file = MOONDENTAL_DIR . '/inc/encyclopedia-seed-v344207.php';
+	if ( ! file_exists( $seed_file ) ) return;
+
+	if ( function_exists( 'moondental_seed_encyclopedia_categories_v34110' ) ) {
+		moondental_seed_encyclopedia_categories_v34110();
+	}
+
+	$terms = require $seed_file;
+	if ( ! is_array( $terms ) || empty( $terms ) ) return;
+
+	global $wpdb;
+	$existing_titles = $wpdb->get_col( "SELECT post_title FROM {$wpdb->posts} WHERE post_type = 'md_term' AND post_status = 'publish'" );
+	$existing_set = array();
+	foreach ( (array) $existing_titles as $t ) $existing_set[ trim( (string) $t ) ] = true;
+
+	$inserted = 0;
+	$skipped_dup = 0;
+
+	foreach ( $terms as $t ) {
+		if ( empty( $t['title'] ) || empty( $t['body'] ) ) continue;
+		$title = trim( (string) $t['title'] );
+		if ( isset( $existing_set[ $title ] ) ) { $skipped_dup++; continue; }
+		$post_id = wp_insert_post( array(
+			'post_type'    => 'md_term',
+			'post_status'  => 'publish',
+			'post_title'   => $title,
+			'post_excerpt' => $t['excerpt'] ?? '',
+			'post_content' => $t['body'],
+		) );
+		if ( $post_id && ! is_wp_error( $post_id ) ) {
+			if ( ! empty( $t['cat'] ) ) {
+				$term = get_term_by( 'slug', $t['cat'], 'md_term_category' );
+				if ( $term ) wp_set_object_terms( $post_id, array( (int) $term->term_id ), 'md_term_category' );
+			}
+			$existing_set[ $title ] = true;
+			$inserted++;
+		}
+	}
+
+	if ( function_exists( 'wp_update_term_count' ) ) {
+		$all_cats = get_terms( array( 'taxonomy' => 'md_term_category', 'hide_empty' => false, 'fields' => 'ids' ) );
+		if ( is_array( $all_cats ) ) wp_update_term_count( $all_cats, 'md_term_category', true );
+	}
+
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_md\_term\_json\_%' OR option_name LIKE '\_transient\_timeout\_md\_term\_json\_%'" );
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_md\_terms\_all\_%' OR option_name LIKE '\_transient\_timeout\_md\_terms\_all\_%'" );
+
+	update_option( 'moondental_encyclopedia_seed_v344207', 'done' );
+	update_option( 'moondental_encyclopedia_seed_v344207_count', $inserted, false );
+	update_option( 'moondental_encyclopedia_seed_v344207_skipped', $skipped_dup, false );
+}
+add_action( 'admin_init', 'moondental_seed_encyclopedia_v344207', 66 );
+add_action( 'wp_loaded',  'moondental_seed_encyclopedia_v344207', 66 );
+
+/**
  * v3.44.110 · 카테고리 대통합 · 15개 → 7개
  *   1) 새 카테고리 7개 생성
  *   2) 기존 카테고리별 all md_term 포스트 → 새 카테고리로 재배정
