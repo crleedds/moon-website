@@ -406,7 +406,11 @@ function moondental_render_region_sitemap_yoast() {
 	$sitemap = '';
 	foreach ( $regions as $region ) {
 		if ( empty( $region['slug'] ) ) continue;
-		$loc = home_url( '/오시는-길/' . $region['slug'] . '/' );
+		/* v3.44.215 · 사이트맵 URL 은 퍼센트 인코딩이 규격이다.
+		 *   esc_url() 은 비ASCII 경로를 그대로 두므로 <loc> 에 한글 원문이 들어갔고,
+		 *   region-sitemap.xml 40개만 다른 사이트맵과 표기가 달랐다.
+		 *   크롤러·검사 도구가 원문 한글을 그대로 요청하면 404 가 난다. */
+		$loc = home_url( '/' . rawurlencode( '오시는-길' ) . '/' . rawurlencode( $region['slug'] ) . '/' );
 		$sitemap .= "\t<url>\n";
 		$sitemap .= "\t\t<loc>" . esc_url( $loc ) . "</loc>\n";
 		$sitemap .= "\t\t<lastmod>" . esc_html( $today ) . "</lastmod>\n";
