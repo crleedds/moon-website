@@ -360,7 +360,18 @@ function moondental_jsonld_schema() {
 
 	/* v3.30.0 · aggregateRating + review (홈 후기 데이터 machine-readable 노출)
 	 * v3.44.74 · 홈페이지에서만 출력 (모든 페이지 반복 출력 방지 · Google Search Console 리뷰 스니펫 부풀림 방지) */
-	if ( is_front_page() && function_exists( 'moondental_get_testimonials' ) ) {
+	/* v3.44.207 · 기본 비활성화.
+	 *   Google 구조화 데이터 정책상 LocalBusiness 계열은 자사 사이트에서 수집한
+	 *   후기(self-serving review)를 리치 결과 대상으로 인정하지 않는다.
+	 *   현재 출력되던 후기는 Customizer 기본값(마스킹 이름 + 예시 문안)이라
+	 *   검증된 후기로 보기 어렵고, 이 상태의 마크업은 수동 조치 위험이 있다.
+	 *   검색 노출을 늘리려는 목적과 정반대 결과가 되므로 기본값을 끈다.
+	 *
+	 *   제3자 플랫폼의 검증된 평점·후기 수를 확보했다면 아래 필터로 켠다:
+	 *     add_filter( 'moondental_enable_review_schema', '__return_true' );
+	 *   이때 값은 반드시 실제 수집된 수치여야 한다. */
+	if ( apply_filters( 'moondental_enable_review_schema', false )
+		&& is_front_page() && function_exists( 'moondental_get_testimonials' ) ) {
 		$testimonials = moondental_get_testimonials();
 		if ( ! empty( $testimonials ) ) {
 			$count = 0;
@@ -475,10 +486,23 @@ add_action( 'wp_head', 'moondental_jsonld_breadcrumb', 55 );
  * moondental_get_faqs() 데이터를 스키마화 → 구글 리치 결과 (아코디언).
  */
 function moondental_jsonld_faq() {
-	if ( ! is_page_template( 'page-templates/page-faq.php' ) ) return;
-	if ( ! function_exists( 'moondental_get_faqs' ) ) return;
+	$faqs = array();
 
-	$faqs = moondental_get_faqs();
+	if ( is_page_template( 'page-templates/page-faq.php' ) && function_exists( 'moondental_get_faqs' ) ) {
+		$faqs = moondental_get_faqs();
+	}
+
+	/* v3.44.207 · 진료항목 페이지의 slug 별 FAQ 도 스키마화.
+	 *   질문·답변 쌍은 생성형 답변 엔진이 가장 인용하기 쉬운 형태인데,
+	 *   지금까지는 FAQ 페이지 한 곳에서만 출력되고 있었다. */
+	if ( empty( $faqs ) && is_page() && function_exists( 'moondental_get_faqs_by_service' ) ) {
+		$slug = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
+		$map  = moondental_get_faqs_by_service();
+		if ( ! empty( $map[ $slug ] ) && is_array( $map[ $slug ] ) ) {
+			$faqs = array( $map[ $slug ] );
+		}
+	}
+
 	if ( empty( $faqs ) ) return;
 
 	$questions = array();

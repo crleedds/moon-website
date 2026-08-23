@@ -50,6 +50,31 @@ jobs:
           fi
           echo "✓ PHP 구문 검사 통과 ($COUNT개 파일)"
 
+          # v3.44.207 · 함수 중복 정의 검사
+          #   php -l 은 파일 단위 파싱만 하므로 서로 다른 파일에 같은 이름의
+          #   함수를 정의해도 통과한다. 실제로는 로드 시점에
+          #   'Cannot redeclare' 치명적 오류가 나 사이트 전체가 죽는다.
+          #   (v3.44.206 에서 moondental_jsonld_faq 중복으로 실제 발생)
+          echo ""
+          echo "── 함수 중복 정의 검사"
+          DUPES=$(grep -rhoE '^[[:space:]]*function[[:space:]]+[A-Za-z_][A-Za-z0-9_]*' \
+                    --include='*.php' wp-content/themes/moondental-child \
+                  | awk '{print $2}' | sort | uniq -d)
+          if [ -n "$DUPES" ]; then
+            echo "❌ 같은 이름의 함수가 두 번 이상 정의되어 있습니다:"
+            echo "$DUPES" | while IFS= read -r FN; do
+              [ -z "$FN" ] && continue
+              echo "  · $FN"
+              grep -rnE "^[[:space:]]*function[[:space:]]+${FN}[[:space:]]*\(" \
+                --include='*.php' wp-content/themes/moondental-child | sed 's/^/      /'
+            done
+            echo ""
+            echo "   PHP 로드 시 Cannot redeclare 로 사이트 전체가 500 이 됩니다."
+            echo "   배포를 중단합니다 (서버 파일은 그대로입니다)."
+            exit 1
+          fi
+          echo "✓ 함수 중복 없음"
+
       - name: Check secrets are present
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}

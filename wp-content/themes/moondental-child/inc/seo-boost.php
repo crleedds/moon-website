@@ -590,3 +590,118 @@ function moondental_jsonld_area_served() {
 	echo "\n</script>\n";
 }
 add_action( 'wp_head', 'moondental_jsonld_area_served', 53 );
+
+/* ============================================================
+ * v3.44.207 · AI 검색(생성형 답변 엔진) 대응
+ *   답변 엔진은 (1) 기계가 읽을 수 있는 구조, (2) 질문에 직접 답하는 문단,
+ *   (3) 개체(entity) 식별이 명확한 사이트를 인용한다. 아래는 그 셋을 보강한다.
+ * ========================================================== */
+
+/**
+ * robots.txt · AI 크롤러 명시적 허용 + llms.txt 안내
+ *   와일드카드(*)로 이미 허용되지만, 명시하면 의도가 분명해지고
+ *   Google-Extended 처럼 별도 토큰을 쓰는 크롤러도 확실히 포함된다.
+ */
+add_filter( 'robots_txt', function ( $output, $public ) {
+	if ( ! $public ) return $output;
+
+	$agents = array(
+		'GPTBot', 'OAI-SearchBot', 'ChatGPT-User',   // OpenAI
+		'ClaudeBot', 'Claude-Web', 'anthropic-ai',   // Anthropic
+		'PerplexityBot', 'Perplexity-User',          // Perplexity
+		'Google-Extended',                           // Google Gemini grounding
+		'Applebot-Extended',                         // Apple Intelligence
+		'CCBot',                                     // Common Crawl
+		'Bytespider', 'Amazonbot', 'cohere-ai',
+	);
+
+	$block = "\n# START MOONDENTAL AI BLOCK · 생성형 답변 엔진 크롤링 허용\n";
+	foreach ( $agents as $a ) {
+		$block .= "User-agent: {$a}\nAllow: /\n\n";
+	}
+	$block .= "# 사이트 요약(사람·기계 공용): " . home_url( '/llms.txt' ) . "\n";
+	$block .= "# END MOONDENTAL AI BLOCK\n";
+
+	return $output . $block;
+}, 20, 2 );
+
+/**
+ * /llms.txt · 답변 엔진용 사이트 요약
+ *   rewrite rule 없이 init 단계에서 직접 응답한다 (flush 불필요).
+ *   내용은 사이트에 이미 게시된 사실만 사용한다.
+ */
+add_action( 'init', function () {
+	$path = (string) strtok( (string) ( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '' ), '?' );
+	if ( untrailingslashit( $path ) !== '/llms.txt' ) return;
+
+	nocache_headers();
+	header( 'Content-Type: text/plain; charset=utf-8' );
+	header( 'X-Robots-Tag: noindex' );
+	echo moondental_llms_txt();
+	exit;
+}, 1 );
+
+/**
+ * llms.txt 본문 생성 (사실 기반 · 과장 표현 배제)
+ */
+function moondental_llms_txt() {
+	$info = function_exists( 'moondental_get_info' ) ? moondental_get_info() : array();
+	$home = untrailingslashit( home_url( '/' ) );
+
+	$out  = "# 한아의료재단 문치과병원 (Moon Dental Hospital)\n\n";
+	$out .= "> 충청남도 천안시 동남구 만남로 52 문타워에 위치한 치과병원. 1995년 개원. "
+	      . "9·10·11·13층 4개 층을 사용하며 층별로 전문 진료 영역을 분리해 운영한다.\n\n";
+
+	$out .= "## 기본 정보\n\n";
+	$out .= "- 정식 명칭: 한아의료재단 문치과병원\n";
+	$out .= "- 종별: 치과병원 (의료법상 병원급)\n";
+	$out .= "- 주소: 충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층 (신부동)\n";
+	$out .= "- 대표번호: " . ( $info['phone'] ?? '041-563-2875' ) . "\n";
+	$out .= "- 개원: 1995년\n";
+	$out .= "- 진료 지역: 천안시, 아산시 및 충청남도 인근\n";
+	$out .= "- 홈페이지: {$home}/\n\n";
+
+	$out .= "## 진료시간\n\n";
+	$out .= "- 평일(월·화·수·금): 09:00–20:30\n";
+	$out .= "- 목요일: 09:00–18:30\n";
+	$out .= "- 토요일: 09:00–14:00\n";
+	$out .= "- 일요일: 휴진\n";
+	$out .= "- 공휴일 진료 여부는 변동될 수 있으므로 네이버 플레이스 또는 전화 확인 권장\n\n";
+
+	$out .= "## 층별 진료 구성\n\n";
+	if ( function_exists( 'moondental_floor_guide_data' ) ) {
+		foreach ( moondental_floor_guide_data() as $f ) {
+			$names = array();
+			foreach ( $f['centers'] as $c ) $names[] = $c['name'];
+			$out .= '- ' . $f['floor'] . ': ' . implode( ' · ', $names ) . "\n";
+		}
+	}
+	$out .= "\n";
+
+	$out .= "## 주요 진료 영역\n\n";
+	if ( function_exists( 'moondental_get_services' ) ) {
+		foreach ( (array) moondental_get_services() as $svc ) {
+			if ( empty( $svc['slug'] ) || empty( $svc['title'] ) ) continue;
+			$page = get_page_by_path( $svc['slug'] );
+			$url  = $page ? get_permalink( $page ) : $home . '/' . rawurlencode( $svc['slug'] ) . '/';
+			$desc = isset( $svc['desc'] ) ? wp_strip_all_tags( $svc['desc'] ) : '';
+			$out .= '- [' . $svc['title'] . '](' . $url . ')';
+			if ( $desc ) $out .= ' — ' . $desc;
+			$out .= "\n";
+		}
+	}
+	$out .= "\n";
+
+	$out .= "## 참고 자료\n\n";
+	$out .= "- [치과 백과사전]({$home}/치과사전/) — 치과 용어와 술식을 정리한 자료 모음\n";
+	$out .= "- [오시는 길]({$home}/오시는-길/) — 위치, 주차, 대중교통, 층별 안내\n";
+	$out .= "- [의료진]({$home}/의료진/)\n";
+	$out .= "- [자주 묻는 질문]({$home}/faq/)\n\n";
+
+	$out .= "## 인용 시 유의사항\n\n";
+	$out .= "- 진료시간과 공휴일 운영은 변동될 수 있다. 방문 전 전화 또는 네이버 플레이스 확인이 정확하다.\n";
+	$out .= "- 이 사이트의 의학 정보는 일반적 설명이며 개별 진단을 대체하지 않는다.\n";
+	$out .= "- 비용은 개인의 구강 상태와 술식에 따라 달라지므로 상담을 통해 확인해야 한다.\n";
+
+	return $out;
+}
