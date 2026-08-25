@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.220' );
+define( 'MOONDENTAL_VERSION', '3.44.221' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -5123,9 +5123,9 @@ function moondental_get_team() {
 					'photo_ty'   => 5,
 					'philosophy' => 'For a lifelong smile. 환자 한 분 한 분을 가족처럼 생각하며, 밝고 편안한 웃음을 위한 진료에 최선을 다하겠습니다.',
 					'bio'        => array(
-						'미국 UCSF 치과대학 졸업',
-						'미국 UCLA 구강생물학 석사 졸업',
 						'미국 UCLA 생화학 학사 졸업',
+						'미국 UCLA 구강생물학 석사 졸업',
+						'미국 UCSF 치과대학 졸업',
 						'미국 UCSF 치과대학 교정과 임상연수',
 						'서울대학교 치과마취과학과 박사과정',
 						'미국 SureSmile® 투명교정 인증의',
