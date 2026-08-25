@@ -88,7 +88,7 @@ return array(
 
 	/* ── 히어로 · 인증 배지 ────────────────────────── */
 	'1990년대부터 임플란트를 식립해온 병원' => 'Placing implants since the 1990s',
-	'국가지정 구강검진 치과'   => 'Government-Designated Oral Screening Clinic',
+	'국가지정 구강검진 병원'   => 'Government-Designated Oral Screening Hospital',
 	'외국인환자 유치 의료기관' => 'Registered for International Patient Care',
 	'미군 및 가족 치료기관'    => 'Care Provider for U.S. Forces and Families',
 	'천안시 치아사랑사업 협력병원' => 'Cheonan City Dental Care Program Partner',

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.44.221' );
+define( 'MOONDENTAL_VERSION', '3.44.222' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -142,6 +142,17 @@ add_action( 'init', function() {
 		remove_theme_mod( 'md_content_mission_certs' );
 	}
 	update_option( 'moondental_1990s_v34189', 'done' );
+} );
+
+/* v3.44.222 · mission_certs · '국가지정 구강검진 치과' → '국가지정 구강검진 병원' 치환 */
+add_action( 'init', function() {
+	if ( get_option( 'moondental_certs_v34222' ) === 'done' ) return;
+	$_certs = (string) get_theme_mod( 'md_content_mission_certs', '' );
+	if ( $_certs && strpos( $_certs, '국가지정 구강검진 치과' ) !== false ) {
+		$_new = str_replace( '국가지정 구강검진 치과', '국가지정 구강검진 병원', $_certs );
+		set_theme_mod( 'md_content_mission_certs', $_new );
+	}
+	update_option( 'moondental_certs_v34222', 'done' );
 } );
 
 /* v3.42.4 · 충치·레진 탭 강제 sync 마이그레이션 (init 훅 · 프론트에서도 실행)

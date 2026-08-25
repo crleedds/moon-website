@@ -13,8 +13,8 @@ $mission_text    = function_exists( 'md_content' ) ? md_content( 'mission_band_t
 
 // v3.30.0 · 협력·지정 의료기관 · Customizer 텍스트영역 (한 줄에 하나 "이모지|라벨")
 $certs_raw = function_exists( 'md_content' )
-	? md_content( 'mission_certs', "🏥|국가지정 구강검진 치과\n🌐|외국인환자 유치 의료기관\n🪖|미군 및 가족 치료기관\n🦷|천안시 치아사랑사업 협력병원\n🔗|삼성서울병원 협력병원\n➕|대한적십자사 협력병원" )
-	: "🏥|국가지정 구강검진 치과\n🌐|외국인환자 유치 의료기관\n🪖|미군 및 가족 치료기관\n🦷|천안시 치아사랑사업 협력병원\n🔗|삼성서울병원 협력병원\n➕|대한적십자사 협력병원";
+	? md_content( 'mission_certs', "🏥|국가지정 구강검진 병원\n🌐|외국인환자 유치 의료기관\n🪖|미군 및 가족 치료기관\n🦷|천안시 치아사랑사업 협력병원\n🔗|삼성서울병원 협력병원\n➕|대한적십자사 협력병원" )
+	: "🏥|국가지정 구강검진 병원\n🌐|외국인환자 유치 의료기관\n🪖|미군 및 가족 치료기관\n🦷|천안시 치아사랑사업 협력병원\n🔗|삼성서울병원 협력병원\n➕|대한적십자사 협력병원";
 $certifications = array();
 foreach ( preg_split( "/\r\n|\r|\n/", (string) $certs_raw ) as $line ) {
 	$line = trim( $line );

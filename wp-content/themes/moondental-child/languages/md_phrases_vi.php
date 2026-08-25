@@ -117,7 +117,7 @@ return array(
 
 	/* ── 히어로 · 인증 배지 ── */
 	'1990년대부터 임플란트를 식립해온 병원' => 'Bệnh viện cấy ghép Implant từ thập niên 1990',
-	'국가지정 구강검진 치과'   => 'Cơ sở khám răng miệng do nhà nước chỉ định',
+	'국가지정 구강검진 병원'   => 'Cơ sở khám răng miệng do nhà nước chỉ định',
 	'외국인환자 유치 의료기관' => 'Cơ sở y tế được phép tiếp nhận bệnh nhân nước ngoài',
 	'미군 및 가족 치료기관'    => 'Cơ sở điều trị cho quân nhân Hoa Kỳ và gia đình',
 	'천안시 치아사랑사업 협력병원' => 'Bệnh viện hợp tác chương trình chăm sóc răng TP Cheonan',
