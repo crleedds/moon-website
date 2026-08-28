@@ -4822,13 +4822,11 @@ html.is-mobile-menu:has(.md-header__nav.is-open) { overflow: hidden; }
   border-bottom: 1px dashed rgba(255, 255, 255, 0.08) !important;
 }
 .md-footer__park-list li:last-child { border-bottom: none !important; }
-/* v3.44.225 · 주차 공통 안내 각주.
+/* v3.44.227 · 주차 공통 안내.
    '무료'가 이 섹션의 핵심 정보인데 흐린 회색 한 줄이라 거의 읽히지 않았다.
    진료시간 컬럼의 hours-note 와 같은 톤 박스로 맞춰 대비를 올린다.
-   별표는 ::before 로 빼서 두 줄로 접힐 때 본문이 세로로 정렬되게 한다. */
+   박스 자체가 안내문임을 드러내므로 별표는 두지 않는다. */
 .md-footer__park-note {
-  display: flex;
-  gap: 7px;
   margin: 14px 4px 0;
   padding: 12px 14px;
   background: rgba(216, 128, 98, 0.08);
@@ -4836,12 +4834,6 @@ html.is-mobile-menu:has(.md-header__nav.is-open) { overflow: hidden; }
   font-size: 0.8125rem;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.78);
-}
-.md-footer__park-note::before {
-  content: "*";
-  flex: 0 0 auto;
-  color: var(--color-primary-light);
-  font-weight: 700;
 }
 /* 대중교통 안내 · 상단 여백 확대 */
 .md-footer__park-transit {
