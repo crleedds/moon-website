@@ -240,18 +240,20 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			$park_1_url = $mc( 'footer_park_1_url', $info['naver_map_url'] ?? 'https://map.naver.com/p/entry/place/12772165' );
 			$park_2_url = $mc( 'footer_park_2_url', 'https://map.naver.com/p/search/%EC%8B%A0%EB%B6%80%EC%A0%9C5%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5' );
 
-			/* v3.44.224 · SUV 가능 여부를 제목에 명시 · 공통 안내(데스크 접수 → 무료 등록)는
-			 * 항목마다 반복하지 않고 리스트 하단 각주 한 줄로 모은다. */
+			/* v3.44.224 · SUV 가능 여부를 제목에 명시 · 공통 안내(접수처 무료 등록)는
+			 * 항목마다 반복하지 않고 리스트 하단 안내문 한 줄로 모은다.
+			 * v3.44.229 · 두 항목 모두 주소를 넣어 높이를 맞추고, 02 는 도보 시간까지 적어
+			 * '얼마나 먼가' 라는 첫 질문에 바로 답한다. */
 			$park_1_title = $mc( 'footer_park_1_title', '병원 지하 기계식 주차장 (SUV 불가)' );
-			$park_1_desc  = $mc( 'footer_park_1_desc',  '' );
+			$park_1_desc  = $mc( 'footer_park_1_desc',  '천안시 동남구 만남로 52 문타워' );
 			$park_2_title = $mc( 'footer_park_2_title', '신부 제5공영주차장 (SUV 가능)' );
-			$park_2_desc  = $mc( 'footer_park_2_desc',  '천안시 동남구 먹거리1길 10' );
-			$park_note    = $mc( 'footer_park_note',    '주차 후 데스크에 접수해주시면 무료 등록 도와드리겠습니다' );
+			$park_2_desc  = $mc( 'footer_park_2_desc',  '천안시 동남구 먹거리1길 10 (도보 5분)' );
+			$park_note    = $mc( 'footer_park_note',    '🎫 주차 후 병원 접수처에서 무료 등록 도와드리겠습니다' );
 			?>
 			<div class="md-footer__col md-footer__col--parking">
 				<h4>
 					<span class="md-footer__park-badge">P</span>
-					<?php echo esc_html( $mc( 'footer_park_title', '무료주차안내' ) ); ?>
+					<?php echo esc_html( $mc( 'footer_park_title', '무료 주차 안내' ) ); ?>
 				</h4>
 				<ul class="md-footer__park-list">
 					<li>

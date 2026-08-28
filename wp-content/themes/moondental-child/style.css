@@ -4822,6 +4822,28 @@ html.is-mobile-menu:has(.md-header__nav.is-open) { overflow: hidden; }
   border-bottom: 1px dashed rgba(255, 255, 255, 0.08) !important;
 }
 .md-footer__park-list li:last-child { border-bottom: none !important; }
+
+/* v3.44.229 · 주차 항목이 네이버 지도로 가는 링크라는 단서.
+   기존에는 hover 시 배경색만 변해, 마우스를 올리기 전이나 모바일에서는
+   누를 수 있다는 것 자체가 드러나지 않았다.
+   안쪽 div 가 flex:1 이라 ::after 는 자연히 오른쪽 끝에 놓인다.
+   aria-label 이 이미 '네이버 지도에서 위치 보기' 를 읽어주므로 순수 장식. */
+.md-footer__park-item::after {
+  content: "\203A";
+  flex: 0 0 auto;
+  align-self: center;
+  margin-left: 4px;
+  font-size: 1.375rem;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.32);
+  transition: color 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.md-footer__park-item:hover::after,
+.md-footer__park-item:focus-visible::after {
+  color: var(--color-primary-light);
+  transform: translateX(3px);
+}
+
 /* v3.44.227 · 주차 공통 안내.
    '무료'가 이 섹션의 핵심 정보인데 흐린 회색 한 줄이라 거의 읽히지 않았다.
    진료시간 컬럼의 hours-note 와 같은 톤 박스로 맞춰 대비를 올린다.

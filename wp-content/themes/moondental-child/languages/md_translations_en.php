@@ -393,10 +393,10 @@ return array(
 	/* === Footer parking (v3.44.13) === */
 	'footer_park_title'  => 'Free Parking',
 	'footer_park_1_title'=> 'Hospital basement mechanical parking (No SUVs)',
-	'footer_park_1_desc' => '',
+	'footer_park_1_desc' => '52 Mannam-ro, Dongnam-gu, Cheonan (Moon Tower)',
 	'footer_park_2_title'=> 'Sinbu 5th Public Parking (SUVs OK)',
-	'footer_park_2_desc' => '10 Meokgeori 1-gil, Dongnam-gu, Cheonan',
-	'footer_park_note'   => 'Register at the front desk after parking and we will validate it free of charge',
+	'footer_park_2_desc' => '10 Meokgeori 1-gil, Dongnam-gu, Cheonan (5 min walk)',
+	'footer_park_note'   => '🎫 Park first — our front desk will validate it free of charge',
 	'footer_park_walk'   => '🚌 5 min walk from Cheonan Bus Terminal',
 	'footer_park_train'  => '🚆 10 min by bus from Cheonan Station',
 
