@@ -397,6 +397,7 @@ return array(
 	'footer_park_2_title'=> 'Sinbu 5th Public Parking (SUVs OK)',
 	'footer_park_2_desc' => '10 Meokgeori 1-gil, Dongnam-gu, Cheonan (5 min walk)',
 	'footer_park_note'   => '🎫 Park first — our front desk will validate it free of charge',
+	'footer_park_map_hint' => 'Tap to view on Naver Map',
 	'footer_park_walk'   => '🚌 5 min walk from Cheonan Bus Terminal',
 	'footer_park_train'  => '🚆 10 min by bus from Cheonan Station',
 

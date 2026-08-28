@@ -318,6 +318,7 @@ return array(
 	'footer_park_2_title'=> 'Bãi đậu xe công cộng Sinbu số 5 (nhận SUV)',
 	'footer_park_2_desc' => '10 Meokgeori 1-gil, Dongnam-gu, Cheonan (đi bộ 5 phút)',
 	'footer_park_note'   => '🎫 Sau khi đậu xe, quầy lễ tân sẽ đăng ký miễn phí cho quý khách',
+	'footer_park_map_hint' => 'Nhấn để xem vị trí trên Naver Map',
 	'footer_park_walk'   => '🚌 5 phút đi bộ từ Bến xe Cheonan',
 	'footer_park_train'  => '🚆 10 phút xe buýt từ Ga Cheonan',
 	'footer_hours_naver_note' => '🔔 Giờ ngày lễ và thay đổi lịch — vui lòng xác nhận trên Naver Place',

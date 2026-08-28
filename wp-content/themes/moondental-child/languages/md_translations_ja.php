@@ -217,6 +217,7 @@ return array(
 	'footer_park_2_title'=> '新富第5公営駐車場（SUV可）',
 	'footer_park_2_desc' => '天安市東南区 モッコリ1キル10（徒歩5分）',
 	'footer_park_note'   => '🎫 駐車後、受付にて無料登録をお手伝いいたします',
+	'footer_park_map_hint' => 'タップしてNAVERマップで位置を見る',
 	'footer_park_walk'   => '🚌 天安総合・高速バスターミナルから徒歩約5分',
 	'footer_park_train'  => '🚆 天安駅からバスで約10分',
 	'footer_hours_naver_note' => '🔔 祝日診療・臨時休診などの変更事項はネイバープレイスでご確認ください',

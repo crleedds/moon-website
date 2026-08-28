@@ -249,6 +249,9 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			$park_2_title = $mc( 'footer_park_2_title', '신부 제5공영주차장 (SUV 가능)' );
 			$park_2_desc  = $mc( 'footer_park_2_desc',  '천안시 동남구 먹거리1길 10 (도보 5분)' );
 			$park_note    = $mc( 'footer_park_note',    '🎫 주차 후 병원 접수처에서 무료 등록 도와드리겠습니다' );
+			/* v3.44.230 · 📍 핀만으로 부족할 때를 대비한 툴팁. title 은 마우스를 올리면
+			 * 보이고, aria-label 은 스크린리더가 읽는다. 문구는 한 곳에서 관리한다. */
+			$park_map_hint = $mc( 'footer_park_map_hint', '눌러서 네이버 지도로 위치 보기' );
 			?>
 			<div class="md-footer__col md-footer__col--parking">
 				<h4>
@@ -259,7 +262,8 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 					<li>
 						<a class="md-footer__park-item" href="<?php echo esc_url( $park_1_url ); ?>" target="_blank" rel="noopener"
 						   data-track="cta-footer-park1"
-						   aria-label="<?php echo esc_attr( $park_1_title . ' — 네이버 지도에서 위치 보기' ); ?>">
+						   title="<?php echo esc_attr( $park_map_hint ); ?>"
+						   aria-label="<?php echo esc_attr( $park_1_title . ' — ' . $park_map_hint ); ?>">
 							<span class="md-footer__park-num">01</span>
 							<div>
 								<strong><?php echo esc_html( $park_1_title ); ?></strong>
@@ -270,7 +274,8 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 					<li>
 						<a class="md-footer__park-item" href="<?php echo esc_url( $park_2_url ); ?>" target="_blank" rel="noopener"
 						   data-track="cta-footer-park2"
-						   aria-label="<?php echo esc_attr( $park_2_title . ' — 네이버 지도에서 위치 보기' ); ?>">
+						   title="<?php echo esc_attr( $park_map_hint ); ?>"
+						   aria-label="<?php echo esc_attr( $park_2_title . ' — ' . $park_map_hint ); ?>">
 							<span class="md-footer__park-num">02</span>
 							<div>
 								<strong><?php echo esc_html( $park_2_title ); ?></strong>

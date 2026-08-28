@@ -314,6 +314,7 @@ return array(
 	'footer_park_2_title'=> 'Sinbu 5-р нийтийн зогсоол (SUV боломжтой)',
 	'footer_park_2_desc' => 'Meokgeori 1-gil 10, Dongnam-gu, Cheonan (5 мин алхам)',
 	'footer_park_note'   => '🎫 Зогсоосны дараа хүлээн авах хэсэгт үнэгүй бүртгүүлнэ',
+	'footer_park_map_hint' => 'Naver Map дээр байршлыг харах',
 	'footer_park_walk'   => '🚌 Cheonan автобусны буудлаас 5 мин алхаж',
 	'footer_park_train'  => '🚆 Cheonan станцаас автобусаар 10 мин',
 	'footer_hours_naver_note' => '🔔 Баярын өдрүүд ба өөрчлөлтийг Naver Place-с шалгаарай',

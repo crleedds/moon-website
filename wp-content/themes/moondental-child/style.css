@@ -4823,25 +4823,27 @@ html.is-mobile-menu:has(.md-header__nav.is-open) { overflow: hidden; }
 }
 .md-footer__park-list li:last-child { border-bottom: none !important; }
 
-/* v3.44.229 · 주차 항목이 네이버 지도로 가는 링크라는 단서.
+/* v3.44.230 · 주차 항목이 '눌러서 지도를 보는' 링크라는 단서.
    기존에는 hover 시 배경색만 변해, 마우스를 올리기 전이나 모바일에서는
    누를 수 있다는 것 자체가 드러나지 않았다.
-   안쪽 div 가 flex:1 이라 ::after 는 자연히 오른쪽 끝에 놓인다.
-   aria-label 이 이미 '네이버 지도에서 위치 보기' 를 읽어주므로 순수 장식. */
+   v3.44.229 의 › 는 '이동한다'만 말할 뿐 '지도'라는 목적지를 못 알려줘
+   핀으로 바꾼다. 안쪽 div 가 flex:1 이라 ::after 는 오른쪽 끝에 놓인다.
+   컬러 이모지라 color 가 먹지 않으므로 hover 는 투명도·크기로 준다.
+   aria-label·title 이 이미 목적지를 알려주므로 순수 장식. */
 .md-footer__park-item::after {
-  content: "\203A";
+  content: "📍";
   flex: 0 0 auto;
   align-self: center;
-  margin-left: 4px;
-  font-size: 1.375rem;
+  margin-left: 6px;
+  font-size: 1.0625rem;
   line-height: 1;
-  color: rgba(255, 255, 255, 0.32);
-  transition: color 0.2s var(--ease), transform 0.2s var(--ease);
+  opacity: 0.5;
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
 }
 .md-footer__park-item:hover::after,
 .md-footer__park-item:focus-visible::after {
-  color: var(--color-primary-light);
-  transform: translateX(3px);
+  opacity: 1;
+  transform: scale(1.18);
 }
 
 /* v3.44.227 · 주차 공통 안내.

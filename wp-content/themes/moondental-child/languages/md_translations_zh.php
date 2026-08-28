@@ -318,6 +318,7 @@ return array(
 	'footer_park_2_title'=> '新富第5公营停车场（SUV 可）',
 	'footer_park_2_desc' => '天安市东南区 食街1街10号（步行5分钟）',
 	'footer_park_note'   => '🎫 停车后请至医院前台，我们将为您免费登记',
+	'footer_park_map_hint' => '点击在 NAVER 地图查看位置',
 	'footer_park_walk'   => '🚌 从天安综合·高速巴士客运站步行约5分钟',
 	'footer_park_train'  => '🚆 从天安站乘公交约10分钟',
 	'footer_hours_naver_note' => '🔔 节假日诊疗和休诊等变动信息请在Naver最终确认',
