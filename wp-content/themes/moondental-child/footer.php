@@ -278,7 +278,8 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 					</li>
 				</ul>
 				<?php if ( $park_note ) : ?>
-					<p class="md-footer__park-note">* <?php echo esc_html( $park_note ); ?></p>
+					<?php /* 별표는 CSS ::before · 줄바꿈 시 본문 세로 정렬을 위해 */ ?>
+					<p class="md-footer__park-note"><span><?php echo esc_html( $park_note ); ?></span></p>
 				<?php endif; ?>
 				<?php
 				/* v3.44.18 · 대중교통 안내 · 주차 리스트 하단 */
