@@ -391,11 +391,12 @@ return array(
 	'loc_day_sun'             => 'Sunday',
 
 	/* === Footer parking (v3.44.13) === */
-	'footer_park_title'  => 'Parking',
-	'footer_park_1_title'=> 'Onsite basement mechanical parking',
-	'footer_park_1_desc' => 'Park then register free at the front desk',
-	'footer_park_2_title'=> 'SUV / Large cars — Sinbu 5th Public Parking (Meokgeori 1-gil 10)',
-	'footer_park_2_desc' => 'Park at nearby Sinbu 5th Public Parking then register free at the front desk',
+	'footer_park_title'  => 'Free Parking',
+	'footer_park_1_title'=> 'Hospital basement mechanical parking (No SUVs)',
+	'footer_park_1_desc' => '',
+	'footer_park_2_title'=> 'Sinbu 5th Public Parking (SUVs OK)',
+	'footer_park_2_desc' => '10 Meokgeori 1-gil, Dongnam-gu, Cheonan',
+	'footer_park_note'   => 'Register at the front desk after parking and we will validate it free of charge',
 	'footer_park_walk'   => '🚌 5 min walk from Cheonan Bus Terminal',
 	'footer_park_train'  => '🚆 10 min by bus from Cheonan Station',
 

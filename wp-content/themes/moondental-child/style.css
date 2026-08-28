@@ -4822,6 +4822,14 @@ html.is-mobile-menu:has(.md-header__nav.is-open) { overflow: hidden; }
   border-bottom: 1px dashed rgba(255, 255, 255, 0.08) !important;
 }
 .md-footer__park-list li:last-child { border-bottom: none !important; }
+/* v3.44.224 · 주차 공통 안내 각주 · 리스트와 대중교통 사이.
+   대중교통이 이미 점선 구분선을 갖고 있어 여기서는 여백만 준다. */
+.md-footer__park-note {
+  margin: 10px 4px 0;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.62);
+}
 /* 대중교통 안내 · 상단 여백 확대 */
 .md-footer__park-transit {
   margin: 16px 0 0 !important;

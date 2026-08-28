@@ -240,17 +240,18 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			$park_1_url = $mc( 'footer_park_1_url', $info['naver_map_url'] ?? 'https://map.naver.com/p/entry/place/12772165' );
 			$park_2_url = $mc( 'footer_park_2_url', 'https://map.naver.com/p/search/%EC%8B%A0%EB%B6%80%EC%A0%9C5%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5' );
 
-			$park_1_title = $mc( 'footer_park_1_title', '본원 지하 기계식 주차장' );
-			$park_1_desc  = $mc( 'footer_park_1_desc',  '주차 후 데스크에 접수 → 무료 등록' );
-			/* v3.44.201 · 제목이 3줄로 접혀 카드가 불필요하게 길어졌다.
-			 * 주소는 설명줄로 옮겨 제목을 2줄 이내로 줄인다 (정보 손실 없음). */
-			$park_2_title = $mc( 'footer_park_2_title', 'SUV·대형차 — 신부 제5공영주차장' );
-			$park_2_desc  = $mc( 'footer_park_2_desc',  '동남구 먹거리1길 10 · 주차 후 데스크에 접수 → 무료 등록' );
+			/* v3.44.224 · SUV 가능 여부를 제목에 명시 · 공통 안내(데스크 접수 → 무료 등록)는
+			 * 항목마다 반복하지 않고 리스트 하단 각주 한 줄로 모은다. */
+			$park_1_title = $mc( 'footer_park_1_title', '병원 지하 기계식 주차장 (SUV 불가)' );
+			$park_1_desc  = $mc( 'footer_park_1_desc',  '' );
+			$park_2_title = $mc( 'footer_park_2_title', '신부 제5공영주차장 (SUV 가능)' );
+			$park_2_desc  = $mc( 'footer_park_2_desc',  '천안시 동남구 먹거리1길 10' );
+			$park_note    = $mc( 'footer_park_note',    '주차 후 데스크에 접수해주시면 무료 등록 도와드리겠습니다' );
 			?>
 			<div class="md-footer__col md-footer__col--parking">
 				<h4>
 					<span class="md-footer__park-badge">P</span>
-					<?php echo esc_html( $mc( 'footer_park_title', '주차 안내' ) ); ?>
+					<?php echo esc_html( $mc( 'footer_park_title', '무료주차안내' ) ); ?>
 				</h4>
 				<ul class="md-footer__park-list">
 					<li>
@@ -260,7 +261,7 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 							<span class="md-footer__park-num">01</span>
 							<div>
 								<strong><?php echo esc_html( $park_1_title ); ?></strong>
-								<span><?php echo esc_html( $park_1_desc ); ?></span>
+								<?php if ( $park_1_desc ) : ?><span><?php echo esc_html( $park_1_desc ); ?></span><?php endif; ?>
 							</div>
 						</a>
 					</li>
@@ -271,11 +272,14 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 							<span class="md-footer__park-num">02</span>
 							<div>
 								<strong><?php echo esc_html( $park_2_title ); ?></strong>
-								<span><?php echo esc_html( $park_2_desc ); ?></span>
+								<?php if ( $park_2_desc ) : ?><span><?php echo esc_html( $park_2_desc ); ?></span><?php endif; ?>
 							</div>
 						</a>
 					</li>
 				</ul>
+				<?php if ( $park_note ) : ?>
+					<p class="md-footer__park-note">* <?php echo esc_html( $park_note ); ?></p>
+				<?php endif; ?>
 				<?php
 				/* v3.44.18 · 대중교통 안내 · 주차 리스트 하단 */
 				/* v3.44.117 · 3줄로 분리 (터미널·천안역·천안아산역) + 네이버 지도 자동 링크 */
