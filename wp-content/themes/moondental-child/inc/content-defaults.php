@@ -1839,8 +1839,8 @@ function moondental_default_location_content() {
 
 <h3>🅿️ 주차</h3>
 <ul>
-<li><strong>본원 지하 기계식 주차장</strong>을 무료로 이용하실 수 있습니다.</li>
-<li>기계식 주차가 어려운 <strong>SUV 차량</strong>은 인근 <strong><a href="' . esc_url( 'https://map.naver.com/p/search/' . rawurlencode( '신부 제5공영주차장' ) ) . '" target="_blank" rel="noopener" class="md-addr-link" data-track="cta-park-5gongyoung-content">신부 제5공영주차장</a></strong>(<a href="' . esc_url( 'https://map.naver.com/p/search/' . rawurlencode( '신부 제5공영주차장' ) ) . '" target="_blank" rel="noopener" class="md-addr-link" data-track="cta-park-5gongyoung-addr">동남구 먹거리1길 10</a>)에 주차하고 방문해주시면 무료 주차 등록을 도와드리겠습니다.</li>
+<li><strong>병원 지하 기계식 주차장</strong>(천안시 동남구 만남로 52 문타워)을 무료로 이용하실 수 있습니다. 기계식이라 SUV·대형차는 이용이 어렵습니다.</li>
+<li>기계식 주차가 어려운 <strong>SUV 차량</strong>은 인근 <strong><a href="' . esc_url( 'https://map.naver.com/p/search/' . rawurlencode( '신부 제5공영주차장' ) ) . '" target="_blank" rel="noopener" class="md-addr-link" data-track="cta-park-5gongyoung-content">신부 제5공영주차장</a></strong>(<a href="' . esc_url( 'https://map.naver.com/p/search/' . rawurlencode( '신부 제5공영주차장' ) ) . '" target="_blank" rel="noopener" class="md-addr-link" data-track="cta-park-5gongyoung-addr">천안시 동남구 먹거리1길 10</a>, 도보 5분)에 주차해주세요. 주차 후 병원 접수처에서 무료 등록 도와드리겠습니다.</li>
 </ul>
 
 <h3>🚌 대중교통</h3>

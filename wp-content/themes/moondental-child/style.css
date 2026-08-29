@@ -6223,6 +6223,16 @@ a.md-team-card:hover .md-team-card__more {
   line-height: 1.65;
   word-break: keep-all;
 }
+/* v3.44.232 · 주차 카드 하단 공통 안내.
+   푸터의 md-footer__park-note 와 같은 역할이라 톤 박스로 맞춘다.
+   아래 md-park__walk 가 이미 박스라 배경을 더 옅게 두어 위계를 나눈다. */
+.md-park__lead--note {
+  margin: 0 0 clamp(16px, 2vw, 22px);
+  padding: 12px 16px;
+  background: var(--color-accent-light);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+}
 
 .md-park__list {
   list-style: none;

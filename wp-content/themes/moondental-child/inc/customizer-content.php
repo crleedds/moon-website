@@ -496,7 +496,7 @@ function moondental_home_content_fields() {
 				'faq_1_a' => array( 'default' => '네, 가능합니다. 다만 예약 상황에 따라 대기 시간이 발생할 수 있으니 가급적 전화 또는 카카오톡으로 먼저 확인 후 방문해주시기 바랍니다.', 'label' => '①번 — 답변', 'type' => 'textarea' ),
 
 				'faq_2_q' => array( 'default' => '주차는 어떻게 하나요?', 'label' => '②번 — 질문', 'type' => 'text' ),
-				'faq_2_a' => array( 'default' => '본원 지하 기계식 주차장을 무료로 이용하실 수 있습니다. 기계식이 어려운 SUV는 인근 신부 제5공영주차장(동남구 먹거리1길 10)에 주차 후 방문해주시면 무료 주차 등록을 도와드립니다.', 'label' => '②번 — 답변', 'type' => 'textarea' ),
+				'faq_2_a' => array( 'default' => '병원 지하 기계식 주차장(천안시 동남구 만남로 52 문타워)을 무료로 이용하실 수 있습니다. 기계식이라 SUV·대형차는 인근 신부 제5공영주차장(천안시 동남구 먹거리1길 10, 도보 5분)에 주차해주세요. 주차 후 병원 접수처에서 무료 등록 도와드리겠습니다.', 'label' => '②번 — 답변', 'type' => 'textarea' ),
 
 				'faq_3_q' => array( 'default' => '전신질환(고혈압·당뇨·심장)이 있어도 진료 가능한가요?', 'label' => '③번 — 질문', 'type' => 'text' ),
 				'faq_3_a' => array( 'default' => '안심하셔도 됩니다. 혈압기·당검사·심전도·산소포화도 측정 장비를 상시 보유하고 있으며, 복용 중인 약물(혈전용해제·골다공증 약 등)을 사전에 체크해 안전하게 진료합니다.', 'label' => '③번 — 답변', 'type' => 'textarea' ),
@@ -753,7 +753,7 @@ function moondental_home_content_fields() {
 				'seo_doctors_kw'    => array( 'default' => '천안·아산 치과 의사, 아산 치과 의사, 천안·아산 치과 의료진, 아산 치과 의료진, 천안·아산 임플란트 진료팀, 아산 임플란트 진료팀, 천안·아산 교정과, 아산 교정과, 문치과병원 원장', 'label' => '의료진 · 키워드', 'type' => 'textarea' ),
 				// 오시는 길
 				'seo_location_title' => array( 'default' => '천안 만남로 치과 — 오시는 길 · 주차 · 진료시간', 'label' => '오시는 길 · 제목', 'type' => 'text' ),
-				'seo_location_desc'  => array( 'default' => '천안 동남구 만남로 52 문타워 9·10·11·13층. 천안시외·고속버스터미널 도보 5분, 천안역 버스 10분, 천안아산역 버스 25분. 본원 지하 기계식 주차장 무료.', 'label' => '오시는 길 · 설명', 'type' => 'textarea' ),
+				'seo_location_desc'  => array( 'default' => '천안 동남구 만남로 52 문타워 9·10·11·13층. 천안시외·고속버스터미널 도보 5분, 천안역 버스 10분, 천안아산역 버스 25분. 병원 지하 기계식 주차장 무료.', 'label' => '오시는 길 · 설명', 'type' => 'textarea' ),
 				'seo_location_kw'    => array( 'default' => '천안 만남로 치과, 천안 신부동 치과, 천안 동남구 치과, 천안 버스터미널 치과, 문치과병원 위치', 'label' => '오시는 길 · 키워드', 'type' => 'textarea' ),
 				// 상담예약
 				'seo_reservation_title' => array( 'default' => '천안·아산 치과 예약 — 네이버 예약·카카오톡 상담', 'label' => '상담예약 · 제목', 'type' => 'text' ),
@@ -1273,16 +1273,16 @@ function moondental_subpage_content_fields() {
 		'location_parking' => array(
 			'title'  => '오시는 길 — 주차 안내',
 			'fields' => array(
-				'loc_park_badge'     => array( 'default' => '🅿️ 주차 안내', 'label' => '배지', 'type' => 'text' ),
-				'loc_park_title'     => array( 'default' => '본원 지하 기계식 무료', 'label' => '주차 카드 — 제목 (강조는 자동)', 'type' => 'text' ),
-				'loc_park_lead'      => array( 'default' => '방문 시 데스크에 주차권을 제출하시면 등록해드립니다.', 'label' => '주차 카드 — 설명', 'type' => 'textarea' ),
+				'loc_park_badge'     => array( 'default' => '🅿️ 무료 주차 안내', 'label' => '배지', 'type' => 'text' ),
+				'loc_park_title'     => array( 'default' => '무료 주차 안내', 'label' => '주차 카드 — 제목 (강조는 자동)', 'type' => 'text' ),
+				'loc_park_lead'      => array( 'default' => '🎫 주차 후 병원 접수처에서 무료 등록 도와드리겠습니다', 'label' => '주차 카드 — 설명', 'type' => 'textarea' ),
 
-				'loc_park_1_title' => array( 'default' => '본원 지하 기계식 주차장', 'label' => '①번 항목 — 제목', 'type' => 'text' ),
-				'loc_park_1_desc'  => array( 'default' => '진료 시간 동안 무료 이용', 'label' => '①번 항목 — 설명', 'type' => 'textarea' ),
+				'loc_park_1_title' => array( 'default' => '병원 지하 기계식 주차장 (SUV 불가)', 'label' => '①번 항목 — 제목', 'type' => 'text' ),
+				'loc_park_1_desc'  => array( 'default' => '천안시 동남구 만남로 52 문타워', 'label' => '①번 항목 — 설명', 'type' => 'textarea' ),
 
-				'loc_park_2_title'   => array( 'default' => 'SUV·대형차 — 신부 제5공영주차장', 'label' => '②번 항목 — 제목', 'type' => 'text' ),
-				'loc_park_2_desc'   => array( 'default' => '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록', 'label' => '②번 항목 — 설명', 'type' => 'textarea' ),
-				'loc_park_2_addr'     => array( 'default' => '동남구 먹거리1길 10', 'label' => '②번 항목 — 클릭 가능한 주소 문구 (위 설명 안의 일치 문자열이 자동으로 링크 처리됨)', 'type' => 'text' ),
+				'loc_park_2_title'   => array( 'default' => '신부 제5공영주차장 (SUV 가능)', 'label' => '②번 항목 — 제목', 'type' => 'text' ),
+				'loc_park_2_desc'   => array( 'default' => '천안시 동남구 먹거리1길 10 (도보 5분)', 'label' => '②번 항목 — 설명', 'type' => 'textarea' ),
+				'loc_park_2_addr'     => array( 'default' => '천안시 동남구 먹거리1길 10', 'label' => '②번 항목 — 클릭 가능한 주소 문구 (위 설명 안의 일치 문자열이 자동으로 링크 처리됨)', 'type' => 'text' ),
 				'loc_park_2_addr_url' => array( 'default' => 'https://map.naver.com/p/search/%EC%8B%A0%EB%B6%80%20%EC%A0%9C5%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5', 'label' => '②번 항목 — 주소 클릭 시 이동할 URL (기본: 네이버 지도 검색)', 'type' => 'text' ),
 
 				'loc_park_walk'    => array( 'default' => "🚌 천안시외버스터미널에서 도보 5분\n🚌 천안고속버스터미널에서 도보 5분", 'label' => '하단 안내 ① (터미널 · 한 줄에 하나)', 'type' => 'textarea' ),
@@ -2756,7 +2756,7 @@ function moondental_region_content_fields() {
 				'region_traffic_car_title'  => array( 'default' => '자가용으로 오시는 길', 'label' => '자가용 카드 · 제목', 'type' => 'text' ),
 				'region_traffic_car_body'   => array( 'default' => '<strong>{region}</strong>에서 천안 만남로 문치과병원까지 자동차로 약 <strong>{duration}분</strong>, 거리 약 {distance}km.', 'label' => '자가용 카드 · 본문', 'type' => 'textarea' ),
 				'region_traffic_car_route'  => array( 'default' => '<strong>주요 경로</strong>: {highway} 이용', 'label' => '자가용 카드 · 경로 라인', 'type' => 'text' ),
-				'region_traffic_car_park'   => array( 'default' => '<strong>주차</strong>: 본원 지하 기계식 주차장 무료 / SUV·대형차는 신부 제5공영주차장(동남구 먹거리1길 10) 무료 등록', 'label' => '자가용 카드 · 주차 라인', 'type' => 'textarea' ),
+				'region_traffic_car_park'   => array( 'default' => '<strong>주차</strong>: 병원 지하 기계식 주차장(SUV 불가) 무료 / SUV·대형차는 신부 제5공영주차장(천안시 동남구 먹거리1길 10, 도보 5분) 무료 등록', 'label' => '자가용 카드 · 주차 라인', 'type' => 'textarea' ),
 				'region_traffic_ktx_title'  => array( 'default' => 'KTX·기차로 오시는 길', 'label' => 'KTX 카드 · 제목', 'type' => 'text' ),
 				'region_traffic_ktx_detail' => array( 'default' => '천안역 또는 천안아산역 도착 후 시내버스 또는 택시로 신부동 문타워까지 약 10~15분.', 'label' => 'KTX 카드 · 부가 안내', 'type' => 'textarea' ),
 				'region_traffic_bus_title'  => array( 'default' => '시외버스로 오시는 길', 'label' => '버스 카드 · 제목', 'type' => 'text' ),
@@ -2806,7 +2806,7 @@ function moondental_region_content_fields() {
 				'region_faq_eyebrow' => array( 'default' => '❓ 자주 묻는 질문', 'label' => 'eyebrow', 'type' => 'text' ),
 				'region_faq_title'   => array( 'default' => '{region} 추천 치과 · 자주 묻는 질문', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
 				'region_faq_items'   => array(
-					'default' => "{region}에서 천안·아산 문치과병원까지 얼마나 걸리나요? | 자동차로 약 <strong>{duration}분</strong>, 거리 약 {distance}km입니다. 주요 경로는 {highway} 이용. 시외버스·KTX로도 천안종합터미널 또는 천안역 도착 후 도보 5분 거리입니다.\n{region}에서 갈 만한 임플란트 잘하는 치과인가요? | 네, {region}에서 임플란트 진료받으러 오시는 환자분이 많습니다. 1995년 개원 30여년 임상, CBCT 디지털 가이드 수술, 13층 자체 한아 임플란트 보철연구소에서 보철 직접 제작 — 다른 지역에서 오셔도 한 번 방문으로 진단부터 보철까지 진행할 수 있도록 시스템이 갖춰져 있습니다.\n{region}에서 주차가 가능한가요? | 네, 본원 지하 기계식 주차장을 <strong>무료</strong>로 이용하실 수 있습니다. SUV·대형차는 인근 신부 제5공영주차장(동남구 먹거리1길 10)에 주차하시고 데스크에 접수하시면 무료 등록을 도와드립니다.\n{region}에서 야간이나 주말에도 진료 가능한가요? | 네, 평일(월·화·수·금)은 <strong>9:00~20:30</strong>까지 점심시간 없이 진료합니다. {region}에서 퇴근 후 출발하셔도 충분한 시간입니다. 토요일은 9:00~14:00, 일요일·공휴일은 휴진입니다.\n{region}에서 첫 진료 시 무엇이 필요한가요? | 신분증(또는 건강보험증)을 지참해주세요. 복용 중인 약이 있다면 약 정보, 타원 X-ray 파일(USB·이메일)이 있으면 진단 시간이 단축됩니다. 사전 예약은 네이버 예약, 전화, 카카오톡 채널로 가능합니다.",
+					'default' => "{region}에서 천안·아산 문치과병원까지 얼마나 걸리나요? | 자동차로 약 <strong>{duration}분</strong>, 거리 약 {distance}km입니다. 주요 경로는 {highway} 이용. 시외버스·KTX로도 천안종합터미널 또는 천안역 도착 후 도보 5분 거리입니다.\n{region}에서 갈 만한 임플란트 잘하는 치과인가요? | 네, {region}에서 임플란트 진료받으러 오시는 환자분이 많습니다. 1995년 개원 30여년 임상, CBCT 디지털 가이드 수술, 13층 자체 한아 임플란트 보철연구소에서 보철 직접 제작 — 다른 지역에서 오셔도 한 번 방문으로 진단부터 보철까지 진행할 수 있도록 시스템이 갖춰져 있습니다.\n{region}에서 주차가 가능한가요? | 네, 병원 지하 기계식 주차장(천안시 동남구 만남로 52 문타워)을 <strong>무료</strong>로 이용하실 수 있습니다. 기계식이라 SUV·대형차는 인근 신부 제5공영주차장(천안시 동남구 먹거리1길 10, 도보 5분)에 주차해주세요. 주차 후 병원 접수처에서 무료 등록 도와드리겠습니다.\n{region}에서 야간이나 주말에도 진료 가능한가요? | 네, 평일(월·화·수·금)은 <strong>9:00~20:30</strong>까지 점심시간 없이 진료합니다. {region}에서 퇴근 후 출발하셔도 충분한 시간입니다. 토요일은 9:00~14:00, 일요일·공휴일은 휴진입니다.\n{region}에서 첫 진료 시 무엇이 필요한가요? | 신분증(또는 건강보험증)을 지참해주세요. 복용 중인 약이 있다면 약 정보, 타원 X-ray 파일(USB·이메일)이 있으면 진단 시간이 단축됩니다. 사전 예약은 네이버 예약, 전화, 카카오톡 채널로 가능합니다.",
 					'label' => 'FAQ (한 줄에 1개, 형식: 질문 | 답변) · 토큰 다 사용 가능',
 					'type'  => 'textarea',
 				),

@@ -265,25 +265,34 @@ $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '�
 				};
 				?>
 				<header class="md-park__head">
-					<span class="md-park__badge"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_badge', '🅿️ 주차 안내' ) : '🅿️ 주차 안내' ); ?></span>
-					<?php /* v3.44.4 · '본원 지하 기계식 무료' 타이틀 제거 (사용자 요청) · 배지·01·02 카드 유지 */ ?>
+					<span class="md-park__badge"><?php echo esc_html( function_exists( 'md_content' ) ? md_content( 'loc_park_badge', '🅿️ 무료 주차 안내' ) : '🅿️ 무료 주차 안내' ); ?></span>
+					<?php /* v3.44.4 · '병원 지하 기계식 무료' 타이틀 제거 (사용자 요청) · 배지·01·02 카드 유지 */ ?>
 				</header>
 				<ul class="md-park__list">
 					<li>
 						<span class="md-park__num">01</span>
 						<div>
-							<strong><?php echo wp_kses_post( $mdf( 'loc_park_1_title', '본원 지하 기계식 주차장' ) ); ?></strong>
-							<span><?php echo wp_kses_post( $mdf( 'loc_park_1_desc', '진료 시간 동안 무료 이용' ) ); ?></span>
+							<strong><?php echo wp_kses_post( $mdf( 'loc_park_1_title', '병원 지하 기계식 주차장 (SUV 불가)' ) ); ?></strong>
+							<span><?php echo wp_kses_post( $mdf( 'loc_park_1_desc', '천안시 동남구 만남로 52 문타워' ) ); ?></span>
 						</div>
 					</li>
 					<li>
 						<span class="md-park__num">02</span>
 						<div>
-							<strong><?php echo wp_kses_post( $mdf( 'loc_park_2_title', 'SUV·대형차 — 신부 제5공영주차장' ) ); ?></strong>
-							<span><?php echo wp_kses_post( $mdf( 'loc_park_2_desc', '인근 신부 제5공영주차장(동남구 먹거리1길 10) 주차 후 데스크에 접수 → 무료 등록' ) ); ?></span>
+							<strong><?php echo wp_kses_post( $mdf( 'loc_park_2_title', '신부 제5공영주차장 (SUV 가능)' ) ); ?></strong>
+							<span><?php echo wp_kses_post( $mdf( 'loc_park_2_desc', '천안시 동남구 먹거리1길 10 (도보 5분)' ) ); ?></span>
 						</div>
 					</li>
 				</ul>
+				<?php
+				/* v3.44.232 · 푸터와 같은 안내문을 이 카드에도 노출.
+				 * loc_park_lead 는 Customizer 에 정의만 되어 있고 어디서도 출력되지 않았다. */
+				$park_lead = function_exists( 'md_content' )
+					? md_content( 'loc_park_lead', '🎫 주차 후 병원 접수처에서 무료 등록 도와드리겠습니다' )
+					: '🎫 주차 후 병원 접수처에서 무료 등록 도와드리겠습니다';
+				if ( $park_lead ) : ?>
+					<p class="md-park__lead md-park__lead--note"><?php echo esc_html( $park_lead ); ?></p>
+				<?php endif; ?>
 				<?php if ( $park_walk || $park_train || $park_ktx ) : ?>
 				<p class="md-park__walk">
 					<?php
