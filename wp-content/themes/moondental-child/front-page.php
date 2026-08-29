@@ -22,9 +22,13 @@ get_header();
 		<?php get_template_part( 'template-parts/section', 'history-rail' ); ?>
 		<?php /* v3.44.161 · 30여년 발자취 아래에 소식·치아이야기 세로 리스트 */ ?>
 		<?php get_template_part( 'template-parts/section', 'news-rail' ); ?>
-		<?php /* v3.44.166 · 소식 아래 층별 안내 */ ?>
-		<?php get_template_part( 'template-parts/section', 'floor-rail' ); ?>
-		<?php /* v3.44.182 · 층별안내 아래 · 종합안내서 3개 별도 섹션 (임플란트센터·교정센터·스마일디자인센터) */ ?>
+		<?php /* v3.44.233 · 홈 사이드바의 층별 안내 제거 (v3.44.166 에 추가했던 것).
+		 * 같은 내용이 푸터에 전 페이지 공통으로 있고 오시는 길·상담예약 페이지에도
+		 * 카드로 들어가 있어, 홈에서는 사이드바만 길어졌다.
+		 * template-parts/section-floor-rail.php 파일은 그대로 두었다.
+		 * 되살리려면 이 자리에 floor-rail 을 부르는 get_template_part 한 줄을
+		 * 다시 넣으면 된다 (바로 아래 guide-rail 호출과 같은 형태). */ ?>
+		<?php /* v3.44.182 · 종합안내서 3개 별도 섹션 (임플란트센터·교정센터·스마일디자인센터) */ ?>
 		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'implant'   ) ); ?>
 		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'suresmile' ) ); ?>
 		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'laminate'  ) ); ?>
