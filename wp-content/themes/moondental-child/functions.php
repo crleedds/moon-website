@@ -4113,16 +4113,14 @@ function moondental_doctor_name_to_slug( $name ) {
  */
 function moondental_get_doctor_by_slug( $slug ) {
 	$slug = urldecode( $slug );
-	$groups = function_exists( 'moondental_get_team_with_customizer' )
+	$doctors = function_exists( 'moondental_get_team_with_customizer' )
 		? moondental_get_team_with_customizer()
 		: moondental_get_team();
-	foreach ( $groups as $group ) {
-		foreach ( $group['members'] as $m ) {
-			// 직접 이름 매치 (한글 fallback)
-			if ( $m['name'] === $slug ) return $m;
-			// ASCII 슬러그 매치
-			if ( moondental_doctor_name_to_slug( $m['name'] ) === $slug ) return $m;
-		}
+	foreach ( $doctors as $m ) {
+		// 직접 이름 매치 (한글 fallback)
+		if ( $m['name'] === $slug ) return $m;
+		// ASCII 슬러그 매치
+		if ( moondental_doctor_name_to_slug( $m['name'] ) === $slug ) return $m;
 	}
 	return null;
 }
@@ -4682,7 +4680,7 @@ function moondental_service_visual( $slug ) {
 			'stats' => array(
 				array( 'value' => '설측·일반', 'unit' => '', 'label' => '브라켓 옵션' ),
 				array( 'value' => '±0.1', 'unit' => 'mm', 'label' => '치아 이동 정밀도' ),
-				array( 'value' => '진료팀', 'unit' => '', 'label' => '치과교정과 인정의' ),
+				array( 'value' => '진료팀', 'unit' => '', 'label' => '대한치과교정학회 정회원' ),
 			),
 			'headline' => '브라켓 치아교정 · 검증된 표준 방식으로 정확한 결과를',
 			'sub'      => '설측교정(안쪽 브라켓)·메탈·세라믹·자가결찰 브라켓·소아 성장기 교정까지 케이스에 맞게 선택',
@@ -5011,7 +5009,9 @@ function moondental_service_slug_to_area( $slug ) {
 /**
  * 의료진 데이터. 추후 Custom Post Type "doctor"로 이관 가능.
  *
- * @return array[] role 그룹별 [ 'group' => label, 'members' => [name, …] ]
+ * v3.45 · 진료센터 그룹 구분 제거 — 의료진 단일 리스트로 반환.
+ *
+ * @return array[] 의료진 목록 [ name, role, photo, photo_zoom, photo_ty, philosophy, bio ]
  */
 function moondental_get_team() {
 	/*
@@ -5022,204 +5022,180 @@ function moondental_get_team() {
 	 * philosophy 는 진료 철학 한 문장 (선택).
 	 */
 	return array(
-		/* ─── 대표 병원장 ─── */
 		array(
-			'group'   => '대표 병원장',
-			'members' => array(
-				array(
-					'name'       => '문은수',
-					'role'       => '대표 병원장',
-					'photo'      => 'doctor-04.png',
-					'photo_zoom' => 1.00,
-					'photo_ty'   => 0,
-					'philosophy' => '환자를 가족처럼 생각하는 마음, 그것이 문치과의 진료 철학입니다.',
-					'bio'        => array(
-						'한아의료재단 이사장',
-						'(사)블루문드림 이사장',
-						'블루문드림엔젤스 대표이사',
-						'단국대 치과대학 겸임교수',
-						'서울삼성의료원·서울대·이화여대·나사렛대 외래교수',
-						'한국 사랑의 집짓기 해비타트 충남·세종지회 이사',
-						'대전지방검찰청 천안지청 천안·아산 범죄피해자 지원센터 이사장',
-						'사회복지공동모금회 충남 아너소사이어티 클럽 초대회장',
-						'천안시복지재단 초대·2대 이사장',
-						'대한적십자사 충청남도지사 회장',
-						'충남 AI 플랫폼 회장',
-						'2008-2009 국제로타리 3620지구 총재 (세계 1등 지구 수상)',
-						'2017-2019 국제로타리 국제이사',
-					),
-				),
+			'name'       => '문은수',
+			'role'       => '대표 병원장',
+			'photo'      => 'doctor-04.png',
+			'photo_zoom' => 1.00,
+			'photo_ty'   => 0,
+			'philosophy' => '환자를 가족처럼 생각하는 마음, 그것이 문치과의 진료 철학입니다.',
+			'bio'        => array(
+				'한아의료재단 이사장',
+				'(사)블루문드림 이사장',
+				'블루문드림엔젤스 대표이사',
+				'단국대 치과대학 겸임교수',
+				'서울삼성의료원·서울대·이화여대·나사렛대 외래교수',
+				'한국 사랑의 집짓기 해비타트 충남·세종지회 이사',
+				'대전지방검찰청 천안지청 천안·아산 범죄피해자 지원센터 이사장',
+				'사회복지공동모금회 충남 아너소사이어티 클럽 초대회장',
+				'천안시복지재단 초대·2대 이사장',
+				'대한적십자사 충청남도지사 회장',
+				'충남 AI 플랫폼 회장',
+				'2008-2009 국제로타리 3620지구 총재 (세계 1등 지구 수상)',
+				'2017-2019 국제로타리 국제이사',
 			),
 		),
 
-		/* ─── 보철·보존 ─── */
 		array(
-			'group'   => '보철·보존',
-			'members' => array(
-				array(
-					'name'       => '이승주',
-					'role'       => '원장',
-					'photo'      => 'doctor-07.png',
-					'photo_zoom' => 1.00,
-					'photo_ty'   => 5,
-					'philosophy' => '최선을 다하여 환자를 가족처럼 생각하며 진료에 임하겠습니다.',
-					'bio'        => array(
-						'단국대학교치과대학 치의학과 졸업',
-						'대한치주과학회 정회원',
-						'대한보철학회 정회원',
-						'한아임플란트보철연구소 연구위원',
-					),
-				),
-				array(
-					'name'       => '이수연',
-					'role'       => '원장',
-					'photo'      => 'doctor-08.png',
-					'photo_zoom' => 1.00,
-					'photo_ty'   => 3,
-					'philosophy' => '진실된 마음으로 환자분들과 함께하는 의료서비스를 제공하겠습니다.',
-					'bio'        => array(
-						'치과 보철과·통합치의학 진료',
-						'조선대학교 치의학전문대학원 석사',
-						'조선대학교 치의학전문대학원 박사',
-						'조선대학교 치과병원 인턴',
-						'조선대학교 치과병원 레지던트',
-						'Harvard School advanced education in periodontics and prosthodontics 수료',
-					),
-				),
-				array(
-					'name'       => '권혜진',
-					'role'       => '원장',
-					'photo'      => 'doctor-02.png',
-					'photo_zoom' => 1.00,
-					'photo_ty'   => 4,
-					'philosophy' => '기본에 충실하되 새로운 변화에 맞춰가며, 환자분을 가족처럼 생각하는 따뜻한 마음으로 진료에 임하겠습니다.',
-					'bio'        => array(
-						'보존과 진료팀',
-						'단국대학교 치과대학 졸업',
-						'단국대학교 치과대학 보존과 석사',
-						'단국대학교 치과대학 보존과 레지던트 수료',
-						'대한 근관학회 정회원',
-						'대한 보존학회 정회원',
-					),
-				),
+			'name'       => '이승주',
+			'role'       => '원장',
+			'photo'      => 'doctor-07.png',
+			'photo_zoom' => 1.00,
+			'photo_ty'   => 5,
+			'philosophy' => '최선을 다하여 환자를 가족처럼 생각하며 진료에 임하겠습니다.',
+			'bio'        => array(
+				'단국대학교치과대학 치의학과 졸업',
+				'대한치주과학회 정회원',
+				'대한보철학회 정회원',
+				'한아임플란트보철연구소 연구위원',
+			),
+		),
+		array(
+			'name'       => '이수연',
+			'role'       => '원장',
+			'photo'      => 'doctor-08.png',
+			'photo_zoom' => 1.00,
+			'photo_ty'   => 3,
+			'philosophy' => '진실된 마음으로 환자분들과 함께하는 의료서비스를 제공하겠습니다.',
+			'bio'        => array(
+				'치과보철과 전문의',
+				'통합치의학과 전문의',
+				'조선대학교 치의학전문대학원 석사',
+				'조선대학교 치의학전문대학원 박사',
+				'조선대학교 치과병원 인턴',
+				'조선대학교 치과병원 레지던트',
+				'Harvard School advanced education in periodontics and prosthodontics 수료',
+			),
+		),
+		array(
+			'name'       => '권혜진',
+			'role'       => '원장',
+			'photo'      => 'doctor-02.png',
+			'photo_zoom' => 1.00,
+			'photo_ty'   => 4,
+			'philosophy' => '기본에 충실하되 새로운 변화에 맞춰가며, 환자분을 가족처럼 생각하는 따뜻한 마음으로 진료에 임하겠습니다.',
+			'bio'        => array(
+				'보존과 진료팀',
+				'단국대학교 치과대학 졸업',
+				'단국대학교 치과대학 보존과 석사',
+				'단국대학교 치과대학 보존과 레지던트 수료',
+				'대한 근관학회 정회원',
+				'대한 보존학회 정회원',
 			),
 		),
 
-		/* ─── 임플란트·외과 ─── */
 		array(
-			'group'   => '임플란트·외과',
-			'members' => array(
-				array(
-					'name'       => '문지현',
-					'role'       => '원장',
-					'photo'      => 'doctor-05.png',
-					'photo_zoom' => 1.00,
-					'photo_ty'   => 2,
-					'philosophy' => '구강건강 증진을 통해 환자분들의 삶이 회복되는 과정을 함께 하고 싶습니다. 최선을 다해 진료하겠습니다.',
-					'bio'        => array(
-						'서울대학교 치의학대학원 졸업',
-						'단국대학교 구강악안면외과 박사 수료',
-						'포항공과대학교 신소재공학과 석사 졸업',
-						'포항공과대학교 신소재공학과 학사 졸업',
-						'미국 SureSmile® 투명교정 인정의',
-						'대한구강악안면임플란트학회 정회원',
-						'미국 UCSF 치과대학 교정과 임상연수',
-						'미국 UPENN 치과대학 근관치료학 연수',
-						'대한치과이식임플란트학회아카데미 수료',
-						'턱관절장애교육연구회 고급과정 수료',
-						'대한여성치과의사회 미래여성인재상 수상',
-						'한국금속재료학회 우수논문상 수상',
-						'한아임플란트보철연구소 연구위원',
-					),
-				),
-				array(
-					'name'       => '이창률',
-					'role'       => '원장',
-					'photo'      => 'doctor-01.png',
-					'photo_zoom' => 1.00,
-					'photo_ty'   => 5,
-					'philosophy' => 'For a lifelong smile. 환자 한 분 한 분을 가족처럼 생각하며, 밝고 편안한 웃음을 위한 진료에 최선을 다하겠습니다.',
-					'bio'        => array(
-						'미국 UCLA 생화학 학사 졸업',
-						'미국 UCLA 구강생물학 석사 졸업',
-						'미국 UCSF 치과대학 졸업',
-						'미국 UCSF 치과대학 교정과 임상연수',
-						'서울대학교 치과마취과학과 박사과정',
-						'미국 SureSmile® 투명교정 인정의',
-						'대한턱관절교합학회 이사',
-						'대한심미치과학회 인정의',
-						'미국 & 한국 치과의사 면허 보유',
-						'미국 치과의사 협회(ADA) 정회원',
-						'미국 UCLA 구강암센터 연구원',
-						'대한국제치과의사회 학술위원',
-					),
-				),
+			'name'       => '문지현',
+			'role'       => '원장',
+			'photo'      => 'doctor-05.png',
+			'photo_zoom' => 1.00,
+			'photo_ty'   => 2,
+			'philosophy' => '구강건강 증진을 통해 환자분들의 삶이 회복되는 과정을 함께 하고 싶습니다. 최선을 다해 진료하겠습니다.',
+			'bio'        => array(
+				'서울대학교 치의학대학원 졸업',
+				'단국대학교 구강악안면외과 박사 수료',
+				'포항공과대학교 신소재공학과 석사 졸업',
+				'포항공과대학교 신소재공학과 학사 졸업',
+				'미국 SureSmile® 투명교정 인정의',
+				'대한구강악안면임플란트학회 정회원',
+				'미국 UCSF 치과대학 교정과 임상연수',
+				'미국 UPENN 치과대학 근관치료학 연수',
+				'대한치과이식임플란트학회아카데미 수료',
+				'턱관절장애교육연구회 고급과정 수료',
+				'대한여성치과의사회 미래여성인재상 수상',
+				'한국금속재료학회 우수논문상 수상',
+				'한아임플란트보철연구소 연구위원',
+			),
+		),
+		array(
+			'name'       => '이창률',
+			'role'       => '원장',
+			'photo'      => 'doctor-01.png',
+			'photo_zoom' => 1.00,
+			'photo_ty'   => 5,
+			'philosophy' => 'For a lifelong smile. 환자 한 분 한 분을 가족처럼 생각하며, 밝고 편안한 웃음을 위한 진료에 최선을 다하겠습니다.',
+			'bio'        => array(
+				'미국 UCLA 생화학 학사 졸업',
+				'미국 UCLA 구강생물학 석사 졸업',
+				'미국 UCSF 치과대학 졸업',
+				'미국 UCSF 치과대학 교정과 임상연수',
+				'서울대학교 치과마취과학과 박사과정',
+				'미국 SureSmile® 투명교정 인정의',
+				'대한턱관절교합학회 이사',
+				'대한심미치과학회 인정의',
+				'미국 & 한국 치과의사 면허 보유',
+				'미국 치과의사 협회(ADA) 정회원',
+				'미국 UCLA 구강암센터 연구원',
+				'대한국제치과의사회 학술위원',
 			),
 		),
 
-		/* ─── 교정·치주 ─── */
 		array(
-			'group'   => '교정·치주',
-			'members' => array(
-				array(
-					'name'       => '이영일',
-					'role'       => '원장',
-					'photo'      => 'doctor-09.png',
-					'photo_zoom' => 1.00,
-					'photo_ty'   => 2,
-					'philosophy' => '환자를 가족처럼 생각하는 마음, 그것이 문치과의 진료 철학입니다.',
-					'bio'        => array(
-						'단국대학교 치과대학 졸업',
-						'단국대 치과대학원 치의학과 석사',
-						'단국대 치과대학원 치의학과 박사',
-						'단국대 치과부속병원 교정과 인턴, 레지던트 수료',
-						'치과교정과',
-						'치과교정과 인정의',
-						'대한치과교정학회 정회원',
-					),
-				),
-				array(
-					'name'       => '김세일',
-					'role'       => '원장',
-					'photo'      => 'doctor-03.png',
-					'photo_zoom' => 1.00,
-					'photo_ty'   => -2,
-					'philosophy' => '건강한 치아는 건강한 일상의 시작입니다. 세밀한 진단과 진료로 환자분들의 건강한 하루를 책임지겠습니다.',
-					'bio'        => array(
-						'단국대학교 치과대학 졸업',
-						'이화여자대학교 교정과 석사 수료',
-						'대한 치과 교정학회 정회원',
-					),
-				),
-				array(
-					'name'       => '정석형',
-					'role'       => '원장',
-					'photo'      => 'doctor-06.png',
-					'photo_zoom' => 1.00,
-					'photo_ty'   => 2,
-					'philosophy' => '저희 문치과를 방문하는 모든 분들이 밝고 건강한 웃음의 주인이 되시길 바라며 항상 최선을 다하겠습니다.',
-					'bio'        => array(
-						'단국대학교 치과대학 치주과 석사',
-						'서울위생치과병원 치주과 인턴, 레지던트 수료',
-						'대한치주과학회 인정의',
-						'한아임플란트보철연구소 연구위원',
-						'대한치주과학회 정회원',
-					),
-				),
+			'name'       => '이영일',
+			'role'       => '원장',
+			'photo'      => 'doctor-09.png',
+			'photo_zoom' => 1.00,
+			'photo_ty'   => 2,
+			'philosophy' => '정확한 진단에서 교정 치료가 시작됩니다. 진단을 바탕으로 방향을 정하고 계획에 따라 차근차근 진행하겠습니다.',
+			'bio'        => array(
+				'단국대학교 치과대학 졸업',
+				'단국대 치과대학원 치의학과 석사',
+				'단국대 치과대학원 치의학과 박사',
+				'단국대 치과부속병원 교정과 인턴, 레지던트 수료',
+				'대한치과교정학회 정회원',
+			),
+		),
+		array(
+			'name'       => '김세일',
+			'role'       => '원장',
+			'photo'      => 'doctor-03.png',
+			'photo_zoom' => 1.00,
+			'photo_ty'   => -2,
+			'philosophy' => '건강한 치아는 건강한 일상의 시작입니다. 세밀한 진단과 진료로 환자분들의 건강한 하루를 책임지겠습니다.',
+			'bio'        => array(
+				'단국대학교 치과대학 졸업',
+				'이화여자대학교 치의학대학원 석사',
+				'통합치의학과 전문의',
+				'통합치의학회 정회원',
+			),
+		),
+		array(
+			'name'       => '정석형',
+			'role'       => '원장',
+			'photo'      => 'doctor-06.png',
+			'photo_zoom' => 1.00,
+			'photo_ty'   => 2,
+			'philosophy' => '저희 문치과를 방문하는 모든 분들이 밝고 건강한 웃음의 주인이 되시길 바라며 항상 최선을 다하겠습니다.',
+			'bio'        => array(
+				'단국대학교 치과대학 치주과 석사',
+				'서울위생치과병원 치주과 인턴, 레지던트 수료',
+				'대한치주과학회 인정의',
+				'한아임플란트보철연구소 연구위원',
+				'대한치주과학회 정회원',
 			),
 		),
 	);
 }
 
 /**
- * 의료진 그룹 데이터에 Customizer 값(개인별 줌)을 덧입혀 반환.
+ * 의료진 데이터에 Customizer 값(개인별 줌·철학·약력·직책)을 덧입혀 반환.
  *
  * page-doctors.php 등 모든 호출처는 그대로 moondental_get_team() 만 사용해도
  * Customizer 값이 자동 반영되도록, 이 wrapper를 통해 후처리한다.
  */
 function moondental_get_team_with_customizer() {
-	$groups = moondental_get_team();
-	if ( ! function_exists( 'get_theme_mod' ) ) return $groups;
+	$doctors = moondental_get_team();
+	if ( ! function_exists( 'get_theme_mod' ) ) return $doctors;
 
 	/* 의료진 이름 → Customizer key 매핑 · v3.38.6 · Customizer 편집 가능 */
 	$name_to_key = array();
@@ -5236,52 +5212,39 @@ function moondental_get_team_with_customizer() {
 		}
 	}
 
-	/* 그룹명 Customizer override (4개) */
-	if ( function_exists( 'md_content' ) ) {
-		foreach ( $groups as $gi => $group ) {
-			$grp_idx = $gi + 1; // 1~4
-			$grp_override = md_content( "doctor_group_{$grp_idx}", '' );
-			if ( $grp_override ) {
-				$groups[ $gi ]['group'] = $grp_override;
+	foreach ( $doctors as $di => $m ) {
+		/* 사진 zoom·translateY */
+		$z_fallback = isset( $m['photo_zoom'] ) ? (float) $m['photo_zoom'] : 1.00;
+		$t_fallback = isset( $m['photo_ty'] )   ? (float) $m['photo_ty']   : 0.00;
+		$doctors[ $di ]['photo_zoom'] = moondental_get_doctor_zoom( $m['name'], $z_fallback );
+		$doctors[ $di ]['photo_ty']   = moondental_get_doctor_ty(   $m['name'], $t_fallback );
+
+		/* 철학 + 약력 + 직책 Customizer override */
+		$key = $name_to_key[ $m['name'] ] ?? null;
+		if ( $key && function_exists( 'md_content' ) ) {
+			$phil_override = md_content( "doctor_{$key}_philosophy", '' );
+			if ( $phil_override ) {
+				$doctors[ $di ]['philosophy'] = $phil_override;
+			}
+			$bio_override = md_content( "doctor_{$key}_bio", '' );
+			if ( $bio_override ) {
+				$bio_lines = array();
+				foreach ( preg_split( "/\r\n|\r|\n/", $bio_override ) as $line ) {
+					$line = trim( $line );
+					if ( ! $line || strpos( $line, '#' ) === 0 ) continue;
+					$bio_lines[] = $line;
+				}
+				if ( $bio_lines ) {
+					$doctors[ $di ]['bio'] = $bio_lines;
+				}
+			}
+			$role_override = md_content( "doctor_{$key}_role", '' );
+			if ( $role_override ) {
+				$doctors[ $di ]['role'] = $role_override;
 			}
 		}
 	}
-
-	foreach ( $groups as $gi => $group ) {
-		foreach ( $group['members'] as $mi => $m ) {
-			/* 사진 zoom·translateY */
-			$z_fallback = isset( $m['photo_zoom'] ) ? (float) $m['photo_zoom'] : 1.00;
-			$t_fallback = isset( $m['photo_ty'] )   ? (float) $m['photo_ty']   : 0.00;
-			$groups[ $gi ]['members'][ $mi ]['photo_zoom'] = moondental_get_doctor_zoom( $m['name'], $z_fallback );
-			$groups[ $gi ]['members'][ $mi ]['photo_ty']   = moondental_get_doctor_ty(   $m['name'], $t_fallback );
-
-			/* 철학 + 약력 + 직책 Customizer override */
-			$key = $name_to_key[ $m['name'] ] ?? null;
-			if ( $key && function_exists( 'md_content' ) ) {
-				$phil_override = md_content( "doctor_{$key}_philosophy", '' );
-				if ( $phil_override ) {
-					$groups[ $gi ]['members'][ $mi ]['philosophy'] = $phil_override;
-				}
-				$bio_override = md_content( "doctor_{$key}_bio", '' );
-				if ( $bio_override ) {
-					$bio_lines = array();
-					foreach ( preg_split( "/\r\n|\r|\n/", $bio_override ) as $line ) {
-						$line = trim( $line );
-						if ( ! $line || strpos( $line, '#' ) === 0 ) continue;
-						$bio_lines[] = $line;
-					}
-					if ( $bio_lines ) {
-						$groups[ $gi ]['members'][ $mi ]['bio'] = $bio_lines;
-					}
-				}
-				$role_override = md_content( "doctor_{$key}_role", '' );
-				if ( $role_override ) {
-					$groups[ $gi ]['members'][ $mi ]['role'] = $role_override;
-				}
-			}
-		}
-	}
-	return $groups;
+	return $doctors;
 }
 
 /**
@@ -5289,14 +5252,12 @@ function moondental_get_team_with_customizer() {
  * 외부에서 add_filter( 'moondental_team', 'moondental_get_team_with_customizer' ) 형태로 후킹 가능.
  */
 add_filter( 'moondental_team_data', 'moondental_apply_team_zoom_customizer', 10, 1 );
-function moondental_apply_team_zoom_customizer( $groups ) {
-	foreach ( $groups as $gi => $group ) {
-		foreach ( $group['members'] as $mi => $m ) {
-			$fallback = isset( $m['photo_zoom'] ) ? (float) $m['photo_zoom'] : 1.00;
-			$groups[ $gi ]['members'][ $mi ]['photo_zoom'] = moondental_get_doctor_zoom( $m['name'], $fallback );
-		}
+function moondental_apply_team_zoom_customizer( $doctors ) {
+	foreach ( $doctors as $di => $m ) {
+		$fallback = isset( $m['photo_zoom'] ) ? (float) $m['photo_zoom'] : 1.00;
+		$doctors[ $di ]['photo_zoom'] = moondental_get_doctor_zoom( $m['name'], $fallback );
 	}
-	return $groups;
+	return $doctors;
 }
 
 /**
@@ -5433,15 +5394,6 @@ function moondental_fetch_naver_blog( $limit = 20, $no_cache = false ) {
 
 
 /**
- * Flatten team for simple grid rendering.
+ * v3.45 · moondental_get_team() 이 이미 단일 리스트를 반환하므로 flatten 헬퍼 제거.
+ * (호출처 없음 — 그룹 구분 폐지와 함께 삭제)
  */
-function moondental_get_team_flat() {
-	$flat = array();
-	foreach ( moondental_get_team() as $group ) {
-		foreach ( $group['members'] as $m ) {
-			$m['group'] = $group['group'];
-			$flat[]     = $m;
-		}
-	}
-	return $flat;
-}

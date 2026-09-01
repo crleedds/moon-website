@@ -621,14 +621,11 @@ function moondental_jsonld_doctor() {
 	if ( ! $slug ) return;
 
 	$found = null;
-	foreach ( moondental_get_team() as $group ) {
-		foreach ( ( $group['members'] ?? array() ) as $doc ) {
-			if ( function_exists( 'moondental_doctor_name_to_slug' )
-				&& moondental_doctor_name_to_slug( $doc['name'] ) === $slug ) {
-				$found = $doc;
-				$found['_group'] = $group['group'] ?? '';
-				break 2;
-			}
+	foreach ( moondental_get_team() as $doc ) {
+		if ( function_exists( 'moondental_doctor_name_to_slug' )
+			&& moondental_doctor_name_to_slug( $doc['name'] ) === $slug ) {
+			$found = $doc;
+			break;
 		}
 	}
 	if ( ! $found ) return;

@@ -89,15 +89,13 @@ $photo_style = sprintf(
 	esc_attr( number_format( $photo_zoom, 2 ) )
 );
 
-/* 다른 의료진 — 동일 그룹 또는 전체 중 8명 */
-$all_groups = function_exists( 'moondental_get_team_with_customizer' )
+/* 다른 의료진 — 본인을 제외한 전체 */
+$all_doctors = function_exists( 'moondental_get_team_with_customizer' )
 	? moondental_get_team_with_customizer()
 	: moondental_get_team();
 $others = array();
-foreach ( $all_groups as $g ) {
-	foreach ( $g['members'] as $m ) {
-		if ( $m['name'] !== $doctor['name'] ) $others[] = $m;
-	}
+foreach ( $all_doctors as $m ) {
+	if ( $m['name'] !== $doctor['name'] ) $others[] = $m;
 }
 ?>
 
@@ -164,7 +162,8 @@ foreach ( $all_groups as $g ) {
 						<h3><?php echo esc_html( $qa['q'] ); ?></h3>
 					</div>
 					<div class="md-docsingle-qa__a">
-						<p><?php echo wp_kses_post( wpautop( $qa['a'] ) ); ?></p>
+						<?php // v3.45 · wpautop 이 이미 <p> 를 생성하므로 바깥 <p> 제거 (중첩 <p> 방지) ?>
+						<?php echo wp_kses_post( wpautop( $qa['a'] ) ); ?>
 					</div>
 				</div>
 			<?php endforeach; ?>

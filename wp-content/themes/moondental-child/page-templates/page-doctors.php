@@ -11,19 +11,12 @@
 get_header();
 $info       = moondental_get_info();
 $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'] );
-$groups     = function_exists( 'moondental_get_team_with_customizer' )
+$all_doctors = function_exists( 'moondental_get_team_with_customizer' )
 	? moondental_get_team_with_customizer()
 	: moondental_get_team();
 
-// 그룹 → 필터 키 매핑 (한글 라벨 → kebab key for data-attr)
-$group_keys = array();
-foreach ( $groups as $g ) {
-	$group_keys[ $g['group'] ] = sanitize_title( $g['group'] );
-}
-
-// 의료진 총원 계산
-$total_doctors = 0;
-foreach ( $groups as $g ) $total_doctors += count( $g['members'] );
+// 의료진 총원
+$total_doctors = count( $all_doctors );
 
 // 진료 전문과 안내 — v3.32.7: Customizer 편집 가능
 $specialties = array();
@@ -117,15 +110,12 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 
 		<?php
 		// v3.30.7 · 그룹 해제 · 사용자 지정 순서로 단일 리스트 렌더
-		// 순서: 대표 병원장 문은수 → 정석형 → 이승주 → 김세일 → 이수연 → 권혜진 → 문지현 → 이창률 → 이영일
+		// 순서: 대표 병원장 문은수 → 나머지 가나다순
 		$doctor_order = array( '문은수', '권혜진', '김세일', '문지현', '이수연', '이승주', '이영일', '이창률', '정석형' );
 
-		// 모든 그룹에서 의료진 flatten
 		$doctors_by_name = array();
-		foreach ( $groups as $g ) {
-			foreach ( $g['members'] as $m ) {
-				$doctors_by_name[ $m['name'] ] = $m;
-			}
+		foreach ( $all_doctors as $m ) {
+			$doctors_by_name[ $m['name'] ] = $m;
 		}
 
 		// 사용자 지정 순서로 정렬 · 순서 목록에 없는 의료진은 뒤에 append
