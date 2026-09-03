@@ -16110,12 +16110,32 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
 }
 
 /* =============================================================
-   v3.47 · 임플란트센터 — 환자 중심 재구성
-   색은 전부 --color-* 토큰. 다크모드는 :root 스와프를 자동 추종.
-   코럴 = 환자가 겪는 문제 · 세이지 = 문치과의 해법
+   v3.49 · 임플란트센터
+   내용은 기존 본문을 그대로 살리고 배치·디자인으로 정리한다.
+   색 역할 · 코럴 = 환자가 겪는 문제 / 세이지 = 문치과의 해법
+   전부 --color-* 토큰이라 다크모드는 :root 스와프를 자동 추종.
    ============================================================= */
 
-/* --- 다른 병원에서 어렵다고 하셨나요 ------------------------- */
+/* --- 섹션 내 소제목 ----------------------------------------- */
+.md-impl-h3 {
+  margin: 44px 0 8px;
+  font-size: var(--fs-h3);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.4;
+  color: var(--color-primary-dark);
+  word-break: keep-all;
+}
+.md-impl-h3:first-of-type { margin-top: 0; }
+.md-impl-lead {
+  margin: 0 0 22px;
+  font-size: var(--fs-small);
+  line-height: 1.85;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+}
+
+/* --- ① 어려운 케이스 ---------------------------------------- */
 .md-impl-hard {
   background: linear-gradient(180deg, rgba(216, 128, 98, 0.05) 0%, rgba(216, 128, 98, 0.11) 100%);
   border-top: 3px solid var(--color-primary);
@@ -16125,58 +16145,52 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
 
 .md-impl-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
 }
 .md-impl-card {
   position: relative;
   background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: 16px;
-  padding: 26px 24px 26px;
+  padding: 22px 20px 24px;
   box-shadow: var(--card-shadow);
   transition: transform 0.24s var(--ease), box-shadow 0.24s var(--ease);
 }
-.md-impl-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--card-shadow-hover);
-}
+.md-impl-card:hover { transform: translateY(-3px); box-shadow: var(--card-shadow-hover); }
 .md-impl-card::before {
   content: "\201C";
   position: absolute;
-  top: 6px;
-  left: 18px;
-  font-size: 3.4rem;
+  top: 2px;
+  left: 14px;
+  font-size: 3rem;
   line-height: 1;
   font-weight: 700;
   color: var(--color-primary);
-  opacity: 0.22;
+  opacity: 0.2;
   pointer-events: none;
 }
 .md-impl-card__q {
   position: relative;
-  margin: 0 0 12px;
-  padding-left: 20px;
-  font-size: 1.08rem;
+  margin: 0 0 10px;
+  padding-left: 16px;
+  font-size: 1rem;
   font-weight: 800;
   line-height: 1.5;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.03em;
   color: var(--color-primary-dark);
   word-break: keep-all;
 }
 .md-impl-card p {
   margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.85;
+  font-size: 0.86rem;
+  line-height: 1.8;
   color: var(--color-text-sub);
   word-break: keep-all;
 }
-.md-impl-card p strong {
-  color: var(--color-accent-dark);
-  font-weight: 800;
-}
+.md-impl-card p strong { color: var(--color-accent-dark); font-weight: 800; }
 
-/* --- 30년이 만든 차이 --------------------------------------- */
+/* --- ② 30년이 만든 차이 -------------------------------------- */
 .md-impl-diffs {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -16224,47 +16238,88 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
   word-break: keep-all;
 }
 
-/* --- 치료 과정 --------------------------------------------- */
-.md-impl-steps {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  counter-reset: mdimpl;
+/* --- ③ 기존 방식 vs 당일 임플란트 ----------------------------- */
+.md-impl-compare {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: stretch;
 }
-.md-impl-steps li {
-  counter-increment: mdimpl;
-  position: relative;
-  padding-top: 52px;
+.md-impl-compare__col {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 22px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.md-impl-steps li::before {
-  content: counter(mdimpl);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
+.md-impl-compare__col.is-ours {
+  border: 1.5px solid var(--color-accent);
+  background: var(--color-accent-bg);
+}
+.md-impl-compare__tag {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 5px 13px;
+  border-radius: 999px;
+  background: var(--color-surface-alt);
+  color: var(--color-text-mute);
+}
+.md-impl-compare__col.is-ours .md-impl-compare__tag {
   background: var(--color-accent-dark);
   color: var(--color-text-on-primary);
-  font-size: 1rem;
-  font-weight: 800;
 }
-.md-impl-steps li::after {
-  content: "";
-  position: absolute;
-  top: 19px;
-  left: 48px;
-  right: -16px;
-  height: 2px;
-  background: var(--color-border);
+.md-impl-compare__flow {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.85;
+  color: var(--color-text-sub);
+  word-break: keep-all;
 }
-.md-impl-steps li:last-child::after { display: none; }
-.md-impl-steps h3 {
+.md-impl-compare__flow b { color: var(--color-accent-dark); font-weight: 800; }
+.md-impl-compare__sum {
+  margin: auto 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--color-text);
+  word-break: keep-all;
+}
+.md-impl-compare__sum b { color: var(--color-primary-dark); font-weight: 900; font-size: 1.1em; }
+
+.md-impl-note {
+  display: block;
+  margin-top: 14px;
+  background: var(--color-surface-alt);
+  border-left: 4px solid var(--color-warning);
+  border-radius: 0 12px 12px 0;
+  padding: 18px 20px;
+  font-size: 0.87rem;
+  line-height: 1.85;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+}
+.md-impl-note strong { display: block; margin-bottom: 4px; color: var(--color-text); font-weight: 800; }
+
+/* --- ③-b 치료 옵션 ------------------------------------------- */
+.md-impl-options {
+  margin-top: 32px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.md-impl-option {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 20px 20px 22px;
+  box-shadow: var(--card-shadow);
+}
+.md-impl-option h4 {
   margin: 0 0 8px;
   font-size: 1.02rem;
   font-weight: 800;
@@ -16272,18 +16327,320 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
   color: var(--color-text);
   word-break: keep-all;
 }
-.md-impl-steps p {
+.md-impl-option h4 span {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+}
+.md-impl-option p {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.87rem;
   line-height: 1.8;
   color: var(--color-text-sub);
   word-break: keep-all;
 }
 
-/* --- 건강보험 임플란트 --------------------------------------- */
+/* --- ④ 프리미엄 시스템 --------------------------------------- */
+.md-impl-brands {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+.md-impl-brand {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 24px 22px 26px;
+  box-shadow: var(--card-shadow);
+}
+.md-impl-brand h3 {
+  margin: 0 0 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+  word-break: keep-all;
+}
+.md-impl-brand h3 span {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+}
+.md-impl-brand ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.md-impl-brand li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 0.88rem;
+  line-height: 1.8;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+}
+.md-impl-brand li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.72em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.md-impl-brand li strong { color: var(--color-text); font-weight: 800; }
+
+/* --- ⑤ 보철 · 이미지 + 본문 ---------------------------------- */
+.md-impl-media {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: clamp(24px, 3.5vw, 44px);
+  align-items: start;
+}
+.md-impl-media__fig {
+  margin: 0;
+  position: sticky;
+  top: 96px;
+}
+.md-impl-media__fig img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+}
+.md-impl-media__fig figcaption {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--color-text-mute);
+  word-break: keep-all;
+}
+.md-impl-media__body > .md-section-head__eyebrow { margin-bottom: 8px; }
+.md-impl-media__body h2 {
+  margin: 0 0 14px;
+  font-size: var(--fs-h2);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.35;
+  color: var(--color-primary-dark);
+  word-break: keep-all;
+}
+.md-impl-media__body h3 {
+  margin: 30px 0 10px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+  word-break: keep-all;
+}
+.md-impl-media__body p {
+  margin: 0 0 14px;
+  font-size: 0.92rem;
+  line-height: 1.9;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+}
+.md-impl-media__body p strong { color: var(--color-text); font-weight: 700; }
+
+.md-impl-ticks { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.md-impl-ticks li {
+  position: relative;
+  padding-left: 26px;
+  font-size: 0.89rem;
+  line-height: 1.8;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+}
+.md-impl-ticks li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.5em;
+  width: 11px;
+  height: 6px;
+  border-left: 2px solid var(--color-accent-dark);
+  border-bottom: 2px solid var(--color-accent-dark);
+  transform: rotate(-45deg);
+}
+.md-impl-ticks li strong { color: var(--color-text); font-weight: 800; }
+
+/* --- ⑥ 살리기 위한 노력 -------------------------------------- */
+.md-impl-saves {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.md-impl-save {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 24px 22px 26px;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.md-impl-save h3 {
+  margin: 0;
+  font-size: 1.06rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--color-accent-dark);
+  word-break: keep-all;
+}
+.md-impl-save h3 span {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-text-mute);
+}
+.md-impl-save p {
+  margin: 0;
+  font-size: 0.87rem;
+  line-height: 1.8;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+}
+.md-impl-save ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.md-impl-save li {
+  position: relative;
+  padding-left: 15px;
+  font-size: 0.85rem;
+  line-height: 1.75;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+}
+.md-impl-save li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.68em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.md-impl-save li strong { color: var(--color-text); font-weight: 700; }
+.md-impl-save__stat {
+  margin: auto 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--color-text-mute);
+}
+.md-impl-save__stat b { color: var(--color-accent-dark); font-weight: 800; }
+
+.md-impl-save--wide {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(20px, 3vw, 34px);
+  align-items: center;
+}
+.md-impl-save--wide .md-impl-save__fig { margin: 0; }
+.md-impl-save--wide .md-impl-save__fig img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+.md-impl-save--wide > div { display: flex; flex-direction: column; gap: 12px; }
+
+/* --- ⑦ 수술 과정 타임라인 ------------------------------------ */
+.md-impl-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: mdimpl;
+  position: relative;
+}
+.md-impl-timeline::before {
+  content: "";
+  position: absolute;
+  left: 19px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background: var(--color-border);
+}
+.md-impl-timeline li {
+  counter-increment: mdimpl;
+  position: relative;
+  padding: 0 0 26px 58px;
+}
+.md-impl-timeline li:last-child { padding-bottom: 0; }
+.md-impl-timeline li::before {
+  content: counter(mdimpl);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-accent-dark);
+  color: var(--color-text-on-primary);
+  font-size: 1rem;
+  font-weight: 800;
+  box-shadow: 0 0 0 5px var(--color-bg);
+}
+.md-impl-timeline h3 {
+  margin: 8px 0 6px;
+  font-size: 1.04rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+  word-break: keep-all;
+}
+.md-impl-timeline p {
+  margin: 0;
+  font-size: 0.89rem;
+  line-height: 1.85;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+}
+.md-impl-timeline p strong { color: var(--color-accent-dark); font-weight: 800; }
+
+/* --- ⑧ 안심 케어 -------------------------------------------- */
+.md-impl-care {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.md-impl-care__col {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 26px 24px 28px;
+  box-shadow: var(--card-shadow);
+}
+.md-impl-care__col h3 {
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--color-accent-dark);
+  word-break: keep-all;
+}
+
+/* --- ⑨ 건강보험 --------------------------------------------- */
 .md-impl-insurance {
   display: grid;
-  grid-template-columns: 1fr 1.1fr;
+  grid-template-columns: 0.85fr 1.15fr;
   gap: clamp(24px, 3.5vw, 44px);
   align-items: center;
   background: var(--color-accent-bg);
@@ -16301,26 +16658,25 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
 }
 .md-impl-insurance__head p {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
   line-height: 1.85;
   color: var(--color-text-sub);
   word-break: keep-all;
 }
 .md-impl-insurance__head p strong { color: var(--color-text); font-weight: 800; }
-
 .md-impl-insurance__facts {
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 .md-impl-insurance__facts > div {
   background: var(--color-white);
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 14px 15px;
 }
 .md-impl-insurance__facts dt {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   color: var(--color-text-mute);
@@ -16328,27 +16684,38 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
 }
 .md-impl-insurance__facts dd {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   font-weight: 600;
   line-height: 1.6;
   color: var(--color-text);
   word-break: keep-all;
 }
 
-/* --- 반응형 ------------------------------------------------- */
-@media (max-width: 900px) {
+/* --- 반응형 -------------------------------------------------- */
+@media (max-width: 1024px) {
   .md-impl-cards { grid-template-columns: repeat(2, 1fr); }
-  .md-impl-diffs { grid-template-columns: 1fr; }
-  .md-impl-steps { grid-template-columns: repeat(2, 1fr); row-gap: 26px; }
-  .md-impl-steps li:nth-child(2)::after { display: none; }
+  .md-impl-saves { grid-template-columns: repeat(2, 1fr); }
+  .md-impl-media { grid-template-columns: 1fr; }
+  .md-impl-media__fig { position: static; }
   .md-impl-insurance { grid-template-columns: 1fr; }
+  .md-impl-insurance__facts { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 820px) {
+  .md-impl-diffs { grid-template-columns: 1fr; }
+  .md-impl-options { grid-template-columns: 1fr; }
+  .md-impl-brands { grid-template-columns: 1fr; }
+  .md-impl-compare { grid-template-columns: 1fr; }
+  .md-impl-care { grid-template-columns: 1fr; }
+  .md-impl-save--wide { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
   .md-impl-cards { grid-template-columns: 1fr; }
-  .md-impl-steps { grid-template-columns: 1fr; row-gap: 22px; }
-  .md-impl-steps li { padding-top: 0; padding-left: 54px; min-height: 38px; }
-  .md-impl-steps li::after { display: none; }
+  .md-impl-saves { grid-template-columns: 1fr; }
   .md-impl-insurance__facts { grid-template-columns: 1fr; }
+  .md-impl-timeline li { padding-left: 50px; }
+  .md-impl-timeline::before { left: 17px; }
+  .md-impl-timeline li::before { width: 36px; height: 36px; font-size: 0.92rem; }
+  .md-impl-h3 { margin-top: 34px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .md-impl-card { transition: none; }

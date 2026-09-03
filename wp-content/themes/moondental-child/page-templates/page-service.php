@@ -81,10 +81,12 @@ if ( $_visual ) :
 <?php endif; ?>
 
 <?php
-/* v3.47 · 임플란트-센터는 본문을 이 템플릿에서 직접 구성한다.
+/* v3.49 · 임플란트-센터는 본문을 template-parts/section-implant.php 에서 구성한다.
  *   기존 Customizer 본문( md_content_service_body_임플란트-센터 )은 DB 에 그대로 두고
- *   렌더에서만 제외한다. 되돌리려면 아래 조건 두 개를 지우면 원래대로 출력된다.
- *   이유 · 기존 본문이 소제목 23개 분량이라 환자가 읽어야 할 핵심이 묻혔다. */
+ *   렌더에서만 제외한다. 되돌리려면 이 파일의 $md_impl_own 조건 3곳(91·113·218행)을
+ *   지우면 원래 본문과 md-pain 섹션이 그대로 다시 출력된다.
+ *   이유 · 내용은 살리되 중복 블록을 합치고 배치·디자인을 다시 잡기 위해서다.
+ *          무엇을 합쳤는지는 section-implant.php 상단 주석에 적어 두었다. */
 $md_impl_own = ( $slug === '임플란트-센터' );
 ?>
 
@@ -108,129 +110,12 @@ $md_impl_own = ( $slug === '임플란트-센터' );
 </section>
 <?php endif; ?>
 
-<?php if ( $md_impl_own ) : ?>
-
-<!-- ── 다른 병원에서 어렵다고 들으신 분들 ───────────────────── -->
-<section class="md-section md-impl-hard" aria-label="다른 병원에서 어렵다고 하신 경우">
-	<div class="md-container md-container--narrow">
-		<header class="md-section-head">
-			<span class="md-section-head__eyebrow md-eyebrow--star">⭐ 임플란트센터가 가장 많이 받는 의뢰</span>
-			<h2 class="md-section-head__title">다른 병원에서 어렵다고 하셨나요?</h2>
-			<p class="md-section-head__lead">
-				문치과병원은 1990년대부터 임플란트를 심어 왔습니다. 그래서 <strong>오래된 임플란트, 실패했다고 들은 임플란트,
-				뼈가 부족해 거절당한 경우</strong>가 임플란트센터에 가장 많이 오는 의뢰입니다.
-			</p>
-		</header>
-
-		<div class="md-impl-cards">
-			<article class="md-impl-card">
-				<h3 class="md-impl-card__q">임플란트가 흔들려요</h3>
-				<p>나사만 풀린 것인지, 뼈가 녹은 것인지에 따라 처치가 완전히 다릅니다. 원인부터 가려내고, <strong>살릴 수 있으면 뽑지 않습니다.</strong></p>
-			</article>
-			<article class="md-impl-card">
-				<h3 class="md-impl-card__q">부품이 단종됐다고 하네요</h3>
-				<p>20~30년 전 임플란트에서 가장 흔한 일입니다. 병원 안 기공소에서 <strong>그 임플란트에 맞는 부품을 직접 만듭니다.</strong></p>
-			</article>
-			<article class="md-impl-card">
-				<h3 class="md-impl-card__q">뼈가 부족해서 안 된대요</h3>
-				<p>뼈를 만들어서 심습니다. 골이식과 상악동 거상술로 <strong>식립할 수 있는 조건을 먼저 만듭니다.</strong></p>
-			</article>
-			<article class="md-impl-card">
-				<h3 class="md-impl-card__q">잇몸이 붓고 피가 나요</h3>
-				<p>임플란트 주위염입니다. 잇몸을 열어 소독하고 뼈를 보강해 <strong>뽑지 않고 살리는 방법을 먼저 봅니다.</strong></p>
-			</article>
-			<article class="md-impl-card">
-				<h3 class="md-impl-card__q">당뇨·고혈압이 있어 거절당했어요</h3>
-				<p>혈압·혈당·심전도·산소포화도를 재면서 진행합니다. 드시는 약까지 확인한 뒤 <strong>안전한 방법을 함께 정합니다.</strong></p>
-			</article>
-			<article class="md-impl-card">
-				<h3 class="md-impl-card__q">어디서 심었는지 기억이 안 나요</h3>
-				<p>괜찮습니다. <strong>CT 한 장이면 어느 회사 제품인지 찾아냅니다.</strong> 브랜드를 모르셔도 진료를 시작할 수 있습니다.</p>
-			</article>
-		</div>
-	</div>
-</section>
-
-<!-- ── 30년이 만든 차이 ─────────────────────────────────────── -->
-<section class="md-section md-section--surface" aria-label="30여년 임플란트 임상이 만든 차이">
-	<div class="md-container md-container--narrow">
-		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">30여년이 만든 차이</span>
-			<h2 class="md-section-head__title">오래된 임플란트를 다룰 수 있는 이유</h2>
-		</header>
-
-		<div class="md-impl-diffs">
-			<article class="md-impl-diff">
-				<span class="md-impl-diff__n">1995<span>년부터</span></span>
-				<h3>그 시절에 직접 심었습니다</h3>
-				<p>지금 문제가 생기고 있는 20~30년 전 임플란트를, 저희가 그때 현장에서 직접 심고 관리해 왔습니다. 세대마다 어디가 탈이 나는지 알고 있습니다.</p>
-			</article>
-			<article class="md-impl-diff">
-				<span class="md-impl-diff__n">20<span>여 종</span></span>
-				<h3>국내외 브랜드를 가리지 않습니다</h3>
-				<p>수입 임플란트와 국산 임플란트를 두루 다뤄 왔습니다. 브랜드마다 부품이 맞물리는 방식이 다른데, 그 차이를 영상만 보고 구분합니다.</p>
-			</article>
-			<article class="md-impl-diff">
-				<span class="md-impl-diff__n">병원 안<span>에 기공소</span></span>
-				<h3>없는 부품은 직접 만듭니다</h3>
-				<p>한아 임플란트 보철연구소가 병원 안에 있고 기공사가 상주합니다. 단종된 부품도 만들 수 있고, 맞지 않으면 그 자리에서 고칩니다.</p>
-			</article>
-		</div>
-	</div>
-</section>
-
-<!-- ── 치료 과정 ────────────────────────────────────────────── -->
-<section class="md-section" aria-label="임플란트 치료 과정">
-	<div class="md-container md-container--narrow">
-		<header class="md-section-head">
-			<span class="md-section-head__eyebrow">치료 과정</span>
-			<h2 class="md-section-head__title">이렇게 진행됩니다</h2>
-			<p class="md-section-head__lead">
-				진단 결과와 <strong>투명한 비용 설명</strong>을 먼저 드린 뒤에 치료를 시작합니다. 기간은 뼈 상태에 따라 달라지며,
-				상담 때 예상 일정을 함께 안내드립니다.
-			</p>
-		</header>
-
-		<ol class="md-impl-steps">
-			<li>
-				<h3>정밀 진단과 상담</h3>
-				<p>CT로 잇몸뼈 양과 신경 위치를 확인합니다. 치료 계획과 비용을 이 단계에서 모두 설명드립니다.</p>
-			</li>
-			<li>
-				<h3>수술 준비</h3>
-				<p>뼈가 부족하면 골이식을 함께 계획하고, 전신질환이 있으면 복용 약까지 미리 점검합니다.</p>
-			</li>
-			<li>
-				<h3>임플란트 식립</h3>
-				<p>네비게이션 가이드로 계획한 위치에 정확히 심습니다. 무바늘 마취기와 자가진통조절기로 통증 부담을 줄입니다.</p>
-			</li>
-			<li>
-				<h3>보철과 평생 관리</h3>
-				<p>원내 기공소에서 맞춤 제작한 보철을 끼웁니다. 이후 연 4회 정기검진으로 10~20년 이상 쓰시도록 관리합니다.</p>
-			</li>
-		</ol>
-	</div>
-</section>
-
-<!-- ── 건강보험 임플란트 ────────────────────────────────────── -->
-<section class="md-section md-section--sm" aria-label="건강보험 임플란트">
-	<div class="md-container md-container--narrow">
-		<aside class="md-impl-insurance">
-			<div class="md-impl-insurance__head">
-				<h2>만 65세 이상이시라면</h2>
-				<p>건강보험으로 임플란트를 <strong>평생 2개까지</strong> 하실 수 있습니다. 대상이 되시는지 상담 때 확인해 드립니다.</p>
-			</div>
-			<dl class="md-impl-insurance__facts">
-				<div><dt>대상</dt><dd>만 65세 이상 건강보험 가입자<br>(피부양자·의료급여자 포함)</dd></div>
-				<div><dt>개수</dt><dd>평생 2개까지</dd></div>
-				<div><dt>본인 부담</dt><dd>치료비의 30%</dd></div>
-				<div><dt>조건</dt><dd>부분 무치악<br>남은 치아가 하나만 있어도 가능</dd></div>
-			</dl>
-		</aside>
-	</div>
-</section>
-
-<?php endif; ?>
+<?php
+/* 임플란트-센터 본문 · template-parts/section-implant.php 참고 */
+if ( $md_impl_own ) {
+	get_template_part( 'template-parts/section', 'implant' );
+}
+?>
 
 <?php
 /* v3.44.112 · 사랑니-발치 페이지 전용 · 매복 사랑니 전문 진료 섹션 */
