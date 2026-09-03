@@ -202,11 +202,11 @@ $md_impl_own = ( $slug === '임플란트-센터' );
 			</li>
 			<li>
 				<h3>임플란트 식립</h3>
-				<p>네비게이션 가이드로 계획한 위치에 정확히 심습니다. 통증과 붓기를 줄이는 처치를 함께 진행합니다.</p>
+				<p>네비게이션 가이드로 계획한 위치에 정확히 심습니다. 무바늘 마취기와 자가진통조절기로 통증 부담을 줄입니다.</p>
 			</li>
 			<li>
 				<h3>보철과 평생 관리</h3>
-				<p>원내 기공소에서 맞춤 제작한 보철을 끼웁니다. 이후 연 4회 정기검진으로 오래 쓰시도록 관리합니다.</p>
+				<p>원내 기공소에서 맞춤 제작한 보철을 끼웁니다. 이후 연 4회 정기검진으로 10~20년 이상 쓰시도록 관리합니다.</p>
 			</li>
 		</ol>
 	</div>
@@ -328,8 +328,11 @@ if ( $slug === '사랑니-발치' ) : ?>
 <?php endif; ?>
 
 <?php
-/* === 환자 고민 / 솔루션 6쌍 — bdbddc.com 패턴 참고 === */
-if ( function_exists( 'moondental_service_pain_points' ) ) {
+/* === 환자 고민 / 솔루션 6쌍 — bdbddc.com 패턴 참고 ===
+ * v3.47 · 임플란트-센터는 제외. 위 "다른 병원에서 어렵다고 하셨나요" 6케이스와
+ *   뼈 부족·전신질환·흔들림 3개가 겹쳐 같은 말을 두 번 하게 된다.
+ *   해당 페이지에서는 그쪽 한 블록으로 합쳤다. */
+if ( function_exists( 'moondental_service_pain_points' ) && ! $md_impl_own ) {
 	$pp_map = moondental_service_pain_points();
 	if ( isset( $pp_map[ $slug ] ) && ! empty( $pp_map[ $slug ] ) ) :
 ?>
