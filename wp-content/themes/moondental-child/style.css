@@ -16110,434 +16110,246 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
 }
 
 /* =============================================================
-   v3.46 · 임플란트센터 — 30여년 노하우 / 시스템 색인 / 재수복
-   토큰(--color-*)만 사용하므로 다크모드는 :root 스와프를 자동 추종.
+   v3.47 · 임플란트센터 — 환자 중심 재구성
+   색은 전부 --color-* 토큰. 다크모드는 :root 스와프를 자동 추종.
+   코럴 = 환자가 겪는 문제 · 세이지 = 문치과의 해법
    ============================================================= */
-.md-implant-legacy {
-  background: linear-gradient(180deg, rgba(216, 128, 98, 0.04) 0%, rgba(216, 128, 98, 0.10) 100%);
+
+/* --- 다른 병원에서 어렵다고 하셨나요 ------------------------- */
+.md-impl-hard {
+  background: linear-gradient(180deg, rgba(216, 128, 98, 0.05) 0%, rgba(216, 128, 98, 0.11) 100%);
   border-top: 3px solid var(--color-primary);
   border-bottom: 3px solid var(--color-primary);
 }
-.md-implant-legacy .md-section-head__title {
-  color: var(--color-primary-dark);
-}
+.md-impl-hard .md-section-head__title { color: var(--color-primary-dark); }
 
-/* --- 핵심 지표 --------------------------------------------- */
-.md-implant-stats {
+.md-impl-cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin: 32px 0;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
-.md-implant-stat {
-  background: var(--color-white);
-  border: 1.5px solid rgba(216, 128, 98, 0.20);
-  border-radius: 14px;
-  padding: 20px 16px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(216, 128, 98, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: center;
-}
-.md-implant-stat__value {
-  font-size: clamp(1.4rem, 2.3vw, 1.9rem);
-  font-weight: 900;
-  color: var(--color-primary-dark);
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-.md-implant-stat__value sup {
-  font-size: 0.6em;
-  vertical-align: super;
-  color: var(--color-primary);
-  font-weight: 800;
-}
-.md-implant-stat__unit {
-  font-size: 0.55em;
-  margin-left: 2px;
-  color: var(--color-primary);
-  font-weight: 700;
-}
-.md-implant-stat__label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-text);
-  line-height: 1.4;
-  word-break: keep-all;
-}
-
-/* --- 소제목 ------------------------------------------------ */
-.md-implant-h3 {
-  margin: 48px 0 10px;
-  font-size: var(--fs-h3);
-  font-weight: 800;
-  color: var(--color-primary-dark);
-  letter-spacing: -0.025em;
-  line-height: 1.4;
-  word-break: keep-all;
-}
-.md-implant-sub {
-  margin: 0 0 24px;
-  font-size: var(--fs-small);
-  color: var(--color-text-sub);
-  line-height: 1.85;
-  word-break: keep-all;
-}
-
-/* --- 임플란트 연대기 ---------------------------------------- */
-.md-implant-eras {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-}
-.md-implant-era {
+.md-impl-card {
+  position: relative;
   background: var(--color-white);
   border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 20px 18px 22px;
+  border-radius: 16px;
+  padding: 26px 24px 26px;
   box-shadow: var(--card-shadow);
+  transition: transform 0.24s var(--ease), box-shadow 0.24s var(--ease);
 }
-.md-implant-era__yr {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
+.md-impl-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow-hover);
+}
+.md-impl-card::before {
+  content: "\201C";
+  position: absolute;
+  top: 6px;
+  left: 18px;
+  font-size: 3.4rem;
+  line-height: 1;
+  font-weight: 700;
   color: var(--color-primary);
+  opacity: 0.22;
+  pointer-events: none;
 }
-.md-implant-era__yr::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  flex: none;
-}
-.md-implant-era h4 {
-  margin: 6px 0 14px;
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--color-text);
-  word-break: keep-all;
-}
-.md-implant-era dl { margin: 0; }
-.md-implant-era dt {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--color-text-mute);
-  margin: 0 0 3px;
-}
-.md-implant-era dd {
-  margin: 0 0 13px;
-  font-size: 0.85rem;
-  line-height: 1.75;
-  color: var(--color-text-sub);
-  word-break: keep-all;
-}
-.md-implant-era dd:last-child { margin-bottom: 0; }
-.md-implant-era dd.is-now { color: var(--color-text); }
-.md-implant-era dd.is-ours { color: var(--color-accent-dark); font-weight: 600; }
-
-/* --- 시스템 색인 ------------------------------------------- */
-.md-implant-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px 28px;
-  margin-bottom: 18px;
-}
-.md-implant-filter-group {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-}
-.md-implant-filter-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--color-text-mute);
-  margin-right: 4px;
-}
-.md-implant-chip {
-  font: inherit;
-  font-size: 0.84rem;
-  font-weight: 600;
-  cursor: pointer;
-  background: var(--color-white);
-  color: var(--color-text-sub);
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  padding: 6px 15px;
-  line-height: 1.5;
-  transition: background 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease);
-}
-.md-implant-chip:hover { color: var(--color-text); border-color: var(--color-primary); }
-.md-implant-chip[aria-pressed="true"] {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-text-on-primary);
-}
-.md-implant-count {
+.md-impl-card__q {
+  position: relative;
   margin: 0 0 12px;
-  font-size: 0.76rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: var(--color-text-mute);
+  padding-left: 20px;
+  font-size: 1.08rem;
+  font-weight: 800;
+  line-height: 1.5;
+  letter-spacing: -0.025em;
+  color: var(--color-primary-dark);
+  word-break: keep-all;
+}
+.md-impl-card p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.85;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+}
+.md-impl-card p strong {
+  color: var(--color-accent-dark);
+  font-weight: 800;
 }
 
-.md-implant-sys-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* --- 30년이 만든 차이 --------------------------------------- */
+.md-impl-diffs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.md-impl-diff {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 28px 24px 30px;
+  box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-.md-implant-sys {
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 16px 18px;
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
-  gap: 6px 16px;
-  align-items: baseline;
-  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
-}
-.md-implant-sys:hover { border-color: var(--color-primary); box-shadow: var(--card-shadow); }
-.md-implant-sys__ico {
-  grid-row: span 2;
-  align-self: start;
-  color: var(--color-text-mute);
-  padding-top: 2px;
-}
-.md-implant-sys__ico svg {
-  display: block;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.15;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-}
-.md-implant-sys__name {
-  font-size: 0.98rem;
-  font-weight: 800;
-  color: var(--color-text);
-  letter-spacing: -0.01em;
+.md-impl-diff__n {
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--color-primary);
   word-break: keep-all;
 }
-.md-implant-sys__en {
-  margin-left: 8px;
-  font-size: 0.82rem;
-  font-weight: 400;
+.md-impl-diff__n span {
+  font-size: 0.46em;
+  font-weight: 700;
+  margin-left: 3px;
   color: var(--color-text-mute);
+  letter-spacing: 0;
 }
-.md-implant-sys__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  font-size: 0.74rem;
-  color: var(--color-text-mute);
-  white-space: nowrap;
-}
-.md-implant-tag {
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: var(--color-surface-alt);
-  color: var(--color-text-sub);
-  font-weight: 600;
-}
-.md-implant-sys__note {
-  grid-column: 2 / -1;
-  font-size: 0.86rem;
-  line-height: 1.8;
-  color: var(--color-text-sub);
-  word-break: keep-all;
-}
-.md-implant-sys__note strong { color: var(--color-text); font-weight: 700; }
-
-.md-implant-empty {
-  margin: 10px 0 0;
-  background: var(--color-accent-bg);
-  border: 1px dashed var(--color-accent-dark);
-  border-radius: 14px;
-  padding: 22px 20px;
-  font-size: 0.88rem;
-  line-height: 1.8;
-  color: var(--color-text-sub);
-  word-break: keep-all;
-}
-.md-implant-empty strong { color: var(--color-accent-dark); font-weight: 800; }
-
-.md-implant-legend {
-  list-style: none;
-  margin: 20px 0 0;
-  padding: 18px 0 0;
-  border-top: 1px solid var(--color-border);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 26px;
-}
-.md-implant-legend li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-text-mute);
-}
-.md-implant-legend svg {
-  flex: none;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.15;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-}
-
-.md-implant-foot {
-  margin: 18px 0 0;
-  font-size: 0.82rem;
-  line-height: 1.85;
-  color: var(--color-text-mute);
-  word-break: keep-all;
-}
-.md-implant-foot strong { color: var(--color-text-sub); font-weight: 700; }
-
-/* --- 재수복 클리닉 ----------------------------------------- */
-.md-implant-revs {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-}
-.md-implant-rev {
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-top: 3px solid var(--color-danger);
-  border-radius: 14px;
-  padding: 20px 20px 22px;
-  box-shadow: var(--card-shadow);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.md-implant-rev__said {
+.md-impl-diff h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.06rem;
   font-weight: 800;
   line-height: 1.5;
-  letter-spacing: -0.02em;
-  color: var(--color-danger);
+  letter-spacing: -0.025em;
+  color: var(--color-text);
   word-break: keep-all;
 }
-.md-implant-rev__check,
-.md-implant-rev__plan {
+.md-impl-diff p {
   margin: 0;
-  font-size: 0.86rem;
-  line-height: 1.8;
-  color: var(--color-text-sub);
-  word-break: keep-all;
-}
-.md-implant-rev__plan { color: var(--color-text); }
-.md-implant-rev__check b,
-.md-implant-rev__plan b {
-  display: block;
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.11em;
-  color: var(--color-text-mute);
-  margin-bottom: 3px;
-}
-.md-implant-rev__plan strong { color: var(--color-accent-dark); font-weight: 800; }
-.md-implant-rev__stat {
-  margin: auto 0 0;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-border);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-accent-dark);
-}
-
-/* --- 시스템 판독 흐름 --------------------------------------- */
-.md-implant-flow {
-  margin-top: 32px;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  padding: 26px 26px 28px;
-  box-shadow: var(--card-shadow);
-}
-.md-implant-flow__title {
-  margin: 0 0 10px;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: var(--color-primary-dark);
-  word-break: keep-all;
-}
-.md-implant-flow__lead {
-  margin: 0 0 18px;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   line-height: 1.85;
   color: var(--color-text-sub);
   word-break: keep-all;
 }
-.md-implant-flow__list {
+
+/* --- 치료 과정 --------------------------------------------- */
+.md-impl-steps {
+  list-style: none;
   margin: 0;
   padding: 0;
-  list-style: none;
-  counter-reset: mdimplstep;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  counter-reset: mdimpl;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
-.md-implant-flow__list li {
-  counter-increment: mdimplstep;
+.md-impl-steps li {
+  counter-increment: mdimpl;
   position: relative;
-  padding-left: 42px;
-  font-size: 0.87rem;
-  line-height: 1.8;
-  color: var(--color-text-sub);
-  word-break: keep-all;
+  padding-top: 52px;
 }
-.md-implant-flow__list li::before {
-  content: counter(mdimplstep, decimal-leading-zero);
+.md-impl-steps li::before {
+  content: counter(mdimpl);
   position: absolute;
-  left: 0;
   top: 0;
-  width: 28px;
-  height: 28px;
+  left: 0;
+  width: 38px;
+  height: 38px;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--color-accent-bg);
-  color: var(--color-accent-dark);
-  font-size: 0.72rem;
+  background: var(--color-accent-dark);
+  color: var(--color-text-on-primary);
+  font-size: 1rem;
   font-weight: 800;
 }
-.md-implant-flow__list li strong { color: var(--color-text); font-weight: 700; }
+.md-impl-steps li::after {
+  content: "";
+  position: absolute;
+  top: 19px;
+  left: 48px;
+  right: -16px;
+  height: 2px;
+  background: var(--color-border);
+}
+.md-impl-steps li:last-child::after { display: none; }
+.md-impl-steps h3 {
+  margin: 0 0 8px;
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+  word-break: keep-all;
+}
+.md-impl-steps p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.8;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+}
 
-.md-implant-callout { margin-top: 32px; }
+/* --- 건강보험 임플란트 --------------------------------------- */
+.md-impl-insurance {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: clamp(24px, 3.5vw, 44px);
+  align-items: center;
+  background: var(--color-accent-bg);
+  border: 1.5px solid var(--color-accent);
+  border-radius: 20px;
+  padding: clamp(26px, 3.5vw, 38px);
+}
+.md-impl-insurance__head h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.2rem, 2.2vw, 1.55rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--color-accent-dark);
+  word-break: keep-all;
+}
+.md-impl-insurance__head p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.85;
+  color: var(--color-text-sub);
+  word-break: keep-all;
+}
+.md-impl-insurance__head p strong { color: var(--color-text); font-weight: 800; }
 
-/* --- 반응형 ------------------------------------------------ */
+.md-impl-insurance__facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.md-impl-insurance__facts > div {
+  background: var(--color-white);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.md-impl-insurance__facts dt {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--color-text-mute);
+  margin-bottom: 4px;
+}
+.md-impl-insurance__facts dd {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--color-text);
+  word-break: keep-all;
+}
+
+/* --- 반응형 ------------------------------------------------- */
 @media (max-width: 900px) {
-  .md-implant-stats { grid-template-columns: repeat(2, 1fr); }
-  .md-implant-eras { grid-template-columns: repeat(2, 1fr); }
-  .md-implant-revs { grid-template-columns: 1fr; }
+  .md-impl-cards { grid-template-columns: repeat(2, 1fr); }
+  .md-impl-diffs { grid-template-columns: 1fr; }
+  .md-impl-steps { grid-template-columns: repeat(2, 1fr); row-gap: 26px; }
+  .md-impl-steps li:nth-child(2)::after { display: none; }
+  .md-impl-insurance { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
-  .md-implant-eras { grid-template-columns: 1fr; }
-  .md-implant-h3 { margin-top: 38px; }
-  .md-implant-sys { grid-template-columns: 28px minmax(0, 1fr); }
-  .md-implant-sys__meta { grid-column: 2; white-space: normal; }
-  .md-implant-sys__note { grid-column: 2; }
-  .md-implant-flow { padding: 20px 18px 22px; }
+  .md-impl-cards { grid-template-columns: 1fr; }
+  .md-impl-steps { grid-template-columns: 1fr; row-gap: 22px; }
+  .md-impl-steps li { padding-top: 0; padding-left: 54px; min-height: 38px; }
+  .md-impl-steps li::after { display: none; }
+  .md-impl-insurance__facts { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .md-implant-chip,
-  .md-implant-sys { transition: none; }
+  .md-impl-card { transition: none; }
 }
