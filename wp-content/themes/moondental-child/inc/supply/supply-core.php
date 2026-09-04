@@ -1,0 +1,400 @@
+<?php
+/**
+ * 재고관리 — 조회와 기록
+ *
+ * 규칙 하나 · 재고 수량을 직접 쓰는 함수는 없다.
+ * 무엇이 움직이든 md_sup_move() 로 원장에 한 줄 남기고, 현재고는 합계로 읽는다.
+ *
+ * @package moondental-child
+ */
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
+/* ============================================================
+ * 권한
+ * ============================================================ */
+
+/** 재고 페이지를 볼 수 있는가 (로그인한 직원) */
+function md_sup_can_use() {
+	return is_user_logged_in() && ( current_user_can( 'md_supply_use' ) || current_user_can( 'manage_options' ) );
+}
+
+/** 반출 처리·입고·품목 관리를 할 수 있는가 (재고 담당자) */
+function md_sup_can_manage() {
+	return is_user_logged_in() && ( current_user_can( 'md_supply_manage' ) || current_user_can( 'manage_options' ) );
+}
+
+/** 로그인한 사용자의 소속 팀 id (사용자 메타에 저장) */
+function md_sup_my_team_id() {
+	$id = (int) get_user_meta( get_current_user_id(), 'md_sup_team_id', true );
+	return $id > 0 ? $id : 0;
+}
+
+/* ============================================================
+ * 팀 · 품목
+ * ============================================================ */
+
+function md_sup_teams( $only_active = true ) {
+	global $wpdb;
+	$t     = md_sup_tables();
+	$where = $only_active ? 'WHERE active = 1' : '';
+	return $wpdb->get_results( "SELECT * FROM {$t['teams']} $where ORDER BY sort_no ASC, id ASC" );
+}
+
+function md_sup_team_name( $team_id ) {
+	foreach ( md_sup_teams( false ) as $tm ) {
+		if ( (int) $tm->id === (int) $team_id ) { return $tm->name; }
+	}
+	return '';
+}
+
+/**
+ * 품목 목록. 검색어·카테고리·거래처로 좁힐 수 있다.
+ * 현재고는 여기서 원장 합계를 붙여 한 번에 가져온다(품목마다 따로 세지 않는다).
+ */
+function md_sup_items( $args = array() ) {
+	global $wpdb;
+	$t = md_sup_tables();
+
+	$a = wp_parse_args( $args, array(
+		'search'   => '',
+		'category' => '',
+		'vendor'   => '',
+		'low_only' => false,
+		'limit'    => 0,
+	) );
+
+	$where  = array( 'i.active = 1' );
+	$params = array();
+
+	if ( '' !== $a['search'] ) {
+		$like     = '%' . $wpdb->esc_like( $a['search'] ) . '%';
+		$where[]  = '(i.name LIKE %s OR i.code LIKE %s OR i.vendor LIKE %s)';
+		$params[] = $like; $params[] = $like; $params[] = $like;
+	}
+	if ( '' !== $a['category'] ) { $where[] = 'i.category = %s'; $params[] = $a['category']; }
+	if ( '' !== $a['vendor'] )   { $where[] = 'i.vendor = %s';   $params[] = $a['vendor']; }
+
+	$sql = "SELECT i.*, COALESCE(l.stock, 0) AS stock
+	        FROM {$t['items']} i
+	        LEFT JOIN (
+	            SELECT item_id, SUM(qty) AS stock FROM {$t['ledger']} GROUP BY item_id
+	        ) l ON l.item_id = i.id
+	        WHERE " . implode( ' AND ', $where );
+
+	if ( $a['low_only'] ) { $sql .= ' HAVING stock <= i.min_stock AND i.min_stock > 0'; }
+	$sql .= ' ORDER BY i.sort_no ASC, i.id ASC';
+	if ( $a['limit'] > 0 ) { $sql .= ' LIMIT ' . (int) $a['limit']; }
+
+	if ( $params ) { $sql = $wpdb->prepare( $sql, $params ); }
+	return $wpdb->get_results( $sql );
+}
+
+function md_sup_item( $item_id ) {
+	global $wpdb;
+	$t = md_sup_tables();
+	return $wpdb->get_row( $wpdb->prepare(
+		"SELECT i.*, COALESCE((SELECT SUM(qty) FROM {$t['ledger']} WHERE item_id = i.id), 0) AS stock
+		 FROM {$t['items']} i WHERE i.id = %d", $item_id
+	) );
+}
+
+function md_sup_categories() {
+	global $wpdb;
+	$t = md_sup_tables();
+	return $wpdb->get_col( "SELECT DISTINCT category FROM {$t['items']} WHERE active = 1 AND category <> '' ORDER BY category" );
+}
+
+/* ============================================================
+ * 원장 — 모든 수량 변화는 여기를 지난다
+ * ============================================================ */
+
+/**
+ * 원장에 한 줄 기록한다.
+ *
+ * @param int    $item_id 품목
+ * @param int    $qty     부호 있는 수량. 입고 +, 출고 −
+ * @param string $reason  in | out | dispose | adjust
+ * @param int    $team_id 출고 대상 팀 (입고·조정이면 0)
+ * @param int    $ref_id  연결된 신청 id 등
+ * @param string $note    메모
+ * @return int|false 기록 id
+ */
+function md_sup_move( $item_id, $qty, $reason = 'out', $team_id = 0, $ref_id = 0, $note = '' ) {
+	global $wpdb;
+	$t   = md_sup_tables();
+	$qty = (int) $qty;
+	if ( ! $item_id || 0 === $qty ) { return false; }
+
+	$allowed = array( 'in', 'out', 'dispose', 'adjust' );
+	if ( ! in_array( $reason, $allowed, true ) ) { $reason = 'out'; }
+
+	$now = current_time( 'mysql' );
+	$ok  = $wpdb->insert( $t['ledger'], array(
+		'item_id'    => (int) $item_id,
+		'team_id'    => (int) $team_id,
+		'qty'        => $qty,
+		'reason'     => $reason,
+		'ref_id'     => (int) $ref_id,
+		'note'       => mb_substr( (string) $note, 0, 255 ),
+		'user_id'    => get_current_user_id(),
+		'ym'         => substr( $now, 0, 7 ),
+		'created_at' => $now,
+	), array( '%d', '%d', '%d', '%s', '%d', '%s', '%d', '%s', '%s' ) );
+
+	return $ok ? (int) $wpdb->insert_id : false;
+}
+
+/** 품목 현재고 */
+function md_sup_stock( $item_id ) {
+	global $wpdb;
+	$t = md_sup_tables();
+	return (int) $wpdb->get_var( $wpdb->prepare(
+		"SELECT COALESCE(SUM(qty),0) FROM {$t['ledger']} WHERE item_id = %d", $item_id
+	) );
+}
+
+/* ============================================================
+ * 사용량 — 낭비를 줄이는 장치의 근거
+ * ============================================================ */
+
+/**
+ * 특정 팀이 특정 품목을 최근 몇 달간 월평균 얼마나 받아갔는가.
+ * 신청 화면에서 수량 칸 옆에 바로 보여주는 값이다.
+ *
+ * @return float 월평균 수량
+ */
+function md_sup_avg_monthly( $item_id, $team_id, $months = 3 ) {
+	global $wpdb;
+	$t     = md_sup_tables();
+	$since = gmdate( 'Y-m-d H:i:s', strtotime( '-' . (int) $months . ' months', current_time( 'timestamp' ) ) );
+
+	$total = (int) $wpdb->get_var( $wpdb->prepare(
+		"SELECT COALESCE(SUM(-qty),0) FROM {$t['ledger']}
+		 WHERE item_id = %d AND team_id = %d AND reason = 'out' AND created_at >= %s",
+		$item_id, $team_id, $since
+	) );
+	return $months > 0 ? round( $total / $months, 1 ) : 0;
+}
+
+/** 팀이 그 품목을 마지막으로 받아간 날짜와 수량 */
+function md_sup_last_out( $item_id, $team_id ) {
+	global $wpdb;
+	$t = md_sup_tables();
+	return $wpdb->get_row( $wpdb->prepare(
+		"SELECT created_at, -qty AS qty FROM {$t['ledger']}
+		 WHERE item_id = %d AND team_id = %d AND reason = 'out'
+		 ORDER BY created_at DESC LIMIT 1",
+		$item_id, $team_id
+	) );
+}
+
+/**
+ * 팀별 월 사용 금액. 통계 화면의 기본 표.
+ * 금액은 원장 수량 × 품목 단가로 계산한다.
+ */
+function md_sup_team_usage( $ym ) {
+	global $wpdb;
+	$t = md_sup_tables();
+	return $wpdb->get_results( $wpdb->prepare(
+		"SELECT l.team_id, tm.name AS team_name,
+		        SUM(-l.qty) AS qty,
+		        SUM(-l.qty * i.price) AS amount
+		 FROM {$t['ledger']} l
+		 INNER JOIN {$t['items']} i ON i.id = l.item_id
+		 LEFT JOIN {$t['teams']} tm ON tm.id = l.team_id
+		 WHERE l.reason = 'out' AND l.ym = %s
+		 GROUP BY l.team_id, tm.name
+		 ORDER BY amount DESC",
+		$ym
+	) );
+}
+
+/** 한 달간 가장 많이 나간 품목 (금액 기준) */
+function md_sup_top_items( $ym, $team_id = 0, $limit = 10 ) {
+	global $wpdb;
+	$t = md_sup_tables();
+
+	$where  = "l.reason = 'out' AND l.ym = %s";
+	$params = array( $ym );
+	if ( $team_id > 0 ) { $where .= ' AND l.team_id = %d'; $params[] = $team_id; }
+	$params[] = (int) $limit;
+
+	return $wpdb->get_results( $wpdb->prepare(
+		"SELECT i.id, i.name, i.unit, i.price,
+		        SUM(-l.qty) AS qty, SUM(-l.qty * i.price) AS amount
+		 FROM {$t['ledger']} l
+		 INNER JOIN {$t['items']} i ON i.id = l.item_id
+		 WHERE $where
+		 GROUP BY i.id, i.name, i.unit, i.price
+		 ORDER BY amount DESC LIMIT %d",
+		$params
+	) );
+}
+
+/** 최근 N개월의 월별 사용 금액 (팀 지정 시 그 팀만) */
+function md_sup_monthly_trend( $team_id = 0, $months = 6 ) {
+	global $wpdb;
+	$t      = md_sup_tables();
+	$yms    = array();
+	$ts     = current_time( 'timestamp' );
+	for ( $i = $months - 1; $i >= 0; $i-- ) {
+		$yms[] = gmdate( 'Y-m', strtotime( "-$i months", $ts ) );
+	}
+	$in     = implode( ',', array_fill( 0, count( $yms ), '%s' ) );
+	$params = $yms;
+
+	$where = "l.reason = 'out' AND l.ym IN ($in)";
+	if ( $team_id > 0 ) { $where .= ' AND l.team_id = %d'; $params[] = $team_id; }
+
+	$rows = $wpdb->get_results( $wpdb->prepare(
+		"SELECT l.ym, SUM(-l.qty * i.price) AS amount
+		 FROM {$t['ledger']} l INNER JOIN {$t['items']} i ON i.id = l.item_id
+		 WHERE $where GROUP BY l.ym",
+		$params
+	) );
+
+	$map = array();
+	foreach ( $rows as $r ) { $map[ $r->ym ] = (int) $r->amount; }
+
+	$out = array();
+	foreach ( $yms as $ym ) { $out[ $ym ] = isset( $map[ $ym ] ) ? $map[ $ym ] : 0; }
+	return $out;
+}
+
+/* ============================================================
+ * 신청
+ * ============================================================ */
+
+/**
+ * 신청서를 만든다.
+ *
+ * @param array $lines [ item_id => array( qty, over_reason ) ]
+ * @return int|WP_Error 신청 id
+ */
+function md_sup_create_request( $team_id, $lines, $urgent = 0, $note = '' ) {
+	global $wpdb;
+	$t = md_sup_tables();
+
+	$team_id = (int) $team_id;
+	if ( $team_id <= 0 ) { return new WP_Error( 'no_team', '팀이 지정되지 않았습니다.' ); }
+	if ( empty( $lines ) ) { return new WP_Error( 'empty', '신청할 품목이 없습니다.' ); }
+
+	$now = current_time( 'mysql' );
+	$ok  = $wpdb->insert( $t['req'], array(
+		'team_id'    => $team_id,
+		'user_id'    => get_current_user_id(),
+		'status'     => 'pending',
+		'urgent'     => $urgent ? 1 : 0,
+		'note'       => mb_substr( (string) $note, 0, 500 ),
+		'created_at' => $now,
+	), array( '%d', '%d', '%s', '%d', '%s', '%s' ) );
+
+	if ( ! $ok ) { return new WP_Error( 'db', '신청서를 저장하지 못했습니다.' ); }
+	$req_id = (int) $wpdb->insert_id;
+
+	foreach ( $lines as $item_id => $ln ) {
+		$qty = isset( $ln['qty'] ) ? (int) $ln['qty'] : 0;
+		if ( $qty <= 0 ) { continue; }
+		$wpdb->insert( $t['line'], array(
+			'req_id'      => $req_id,
+			'item_id'     => (int) $item_id,
+			'qty_req'     => $qty,
+			'qty_out'     => 0,
+			'over_reason' => isset( $ln['over_reason'] ) ? mb_substr( (string) $ln['over_reason'], 0, 255 ) : '',
+		), array( '%d', '%d', '%d', '%d', '%s' ) );
+	}
+
+	return $req_id;
+}
+
+/** 신청 목록. 팀을 지정하면 그 팀 것만. */
+function md_sup_requests( $args = array() ) {
+	global $wpdb;
+	$t = md_sup_tables();
+	$a = wp_parse_args( $args, array( 'team_id' => 0, 'status' => '', 'limit' => 50 ) );
+
+	$where  = array( '1=1' );
+	$params = array();
+	if ( $a['team_id'] > 0 ) { $where[] = 'r.team_id = %d'; $params[] = (int) $a['team_id']; }
+	if ( '' !== $a['status'] ) { $where[] = 'r.status = %s'; $params[] = $a['status']; }
+	$params[] = (int) $a['limit'];
+
+	return $wpdb->get_results( $wpdb->prepare(
+		"SELECT r.*, tm.name AS team_name,
+		        (SELECT COUNT(*) FROM {$t['line']} WHERE req_id = r.id) AS line_count
+		 FROM {$t['req']} r LEFT JOIN {$t['teams']} tm ON tm.id = r.team_id
+		 WHERE " . implode( ' AND ', $where ) . "
+		 ORDER BY r.urgent DESC, r.created_at DESC LIMIT %d",
+		$params
+	) );
+}
+
+/** 신청서에 달린 품목 줄 */
+function md_sup_request_lines( $req_id ) {
+	global $wpdb;
+	$t = md_sup_tables();
+	return $wpdb->get_results( $wpdb->prepare(
+		"SELECT ln.*, i.name, i.unit, i.price, i.code
+		 FROM {$t['line']} ln INNER JOIN {$t['items']} i ON i.id = ln.item_id
+		 WHERE ln.req_id = %d ORDER BY ln.id ASC",
+		$req_id
+	) );
+}
+
+/**
+ * 신청을 출고 처리한다. 줄마다 실제 나간 수량을 받아 원장에 기록한다.
+ *
+ * @param array $qty_map [ line_id => qty_out ]
+ */
+function md_sup_release_request( $req_id, $qty_map ) {
+	global $wpdb;
+	$t   = md_sup_tables();
+	$req = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$t['req']} WHERE id = %d", $req_id ) );
+	if ( ! $req ) { return new WP_Error( 'not_found', '신청서를 찾을 수 없습니다.' ); }
+	if ( 'done' === $req->status ) { return new WP_Error( 'done', '이미 처리된 신청입니다.' ); }
+
+	foreach ( md_sup_request_lines( $req_id ) as $ln ) {
+		$qty = isset( $qty_map[ $ln->id ] ) ? (int) $qty_map[ $ln->id ] : 0;
+		if ( $qty <= 0 ) { continue; }
+		md_sup_move( $ln->item_id, -$qty, 'out', $req->team_id, $req_id, '신청 #' . $req_id . ' 출고' );
+		$wpdb->update( $t['line'], array( 'qty_out' => $qty ), array( 'id' => $ln->id ), array( '%d' ), array( '%d' ) );
+	}
+
+	$wpdb->update( $t['req'], array(
+		'status'  => 'done',
+		'done_at' => current_time( 'mysql' ),
+		'done_by' => get_current_user_id(),
+	), array( 'id' => $req_id ), array( '%s', '%s', '%d' ), array( '%d' ) );
+
+	return true;
+}
+
+/** 신청 반려 */
+function md_sup_reject_request( $req_id, $reason = '' ) {
+	global $wpdb;
+	$t = md_sup_tables();
+	return $wpdb->update( $t['req'], array(
+		'status'  => 'rejected',
+		'note'    => mb_substr( (string) $reason, 0, 500 ),
+		'done_at' => current_time( 'mysql' ),
+		'done_by' => get_current_user_id(),
+	), array( 'id' => (int) $req_id ), array( '%s', '%s', '%s', '%d' ), array( '%d' ) );
+}
+
+/* ============================================================
+ * 표시 도우미
+ * ============================================================ */
+
+function md_sup_won( $n ) {
+	return number_format( (int) $n ) . '원';
+}
+
+function md_sup_status_label( $status ) {
+	$map = array(
+		'pending'  => '신청됨',
+		'done'     => '출고 완료',
+		'rejected' => '반려',
+	);
+	return isset( $map[ $status ] ) ? $map[ $status ] : $status;
+}

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.49' );
+define( 'MOONDENTAL_VERSION', '3.50' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2059,6 +2059,16 @@ require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3353.php';
 require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3354.php';
 require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3355.php';
 require_once MOONDENTAL_DIR . '/inc/guides/guides.php'; // v3.44.175 · 종합 안내서 (임플란트·투명교정·라미네이트)
+
+/* v3.50 · 직원 전용 재고관리.
+ * file_exists 로 감싸는 이유 — FTP 미러링이 중간에 끊겨 한 파일만 빠져도
+ * require_once 는 치명적 오류를 내고 사이트 전체가 500 이 된다. 재고 기능만
+ * 조용히 빠지는 편이 낫다. */
+foreach ( array( 'supply-schema', 'supply-core' ) as $_md_sup_f ) {
+	$_md_sup_p = MOONDENTAL_DIR . '/inc/supply/' . $_md_sup_f . '.php';
+	if ( file_exists( $_md_sup_p ) ) { require_once $_md_sup_p; }
+}
+unset( $_md_sup_f, $_md_sup_p );
 
 
 /* ============================================================
