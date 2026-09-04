@@ -111,7 +111,7 @@ function md_sup_handle_post() {
 				isset( $_POST['urgent'] ) ? 1 : 0,
 				isset( $_POST['note'] ) ? sanitize_text_field( wp_unslash( $_POST['note'] ) ) : ''
 			);
-			$redirect = add_query_arg( 'msg', is_wp_error( $res ) ? 'error' : 'sent', $redirect );
+			$redirect = add_query_arg( array( 'team' => $team_id, 'msg' => is_wp_error( $res ) ? 'error' : 'sent' ), $redirect );
 			break;
 
 		/* 출고 처리 */
@@ -170,6 +170,20 @@ function md_sup_handle_post() {
 	exit;
 }
 add_action( 'template_redirect', 'md_sup_handle_post', 1 );
+
+/**
+ * 고른 팀을 기억한다. 공용 계정이라 소속 팀이 없어서,
+ * 매번 다시 고르게 하면 실수로 다른 팀을 누를 확률이 올라간다.
+ * 출력 전에 실행되어야 하므로 template_redirect 에서 처리한다.
+ */
+function md_sup_remember_team() {
+	if ( ! md_sup_is_page() || ! isset( $_GET['team'] ) ) { return; }
+	if ( headers_sent() ) { return; }
+	$team = (int) $_GET['team'];
+	if ( $team <= 0 ) { return; }
+	setcookie( 'md_sup_team', (string) $team, time() + YEAR_IN_SECONDS, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, is_ssl(), true );
+}
+add_action( 'template_redirect', 'md_sup_remember_team', 2 );
 
 /* ============================================================
  * 보조
@@ -288,6 +302,37 @@ function md_sup_render_header( $tab ) {
 	<?php
 }
 
+/**
+ * 팀 선택 — 3행 × 5열. 병원 층 배치를 그대로 옮긴 것이라
+ * 직원분들이 자기 자리를 눈으로 찾는다.
+ *
+ * @param array $teams   팀 목록
+ * @param int   $current 지금 고른 팀 (0이면 아직 안 고름)
+ */
+function md_sup_render_team_picker( $teams, $current ) {
+	?>
+	<section class="mds-teams<?php echo $current ? ' is-compact' : ''; ?>">
+		<h2 class="mds-teams__title">
+			<?php echo $current ? '팀' : '어느 팀에서 신청하시나요?'; ?>
+			<?php if ( $current ) : ?>
+				<span class="mds-teams__now"><?php echo esc_html( md_sup_team_name( $current ) ); ?></span>
+			<?php endif; ?>
+		</h2>
+		<?php if ( ! $current ) : ?>
+			<p class="mds-hint">한 번 고르면 다음부터 기억합니다. 팀을 바꾸려면 다시 누르시면 됩니다.</p>
+		<?php endif; ?>
+		<div class="mds-teamgrid">
+			<?php foreach ( $teams as $tm ) : ?>
+				<a class="mds-teambtn<?php echo (int) $tm->id === $current ? ' is-on' : ''; ?>"
+				   href="<?php echo esc_url( md_sup_url( array( 'tab' => 'request', 'team' => (int) $tm->id ) ) ); ?>">
+					<?php echo esc_html( $tm->name ); ?>
+				</a>
+			<?php endforeach; ?>
+		</div>
+	</section>
+	<?php
+}
+
 /** ① 요청 */
 function md_sup_render_request() {
 	$my_team = md_sup_my_team_id();
@@ -298,7 +343,21 @@ function md_sup_render_request() {
 
 	$vendor = isset( $_GET['vendor'] ) ? sanitize_text_field( wp_unslash( $_GET['vendor'] ) ) : '';
 
-	if ( ! $team_id && $teams ) { $team_id = (int) $teams[0]->id; }
+	/* 공용 계정이라 소속 팀이 없다. 주소에 없으면 지난번에 고른 팀을 쓴다. */
+	if ( ! $team_id && isset( $_COOKIE['md_sup_team'] ) ) { $team_id = (int) $_COOKIE['md_sup_team']; }
+
+	/* 존재하는 팀인지 확인 — 쿠키가 낡았거나 팀이 지워졌을 수 있다 */
+	$valid = false;
+	foreach ( $teams as $tm ) { if ( (int) $tm->id === $team_id ) { $valid = true; break; } }
+	if ( ! $valid ) { $team_id = 0; }
+
+	/* 팀을 아직 안 골랐으면 팀 선택만 보여준다. 잘못된 팀으로 신청하면
+	 * 그 팀 사용량으로 잡히므로, 고르기 전에는 품목을 띄우지 않는다. */
+	if ( ! $team_id ) {
+		md_sup_render_team_picker( $teams, 0 );
+		return;
+	}
+	md_sup_render_team_picker( $teams, $team_id );
 
 	/* 필터에 걸린 전 품목을 다 보여준다. 평균·최근수령은 품목마다 조회하지 않고
 	 * 팀 단위로 한 번에 받아 온다 — 그러지 않으면 568개 × 2질의가 된다. */
@@ -309,14 +368,7 @@ function md_sup_render_request() {
 	?>
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="request">
-		<label class="mds-field">
-			<span>팀</span>
-			<select name="team">
-				<?php foreach ( $teams as $tm ) : ?>
-					<option value="<?php echo (int) $tm->id; ?>" <?php selected( $team_id, $tm->id ); ?>><?php echo esc_html( $tm->name ); ?></option>
-				<?php endforeach; ?>
-			</select>
-		</label>
+		<input type="hidden" name="team" value="<?php echo (int) $team_id; ?>">
 		<label class="mds-field">
 			<span>분류</span>
 			<select name="cat">
@@ -402,7 +454,9 @@ function md_sup_render_request() {
 		<div class="mds-submit">
 			<label class="mds-check"><input type="checkbox" name="urgent" value="1"> 긴급 (오늘 필요)</label>
 			<input class="mds-note" type="text" name="note" placeholder="담당자에게 전할 메모 (선택)" maxlength="200">
-			<button type="submit" class="mds-btn mds-btn--fill">신청하기</button>
+			<button type="submit" class="mds-btn mds-btn--fill">
+				<?php echo esc_html( md_sup_team_name( $team_id ) ); ?> 이름으로 신청
+			</button>
 		</div>
 	</form>
 

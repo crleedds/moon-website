@@ -15,38 +15,37 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-/** 팀 번호 → 로그인 아이디. 한글 아이디는 로그인 때 번거로워 번호를 쓴다. */
-function md_sup_team_login( $index ) {
-	return 'team' . str_pad( (string) $index, 2, '0', STR_PAD_LEFT );
-}
-
 define( 'MD_SUP_MANAGER_LOGIN', 'stock.manager' );
+define( 'MD_SUP_STAFF_LOGIN', 'moondental' );
 
-/** 계정 현황 — 어떤 것이 있고 없는지 */
+/**
+ * 계정은 둘뿐이다.
+ *   stock.manager — 재고 담당자. 승인·출고·입고·재고까지.
+ *   moondental    — 직원 공용. 로그인해서 자기 팀을 고르고 신청한다.
+ *
+ * 공용 계정이라 「누가」는 남지 않고 「어느 팀」만 남는다.
+ * 사용량 집계는 팀 단위라 문제없지만, 팀을 잘못 고르면 그 팀으로 잡히므로
+ * 신청 화면에서 팀 선택을 크게 두고 마지막 선택을 기억하게 했다.
+ */
 function md_sup_account_rows() {
-	$rows = array();
-
-	$rows[] = array(
-		'login' => MD_SUP_MANAGER_LOGIN,
-		'name'  => '재고 담당자',
-		'role'  => 'md_stock_manager',
-		'team'  => 0,
-		'user'  => get_user_by( 'login', MD_SUP_MANAGER_LOGIN ),
-	);
-
-	$i = 0;
-	foreach ( md_sup_teams() as $tm ) {
-		$i++;
-		$login  = md_sup_team_login( $i );
-		$rows[] = array(
-			'login' => $login,
-			'name'  => $tm->name,
+	return array(
+		array(
+			'login' => MD_SUP_MANAGER_LOGIN,
+			'name'  => '재고 담당자',
+			'role'  => 'md_stock_manager',
+			'desc'  => '신청 승인 · 출고 · 입고 · 재고 실사까지 전부',
+			'team'  => 0,
+			'user'  => get_user_by( 'login', MD_SUP_MANAGER_LOGIN ),
+		),
+		array(
+			'login' => MD_SUP_STAFF_LOGIN,
+			'name'  => '직원 공용',
 			'role'  => 'md_stock_staff',
-			'team'  => (int) $tm->id,
-			'user'  => get_user_by( 'login', $login ),
-		);
-	}
-	return $rows;
+			'desc'  => '로그인 후 자기 팀을 골라 신청 · 사용량과 비용 확인',
+			'team'  => 0,
+			'user'  => get_user_by( 'login', MD_SUP_STAFF_LOGIN ),
+		),
+	);
 }
 
 /** 없는 계정만 만든다. 이미 있는 것은 건드리지 않는다. */
@@ -107,7 +106,8 @@ function md_sup_accounts_screen() {
 		<h1>재고 계정</h1>
 		<p>
 			재고관리 페이지(<a href="<?php echo esc_url( home_url( '/직원/' ) ); ?>" target="_blank" rel="noopener">/직원/</a>)에서 쓸 계정입니다.
-			팀마다 하나씩, 그리고 재고 담당자 계정 하나를 만듭니다.
+			<strong>재고 담당자 하나, 직원 공용 하나</strong> 총 두 개입니다.
+			직원분들은 공용 계정으로 로그인해 신청 화면에서 자기 팀을 고릅니다.
 		</p>
 
 		<?php if ( $made ) : ?>
@@ -134,14 +134,14 @@ function md_sup_accounts_screen() {
 		<?php endif; ?>
 
 		<h2>현황</h2>
-		<table class="widefat striped" style="max-width:760px">
-			<thead><tr><th>소속</th><th>아이디</th><th>역할</th><th>상태</th></tr></thead>
+		<table class="widefat striped" style="max-width:860px">
+			<thead><tr><th>계정</th><th>아이디</th><th>할 수 있는 일</th><th>상태</th></tr></thead>
 			<tbody>
 			<?php foreach ( $rows as $r ) : ?>
 				<tr>
 					<td><strong><?php echo esc_html( $r['name'] ); ?></strong></td>
 					<td><code><?php echo esc_html( $r['login'] ); ?></code></td>
-					<td><?php echo 'md_stock_manager' === $r['role'] ? '재고 · 담당자 (전체 관리)' : '재고 · 직원 (신청 · 통계)'; ?></td>
+					<td><?php echo esc_html( $r['desc'] ); ?></td>
 					<td>
 						<?php if ( $r['user'] ) : ?>
 							<span style="color:#2271b1">있음</span>

@@ -255,3 +255,51 @@
 @media (prefers-reduced-motion: reduce) {
   .mds-tab, .mds-btn { transition: none; }
 }
+
+/* --- 팀 선택 (v3.54) ---------------------------------------
+   병원 층 배치를 그대로 옮긴 3행 × 5열. 공용 계정으로 로그인해
+   자기 자리를 눈으로 찾아 누른다. 잘못 누르면 그 팀 사용량으로
+   잡히므로 지금 고른 팀을 항상 크게 보여준다.
+   ----------------------------------------------------------- */
+.mds-teams {
+  background: var(--color-white, #fff);
+  border: 1px solid var(--color-border, #EDDFD0);
+  border-radius: 16px;
+  padding: 20px 20px 22px;
+  margin-bottom: 16px;
+}
+.mds-teams__title {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  margin: 0 0 4px; font-size: 1.1rem; font-weight: 800;
+  color: var(--color-text, #3D2F26);
+}
+.mds-teams__now {
+  padding: 4px 14px; border-radius: 999px; font-size: .88rem; font-weight: 800;
+  background: var(--color-primary, #D88062); color: var(--color-text-on-primary, #fff);
+}
+.mds-teams.is-compact { padding: 14px 16px 16px; }
+.mds-teams.is-compact .mds-teams__title { font-size: .84rem; color: var(--color-text-mute, #A89685); }
+
+.mds-teamgrid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px;
+}
+.mds-teambtn {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 58px; padding: 10px 8px;
+  border: 1.5px solid var(--color-border, #EDDFD0); border-radius: 12px;
+  background: var(--color-bg, #FFFAF4); color: var(--color-text-sub, #7A6B5F);
+  font-size: .88rem; font-weight: 700; line-height: 1.35; text-decoration: none;
+  word-break: keep-all;
+  transition: background .16s, color .16s, border-color .16s;
+}
+.mds-teambtn:hover { border-color: var(--color-primary, #D88062); color: var(--color-text, #3D2F26); }
+.mds-teambtn.is-on {
+  background: var(--color-primary, #D88062);
+  border-color: var(--color-primary, #D88062);
+  color: var(--color-text-on-primary, #fff);
+}
+.mds-teams.is-compact .mds-teambtn { min-height: 42px; font-size: .8rem; padding: 6px; }
+
+@media (max-width: 900px) { .mds-teamgrid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 560px) { .mds-teamgrid { grid-template-columns: repeat(2, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .mds-teambtn { transition: none; } }
