@@ -181,14 +181,48 @@ add_action( 'wp_enqueue_scripts', 'md_sup_trim_assets', 100 );
 function md_sup_trim_head() {
 	if ( ! md_sup_is_page() ) { return; }
 
-	remove_action( 'wp_enqueue_scripts', 'wp_enqueue_global_styles' );
-	remove_action( 'wp_footer', 'wp_enqueue_global_styles' );
-	remove_action( 'wp_body_open', 'wp_global_styles_render_svg_filters' );
+	/* 검색엔진용 출력 — 이 화면은 noindex 다. 아무도 읽지 않는 글을 만드느라
+	 * 의료진·지역·백과 항목을 질의하고 12KB 넘는 JSON-LD 를 조립하고 있었다.
+	 * v3.69 에서 Yoast 필터를 걸었는데, 실제 출처는 테마 자신이었다.
+	 * 훅에서 뗄 때는 붙일 때 쓴 우선순위와 정확히 같아야 한다. */
+	$seo = array(
+		'moondental_seo_meta_tags'                  => 5,
+		'moondental_seo_analytics_snippets'         => 6,
+		'moondental_seo_extra_keywords'             => 3,
+		'moondental_jsonld_schema'                  => 50,
+		'moondental_jsonld_sitenav'                 => 51,
+		'moondental_jsonld_encyclopedia'            => 52,
+		'moondental_jsonld_area_served'             => 53,
+		'moondental_seo_sameas_organization_schema' => 55,
+		'moondental_jsonld_breadcrumb'              => 55,
+		'moondental_jsonld_faq'                     => 60,
+		'moondental_jsonld_doctor'                  => 65,
+		'moondental_jsonld_region'                  => 66,
+		'moondental_jsonld_service_faq'             => 67,
+	);
+	foreach ( $seo as $fn => $priority ) {
+		remove_action( 'wp_head', $fn, $priority );
+	}
 
+	/* Yoast 가 깔려 있다면 그쪽 구조화 데이터도 */
 	add_filter( 'wpseo_schema_graph', '__return_empty_array', 99 );
 	add_filter( 'wpseo_json_ld_output', '__return_false', 99 );
+
+	/* 블록 에디터 전역 스타일 (theme.json 을 읽어 CSS 로 합친다).
+	 * remove_action 은 워드프레스 버전마다 붙는 자리가 달라 확실하지 않았다 —
+	 * 스타일이 인쇄되기 직전(wp_head 8번)에 한 칸 앞서서 목록에서 뺀다. */
+	remove_action( 'wp_enqueue_scripts', 'wp_enqueue_global_styles' );
+	remove_action( 'wp_footer', 'wp_enqueue_global_styles', 1 );
+	remove_action( 'wp_body_open', 'wp_global_styles_render_svg_filters' );
+	add_action( 'wp_head', 'md_sup_drop_global_styles', 7 );
 }
 add_action( 'wp', 'md_sup_trim_head', 5 );
+
+/** 스타일이 인쇄되기 직전에 전역 스타일을 목록에서 뺀다 */
+function md_sup_drop_global_styles() {
+	wp_dequeue_style( 'global-styles' );
+	wp_dequeue_style( 'core-block-supports' );
+}
 
 /**
  * 환자용 떠다니는 버튼을 이 페이지에서만 걷어낸다.
