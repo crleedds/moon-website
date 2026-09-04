@@ -34,9 +34,49 @@ function md_sup_current_tab() {
 	return $tab;
 }
 
+/**
+ * 직원 전용 페이지는 여러 도구의 허브다.
+ * 들어오면 먼저 무엇을 할지 고르고, 고른 뒤에 그 도구로 들어간다.
+ */
+function md_sup_apps() {
+	return array(
+		'stock' => array(
+			'label' => '재고관리',
+			'icon'  => '📦',
+			'desc'  => '재료 신청 · 사용량과 비용 확인 · 입출고 관리',
+		),
+		'notice' => array(
+			'label' => '공지사항',
+			'icon'  => '📢',
+			'desc'  => '병원 내부 공지와 안내',
+		),
+	);
+}
+
+function md_sup_current_app() {
+	$app  = isset( $_GET['app'] ) ? sanitize_key( wp_unslash( $_GET['app'] ) ) : '';
+	$apps = md_sup_apps();
+	return isset( $apps[ $app ] ) ? $app : '';
+}
+
+/**
+ * 페이지 주소를 만든다.
+ *
+ * app 을 넘기지 않으면 지금 보고 있는 도구를 그대로 유지한다.
+ * 화면마다 'app' => 'stock' 을 일일이 붙이지 않아도 되게 하기 위함이다.
+ * 허브로 나가려면 'app' => '' 을 명시한다.
+ */
 function md_sup_url( $args = array() ) {
 	$base = get_permalink();
 	if ( ! $base ) { $base = home_url( '/직원/' ); }
+
+	if ( ! array_key_exists( 'app', $args ) ) {
+		$cur = md_sup_current_app();
+		if ( $cur ) { $args['app'] = $cur; }
+	} elseif ( '' === $args['app'] ) {
+		unset( $args['app'] );
+	}
+
 	return add_query_arg( $args, $base );
 }
 
@@ -183,6 +223,27 @@ function md_sup_handle_post() {
 			}
 			$redirect = add_query_arg( array( 'tab' => 'inventory', 'msg' => $n ? 'adjusted' : 'empty' ), md_sup_url() );
 			break;
+
+		/* 공지 쓰기 · 수정 */
+		case 'notice':
+			if ( ! md_sup_can_manage() ) { break; }
+			$res = md_sup_notice_save(
+				isset( $_POST['notice_id'] ) ? (int) $_POST['notice_id'] : 0,
+				isset( $_POST['title'] ) ? wp_unslash( $_POST['title'] ) : '',
+				isset( $_POST['body'] ) ? wp_unslash( $_POST['body'] ) : '',
+				isset( $_POST['pinned'] ) ? 1 : 0
+			);
+			$redirect = is_wp_error( $res )
+				? add_query_arg( array( 'app' => 'notice', 'msg' => 'error' ), md_sup_url( array( 'app' => 'notice' ) ) )
+				: add_query_arg( array( 'app' => 'notice', 'n' => (int) $res, 'msg' => 'noticed' ), md_sup_url( array( 'app' => 'notice' ) ) );
+			break;
+
+		/* 공지 삭제 */
+		case 'notice_del':
+			if ( ! md_sup_can_manage() ) { break; }
+			md_sup_notice_delete( isset( $_POST['notice_id'] ) ? (int) $_POST['notice_id'] : 0 );
+			$redirect = add_query_arg( array( 'app' => 'notice', 'msg' => 'notice_del' ), md_sup_url( array( 'app' => 'notice' ) ) );
+			break;
 	}
 
 	wp_safe_redirect( $redirect );
@@ -234,7 +295,9 @@ function md_sup_notice( $code ) {
 		'released' => array( 'ok',   '출고 처리했습니다. 재고에 반영되었습니다.' ),
 		'rejected' => array( 'ok',   '반려 처리했습니다.' ),
 		'inbound'  => array( 'ok',   '입고를 기록했습니다.' ),
-		'adjusted' => array( 'ok',   '실사 결과를 반영했습니다.' ),
+		'adjusted'   => array( 'ok',   '실사 결과를 반영했습니다.' ),
+		'noticed'    => array( 'ok',   '공지를 저장했습니다.' ),
+		'notice_del' => array( 'ok',   '공지를 삭제했습니다.' ),
 	);
 	if ( ! isset( $map[ $code ] ) ) { return ''; }
 	list( $type, $text ) = $map[ $code ];
@@ -291,36 +354,85 @@ function md_sup_render_denied() {
 	<?php
 }
 
-/** 헤더 + 탭 */
-function md_sup_render_header( $tab ) {
-	$user    = wp_get_current_user();
-	$team_id = md_sup_my_team_id();
-	$team    = $team_id ? md_sup_team_name( $team_id ) : '';
+/** 헤더 — 허브면 제목만, 도구 안이면 돌아가기와 탭까지 */
+function md_sup_render_header( $app, $tab ) {
+	$user = wp_get_current_user();
+	$apps = md_sup_apps();
+	$name = $app ? $apps[ $app ]['label'] : '직원 전용';
 	?>
 	<div class="mds-head">
 		<div class="mds-head__top">
 			<div>
-				<span class="mds-head__eyebrow">문치과병원 · 직원 전용</span>
-				<h1>재고관리</h1>
+				<span class="mds-head__eyebrow">
+					<?php if ( $app ) : ?>
+						<a class="mds-head__back" href="<?php echo esc_url( md_sup_url( array( "app" => "" ) ) ); ?>">← 직원 전용</a>
+					<?php else : ?>
+						문치과병원
+					<?php endif; ?>
+				</span>
+				<h1><?php echo esc_html( $name ); ?></h1>
 			</div>
 			<div class="mds-head__me">
 				<span class="mds-head__name"><?php echo esc_html( $user->display_name ); ?></span>
-				<?php if ( $team ) : ?><span class="mds-head__team"><?php echo esc_html( $team ); ?></span><?php endif; ?>
 				<a class="mds-head__out" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">로그아웃</a>
 			</div>
 		</div>
-		<nav class="mds-tabs" aria-label="재고관리 메뉴">
-			<?php foreach ( md_sup_tabs() as $key => $t ) :
-				if ( $t['manage'] && ! md_sup_can_manage() ) { continue; } ?>
-				<a class="mds-tab<?php echo $tab === $key ? ' is-on' : ''; ?>"
-				   href="<?php echo esc_url( md_sup_url( array( 'tab' => $key ) ) ); ?>"
-				   <?php echo $tab === $key ? 'aria-current="page"' : ''; ?>>
-					<span aria-hidden="true"><?php echo esc_html( $t['icon'] ); ?></span><?php echo esc_html( $t['label'] ); ?>
-				</a>
-			<?php endforeach; ?>
-		</nav>
+
+		<?php if ( 'stock' === $app ) : ?>
+			<nav class="mds-tabs" aria-label="재고관리 메뉴">
+				<?php foreach ( md_sup_tabs() as $key => $t ) :
+					if ( $t['manage'] && ! md_sup_can_manage() ) { continue; } ?>
+					<a class="mds-tab<?php echo $tab === $key ? ' is-on' : ''; ?>"
+					   href="<?php echo esc_url( md_sup_url( array( 'app' => 'stock', 'tab' => $key ) ) ); ?>"
+					   <?php echo $tab === $key ? 'aria-current="page"' : ''; ?>>
+						<span aria-hidden="true"><?php echo esc_html( $t['icon'] ); ?></span><?php echo esc_html( $t['label'] ); ?>
+					</a>
+				<?php endforeach; ?>
+			</nav>
+		<?php endif; ?>
 	</div>
 	<?php
+}
+
+/** 허브 — 무엇을 할지 고르는 첫 화면 */
+function md_sup_render_hub() {
+	$pending = md_sup_can_manage() ? count( md_sup_requests( array( 'status' => 'pending', 'limit' => 99 ) ) ) : 0;
+	$recent  = md_sup_notice_recent( 3 );
+	?>
+	<div class="mds-apps">
+		<?php foreach ( md_sup_apps() as $key => $a ) : ?>
+			<a class="mds-app" href="<?php echo esc_url( md_sup_url( array( 'app' => $key ) ) ); ?>">
+				<span class="mds-app__icon" aria-hidden="true"><?php echo esc_html( $a['icon'] ); ?></span>
+				<span class="mds-app__body">
+					<span class="mds-app__label">
+						<?php echo esc_html( $a['label'] ); ?>
+						<?php if ( 'stock' === $key && $pending ) : ?>
+							<span class="mds-app__badge"><?php echo (int) $pending; ?>건 대기</span>
+						<?php endif; ?>
+					</span>
+					<span class="mds-app__desc"><?php echo esc_html( $a['desc'] ); ?></span>
+				</span>
+				<span class="mds-app__go" aria-hidden="true">→</span>
+			</a>
+		<?php endforeach; ?>
+	</div>
+
+	<?php if ( $recent ) : ?>
+		<h2 class="mds-h2">최근 공지</h2>
+		<ul class="mds-notices">
+			<?php foreach ( $recent as $n ) : ?>
+				<li class="mds-noticeitem<?php echo $n->pinned ? ' is-pinned' : ''; ?>">
+					<a href="<?php echo esc_url( md_sup_url( array( 'app' => 'notice', 'n' => (int) $n->id ) ) ); ?>">
+						<span class="mds-noticeitem__title">
+							<?php if ( $n->pinned ) : ?><span class="mds-pin">고정</span><?php endif; ?>
+							<?php echo esc_html( $n->title ); ?>
+						</span>
+						<span class="mds-noticeitem__meta"><?php echo esc_html( mysql2date( 'Y-m-d', $n->created_at ) ); ?></span>
+					</a>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+	<?php endif;
 }
 
 /**
@@ -863,19 +975,26 @@ function md_sup_render_page() {
 	if ( ! is_user_logged_in() ) { md_sup_render_login(); return; }
 	if ( ! md_sup_can_use() )    { md_sup_render_denied(); return; }
 
+	$app = md_sup_current_app();
 	$tab = md_sup_current_tab();
-	md_sup_render_header( $tab );
+	md_sup_render_header( $app, $tab );
 
 	if ( isset( $_GET['msg'] ) ) {
 		echo md_sup_notice( sanitize_key( wp_unslash( $_GET['msg'] ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 
-	switch ( $tab ) {
-		case 'stats':     md_sup_render_stats();     break;
-		case 'manage':    md_sup_render_manage();    break;
-		case 'inbound':   md_sup_render_inbound();   break;
-		case 'inventory': md_sup_render_inventory(); break;
-		default:          md_sup_render_request();   break;
+	if ( 'notice' === $app ) {
+		md_sup_render_notice();
+	} elseif ( 'stock' === $app ) {
+		switch ( $tab ) {
+			case 'stats':     md_sup_render_stats();     break;
+			case 'manage':    md_sup_render_manage();    break;
+			case 'inbound':   md_sup_render_inbound();   break;
+			case 'inventory': md_sup_render_inventory(); break;
+			default:          md_sup_render_request();   break;
+		}
+	} else {
+		md_sup_render_hub();
 	}
 
 	/* 사이트 푸터를 감췄으니 필요한 안내만 여기서 */

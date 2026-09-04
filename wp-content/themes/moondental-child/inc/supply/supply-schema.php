@@ -18,6 +18,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 define( 'MD_SUP_DB_VERSION', '1.0.0' );
+define( 'MD_SUP_DB2_VERSION', '1.0.0' );
 
 /** 테이블 이름 모음 */
 function md_sup_tables() {
@@ -29,6 +30,8 @@ function md_sup_tables() {
 		'ledger' => $p . 'ledger',
 		'req'    => $p . 'req',
 		'line'   => $p . 'req_line',
+		'notice' => $p . 'notice',
+		'fav'    => $p . 'fav',
 	);
 }
 
@@ -341,3 +344,50 @@ function md_sup_user_column_value( $val, $col, $user_id ) {
 	return $id && function_exists( 'md_sup_team_name' ) ? esc_html( md_sup_team_name( $id ) ) : '—';
 }
 add_filter( 'manage_users_custom_column', 'md_sup_user_column_value', 10, 3 );
+
+/* ============================================================
+ * v3.59 · 공지사항 · 즐겨찾기
+ * ============================================================ */
+
+/** 추가 테이블 (공지 · 즐겨찾기) */
+function md_sup_install_v2() {
+	global $wpdb;
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+	$t       = md_sup_tables();
+	$charset = $wpdb->get_charset_collate();
+
+	/* 공지사항 — 직원 전용. 본문은 서식 없는 글로 받고 출력할 때 줄바꿈만 살린다.
+	 * 에디터를 붙이지 않는 이유 · 재고 계정은 wp-admin 에 못 들어가므로
+	 * 프론트에서 써야 하는데, 리치 에디터는 HTML 이 섞여 들어와 위험하다. */
+	dbDelta( "CREATE TABLE {$t['notice']} (
+		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		title VARCHAR(255) NOT NULL DEFAULT '',
+		body TEXT NULL,
+		pinned TINYINT(1) NOT NULL DEFAULT 0,
+		author_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		author_name VARCHAR(100) NOT NULL DEFAULT '',
+		created_at DATETIME NULL DEFAULT NULL,
+		updated_at DATETIME NULL DEFAULT NULL,
+		PRIMARY KEY (id),
+		KEY pinned_created (pinned, created_at)
+	) $charset;" );
+
+	/* 팀별 즐겨찾기 품목 */
+	dbDelta( "CREATE TABLE {$t['fav']} (
+		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		team_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		item_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		PRIMARY KEY (id),
+		UNIQUE KEY team_item (team_id, item_id)
+	) $charset;" );
+
+	update_option( 'md_sup_db2_version', MD_SUP_DB2_VERSION );
+}
+
+function md_sup_maybe_install_v2() {
+	if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) { return; }
+	if ( get_option( 'md_sup_db2_version' ) === MD_SUP_DB2_VERSION ) { return; }
+	md_sup_install_v2();
+}
+add_action( 'admin_init', 'md_sup_maybe_install_v2', 11 );
