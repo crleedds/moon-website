@@ -208,7 +208,7 @@
 .mds-kpi .k { display: block; margin-top: 3px; font-size: .78rem; font-weight: 600; color: var(--color-text-mute, #A89685); }
 
 .mds-bars { display: flex; flex-direction: column; gap: 8px; }
-.mds-bar { display: grid; grid-template-columns: 130px 1fr 92px; gap: 12px; align-items: center; font-size: .86rem; }
+.mds-bars .mds-bar { display: grid; grid-template-columns: 130px 1fr 92px; gap: 12px; align-items: center; font-size: .86rem; }
 .mds-bar__label { font-weight: 700; color: var(--color-text-sub, #7A6B5F); word-break: keep-all; }
 .mds-bar__track { height: 22px; border-radius: 6px; background: var(--color-surface-alt, #F5E8D8); overflow: hidden; }
 .mds-bar__fill { display: block; height: 100%; background: var(--color-accent, #8FAE92); border-radius: 6px; }
@@ -247,7 +247,7 @@
 @media (max-width: 720px) {
   .mds-head__top { align-items: flex-start; }
   .mds-tab { flex: 1 1 auto; justify-content: center; padding-inline: 12px; font-size: .84rem; }
-  .mds-bar { grid-template-columns: 96px 1fr 76px; gap: 8px; font-size: .8rem; }
+  .mds-bars .mds-bar { grid-template-columns: 96px 1fr 76px; gap: 8px; font-size: .8rem; }
   .mds-trend { height: 160px; gap: 6px; padding: 12px; }
   .mds-submit { flex-direction: column; align-items: stretch; }
   .mds-btn { width: 100%; }
@@ -308,7 +308,7 @@
    568줄을 스크롤해 내려가 제출 버튼을 찾지 않아도 되게,
    수량을 하나라도 적으면 화면 아래에 바가 붙어 따라온다.
    ----------------------------------------------------------- */
-.mds-bar {
+.mds-cart {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
   background: var(--color-white, #fff);
   border-top: 1px solid var(--color-border, #EDDFD0);
@@ -316,27 +316,27 @@
   padding: 12px clamp(14px, 3vw, 28px);
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
 }
-.mds-bar__inner {
+.mds-cart__inner {
   max-width: 1180px; margin-inline: auto;
   display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap;
 }
-.mds-bar__team {
+.mds-cart__team {
   padding: 5px 14px; border-radius: 999px;
   font-size: .84rem; font-weight: 800;
   background: var(--color-accent-bg, rgba(143,174,146,.08));
   color: var(--color-accent-dark, #6B8F72);
   white-space: nowrap;
 }
-.mds-bar__sum { font-size: .95rem; color: var(--color-text-sub, #7A6B5F); white-space: nowrap; }
-.mds-bar__sum b { font-size: 1.15rem; font-weight: 900; color: var(--color-text, #3D2F26); font-variant-numeric: tabular-nums; }
-.mds-bar__won { margin-left: 10px; color: var(--color-primary-dark, #B86347); }
-.mds-bar__won b { color: var(--color-primary-dark, #B86347); }
-.mds-bar .mds-btn { margin-left: auto; min-height: 46px; padding-inline: 30px; }
+.mds-cart__sum { font-size: .95rem; color: var(--color-text-sub, #7A6B5F); white-space: nowrap; }
+.mds-cart__sum b { font-size: 1.15rem; font-weight: 900; color: var(--color-text, #3D2F26); font-variant-numeric: tabular-nums; }
+.mds-cart__won { margin-left: 10px; color: var(--color-primary-dark, #B86347); }
+.mds-cart__won b { color: var(--color-primary-dark, #B86347); }
+.mds-cart .mds-btn { margin-left: auto; min-height: 46px; padding-inline: 30px; }
 
 /* 바가 떠 있는 동안 아래 내용이 가려지지 않게 여백을 준다 */
-body.mds-has-bar .mds-page { padding-bottom: 120px; }
+body.mds-has-cart .mds-page { padding-bottom: 120px; }
 /* JS 로 제출하는 사람에겐 아래 제출 줄이 중복이라 감춘다 */
-body.mds-has-bar #mds-submit .mds-btn { display: none; }
+body.mds-has-cart #mds-submit .mds-btn { display: none; }
 
 /* 수량 +/− */
 .mds-stepper { display: inline-flex; align-items: center; gap: 4px; }
@@ -366,9 +366,9 @@ body.mds-has-bar #mds-submit .mds-btn { display: none; }
 .mds-table tbody tr.mds-divider:hover td { background: var(--color-surface, #FBF2E8); }
 
 @media (max-width: 700px) {
-  .mds-bar__inner { gap: 8px 10px; }
-  .mds-bar__sum { font-size: .85rem; }
-  .mds-bar .mds-btn { width: auto; min-width: 130px; padding-inline: 18px; }
+  .mds-cart__inner { gap: 8px 10px; }
+  .mds-cart__sum { font-size: .85rem; }
+  .mds-cart .mds-btn { width: auto; min-width: 130px; padding-inline: 18px; }
   .mds-step { width: 34px; }
   .mds-stepper .mds-qty { width: 58px; }
 }
@@ -396,7 +396,7 @@ body.mds-has-bar #mds-submit .mds-btn { display: none; }
 .mds-page-body .md-rcta { display: none !important; }
 
 /* 합계 바 — hidden 이 확실히 먹게. 테마 CSS 가 display 를 건드려도 이긴다. */
-.mds-bar[hidden] { display: none !important; }
+.mds-cart[hidden] { display: none !important; }
 
 /* 접히는 팀 선택 */
 .mds-teams { padding: 0; }
@@ -548,7 +548,7 @@ body.mds-has-bar #mds-submit .mds-btn { display: none; }
 @media (prefers-color-scheme: dark) {
   .mds-impl-none { display: none; }  /* 스타일시트 유효성 유지용 자리 */
 
-  .mds-bar { box-shadow: 0 -6px 24px rgba(0, 0, 0, .55); }
+  .mds-cart { box-shadow: 0 -6px 24px rgba(0, 0, 0, .55); }
   .mds-notice--warn { background: rgba(198, 107, 94, .18); }
   .mds-flag,
   .mds-table .is-low + .mds-flag { background: rgba(198, 107, 94, .22); }
@@ -559,4 +559,159 @@ body.mds-has-bar #mds-submit .mds-btn { display: none; }
   .mds-card,
   .mds-req { box-shadow: 0 6px 20px rgba(0, 0, 0, .4); }
   .mds-app:hover { box-shadow: 0 14px 32px rgba(0, 0, 0, .55); }
+}
+
+/* =============================================================
+   v3.60 · 즐겨찾기 · 즉시검색 · 요약 · 모바일 카드 · 인쇄
+   ============================================================= */
+
+.mds-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* --- 즐겨찾기 별 ------------------------------------------- */
+.mds-th-fav, .mds-td-fav { width: 44px; text-align: center; padding-inline: 6px !important; }
+.mds-fav {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 10px;
+  font-size: 1.15rem; line-height: 1; text-decoration: none;
+  color: var(--color-text-mute, #A89685);
+  transition: background .15s, color .15s;
+}
+.mds-fav:hover { background: var(--color-surface-alt, #F5E8D8); color: var(--color-primary, #D88062); }
+.mds-fav.is-on { color: var(--color-primary, #D88062); }
+
+/* --- 즉시 검색 --------------------------------------------- */
+.mds-quick { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.mds-quick input {
+  flex: 1 1 auto; font: inherit; font-size: 1rem; min-height: 48px;
+  padding: 10px 16px; border-radius: 999px;
+  border: 1.5px solid var(--color-border, #EDDFD0);
+  background: var(--color-white, #fff); color: var(--color-text, #3D2F26);
+}
+.mds-quick input:focus { outline: 2px solid var(--color-primary, #D88062); outline-offset: 1px; border-color: var(--color-primary, #D88062); }
+.mds-quick__count { font-size: .84rem; font-weight: 700; color: var(--color-primary-dark, #B86347); white-space: nowrap; }
+
+/* --- 도구 줄 (CSV · 인쇄) ----------------------------------- */
+.mds-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.mds-tools .mds-btn { min-height: 42px; padding: 9px 18px; font-size: .88rem; text-decoration: none; display: inline-flex; align-items: center; }
+
+.mds-mini {
+  display: inline-block; padding: 7px 14px; border-radius: 999px;
+  font-size: .8rem; font-weight: 700; text-decoration: none; white-space: nowrap;
+  border: 1px solid var(--color-accent, #8FAE92); color: var(--color-accent-dark, #6B8F72);
+}
+.mds-mini:hover { background: var(--color-accent-bg, rgba(143,174,146,.08)); }
+
+/* --- 통계 · 전월 대비 --------------------------------------- */
+.mds-bars .mds-bar { display: grid; grid-template-columns: 128px 1fr 92px 62px; gap: 12px; align-items: center; }
+.mds-bar__delta { text-align: right; font-size: .82rem; font-weight: 700; color: var(--color-text-mute, #A89685); font-variant-numeric: tabular-nums; }
+.mds-bar__delta.is-up { color: var(--color-danger, #C66B5E); }
+.mds-bar__delta.is-down { color: var(--color-accent-dark, #6B8F72); }
+
+/* --- 신청 직후 요약 ----------------------------------------- */
+.mds-sent { border-left: 4px solid var(--color-accent, #8FAE92); margin-bottom: 16px; }
+.mds-sent__meta { margin: 0 0 14px; font-size: .9rem; color: var(--color-text-sub, #7A6B5F); }
+.mds-sent__meta b { color: var(--color-text, #3D2F26); }
+.mds-sent__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.mds-sent__list li {
+  display: flex; justify-content: space-between; gap: 14px;
+  padding: 9px 14px; border-radius: 10px;
+  background: var(--color-surface, #FBF2E8);
+  font-size: .89rem; color: var(--color-text-sub, #7A6B5F);
+}
+.mds-sent__list b { color: var(--color-text, #3D2F26); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* =============================================================
+   모바일 — 표를 카드로 바꾼다
+   가로 스크롤로 6~7열을 훑는 것은 손에 폰을 든 상태에서 못 할 일이다.
+   ============================================================= */
+@media (max-width: 760px) {
+  .mds-tablewrap { border: 0; background: transparent; overflow: visible; }
+  .mds-table { min-width: 0; display: block; }
+  .mds-table thead { display: none; }
+  .mds-table tbody, .mds-table tr, .mds-table td { display: block; width: 100%; }
+
+  .mds-table tbody tr {
+    position: relative;
+    background: var(--color-white, #fff);
+    border: 1px solid var(--color-border, #EDDFD0);
+    border-radius: 14px;
+    padding: 14px 16px 12px;
+    margin-bottom: 10px;
+  }
+  .mds-table tbody tr:hover { background: var(--color-white, #fff); }
+  .mds-table td { border: 0; padding: 4px 0; text-align: left !important; }
+
+  /* 라벨을 값 앞에 붙여 무슨 숫자인지 알게 한다 */
+  .mds-table td[data-label]::before {
+    content: attr(data-label) " ";
+    display: inline-block; min-width: 92px;
+    font-size: .74rem; font-weight: 800; letter-spacing: .04em;
+    color: var(--color-text-mute, #A89685);
+  }
+  .mds-table td.mds-item::before { display: none; }
+  .mds-table td.mds-item { padding-bottom: 8px; }
+  .mds-table td.mds-item b { font-size: 1rem; }
+
+  /* 즐겨찾기 별은 카드 오른쪽 위 모서리로 */
+  .mds-table td.mds-td-fav {
+    position: absolute; top: 8px; right: 8px; width: auto; padding: 0 !important;
+  }
+  .mds-table td.mds-item { padding-right: 44px; }
+
+  /* 수량 입력은 한 줄 전체를 쓴다 */
+  .mds-table td[data-label="신청 수량"],
+  .mds-table td[data-label="입고 수량"],
+  .mds-table td[data-label="실사"] {
+    margin-top: 8px; padding-top: 10px;
+    border-top: 1px dashed var(--color-border, #EDDFD0);
+  }
+  .mds-stepper { width: 100%; }
+  .mds-stepper .mds-qty { flex: 1 1 auto; width: auto; }
+  .mds-step { width: 52px; }
+  .mds-reason { width: 100%; }
+
+  .mds-table tbody tr.mds-divider {
+    padding: 0; border: 0; background: transparent;
+  }
+  .mds-table tbody tr.mds-divider td {
+    border-radius: 999px; padding: 8px 14px;
+    background: var(--color-surface-alt, #F5E8D8);
+  }
+  .mds-table tbody tr.mds-divider td::before { display: none; }
+
+  .mds-bars .mds-bar { grid-template-columns: 1fr 62px; grid-template-areas: "label delta" "track track" "val val"; row-gap: 4px; }
+  .mds-bars .mds-bar__label { grid-area: label; }
+  .mds-bars .mds-bar__delta { grid-area: delta; }
+  .mds-bars .mds-bar__track { grid-area: track; }
+  .mds-bars .mds-bar__val { grid-area: val; text-align: left; font-size: .82rem; }
+
+  .mds-quick input { font-size: 16px; }  /* iOS 가 확대하지 않는 최소 크기 */
+  .mds-tools .mds-btn { flex: 1 1 auto; justify-content: center; }
+}
+
+/* =============================================================
+   인쇄 — 실사표를 종이에 들고 다닐 수 있게
+   ============================================================= */
+@media print {
+  .mds-head, .mds-tabs, .mds-teams, .mds-filter, .mds-quick, .mds-tools,
+  .mds-cart, .mds-submit, .mds-foot, .mds-hint, .mds-notice,
+  .md-header, .md-footer { display: none !important; }
+
+  .mds-page { padding: 0; background: #fff; }
+  .mds-tablewrap { border: 0; overflow: visible; }
+  .mds-table { min-width: 0; font-size: 10pt; }
+  .mds-table thead th { background: #eee; color: #000; }
+  .mds-table td, .mds-table th { border-bottom: 1px solid #ccc; color: #000; }
+  .mds-table tbody tr { page-break-inside: avoid; }
+  .mds-qty, .mds-step { border: 1px solid #999; }
+  .mds-step { display: none; }
+  a[href]::after { content: ""; }
+}
+
+/* --- 다크모드 보정 (v3.60 추가분) ---------------------------- */
+@media (prefers-color-scheme: dark) {
+  .mds-quick input { background: var(--color-surface, #241C15); }
+  .mds-sent__list li { background: var(--color-surface-alt, #2F251C); }
+  .mds-fav:hover { background: var(--color-surface-alt, #2F251C); }
+  .mds-table tbody tr { background: var(--color-white, #2A211A); }
 }

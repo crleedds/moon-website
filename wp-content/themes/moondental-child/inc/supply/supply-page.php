@@ -41,9 +41,9 @@ function md_sup_current_tab() {
 function md_sup_apps() {
 	return array(
 		'stock' => array(
-			'label' => '재고관리',
+			'label' => '재료실',
 			'icon'  => '📦',
-			'desc'  => '재료 신청 · 사용량과 비용 확인 · 입출고 관리',
+			'desc'  => '재료 신청 · 우리 팀 사용량과 비용 · 입출고 관리',
 		),
 		'notice' => array(
 			'label' => '공지사항',
@@ -170,7 +170,7 @@ function md_sup_handle_post() {
 				isset( $_POST['urgent'] ) ? 1 : 0,
 				isset( $_POST['note'] ) ? sanitize_text_field( wp_unslash( $_POST['note'] ) ) : ''
 			);
-			$redirect = add_query_arg( array( 'team' => $team_id, 'msg' => is_wp_error( $res ) ? 'error' : 'sent' ), $redirect );
+			$redirect = add_query_arg( array( 'team' => $team_id, 'msg' => is_wp_error( $res ) ? 'error' : 'sent', 'req' => is_wp_error( $res ) ? 0 : (int) $res ), $redirect );
 			break;
 
 		/* 출고 처리 */
@@ -250,6 +250,87 @@ function md_sup_handle_post() {
 	exit;
 }
 add_action( 'template_redirect', 'md_sup_handle_post', 1 );
+
+/**
+ * 즐겨찾기 토글 · CSV 내보내기 — 화면을 그리기 전에 처리한다.
+ * 둘 다 GET 이라 여기서 받는다. 토글은 nonce 로 위조를 막는다.
+ */
+function md_sup_handle_get() {
+	if ( ! md_sup_is_page() || ! md_sup_can_use() ) { return; }
+
+	/* 즐겨찾기 */
+	if ( isset( $_GET['fav'] ) && isset( $_GET['_wpnonce'] ) ) {
+		$item = (int) $_GET['fav'];
+		$team = isset( $_GET['team'] ) ? (int) $_GET['team'] : md_sup_my_team_id();
+		if ( wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'md_sup_fav_' . $item ) ) {
+			md_sup_fav_toggle( $team, $item );
+		}
+		$back = remove_query_arg( array( 'fav', '_wpnonce' ) );
+		wp_safe_redirect( $back . '#i' . $item );
+		exit;
+	}
+
+	/* CSV 내보내기 */
+	if ( isset( $_GET['export'] ) ) {
+		$what = sanitize_key( wp_unslash( $_GET['export'] ) );
+		if ( 'usage' === $what ) { md_sup_export_usage(); }
+		if ( 'stock' === $what && md_sup_can_manage() ) { md_sup_export_stock(); }
+	}
+}
+add_action( 'template_redirect', 'md_sup_handle_get', 2 );
+
+/** CSV 한 줄 — 엑셀이 한글을 깨뜨리지 않게 BOM 을 앞에 붙인다 */
+function md_sup_csv_start( $filename ) {
+	nocache_headers();
+	header( 'Content-Type: text/csv; charset=UTF-8' );
+	header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+	echo "\xEF\xBB\xBF"; // UTF-8 BOM · 없으면 엑셀에서 한글이 깨진다
+}
+
+function md_sup_csv_row( $cols ) {
+	$out = array();
+	foreach ( $cols as $c ) {
+		$c = (string) $c;
+		$out[] = '"' . str_replace( '"', '""', $c ) . '"';
+	}
+	echo implode( ',', $out ) . "\r\n";
+}
+
+/** 사용량 CSV — 통계 화면에서 내려받는다 */
+function md_sup_export_usage() {
+	$ym   = isset( $_GET['ym'] ) ? sanitize_text_field( wp_unslash( $_GET['ym'] ) ) : current_time( 'Y-m' );
+	$view = isset( $_GET['team'] ) ? (int) $_GET['team'] : 0;
+
+	md_sup_csv_start( 'moondental-usage-' . $ym . '.csv' );
+	md_sup_csv_row( array( '문치과병원 재료 사용 내역', $ym, $view ? md_sup_team_name( $view ) : '전체 팀' ) );
+	md_sup_csv_row( array() );
+
+	md_sup_csv_row( array( '팀', '수량', '금액(원)' ) );
+	foreach ( md_sup_team_usage( $ym ) as $u ) {
+		md_sup_csv_row( array( $u->team_name, (int) $u->qty, (int) $u->amount ) );
+	}
+
+	md_sup_csv_row( array() );
+	md_sup_csv_row( array( '품목', '단위', '단가', '수량', '금액(원)' ) );
+	foreach ( md_sup_top_items( $ym, $view, 500 ) as $r ) {
+		md_sup_csv_row( array( $r->name, $r->unit, (int) $r->price, (int) $r->qty, (int) $r->amount ) );
+	}
+	exit;
+}
+
+/** 재고 CSV — 실사용 인쇄나 엑셀 정리에 쓴다 */
+function md_sup_export_stock() {
+	md_sup_csv_start( 'moondental-stock-' . current_time( 'Y-m-d' ) . '.csv' );
+	md_sup_csv_row( array( '품목코드', '품목명', '거래처', '단위', '단가', '현재고', '적정재고', '부족' ) );
+	foreach ( md_sup_items() as $it ) {
+		$low = ( $it->min_stock > 0 && $it->stock <= $it->min_stock ) ? 'O' : '';
+		md_sup_csv_row( array(
+			$it->code, $it->name, $it->vendor, $it->unit,
+			(int) $it->price, (int) $it->stock, (int) $it->min_stock, $low,
+		) );
+	}
+	exit;
+}
 
 /**
  * 고른 팀을 기억한다. 공용 계정이라 소속 팀이 없어서,
@@ -498,28 +579,44 @@ function md_sup_render_request() {
 	}
 	md_sup_render_team_picker( $teams, $team_id );
 
+	/* 방금 신청했다면 무엇을 넣었는지 먼저 보여준다 */
+	if ( isset( $_GET['req'] ) && (int) $_GET['req'] > 0 ) { md_sup_render_sent_summary( (int) $_GET['req'] ); }
+
 	/* 필터에 걸린 전 품목을 다 보여준다. 평균·최근수령은 품목마다 조회하지 않고
 	 * 팀 단위로 한 번에 받아 온다 — 그러지 않으면 568개 × 2질의가 된다. */
 	$items    = md_sup_items( array( 'search' => $search, 'category' => $cat, 'vendor' => $vendor ) );
 	$avg_map  = md_sup_avg_map( $team_id );
 	$last_map = md_sup_last_map( $team_id );
 
-	/* 우리 팀이 실제로 쓰는 품목을 맨 위로. 568개 중 우리가 만지는 건
-	 * 보통 수십 개뿐이라, 이 정렬 하나로 찾는 시간이 확 줄어든다. */
+	/* 지난 신청 그대로 다시 담기 — 수량 칸을 미리 채운다 */
+	$prefill = array();
+	if ( isset( $_GET['repeat'] ) ) {
+		$prefill = md_sup_request_qty_map( (int) $_GET['repeat'] );
+	}
+
+	$favs = array_flip( md_sup_fav_ids( $team_id ) );
+
+	/* 정렬 · 즐겨찾기 → 우리 팀이 쓰는 것 → 나머지.
+	 * 568개 중 실제로 만지는 건 보통 수십 개뿐이라, 이 정렬이 찾는 시간을 좌우한다. */
+	$fav = array();
 	$used = array();
 	$rest = array();
 	foreach ( $items as $it ) {
-		if ( isset( $avg_map[ $it->id ] ) && $avg_map[ $it->id ] > 0 ) { $used[] = $it; } else { $rest[] = $it; }
+		if ( isset( $favs[ $it->id ] ) )                                   { $fav[]  = $it; }
+		elseif ( isset( $avg_map[ $it->id ] ) && $avg_map[ $it->id ] > 0 )  { $used[] = $it; }
+		else                                                               { $rest[] = $it; }
 	}
 	usort( $used, function ( $a, $b ) use ( $avg_map ) {
 		return $avg_map[ $b->id ] <=> $avg_map[ $a->id ];
 	} );
-	$items      = array_merge( $used, $rest );
+	$items      = array_merge( $fav, $used, $rest );
+	$fav_count  = count( $fav );
 	$used_count = count( $used );
 
 	$hint = '총 ' . number_format( count( $items ) ) . '개 품목';
-	$hint .= $used_count ? ' · 우리 팀이 쓰는 ' . $used_count . '개를 맨 위로 모았습니다.' : '.';
-	$hint .= ' 필요한 것만 수량을 적으면 아래에 합계가 뜹니다.';
+	if ( $fav_count )  { $hint .= ' · 즐겨찾기 ' . $fav_count . '개'; }
+	if ( $used_count ) { $hint .= ' · 우리 팀이 쓰는 ' . $used_count . '개'; }
+	$hint .= '를 맨 위로 모았습니다. 별표를 눌러 즐겨찾기에 넣을 수 있습니다.';
 	?>
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="request">
@@ -554,49 +651,69 @@ function md_sup_render_request() {
 
 	<p class="mds-hint"><?php echo esc_html( $hint ); ?></p>
 
+	<?php /* 즉시 검색 — 이미 화면에 있는 줄을 타이핑하는 대로 걸러낸다.
+	         서버 검색(위 「찾기」)과 달리 새로 고치지 않는다. JS 가 없으면 감춰진다. */ ?>
+	<div class="mds-quick" hidden>
+		<input type="search" id="mds-quick" placeholder="빠른 검색 — 품목명을 입력하면 바로 걸러집니다" aria-label="화면 안에서 품목 빠르게 찾기">
+		<span class="mds-quick__count" id="mds-quick-count"></span>
+	</div>
+
 	<form method="post" action="<?php echo esc_url( md_sup_url( array( 'tab' => 'request' ) ) ); ?>">
 		<?php wp_nonce_field( 'md_sup_request', 'md_sup_nonce' ); ?>
 		<input type="hidden" name="md_sup_action" value="request">
 		<input type="hidden" name="team_id" value="<?php echo (int) $team_id; ?>">
 
 		<div class="mds-tablewrap">
-			<table class="mds-table">
+			<table class="mds-table mds-table--items">
 				<thead>
 					<tr>
+						<th class="mds-th-fav"><span class="mds-sr">즐겨찾기</span></th>
 						<th>품목</th><th class="num">단가</th><th class="num">창고 재고</th>
 						<th class="num">우리 팀 월평균</th><th>최근 수령</th><th class="num">신청 수량</th>
 					</tr>
 				</thead>
 				<tbody>
 				<?php if ( empty( $items ) ) : ?>
-					<tr><td colspan="6" class="mds-empty">해당하는 품목이 없습니다.</td></tr>
+					<tr><td colspan="7" class="mds-empty">해당하는 품목이 없습니다.</td></tr>
 				<?php else : $i_row = 0; foreach ( $items as $it ) :
 					$i_row++;
-					$avg  = isset( $avg_map[ $it->id ] ) ? $avg_map[ $it->id ] : 0;
-					$last = isset( $last_map[ $it->id ] ) ? $last_map[ $it->id ] : null;
-					$low  = ( $it->min_stock > 0 && $it->stock <= $it->min_stock );
+					$avg    = isset( $avg_map[ $it->id ] ) ? $avg_map[ $it->id ] : 0;
+					$last   = isset( $last_map[ $it->id ] ) ? $last_map[ $it->id ] : null;
+					$low    = ( $it->min_stock > 0 && $it->stock <= $it->min_stock );
+					$is_fav = isset( $favs[ $it->id ] );
+					$pre    = isset( $prefill[ $it->id ] ) ? (int) $prefill[ $it->id ] : '';
+					/* 즉시 검색이 훑을 문자열 — 소문자로 미리 만들어 둔다 */
+					$hay    = mb_strtolower( $it->name . ' ' . $it->code . ' ' . $it->vendor . ' ' . $it->category );
 					?>
-					<tr>
-						<td class="mds-item">
+					<tr id="i<?php echo (int) $it->id; ?>" data-search="<?php echo esc_attr( $hay ); ?>">
+						<td class="mds-td-fav">
+							<a class="mds-fav<?php echo $is_fav ? ' is-on' : ''; ?>"
+							   href="<?php echo esc_url( wp_nonce_url( md_sup_url( array( 'tab' => 'request', 'team' => $team_id, 'fav' => (int) $it->id ) ), 'md_sup_fav_' . (int) $it->id ) ); ?>"
+							   title="<?php echo $is_fav ? '즐겨찾기에서 빼기' : '즐겨찾기에 넣기'; ?>"
+							   aria-label="<?php echo esc_attr( $it->name . ( $is_fav ? ' 즐겨찾기 해제' : ' 즐겨찾기' ) ); ?>">
+								<?php echo $is_fav ? '★' : '☆'; ?>
+							</a>
+						</td>
+						<td class="mds-item" data-label="품목">
 							<b><?php echo esc_html( $it->name ); ?></b>
 							<span class="mds-item__meta"><?php echo esc_html( $it->code . ' · ' . $it->vendor . ( $it->unit ? ' · ' . $it->unit : '' ) ); ?></span>
 						</td>
-						<td class="num"><?php echo esc_html( number_format( (int) $it->price ) ); ?></td>
-						<td class="num<?php echo $low ? ' is-low' : ''; ?>">
+						<td class="num" data-label="단가"><?php echo esc_html( number_format( (int) $it->price ) ); ?></td>
+						<td class="num<?php echo $low ? ' is-low' : ''; ?>" data-label="창고 재고">
 							<?php echo esc_html( number_format( (int) $it->stock ) ); ?>
 							<?php if ( $low ) : ?><span class="mds-flag">부족</span><?php endif; ?>
 						</td>
-						<td class="num mds-avg" data-avg="<?php echo esc_attr( $avg ); ?>"><?php echo esc_html( $avg > 0 ? $avg : '—' ); ?></td>
-						<td class="mds-last">
+						<td class="num mds-avg" data-label="우리 팀 월평균" data-avg="<?php echo esc_attr( $avg ); ?>"><?php echo esc_html( $avg > 0 ? $avg : '—' ); ?></td>
+						<td class="mds-last" data-label="최근 수령">
 							<?php if ( $last ) : ?>
 								<?php echo esc_html( mysql2date( 'n/j', $last->created_at ) . ' · ' . (int) $last->qty ); ?>
 							<?php else : ?>—<?php endif; ?>
 						</td>
-						<td class="num">
+						<td class="num" data-label="신청 수량">
 							<span class="mds-stepper">
 								<button type="button" class="mds-step" data-step="-1" aria-label="수량 줄이기" tabindex="-1">−</button>
 								<input class="mds-qty" type="number" min="0" step="1" inputmode="numeric"
-								       name="qty[<?php echo (int) $it->id; ?>]" value=""
+								       name="qty[<?php echo (int) $it->id; ?>]" value="<?php echo esc_attr( $pre ); ?>"
 								       data-avg="<?php echo esc_attr( $avg ); ?>"
 								       data-price="<?php echo (int) $it->price; ?>"
 								       aria-label="<?php echo esc_attr( $it->name . ' 신청 수량' ); ?>">
@@ -607,8 +724,8 @@ function md_sup_render_request() {
 							       aria-label="<?php echo esc_attr( $it->name . ' 초과 신청 사유' ); ?>">
 						</td>
 					</tr>
-					<?php if ( $used_count && $i_row === $used_count ) : ?>
-						<tr class="mds-divider"><td colspan="6">여기부터는 우리 팀이 최근 3개월간 받아가지 않은 품목입니다</td></tr>
+					<?php if ( ( $fav_count + $used_count ) && $i_row === ( $fav_count + $used_count ) ) : ?>
+						<tr class="mds-divider"><td colspan="7">여기부터는 우리 팀이 최근 3개월간 받아가지 않은 품목입니다</td></tr>
 					<?php endif; ?>
 				<?php endforeach; endif; ?>
 				</tbody>
@@ -625,12 +742,12 @@ function md_sup_render_request() {
 
 		<?php /* 고정 바 — 수량을 하나라도 적으면 화면 아래에 붙어 따라온다.
 		         568줄을 스크롤해 내려가 제출 버튼을 찾지 않아도 되게. */ ?>
-		<div class="mds-bar" id="mds-bar" hidden>
-			<div class="mds-bar__inner">
-				<span class="mds-bar__team"><?php echo esc_html( md_sup_team_name( $team_id ) ); ?></span>
-				<span class="mds-bar__sum">
-					<b id="mds-bar-count">0</b>개 품목
-					<span class="mds-bar__won">약 <b id="mds-bar-total">0</b>원</span>
+		<div class="mds-cart" id="mds-cart" hidden>
+			<div class="mds-cart__inner">
+				<span class="mds-cart__team"><?php echo esc_html( md_sup_team_name( $team_id ) ); ?></span>
+				<span class="mds-cart__sum">
+					<b id="mds-cart-count">0</b>개 품목
+					<span class="mds-cart__won">약 <b id="mds-cart-total">0</b>원</span>
 				</span>
 				<button type="submit" class="mds-btn mds-btn--fill">신청하기</button>
 			</div>
@@ -641,22 +758,56 @@ function md_sup_render_request() {
 	$mine = md_sup_requests( array( 'team_id' => $team_id, 'limit' => 8 ) );
 	if ( $mine ) : ?>
 		<h2 class="mds-h2">우리 팀 최근 신청</h2>
+		<p class="mds-hint">매달 비슷한 것을 신청하신다면 「이대로 다시 담기」를 누르세요. 수량이 그대로 채워집니다.</p>
 		<div class="mds-tablewrap">
 			<table class="mds-table">
-				<thead><tr><th>신청일</th><th>품목 수</th><th>상태</th><th>메모</th></tr></thead>
+				<thead><tr><th>신청일</th><th class="num">품목 수</th><th>상태</th><th>메모</th><th></th></tr></thead>
 				<tbody>
 				<?php foreach ( $mine as $r ) : ?>
 					<tr>
-						<td><?php echo esc_html( mysql2date( 'Y-m-d H:i', $r->created_at ) ); ?><?php echo $r->urgent ? ' <span class="mds-flag">긴급</span>' : ''; ?></td>
-						<td><?php echo (int) $r->line_count; ?>건</td>
-						<td><span class="mds-status is-<?php echo esc_attr( $r->status ); ?>"><?php echo esc_html( md_sup_status_label( $r->status ) ); ?></span></td>
-						<td class="mds-memo"><?php echo esc_html( $r->note ); ?></td>
+						<td data-label="신청일"><?php echo esc_html( mysql2date( 'Y-m-d H:i', $r->created_at ) ); ?><?php echo $r->urgent ? ' <span class="mds-flag">긴급</span>' : ''; ?></td>
+						<td class="num" data-label="품목 수"><?php echo (int) $r->line_count; ?>건</td>
+						<td data-label="상태"><span class="mds-status is-<?php echo esc_attr( $r->status ); ?>"><?php echo esc_html( md_sup_status_label( $r->status ) ); ?></span></td>
+						<td class="mds-memo" data-label="메모"><?php echo esc_html( $r->note ); ?></td>
+						<td class="num">
+							<a class="mds-mini" href="<?php echo esc_url( md_sup_url( array( 'tab' => 'request', 'team' => $team_id, 'repeat' => (int) $r->id ) ) ); ?>">이대로 다시 담기</a>
+						</td>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>
 			</table>
 		</div>
 	<?php endif;
+}
+
+/** 신청 직후 요약 — 무엇을 몇 개 넣었는지 확인시켜 준다 */
+function md_sup_render_sent_summary( $req_id ) {
+	$r = md_sup_request_summary( $req_id );
+	if ( ! $r ) { return; }
+	$lines = md_sup_request_lines( $req_id );
+	?>
+	<section class="mds-card mds-sent">
+		<h2 class="mds-h2" style="margin-top:0">신청이 접수되었습니다</h2>
+		<p class="mds-sent__meta">
+			<b><?php echo esc_html( $r->team_name ); ?></b> ·
+			<?php echo esc_html( mysql2date( 'Y-m-d H:i', $r->created_at ) ); ?> ·
+			<?php echo (int) $r->line_count; ?>개 품목 ·
+			약 <b><?php echo esc_html( number_format( (int) $r->amount ) ); ?></b>원
+			<?php if ( $r->urgent ) : ?><span class="mds-flag">긴급</span><?php endif; ?>
+		</p>
+		<ul class="mds-sent__list">
+			<?php foreach ( $lines as $ln ) : ?>
+				<li>
+					<span><?php echo esc_html( $ln->name ); ?></span>
+					<b><?php echo (int) $ln->qty_req; ?><?php echo $ln->unit ? esc_html( ' ' . $ln->unit ) : ''; ?></b>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+		<p class="mds-hint" style="margin:14px 0 0">
+			재고 담당자가 확인 후 출고합니다. 진행 상태는 아래 「우리 팀 최근 신청」에서 보실 수 있습니다.
+		</p>
+	</section>
+	<?php
 }
 
 /** ② 통계 */
@@ -668,6 +819,7 @@ function md_sup_render_stats() {
 	$teams   = md_sup_teams();
 
 	$usage = md_sup_team_usage( $ym );
+	$delta_map = md_sup_team_delta( $ym );
 	$trend = md_sup_monthly_trend( $view, 6 );
 	$top   = md_sup_top_items( $ym, $view, 15 );
 
@@ -716,6 +868,11 @@ function md_sup_render_stats() {
 		<noscript><button type="submit" class="mds-btn mds-btn--ghost">보기</button></noscript>
 	</form>
 
+	<div class="mds-tools">
+		<a class="mds-btn mds-btn--ghost" href="<?php echo esc_url( md_sup_url( array( "tab" => "stats", "ym" => $ym, "team" => $view, "export" => "usage" ) ) ); ?>">엑셀(CSV) 내려받기</a>
+		<button type="button" class="mds-btn mds-btn--ghost" onclick="window.print()">인쇄</button>
+	</div>
+
 	<div class="mds-kpis">
 		<div class="mds-kpi">
 			<span class="n"><?php echo esc_html( number_format( $view ? $mine : $total ) ); ?></span>
@@ -749,6 +906,8 @@ function md_sup_render_stats() {
 					<span class="mds-bar__label"><?php echo esc_html( $u->team_name ? $u->team_name : '(팀 없음)' ); ?></span>
 					<span class="mds-bar__track"><span class="mds-bar__fill" style="width:<?php echo (int) $w; ?>%"></span></span>
 					<span class="mds-bar__val"><?php echo esc_html( number_format( (int) $u->amount ) ); ?></span>
+					<?php $d = isset( $delta_map[ (int) $u->team_id ] ) ? $delta_map[ (int) $u->team_id ] : null; ?>
+					<span class="mds-bar__delta<?php echo ( null !== $d && $d > 20 ) ? " is-up" : ( ( null !== $d && $d < -10 ) ? " is-down" : "" ); ?>"><?php echo null === $d ? "—" : esc_html( ( $d > 0 ? "+" : "" ) . $d . "%" ); ?></span>
 				</div>
 			<?php endforeach; ?>
 		</div>
@@ -935,6 +1094,11 @@ function md_sup_render_inventory() {
 		<label class="mds-check"><input type="checkbox" name="low" value="1" <?php checked( $low ); ?>> 부족한 것만</label>
 		<button type="submit" class="mds-btn mds-btn--ghost">찾기</button>
 	</form>
+
+	<div class="mds-tools">
+		<a class="mds-btn mds-btn--ghost" href="<?php echo esc_url( md_sup_url( array( "tab" => "inventory", "export" => "stock" ) ) ); ?>">엑셀(CSV) 내려받기</a>
+		<button type="button" class="mds-btn mds-btn--ghost" onclick="window.print()">실사표 인쇄</button>
+	</div>
 
 	<p class="mds-hint">
 		센 수량을 「실사」 칸에 적고 저장하면 장부와의 차이가 조정 기록으로 남습니다.

@@ -462,3 +462,94 @@ function md_sup_status_label( $status ) {
 	);
 	return isset( $map[ $status ] ) ? $map[ $status ] : $status;
 }
+
+/* ============================================================
+ * v3.60 · 즐겨찾기 · 지난 신청 · 내보내기
+ * ============================================================ */
+
+/** 팀의 즐겨찾기 품목 id 목록 */
+function md_sup_fav_ids( $team_id ) {
+	global $wpdb;
+	$t   = md_sup_tables();
+	$ids = $wpdb->get_col( $wpdb->prepare( "SELECT item_id FROM {$t['fav']} WHERE team_id = %d", (int) $team_id ) );
+	return is_array( $ids ) ? array_map( 'intval', $ids ) : array();
+}
+
+/** 즐겨찾기 켜고 끄기 */
+function md_sup_fav_toggle( $team_id, $item_id ) {
+	global $wpdb;
+	$t       = md_sup_tables();
+	$team_id = (int) $team_id;
+	$item_id = (int) $item_id;
+	if ( $team_id <= 0 || $item_id <= 0 ) { return false; }
+
+	$has = $wpdb->get_var( $wpdb->prepare(
+		"SELECT id FROM {$t['fav']} WHERE team_id = %d AND item_id = %d", $team_id, $item_id
+	) );
+
+	if ( $has ) {
+		$wpdb->delete( $t['fav'], array( 'id' => (int) $has ), array( '%d' ) );
+		return false;
+	}
+	$wpdb->insert( $t['fav'], array( 'team_id' => $team_id, 'item_id' => $item_id ), array( '%d', '%d' ) );
+	return true;
+}
+
+/**
+ * 지난 신청의 품목·수량. "이대로 다시 담기" 에 쓴다.
+ * @return array [ item_id => qty ]
+ */
+function md_sup_request_qty_map( $req_id ) {
+	global $wpdb;
+	$t   = md_sup_tables();
+	$rows = $wpdb->get_results( $wpdb->prepare(
+		"SELECT item_id, qty_req FROM {$t['line']} WHERE req_id = %d", (int) $req_id
+	) );
+	$map = array();
+	foreach ( $rows as $r ) { $map[ (int) $r->item_id ] = (int) $r->qty_req; }
+	return $map;
+}
+
+/** 신청서 한 건의 요약 — 제출 직후 확인용 */
+function md_sup_request_summary( $req_id ) {
+	global $wpdb;
+	$t = md_sup_tables();
+	return $wpdb->get_row( $wpdb->prepare(
+		"SELECT r.*, tm.name AS team_name,
+		        (SELECT COUNT(*) FROM {$t['line']} WHERE req_id = r.id) AS line_count,
+		        (SELECT COALESCE(SUM(ln.qty_req * i.price),0)
+		           FROM {$t['line']} ln INNER JOIN {$t['items']} i ON i.id = ln.item_id
+		          WHERE ln.req_id = r.id) AS amount
+		 FROM {$t['req']} r LEFT JOIN {$t['teams']} tm ON tm.id = r.team_id
+		 WHERE r.id = %d",
+		(int) $req_id
+	) );
+}
+
+/** 팀별 전월 대비 증감(%) — 통계 표에 붙인다 */
+function md_sup_team_delta( $ym ) {
+	global $wpdb;
+	$t    = md_sup_tables();
+	$prev = gmdate( 'Y-m', strtotime( $ym . '-01 -1 month' ) );
+
+	$rows = $wpdb->get_results( $wpdb->prepare(
+		"SELECT l.team_id, l.ym, SUM(-l.qty * i.price) AS amount
+		 FROM {$t['ledger']} l INNER JOIN {$t['items']} i ON i.id = l.item_id
+		 WHERE l.reason = 'out' AND l.ym IN (%s, %s)
+		 GROUP BY l.team_id, l.ym",
+		$ym, $prev
+	) );
+
+	$now = array(); $was = array();
+	foreach ( $rows as $r ) {
+		if ( $r->ym === $ym ) { $now[ (int) $r->team_id ] = (int) $r->amount; }
+		else { $was[ (int) $r->team_id ] = (int) $r->amount; }
+	}
+
+	$out = array();
+	foreach ( $now as $team => $amt ) {
+		$p = isset( $was[ $team ] ) ? $was[ $team ] : 0;
+		$out[ $team ] = ( $p > 0 ) ? (int) round( ( $amt - $p ) / $p * 100 ) : null;
+	}
+	return $out;
+}

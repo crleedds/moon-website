@@ -54,7 +54,7 @@
     bar.hidden = (count === 0);
     if (barCount) { barCount.textContent = count; }
     if (barTotal) { barTotal.textContent = won(total); }
-    document.body.classList.toggle('mds-has-bar', count > 0);
+    document.body.classList.toggle('mds-has-cart', count > 0);
   }
 
   function onChange(e) {
@@ -93,9 +93,9 @@
     form = inputs[0].form;
     if (!form) return;
 
-    bar      = document.getElementById('mds-bar');
-    barCount = document.getElementById('mds-bar-count');
-    barTotal = document.getElementById('mds-bar-total');
+    bar      = document.getElementById('mds-cart');
+    barCount = document.getElementById('mds-cart-count');
+    barTotal = document.getElementById('mds-cart-total');
 
     form.addEventListener('input', onChange);
     form.addEventListener('change', onChange);
@@ -119,6 +119,56 @@
         blanks[0].focus();
       }
     });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+/* =============================================================
+   v3.60 · 즉시 검색
+   568줄이 이미 화면에 있으니 서버에 다시 묻지 않고 그 자리에서 거른다.
+   서버 검색(위 「찾기」)은 그대로 남겨 둔다 — JS 가 없어도 찾을 수 있게.
+   ============================================================= */
+(function () {
+  'use strict';
+
+  function init() {
+    var box  = document.getElementById('mds-quick');
+    var wrap = box ? box.parentNode : null;
+    var cnt  = document.getElementById('mds-quick-count');
+    var rows = document.querySelectorAll('.mds-table--items tbody tr[data-search]');
+    if (!box || !rows.length) return;
+
+    if (wrap) { wrap.hidden = false; }   // JS 가 있을 때만 보여준다
+
+    var divider = document.querySelector('.mds-table--items tbody tr.mds-divider');
+    var timer;
+
+    function apply() {
+      var q = box.value.trim().toLowerCase();
+      var shown = 0;
+
+      Array.prototype.forEach.call(rows, function (row) {
+        var hit = !q || row.getAttribute('data-search').indexOf(q) !== -1;
+        row.hidden = !hit;
+        if (hit) shown++;
+      });
+
+      /* 걸러내는 중에는 "여기부터 안 쓰던 품목" 구분선이 의미가 없다 */
+      if (divider) { divider.hidden = !!q; }
+
+      if (cnt) { cnt.textContent = q ? (shown + '개') : ''; }
+    }
+
+    box.addEventListener('input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(apply, 60);   // 한글 조합 중 과도한 실행을 막는다
+    });
+    box.addEventListener('search', apply);
   }
 
   if (document.readyState === 'loading') {
