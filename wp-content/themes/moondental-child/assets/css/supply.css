@@ -1158,3 +1158,29 @@ body.mds-page-body input,
 body.mds-page-body select,
 body.mds-page-body textarea,
 body.mds-page-body button { font-family: inherit; }
+
+/* =============================================================
+   v3.68 · 팀을 고르기 전에도 품목표가 보인다
+   ============================================================= */
+
+/* 팀 고르는 줄이 폼(form) 에서 그냥 줄(div) 로 바뀌었다 — 안쪽은 그대로다.
+   신청 폼 맨 위에 붙어 있어 표를 보다 올려다보면 지금 팀이 바로 보인다. */
+.mds-teampick { margin-bottom: 14px; }
+
+/* 팀을 아직 안 골랐을 때 눌러도 소용없는 별표 — 있는 자리만 지킨다 */
+.mds-fav.is-mute {
+  display: inline-block;
+  color: var(--color-border, #EDDFD0);
+  cursor: default;
+}
+
+/* 고정 바에서도 팀부터 고르라고 알려 준다 */
+.mds-cart__team.is-mute {
+  color: var(--color-danger, #C66B5E);
+  font-weight: 800;
+}
+
+/* 팀을 안 고른 상태에서는 「우리 팀」 칸 두 개가 비어 있다 —
+   빈 칸이 눈에 덜 걸리게 흐리게 둔다 */
+.mds-teampick.is-empty ~ .mds-tablewrap .mds-avg,
+.mds-teampick.is-empty ~ .mds-tablewrap .mds-last { opacity: .45; }

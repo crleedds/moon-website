@@ -187,7 +187,8 @@
     var box  = document.getElementById('mds-quick');
     var wrap = box ? box.parentNode : null;
     var cnt  = document.getElementById('mds-quick-count');
-    var rows = document.querySelectorAll('.mds-table--items tbody tr[data-search]');
+    /* 품목 줄에는 id="i<품목번호>" 가 붙어 있다. 구분선 줄에는 없다. */
+    var rows = document.querySelectorAll('.mds-table--items tbody tr[id]');
     if (!box || !rows.length) return;
 
     if (wrap) { wrap.hidden = false; }   // JS 가 있을 때만 보여준다
@@ -195,12 +196,20 @@
     var divider = document.querySelector('.mds-table--items tbody tr.mds-divider');
     var timer;
 
+    /* 훑을 문자열은 줄의 글자에서 직접 만든다 (v3.68).
+       서버가 data-search 로 실어 보내던 것을 뺐다 — 이름·코드·거래처는
+       이미 그 줄에 적혀 있는데 같은 내용을 한 번 더 보내느라
+       568줄이면 30KB 가 더 오갔다. 여기서 한 번만 만들어 들고 있는다. */
+    var hay = Array.prototype.map.call(rows, function (row) {
+      return (row.textContent || '').toLowerCase().replace(/\s+/g, ' ');
+    });
+
     function apply() {
       var q = box.value.trim().toLowerCase();
       var shown = 0;
 
-      Array.prototype.forEach.call(rows, function (row) {
-        var hit = !q || row.getAttribute('data-search').indexOf(q) !== -1;
+      Array.prototype.forEach.call(rows, function (row, i) {
+        var hit = !q || hay[i].indexOf(q) !== -1;
         row.hidden = !hit;
         if (hit) shown++;
       });
@@ -293,28 +302,46 @@
 })();
 
 /* =============================================================
-   v3.66 · 신청 팀 드롭다운
+   v3.68 · 신청 팀 고르기
 
-   고르면 바로 넘어간다. 「보기」 버튼은 JS 가 없을 때를 위한 것이라
-   JS 가 있으면 감춘다 — 고르고 나서 버튼을 또 누르게 하지 않는다.
+   고르는 칸은 신청 폼 안에 있다 — 그대로 제출되므로 JS 가 없어도
+   팀이 실려 간다. JS 가 있으면 고르는 순간 그 팀 기준으로 화면을 다시
+   불러 「우리 팀 월평균」·「최근 수령」·즐겨찾기를 채운다.
+
+   적어 둔 수량이 있으면 먼저 물어본다 — 화면을 다시 부르면 지워진다.
    ============================================================= */
 (function () {
   'use strict';
+
+  function typedSomething() {
+    var qs = document.querySelectorAll('.mds-qty[data-price]');
+    for (var i = 0; i < qs.length; i++) {
+      if (parseInt(qs[i].value, 10) > 0) return true;
+    }
+    return false;
+  }
 
   function init() {
     var sel = document.getElementById('mds-team');
     if (!sel) return;
 
-    var form = sel.form;
-    if (!form) return;
+    var base = sel.getAttribute('data-base');
+    if (!base) return;
 
-    var go = form.querySelector('.mds-teampick__go');
-    if (go) { go.hidden = true; }
+    var before = sel.value;
 
     sel.addEventListener('change', function () {
-      /* 「— 팀을 고르세요 —」로 되돌린 것은 넘기지 않는다 */
-      if (!parseInt(sel.value, 10)) return;
-      form.submit();
+      var v = parseInt(sel.value, 10);
+      if (!v) { before = sel.value; return; }
+
+      if (typedSomething() &&
+          !window.confirm('팀을 바꾸면 적어 두신 수량이 지워집니다.\n그래도 바꾸시겠습니까?')) {
+        sel.value = before;
+        return;
+      }
+
+      before = sel.value;
+      window.location.href = base + (base.indexOf('?') === -1 ? '?' : '&') + 'team=' + v;
     });
   }
 

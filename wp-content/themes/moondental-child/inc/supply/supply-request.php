@@ -28,16 +28,16 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  * @param int   $current 지금 고른 팀 (0이면 아직 안 고름)
  */
 function md_sup_render_team_picker( $teams, $current ) {
+	/* 신청 폼 안에 들어가는 줄이다 — 폼 안에 폼을 넣을 수 없으므로 form 태그가 없다.
+	 * 고른 값은 team_id 로 그대로 제출되고, JS 가 있으면 고르는 순간
+	 * 그 팀 기준으로 화면을 다시 불러 월평균·최근 수령·즐겨찾기를 채운다. */
 	?>
-	<form class="mds-teampick<?php echo $current ? '' : ' is-empty'; ?>"
-	      method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
-		<input type="hidden" name="tab" value="request">
-		<?php md_sup_app_field(); ?>
-
+	<div class="mds-teampick<?php echo $current ? '' : ' is-empty'; ?>">
 		<label class="mds-teampick__label" for="mds-team">신청 팀</label>
 
-		<select class="mds-teampick__select" id="mds-team" name="team">
-			<option value="0"<?php selected( $current, 0 ); ?>>— 팀을 고르세요 —</option>
+		<select class="mds-teampick__select" id="mds-team" name="team_id" required
+		        data-base="<?php echo esc_attr( md_sup_url( array( 'tab' => 'request' ) ) ); ?>">
+			<option value="">— 팀을 고르세요 —</option>
 			<?php foreach ( $teams as $tm ) : ?>
 				<option value="<?php echo (int) $tm->id; ?>" <?php selected( $current, (int) $tm->id ); ?>>
 					<?php echo esc_html( $tm->name ); ?>
@@ -45,12 +45,12 @@ function md_sup_render_team_picker( $teams, $current ) {
 			<?php endforeach; ?>
 		</select>
 
-		<button type="submit" class="mds-btn mds-btn--ghost mds-teampick__go">보기</button>
-
-		<?php if ( ! $current ) : ?>
-			<span class="mds-teampick__ask">고른 팀 이름으로 사용량이 잡힙니다.</span>
-		<?php endif; ?>
-	</form>
+		<span class="mds-teampick__ask">
+			<?php echo $current
+				? '이 팀 이름으로 사용량이 잡힙니다.'
+				: '팀을 고르면 아래 표에 우리 팀 월평균과 최근 수령이 채워집니다.'; ?>
+		</span>
+	</div>
 	<?php
 }
 
@@ -74,13 +74,17 @@ function md_sup_render_request() {
 	foreach ( $teams as $tm ) { if ( (int) $tm->id === $team_id ) { $valid = true; break; } }
 	if ( ! $valid ) { $team_id = 0; }
 
-	/* 팀을 아직 안 골랐으면 팀 선택만 보여준다. 잘못된 팀으로 신청하면
-	 * 그 팀 사용량으로 잡히므로, 고르기 전에는 품목을 띄우지 않는다. */
-	if ( ! $team_id ) {
-		md_sup_render_team_picker( $teams, 0 );
-		return;
-	}
-	md_sup_render_team_picker( $teams, $team_id );
+	/* v3.68 · 팀을 고르기 전에도 품목표를 보여준다.
+	 *
+	 * v3.67 까지는 팀을 고를 때까지 표를 띄우지 않았다. 잘못된 팀으로 신청하면
+	 * 그 팀 사용량으로 잡히기 때문인데, 그 대가로 화면에 들어올 때마다 아무것도
+	 * 없는 팀 고르기 화면을 한 번 거쳐야 했다. 무엇이 있는지 보려고 들어온
+	 * 경우에도 마찬가지였다.
+	 *
+	 * 이제 표는 바로 뜨고, 팀 고르는 칸이 신청 폼 안에 required 로 들어간다.
+	 * 팀 없이 신청 버튼을 누르면 브라우저가 먼저 막고, 그래도 넘어오면
+	 * 서버가 막는다. 안전은 그대로 두고 한 화면을 걷어낸 셈이다.
+	 * 팀을 고르기 전에는 「우리 팀 월평균」과 「최근 수령」만 비어 있다. */
 
 	/* 방금 신청했다면 무엇을 넣었는지 먼저 보여준다 */
 	if ( isset( $_GET['req'] ) && (int) $_GET['req'] > 0 ) { md_sup_render_sent_summary( (int) $_GET['req'] ); }
@@ -128,10 +132,25 @@ function md_sup_render_request() {
 	/* 구분선이 놓일 자리 — 위로 끌어올린 줄 전부의 다음 */
 	$top_count  = count( $fresh ) + $fav_count + $used_count;
 
+	/* 즐겨찾기 주소의 앞부분 — 한 번만 만들어 줄마다 품목 번호만 이어 붙인다.
+	 * 상대 주소라 도메인·경로가 568번 반복되지 않고, nonce 도 한 번만 계산한다. */
+	$fav_base = '?' . http_build_query( array_filter( array(
+		'app'      => md_sup_current_app(),
+		'tab'      => 'request',
+		'team'     => $team_id,
+		'_wpnonce' => wp_create_nonce( 'md_sup_fav' ),
+	) ) ) . '&fav=';
+
 	$hint = '총 ' . number_format( count( $items ) ) . '개 품목';
-	if ( $fav_count )  { $hint .= ' · 즐겨찾기 ' . $fav_count . '개'; }
-	if ( $used_count ) { $hint .= ' · 우리 팀이 쓰는 ' . $used_count . '개'; }
-	$hint .= '를 맨 위로 모았습니다. 별표를 눌러 즐겨찾기에 넣을 수 있습니다.';
+	if ( ! $team_id ) {
+		$hint .= '. 팀을 고르면 우리 팀이 자주 쓰는 품목이 맨 위로 올라오고 즐겨찾기를 쓸 수 있습니다.';
+	} elseif ( $fav_count || $used_count ) {
+		if ( $fav_count )  { $hint .= ' · 즐겨찾기 ' . $fav_count . '개'; }
+		if ( $used_count ) { $hint .= ' · 우리 팀이 쓰는 ' . $used_count . '개'; }
+		$hint .= '를 맨 위로 모았습니다. 별표를 눌러 즐겨찾기에 넣을 수 있습니다.';
+	} else {
+		$hint .= '. 별표를 눌러 자주 쓰는 품목을 맨 위로 모아 두실 수 있습니다.';
+	}
 	?>
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="request">
@@ -177,7 +196,8 @@ function md_sup_render_request() {
 	<form method="post" action="<?php echo esc_url( md_sup_url( array( 'tab' => 'request' ) ) ); ?>">
 		<?php wp_nonce_field( 'md_sup_request', 'md_sup_nonce' ); ?>
 		<input type="hidden" name="md_sup_action" value="request">
-		<input type="hidden" name="team_id" value="<?php echo (int) $team_id; ?>">
+
+		<?php md_sup_render_team_picker( $teams, $team_id ); ?>
 
 		<div class="mds-tablewrap">
 			<table class="mds-table mds-table--items">
@@ -198,21 +218,27 @@ function md_sup_render_request() {
 					$low    = ( $it->min_stock > 0 && $it->stock <= $it->min_stock );
 					$is_fav = isset( $favs[ $it->id ] );
 					$pre    = isset( $prefill[ $it->id ] ) ? (int) $prefill[ $it->id ] : '';
-					/* 즉시 검색이 훑을 문자열 — 소문자로 미리 만들어 둔다 */
-					$hay    = mb_strtolower( $it->name . ' ' . $it->code . ' ' . $it->vendor . ' ' . $it->category );
 					?>
-					<tr id="i<?php echo (int) $it->id; ?>" data-search="<?php echo esc_attr( $hay ); ?>">
+					<?php /* 줄 하나의 무게가 568배로 돌아온다 (v3.68).
+					         · data-search 를 뺐다 — 이름·코드·거래처가 이미 이 줄에 적혀 있으니
+					           JS 가 줄의 글자에서 만들어 쓴다. 568줄이면 30KB 남짓이었다.
+					         · 즐겨찾기 링크의 주소를 짧은 상대 주소로 바꾸고 nonce 를 품목마다
+					           따로 만들지 않는다. 절대 주소 + 품목별 nonce 는 한 줄에 130자가
+					           넘었고(568줄이면 70KB), 서버도 nonce 를 568번 계산했다.
+					         · title 은 aria-label 과 같은 말이라 뺐다. */ ?>
+					<tr id="i<?php echo (int) $it->id; ?>">
 						<td class="mds-td-fav">
-							<?php /* 링크는 그대로 둔다 — JS 가 없으면 예전처럼 새로고침으로 동작한다.
-							         JS 가 있으면 이 링크를 가로채 그 자리에서 별표만 바꾼다(v3.64). */ ?>
-							<a class="mds-fav<?php echo $is_fav ? ' is-on' : ''; ?>"
-							   data-fav="<?php echo (int) $it->id; ?>"
-							   data-on="<?php echo $is_fav ? '1' : '0'; ?>"
-							   href="<?php echo esc_url( wp_nonce_url( md_sup_url( array( 'tab' => 'request', 'team' => $team_id, 'fav' => (int) $it->id ) ), 'md_sup_fav_' . (int) $it->id ) ); ?>"
-							   title="<?php echo $is_fav ? '즐겨찾기에서 빼기' : '즐겨찾기에 넣기'; ?>"
-							   aria-label="<?php echo esc_attr( $it->name . ( $is_fav ? ' 즐겨찾기 해제' : ' 즐겨찾기' ) ); ?>">
-								<?php echo $is_fav ? '★' : '☆'; ?>
-							</a>
+							<?php /* 즐겨찾기는 팀별로 저장된다 — 팀을 고르기 전에는 누를 곳이 없다 */
+							if ( $team_id ) : ?>
+								<a class="mds-fav<?php echo $is_fav ? ' is-on' : ''; ?>"
+								   data-fav="<?php echo (int) $it->id; ?>"
+								   href="<?php echo esc_attr( $fav_base . (int) $it->id ); ?>"
+								   aria-label="<?php echo esc_attr( $it->name . ( $is_fav ? ' 즐겨찾기 해제' : ' 즐겨찾기' ) ); ?>">
+									<?php echo $is_fav ? '★' : '☆'; ?>
+								</a>
+							<?php else : ?>
+								<span class="mds-fav is-mute" aria-hidden="true">☆</span>
+							<?php endif; ?>
 						</td>
 						<td class="mds-item" data-label="품목">
 							<b><?php echo esc_html( $it->name ); ?></b>
@@ -254,15 +280,20 @@ function md_sup_render_request() {
 			<label class="mds-check"><input type="checkbox" name="urgent" value="1"> 긴급 (오늘 필요)</label>
 			<input class="mds-note" type="text" name="note" placeholder="담당자에게 전할 메모 (선택)" maxlength="200">
 			<button type="submit" class="mds-btn mds-btn--fill">
-				<?php echo esc_html( md_sup_team_name( $team_id ) ); ?> 이름으로 신청
+				<?php echo $team_id
+					? esc_html( md_sup_team_name( $team_id ) ) . ' 이름으로 신청'
+					: '신청하기'; ?>
 			</button>
 		</div>
 
 		<?php /* 고정 바 — 수량을 하나라도 적으면 화면 아래에 붙어 따라온다.
-		         568줄을 스크롤해 내려가 제출 버튼을 찾지 않아도 되게. */ ?>
+		         568줄을 스크롤해 내려가 제출 버튼을 찾지 않아도 되게.
+		         팀을 아직 안 골랐으면 그것부터 알려 준다 (v3.68). */ ?>
 		<div class="mds-cart" id="mds-cart" hidden>
 			<div class="mds-cart__inner">
-				<span class="mds-cart__team"><?php echo esc_html( md_sup_team_name( $team_id ) ); ?></span>
+				<span class="mds-cart__team<?php echo $team_id ? '' : ' is-mute'; ?>">
+					<?php echo $team_id ? esc_html( md_sup_team_name( $team_id ) ) : '팀을 고르세요'; ?>
+				</span>
 				<span class="mds-cart__sum">
 					<b id="mds-cart-count">0</b>개 품목
 					<span class="mds-cart__won">약 <b id="mds-cart-total">0</b>원</span>
@@ -275,7 +306,10 @@ function md_sup_render_request() {
 	<?php
 	/* 신청 폼 바깥에 둔다 — 폼 안에 폼을 넣을 수 없다 */
 	md_sup_render_newitem_form( $team_id );
-	md_sup_render_my_requests( $team_id );
+
+	/* 「우리 팀」이 정해져야 볼 수 있는 목록이다.
+	 * 팀 없이 부르면 모든 팀의 신청이 섞여 나온다. */
+	if ( $team_id ) { md_sup_render_my_requests( $team_id ); }
 }
 
 /**

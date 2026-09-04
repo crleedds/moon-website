@@ -548,11 +548,14 @@ add_action( 'template_redirect', 'md_sup_handle_post', 1 );
 function md_sup_handle_get() {
 	if ( ! md_sup_is_page() || ! md_sup_can_use() ) { return; }
 
-	/* 즐겨찾기 */
+	/* 즐겨찾기.
+	 * nonce 는 품목마다 따로 만들지 않고 화면 전체가 하나를 쓴다 (v3.68) —
+	 * 568줄이면 nonce 를 568번 계산해 붙이던 것이 한 번이 된다.
+	 * 어느 품목인지는 fav 값으로 오고, nonce 는 「이 화면에서 온 요청인가」만 본다. */
 	if ( isset( $_GET['fav'] ) && isset( $_GET['_wpnonce'] ) ) {
 		$item = (int) $_GET['fav'];
 		$team = isset( $_GET['team'] ) ? (int) $_GET['team'] : md_sup_my_team_id();
-		$ok   = wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'md_sup_fav_' . $item );
+		$ok   = wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'md_sup_fav' );
 		$on   = false;
 		if ( $ok ) { $on = md_sup_fav_toggle( $team, $item ); }
 
