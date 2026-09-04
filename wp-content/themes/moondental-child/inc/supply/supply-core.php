@@ -336,13 +336,13 @@ function md_sup_monthly_trend( $team_id = 0, $months = 6 ) {
  * @param array $lines [ item_id => array( qty, over_reason ) ]
  * @return int|WP_Error 신청 id
  */
-function md_sup_create_request( $team_id, $lines, $urgent = 0, $note = '' ) {
+function md_sup_create_request( $team_id, $lines, $urgent = 0, $note = '', $customs = array() ) {
 	global $wpdb;
 	$t = md_sup_tables();
 
 	$team_id = (int) $team_id;
 	if ( $team_id <= 0 ) { return new WP_Error( 'no_team', '팀이 지정되지 않았습니다.' ); }
-	if ( empty( $lines ) ) { return new WP_Error( 'empty', '신청할 품목이 없습니다.' ); }
+	if ( empty( $lines ) && empty( $customs ) ) { return new WP_Error( 'empty', '신청할 품목이 없습니다.' ); }
 
 	$now = current_time( 'mysql' );
 	$ok  = $wpdb->insert( $t['req'], array(
@@ -367,6 +367,22 @@ function md_sup_create_request( $team_id, $lines, $urgent = 0, $note = '' ) {
 			'qty_out'     => 0,
 			'over_reason' => isset( $ln['over_reason'] ) ? mb_substr( (string) $ln['over_reason'], 0, 255 ) : '',
 		), array( '%d', '%d', '%d', '%d', '%s' ) );
+	}
+
+	/* 목록에 없어 직접 적은 품목 — item_id 0 에 이름만 남긴다.
+	 * 담당자가 「품목·팀」에서 등록한 뒤 반출관리에서 연결한다. */
+	foreach ( $customs as $c ) {
+		$nm = sanitize_text_field( isset( $c['name'] ) ? $c['name'] : '' );
+		$q  = isset( $c['qty'] ) ? (int) $c['qty'] : 0;
+		if ( '' === trim( $nm ) || $q <= 0 ) { continue; }
+		$wpdb->insert( $t['line'], array(
+			'req_id'      => $req_id,
+			'item_id'     => 0,
+			'custom_name' => mb_substr( $nm, 0, 255 ),
+			'qty_req'     => $q,
+			'qty_out'     => 0,
+			'over_reason' => '',
+		), array( '%d', '%d', '%s', '%d', '%d', '%s' ) );
 	}
 
 	return $req_id;
@@ -398,9 +414,15 @@ function md_sup_requests( $args = array() ) {
 function md_sup_request_lines( $req_id ) {
 	global $wpdb;
 	$t = md_sup_tables();
+	/* LEFT JOIN 인 이유 — 직접 적은 품목은 item_id 가 0 이라
+	 * INNER JOIN 이면 그 줄이 통째로 사라진다. */
 	return $wpdb->get_results( $wpdb->prepare(
-		"SELECT ln.*, i.name, i.unit, i.price, i.code
-		 FROM {$t['line']} ln INNER JOIN {$t['items']} i ON i.id = ln.item_id
+		"SELECT ln.*,
+		        COALESCE(NULLIF(i.name,''), ln.custom_name) AS name,
+		        COALESCE(i.unit,'')  AS unit,
+		        COALESCE(i.price,0)  AS price,
+		        COALESCE(i.code,'')  AS code
+		 FROM {$t['line']} ln LEFT JOIN {$t['items']} i ON i.id = ln.item_id
 		 WHERE ln.req_id = %d ORDER BY ln.id ASC",
 		$req_id
 	) );
@@ -420,7 +442,9 @@ function md_sup_release_request( $req_id, $qty_map ) {
 
 	foreach ( md_sup_request_lines( $req_id ) as $ln ) {
 		$qty = isset( $qty_map[ $ln->id ] ) ? (int) $qty_map[ $ln->id ] : 0;
-		if ( $qty <= 0 ) { continue; }
+		/* 직접 적은 품목(item_id 0)은 아직 등록된 품목이 없어 출고할 수 없다.
+		 * 담당자가 「품목·팀」에서 등록한 뒤 다시 신청받는다. */
+		if ( $qty <= 0 || 0 === (int) $ln->item_id ) { continue; }
 		md_sup_move( $ln->item_id, -$qty, 'out', $req->team_id, $req_id, '신청 #' . $req_id . ' 출고' );
 		$wpdb->update( $t['line'], array( 'qty_out' => $qty ), array( 'id' => $ln->id ), array( '%d' ), array( '%d' ) );
 	}
@@ -552,4 +576,132 @@ function md_sup_team_delta( $ym ) {
 		$out[ $team ] = ( $p > 0 ) ? (int) round( ( $amt - $p ) / $p * 100 ) : null;
 	}
 	return $out;
+}
+
+/* ============================================================
+ * v3.61 · 품목 · 팀 관리 (재고 담당자)
+ * ============================================================ */
+
+/** 다음 품목 코드 — M0569 처럼 이어서 매긴다 */
+function md_sup_next_code() {
+	global $wpdb;
+	$t   = md_sup_tables();
+	$max = (string) $wpdb->get_var( "SELECT code FROM {$t['items']} WHERE code REGEXP '^M[0-9]+$' ORDER BY CAST(SUBSTRING(code,2) AS UNSIGNED) DESC LIMIT 1" );
+	$n   = $max ? (int) substr( $max, 1 ) : 0;
+	return 'M' . str_pad( (string) ( $n + 1 ), 4, '0', STR_PAD_LEFT );
+}
+
+/**
+ * 품목 저장. id 가 0 이면 새로 만든다.
+ * 코드를 비워 두면 자동으로 매긴다.
+ */
+function md_sup_item_save( $id, $d ) {
+	global $wpdb;
+	$t = md_sup_tables();
+
+	$name = sanitize_text_field( isset( $d['name'] ) ? $d['name'] : '' );
+	if ( '' === trim( $name ) ) { return new WP_Error( 'empty', '품목명을 적어 주세요.' ); }
+
+	$row = array(
+		'name'      => mb_substr( $name, 0, 255 ),
+		'vendor'    => sanitize_text_field( isset( $d['vendor'] ) ? $d['vendor'] : '' ),
+		'unit'      => sanitize_text_field( isset( $d['unit'] ) ? $d['unit'] : '' ),
+		'category'  => sanitize_text_field( isset( $d['category'] ) ? $d['category'] : '' ),
+		'price'     => max( 0, (int) ( isset( $d['price'] ) ? $d['price'] : 0 ) ),
+		'min_stock' => max( 0, (int) ( isset( $d['min_stock'] ) ? $d['min_stock'] : 0 ) ),
+	);
+
+	if ( $id > 0 ) {
+		$wpdb->update( $t['items'], $row, array( 'id' => (int) $id ), array( '%s', '%s', '%s', '%s', '%d', '%d' ), array( '%d' ) );
+		return (int) $id;
+	}
+
+	$code = sanitize_text_field( isset( $d['code'] ) ? $d['code'] : '' );
+	if ( '' === trim( $code ) ) { $code = md_sup_next_code(); }
+
+	$dup = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$t['items']} WHERE code = %s", $code ) );
+	if ( $dup ) { return new WP_Error( 'dup', '이미 쓰고 있는 품목코드입니다 — ' . $code ); }
+
+	$row['code']    = $code;
+	$row['active']  = 1;
+	$row['sort_no'] = 9999;
+	$wpdb->insert( $t['items'], $row, array( '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%d', '%d' ) );
+	return (int) $wpdb->insert_id;
+}
+
+/**
+ * 품목 감추기 / 되살리기.
+ *
+ * 진짜로 지우지 않는다 — 지나간 입출고 기록이 그 품목을 가리키고 있어서,
+ * 삭제하면 과거 사용량 통계가 "이름 없는 품목" 이 되어 버린다.
+ * active 를 0 으로 내리면 목록·신청에서 사라지고 기록은 그대로 남는다.
+ */
+function md_sup_item_archive( $id, $on = false ) {
+	global $wpdb;
+	$t = md_sup_tables();
+	return $wpdb->update( $t['items'], array( 'active' => $on ? 1 : 0 ), array( 'id' => (int) $id ), array( '%d' ), array( '%d' ) );
+}
+
+/** 기록이 전혀 없는 품목만 진짜로 지운다 */
+function md_sup_item_delete( $id ) {
+	global $wpdb;
+	$t   = md_sup_tables();
+	$id  = (int) $id;
+	$use = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t['ledger']} WHERE item_id = %d", $id ) );
+	$req = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t['line']} WHERE item_id = %d", $id ) );
+	if ( $use || $req ) {
+		return new WP_Error( 'inuse', '입출고나 신청 기록이 있어 지울 수 없습니다. 대신 「감추기」를 쓰세요.' );
+	}
+	$wpdb->delete( $t['fav'], array( 'item_id' => $id ), array( '%d' ) );
+	$wpdb->delete( $t['items'], array( 'id' => $id ), array( '%d' ) );
+	return true;
+}
+
+/** 감춘 것까지 포함해 품목을 가져온다 (품목 관리 화면용) */
+function md_sup_items_all( $search = '', $show_hidden = false ) {
+	global $wpdb;
+	$t = md_sup_tables();
+
+	$where  = $show_hidden ? array( '1=1' ) : array( 'i.active = 1' );
+	$params = array();
+	if ( '' !== $search ) {
+		$like    = '%' . $wpdb->esc_like( $search ) . '%';
+		$where[] = '(i.name LIKE %s OR i.code LIKE %s OR i.vendor LIKE %s)';
+		$params[] = $like; $params[] = $like; $params[] = $like;
+	}
+
+	$sql = "SELECT i.*, COALESCE(l.stock,0) AS stock
+	        FROM {$t['items']} i
+	        LEFT JOIN (SELECT item_id, SUM(qty) AS stock FROM {$t['ledger']} GROUP BY item_id) l ON l.item_id = i.id
+	        WHERE " . implode( ' AND ', $where ) . '
+	        ORDER BY i.active DESC, i.sort_no ASC, i.id ASC';
+
+	if ( $params ) { $sql = $wpdb->prepare( $sql, $params ); }
+	return $wpdb->get_results( $sql );
+}
+
+/* --- 팀 --------------------------------------------------- */
+
+function md_sup_team_save( $id, $name, $sort_no = 0 ) {
+	global $wpdb;
+	$t    = md_sup_tables();
+	$name = sanitize_text_field( $name );
+	if ( '' === trim( $name ) ) { return new WP_Error( 'empty', '팀 이름을 적어 주세요.' ); }
+
+	if ( $id > 0 ) {
+		$wpdb->update( $t['teams'], array( 'name' => $name, 'sort_no' => (int) $sort_no ), array( 'id' => (int) $id ), array( '%s', '%d' ), array( '%d' ) );
+		return (int) $id;
+	}
+	$dup = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$t['teams']} WHERE name = %s", $name ) );
+	if ( $dup ) { return new WP_Error( 'dup', '같은 이름의 팀이 이미 있습니다.' ); }
+
+	$wpdb->insert( $t['teams'], array( 'name' => $name, 'sort_no' => (int) $sort_no, 'active' => 1 ), array( '%s', '%d', '%d' ) );
+	return (int) $wpdb->insert_id;
+}
+
+/** 팀도 지우지 않고 감춘다 — 과거 사용량이 그 팀을 가리키고 있다 */
+function md_sup_team_archive( $id, $on = false ) {
+	global $wpdb;
+	$t = md_sup_tables();
+	return $wpdb->update( $t['teams'], array( 'active' => $on ? 1 : 0 ), array( 'id' => (int) $id ), array( '%d' ), array( '%d' ) );
 }

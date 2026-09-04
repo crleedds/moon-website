@@ -715,3 +715,74 @@ body.mds-has-cart #mds-submit .mds-btn { display: none; }
   .mds-fav:hover { background: var(--color-surface-alt, #2F251C); }
   .mds-table tbody tr { background: var(--color-white, #2A211A); }
 }
+
+/* =============================================================
+   v3.61 · 품목·팀 관리 · 직접 입력 신청
+   ============================================================= */
+
+.mds-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 18px; }
+
+.mds-rowbtns { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.mds-mini--warn { border-color: var(--color-danger, #C66B5E); color: var(--color-danger, #C66B5E); }
+.mds-mini--warn:hover { background: rgba(198, 107, 94, .10); }
+
+/* 감춘 품목은 흐리게 */
+.mds-table tbody tr.is-off { opacity: .55; }
+.mds-table tbody tr.is-off .mds-item b { text-decoration: line-through; }
+
+/* 담당자 화면에서 직접 적은 품목 줄 */
+.mds-table tbody tr.is-custom { background: var(--color-surface-alt, #F5E8D8); }
+.mds-table tbody tr.is-custom:hover { background: var(--color-surface-alt, #F5E8D8); }
+
+/* --- 목록에 없는 품목 직접 입력 ------------------------------ */
+.mds-custom {
+  margin-top: 14px;
+  background: var(--color-white, #fff);
+  border: 1px dashed var(--color-accent, #8FAE92);
+  border-radius: 16px;
+  padding: 0 18px 4px;
+}
+.mds-custom[open] { padding-bottom: 18px; }
+.mds-custom__sum {
+  padding: 16px 0; cursor: pointer; list-style: none;
+  font-size: .96rem; font-weight: 800;
+  color: var(--color-accent-dark, #6B8F72);
+  display: flex; align-items: center; gap: 8px;
+}
+.mds-custom__sum::-webkit-details-marker { display: none; }
+.mds-custom__sum::before { content: "＋"; font-size: 1.1rem; }
+.mds-custom[open] .mds-custom__sum::before { content: "－"; }
+.mds-custom__row { display: flex; gap: 8px; margin-bottom: 8px; }
+.mds-custom__row input[type="text"] {
+  flex: 1 1 auto; font: inherit; font-size: .95rem; min-height: 46px;
+  padding: 10px 14px; border-radius: 12px;
+  border: 1px solid var(--color-border, #EDDFD0);
+  background: var(--color-bg, #FFFAF4); color: var(--color-text, #3D2F26);
+}
+.mds-custom__row .mds-qty { width: 92px; flex: none; }
+.mds-custom__row input:focus { outline: 2px solid var(--color-accent-dark, #6B8F72); outline-offset: 1px; }
+
+/* --- 팀 편집 ------------------------------------------------ */
+.mds-teamedit { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+.mds-teamedit__row { display: flex; gap: 8px; align-items: center; }
+.mds-teamedit__row input[type="text"] {
+  flex: 1 1 auto; font: inherit; font-size: .94rem; min-height: 44px;
+  padding: 8px 13px; border-radius: 10px;
+  border: 1px solid var(--color-border, #EDDFD0);
+  background: var(--color-bg, #FFFAF4); color: var(--color-text, #3D2F26);
+}
+.mds-teamedit__row.is-off input[type="text"] { opacity: .55; text-decoration: line-through; }
+.mds-teamedit__row input:focus { outline: 2px solid var(--color-primary, #D88062); outline-offset: 1px; }
+
+@media (max-width: 600px) {
+  .mds-custom__row { flex-wrap: wrap; }
+  .mds-custom__row .mds-qty { width: 100%; }
+  .mds-rowbtns { width: 100%; }
+  .mds-rowbtns .mds-mini { flex: 1 1 auto; text-align: center; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .mds-mini--warn:hover { background: rgba(198, 107, 94, .20); }
+  .mds-table tbody tr.is-custom { background: var(--color-surface-alt, #2F251C); }
+  .mds-custom { background: var(--color-white, #2A211A); }
+}

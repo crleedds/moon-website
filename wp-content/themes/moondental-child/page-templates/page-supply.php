@@ -1,9 +1,9 @@
 <?php
 /**
- * Template Name: 직원 전용 · 재고관리
+ * Template Name: 재료실 (직원 전용)
  * Template Post Type: page
  *
- * 로그인한 직원만 볼 수 있는 재고관리 화면.
+ * 로그인한 직원만 볼 수 있는 재료실 화면.
  * 검색엔진에서는 완전히 제외한다.
  *
  * @package moondental-child
@@ -31,7 +31,7 @@ get_header();
 		if ( function_exists( 'md_sup_render_page' ) ) {
 			md_sup_render_page();
 		} else {
-			echo '<p>재고관리 모듈을 불러오지 못했습니다. 관리자에게 문의해 주세요.</p>';
+			echo '<p>재료실 모듈을 불러오지 못했습니다. 관리자에게 문의해 주세요.</p>';
 		}
 		?>
 	</div>

@@ -19,6 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 define( 'MD_SUP_DB_VERSION', '1.0.0' );
 define( 'MD_SUP_DB2_VERSION', '1.0.0' );
+define( 'MD_SUP_DB3_VERSION', '1.0.0' );
 
 /** 테이블 이름 모음 */
 function md_sup_tables() {
@@ -231,9 +232,26 @@ add_action( 'admin_init', 'md_sup_maybe_install' );
  * 테마의 다른 자동 생성(inc/reservation.php)과 같은 방식.
  */
 function md_sup_ensure_page() {
-	if ( get_option( 'md_sup_page_id' ) ) { return; }
+	/* v3.61 · 「직원 전용」 → 「재료실」 로 이름을 바꾼다.
+	 * 푸터 링크가 /재료실/ 을 가리키므로 기존 페이지 슬러그도 옮겨야 한다.
+	 * 한 번만 실행되고, 이미 바꿨거나 사람이 손댄 경우엔 건드리지 않는다. */
+	$pid = (int) get_option( 'md_sup_page_id' );
+	if ( $pid && ! get_option( 'md_sup_renamed_v361' ) ) {
+		$p = get_post( $pid );
+		if ( $p && 'page' === $p->post_type && '직원' === urldecode( $p->post_name ) ) {
+			wp_update_post( array(
+				'ID'         => $pid,
+				'post_title' => '재료실',
+				'post_name'  => '재료실',
+			) );
+		}
+		update_option( 'md_sup_renamed_v361', '1' );
+	}
 
-	$existing = get_page_by_path( '직원' );
+	if ( $pid && get_post( $pid ) ) { return; }
+
+	$existing = get_page_by_path( '재료실' );
+	if ( ! $existing ) { $existing = get_page_by_path( '직원' ); }
 	if ( ! $existing ) { $existing = get_page_by_path( 'staff' ); }
 
 	if ( $existing ) {
@@ -242,8 +260,8 @@ function md_sup_ensure_page() {
 	}
 
 	$id = wp_insert_post( array(
-		'post_title'     => '직원 전용',
-		'post_name'      => '직원',
+		'post_title'     => '재료실',
+		'post_name'      => '재료실',
 		'post_type'      => 'page',
 		'post_status'    => 'publish',
 		'post_content'   => '',
@@ -391,3 +409,33 @@ function md_sup_maybe_install_v2() {
 	md_sup_install_v2();
 }
 add_action( 'admin_init', 'md_sup_maybe_install_v2', 11 );
+
+/* ============================================================
+ * v3.61 · 목록에 없는 품목을 직접 적어 신청
+ * ============================================================ */
+
+/**
+ * 신청 줄에 custom_name 을 더한다.
+ * item_id 가 0 이고 custom_name 이 있으면 "직접 적은 품목" 이다.
+ * 담당자가 나중에 실제 품목에 연결하거나 새 품목으로 등록한다.
+ */
+function md_sup_install_v3() {
+	global $wpdb;
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+	$t = md_sup_tables();
+
+	$has = $wpdb->get_var( "SHOW COLUMNS FROM {$t['line']} LIKE 'custom_name'" );
+	if ( ! $has ) {
+		$wpdb->query( "ALTER TABLE {$t['line']} ADD COLUMN custom_name VARCHAR(255) NOT NULL DEFAULT '' AFTER item_id" );
+	}
+	/* item_id 0 이 들어갈 수 있으므로 인덱스는 그대로 두고 제약만 없다 */
+
+	update_option( 'md_sup_db3_version', MD_SUP_DB3_VERSION );
+}
+
+function md_sup_maybe_install_v3() {
+	if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) { return; }
+	if ( get_option( 'md_sup_db3_version' ) === MD_SUP_DB3_VERSION ) { return; }
+	md_sup_install_v3();
+}
+add_action( 'admin_init', 'md_sup_maybe_install_v3', 12 );

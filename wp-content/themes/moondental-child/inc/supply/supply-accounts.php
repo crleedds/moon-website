@@ -148,7 +148,7 @@ function md_sup_accounts_screen() {
 	<div class="wrap">
 		<h1>재고 계정</h1>
 		<p>
-			재고관리 페이지(<a href="<?php echo esc_url( home_url( '/직원/' ) ); ?>" target="_blank" rel="noopener">/직원/</a>)에서 쓸 계정입니다.
+			재료실 페이지(<a href="<?php echo esc_url( home_url( '/재료실/' ) ); ?>" target="_blank" rel="noopener">/재료실/</a>)에서 쓸 계정입니다.
 			<strong>재고 담당자 하나, 직원 공용 하나</strong> 총 두 개입니다.
 			직원분들은 공용 계정으로 로그인해 신청 화면에서 자기 팀을 고릅니다.
 		</p>
@@ -347,7 +347,7 @@ add_action( 'user_profile_update_errors', 'md_sup_block_password_save', 10, 3 );
 function md_sup_redirect_admin() {
 	if ( wp_doing_ajax() || ! is_admin() ) { return; }
 	if ( ! md_sup_is_stock_account() ) { return; }
-	wp_safe_redirect( home_url( '/직원/' ) );
+	wp_safe_redirect( home_url( '/재료실/' ) );
 	exit;
 }
 add_action( 'admin_init', 'md_sup_redirect_admin', 1 );
@@ -362,7 +362,7 @@ add_filter( 'show_admin_bar', 'md_sup_hide_admin_bar' );
 function md_sup_login_redirect( $redirect_to, $requested, $user ) {
 	if ( is_wp_error( $user ) || ! isset( $user->user_login ) ) { return $redirect_to; }
 	if ( in_array( $user->user_login, array( MD_SUP_MANAGER_LOGIN, MD_SUP_STAFF_LOGIN ), true ) ) {
-		return home_url( '/직원/' );
+		return home_url( '/재료실/' );
 	}
 	return $redirect_to;
 }

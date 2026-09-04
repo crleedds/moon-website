@@ -23,6 +23,7 @@ function md_sup_tabs() {
 		'manage'    => array( 'label' => '반출관리',  'icon' => '📋', 'manage' => true ),
 		'inbound'   => array( 'label' => '입고',      'icon' => '📥', 'manage' => true ),
 		'inventory' => array( 'label' => '재고',      'icon' => '📦', 'manage' => true ),
+		'items'     => array( 'label' => '품목·팀',  'icon' => '⚙️', 'manage' => true ),
 	);
 }
 
@@ -34,49 +35,10 @@ function md_sup_current_tab() {
 	return $tab;
 }
 
-/**
- * 직원 전용 페이지는 여러 도구의 허브다.
- * 들어오면 먼저 무엇을 할지 고르고, 고른 뒤에 그 도구로 들어간다.
- */
-function md_sup_apps() {
-	return array(
-		'stock' => array(
-			'label' => '재료실',
-			'icon'  => '📦',
-			'desc'  => '재료 신청 · 우리 팀 사용량과 비용 · 입출고 관리',
-		),
-		'notice' => array(
-			'label' => '공지사항',
-			'icon'  => '📢',
-			'desc'  => '병원 내부 공지와 안내',
-		),
-	);
-}
-
-function md_sup_current_app() {
-	$app  = isset( $_GET['app'] ) ? sanitize_key( wp_unslash( $_GET['app'] ) ) : '';
-	$apps = md_sup_apps();
-	return isset( $apps[ $app ] ) ? $app : '';
-}
-
-/**
- * 페이지 주소를 만든다.
- *
- * app 을 넘기지 않으면 지금 보고 있는 도구를 그대로 유지한다.
- * 화면마다 'app' => 'stock' 을 일일이 붙이지 않아도 되게 하기 위함이다.
- * 허브로 나가려면 'app' => '' 을 명시한다.
- */
+/** 페이지 주소를 만든다 */
 function md_sup_url( $args = array() ) {
 	$base = get_permalink();
-	if ( ! $base ) { $base = home_url( '/직원/' ); }
-
-	if ( ! array_key_exists( 'app', $args ) ) {
-		$cur = md_sup_current_app();
-		if ( $cur ) { $args['app'] = $cur; }
-	} elseif ( '' === $args['app'] ) {
-		unset( $args['app'] );
-	}
-
+	if ( ! $base ) { $base = home_url( '/재료실/' ); }
 	return add_query_arg( $args, $base );
 }
 
@@ -85,7 +47,7 @@ function md_sup_is_page() {
 	if ( ! is_page() ) { return false; }
 	if ( is_page_template( 'page-templates/page-supply.php' ) ) { return true; }
 	$slug = urldecode( (string) get_post_field( 'post_name', get_queried_object_id() ) );
-	return in_array( $slug, array( '직원', 'staff', 'supply', '재고관리' ), true );
+	return in_array( $slug, array( '재료실', '직원', 'staff', 'supply', '재고관리' ), true );
 }
 
 /** 이 페이지에서만 CSS·JS 를 싣는다 */
@@ -159,7 +121,18 @@ function md_sup_handle_post() {
 				);
 			}
 
-			if ( empty( $lines ) ) {
+			/* 목록에 없어 직접 적은 품목 */
+			$customs = array();
+			$cn      = isset( $_POST['custom_name'] ) && is_array( $_POST['custom_name'] ) ? wp_unslash( $_POST['custom_name'] ) : array();
+			$cq      = isset( $_POST['custom_qty'] ) && is_array( $_POST['custom_qty'] ) ? wp_unslash( $_POST['custom_qty'] ) : array();
+			foreach ( $cn as $k => $nm ) {
+				$nm = trim( (string) $nm );
+				if ( '' === $nm ) { continue; }
+				$q         = isset( $cq[ $k ] ) ? (int) $cq[ $k ] : 0;
+				$customs[] = array( 'name' => $nm, 'qty' => $q > 0 ? $q : 1 );
+			}
+
+			if ( empty( $lines ) && empty( $customs ) ) {
 				$redirect = add_query_arg( 'msg', 'empty', $redirect );
 				break;
 			}
@@ -168,7 +141,8 @@ function md_sup_handle_post() {
 				$team_id,
 				$lines,
 				isset( $_POST['urgent'] ) ? 1 : 0,
-				isset( $_POST['note'] ) ? sanitize_text_field( wp_unslash( $_POST['note'] ) ) : ''
+				isset( $_POST['note'] ) ? sanitize_text_field( wp_unslash( $_POST['note'] ) ) : '',
+				$customs
 			);
 			$redirect = add_query_arg( array( 'team' => $team_id, 'msg' => is_wp_error( $res ) ? 'error' : 'sent', 'req' => is_wp_error( $res ) ? 0 : (int) $res ), $redirect );
 			break;
@@ -224,25 +198,40 @@ function md_sup_handle_post() {
 			$redirect = add_query_arg( array( 'tab' => 'inventory', 'msg' => $n ? 'adjusted' : 'empty' ), md_sup_url() );
 			break;
 
-		/* 공지 쓰기 · 수정 */
-		case 'notice':
+		/* 품목 등록 · 수정 */
+		case 'item':
 			if ( ! md_sup_can_manage() ) { break; }
-			$res = md_sup_notice_save(
-				isset( $_POST['notice_id'] ) ? (int) $_POST['notice_id'] : 0,
-				isset( $_POST['title'] ) ? wp_unslash( $_POST['title'] ) : '',
-				isset( $_POST['body'] ) ? wp_unslash( $_POST['body'] ) : '',
-				isset( $_POST['pinned'] ) ? 1 : 0
+			$res = md_sup_item_save(
+				isset( $_POST['item_id'] ) ? (int) $_POST['item_id'] : 0,
+				array(
+					'name'      => isset( $_POST['name'] ) ? wp_unslash( $_POST['name'] ) : '',
+					'vendor'    => isset( $_POST['vendor'] ) ? wp_unslash( $_POST['vendor'] ) : '',
+					'unit'      => isset( $_POST['unit'] ) ? wp_unslash( $_POST['unit'] ) : '',
+					'category'  => isset( $_POST['category'] ) ? wp_unslash( $_POST['category'] ) : '',
+					'price'     => isset( $_POST['price'] ) ? $_POST['price'] : 0,
+					'min_stock' => isset( $_POST['min_stock'] ) ? $_POST['min_stock'] : 0,
+				)
 			);
 			$redirect = is_wp_error( $res )
-				? add_query_arg( array( 'app' => 'notice', 'msg' => 'error' ), md_sup_url( array( 'app' => 'notice' ) ) )
-				: add_query_arg( array( 'app' => 'notice', 'n' => (int) $res, 'msg' => 'noticed' ), md_sup_url( array( 'app' => 'notice' ) ) );
+				? add_query_arg( array( 'tab' => 'items', 'err' => $res->get_error_message() ), md_sup_url() )
+				: add_query_arg( array( 'tab' => 'items', 'msg' => 'item_saved' ), md_sup_url() );
 			break;
 
-		/* 공지 삭제 */
-		case 'notice_del':
+		/* 팀 이름·사용 여부 저장 + 새 팀 추가 */
+		case 'team':
 			if ( ! md_sup_can_manage() ) { break; }
-			md_sup_notice_delete( isset( $_POST['notice_id'] ) ? (int) $_POST['notice_id'] : 0 );
-			$redirect = add_query_arg( array( 'app' => 'notice', 'msg' => 'notice_del' ), md_sup_url( array( 'app' => 'notice' ) ) );
+			$names = isset( $_POST['team_name'] ) && is_array( $_POST['team_name'] ) ? wp_unslash( $_POST['team_name'] ) : array();
+			$ons   = isset( $_POST['team_on'] ) && is_array( $_POST['team_on'] ) ? wp_unslash( $_POST['team_on'] ) : array();
+
+			foreach ( $names as $tid => $nm ) {
+				$tid = (int) $tid;
+				md_sup_team_save( $tid, $nm );
+				md_sup_team_archive( $tid, isset( $ons[ $tid ] ) );
+			}
+			$new = isset( $_POST['team_new'] ) ? trim( (string) wp_unslash( $_POST['team_new'] ) ) : '';
+			if ( '' !== $new ) { md_sup_team_save( 0, $new, 9999 ); }
+
+			$redirect = add_query_arg( array( 'tab' => 'items', 'msg' => 'team_saved' ), md_sup_url() );
 			break;
 	}
 
@@ -267,6 +256,17 @@ function md_sup_handle_get() {
 		}
 		$back = remove_query_arg( array( 'fav', '_wpnonce' ) );
 		wp_safe_redirect( $back . '#i' . $item );
+		exit;
+	}
+
+	/* 품목 감추기 · 되살리기 */
+	if ( isset( $_GET['toggle'] ) && isset( $_GET['_wpnonce'] ) && md_sup_can_manage() ) {
+		$id = (int) $_GET['toggle'];
+		if ( wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'md_sup_toggle_' . $id ) ) {
+			$it = md_sup_item( $id );
+			if ( $it ) { md_sup_item_archive( $id, ! (int) $it->active ); }
+		}
+		wp_safe_redirect( remove_query_arg( array( 'toggle', '_wpnonce' ) ) );
 		exit;
 	}
 
@@ -377,8 +377,8 @@ function md_sup_notice( $code ) {
 		'rejected' => array( 'ok',   '반려 처리했습니다.' ),
 		'inbound'  => array( 'ok',   '입고를 기록했습니다.' ),
 		'adjusted'   => array( 'ok',   '실사 결과를 반영했습니다.' ),
-		'noticed'    => array( 'ok',   '공지를 저장했습니다.' ),
-		'notice_del' => array( 'ok',   '공지를 삭제했습니다.' ),
+		'item_saved' => array( 'ok',   '품목을 저장했습니다.' ),
+		'team_saved' => array( 'ok',   '팀을 저장했습니다.' ),
 	);
 	if ( ! isset( $map[ $code ] ) ) { return ''; }
 	list( $type, $text ) = $map[ $code ];
@@ -394,8 +394,8 @@ function md_sup_render_login() {
 	?>
 	<div class="mds-gate">
 		<div class="mds-gate__box">
-			<span class="mds-gate__eyebrow">문치과병원 직원 전용</span>
-			<h1>재고관리</h1>
+			<span class="mds-gate__eyebrow">한아의료재단 문치과병원</span>
+			<h1>재료실</h1>
 			<p>병원에서 발급받은 계정으로 로그인해 주세요.</p>
 			<?php
 			wp_login_form( array(
@@ -424,9 +424,9 @@ function md_sup_render_denied() {
 	<div class="mds-gate">
 		<div class="mds-gate__box">
 			<span class="mds-gate__eyebrow">접근 권한 없음</span>
-			<h1>재고관리 권한이 없습니다</h1>
+			<h1>재료실 이용 권한이 없습니다</h1>
 			<p>
-				<?php echo esc_html( wp_get_current_user()->display_name ); ?> 님 계정에는 재고관리 권한이 없습니다.
+				<?php echo esc_html( wp_get_current_user()->display_name ); ?> 님 계정에는 재료실 이용 권한이 없습니다.
 				경영지원실에 권한 부여를 요청해 주세요.
 			</p>
 			<p class="mds-gate__help"><a href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">로그아웃</a></p>
@@ -435,23 +435,15 @@ function md_sup_render_denied() {
 	<?php
 }
 
-/** 헤더 — 허브면 제목만, 도구 안이면 돌아가기와 탭까지 */
-function md_sup_render_header( $app, $tab ) {
+/** 헤더 + 탭 */
+function md_sup_render_header( $tab ) {
 	$user = wp_get_current_user();
-	$apps = md_sup_apps();
-	$name = $app ? $apps[ $app ]['label'] : '직원 전용';
 	?>
 	<div class="mds-head">
 		<div class="mds-head__top">
 			<div>
-				<span class="mds-head__eyebrow">
-					<?php if ( $app ) : ?>
-						<a class="mds-head__back" href="<?php echo esc_url( md_sup_url( array( "app" => "" ) ) ); ?>">← 직원 전용</a>
-					<?php else : ?>
-						문치과병원
-					<?php endif; ?>
-				</span>
-				<h1><?php echo esc_html( $name ); ?></h1>
+				<span class="mds-head__eyebrow">한아의료재단 문치과병원</span>
+				<h1>재료실</h1>
 			</div>
 			<div class="mds-head__me">
 				<span class="mds-head__name"><?php echo esc_html( $user->display_name ); ?></span>
@@ -459,61 +451,18 @@ function md_sup_render_header( $app, $tab ) {
 			</div>
 		</div>
 
-		<?php if ( 'stock' === $app ) : ?>
-			<nav class="mds-tabs" aria-label="재고관리 메뉴">
-				<?php foreach ( md_sup_tabs() as $key => $t ) :
-					if ( $t['manage'] && ! md_sup_can_manage() ) { continue; } ?>
-					<a class="mds-tab<?php echo $tab === $key ? ' is-on' : ''; ?>"
-					   href="<?php echo esc_url( md_sup_url( array( 'app' => 'stock', 'tab' => $key ) ) ); ?>"
-					   <?php echo $tab === $key ? 'aria-current="page"' : ''; ?>>
-						<span aria-hidden="true"><?php echo esc_html( $t['icon'] ); ?></span><?php echo esc_html( $t['label'] ); ?>
-					</a>
-				<?php endforeach; ?>
-			</nav>
-		<?php endif; ?>
+		<nav class="mds-tabs" aria-label="재료실 메뉴">
+			<?php foreach ( md_sup_tabs() as $key => $t ) :
+				if ( $t['manage'] && ! md_sup_can_manage() ) { continue; } ?>
+				<a class="mds-tab<?php echo $tab === $key ? ' is-on' : ''; ?>"
+				   href="<?php echo esc_url( md_sup_url( array( 'tab' => $key ) ) ); ?>"
+				   <?php echo $tab === $key ? 'aria-current="page"' : ''; ?>>
+					<span aria-hidden="true"><?php echo esc_html( $t['icon'] ); ?></span><?php echo esc_html( $t['label'] ); ?>
+				</a>
+			<?php endforeach; ?>
+		</nav>
 	</div>
 	<?php
-}
-
-/** 허브 — 무엇을 할지 고르는 첫 화면 */
-function md_sup_render_hub() {
-	$pending = md_sup_can_manage() ? count( md_sup_requests( array( 'status' => 'pending', 'limit' => 99 ) ) ) : 0;
-	$recent  = md_sup_notice_recent( 3 );
-	?>
-	<div class="mds-apps">
-		<?php foreach ( md_sup_apps() as $key => $a ) : ?>
-			<a class="mds-app" href="<?php echo esc_url( md_sup_url( array( 'app' => $key ) ) ); ?>">
-				<span class="mds-app__icon" aria-hidden="true"><?php echo esc_html( $a['icon'] ); ?></span>
-				<span class="mds-app__body">
-					<span class="mds-app__label">
-						<?php echo esc_html( $a['label'] ); ?>
-						<?php if ( 'stock' === $key && $pending ) : ?>
-							<span class="mds-app__badge"><?php echo (int) $pending; ?>건 대기</span>
-						<?php endif; ?>
-					</span>
-					<span class="mds-app__desc"><?php echo esc_html( $a['desc'] ); ?></span>
-				</span>
-				<span class="mds-app__go" aria-hidden="true">→</span>
-			</a>
-		<?php endforeach; ?>
-	</div>
-
-	<?php if ( $recent ) : ?>
-		<h2 class="mds-h2">최근 공지</h2>
-		<ul class="mds-notices">
-			<?php foreach ( $recent as $n ) : ?>
-				<li class="mds-noticeitem<?php echo $n->pinned ? ' is-pinned' : ''; ?>">
-					<a href="<?php echo esc_url( md_sup_url( array( 'app' => 'notice', 'n' => (int) $n->id ) ) ); ?>">
-						<span class="mds-noticeitem__title">
-							<?php if ( $n->pinned ) : ?><span class="mds-pin">고정</span><?php endif; ?>
-							<?php echo esc_html( $n->title ); ?>
-						</span>
-						<span class="mds-noticeitem__meta"><?php echo esc_html( mysql2date( 'Y-m-d', $n->created_at ) ); ?></span>
-					</a>
-				</li>
-			<?php endforeach; ?>
-		</ul>
-	<?php endif;
 }
 
 /**
@@ -731,6 +680,25 @@ function md_sup_render_request() {
 				</tbody>
 			</table>
 		</div>
+
+		<?php /* 목록에 없는 품목을 직접 적어 신청.
+		         담당자가 나중에 품목으로 등록하거나 대체품을 알려 준다. */ ?>
+		<details class="mds-custom">
+			<summary class="mds-custom__sum">목록에 없는 품목 신청하기</summary>
+			<p class="mds-hint" style="margin:10px 0 12px">
+				찾으시는 품목이 위 목록에 없으면 여기에 직접 적어 주세요.
+				이름과 규격을 되도록 자세히 적어 주시면 담당자가 확인해 주문합니다.
+			</p>
+			<?php for ( $c = 1; $c <= 3; $c++ ) : ?>
+				<div class="mds-custom__row">
+					<input type="text" name="custom_name[]" maxlength="200"
+					       placeholder="품목명 · 규격 · 브랜드 (예: 오스템 KS 픽스처 4.0×10)"
+					       aria-label="직접 적는 품목명 <?php echo (int) $c; ?>">
+					<input type="number" name="custom_qty[]" min="0" step="1" inputmode="numeric"
+					       class="mds-qty" placeholder="수량" aria-label="직접 적는 품목 수량 <?php echo (int) $c; ?>">
+				</div>
+			<?php endfor; ?>
+		</details>
 
 		<div class="mds-submit" id="mds-submit">
 			<label class="mds-check"><input type="checkbox" name="urgent" value="1"> 긴급 (오늘 필요)</label>
@@ -977,15 +945,33 @@ function md_sup_render_manage() {
 						<thead><tr><th>품목</th><th class="num">창고 재고</th><th class="num">신청</th><th>초과 사유</th><th class="num">출고</th></tr></thead>
 						<tbody>
 						<?php foreach ( $lines as $ln ) :
-							$stock = md_sup_stock( $ln->item_id ); ?>
-							<tr>
-								<td class="mds-item"><b><?php echo esc_html( $ln->name ); ?></b><span class="mds-item__meta"><?php echo esc_html( $ln->code ); ?></span></td>
-								<td class="num<?php echo $stock < $ln->qty_req ? ' is-low' : ''; ?>"><?php echo esc_html( number_format( $stock ) ); ?></td>
-								<td class="num"><?php echo (int) $ln->qty_req; ?></td>
-								<td class="mds-memo"><?php echo esc_html( $ln->over_reason ); ?></td>
-								<td class="num"><input class="mds-qty" type="number" min="0" step="1" inputmode="numeric"
-									name="out[<?php echo (int) $ln->id; ?>]" value="<?php echo (int) $ln->qty_req; ?>"
-									aria-label="<?php echo esc_attr( $ln->name . ' 출고 수량' ); ?>"></td>
+							$is_custom = ( 0 === (int) $ln->item_id );
+							$stock     = $is_custom ? 0 : md_sup_stock( $ln->item_id ); ?>
+							<tr class="<?php echo $is_custom ? 'is-custom' : ''; ?>">
+								<td class="mds-item" data-label="품목">
+									<b><?php echo esc_html( $ln->name ); ?></b>
+									<span class="mds-item__meta">
+										<?php if ( $is_custom ) : ?>
+											<span class="mds-flag">직접 적은 품목</span> 등록되지 않은 품목입니다
+										<?php else : ?>
+											<?php echo esc_html( $ln->code ); ?>
+										<?php endif; ?>
+									</span>
+								</td>
+								<td class="num<?php echo ( ! $is_custom && $stock < $ln->qty_req ) ? ' is-low' : ''; ?>" data-label="창고 재고">
+									<?php echo $is_custom ? '—' : esc_html( number_format( $stock ) ); ?>
+								</td>
+								<td class="num" data-label="신청"><?php echo (int) $ln->qty_req; ?></td>
+								<td class="mds-memo" data-label="비고"><?php echo esc_html( $ln->over_reason ); ?></td>
+								<td class="num" data-label="출고">
+									<?php if ( $is_custom ) : ?>
+										<a class="mds-mini" href="<?php echo esc_url( md_sup_url( array( 'tab' => 'items' ) ) ); ?>">품목 등록하기</a>
+									<?php else : ?>
+										<input class="mds-qty" type="number" min="0" step="1" inputmode="numeric"
+											name="out[<?php echo (int) $ln->id; ?>]" value="<?php echo (int) $ln->qty_req; ?>"
+											aria-label="<?php echo esc_attr( $ln->name . ' 출고 수량' ); ?>">
+									<?php endif; ?>
+								</td>
 							</tr>
 						<?php endforeach; ?>
 						</tbody>
@@ -1139,32 +1125,29 @@ function md_sup_render_page() {
 	if ( ! is_user_logged_in() ) { md_sup_render_login(); return; }
 	if ( ! md_sup_can_use() )    { md_sup_render_denied(); return; }
 
-	$app = md_sup_current_app();
 	$tab = md_sup_current_tab();
-	md_sup_render_header( $app, $tab );
+	md_sup_render_header( $tab );
 
 	if ( isset( $_GET['msg'] ) ) {
 		echo md_sup_notice( sanitize_key( wp_unslash( $_GET['msg'] ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput
 	}
+	if ( isset( $_GET['err'] ) ) {
+		echo '<div class="mds-notice mds-notice--warn">' . esc_html( wp_unslash( $_GET['err'] ) ) . '</div>';
+	}
 
-	if ( 'notice' === $app ) {
-		md_sup_render_notice();
-	} elseif ( 'stock' === $app ) {
-		switch ( $tab ) {
-			case 'stats':     md_sup_render_stats();     break;
-			case 'manage':    md_sup_render_manage();    break;
-			case 'inbound':   md_sup_render_inbound();   break;
-			case 'inventory': md_sup_render_inventory(); break;
-			default:          md_sup_render_request();   break;
-		}
-	} else {
-		md_sup_render_hub();
+	switch ( $tab ) {
+		case 'stats':     md_sup_render_stats();     break;
+		case 'manage':    md_sup_render_manage();    break;
+		case 'inbound':   md_sup_render_inbound();   break;
+		case 'inventory': md_sup_render_inventory(); break;
+		case 'items':     md_sup_render_items();     break;
+		default:          md_sup_render_request();   break;
 	}
 
 	/* 사이트 푸터를 감췄으니 필요한 안내만 여기서 */
 	?>
 	<div class="mds-foot">
-		<span>한아의료재단 문치과병원 · 직원 전용</span>
+		<span>한아의료재단 문치과병원 · 재료실</span>
 		<a href="<?php echo esc_url( home_url( '/' ) ); ?>">병원 홈페이지</a>
 		<a href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">로그아웃</a>
 	</div>
