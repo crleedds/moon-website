@@ -303,3 +303,73 @@
 @media (max-width: 900px) { .mds-teamgrid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 560px) { .mds-teamgrid { grid-template-columns: repeat(2, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .mds-teambtn { transition: none; } }
+
+/* --- 고정 합계 바 · 스테퍼 · 행 강조 (v3.55) ------------------
+   568줄을 스크롤해 내려가 제출 버튼을 찾지 않아도 되게,
+   수량을 하나라도 적으면 화면 아래에 바가 붙어 따라온다.
+   ----------------------------------------------------------- */
+.mds-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+  background: var(--color-white, #fff);
+  border-top: 1px solid var(--color-border, #EDDFD0);
+  box-shadow: 0 -6px 24px rgba(61, 47, 38, .14);
+  padding: 12px clamp(14px, 3vw, 28px);
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+.mds-bar__inner {
+  max-width: 1180px; margin-inline: auto;
+  display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap;
+}
+.mds-bar__team {
+  padding: 5px 14px; border-radius: 999px;
+  font-size: .84rem; font-weight: 800;
+  background: var(--color-accent-bg, rgba(143,174,146,.08));
+  color: var(--color-accent-dark, #6B8F72);
+  white-space: nowrap;
+}
+.mds-bar__sum { font-size: .95rem; color: var(--color-text-sub, #7A6B5F); white-space: nowrap; }
+.mds-bar__sum b { font-size: 1.15rem; font-weight: 900; color: var(--color-text, #3D2F26); font-variant-numeric: tabular-nums; }
+.mds-bar__won { margin-left: 10px; color: var(--color-primary-dark, #B86347); }
+.mds-bar__won b { color: var(--color-primary-dark, #B86347); }
+.mds-bar .mds-btn { margin-left: auto; min-height: 46px; padding-inline: 30px; }
+
+/* 바가 떠 있는 동안 아래 내용이 가려지지 않게 여백을 준다 */
+body.mds-has-bar .mds-page { padding-bottom: 120px; }
+/* JS 로 제출하는 사람에겐 아래 제출 줄이 중복이라 감춘다 */
+body.mds-has-bar #mds-submit .mds-btn { display: none; }
+
+/* 수량 +/− */
+.mds-stepper { display: inline-flex; align-items: center; gap: 4px; }
+.mds-step {
+  width: 38px; height: 44px; flex: none;
+  border: 1.5px solid var(--color-border, #EDDFD0); border-radius: 10px;
+  background: var(--color-white, #fff); color: var(--color-text-sub, #7A6B5F);
+  font-size: 1.25rem; font-weight: 800; line-height: 1; cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.mds-step:hover { border-color: var(--color-primary, #D88062); color: var(--color-primary-dark, #B86347); }
+.mds-step:active { background: var(--color-surface-alt, #F5E8D8); }
+.mds-stepper .mds-qty { width: 68px; }
+
+/* 수량을 적은 줄은 눈에 띄게 */
+.mds-table tbody tr.is-picked { background: var(--color-accent-bg, rgba(143,174,146,.08)); }
+.mds-table tbody tr.is-picked:hover { background: var(--color-accent-bg, rgba(143,174,146,.08)); }
+.mds-table tbody tr.is-picked .mds-item b { color: var(--color-accent-dark, #6B8F72); }
+
+/* 우리 팀 품목 / 나머지 구분선 */
+.mds-table tbody tr.mds-divider td {
+  background: var(--color-surface, #FBF2E8);
+  text-align: center; font-size: .78rem; font-weight: 700;
+  color: var(--color-text-mute, #A89685);
+  padding: 9px 14px;
+}
+.mds-table tbody tr.mds-divider:hover td { background: var(--color-surface, #FBF2E8); }
+
+@media (max-width: 700px) {
+  .mds-bar__inner { gap: 8px 10px; }
+  .mds-bar__sum { font-size: .85rem; }
+  .mds-bar .mds-btn { width: auto; min-width: 130px; padding-inline: 18px; }
+  .mds-step { width: 34px; }
+  .mds-stepper .mds-qty { width: 58px; }
+}
+@media (prefers-reduced-motion: reduce) { .mds-step { transition: none; } }

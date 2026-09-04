@@ -364,7 +364,23 @@ function md_sup_render_request() {
 	$items    = md_sup_items( array( 'search' => $search, 'category' => $cat, 'vendor' => $vendor ) );
 	$avg_map  = md_sup_avg_map( $team_id );
 	$last_map = md_sup_last_map( $team_id );
-	$hint     = '총 ' . number_format( count( $items ) ) . '개 품목. 필요한 품목의 수량 칸에만 숫자를 적고 아래 「신청하기」를 누르세요.';
+
+	/* 우리 팀이 실제로 쓰는 품목을 맨 위로. 568개 중 우리가 만지는 건
+	 * 보통 수십 개뿐이라, 이 정렬 하나로 찾는 시간이 확 줄어든다. */
+	$used = array();
+	$rest = array();
+	foreach ( $items as $it ) {
+		if ( isset( $avg_map[ $it->id ] ) && $avg_map[ $it->id ] > 0 ) { $used[] = $it; } else { $rest[] = $it; }
+	}
+	usort( $used, function ( $a, $b ) use ( $avg_map ) {
+		return $avg_map[ $b->id ] <=> $avg_map[ $a->id ];
+	} );
+	$items      = array_merge( $used, $rest );
+	$used_count = count( $used );
+
+	$hint = '총 ' . number_format( count( $items ) ) . '개 품목';
+	$hint .= $used_count ? ' · 우리 팀이 쓰는 ' . $used_count . '개를 맨 위로 모았습니다.' : '.';
+	$hint .= ' 필요한 것만 수량을 적으면 아래에 합계가 뜹니다.';
 	?>
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="request">
@@ -415,7 +431,8 @@ function md_sup_render_request() {
 				<tbody>
 				<?php if ( empty( $items ) ) : ?>
 					<tr><td colspan="6" class="mds-empty">해당하는 품목이 없습니다.</td></tr>
-				<?php else : foreach ( $items as $it ) :
+				<?php else : $i_row = 0; foreach ( $items as $it ) :
+					$i_row++;
 					$avg  = isset( $avg_map[ $it->id ] ) ? $avg_map[ $it->id ] : 0;
 					$last = isset( $last_map[ $it->id ] ) ? $last_map[ $it->id ] : null;
 					$low  = ( $it->min_stock > 0 && $it->stock <= $it->min_stock );
@@ -437,26 +454,47 @@ function md_sup_render_request() {
 							<?php else : ?>—<?php endif; ?>
 						</td>
 						<td class="num">
-							<input class="mds-qty" type="number" min="0" step="1" inputmode="numeric"
-							       name="qty[<?php echo (int) $it->id; ?>]" value=""
-							       data-avg="<?php echo esc_attr( $avg ); ?>"
-							       aria-label="<?php echo esc_attr( $it->name . ' 신청 수량' ); ?>">
+							<span class="mds-stepper">
+								<button type="button" class="mds-step" data-step="-1" aria-label="수량 줄이기" tabindex="-1">−</button>
+								<input class="mds-qty" type="number" min="0" step="1" inputmode="numeric"
+								       name="qty[<?php echo (int) $it->id; ?>]" value=""
+								       data-avg="<?php echo esc_attr( $avg ); ?>"
+								       data-price="<?php echo (int) $it->price; ?>"
+								       aria-label="<?php echo esc_attr( $it->name . ' 신청 수량' ); ?>">
+								<button type="button" class="mds-step" data-step="1" aria-label="수량 늘리기" tabindex="-1">+</button>
+							</span>
 							<input class="mds-reason" type="text" name="reason[<?php echo (int) $it->id; ?>]"
 							       placeholder="평균보다 많은 이유" hidden
 							       aria-label="<?php echo esc_attr( $it->name . ' 초과 신청 사유' ); ?>">
 						</td>
 					</tr>
+					<?php if ( $used_count && $i_row === $used_count ) : ?>
+						<tr class="mds-divider"><td colspan="6">여기부터는 우리 팀이 최근 3개월간 받아가지 않은 품목입니다</td></tr>
+					<?php endif; ?>
 				<?php endforeach; endif; ?>
 				</tbody>
 			</table>
 		</div>
 
-		<div class="mds-submit">
+		<div class="mds-submit" id="mds-submit">
 			<label class="mds-check"><input type="checkbox" name="urgent" value="1"> 긴급 (오늘 필요)</label>
 			<input class="mds-note" type="text" name="note" placeholder="담당자에게 전할 메모 (선택)" maxlength="200">
 			<button type="submit" class="mds-btn mds-btn--fill">
 				<?php echo esc_html( md_sup_team_name( $team_id ) ); ?> 이름으로 신청
 			</button>
+		</div>
+
+		<?php /* 고정 바 — 수량을 하나라도 적으면 화면 아래에 붙어 따라온다.
+		         568줄을 스크롤해 내려가 제출 버튼을 찾지 않아도 되게. */ ?>
+		<div class="mds-bar" id="mds-bar" hidden>
+			<div class="mds-bar__inner">
+				<span class="mds-bar__team"><?php echo esc_html( md_sup_team_name( $team_id ) ); ?></span>
+				<span class="mds-bar__sum">
+					<b id="mds-bar-count">0</b>개 품목
+					<span class="mds-bar__won">약 <b id="mds-bar-total">0</b>원</span>
+				</span>
+				<button type="submit" class="mds-btn mds-btn--fill">신청하기</button>
+			</div>
 		</div>
 	</form>
 
