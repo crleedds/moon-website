@@ -35,10 +35,45 @@ function md_sup_current_tab() {
 	return $tab;
 }
 
-/** 페이지 주소를 만든다 */
+/**
+ * 직원 전용은 여러 도구가 들어설 자리다.
+ * 들어오면 무엇을 할지 먼저 고르고, 고른 뒤 그 도구로 들어간다.
+ * 도구가 늘면 여기에 한 줄만 더하면 된다.
+ */
+function md_sup_apps() {
+	return array(
+		'stock' => array(
+			'label' => '재료실',
+			'icon'  => '📦',
+			'desc'  => '재료 신청 · 우리 팀 사용량과 비용 · 입출고 관리',
+		),
+	);
+}
+
+function md_sup_current_app() {
+	$app  = isset( $_GET['app'] ) ? sanitize_key( wp_unslash( $_GET['app'] ) ) : '';
+	$apps = md_sup_apps();
+	return isset( $apps[ $app ] ) ? $app : '';
+}
+
+/**
+ * 페이지 주소를 만든다.
+ *
+ * app 을 넘기지 않으면 지금 보고 있는 도구를 그대로 유지한다.
+ * 화면마다 'app' => 'stock' 을 일일이 붙이지 않아도 되게 하기 위함이다.
+ * 첫 화면으로 나가려면 'app' => '' 을 명시한다.
+ */
 function md_sup_url( $args = array() ) {
 	$base = get_permalink();
-	if ( ! $base ) { $base = home_url( '/재료실/' ); }
+	if ( ! $base ) { $base = home_url( '/직원/' ); }
+
+	if ( ! array_key_exists( 'app', $args ) ) {
+		$cur = md_sup_current_app();
+		if ( $cur ) { $args['app'] = $cur; }
+	} elseif ( '' === $args['app'] ) {
+		unset( $args['app'] );
+	}
+
 	return add_query_arg( $args, $base );
 }
 
@@ -395,7 +430,7 @@ function md_sup_render_login() {
 	<div class="mds-gate">
 		<div class="mds-gate__box">
 			<span class="mds-gate__eyebrow">한아의료재단 문치과병원</span>
-			<h1>재료실</h1>
+			<h1>직원 전용</h1>
 			<p>병원에서 발급받은 계정으로 로그인해 주세요.</p>
 			<?php
 			wp_login_form( array(
@@ -424,9 +459,9 @@ function md_sup_render_denied() {
 	<div class="mds-gate">
 		<div class="mds-gate__box">
 			<span class="mds-gate__eyebrow">접근 권한 없음</span>
-			<h1>재료실 이용 권한이 없습니다</h1>
+			<h1>직원 전용 페이지 이용 권한이 없습니다</h1>
 			<p>
-				<?php echo esc_html( wp_get_current_user()->display_name ); ?> 님 계정에는 재료실 이용 권한이 없습니다.
+				<?php echo esc_html( wp_get_current_user()->display_name ); ?> 님 계정에는 이 페이지 이용 권한이 없습니다.
 				경영지원실에 권한 부여를 요청해 주세요.
 			</p>
 			<p class="mds-gate__help"><a href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">로그아웃</a></p>
@@ -435,15 +470,22 @@ function md_sup_render_denied() {
 	<?php
 }
 
-/** 헤더 + 탭 */
-function md_sup_render_header( $tab ) {
+/** 헤더 — 첫 화면이면 제목만, 도구 안이면 돌아가기와 탭까지 */
+function md_sup_render_header( $app, $tab ) {
 	$user = wp_get_current_user();
+	$apps = md_sup_apps();
 	?>
 	<div class="mds-head">
 		<div class="mds-head__top">
 			<div>
-				<span class="mds-head__eyebrow">한아의료재단 문치과병원</span>
-				<h1>재료실</h1>
+				<span class="mds-head__eyebrow">
+					<?php if ( $app ) : ?>
+						<a class="mds-head__back" href="<?php echo esc_url( md_sup_url( array( 'app' => '' ) ) ); ?>">← 직원 전용</a>
+					<?php else : ?>
+						한아의료재단 문치과병원
+					<?php endif; ?>
+				</span>
+				<h1><?php echo esc_html( $app ? $apps[ $app ]['label'] : '직원 전용' ); ?></h1>
 			</div>
 			<div class="mds-head__me">
 				<span class="mds-head__name"><?php echo esc_html( $user->display_name ); ?></span>
@@ -451,16 +493,42 @@ function md_sup_render_header( $tab ) {
 			</div>
 		</div>
 
-		<nav class="mds-tabs" aria-label="재료실 메뉴">
-			<?php foreach ( md_sup_tabs() as $key => $t ) :
-				if ( $t['manage'] && ! md_sup_can_manage() ) { continue; } ?>
-				<a class="mds-tab<?php echo $tab === $key ? ' is-on' : ''; ?>"
-				   href="<?php echo esc_url( md_sup_url( array( 'tab' => $key ) ) ); ?>"
-				   <?php echo $tab === $key ? 'aria-current="page"' : ''; ?>>
-					<span aria-hidden="true"><?php echo esc_html( $t['icon'] ); ?></span><?php echo esc_html( $t['label'] ); ?>
-				</a>
-			<?php endforeach; ?>
-		</nav>
+		<?php if ( 'stock' === $app ) : ?>
+			<nav class="mds-tabs" aria-label="재료실 메뉴">
+				<?php foreach ( md_sup_tabs() as $key => $t ) :
+					if ( $t['manage'] && ! md_sup_can_manage() ) { continue; } ?>
+					<a class="mds-tab<?php echo $tab === $key ? ' is-on' : ''; ?>"
+					   href="<?php echo esc_url( md_sup_url( array( 'app' => 'stock', 'tab' => $key ) ) ); ?>"
+					   <?php echo $tab === $key ? 'aria-current="page"' : ''; ?>>
+						<span aria-hidden="true"><?php echo esc_html( $t['icon'] ); ?></span><?php echo esc_html( $t['label'] ); ?>
+					</a>
+				<?php endforeach; ?>
+			</nav>
+		<?php endif; ?>
+	</div>
+	<?php
+}
+
+/** 첫 화면 — 어떤 도구로 들어갈지 고른다 */
+function md_sup_render_hub() {
+	$pending = md_sup_can_manage() ? count( md_sup_requests( array( 'status' => 'pending', 'limit' => 99 ) ) ) : 0;
+	?>
+	<div class="mds-apps">
+		<?php foreach ( md_sup_apps() as $key => $a ) : ?>
+			<a class="mds-app" href="<?php echo esc_url( md_sup_url( array( 'app' => $key ) ) ); ?>">
+				<span class="mds-app__icon" aria-hidden="true"><?php echo esc_html( $a['icon'] ); ?></span>
+				<span class="mds-app__body">
+					<span class="mds-app__label">
+						<?php echo esc_html( $a['label'] ); ?>
+						<?php if ( 'stock' === $key && $pending ) : ?>
+							<span class="mds-app__badge"><?php echo (int) $pending; ?>건 대기</span>
+						<?php endif; ?>
+					</span>
+					<span class="mds-app__desc"><?php echo esc_html( $a['desc'] ); ?></span>
+				</span>
+				<span class="mds-app__go" aria-hidden="true">→</span>
+			</a>
+		<?php endforeach; ?>
 	</div>
 	<?php
 }
@@ -1125,8 +1193,9 @@ function md_sup_render_page() {
 	if ( ! is_user_logged_in() ) { md_sup_render_login(); return; }
 	if ( ! md_sup_can_use() )    { md_sup_render_denied(); return; }
 
+	$app = md_sup_current_app();
 	$tab = md_sup_current_tab();
-	md_sup_render_header( $tab );
+	md_sup_render_header( $app, $tab );
 
 	if ( isset( $_GET['msg'] ) ) {
 		echo md_sup_notice( sanitize_key( wp_unslash( $_GET['msg'] ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput
@@ -1135,19 +1204,23 @@ function md_sup_render_page() {
 		echo '<div class="mds-notice mds-notice--warn">' . esc_html( wp_unslash( $_GET['err'] ) ) . '</div>';
 	}
 
-	switch ( $tab ) {
-		case 'stats':     md_sup_render_stats();     break;
-		case 'manage':    md_sup_render_manage();    break;
-		case 'inbound':   md_sup_render_inbound();   break;
-		case 'inventory': md_sup_render_inventory(); break;
-		case 'items':     md_sup_render_items();     break;
-		default:          md_sup_render_request();   break;
+	if ( 'stock' !== $app ) {
+		md_sup_render_hub();
+	} else {
+		switch ( $tab ) {
+			case 'stats':     md_sup_render_stats();     break;
+			case 'manage':    md_sup_render_manage();    break;
+			case 'inbound':   md_sup_render_inbound();   break;
+			case 'inventory': md_sup_render_inventory(); break;
+			case 'items':     md_sup_render_items();     break;
+			default:          md_sup_render_request();   break;
+		}
 	}
 
 	/* 사이트 푸터를 감췄으니 필요한 안내만 여기서 */
 	?>
 	<div class="mds-foot">
-		<span>한아의료재단 문치과병원 · 재료실</span>
+		<span>한아의료재단 문치과병원 · 직원 전용</span>
 		<a href="<?php echo esc_url( home_url( '/' ) ); ?>">병원 홈페이지</a>
 		<a href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">로그아웃</a>
 	</div>

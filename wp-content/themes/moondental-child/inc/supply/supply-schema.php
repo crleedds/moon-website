@@ -232,26 +232,26 @@ add_action( 'admin_init', 'md_sup_maybe_install' );
  * 테마의 다른 자동 생성(inc/reservation.php)과 같은 방식.
  */
 function md_sup_ensure_page() {
-	/* v3.61 · 「직원 전용」 → 「재료실」 로 이름을 바꾼다.
-	 * 푸터 링크가 /재료실/ 을 가리키므로 기존 페이지 슬러그도 옮겨야 한다.
-	 * 한 번만 실행되고, 이미 바꿨거나 사람이 손댄 경우엔 건드리지 않는다. */
+	/* v3.62 · 페이지는 「직원 전용」이고, 그 안에서 「재료실」을 골라 들어간다.
+	 * v3.61 에서 잠깐 페이지째 재료실로 바꿨다가 되돌린다.
+	 * 한 번만 실행되고, 사람이 슬러그를 손댄 경우엔 건드리지 않는다. */
 	$pid = (int) get_option( 'md_sup_page_id' );
-	if ( $pid && ! get_option( 'md_sup_renamed_v361' ) ) {
+	if ( $pid && ! get_option( 'md_sup_renamed_v362' ) ) {
 		$p = get_post( $pid );
-		if ( $p && 'page' === $p->post_type && '직원' === urldecode( $p->post_name ) ) {
+		if ( $p && 'page' === $p->post_type && in_array( urldecode( $p->post_name ), array( '재료실', '직원' ), true ) ) {
 			wp_update_post( array(
 				'ID'         => $pid,
-				'post_title' => '재료실',
-				'post_name'  => '재료실',
+				'post_title' => '직원 전용',
+				'post_name'  => '직원',
 			) );
 		}
-		update_option( 'md_sup_renamed_v361', '1' );
+		update_option( 'md_sup_renamed_v362', '1' );
 	}
 
 	if ( $pid && get_post( $pid ) ) { return; }
 
-	$existing = get_page_by_path( '재료실' );
-	if ( ! $existing ) { $existing = get_page_by_path( '직원' ); }
+	$existing = get_page_by_path( '직원' );
+	if ( ! $existing ) { $existing = get_page_by_path( '재료실' ); }
 	if ( ! $existing ) { $existing = get_page_by_path( 'staff' ); }
 
 	if ( $existing ) {
@@ -260,8 +260,8 @@ function md_sup_ensure_page() {
 	}
 
 	$id = wp_insert_post( array(
-		'post_title'     => '재료실',
-		'post_name'      => '재료실',
+		'post_title'     => '직원 전용',
+		'post_name'      => '직원',
 		'post_type'      => 'page',
 		'post_status'    => 'publish',
 		'post_content'   => '',
