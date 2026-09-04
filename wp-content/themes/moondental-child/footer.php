@@ -320,6 +320,9 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				'footer_link_privacy' => '개인정보취급방침|/개인정보처리방침/',
 				'footer_link_terms'   => '이용약관|/이용약관/',
 				'footer_link_email'   => '이메일 무단수집거부|/이메일-무단수집거부/',
+				/* v3.51 · 직원 전용 재고관리. 법적 표시 줄 맨 끝이라 환자분 눈에는 잘 띄지 않는다.
+				 * 링크가 보이는 것과 들어갈 수 있는 것은 다른 문제 — 실제 차단은 로그인에서 한다. */
+				'footer_link_staff'   => '직원 전용|/직원/',
 			);
 			foreach ( $policy_col_keys as $k => $d ) {
 				$raw = trim( $mc( $k, $d ) );

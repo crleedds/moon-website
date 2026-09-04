@@ -1,0 +1,257 @@
+/* =============================================================
+   직원 전용 재고관리 · v3.51
+   사이트 토큰(--color-*)을 그대로 쓴다 → 다크모드 자동 추종.
+   진료실에서 장갑 낀 손으로도 누를 수 있게 터치 목표를 크게 잡았다.
+   ============================================================= */
+
+.mds-page {
+  padding-block: clamp(20px, 3vw, 36px) clamp(40px, 5vw, 72px);
+  background: var(--color-bg, #FFFAF4);
+}
+.mds-wrap {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding-inline: clamp(14px, 3vw, 28px);
+}
+.mds-page * { box-sizing: border-box; }
+.mds-page h1, .mds-page h2 { letter-spacing: -0.03em; word-break: keep-all; }
+
+/* --- 로그인 · 권한 없음 ------------------------------------- */
+.mds-gate { display: grid; place-items: center; min-height: 56vh; padding: 24px 0; }
+.mds-gate__box {
+  width: 100%; max-width: 420px;
+  background: var(--color-white, #fff);
+  border: 1px solid var(--color-border, #EDDFD0);
+  border-radius: 20px;
+  padding: clamp(26px, 4vw, 40px);
+  box-shadow: var(--card-shadow, 0 6px 20px rgba(61,47,38,.06));
+}
+.mds-gate__eyebrow {
+  display: block; font-size: .72rem; font-weight: 800; letter-spacing: .12em;
+  color: var(--color-primary, #D88062); margin-bottom: 8px;
+}
+.mds-gate__box h1 { margin: 0 0 8px; font-size: 1.5rem; font-weight: 800; color: var(--color-text, #3D2F26); }
+.mds-gate__box > p { margin: 0 0 20px; font-size: .9rem; color: var(--color-text-sub, #7A6B5F); line-height: 1.7; }
+.mds-gate__box label { display: block; font-size: .82rem; font-weight: 700; color: var(--color-text-sub, #7A6B5F); margin-bottom: 6px; }
+.mds-gate__box input[type="text"],
+.mds-gate__box input[type="password"] {
+  width: 100%; font: inherit; font-size: 1rem; min-height: 48px;
+  padding: 10px 14px; margin-bottom: 14px;
+  border: 1px solid var(--color-border, #EDDFD0); border-radius: 12px;
+  background: var(--color-bg, #FFFAF4); color: var(--color-text, #3D2F26);
+}
+.mds-gate__box input:focus { outline: 2px solid var(--color-primary, #D88062); outline-offset: 1px; }
+.mds-gate__box .login-remember { font-weight: 400; font-size: .85rem; margin-bottom: 14px; }
+.mds-gate__box .login-remember label { display: inline; font-weight: 400; }
+.mds-gate__box input[type="submit"] {
+  width: 100%; min-height: 50px; font: inherit; font-size: 1rem; font-weight: 800;
+  border: 0; border-radius: 12px; cursor: pointer;
+  background: var(--color-primary, #D88062); color: var(--color-text-on-primary, #fff);
+}
+.mds-gate__box input[type="submit"]:hover { background: var(--color-primary-dark, #B86347); }
+.mds-gate__help { margin: 16px 0 0; font-size: .8rem; color: var(--color-text-mute, #A89685); line-height: 1.7; }
+
+/* --- 헤더 · 탭 ---------------------------------------------- */
+.mds-head { margin-bottom: 18px; }
+.mds-head__top {
+  display: flex; flex-wrap: wrap; gap: 12px 20px;
+  align-items: flex-end; justify-content: space-between;
+  padding-bottom: 14px; border-bottom: 1px solid var(--color-border, #EDDFD0);
+}
+.mds-head__eyebrow { display: block; font-size: .7rem; font-weight: 800; letter-spacing: .12em; color: var(--color-primary, #D88062); }
+.mds-head h1 { margin: 2px 0 0; font-size: clamp(1.25rem, 2.4vw, 1.6rem); font-weight: 800; color: var(--color-text, #3D2F26); }
+.mds-head__me { display: flex; align-items: center; gap: 10px; font-size: .84rem; }
+.mds-head__name { font-weight: 700; color: var(--color-text, #3D2F26); }
+.mds-head__team {
+  padding: 3px 11px; border-radius: 999px; font-weight: 600;
+  background: var(--color-accent-bg, rgba(143,174,146,.08)); color: var(--color-accent-dark, #6B8F72);
+}
+.mds-head__out { color: var(--color-text-mute, #A89685); text-decoration: underline; }
+
+.mds-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.mds-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 44px; padding: 8px 18px;
+  border-radius: 999px; border: 1px solid var(--color-border, #EDDFD0);
+  background: var(--color-white, #fff); color: var(--color-text-sub, #7A6B5F);
+  font-size: .9rem; font-weight: 700; text-decoration: none;
+  transition: background .18s, color .18s, border-color .18s;
+}
+.mds-tab:hover { border-color: var(--color-primary, #D88062); color: var(--color-text, #3D2F26); }
+.mds-tab.is-on {
+  background: var(--color-primary, #D88062);
+  border-color: var(--color-primary, #D88062);
+  color: var(--color-text-on-primary, #fff);
+}
+
+/* --- 알림 --------------------------------------------------- */
+.mds-notice {
+  margin: 0 0 16px; padding: 13px 18px; border-radius: 12px;
+  font-size: .9rem; font-weight: 600; line-height: 1.6;
+}
+.mds-notice--ok   { background: var(--color-accent-bg, rgba(143,174,146,.08)); color: var(--color-accent-dark, #6B8F72); border: 1px solid var(--color-accent, #8FAE92); }
+.mds-notice--warn { background: rgba(198,107,94,.10); color: var(--color-danger, #C66B5E); border: 1px solid var(--color-danger, #C66B5E); }
+
+/* --- 필터 줄 ------------------------------------------------ */
+.mds-filter {
+  display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: flex-end;
+  background: var(--color-white, #fff);
+  border: 1px solid var(--color-border, #EDDFD0);
+  border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
+}
+.mds-field { display: flex; flex-direction: column; gap: 5px; }
+.mds-field--grow { flex: 1 1 200px; }
+.mds-field > span { font-size: .72rem; font-weight: 800; letter-spacing: .08em; color: var(--color-text-mute, #A89685); }
+.mds-field select, .mds-field input {
+  font: inherit; font-size: .95rem; min-height: 44px;
+  padding: 8px 12px; border-radius: 10px;
+  border: 1px solid var(--color-border, #EDDFD0);
+  background: var(--color-bg, #FFFAF4); color: var(--color-text, #3D2F26);
+}
+.mds-field input:focus, .mds-field select:focus { outline: 2px solid var(--color-primary, #D88062); outline-offset: 1px; }
+
+.mds-check { display: inline-flex; align-items: center; gap: 8px; font-size: .9rem; font-weight: 600; color: var(--color-text-sub, #7A6B5F); }
+.mds-check input { width: 20px; height: 20px; }
+
+.mds-hint { margin: 0 0 12px; font-size: .85rem; color: var(--color-text-mute, #A89685); line-height: 1.7; word-break: keep-all; }
+.mds-h2 { margin: 32px 0 10px; font-size: 1.15rem; font-weight: 800; color: var(--color-text, #3D2F26); }
+.mds-count {
+  display: inline-block; margin-left: 6px; padding: 2px 10px; border-radius: 999px;
+  font-size: .78rem; background: var(--color-primary, #D88062); color: var(--color-text-on-primary, #fff);
+}
+.mds-empty { padding: 26px 4px; text-align: center; color: var(--color-text-mute, #A89685); font-size: .9rem; }
+
+/* --- 표 ----------------------------------------------------- */
+.mds-tablewrap {
+  overflow-x: auto;
+  background: var(--color-white, #fff);
+  border: 1px solid var(--color-border, #EDDFD0);
+  border-radius: 14px;
+}
+.mds-table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: .89rem; }
+.mds-table th, .mds-table td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--color-border, #EDDFD0); vertical-align: middle; }
+.mds-table thead th {
+  position: sticky; top: 0; z-index: 1;
+  background: var(--color-surface, #FBF2E8);
+  font-size: .72rem; font-weight: 800; letter-spacing: .06em;
+  color: var(--color-text-mute, #A89685); white-space: nowrap;
+}
+.mds-table tbody tr:last-child td { border-bottom: 0; }
+.mds-table tbody tr:hover { background: var(--color-surface, #FBF2E8); }
+.mds-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mds-table td { color: var(--color-text-sub, #7A6B5F); }
+
+.mds-item b { display: block; font-weight: 700; color: var(--color-text, #3D2F26); word-break: keep-all; }
+.mds-item__meta { display: block; margin-top: 2px; font-size: .74rem; color: var(--color-text-mute, #A89685); }
+.mds-memo { font-size: .82rem; max-width: 26ch; word-break: keep-all; }
+.mds-last { font-size: .82rem; white-space: nowrap; }
+.mds-avg { font-weight: 700; color: var(--color-accent-dark, #6B8F72); }
+
+.is-low { color: var(--color-danger, #C66B5E); font-weight: 800; }
+.mds-flag {
+  display: inline-block; margin-left: 5px; padding: 1px 8px; border-radius: 999px;
+  font-size: .68rem; font-weight: 800;
+  background: rgba(198,107,94,.12); color: var(--color-danger, #C66B5E);
+}
+.mds-status { padding: 3px 11px; border-radius: 999px; font-size: .78rem; font-weight: 700; white-space: nowrap; }
+.mds-status.is-pending  { background: var(--color-surface-alt, #F5E8D8); color: var(--color-text-sub, #7A6B5F); }
+.mds-status.is-done     { background: var(--color-accent-bg, rgba(143,174,146,.08)); color: var(--color-accent-dark, #6B8F72); }
+.mds-status.is-rejected { background: rgba(198,107,94,.12); color: var(--color-danger, #C66B5E); }
+
+/* 수량 입력 — 태블릿에서 누르기 쉽게 크게 */
+.mds-qty {
+  width: 86px; min-height: 44px; font: inherit; font-size: 1rem; font-weight: 700;
+  text-align: right; padding: 6px 10px; border-radius: 10px;
+  border: 1.5px solid var(--color-border, #EDDFD0);
+  background: var(--color-bg, #FFFAF4); color: var(--color-text, #3D2F26);
+}
+.mds-qty:focus { outline: 2px solid var(--color-primary, #D88062); outline-offset: 1px; }
+.mds-qty.is-over { border-color: var(--color-danger, #C66B5E); background: rgba(198,107,94,.06); }
+.mds-reason {
+  display: block; width: 200px; margin-top: 6px; min-height: 38px;
+  font: inherit; font-size: .82rem; padding: 5px 10px; border-radius: 8px;
+  border: 1.5px solid var(--color-danger, #C66B5E); background: var(--color-white, #fff);
+}
+
+/* --- 제출 줄 ------------------------------------------------ */
+.mds-submit {
+  display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center;
+  margin-top: 14px; padding: 14px 16px;
+  background: var(--color-white, #fff);
+  border: 1px solid var(--color-border, #EDDFD0); border-radius: 14px;
+}
+.mds-note {
+  flex: 1 1 220px; font: inherit; font-size: .92rem; min-height: 44px;
+  padding: 8px 12px; border-radius: 10px;
+  border: 1px solid var(--color-border, #EDDFD0);
+  background: var(--color-bg, #FFFAF4); color: var(--color-text, #3D2F26);
+}
+.mds-btn {
+  min-height: 48px; padding: 12px 28px; border-radius: 12px;
+  font: inherit; font-size: 1rem; font-weight: 800; cursor: pointer;
+  border: 1px solid var(--color-primary, #D88062);
+  transition: background .18s, color .18s, transform .12s;
+}
+.mds-btn:active { transform: scale(.98); }
+.mds-btn--fill { background: var(--color-primary, #D88062); color: var(--color-text-on-primary, #fff); }
+.mds-btn--fill:hover { background: var(--color-primary-dark, #B86347); }
+.mds-btn--ghost { background: transparent; color: var(--color-primary-dark, #B86347); }
+.mds-btn--ghost:hover { background: var(--color-accent-bg, rgba(143,174,146,.08)); }
+
+/* --- 통계 --------------------------------------------------- */
+.mds-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 8px; }
+.mds-kpi {
+  background: var(--color-white, #fff); border: 1px solid var(--color-border, #EDDFD0);
+  border-radius: 14px; padding: 18px 20px;
+}
+.mds-kpi .n { display: block; font-size: 1.6rem; font-weight: 900; letter-spacing: -.03em; color: var(--color-primary-dark, #B86347); font-variant-numeric: tabular-nums; }
+.mds-kpi .k { display: block; margin-top: 3px; font-size: .78rem; font-weight: 600; color: var(--color-text-mute, #A89685); }
+
+.mds-bars { display: flex; flex-direction: column; gap: 8px; }
+.mds-bar { display: grid; grid-template-columns: 130px 1fr 92px; gap: 12px; align-items: center; font-size: .86rem; }
+.mds-bar__label { font-weight: 700; color: var(--color-text-sub, #7A6B5F); word-break: keep-all; }
+.mds-bar__track { height: 22px; border-radius: 6px; background: var(--color-surface-alt, #F5E8D8); overflow: hidden; }
+.mds-bar__fill { display: block; height: 100%; background: var(--color-accent, #8FAE92); border-radius: 6px; }
+.mds-bar.is-me .mds-bar__label { color: var(--color-primary-dark, #B86347); }
+.mds-bar.is-me .mds-bar__fill { background: var(--color-primary, #D88062); }
+.mds-bar__val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--color-text, #3D2F26); }
+
+.mds-trend {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+  align-items: end; height: 190px; padding: 16px 18px;
+  background: var(--color-white, #fff); border: 1px solid var(--color-border, #EDDFD0); border-radius: 14px;
+}
+.mds-trend__col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; }
+.mds-trend__bar { width: 100%; max-width: 56px; background: var(--color-accent, #8FAE92); border-radius: 6px 6px 0 0; }
+.mds-trend__v { font-size: .74rem; font-weight: 700; color: var(--color-text-sub, #7A6B5F); font-variant-numeric: tabular-nums; }
+.mds-trend__m { font-size: .74rem; color: var(--color-text-mute, #A89685); }
+
+/* --- 반출관리 카드 ------------------------------------------ */
+.mds-req {
+  background: var(--color-white, #fff); border: 1px solid var(--color-border, #EDDFD0);
+  border-radius: 16px; padding: 18px 18px 20px; margin-bottom: 14px;
+}
+.mds-req__head { margin-bottom: 12px; }
+.mds-req__head b { font-size: 1.02rem; color: var(--color-text, #3D2F26); }
+.mds-req__when { margin-left: 8px; font-size: .8rem; color: var(--color-text-mute, #A89685); }
+.mds-req__note { margin: 6px 0 0; font-size: .85rem; color: var(--color-text-sub, #7A6B5F); }
+.mds-reject { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.mds-reject input {
+  flex: 1 1 200px; font: inherit; font-size: .9rem; min-height: 44px;
+  padding: 8px 12px; border-radius: 10px;
+  border: 1px solid var(--color-border, #EDDFD0);
+  background: var(--color-bg, #FFFAF4); color: var(--color-text, #3D2F26);
+}
+
+/* --- 반응형 ------------------------------------------------- */
+@media (max-width: 720px) {
+  .mds-head__top { align-items: flex-start; }
+  .mds-tab { flex: 1 1 auto; justify-content: center; padding-inline: 12px; font-size: .84rem; }
+  .mds-bar { grid-template-columns: 96px 1fr 76px; gap: 8px; font-size: .8rem; }
+  .mds-trend { height: 160px; gap: 6px; padding: 12px; }
+  .mds-submit { flex-direction: column; align-items: stretch; }
+  .mds-btn { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mds-tab, .mds-btn { transition: none; }
+}

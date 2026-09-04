@@ -223,6 +223,42 @@ function md_sup_maybe_install() {
 add_action( 'admin_init', 'md_sup_maybe_install' );
 
 /**
+ * 「직원」 페이지가 없으면 만든다.
+ * 푸터 링크가 /직원/ 을 가리키는데 페이지가 없으면 404 가 뜬다.
+ * 테마의 다른 자동 생성(inc/reservation.php)과 같은 방식.
+ */
+function md_sup_ensure_page() {
+	if ( get_option( 'md_sup_page_id' ) ) { return; }
+
+	$existing = get_page_by_path( '직원' );
+	if ( ! $existing ) { $existing = get_page_by_path( 'staff' ); }
+
+	if ( $existing ) {
+		update_option( 'md_sup_page_id', (int) $existing->ID );
+		return;
+	}
+
+	$id = wp_insert_post( array(
+		'post_title'     => '직원 전용',
+		'post_name'      => '직원',
+		'post_type'      => 'page',
+		'post_status'    => 'publish',
+		'post_content'   => '',
+		'comment_status' => 'closed',
+		'ping_status'    => 'closed',
+	) );
+
+	if ( $id && ! is_wp_error( $id ) ) {
+		update_post_meta( $id, '_wp_page_template', 'page-templates/page-supply.php' );
+		/* 사이트맵·검색에서 빼둔다. 템플릿에서도 noindex 를 걸지만 여기서 한 번 더. */
+		update_post_meta( $id, '_yoast_wpseo_meta-robots-noindex', '1' );
+		update_post_meta( $id, '_yoast_wpseo_sitemap-include', 'never' );
+		update_option( 'md_sup_page_id', (int) $id );
+	}
+}
+add_action( 'admin_init', 'md_sup_ensure_page', 20 );
+
+/**
  * 재고 담당자 역할과 권한.
  * 홈페이지 글을 쓸 권한은 주지 않는다 — 재고 기능만 가진 역할이다.
  */
