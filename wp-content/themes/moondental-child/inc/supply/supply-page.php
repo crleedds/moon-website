@@ -156,7 +156,6 @@ function md_sup_trim_assets() {
 	foreach ( array(
 		'astra-theme-css',
 		'astra-google-fonts',
-		'global-styles',
 		'wp-block-library',
 		'wp-block-library-theme',
 		'classic-theme-styles',
@@ -165,6 +164,31 @@ function md_sup_trim_assets() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'md_sup_trim_assets', 100 );
+
+/**
+ * 만들지도 말아야 할 것들 (v3.69).
+ *
+ * 위 md_sup_trim_assets() 는 이미 만들어진 것을 빼는 일이라 만드는 값은 이미 치렀다.
+ * 여기 둘은 아예 만들지 않게 막는다 — 재료실 응답의 0.8초는 거의 전부가
+ * 서버에서 무언가를 만드는 시간이고, 그중 이 둘은 이 화면에서 쓸 데가 없다.
+ *
+ *   전역 스타일 · theme.json 을 읽어 합쳐 CSS 를 만든다. 이 화면에는 블록이 없다.
+ *   Yoast 구조화 데이터 · 검색엔진용 JSON-LD 를 질의 여러 번으로 조립한다.
+ *                        noindex 페이지라 아무도 읽지 않는다.
+ *
+ * 'wp' 훅에서 건다 — wp_enqueue_scripts 보다 먼저라 remove_action 이 듣는다.
+ */
+function md_sup_trim_head() {
+	if ( ! md_sup_is_page() ) { return; }
+
+	remove_action( 'wp_enqueue_scripts', 'wp_enqueue_global_styles' );
+	remove_action( 'wp_footer', 'wp_enqueue_global_styles' );
+	remove_action( 'wp_body_open', 'wp_global_styles_render_svg_filters' );
+
+	add_filter( 'wpseo_schema_graph', '__return_empty_array', 99 );
+	add_filter( 'wpseo_json_ld_output', '__return_false', 99 );
+}
+add_action( 'wp', 'md_sup_trim_head', 5 );
 
 /**
  * 환자용 떠다니는 버튼을 이 페이지에서만 걷어낸다.
