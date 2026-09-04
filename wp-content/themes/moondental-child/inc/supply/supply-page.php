@@ -244,9 +244,11 @@ function md_sup_render_login() {
 				'label_remember' => '로그인 상태 유지',
 			) );
 			?>
+			<?php /* 「비밀번호를 잊으셨나요」 링크는 두지 않는다.
+			         이 두 계정은 재설정 메일을 받을 수 없게 막아 두었으므로
+			         눌러도 아무 일도 일어나지 않는다. 안내 문구로 대신한다. */ ?>
 			<p class="mds-gate__help">
-				계정이 없으시면 경영지원실에 문의해 주세요.
-				<a href="<?php echo esc_url( wp_lostpassword_url( md_sup_url() ) ); ?>">비밀번호를 잊으셨나요?</a>
+				아이디나 비밀번호를 모르시면 경영지원실에 문의해 주세요.
 			</p>
 		</div>
 	</div>
