@@ -107,6 +107,9 @@ function md_sup_accounts_screen() {
 
 	$made = array();
 	$err  = '';
+	$ok   = '';
+
+	/* 계정 만들기 */
 	if ( isset( $_POST['md_sup_make'] ) ) {
 		check_admin_referer( 'md_sup_make_accounts' );
 		$pass = isset( $_POST['md_sup_pass'] ) ? (string) wp_unslash( $_POST['md_sup_pass'] ) : '';
@@ -115,6 +118,26 @@ function md_sup_accounts_screen() {
 			$err = '비밀번호는 8자 이상으로 정해 주세요.';
 		} else {
 			$made = md_sup_create_accounts( $pass );
+		}
+	}
+
+	/* 비밀번호 바꾸기 — 관리자만. 여기서 바로 되게 해서
+	 * 사용자 목록을 따로 찾아 들어가지 않아도 되게 한다. */
+	if ( isset( $_POST['md_sup_setpass'] ) ) {
+		check_admin_referer( 'md_sup_set_password' );
+		$login = isset( $_POST['md_sup_login'] ) ? sanitize_user( wp_unslash( $_POST['md_sup_login'] ) ) : '';
+		$new   = isset( $_POST['md_sup_newpass'] ) ? trim( (string) wp_unslash( $_POST['md_sup_newpass'] ) ) : '';
+
+		$allowed = array( MD_SUP_MANAGER_LOGIN, MD_SUP_STAFF_LOGIN );
+		$target  = in_array( $login, $allowed, true ) ? get_user_by( 'login', $login ) : null;
+
+		if ( ! $target ) {
+			$err = '그런 계정이 없습니다.';
+		} elseif ( strlen( $new ) < 8 ) {
+			$err = '비밀번호는 8자 이상으로 정해 주세요.';
+		} else {
+			wp_set_password( $new, $target->ID );
+			$ok = $target->display_name . ' (' . $login . ') 비밀번호를 바꿨습니다. 새 비밀번호는 ' . $new . ' 입니다 — 지금 적어 두세요.';
 		}
 	}
 
@@ -153,9 +176,16 @@ function md_sup_accounts_screen() {
 			<hr>
 		<?php endif; ?>
 
+		<?php if ( $err ) : ?>
+			<div class="notice notice-error"><p><?php echo esc_html( $err ); ?></p></div>
+		<?php endif; ?>
+		<?php if ( $ok ) : ?>
+			<div class="notice notice-success"><p><strong><?php echo esc_html( $ok ); ?></strong></p></div>
+		<?php endif; ?>
+
 		<h2>현황</h2>
-		<table class="widefat striped" style="max-width:860px">
-			<thead><tr><th>계정</th><th>아이디</th><th>할 수 있는 일</th><th>상태</th></tr></thead>
+		<table class="widefat striped" style="max-width:980px">
+			<thead><tr><th style="width:120px">계정</th><th style="width:130px">아이디</th><th>할 수 있는 일</th><th style="width:90px">상태</th><th style="width:330px">비밀번호 바꾸기</th></tr></thead>
 			<tbody>
 			<?php foreach ( $rows as $r ) : ?>
 				<tr>
@@ -165,19 +195,35 @@ function md_sup_accounts_screen() {
 					<td>
 						<?php if ( $r['user'] ) : ?>
 							<span style="color:#2271b1">있음</span>
-							&nbsp;<a href="<?php echo esc_url( get_edit_user_link( $r['user']->ID ) ); ?>">편집</a>
 						<?php else : ?>
 							<span style="color:#b32d2e">없음</span>
+						<?php endif; ?>
+					</td>
+					<td>
+						<?php if ( $r['user'] ) : ?>
+							<form method="post" style="display:flex;gap:6px;align-items:center">
+								<?php wp_nonce_field( 'md_sup_set_password' ); ?>
+								<input type="hidden" name="md_sup_login" value="<?php echo esc_attr( $r['login'] ); ?>">
+								<input type="text" name="md_sup_newpass" class="regular-text" style="width:170px"
+								       autocomplete="off" placeholder="새 비밀번호 (8자 이상)"
+								       aria-label="<?php echo esc_attr( $r['login'] . ' 새 비밀번호' ); ?>">
+								<button type="submit" name="md_sup_setpass" value="1" class="button">바꾸기</button>
+							</form>
+							<p class="description" style="margin-top:4px">
+								<a href="<?php echo esc_url( get_edit_user_link( $r['user']->ID ) ); ?>">계정 상세 편집</a>
+							</p>
+						<?php else : ?>
+							<span class="description">계정을 먼저 만드세요</span>
 						<?php endif; ?>
 					</td>
 				</tr>
 			<?php endforeach; ?>
 			</tbody>
 		</table>
-
-		<?php if ( $err ) : ?>
-			<div class="notice notice-error"><p><?php echo esc_html( $err ); ?></p></div>
-		<?php endif; ?>
+		<p class="description">
+			바꾼 비밀번호는 화면에 한 번 표시됩니다. <strong>이 두 계정은 본인이 스스로 바꿀 수 없고, 여기서 관리자만 바꿉니다.</strong>
+			비밀번호를 바꾸면 해당 계정으로 로그인해 있던 직원분들은 다시 로그인해야 합니다.
+		</p>
 
 		<?php if ( $missing ) : ?>
 			<form method="post" style="margin-top:18px">
@@ -203,11 +249,35 @@ function md_sup_accounts_screen() {
 				</p>
 			</form>
 		<?php else : ?>
-			<p style="margin-top:18px"><strong>필요한 계정이 모두 있습니다.</strong></p>
-			<p class="description">
-				비밀번호를 바꾸시려면 위 표의 「편집」을 누르고 새 비밀번호를 지정하세요.
-				<strong>이 두 계정은 스스로 비밀번호를 바꿀 수 없습니다</strong> — 관리자만 바꿉니다.
-			</p>
+			<p style="margin-top:18px"><strong>필요한 계정이 모두 있습니다.</strong> 비밀번호는 위 표에서 바꾸시면 됩니다.</p>
+		<?php endif; ?>
+
+		<?php
+		/* 예전 방식(팀마다 계정)으로 만들어 둔 것이 남아 있으면 알려준다.
+		 * 지우는 것은 되돌릴 수 없으니 버튼을 두지 않고 링크만 건다. */
+		$stale = array( 'stock.manager' );
+		for ( $n = 1; $n <= 15; $n++ ) { $stale[] = 'team' . str_pad( (string) $n, 2, '0', STR_PAD_LEFT ); }
+		$found = array();
+		foreach ( $stale as $s ) {
+			$u = get_user_by( 'login', $s );
+			if ( $u ) { $found[] = $u; }
+		}
+		if ( $found ) : ?>
+			<div class="notice notice-warning" style="margin-top:18px">
+				<p>
+					<strong>지금은 쓰지 않는 계정이 <?php echo count( $found ); ?>개 남아 있습니다.</strong>
+					예전에 팀마다 하나씩 만들던 방식의 계정입니다. 그냥 두어도 동작에는 지장이 없지만,
+					쓰지 않는 계정은 지우는 편이 안전합니다.
+				</p>
+				<p>
+					<?php foreach ( $found as $u ) : ?>
+						<a href="<?php echo esc_url( get_edit_user_link( $u->ID ) ); ?>"><code><?php echo esc_html( $u->user_login ); ?></code></a>&nbsp;
+					<?php endforeach; ?>
+				</p>
+				<p class="description">
+					<a href="<?php echo esc_url( admin_url( 'users.php' ) ); ?>">사용자 목록</a>에서 선택 후 「삭제」하시면 됩니다.
+				</p>
+			</div>
 		<?php endif; ?>
 
 		<hr>
