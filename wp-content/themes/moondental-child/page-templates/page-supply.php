@@ -30,6 +30,10 @@ add_filter( 'wp_robots', function ( $robots ) {
 add_filter( 'wpseo_robots', '__return_false', 99 );
 add_filter( 'wpseo_canonical', '__return_false', 99 );
 
+/* 검색엔진용 구조화 데이터(JSON-LD)도 끈다 (v3.67).
+ * noindex 페이지라 아무도 읽지 않는데 14KB 를 매번 실어 보내고 있었다. */
+add_filter( 'wpseo_json_ld_output', '__return_false', 99 );
+
 ?><!doctype html>
 <html <?php language_attributes(); ?>>
 <head>

@@ -135,6 +135,38 @@ function md_sup_enqueue() {
 add_action( 'wp_enqueue_scripts', 'md_sup_enqueue', 30 );
 
 /**
+ * 재료실에서 쓰지 않는 스타일을 걷어낸다 (v3.67).
+ *
+ * 재료실 HTML 109KB 중 93KB 가 이 화면과 상관없는 것이었다.
+ * 하루에도 몇 번씩 여는 업무 화면에서 그 무게는 그대로 체감된다.
+ *
+ * 무엇을 왜 빼는가
+ *   astra-theme-css  · 부모 테마가 페이지마다 인라인으로 넣는 61KB.
+ *                      v3.66 부터 이 화면은 Astra 헤더·푸터를 아예 안 그리므로
+ *                      그 선택자들이 걸릴 마크업 자체가 없다.
+ *   global-styles    · 블록 에디터의 테마 설정 CSS 14KB. 이 화면에 블록이 없다.
+ *   wp-block-library · 같은 이유.
+ *
+ * 색·서체·기본 타이포는 자식 테마 style.css 가 이미 갖고 있어 그대로 선다.
+ * 다만 Astra 가 대신 해 주던 body 여백 초기화만 supply.css 에서 다시 못박는다.
+ */
+function md_sup_trim_assets() {
+	if ( ! md_sup_is_page() ) { return; }
+
+	foreach ( array(
+		'astra-theme-css',
+		'astra-google-fonts',
+		'global-styles',
+		'wp-block-library',
+		'wp-block-library-theme',
+		'classic-theme-styles',
+	) as $handle ) {
+		wp_dequeue_style( $handle );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'md_sup_trim_assets', 100 );
+
+/**
  * 환자용 떠다니는 버튼을 이 페이지에서만 걷어낸다.
  *
  * 오시는 길·전화 상담·네이버 예약·카카오톡·언어 선택은 환자분을 위한 것이라

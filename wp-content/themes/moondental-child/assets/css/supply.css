@@ -1133,3 +1133,28 @@ button.mds-mini {
 @media print {
   .mds-teampick { display: none !important; }
 }
+
+/* =============================================================
+   v3.67 · Astra 인라인 CSS 를 걷어낸 자리 메우기
+
+   재료실에서는 부모 테마(Astra)가 페이지마다 넣던 61KB 인라인 CSS 를
+   빼 버렸다. 이 화면은 Astra 마크업을 하나도 그리지 않으므로 걸릴
+   선택자가 없지만, Astra 가 대신 해 주던 「기본값 초기화」 두 줄만은
+   여기서 다시 못박아야 한다. 안 그러면 브라우저 기본 여백이 살아난다.
+   ============================================================= */
+body.mds-page-body {
+  margin: 0;
+  min-height: 100vh;
+}
+body.mds-page-body *,
+body.mds-page-body *::before,
+body.mds-page-body *::after { box-sizing: border-box; }
+
+body.mds-page-body img,
+body.mds-page-body svg { max-width: 100%; height: auto; }
+
+/* 폼 요소는 브라우저 기본 글꼴을 쓴다 — 물려받게 해 둔다 */
+body.mds-page-body input,
+body.mds-page-body select,
+body.mds-page-body textarea,
+body.mds-page-body button { font-family: inherit; }
