@@ -29,22 +29,43 @@ function md_sup_render_items() {
 	$cmsg    = isset( $_GET['cmsg'] ) ? sanitize_text_field( rawurldecode( wp_unslash( $_GET['cmsg'] ) ) ) : '';
 
 	if ( $confirm && $cid ) :
-		$is_item = ( 'item' === $confirm );
-		$label   = $is_item ? ( ( $o = md_sup_item( $cid ) ) ? $o->name : '' ) : md_sup_team_name( $cid );
-		$force   = wp_nonce_url(
-			md_sup_url( array(
-				'tab'                             => 'items',
-				$is_item ? 'delitem' : 'delteam'  => $cid,
-				'force'                           => 1,
-			) ),
-			'md_sup_' . ( $is_item ? 'delitem_' : 'delteam_' ) . $cid
-		);
+		/* 무엇을 지우려던 것인가에 따라 이름·주소·경고문이 달라진다.
+		 * v3.65 에 분류·거래처가 더해지면서 네 갈래가 됐다. */
+		$is_taxo = in_array( $confirm, array( 'category', 'vendor' ), true );
+
+		if ( $is_taxo ) {
+			$m       = md_sup_taxo_meta( $confirm );
+			$c_title = $m['label'];
+			$c_rows  = md_sup_taxo_list( $confirm );
+			$label   = '';
+			foreach ( $c_rows as $c_r ) { if ( (int) $c_r->id === $cid ) { $label = $c_r->name; break; } }
+			$force = wp_nonce_url(
+				md_sup_url( array( 'tab' => 'items', 'deltaxo' => $cid, 'taxokind' => $confirm, 'force' => 1 ) ),
+				'md_sup_deltaxo_' . $confirm . '_' . $cid
+			);
+		} else {
+			$is_item = ( 'item' === $confirm );
+			$c_title = $is_item ? '품목' : '팀';
+			$label   = $is_item ? ( ( $o = md_sup_item( $cid ) ) ? $o->name : '' ) : md_sup_team_name( $cid );
+			$force   = wp_nonce_url(
+				md_sup_url( array(
+					'tab'                             => 'items',
+					$is_item ? 'delitem' : 'delteam'  => $cid,
+					'force'                           => 1,
+				) ),
+				'md_sup_' . ( $is_item ? 'delitem_' : 'delteam_' ) . $cid
+			);
+		}
 		?>
 		<div class="mds-card mds-confirm">
-			<h2><?php echo esc_html( ( $is_item ? '품목' : '팀' ) . ' 삭제 확인' ); ?></h2>
+			<h2><?php echo esc_html( $c_title . ' 삭제 확인' ); ?></h2>
 			<p><b><?php echo esc_html( $label ); ?></b> — <?php echo esc_html( $cmsg ); ?></p>
 			<p class="mds-hint" style="margin:0 0 16px">
-				<?php if ( $is_item ) : ?>
+				<?php if ( $is_taxo ) : ?>
+					지우면 그 품목들의 <b><?php echo esc_html( $c_title ); ?> 칸이 빈 칸이 됩니다</b> — 품목 자체는 그대로 남습니다.
+					이름만 잘못된 것이라면 지우지 마시고 <b>이름을 고쳐 저장</b>하세요. 그 이름을 쓰던 품목이 모두 함께 바뀝니다.
+					고르는 칸에서만 치우실 거라면 <b>「사용」</b>을 꺼두시면 됩니다.
+				<?php elseif ( 'item' === $confirm ) : ?>
 					지우면 그 기록들이 <b>이름 없는 품목</b>으로 남아 과거 사용량 통계를 읽기 어려워집니다.
 					목록에서만 치우실 거라면 <b>「감추기」</b>를 쓰세요 — 기록은 그대로 두고 신청 목록에서만 사라집니다.
 				<?php else : ?>
@@ -144,6 +165,10 @@ function md_sup_render_items() {
 						<span class="mds-item__meta">
 							<?php echo esc_html( $it->code . ( $it->unit ? ' · ' . $it->unit : '' ) . ( $it->category ? ' · ' . $it->category : '' ) ); ?>
 							<?php echo $it->active ? '' : ' · 감춤'; ?>
+							<?php /* 직원이 신청하다가 등록한 품목 — 단가·적정재고가 비어 있으니 채워 주셔야 합니다 */
+							if ( ! empty( $it->created_by ) && ( 0 === (int) $it->price || 0 === (int) $it->min_stock ) ) : ?>
+								<span class="mds-flag mds-flag--new">직원 등록 · 확인 필요</span>
+							<?php endif; ?>
 						</span>
 					</td>
 					<td data-label="거래처"><?php echo esc_html( $it->vendor ); ?></td>
@@ -214,7 +239,9 @@ function md_sup_render_items() {
 	</form>
 	<p class="mds-hint">「사용」을 끄면 신청 화면의 팀 선택에서 빠집니다. 지난 사용량 기록은 그대로 남습니다.</p>
 
-	<?php md_sup_render_notify_settings();
+	<?php
+	md_sup_render_taxo_settings();
+	md_sup_render_notify_settings();
 }
 
 /**
@@ -248,6 +275,80 @@ function md_sup_render_notify_settings() {
 
 		<div class="mds-formbtns" style="margin-top:14px">
 			<button type="submit" class="mds-btn mds-btn--fill">알림 설정 저장</button>
+		</div>
+	</form>
+	<?php
+}
+
+/**
+ * 분류 · 거래처 관리 (v3.65).
+ *
+ * 예전에는 품목마다 적힌 글자를 DISTINCT 로 긁어 고르는 칸을 만들었다.
+ * 그래서 이름을 고치려면 그 값을 쓰는 품목을 하나씩 다 열어야 했고,
+ * 품목이 없는 새 거래처를 미리 등록해 둘 수도 없었다.
+ * 여기서 이름을 바꾸면 그 값을 쓰던 품목까지 한 번에 따라 바뀐다.
+ */
+function md_sup_render_taxo_settings() {
+	?>
+	<h2 class="mds-h2">분류 · 거래처</h2>
+	<p class="mds-hint">
+		신청·재고·품목 화면의 고르는 칸에 나오는 이름들입니다.
+		<b>이름을 바꾸면 그 이름을 쓰던 품목이 모두 함께 바뀝니다</b> — 오타를 한 번에 고칠 수 있습니다.
+		「사용」을 끄면 고르는 칸에서만 빠지고 품목에 적힌 값은 그대로 남습니다.
+		「순서」는 작은 수가 앞이며, 비워 두면 지금 순서를 유지합니다.
+	</p>
+
+	<form class="mds-card" method="post" action="<?php echo esc_url( md_sup_url( array( 'tab' => 'items' ) ) ); ?>">
+		<?php wp_nonce_field( 'md_sup_taxo', 'md_sup_nonce' ); ?>
+		<input type="hidden" name="md_sup_action" value="taxo">
+
+		<div class="mds-taxo">
+			<?php foreach ( array( 'category', 'vendor' ) as $kind ) :
+				$m    = md_sup_taxo_meta( $kind );
+				$rows = md_sup_taxo_list( $kind ); ?>
+
+				<div class="mds-taxo__col">
+					<h3 class="mds-h3" style="margin-top:0">
+						<?php echo esc_html( $m['label'] ); ?>
+						<span class="mds-count"><?php echo count( $rows ); ?></span>
+					</h3>
+
+					<?php if ( empty( $rows ) ) : ?>
+						<p class="mds-empty" style="padding:14px 4px">아직 등록된 <?php echo esc_html( $m['label'] ); ?>가 없습니다.</p>
+					<?php endif; ?>
+
+					<?php foreach ( $rows as $r ) : ?>
+						<div class="mds-taxo__row<?php echo $r->active ? '' : ' is-off'; ?>">
+							<input type="text" name="<?php echo esc_attr( $kind ); ?>_name[<?php echo (int) $r->id; ?>]"
+							       value="<?php echo esc_attr( $r->name ); ?>" maxlength="<?php echo (int) $m['max']; ?>"
+							       aria-label="<?php echo esc_attr( $r->name . ' 이름' ); ?>">
+							<input type="number" class="mds-taxo__sort" name="<?php echo esc_attr( $kind ); ?>_sort[<?php echo (int) $r->id; ?>]"
+							       value="<?php echo (int) $r->sort_no; ?>" step="10" min="0"
+							       aria-label="<?php echo esc_attr( $r->name . ' 표시 순서' ); ?>" title="표시 순서">
+							<label class="mds-check">
+								<input type="checkbox" name="<?php echo esc_attr( $kind ); ?>_on[<?php echo (int) $r->id; ?>]" value="1" <?php checked( (int) $r->active, 1 ); ?>> 사용
+							</label>
+							<span class="mds-taxo__uses" title="이 이름을 쓰는 품목 수"><?php echo (int) $r->uses; ?>건</span>
+							<a class="mds-mini mds-mini--warn"
+							   href="<?php echo esc_url( wp_nonce_url(
+								   md_sup_url( array( 'tab' => 'items', 'deltaxo' => (int) $r->id, 'taxokind' => $kind ) ),
+								   'md_sup_deltaxo_' . $kind . '_' . (int) $r->id
+							   ) ); ?>"
+							   onclick="return confirm('<?php echo esc_js( $r->name ); ?> — 지울까요?');">삭제</a>
+						</div>
+					<?php endforeach; ?>
+
+					<div class="mds-taxo__row">
+						<input type="text" name="<?php echo esc_attr( $kind ); ?>_new" value="" maxlength="<?php echo (int) $m['max']; ?>"
+						       placeholder="새 <?php echo esc_attr( $m['label'] ); ?> 이름을 적으면 추가됩니다"
+						       aria-label="<?php echo esc_attr( '새 ' . $m['label'] . ' 이름' ); ?>">
+					</div>
+				</div>
+			<?php endforeach; ?>
+		</div>
+
+		<div class="mds-formbtns" style="margin-top:16px">
+			<button type="submit" class="mds-btn mds-btn--fill">분류 · 거래처 저장</button>
 		</div>
 	</form>
 	<?php

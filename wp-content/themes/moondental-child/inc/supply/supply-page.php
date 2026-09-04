@@ -393,6 +393,91 @@ function md_sup_handle_post() {
 			$redirect = add_query_arg( array( 'tab' => 'items', 'msg' => 'team_saved' ), md_sup_url() );
 			break;
 
+		/**
+		 * 직원이 목록에 없는 품목을 정식으로 등록한다 (v3.65).
+		 *
+		 * 담당자만 등록할 수 있게 두면, 필요한 물건이 목록에 없을 때 직원은
+		 * 이름만 적어 두고 담당자가 옮겨 적어 주기를 기다려야 했다.
+		 * 이제 직원이 그 자리에서 등록하고 바로 신청까지 담는다.
+		 *
+		 * 카탈로그가 지저분해지지 않게 하는 장치
+		 *   · 같은 이름이 이미 있으면 만들지 않고 그 품목으로 안내한다
+		 *   · 분류·거래처는 담당자가 만든 목록에서만 고른다 (새 값은 못 만든다)
+		 *   · 단가·적정재고는 비워 둔다 — 담당자가 채울 몫이고,
+		 *     created_by 로 「직원 등록」 표시가 붙어 품목 관리에서 눈에 띈다
+		 */
+		case 'newitem':
+			$team_id = isset( $_POST['team_id'] ) ? (int) $_POST['team_id'] : 0;
+			$name    = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
+			$qty     = isset( $_POST['qty_new'] ) ? max( 1, (int) $_POST['qty_new'] ) : 1;
+			$base    = array( 'tab' => 'request', 'team' => $team_id );
+
+			if ( '' === trim( $name ) ) {
+				$redirect = add_query_arg( array_merge( $base, array( 'err' => '품목명을 적어 주세요.' ) ), md_sup_url() );
+				break;
+			}
+
+			/* 이미 있는 품목이면 새로 만들지 않고 그리로 데려간다 */
+			$exists = md_sup_item_by_name( $name );
+			if ( $exists ) {
+				$redirect = add_query_arg( array_merge( $base, array(
+					'newitem' => (int) $exists->id,
+					'nqty'    => $qty,
+					'msg'     => 'newitem_dup',
+				) ), md_sup_url() );
+				break;
+			}
+
+			/* 담당자가 만든 목록에 있는 값만 받는다 */
+			$v_in = isset( $_POST['vendor'] ) ? sanitize_text_field( wp_unslash( $_POST['vendor'] ) ) : '';
+			$c_in = isset( $_POST['category'] ) ? sanitize_text_field( wp_unslash( $_POST['category'] ) ) : '';
+			$v_ok = in_array( $v_in, md_sup_vendors(), true ) ? $v_in : '';
+			$c_ok = in_array( $c_in, md_sup_categories(), true ) ? $c_in : '';
+
+			$res = md_sup_item_save( 0, array(
+				'name'      => $name,
+				'vendor'    => $v_ok,
+				'unit'      => isset( $_POST['unit'] ) ? mb_substr( sanitize_text_field( wp_unslash( $_POST['unit'] ) ), 0, 20 ) : '',
+				'category'  => $c_ok,
+				'price'     => 0,
+				'min_stock' => 0,
+			) );
+
+			$redirect = is_wp_error( $res )
+				? add_query_arg( array_merge( $base, array( 'err' => $res->get_error_message() ) ), md_sup_url() )
+				: add_query_arg( array_merge( $base, array( 'newitem' => (int) $res, 'nqty' => $qty, 'msg' => 'newitem' ) ), md_sup_url() );
+			break;
+
+		/* 분류 · 거래처 목록 저장 (이름·순서·사용 여부 + 새로 추가) */
+		case 'taxo':
+			if ( ! md_sup_can_manage() ) { break; }
+			$err = '';
+
+			foreach ( array( 'category', 'vendor' ) as $kind ) {
+				$names = isset( $_POST[ $kind . '_name' ] ) && is_array( $_POST[ $kind . '_name' ] ) ? wp_unslash( $_POST[ $kind . '_name' ] ) : array();
+				$sorts = isset( $_POST[ $kind . '_sort' ] ) && is_array( $_POST[ $kind . '_sort' ] ) ? wp_unslash( $_POST[ $kind . '_sort' ] ) : array();
+				$ons   = isset( $_POST[ $kind . '_on' ] ) && is_array( $_POST[ $kind . '_on' ] ) ? wp_unslash( $_POST[ $kind . '_on' ] ) : array();
+
+				foreach ( $names as $tid => $nm ) {
+					$tid  = (int) $tid;
+					$sort = ( isset( $sorts[ $tid ] ) && '' !== trim( (string) $sorts[ $tid ] ) ) ? (int) $sorts[ $tid ] : null;
+					$r    = md_sup_taxo_save( $kind, $tid, $nm, $sort );
+					if ( is_wp_error( $r ) && '' === $err ) { $err = $r->get_error_message(); }
+					md_sup_taxo_archive( $kind, $tid, isset( $ons[ $tid ] ) );
+				}
+
+				$new = isset( $_POST[ $kind . '_new' ] ) ? trim( (string) wp_unslash( $_POST[ $kind . '_new' ] ) ) : '';
+				if ( '' !== $new ) {
+					$r = md_sup_taxo_save( $kind, 0, $new );
+					if ( is_wp_error( $r ) && '' === $err ) { $err = $r->get_error_message(); }
+				}
+			}
+
+			$redirect = ( '' !== $err )
+				? add_query_arg( array( 'tab' => 'items', 'err' => $err ), md_sup_url() )
+				: add_query_arg( array( 'tab' => 'items', 'msg' => 'taxo_saved' ), md_sup_url() );
+			break;
+
 		/* 알림 받을 메일 주소 */
 		case 'notify':
 			if ( ! md_sup_can_manage() ) { break; }
@@ -477,6 +562,24 @@ function md_sup_handle_get() {
 		}
 	}
 
+	/* 분류 · 거래처 삭제 — 품목·팀과 같은 두 단계 확인 */
+	if ( isset( $_GET['deltaxo'] ) && isset( $_GET['_wpnonce'] ) && md_sup_can_manage() ) {
+		$id   = (int) $_GET['deltaxo'];
+		$kind = ( isset( $_GET['taxokind'] ) && 'vendor' === $_GET['taxokind'] ) ? 'vendor' : 'category';
+		if ( wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'md_sup_deltaxo_' . $kind . '_' . $id ) ) {
+			$force = isset( $_GET['force'] ) && '1' === $_GET['force'];
+			$res   = md_sup_taxo_delete( $kind, $id, $force );
+			$back  = remove_query_arg( array( 'deltaxo', 'taxokind', '_wpnonce', 'force' ) );
+			if ( is_wp_error( $res ) ) {
+				$back = add_query_arg( array( 'confirm' => $kind, 'cid' => $id, 'cmsg' => rawurlencode( $res->get_error_message() ) ), $back );
+			} else {
+				$back = add_query_arg( 'msg', 'deleted', $back );
+			}
+			wp_safe_redirect( $back );
+			exit;
+		}
+	}
+
 	/* CSV 내보내기 */
 	if ( isset( $_GET['export'] ) ) {
 		$what = sanitize_key( wp_unslash( $_GET['export'] ) );
@@ -541,24 +644,15 @@ function md_sup_export_stock() {
 	exit;
 }
 
-/**
- * 고른 팀을 기억한다. 공용 계정이라 소속 팀이 없어서,
- * 매번 다시 고르게 하면 실수로 다른 팀을 누를 확률이 올라간다.
- * 출력 전에 실행되어야 하므로 template_redirect 에서 처리한다.
+/* v3.65 · 고른 팀을 쿠키에 기억하던 기능을 뺐다.
  *
- * 요청 화면에서만 기억한다
- *   통계·이력에서도 team 을 조건으로 쓴다. 거기서 다른 팀을 한 번 들여다본 것만으로
- *   신청 팀이 바뀌어 버리면, 다음 신청이 남의 팀 사용량으로 잡힌다.
+ * 공용 계정이라 편하라고 넣었는데, 편한 만큼 위험했다 —
+ * 앞사람이 고른 팀이 그대로 남아 있으면 다음 사람이 팀을 확인하지 않고
+ * 신청해 버리고, 그 사용량은 엉뚱한 팀으로 잡힌다. 잘못 잡힌 사용량은
+ * 나중에 원장을 뒤져 한 줄씩 되돌려야 한다.
+ * 매번 고르는 3초가 그보다 싸다. 계정에 소속 팀이 지정돼 있으면
+ * 그 팀이 그대로 기본값이 되므로, 개인 계정 쪽은 달라지는 게 없다.
  */
-function md_sup_remember_team() {
-	if ( ! md_sup_is_page() || ! isset( $_GET['team'] ) ) { return; }
-	if ( 'request' !== md_sup_current_tab() ) { return; }
-	if ( headers_sent() ) { return; }
-	$team = (int) $_GET['team'];
-	if ( $team <= 0 ) { return; }
-	setcookie( 'md_sup_team', (string) $team, time() + YEAR_IN_SECONDS, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, is_ssl(), true );
-}
-add_action( 'template_redirect', 'md_sup_remember_team', 2 );
 
 /* ============================================================
  * 알림 문구
@@ -577,6 +671,9 @@ function md_sup_notice( $code, $n = 0 ) {
 		'item_saved'   => array( 'ok',   '품목을 저장했습니다.' ),
 		'team_saved'   => array( 'ok',   '팀을 저장했습니다.' ),
 		'notify_saved' => array( 'ok',   '알림 받을 주소를 저장했습니다.' ),
+		'taxo_saved'   => array( 'ok',   '분류·거래처를 저장했습니다.' ),
+		'newitem'      => array( 'ok',   '품목을 등록했습니다. 표 맨 위에 있으니 수량을 확인하고 신청해 주세요. 단가와 적정재고는 담당자가 채웁니다.' ),
+		'newitem_dup'  => array( 'warn', '같은 이름의 품목이 이미 있어 새로 만들지 않았습니다. 표 맨 위에 그 품목을 올려 두었습니다.' ),
 		'deleted'      => array( 'ok',   '삭제했습니다.' ),
 		'po_made'      => array( 'ok',   '발주서를 만들었습니다. 수량을 확인하고 주문 확정을 눌러 주세요.' ),
 		'po_saved'     => array( 'ok',   '발주 수량을 저장했습니다.' ),

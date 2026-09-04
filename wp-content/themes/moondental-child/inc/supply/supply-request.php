@@ -35,7 +35,9 @@ function md_sup_render_team_picker( $teams, $current ) {
 			<?php endif; ?>
 		</summary>
 		<?php if ( ! $current ) : ?>
-			<p class="mds-hint" style="margin-top:10px">한 번 고르면 다음부터 기억합니다.</p>
+			<p class="mds-hint" style="margin-top:10px">
+				신청하실 팀을 골라 주세요. 고른 팀 이름으로 사용량이 잡힙니다.
+			</p>
 		<?php endif; ?>
 		<div class="mds-teamgrid">
 			<?php foreach ( $teams as $tm ) : ?>
@@ -59,10 +61,12 @@ function md_sup_render_request() {
 
 	$vendor = isset( $_GET['vendor'] ) ? sanitize_text_field( wp_unslash( $_GET['vendor'] ) ) : '';
 
-	/* 공용 계정이라 소속 팀이 없다. 주소에 없으면 지난번에 고른 팀을 쓴다. */
-	if ( ! $team_id && isset( $_COOKIE['md_sup_team'] ) ) { $team_id = (int) $_COOKIE['md_sup_team']; }
+	/* v3.65 · 지난번에 고른 팀을 쿠키로 기억하던 것을 뺐다.
+	 * 공용 계정에서는 앞사람이 고른 팀이 남아 있는 편이 더 위험하다 —
+	 * 확인하지 않고 신청하면 그 사용량이 남의 팀으로 잡힌다.
+	 * 계정에 소속 팀이 지정돼 있으면 위에서 이미 그 팀이 기본값이 된다. */
 
-	/* 존재하는 팀인지 확인 — 쿠키가 낡았거나 팀이 지워졌을 수 있다 */
+	/* 존재하는 팀인지 확인 — 주소가 낡았거나 팀이 지워졌을 수 있다 */
 	$valid = false;
 	foreach ( $teams as $tm ) { if ( (int) $tm->id === $team_id ) { $valid = true; break; } }
 	if ( ! $valid ) { $team_id = 0; }
@@ -90,24 +94,36 @@ function md_sup_render_request() {
 		$prefill = md_sup_request_qty_map( (int) $_GET['repeat'] );
 	}
 
+	/* 방금 등록한 품목 — 568줄 어딘가가 아니라 맨 위에 놓고 수량까지 채워 준다.
+	 * 등록하자마자 다시 찾아 헤매야 한다면 등록할 수 있게 한 뜻이 없다. */
+	$new_id  = isset( $_GET['newitem'] ) ? (int) $_GET['newitem'] : 0;
+	$new_qty = isset( $_GET['nqty'] ) ? max( 1, (int) $_GET['nqty'] ) : 0;
+	if ( $new_id > 0 && $new_qty > 0 && ! isset( $prefill[ $new_id ] ) ) {
+		$prefill[ $new_id ] = $new_qty;
+	}
+
 	$favs = array_flip( md_sup_fav_ids( $team_id ) );
 
-	/* 정렬 · 즐겨찾기 → 우리 팀이 쓰는 것 → 나머지.
+	/* 정렬 · 방금 등록한 것 → 즐겨찾기 → 우리 팀이 쓰는 것 → 나머지.
 	 * 568개 중 실제로 만지는 건 보통 수십 개뿐이라, 이 정렬이 찾는 시간을 좌우한다. */
-	$fav = array();
-	$used = array();
-	$rest = array();
+	$fresh = array();
+	$fav   = array();
+	$used  = array();
+	$rest  = array();
 	foreach ( $items as $it ) {
-		if ( isset( $favs[ $it->id ] ) )                                   { $fav[]  = $it; }
+		if ( $new_id && (int) $it->id === $new_id )                        { $fresh[] = $it; }
+		elseif ( isset( $favs[ $it->id ] ) )                               { $fav[]  = $it; }
 		elseif ( isset( $avg_map[ $it->id ] ) && $avg_map[ $it->id ] > 0 )  { $used[] = $it; }
 		else                                                               { $rest[] = $it; }
 	}
 	usort( $used, function ( $a, $b ) use ( $avg_map ) {
 		return $avg_map[ $b->id ] <=> $avg_map[ $a->id ];
 	} );
-	$items      = array_merge( $fav, $used, $rest );
+	$items      = array_merge( $fresh, $fav, $used, $rest );
 	$fav_count  = count( $fav );
 	$used_count = count( $used );
+	/* 구분선이 놓일 자리 — 위로 끌어올린 줄 전부의 다음 */
+	$top_count  = count( $fresh ) + $fav_count + $used_count;
 
 	$hint = '총 ' . number_format( count( $items ) ) . '개 품목';
 	if ( $fav_count )  { $hint .= ' · 즐겨찾기 ' . $fav_count . '개'; }
@@ -224,32 +240,13 @@ function md_sup_render_request() {
 							       aria-label="<?php echo esc_attr( $it->name . ' 초과 신청 사유' ); ?>">
 						</td>
 					</tr>
-					<?php if ( ( $fav_count + $used_count ) && $i_row === ( $fav_count + $used_count ) ) : ?>
+					<?php if ( $top_count && $i_row === $top_count ) : ?>
 						<tr class="mds-divider"><td colspan="7">여기부터는 우리 팀이 최근 3개월간 받아가지 않은 품목입니다</td></tr>
 					<?php endif; ?>
 				<?php endforeach; endif; ?>
 				</tbody>
 			</table>
 		</div>
-
-		<?php /* 목록에 없는 품목을 직접 적어 신청.
-		         담당자가 나중에 품목으로 등록하거나 대체품을 알려 준다. */ ?>
-		<details class="mds-custom">
-			<summary class="mds-custom__sum">목록에 없는 품목 신청하기</summary>
-			<p class="mds-hint" style="margin:10px 0 12px">
-				찾으시는 품목이 위 목록에 없으면 여기에 직접 적어 주세요.
-				이름과 규격을 되도록 자세히 적어 주시면 담당자가 확인해 주문합니다.
-			</p>
-			<?php for ( $c = 1; $c <= 3; $c++ ) : ?>
-				<div class="mds-custom__row">
-					<input type="text" name="custom_name[]" maxlength="200"
-					       placeholder="품목명 · 규격 · 브랜드 (예: 오스템 KS 픽스처 4.0×10)"
-					       aria-label="직접 적는 품목명 <?php echo (int) $c; ?>">
-					<input type="number" name="custom_qty[]" min="0" step="1" inputmode="numeric"
-					       class="mds-qty" placeholder="수량" aria-label="직접 적는 품목 수량 <?php echo (int) $c; ?>">
-				</div>
-			<?php endfor; ?>
-		</details>
 
 		<div class="mds-submit" id="mds-submit">
 			<label class="mds-check"><input type="checkbox" name="urgent" value="1"> 긴급 (오늘 필요)</label>
@@ -273,7 +270,95 @@ function md_sup_render_request() {
 		</div>
 	</form>
 
-	<?php md_sup_render_my_requests( $team_id );
+	<?php
+	/* 신청 폼 바깥에 둔다 — 폼 안에 폼을 넣을 수 없다 */
+	md_sup_render_newitem_form( $team_id );
+	md_sup_render_my_requests( $team_id );
+}
+
+/**
+ * 목록에 없는 품목을 직원이 그 자리에서 등록한다 (v3.65).
+ *
+ * 예전에는 이름만 적어 신청서에 딸려 보냈고, 담당자가 그걸 보고 품목을
+ * 옮겨 적은 뒤에야 다시 신청할 수 있었다. 왕복이 한 번 더 있었던 셈이다.
+ * 이제 여기서 등록하면 곧바로 카탈로그에 들어가고, 위 표 맨 위에 얹혀
+ * 수량까지 채워진 채로 나타난다. 다음 달부터는 그냥 검색해서 쓰면 된다.
+ *
+ * 카탈로그가 지저분해지지 않게
+ *   분류·거래처는 담당자가 만든 목록에서만 고른다. 모르면 비워 두면 되고,
+ *   단가·적정재고는 아예 묻지 않는다 — 직원이 알 수 없는 값이고,
+ *   비어 있는 채로 두어야 담당자가 채울 것이 남았음을 알아본다.
+ */
+function md_sup_render_newitem_form( $team_id ) {
+	$units    = array( 'ea', 'box', '갑', '팩', '봉', '병', '통', '롤', '각' );
+	$vendors  = md_sup_vendors();
+	$cats     = md_sup_categories();
+	?>
+	<details class="mds-newitem">
+		<summary class="mds-newitem__sum">찾으시는 품목이 목록에 없나요? — 직접 등록하기</summary>
+
+		<p class="mds-hint" style="margin:12px 0 14px">
+			이름과 규격을 되도록 자세히 적어 주세요 (예: <b>오스템 KS 픽스처 4.0×10</b>).
+			등록하면 위 품목표 맨 위에 올라오고 수량이 채워집니다 — 확인하신 뒤 신청 버튼을 누르시면 됩니다.
+			단가와 적정재고는 담당자가 채웁니다.
+			<br><b>먼저 등록하고 그다음에 수량을 적어 주세요</b> — 등록하면 화면이 새로 열려서,
+			위에 적어 두신 수량은 지워집니다.
+		</p>
+
+		<form class="mds-card" method="post" action="<?php echo esc_url( md_sup_url( array( 'tab' => 'request', 'team' => (int) $team_id ) ) ); ?>">
+			<?php wp_nonce_field( 'md_sup_newitem', 'md_sup_nonce' ); ?>
+			<input type="hidden" name="md_sup_action" value="newitem">
+			<input type="hidden" name="team_id" value="<?php echo (int) $team_id; ?>">
+
+			<label class="mds-formrow">
+				<span>품목명 · 규격 · 브랜드 (필수)</span>
+				<input type="text" name="name" required maxlength="200"
+				       placeholder="오스템 KS 픽스처 4.0×10">
+			</label>
+
+			<div class="mds-grid2">
+				<label class="mds-formrow">
+					<span>거래처 — 모르시면 비워 두세요</span>
+					<select name="vendor">
+						<option value="">— 모름 —</option>
+						<?php foreach ( $vendors as $v ) : ?>
+							<option value="<?php echo esc_attr( $v ); ?>"><?php echo esc_html( $v ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</label>
+
+				<label class="mds-formrow">
+					<span>분류 — 모르시면 비워 두세요</span>
+					<select name="category">
+						<option value="">— 모름 —</option>
+						<?php foreach ( $cats as $c ) : ?>
+							<option value="<?php echo esc_attr( $c ); ?>"><?php echo esc_html( $c ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</label>
+
+				<label class="mds-formrow">
+					<span>단위</span>
+					<input type="text" name="unit" list="mds-newunits" maxlength="20" placeholder="ea · box · 갑">
+				</label>
+
+				<label class="mds-formrow">
+					<span>신청 수량</span>
+					<input type="number" name="qty_new" min="1" step="1" inputmode="numeric" value="1">
+				</label>
+			</div>
+
+			<datalist id="mds-newunits"><?php foreach ( $units as $u ) : ?><option value="<?php echo esc_attr( $u ); ?>"></option><?php endforeach; ?></datalist>
+
+			<div class="mds-formbtns">
+				<button type="submit" class="mds-btn mds-btn--fill">등록하고 신청에 담기</button>
+				<span class="mds-hint" style="margin:0">
+					같은 이름이 이미 있으면 새로 만들지 않고 그 품목을 찾아 드립니다.
+				</span>
+			</div>
+		</form>
+	</details>
+	<?php
 }
 
 /**

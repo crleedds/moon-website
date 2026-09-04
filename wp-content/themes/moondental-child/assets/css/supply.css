@@ -946,3 +946,90 @@ button.mds-mini {
   /* 발주서를 그대로 종이에 내밀 수 있게 요약 카드는 남긴다 */
   .mds-posum { border: 0; padding: 0; }
 }
+
+/* =============================================================
+   v3.65 · 분류·거래처 관리 · 직원 품목 등록
+   ============================================================= */
+
+/* --- 폼 칸에 select 와 number 도 --------------------------------
+   v3.64 까지 .mds-formrow 는 text 와 textarea 만 꾸몄다. 새 등록 폼이
+   고르는 칸과 숫자 칸을 쓰면서 그 둘만 맨몸으로 남아 줄이 안 맞았다. */
+.mds-formrow select,
+.mds-formrow input[type="number"] {
+  width: 100%; font: inherit; font-size: 1rem; min-height: 48px;
+  padding: 11px 14px; border-radius: 12px;
+  border: 1px solid var(--color-border, #EDDFD0);
+  background: var(--color-bg, #FFFAF4); color: var(--color-text, #3D2F26);
+  line-height: 1.7;
+}
+.mds-formrow select:focus { outline: 2px solid var(--color-primary, #D88062); outline-offset: 1px; }
+
+/* --- 목록에 없는 품목 등록 ------------------------------------ */
+.mds-newitem {
+  margin: 18px 0 4px; padding: 16px 18px; border-radius: 16px;
+  border: 1px dashed var(--color-border, #EDDFD0);
+  background: var(--color-surface, #FBF2E8);
+}
+.mds-newitem__sum {
+  cursor: pointer; font-size: .92rem; font-weight: 800;
+  color: var(--color-primary-dark, #B86347); list-style: none;
+}
+.mds-newitem__sum::-webkit-details-marker { display: none; }
+.mds-newitem__sum::before { content: '＋ '; font-weight: 900; }
+.mds-newitem[open] .mds-newitem__sum::before { content: '－ '; }
+.mds-newitem .mds-card { margin-top: 4px; }
+
+/* --- 분류 · 거래처 관리 --------------------------------------- */
+.mds-taxo {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 8px 28px;
+}
+.mds-taxo__col { min-width: 0; }
+.mds-taxo__row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 7px 0; border-bottom: 1px solid var(--color-border, #EDDFD0);
+}
+.mds-taxo__row:last-child { border-bottom: 0; }
+.mds-taxo__row.is-off { opacity: .55; }
+.mds-taxo__row input[type="text"] {
+  flex: 1 1 130px; min-width: 0; font: inherit; font-size: .92rem;
+  padding: 9px 12px; border-radius: 10px;
+  border: 1px solid var(--color-border, #EDDFD0);
+  background: var(--color-white, #fff); color: var(--color-text, #3D2F26);
+}
+.mds-taxo__row input[type="text"]:focus,
+.mds-taxo__sort:focus { outline: 2px solid var(--color-primary, #D88062); outline-offset: 1px; }
+.mds-taxo__sort {
+  flex: 0 0 68px; width: 68px; font: inherit; font-size: .88rem;
+  padding: 9px 10px; border-radius: 10px; text-align: right;
+  border: 1px solid var(--color-border, #EDDFD0);
+  background: var(--color-white, #fff); color: var(--color-text, #3D2F26);
+  font-variant-numeric: tabular-nums;
+}
+/* 이 이름을 쓰는 품목 수 — 지우기 전에 무엇이 딸려 있는지 바로 보인다 */
+.mds-taxo__uses {
+  flex: 0 0 auto; font-size: .76rem; font-weight: 700;
+  color: var(--color-text-mute, #A89685); font-variant-numeric: tabular-nums;
+}
+
+/* 직원이 등록해 담당자가 채울 것이 남은 품목 */
+.mds-flag--new {
+  background: rgba(216, 128, 98, .14);
+  color: var(--color-primary-dark, #B86347);
+}
+
+@media (max-width: 600px) {
+  .mds-taxo { gap: 18px; }
+  .mds-taxo__row input[type="text"] { flex: 1 1 100%; }
+  .mds-newitem { padding: 14px; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .mds-taxo__row input[type="text"],
+  .mds-taxo__sort { background: var(--color-white, #2A211A); }
+  .mds-newitem { background: var(--color-surface, #241C15); }
+}
+
+@media print {
+  .mds-newitem, .mds-taxo { display: none !important; }
+}

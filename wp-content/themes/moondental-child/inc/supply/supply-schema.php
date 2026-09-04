@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  * 어느 단계까지 적용됐는지 한눈에 보이지 않았다.
  * 이제는 번호 하나(md_sup_schema)와 단계 목록 하나로 끝난다.
  */
-define( 'MD_SUP_SCHEMA', 4 );
+define( 'MD_SUP_SCHEMA', 5 );
 
 /** 테이블 이름 모음 */
 function md_sup_tables() {
@@ -40,6 +40,8 @@ function md_sup_tables() {
 		'fav'     => $p . 'fav',
 		'po'      => $p . 'po',
 		'po_line' => $p . 'po_line',
+		'cat'     => $p . 'cat',
+		'vendor'  => $p . 'vendor',
 	);
 	/* 'notice' 는 뺐다 — v3.59 에 넣고 v3.61 에 화면을 지운 뒤로
 	 * 읽지도 쓰지도 않는다. 다만 그 사이에 쓴 글이 남아 있을 수 있어
@@ -57,6 +59,7 @@ function md_sup_schema_steps() {
 		2 => 'md_sup_schema_2',  // 즐겨찾기
 		3 => 'md_sup_schema_3',  // 신청 줄에 직접 적은 품목명
 		4 => 'md_sup_schema_4',  // 반려 사유 · 발주
+		5 => 'md_sup_schema_5',  // 분류 · 거래처 목록 · 직원 등록 표시
 	);
 }
 
@@ -533,5 +536,87 @@ function md_sup_schema_4() {
 	/* 대기 신청 알림을 받을 주소 — 비어 있으면 사이트 관리자 메일로 간다 */
 	if ( false === get_option( 'md_sup_notify_emails', false ) ) {
 		add_option( 'md_sup_notify_emails', '' );
+	}
+}
+
+/* ============================================================
+ * 5단계 · 분류 · 거래처를 담당자가 관리하는 목록으로 (v3.65)
+ *
+ * 왜 표를 따로 두는가
+ *   지금까지 분류·거래처는 품목마다 적힌 글자였고, 화면의 고르는 칸은
+ *   그 글자들을 DISTINCT 로 긁어 만들었다. 그래서
+ *     · 품목이 하나도 없는 새 거래처를 미리 만들어 둘 수 없고
+ *     · 「새한치재」와 「새한치재 」(끝에 공백)가 서로 다른 항목이 되고
+ *     · 이름을 고치려면 그 값을 쓰는 품목을 하나씩 다 열어야 했다.
+ *   이름 목록을 따로 두면 담당자가 추가·수정·삭제할 수 있고,
+ *   이름을 바꾸면 그 값을 쓰던 품목까지 한 번에 따라 바뀐다.
+ *
+ * 품목에는 여전히 이름을 적어 둔다 (id 가 아니라)
+ *   568개 품목의 값을 id 로 바꾸는 이사는 위험한 데 비해 얻는 게 적다.
+ *   지난 CSV·기록과도 그대로 맞는다. 목록은 「고르는 칸과 표기를 관리하는 곳」이다.
+ * ============================================================ */
+
+function md_sup_schema_5() {
+	global $wpdb;
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+	$t       = md_sup_tables();
+	$charset = $wpdb->get_charset_collate();
+
+	dbDelta( "CREATE TABLE {$t['cat']} (
+		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		name VARCHAR(60) NOT NULL DEFAULT '',
+		sort_no INT NOT NULL DEFAULT 0,
+		active TINYINT(1) NOT NULL DEFAULT 1,
+		PRIMARY KEY (id),
+		UNIQUE KEY name (name),
+		KEY active_sort (active, sort_no)
+	) $charset;" );
+
+	dbDelta( "CREATE TABLE {$t['vendor']} (
+		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		name VARCHAR(100) NOT NULL DEFAULT '',
+		sort_no INT NOT NULL DEFAULT 0,
+		active TINYINT(1) NOT NULL DEFAULT 1,
+		PRIMARY KEY (id),
+		UNIQUE KEY name (name),
+		KEY active_sort (active, sort_no)
+	) $charset;" );
+
+	/* 누가 만든 품목인가. 직원이 신청하다가 직접 등록한 품목은
+	 * 단가·적정재고가 비어 있으니 담당자가 채워야 한다 — 그걸 알아보려고 남긴다. */
+	md_sup_add_column( $t['items'], 'created_by', 'BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER sort_no' );
+
+	md_sup_seed_taxo();
+}
+
+/**
+ * 지금 품목이 쓰고 있는 분류·거래처로 목록을 채운다.
+ * INSERT IGNORE 라 여러 번 돌아도 늘어나지 않는다.
+ */
+function md_sup_seed_taxo() {
+	global $wpdb;
+	$t = md_sup_tables();
+
+	$pairs = array(
+		'category' => $t['cat'],
+		'vendor'   => $t['vendor'],
+	);
+
+	foreach ( $pairs as $col => $table ) {
+		$vals = $wpdb->get_col( "SELECT DISTINCT `$col` FROM {$t['items']} WHERE `$col` <> '' ORDER BY `$col`" );
+		if ( ! is_array( $vals ) ) { continue; }
+
+		$i = 0;
+		foreach ( $vals as $v ) {
+			$v = trim( (string) $v );
+			if ( '' === $v ) { continue; }
+			$i += 10;
+			$wpdb->query( $wpdb->prepare(
+				"INSERT IGNORE INTO `$table` (name, sort_no, active) VALUES (%s, %d, 1)",
+				$v,
+				$i
+			) );
+		}
 	}
 }

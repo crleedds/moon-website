@@ -104,16 +104,14 @@ function md_sup_item( $item_id ) {
 	) );
 }
 
+/* 고르는 칸에 쓸 이름들. v3.65 부터 담당자가 관리하는 목록에서 읽는다. */
+
 function md_sup_categories() {
-	global $wpdb;
-	$t = md_sup_tables();
-	return $wpdb->get_col( "SELECT DISTINCT category FROM {$t['items']} WHERE active = 1 AND category <> '' ORDER BY category" );
+	return md_sup_taxo_names( 'category' );
 }
 
 function md_sup_vendors() {
-	global $wpdb;
-	$t = md_sup_tables();
-	return $wpdb->get_col( "SELECT DISTINCT vendor FROM {$t['items']} WHERE active = 1 AND vendor <> '' ORDER BY vendor" );
+	return md_sup_taxo_names( 'vendor' );
 }
 
 /** 등록된 품목 수 (활성) */
@@ -714,6 +712,11 @@ function md_sup_item_save( $id, $d ) {
 		'min_stock' => max( 0, (int) ( isset( $d['min_stock'] ) ? $d['min_stock'] : 0 ) ),
 	);
 
+	/* 새로 적은 분류·거래처는 목록에도 넣어 둔다 —
+	 * 그러지 않으면 이 품목만 그 값을 갖고 고르는 칸에는 안 보인다. */
+	md_sup_taxo_ensure( 'category', $row['category'] );
+	md_sup_taxo_ensure( 'vendor', $row['vendor'] );
+
 	if ( $id > 0 ) {
 		$wpdb->update( $t['items'], $row, array( 'id' => (int) $id ), array( '%s', '%s', '%s', '%s', '%d', '%d' ), array( '%d' ) );
 		return (int) $id;
@@ -728,8 +731,30 @@ function md_sup_item_save( $id, $d ) {
 	$row['code']    = $code;
 	$row['active']  = 1;
 	$row['sort_no'] = 9999;
-	$wpdb->insert( $t['items'], $row, array( '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%d', '%d' ) );
+	$fmt            = array( '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%d', '%d' );
+
+	/* created_by 는 5단계에서 붙는 열이다. 마이그레이션이 아직 안 돌았는데
+	 * 그 열을 넣으면 INSERT 자체가 조용히 실패해 품목이 만들어지지 않는다.
+	 * 스키마 번호를 보고 있을 때만 넣는다. */
+	if ( md_sup_current_schema() >= 5 ) {
+		$row['created_by'] = get_current_user_id();
+		$fmt[]             = '%d';
+	}
+
+	$wpdb->insert( $t['items'], $row, $fmt );
 	return (int) $wpdb->insert_id;
+}
+
+/** 이름이 똑같은 활성 품목 — 직원이 이미 있는 것을 또 등록하는 걸 막는다 */
+function md_sup_item_by_name( $name ) {
+	global $wpdb;
+	$t    = md_sup_tables();
+	$name = trim( (string) $name );
+	if ( '' === $name ) { return null; }
+
+	return $wpdb->get_row( $wpdb->prepare(
+		"SELECT * FROM {$t['items']} WHERE active = 1 AND name = %s LIMIT 1", $name
+	) );
 }
 
 /**
@@ -1180,4 +1205,167 @@ function md_sup_notify_new_request( $req_id ) {
 
 	/* 실패해도 신청은 이미 저장돼 있다 — 화면을 막지 않는다 */
 	return wp_mail( $to, $subject, $body );
+}
+
+/* ============================================================
+ * v3.65 · 분류 · 거래처 목록
+ *
+ * 둘은 하는 일이 똑같아 함수를 한 벌만 두고 $kind 로 가른다.
+ * 같은 코드를 두 번 쓰면 한쪽만 고쳐 두 화면이 어긋난다.
+ * ============================================================ */
+
+/** $kind → 표 이름 · 품목의 열 이름 · 화면에 쓸 말 */
+function md_sup_taxo_meta( $kind ) {
+	$t = md_sup_tables();
+
+	if ( 'vendor' === $kind ) {
+		return array( 'kind' => 'vendor', 'table' => $t['vendor'], 'col' => 'vendor', 'label' => '거래처', 'max' => 100 );
+	}
+	return array( 'kind' => 'category', 'table' => $t['cat'], 'col' => 'category', 'label' => '분류', 'max' => 60 );
+}
+
+/**
+ * 고르는 칸에 넣을 이름들 (쓰는 것만).
+ *
+ * 목록이 아직 비어 있으면 — 5단계 마이그레이션 전이라면 — 예전처럼
+ * 품목이 쓰고 있는 값에서 뽑는다. 담당자가 아직 안 들어와도 화면은 멀쩡하다.
+ */
+function md_sup_taxo_names( $kind ) {
+	global $wpdb;
+	$m = md_sup_taxo_meta( $kind );
+
+	$names = $wpdb->get_col( "SELECT name FROM {$m['table']} WHERE active = 1 ORDER BY sort_no ASC, name ASC" );
+	if ( ! empty( $names ) ) { return $names; }
+
+	$t = md_sup_tables();
+	$col = $m['col'];
+	return $wpdb->get_col( "SELECT DISTINCT `$col` FROM {$t['items']} WHERE active = 1 AND `$col` <> '' ORDER BY `$col`" );
+}
+
+/** 관리 화면용 — 감춘 것까지, 쓰고 있는 품목 수와 함께 */
+function md_sup_taxo_list( $kind ) {
+	global $wpdb;
+	$m   = md_sup_taxo_meta( $kind );
+	$t   = md_sup_tables();
+	$col = $m['col'];
+
+	return $wpdb->get_results(
+		"SELECT x.*,
+		        (SELECT COUNT(*) FROM {$t['items']} i WHERE i.`$col` = x.name) AS uses
+		 FROM {$m['table']} x
+		 ORDER BY x.active DESC, x.sort_no ASC, x.name ASC"
+	);
+}
+
+/** 이 이름을 쓰고 있는 품목 수 */
+function md_sup_taxo_uses( $kind, $name ) {
+	global $wpdb;
+	$m   = md_sup_taxo_meta( $kind );
+	$t   = md_sup_tables();
+	$col = $m['col'];
+
+	return (int) $wpdb->get_var( $wpdb->prepare(
+		"SELECT COUNT(*) FROM {$t['items']} WHERE `$col` = %s", (string) $name
+	) );
+}
+
+/** 없으면 넣는다 — 품목을 저장할 때 새 값이 딸려 들어오는 경우 */
+function md_sup_taxo_ensure( $kind, $name ) {
+	global $wpdb;
+	$m    = md_sup_taxo_meta( $kind );
+	$name = trim( sanitize_text_field( (string) $name ) );
+	if ( '' === $name ) { return false; }
+
+	$name = mb_substr( $name, 0, $m['max'] );
+	$wpdb->query( $wpdb->prepare(
+		"INSERT IGNORE INTO {$m['table']} (name, sort_no, active) VALUES (%s, %d, 1)", $name, 9999
+	) );
+	return true;
+}
+
+/**
+ * 이름 저장. id 가 0 이면 새로 만든다.
+ *
+ * 이름을 바꾸면 그 값을 쓰던 품목까지 함께 바꾼다 — 이게 이 목록의 존재 이유다.
+ * 품목에는 id 가 아니라 이름이 적혀 있으므로, 여기서 갈아주지 않으면
+ * 품목들만 옛 이름에 남아 목록에서 사라진다.
+ *
+ * @param int|null $sort_no null 이면 지금 순서를 건드리지 않는다 (팀 저장과 같은 규칙)
+ */
+function md_sup_taxo_save( $kind, $id, $name, $sort_no = null ) {
+	global $wpdb;
+	$m    = md_sup_taxo_meta( $kind );
+	$t    = md_sup_tables();
+	$col  = $m['col'];
+	$id   = (int) $id;
+	$name = trim( sanitize_text_field( (string) $name ) );
+
+	if ( '' === $name ) { return new WP_Error( 'empty', $m['label'] . ' 이름을 적어 주세요.' ); }
+	$name = mb_substr( $name, 0, $m['max'] );
+
+	$dup = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$m['table']} WHERE name = %s", $name ) );
+	if ( $dup && (int) $dup !== $id ) {
+		return new WP_Error( 'dup', '같은 이름의 ' . $m['label'] . '가 이미 있습니다 — ' . $name );
+	}
+
+	if ( $id > 0 ) {
+		$old = (string) $wpdb->get_var( $wpdb->prepare( "SELECT name FROM {$m['table']} WHERE id = %d", $id ) );
+		if ( '' === $old ) { return new WP_Error( 'not_found', $m['label'] . '를 찾을 수 없습니다.' ); }
+
+		$row = array( 'name' => $name );
+		$fmt = array( '%s' );
+		if ( null !== $sort_no ) { $row['sort_no'] = (int) $sort_no; $fmt[] = '%d'; }
+
+		$wpdb->update( $m['table'], $row, array( 'id' => $id ), $fmt, array( '%d' ) );
+
+		if ( $old !== $name ) {
+			$wpdb->query( $wpdb->prepare(
+				"UPDATE {$t['items']} SET `$col` = %s WHERE `$col` = %s", $name, $old
+			) );
+		}
+		return $id;
+	}
+
+	$sort = ( null === $sort_no ) ? 9999 : (int) $sort_no;
+	$wpdb->insert( $m['table'], array( 'name' => $name, 'sort_no' => $sort, 'active' => 1 ), array( '%s', '%d', '%d' ) );
+	return (int) $wpdb->insert_id;
+}
+
+/** 감추기 / 되살리기 — 고르는 칸에서만 사라지고 품목의 값은 그대로 */
+function md_sup_taxo_archive( $kind, $id, $on = false ) {
+	global $wpdb;
+	$m = md_sup_taxo_meta( $kind );
+	return $wpdb->update( $m['table'], array( 'active' => $on ? 1 : 0 ), array( 'id' => (int) $id ), array( '%d' ), array( '%d' ) );
+}
+
+/**
+ * 삭제.
+ *
+ * 쓰고 있는 품목이 있으면 한 번 막는다. 그래도 지우겠다면 그 품목들의 값을 비운다 —
+ * 품목 자체는 그대로 두고 분류·거래처만 빈 칸이 된다.
+ * 품목·팀 삭제와 같은 두 단계 방식이라 자바스크립트가 없어도 확인 절차가 작동한다.
+ */
+function md_sup_taxo_delete( $kind, $id, $force = false ) {
+	global $wpdb;
+	$m   = md_sup_taxo_meta( $kind );
+	$t   = md_sup_tables();
+	$col = $m['col'];
+	$id  = (int) $id;
+
+	$name = (string) $wpdb->get_var( $wpdb->prepare( "SELECT name FROM {$m['table']} WHERE id = %d", $id ) );
+	if ( '' === $name ) { return new WP_Error( 'not_found', $m['label'] . '를 찾을 수 없습니다.' ); }
+
+	$n = md_sup_taxo_uses( $kind, $name );
+	if ( $n > 0 && ! $force ) {
+		return new WP_Error(
+			'inuse',
+			'품목 ' . number_format( $n ) . '건이 이 ' . $m['label'] . '를 쓰고 있습니다.'
+		);
+	}
+
+	if ( $n > 0 ) {
+		$wpdb->query( $wpdb->prepare( "UPDATE {$t['items']} SET `$col` = '' WHERE `$col` = %s", $name ) );
+	}
+	$wpdb->delete( $m['table'], array( 'id' => $id ), array( '%d' ) );
+	return true;
 }

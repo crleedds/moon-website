@@ -19,6 +19,11 @@ if ( is_page() ) {
 			'page-templates/page-reservation.php',
 		), true )
 		|| in_array( $_slug, array( '오시는-길', '오시는길', 'location', '상담예약', 'reservation' ), true )
+		/* v3.65 · 직원 전용(재료실)에서도 뺀다.
+		 * 오시는 길은 환자분을 위한 안내다. 병원 안에서 재고를 만지는 직원에게는
+		 * 쓸 일이 없고, 568줄짜리 품목표 아래에 지도가 한 판 더 붙어 화면만 길어진다.
+		 * 슬러그를 여기 또 나열하지 않고 재료실 판별 함수를 그대로 쓴다. */
+		|| ( function_exists( 'md_sup_is_page' ) && md_sup_is_page() )
 	) {
 		$md_skip_flocation = true;
 	}
