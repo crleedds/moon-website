@@ -34,6 +34,7 @@ function md_sup_render_inbound() {
 
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="inbound">
+		<?php md_sup_app_field(); ?>
 		<label class="mds-field">
 			<span>거래처</span>
 			<select name="vendor">
@@ -111,6 +112,7 @@ function md_sup_render_inventory() {
 	?>
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="inventory">
+		<?php md_sup_app_field(); ?>
 		<label class="mds-field">
 			<span>분류</span>
 			<select name="cat">

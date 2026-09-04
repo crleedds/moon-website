@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  * 어느 단계까지 적용됐는지 한눈에 보이지 않았다.
  * 이제는 번호 하나(md_sup_schema)와 단계 목록 하나로 끝난다.
  */
-define( 'MD_SUP_SCHEMA', 5 );
+define( 'MD_SUP_SCHEMA', 6 );
 
 /** 테이블 이름 모음 */
 function md_sup_tables() {
@@ -60,6 +60,7 @@ function md_sup_schema_steps() {
 		3 => 'md_sup_schema_3',  // 신청 줄에 직접 적은 품목명
 		4 => 'md_sup_schema_4',  // 반려 사유 · 발주
 		5 => 'md_sup_schema_5',  // 분류 · 거래처 목록 · 직원 등록 표시
+		6 => 'md_sup_schema_6',  // 예방과 팀 추가
 	);
 }
 
@@ -230,6 +231,7 @@ function md_sup_seed_teams() {
 		'9층 데스크', '9층 공통', 'Dr. 이승주팀', 'Dr. 권혜진팀', 'Dr. 이수연팀',
 		'10층 데스크', '10층 공통', 'Dr. 병원장팀', 'Dr. 이창률팀', '기공실',
 		'11층 데스크', '11층 공통', 'Dr. 이영일팀', 'Dr. 정석형팀', 'Dr. 김세일팀',
+		'예방과',
 	);
 
 	foreach ( $teams as $i => $name ) {
@@ -619,4 +621,38 @@ function md_sup_seed_taxo() {
 			) );
 		}
 	}
+}
+
+/* ============================================================
+ * 6단계 · 예방과 (v3.66)
+ *
+ * 처음 팀 15개는 예전 재고관리 앱의 구성을 그대로 옮긴 것이라
+ * 예방과가 빠져 있었다. 이미 돌고 있는 설치에도 넣어 준다.
+ *
+ * 이름이 이미 있으면 아무것도 하지 않는다 — 담당자가 직접 만들어 뒀을 수 있다.
+ * 순서는 맨 뒤에 붙인다. 층 배치에 맞춰 앞으로 옮기려면
+ * 「품목·팀」 탭의 팀 목록에서 순서 숫자를 고치면 된다.
+ * ============================================================ */
+
+function md_sup_schema_6() {
+	md_sup_ensure_team( '예방과' );
+}
+
+/** 그 이름의 팀이 없으면 맨 뒤에 만든다 */
+function md_sup_ensure_team( $name ) {
+	global $wpdb;
+	$t    = md_sup_tables();
+	$name = trim( sanitize_text_field( (string) $name ) );
+	if ( '' === $name ) { return false; }
+
+	$has = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$t['teams']} WHERE name = %s", $name ) );
+	if ( $has ) { return (int) $has; }
+
+	$max = (int) $wpdb->get_var( "SELECT COALESCE(MAX(sort_no), 0) FROM {$t['teams']}" );
+	$wpdb->insert(
+		$t['teams'],
+		array( 'name' => $name, 'sort_no' => $max + 10, 'active' => 1 ),
+		array( '%s', '%d', '%d' )
+	);
+	return (int) $wpdb->insert_id;
 }

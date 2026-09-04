@@ -142,6 +142,7 @@ function md_sup_render_items() {
 
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="items">
+		<?php md_sup_app_field(); ?>
 		<label class="mds-field mds-field--grow">
 			<span>품목 검색</span>
 			<input type="search" name="q" value="<?php echo esc_attr( $search ); ?>" placeholder="품목명 · 코드 · 거래처">

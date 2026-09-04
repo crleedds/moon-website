@@ -21,6 +21,50 @@
     return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 
+  /* +/− 버튼을 만들어 수량 칸을 감싼다 (v3.66)
+     서버가 568줄에 미리 박아 보내면 그것만으로 HTML 이 200KB 넘게 불어난다.
+     어차피 JS 없이는 눌러도 아무 일도 안 하는 버튼이라 여기서 만든다. */
+  function mkStep(step, label, text) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mds-step';
+    b.setAttribute('data-step', String(step));
+    b.setAttribute('aria-label', label);
+    b.tabIndex = -1;
+    b.textContent = text;
+    return b;
+  }
+
+  function buildSteppers(list) {
+    Array.prototype.forEach.call(list, function (input) {
+      var p = input.parentNode;
+      if (!p || (p.classList && p.classList.contains('mds-stepper'))) return;
+
+      var wrap = document.createElement('span');
+      wrap.className = 'mds-stepper';
+      p.insertBefore(wrap, input);
+      wrap.appendChild(mkStep(-1, '수량 줄이기', '−'));
+      wrap.appendChild(input);
+      wrap.appendChild(mkStep(1, '수량 늘리기', '+'));
+    });
+  }
+
+  /* 초과 사유 칸도 필요해질 때 만든다 — 실제로 쓰이는 줄은 몇 개뿐이다 */
+  function makeReason(input) {
+    var td = input.parentNode;
+    while (td && td.tagName !== 'TD') { td = td.parentNode; }
+    if (!td) return null;
+
+    var el = document.createElement('input');
+    el.type = 'text';
+    el.className = 'mds-reason';
+    el.name = 'reason[' + (input.getAttribute('data-item') || '') + ']';
+    el.placeholder = '평균보다 많은 이유';
+    el.setAttribute('aria-label', (input.getAttribute('aria-label') || '').replace(/신청 수량$/, '초과 신청 사유'));
+    td.appendChild(el);
+    return el;
+  }
+
   /* 한 줄 상태 — 초과 표시와 행 강조 */
   function checkRow(input) {
     var avg  = parseFloat(input.getAttribute('data-avg') || '0');
@@ -33,6 +77,7 @@
     if (row) { row.classList.toggle('is-picked', has); }
 
     var reason = row ? row.querySelector('.mds-reason') : null;
+    if (over && !reason) { reason = makeReason(input); }
     if (reason) {
       reason.hidden = !over;
       if (!over) { reason.value = ''; }
@@ -96,6 +141,8 @@
     bar      = document.getElementById('mds-cart');
     barCount = document.getElementById('mds-cart-count');
     barTotal = document.getElementById('mds-cart-total');
+
+    buildSteppers(inputs);
 
     form.addEventListener('input', onChange);
     form.addEventListener('change', onChange);
@@ -235,6 +282,39 @@
           a.removeAttribute('data-busy');
           window.location.href = href;   // 실패하면 예전 방식으로
         });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+/* =============================================================
+   v3.66 · 신청 팀 드롭다운
+
+   고르면 바로 넘어간다. 「보기」 버튼은 JS 가 없을 때를 위한 것이라
+   JS 가 있으면 감춘다 — 고르고 나서 버튼을 또 누르게 하지 않는다.
+   ============================================================= */
+(function () {
+  'use strict';
+
+  function init() {
+    var sel = document.getElementById('mds-team');
+    if (!sel) return;
+
+    var form = sel.form;
+    if (!form) return;
+
+    var go = form.querySelector('.mds-teampick__go');
+    if (go) { go.hidden = true; }
+
+    sel.addEventListener('change', function () {
+      /* 「— 팀을 고르세요 —」로 되돌린 것은 넘기지 않는다 */
+      if (!parseInt(sel.value, 10)) return;
+      form.submit();
     });
   }
 

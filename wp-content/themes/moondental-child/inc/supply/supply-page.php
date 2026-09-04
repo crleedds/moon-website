@@ -91,6 +91,23 @@ function md_sup_url( $args = array() ) {
 	return add_query_arg( $args, $base );
 }
 
+/**
+ * GET 폼 안에 지금 도구(app)를 실어 보낸다 (v3.66).
+ *
+ * 브라우저는 method="get" 폼을 보낼 때 action 주소의 물음표 뒤를 통째로 버리고
+ * 폼에 든 값만 새로 붙인다. 그래서 action 이 「…/직원/?app=stock」이어도
+ * 폼에 app 이 없으면 「…/직원/?tab=request&q=…」로 나가고, app 이 사라진 화면은
+ * 재료실이 아니라 첫 화면(직원 전용)으로 돌아간다.
+ *
+ * v3.62 에서 app 을 도입한 뒤로 「찾기」·기준월 바꾸기 같은 걸 누를 때마다
+ * 첫 화면으로 튕겨 나오고 있었다. 모든 GET 폼이 이 함수를 부른다.
+ */
+function md_sup_app_field() {
+	$app = md_sup_current_app();
+	if ( ! $app ) { return; }
+	echo '<input type="hidden" name="app" value="' . esc_attr( $app ) . '">';
+}
+
 /** 재고관리 페이지인가 — 슬러그 또는 템플릿 지정 둘 다 인정 */
 function md_sup_is_page() {
 	if ( ! is_page() ) { return false; }

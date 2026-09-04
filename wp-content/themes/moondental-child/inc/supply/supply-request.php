@@ -13,41 +13,44 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
- * 팀 선택 — 3행 × 5열. 병원 층 배치를 그대로 옮긴 것이라
- * 직원분들이 자기 자리를 눈으로 찾는다.
+ * 팀 선택 — 드롭다운 한 줄 (v3.66).
+ *
+ * v3.65 까지는 3행 × 5열 버튼판을 펼쳤다 접었다 했다. 병원 층 배치를 그대로
+ * 옮긴 그림이라 처음에는 자기 자리를 눈으로 찾기 좋았지만, 매번 「팀 바꾸기」를
+ * 눌러 판을 펼치고 → 칸을 찾고 → 누르면 화면이 다시 뜨는 세 단계였다.
+ * 하루에 몇 번씩 하는 일에 세 단계는 두 단계 많다.
+ *
+ * 이제 고르는 칸 하나가 화면 맨 위에 늘 붙어 있다. 지금 어느 팀인지 항상 보이고,
+ * 바꾸려면 그 자리에서 다른 이름을 고르면 된다.
+ * JS 가 있으면 고르는 즉시 넘어가고, 없으면 옆의 「보기」 버튼을 누른다.
  *
  * @param array $teams   팀 목록
  * @param int   $current 지금 고른 팀 (0이면 아직 안 고름)
  */
 function md_sup_render_team_picker( $teams, $current ) {
-	/* 팀을 고른 뒤에는 접어 둔다. 15칸이 계속 자리를 차지하면
-	 * 정작 봐야 할 품목표가 화면 밖으로 밀린다.
-	 * <details> 라 자바스크립트 없이도 펼쳐진다. */
 	?>
-	<details class="mds-teams" <?php echo $current ? '' : 'open'; ?>>
-		<summary class="mds-teams__sum">
-			<?php if ( $current ) : ?>
-				<span class="mds-teams__label">신청 팀</span>
-				<span class="mds-teams__now"><?php echo esc_html( md_sup_team_name( $current ) ); ?></span>
-				<span class="mds-teams__change">팀 바꾸기</span>
-			<?php else : ?>
-				<span class="mds-teams__ask">어느 팀에서 신청하시나요?</span>
-			<?php endif; ?>
-		</summary>
-		<?php if ( ! $current ) : ?>
-			<p class="mds-hint" style="margin-top:10px">
-				신청하실 팀을 골라 주세요. 고른 팀 이름으로 사용량이 잡힙니다.
-			</p>
-		<?php endif; ?>
-		<div class="mds-teamgrid">
+	<form class="mds-teampick<?php echo $current ? '' : ' is-empty'; ?>"
+	      method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
+		<input type="hidden" name="tab" value="request">
+		<?php md_sup_app_field(); ?>
+
+		<label class="mds-teampick__label" for="mds-team">신청 팀</label>
+
+		<select class="mds-teampick__select" id="mds-team" name="team">
+			<option value="0"<?php selected( $current, 0 ); ?>>— 팀을 고르세요 —</option>
 			<?php foreach ( $teams as $tm ) : ?>
-				<a class="mds-teambtn<?php echo (int) $tm->id === $current ? ' is-on' : ''; ?>"
-				   href="<?php echo esc_url( md_sup_url( array( 'tab' => 'request', 'team' => (int) $tm->id ) ) ); ?>">
+				<option value="<?php echo (int) $tm->id; ?>" <?php selected( $current, (int) $tm->id ); ?>>
 					<?php echo esc_html( $tm->name ); ?>
-				</a>
+				</option>
 			<?php endforeach; ?>
-		</div>
-	</details>
+		</select>
+
+		<button type="submit" class="mds-btn mds-btn--ghost mds-teampick__go">보기</button>
+
+		<?php if ( ! $current ) : ?>
+			<span class="mds-teampick__ask">고른 팀 이름으로 사용량이 잡힙니다.</span>
+		<?php endif; ?>
+	</form>
 	<?php
 }
 
@@ -132,6 +135,7 @@ function md_sup_render_request() {
 	?>
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="request">
+		<?php md_sup_app_field(); ?>
 		<input type="hidden" name="team" value="<?php echo (int) $team_id; ?>">
 		<label class="mds-field">
 			<span>분류</span>
@@ -225,19 +229,17 @@ function md_sup_render_request() {
 								<?php echo esc_html( mysql2date( 'n/j', $last->created_at ) . ' · ' . (int) $last->qty ); ?>
 							<?php else : ?>—<?php endif; ?>
 						</td>
+						<?php /* +/− 버튼과 초과 사유 칸은 서버에서 그리지 않는다 (v3.66).
+						         둘 다 자바스크립트가 있어야 쓸모가 있는 것들인데, 568줄에
+						         미리 박아 두면 그것만으로 200KB 가 넘는 HTML 이 오간다.
+						         JS 가 화면을 열 때 만들어 붙이므로 동작은 그대로다. */ ?>
 						<td class="num" data-label="신청 수량">
-							<span class="mds-stepper">
-								<button type="button" class="mds-step" data-step="-1" aria-label="수량 줄이기" tabindex="-1">−</button>
-								<input class="mds-qty" type="number" min="0" step="1" inputmode="numeric"
-								       name="qty[<?php echo (int) $it->id; ?>]" value="<?php echo esc_attr( $pre ); ?>"
-								       data-avg="<?php echo esc_attr( $avg ); ?>"
-								       data-price="<?php echo (int) $it->price; ?>"
-								       aria-label="<?php echo esc_attr( $it->name . ' 신청 수량' ); ?>">
-								<button type="button" class="mds-step" data-step="1" aria-label="수량 늘리기" tabindex="-1">+</button>
-							</span>
-							<input class="mds-reason" type="text" name="reason[<?php echo (int) $it->id; ?>]"
-							       placeholder="평균보다 많은 이유" hidden
-							       aria-label="<?php echo esc_attr( $it->name . ' 초과 신청 사유' ); ?>">
+							<input class="mds-qty" type="number" min="0" step="1" inputmode="numeric"
+							       name="qty[<?php echo (int) $it->id; ?>]" value="<?php echo esc_attr( $pre ); ?>"
+							       data-avg="<?php echo esc_attr( $avg ); ?>"
+							       data-price="<?php echo (int) $it->price; ?>"
+							       data-item="<?php echo (int) $it->id; ?>"
+							       aria-label="<?php echo esc_attr( $it->name . ' 신청 수량' ); ?>">
 						</td>
 					</tr>
 					<?php if ( $top_count && $i_row === $top_count ) : ?>

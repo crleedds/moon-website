@@ -1033,3 +1033,103 @@ button.mds-mini {
 @media print {
   .mds-newitem, .mds-taxo { display: none !important; }
 }
+
+/* =============================================================
+   v3.66 · 신청 팀 드롭다운 · 타이포그래피와 여백 정리
+   ============================================================= */
+
+/* --- 신청 팀 고르는 줄 ---------------------------------------
+   15칸 버튼판을 펼쳤다 접었다 하던 것을 한 줄로 바꿨다.
+   화면 맨 위에 늘 붙어 있어 지금 어느 팀인지 항상 보이고,
+   바꾸려면 그 자리에서 다른 이름을 고르면 된다. */
+.mds-teampick {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+  margin-bottom: 18px; padding: 14px 18px; border-radius: 16px;
+  background: var(--color-white, #fff);
+  border: 1px solid var(--color-border, #EDDFD0);
+}
+/* 아직 안 골랐을 때는 눈에 띄게 — 여기서부터 시작한다는 표시 */
+.mds-teampick.is-empty {
+  border-color: var(--color-primary, #D88062);
+  background: var(--color-surface, #FBF2E8);
+}
+.mds-teampick__label {
+  font-size: .72rem; font-weight: 800; letter-spacing: .1em;
+  color: var(--color-text-mute, #A89685); white-space: nowrap;
+}
+.mds-teampick__select {
+  flex: 0 1 280px; min-width: 190px;
+  font: inherit; font-size: 1rem; font-weight: 700; min-height: 46px;
+  padding: 10px 14px; border-radius: 12px;
+  border: 1px solid var(--color-border, #EDDFD0);
+  background: var(--color-bg, #FFFAF4); color: var(--color-text, #3D2F26);
+  letter-spacing: -0.02em;
+}
+.mds-teampick.is-empty .mds-teampick__select { border-color: var(--color-primary, #D88062); }
+.mds-teampick__select:focus { outline: 2px solid var(--color-primary, #D88062); outline-offset: 1px; }
+.mds-teampick__go { min-height: 46px; padding: 10px 20px; }
+.mds-teampick__go[hidden] { display: none !important; }   /* JS 가 있으면 감춘다 */
+.mds-teampick__ask {
+  font-size: .84rem; color: var(--color-text-mute, #A89685); word-break: keep-all;
+}
+
+@media (max-width: 600px) {
+  .mds-teampick { padding: 12px 14px; gap: 8px 10px; }
+  .mds-teampick__select { flex: 1 1 100%; }
+  .mds-teampick__go { flex: 1 1 auto; justify-content: center; }
+}
+
+/* --- 자간 · 줄간 ---------------------------------------------
+   한글은 라틴 활자를 기준으로 만든 기본 자간에서 아주 살짝 좁혀야
+   낱말이 덩어리로 읽힌다. 제목은 더 좁히고, 숫자·코드는 건드리지 않는다 —
+   숫자를 좁히면 자릿수를 세기 어려워진다. */
+.mds-page { letter-spacing: -0.006em; }
+.mds-page h1 { letter-spacing: -0.038em; }
+.mds-page h2, .mds-h2, .mds-h3 { letter-spacing: -0.028em; }
+.mds-table { letter-spacing: -0.004em; }
+.mds-table .num,
+.mds-item__meta,
+.mds-kpi .n,
+.mds-last,
+.mds-taxo__uses { letter-spacing: 0; }
+
+/* --- 헤더 · 탭 ----------------------------------------------
+   탭이 8개로 늘면서 두 줄로 접히기 시작했다. 조금 좁히면 한 줄에 들어간다. */
+.mds-head { margin-bottom: 22px; }
+.mds-head__eyebrow { letter-spacing: .14em; }
+.mds-head h1 { font-size: clamp(1.3rem, 2.4vw, 1.65rem); line-height: 1.25; }
+
+.mds-tabs { gap: 5px; margin-top: 16px; }
+.mds-tab {
+  min-height: 40px; padding: 7px 14px;
+  font-size: .86rem; gap: 5px;
+}
+.mds-tab > span[aria-hidden="true"] { font-size: .95em; line-height: 1; opacity: .85; }
+.mds-tab.is-on > span[aria-hidden="true"] { opacity: 1; }
+
+/* --- 세로 리듬 ----------------------------------------------
+   화면 하나에 표가 여러 개 쌓이는 업무 화면이라, 제목 위 여백이 넓으면
+   스크롤만 길어진다. 제목과 그 아래 내용은 붙이고 단락 사이를 벌린다. */
+.mds-h2 { margin: 26px 0 8px; }
+.mds-h2:first-child { margin-top: 0; }
+.mds-hint { margin-bottom: 10px; line-height: 1.75; }
+.mds-card { padding: clamp(18px, 2.4vw, 26px); }
+.mds-tools { margin-bottom: 12px; }
+
+/* --- 표 밀도 ------------------------------------------------
+   568줄을 훑는 화면이다. 한 줄이 2px 낮아지면 화면에 한 줄이 더 들어온다. */
+.mds-table th, .mds-table td { padding: 10px 13px; }
+.mds-table thead th { letter-spacing: .04em; }
+.mds-table tbody tr.is-picked { background: var(--color-accent-bg, rgba(143,174,146,.10)); }
+.mds-item b { line-height: 1.5; }
+.mds-item__meta { margin-top: 3px; }
+
+@media (prefers-color-scheme: dark) {
+  .mds-teampick { background: var(--color-white, #2A211A); }
+  .mds-teampick.is-empty { background: var(--color-surface, #241C15); }
+  .mds-teampick__select { background: var(--color-bg, #1B1310); }
+}
+
+@media print {
+  .mds-teampick { display: none !important; }
+}

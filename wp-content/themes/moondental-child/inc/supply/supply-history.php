@@ -58,6 +58,7 @@ function md_sup_render_history() {
 
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="history">
+		<?php md_sup_app_field(); ?>
 		<?php if ( $args['item_id'] > 0 ) : ?>
 			<input type="hidden" name="item" value="<?php echo (int) $args['item_id']; ?>">
 		<?php endif; ?>

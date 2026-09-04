@@ -48,6 +48,7 @@ function md_sup_render_stats() {
 	?>
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="stats">
+		<?php md_sup_app_field(); ?>
 		<label class="mds-field">
 			<span>기준 월</span>
 			<select name="ym" onchange="this.form.submit()">
