@@ -283,3 +283,61 @@ function md_sup_add_roles() {
 	}
 }
 add_action( 'admin_init', 'md_sup_add_roles', 5 );
+
+/**
+ * 사용자 프로필에 「소속 팀」 칸을 붙인다.
+ * 이게 없으면 누가 어느 팀인지 알 수 없어 사용량 집계가 무의미해진다.
+ * 관리자만 고칠 수 있게 한다 — 직원이 스스로 팀을 바꾸면 통계가 흔들린다.
+ */
+function md_sup_user_team_field( $user ) {
+	if ( ! current_user_can( 'edit_users' ) ) { return; }
+	if ( ! function_exists( 'md_sup_teams' ) ) { return; }
+
+	$current = (int) get_user_meta( $user->ID, 'md_sup_team_id', true );
+	?>
+	<h2>재고관리 · 소속 팀</h2>
+	<table class="form-table" role="presentation">
+		<tr>
+			<th><label for="md_sup_team_id">소속 팀</label></th>
+			<td>
+				<select name="md_sup_team_id" id="md_sup_team_id">
+					<option value="0">— 지정 안 함 —</option>
+					<?php foreach ( md_sup_teams() as $tm ) : ?>
+						<option value="<?php echo (int) $tm->id; ?>" <?php selected( $current, $tm->id ); ?>>
+							<?php echo esc_html( $tm->name ); ?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+				<p class="description">
+					재고 신청 화면에서 기본으로 선택되는 팀입니다. 사용량도 이 팀으로 집계됩니다.
+				</p>
+			</td>
+		</tr>
+	</table>
+	<?php
+}
+add_action( 'show_user_profile', 'md_sup_user_team_field' );
+add_action( 'edit_user_profile', 'md_sup_user_team_field' );
+
+function md_sup_save_user_team( $user_id ) {
+	if ( ! current_user_can( 'edit_users' ) ) { return; }
+	if ( ! isset( $_POST['md_sup_team_id'] ) ) { return; }
+	check_admin_referer( 'update-user_' . $user_id );
+	update_user_meta( $user_id, 'md_sup_team_id', (int) $_POST['md_sup_team_id'] );
+}
+add_action( 'personal_options_update', 'md_sup_save_user_team' );
+add_action( 'edit_user_profile_update', 'md_sup_save_user_team' );
+
+/** 사용자 목록에 소속 팀 열 추가 — 누가 어느 팀인지 한눈에 */
+function md_sup_user_column( $cols ) {
+	$cols['md_sup_team'] = '재고 팀';
+	return $cols;
+}
+add_filter( 'manage_users_columns', 'md_sup_user_column' );
+
+function md_sup_user_column_value( $val, $col, $user_id ) {
+	if ( 'md_sup_team' !== $col ) { return $val; }
+	$id = (int) get_user_meta( $user_id, 'md_sup_team_id', true );
+	return $id && function_exists( 'md_sup_team_name' ) ? esc_html( md_sup_team_name( $id ) ) : '—';
+}
+add_filter( 'manage_users_custom_column', 'md_sup_user_column_value', 10, 3 );
