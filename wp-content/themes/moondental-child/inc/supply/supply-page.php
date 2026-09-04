@@ -66,6 +66,25 @@ function md_sup_enqueue() {
 }
 add_action( 'wp_enqueue_scripts', 'md_sup_enqueue', 30 );
 
+/**
+ * 환자용 떠다니는 버튼을 이 페이지에서만 걷어낸다.
+ *
+ * 오시는 길·전화 상담·네이버 예약·카카오톡·언어 선택은 환자분을 위한 것이라
+ * 직원 재고 화면에서는 쓸 일이 없고, 화면 아래 합계 바를 가려서 방해가 된다.
+ */
+function md_sup_strip_patient_chrome() {
+	if ( ! md_sup_is_page() ) { return; }
+	remove_action( 'wp_footer', 'moondental_floating_actions', 5 );
+}
+add_action( 'wp', 'md_sup_strip_patient_chrome', 20 );
+
+/** body 에 표시를 남겨, 헤더·푸터의 환자용 요소를 CSS 로 감춘다 */
+function md_sup_body_class( $classes ) {
+	if ( md_sup_is_page() ) { $classes[] = 'mds-page-body'; }
+	return $classes;
+}
+add_filter( 'body_class', 'md_sup_body_class' );
+
 /* ============================================================
  * 폼 처리 — template_redirect 에서 먼저 받는다
  * ============================================================ */
@@ -312,16 +331,22 @@ function md_sup_render_header( $tab ) {
  * @param int   $current 지금 고른 팀 (0이면 아직 안 고름)
  */
 function md_sup_render_team_picker( $teams, $current ) {
+	/* 팀을 고른 뒤에는 접어 둔다. 15칸이 계속 자리를 차지하면
+	 * 정작 봐야 할 품목표가 화면 밖으로 밀린다.
+	 * <details> 라 자바스크립트 없이도 펼쳐진다. */
 	?>
-	<section class="mds-teams<?php echo $current ? ' is-compact' : ''; ?>">
-		<h2 class="mds-teams__title">
-			<?php echo $current ? '팀' : '어느 팀에서 신청하시나요?'; ?>
+	<details class="mds-teams" <?php echo $current ? '' : 'open'; ?>>
+		<summary class="mds-teams__sum">
 			<?php if ( $current ) : ?>
+				<span class="mds-teams__label">신청 팀</span>
 				<span class="mds-teams__now"><?php echo esc_html( md_sup_team_name( $current ) ); ?></span>
+				<span class="mds-teams__change">팀 바꾸기</span>
+			<?php else : ?>
+				<span class="mds-teams__ask">어느 팀에서 신청하시나요?</span>
 			<?php endif; ?>
-		</h2>
+		</summary>
 		<?php if ( ! $current ) : ?>
-			<p class="mds-hint">한 번 고르면 다음부터 기억합니다. 팀을 바꾸려면 다시 누르시면 됩니다.</p>
+			<p class="mds-hint" style="margin-top:10px">한 번 고르면 다음부터 기억합니다.</p>
 		<?php endif; ?>
 		<div class="mds-teamgrid">
 			<?php foreach ( $teams as $tm ) : ?>
@@ -331,7 +356,7 @@ function md_sup_render_team_picker( $teams, $current ) {
 				</a>
 			<?php endforeach; ?>
 		</div>
-	</section>
+	</details>
 	<?php
 }
 
@@ -852,4 +877,13 @@ function md_sup_render_page() {
 		case 'inventory': md_sup_render_inventory(); break;
 		default:          md_sup_render_request();   break;
 	}
+
+	/* 사이트 푸터를 감췄으니 필요한 안내만 여기서 */
+	?>
+	<div class="mds-foot">
+		<span>한아의료재단 문치과병원 · 직원 전용</span>
+		<a href="<?php echo esc_url( home_url( '/' ) ); ?>">병원 홈페이지</a>
+		<a href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">로그아웃</a>
+	</div>
+	<?php
 }

@@ -373,3 +373,62 @@ body.mds-has-bar #mds-submit .mds-btn { display: none; }
   .mds-stepper .mds-qty { width: 58px; }
 }
 @media (prefers-reduced-motion: reduce) { .mds-step { transition: none; } }
+
+/* =============================================================
+   v3.58 · 화면 정리
+   직원 도구는 환자용 껍데기를 벗겨야 쓸 만해진다.
+   ============================================================= */
+
+/* 헤더에서 환자용 요소를 감춘다. 로고는 남겨 홈으로 갈 수 있게. */
+.mds-page-body .md-header__nav,
+.mds-page-body .md-header__nav-toggle,
+.mds-page-body .md-header__cta,
+.mds-page-body .md-header__phone,
+.mds-page-body .md-header__info,
+.mds-page-body .md-header__aside { display: none !important; }
+.mds-page-body .md-header__inner { justify-content: flex-start; }
+
+/* 푸터도 통째로. 대신 페이지 안에서 필요한 안내만 보여준다. */
+.mds-page-body .md-footer,
+.mds-page-body .md-mobile-cta,
+.mds-page-body .md-fab,
+.mds-page-body .md-lang-fab-wrap,
+.mds-page-body .md-rcta { display: none !important; }
+
+/* 합계 바 — hidden 이 확실히 먹게. 테마 CSS 가 display 를 건드려도 이긴다. */
+.mds-bar[hidden] { display: none !important; }
+
+/* 접히는 팀 선택 */
+.mds-teams { padding: 0; }
+.mds-teams > .mds-teamgrid { margin: 0 20px 20px; }
+.mds-teams[open] > .mds-teamgrid { margin-top: 12px; }
+.mds-teams__sum {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  padding: 16px 20px; cursor: pointer; list-style: none;
+  font-weight: 800; color: var(--color-text, #3D2F26);
+}
+.mds-teams__sum::-webkit-details-marker { display: none; }
+.mds-teams__sum::after {
+  content: "▾"; margin-left: auto;
+  color: var(--color-text-mute, #A89685); font-size: .9rem;
+  transition: transform .2s;
+}
+.mds-teams[open] .mds-teams__sum::after { transform: rotate(180deg); }
+.mds-teams__sum:hover { background: var(--color-surface, #FBF2E8); border-radius: 16px; }
+.mds-teams__label { font-size: .74rem; font-weight: 800; letter-spacing: .1em; color: var(--color-text-mute, #A89685); }
+.mds-teams__ask { font-size: 1.05rem; }
+.mds-teams__change {
+  font-size: .78rem; font-weight: 700; padding: 3px 11px; border-radius: 999px;
+  background: var(--color-surface-alt, #F5E8D8); color: var(--color-text-sub, #7A6B5F);
+}
+
+/* 페이지 안쪽 하단 안내 — 푸터를 감췄으니 최소한만 여기서 */
+.mds-foot {
+  margin-top: 34px; padding-top: 18px;
+  border-top: 1px solid var(--color-border, #EDDFD0);
+  display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
+  font-size: .8rem; color: var(--color-text-mute, #A89685);
+}
+.mds-foot a { color: var(--color-text-sub, #7A6B5F); }
+
+@media (prefers-reduced-motion: reduce) { .mds-teams__sum::after { transition: none; } }
