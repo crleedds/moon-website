@@ -296,20 +296,16 @@ function md_sup_render_request() {
 	$cat     = isset( $_GET['cat'] ) ? sanitize_text_field( wp_unslash( $_GET['cat'] ) ) : '';
 	$teams   = md_sup_teams();
 
+	$vendor = isset( $_GET['vendor'] ) ? sanitize_text_field( wp_unslash( $_GET['vendor'] ) ) : '';
+
 	if ( ! $team_id && $teams ) { $team_id = (int) $teams[0]->id; }
 
-	/* 검색·필터가 없으면 우리 팀이 자주 쓰는 것부터. 568개를 다 뿌리면 못 쓴다. */
-	if ( '' === $search && '' === $cat ) {
-		$items = md_sup_frequent_items( $team_id );
-		$hint  = '우리 팀이 최근 3개월간 받아간 품목입니다. 없는 품목은 검색해 주세요.';
-		if ( empty( $items ) ) {
-			$items = md_sup_items( array( 'limit' => 40 ) );
-			$hint  = '아직 신청 기록이 없어 전체 품목의 앞부분을 보여드립니다. 검색으로 찾으실 수 있습니다.';
-		}
-	} else {
-		$items = md_sup_items( array( 'search' => $search, 'category' => $cat, 'limit' => 120 ) );
-		$hint  = '검색 결과 ' . count( $items ) . '건입니다.';
-	}
+	/* 필터에 걸린 전 품목을 다 보여준다. 평균·최근수령은 품목마다 조회하지 않고
+	 * 팀 단위로 한 번에 받아 온다 — 그러지 않으면 568개 × 2질의가 된다. */
+	$items    = md_sup_items( array( 'search' => $search, 'category' => $cat, 'vendor' => $vendor ) );
+	$avg_map  = md_sup_avg_map( $team_id );
+	$last_map = md_sup_last_map( $team_id );
+	$hint     = '총 ' . number_format( count( $items ) ) . '개 품목. 필요한 품목의 수량 칸에만 숫자를 적고 아래 「신청하기」를 누르세요.';
 	?>
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="request">
@@ -330,11 +326,23 @@ function md_sup_render_request() {
 				<?php endforeach; ?>
 			</select>
 		</label>
+		<label class="mds-field">
+			<span>거래처</span>
+			<select name="vendor">
+				<option value="">전체</option>
+				<?php foreach ( md_sup_vendors() as $v ) : ?>
+					<option value="<?php echo esc_attr( $v ); ?>" <?php selected( $vendor, $v ); ?>><?php echo esc_html( $v ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</label>
 		<label class="mds-field mds-field--grow">
 			<span>품목 검색</span>
 			<input type="search" name="q" value="<?php echo esc_attr( $search ); ?>" placeholder="품목명 · 코드 · 거래처">
 		</label>
 		<button type="submit" class="mds-btn mds-btn--ghost">찾기</button>
+		<?php if ( $search || $cat || $vendor ) : ?>
+			<a class="mds-btn mds-btn--ghost" href="<?php echo esc_url( md_sup_url( array( 'tab' => 'request', 'team' => $team_id ) ) ); ?>">필터 해제</a>
+		<?php endif; ?>
 	</form>
 
 	<p class="mds-hint"><?php echo esc_html( $hint ); ?></p>
@@ -356,8 +364,8 @@ function md_sup_render_request() {
 				<?php if ( empty( $items ) ) : ?>
 					<tr><td colspan="6" class="mds-empty">해당하는 품목이 없습니다.</td></tr>
 				<?php else : foreach ( $items as $it ) :
-					$avg  = md_sup_avg_monthly( $it->id, $team_id );
-					$last = md_sup_last_out( $it->id, $team_id );
+					$avg  = isset( $avg_map[ $it->id ] ) ? $avg_map[ $it->id ] : 0;
+					$last = isset( $last_map[ $it->id ] ) ? $last_map[ $it->id ] : null;
 					$low  = ( $it->min_stock > 0 && $it->stock <= $it->min_stock );
 					?>
 					<tr>
@@ -424,16 +432,35 @@ function md_sup_render_request() {
 function md_sup_render_stats() {
 	$ym      = isset( $_GET['ym'] ) ? sanitize_text_field( wp_unslash( $_GET['ym'] ) ) : current_time( 'Y-m' );
 	$my_team = md_sup_my_team_id();
-	$usage   = md_sup_team_usage( $ym );
-	$trend   = md_sup_monthly_trend( $my_team, 6 );
-	$top     = md_sup_top_items( $ym, 0, 10 );
+	/* 볼 팀 — 지정 안 했으면 내 소속 팀. 전체를 보려면 0 */
+	$view    = isset( $_GET['team'] ) ? (int) $_GET['team'] : $my_team;
+	$teams   = md_sup_teams();
+
+	$usage = md_sup_team_usage( $ym );
+	$trend = md_sup_monthly_trend( $view, 6 );
+	$top   = md_sup_top_items( $ym, $view, 15 );
 
 	$total = 0;
-	foreach ( $usage as $u ) { $total += (int) $u->amount; }
-	$max = 1;
-	foreach ( $usage as $u ) { $max = max( $max, (int) $u->amount ); }
+	$max   = 1;
+	$mine  = 0;
+	$rank  = 0;
+	$i     = 0;
+	foreach ( $usage as $u ) {
+		$i++;
+		$total += (int) $u->amount;
+		$max    = max( $max, (int) $u->amount );
+		if ( $view && (int) $u->team_id === $view ) { $mine = (int) $u->amount; $rank = $i; }
+	}
 	$tmax = 1;
 	foreach ( $trend as $v ) { $tmax = max( $tmax, (int) $v ); }
+
+	/* 전월 대비 — 추이 배열의 마지막 두 달을 쓴다 */
+	$tvals = array_values( $trend );
+	$prev  = count( $tvals ) >= 2 ? (int) $tvals[ count( $tvals ) - 2 ] : 0;
+	$curr  = count( $tvals ) >= 1 ? (int) $tvals[ count( $tvals ) - 1 ] : 0;
+	$delta = ( $prev > 0 ) ? round( ( $curr - $prev ) / $prev * 100 ) : null;
+
+	$view_name = $view ? md_sup_team_name( $view ) : '전체';
 	?>
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="stats">
@@ -446,13 +473,36 @@ function md_sup_render_stats() {
 				<?php endfor; ?>
 			</select>
 		</label>
+		<label class="mds-field">
+			<span>팀</span>
+			<select name="team" onchange="this.form.submit()">
+				<option value="0" <?php selected( $view, 0 ); ?>>전체 팀</option>
+				<?php foreach ( $teams as $tm ) : ?>
+					<option value="<?php echo (int) $tm->id; ?>" <?php selected( $view, $tm->id ); ?>><?php echo esc_html( $tm->name ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</label>
 		<noscript><button type="submit" class="mds-btn mds-btn--ghost">보기</button></noscript>
 	</form>
 
 	<div class="mds-kpis">
-		<div class="mds-kpi"><span class="n"><?php echo esc_html( number_format( $total ) ); ?></span><span class="k"><?php echo esc_html( $ym ); ?> 전체 사용액 (원)</span></div>
-		<div class="mds-kpi"><span class="n"><?php echo esc_html( count( $usage ) ); ?></span><span class="k">사용 팀 수</span></div>
-		<div class="mds-kpi"><span class="n"><?php echo esc_html( count( $top ) ); ?></span><span class="k">상위 품목 표시</span></div>
+		<div class="mds-kpi">
+			<span class="n"><?php echo esc_html( number_format( $view ? $mine : $total ) ); ?></span>
+			<span class="k"><?php echo esc_html( $view_name . ' · ' . $ym . ' 사용액 (원)' ); ?></span>
+		</div>
+		<div class="mds-kpi">
+			<span class="n"><?php echo null === $delta ? '—' : esc_html( ( $delta > 0 ? '+' : '' ) . $delta . '%' ); ?></span>
+			<span class="k">전월 대비</span>
+		</div>
+		<?php if ( $view && $rank ) : ?>
+			<div class="mds-kpi"><span class="n"><?php echo (int) $rank; ?>위</span><span class="k">전체 <?php echo count( $usage ); ?>개 팀 중 사용액 순위</span></div>
+		<?php else : ?>
+			<div class="mds-kpi"><span class="n"><?php echo esc_html( count( $usage ) ); ?></span><span class="k">사용 팀 수</span></div>
+		<?php endif; ?>
+		<div class="mds-kpi">
+			<span class="n"><?php echo esc_html( number_format( $total ) ); ?></span>
+			<span class="k">전체 팀 합계 (원)</span>
+		</div>
 	</div>
 
 	<h2 class="mds-h2">팀별 사용액</h2>
@@ -463,7 +513,7 @@ function md_sup_render_stats() {
 		<div class="mds-bars">
 			<?php foreach ( $usage as $u ) :
 				$w = round( (int) $u->amount / $max * 100 );
-				$is_me = ( (int) $u->team_id === $my_team ); ?>
+				$is_me = ( $view && (int) $u->team_id === $view ); ?>
 				<div class="mds-bar<?php echo $is_me ? ' is-me' : ''; ?>">
 					<span class="mds-bar__label"><?php echo esc_html( $u->team_name ? $u->team_name : '(팀 없음)' ); ?></span>
 					<span class="mds-bar__track"><span class="mds-bar__fill" style="width:<?php echo (int) $w; ?>%"></span></span>
@@ -473,7 +523,7 @@ function md_sup_render_stats() {
 		</div>
 	<?php endif; ?>
 
-	<h2 class="mds-h2">우리 팀 6개월 추이</h2>
+	<h2 class="mds-h2"><?php echo esc_html( $view_name ); ?> · 6개월 추이</h2>
 	<div class="mds-trend">
 		<?php foreach ( $trend as $m => $v ) :
 			$h = max( 3, round( (int) $v / $tmax * 100 ) ); ?>
@@ -485,18 +535,23 @@ function md_sup_render_stats() {
 		<?php endforeach; ?>
 	</div>
 
-	<h2 class="mds-h2"><?php echo esc_html( $ym ); ?> 소모 상위 품목</h2>
+	<h2 class="mds-h2"><?php echo esc_html( $view_name . ' · ' . $ym ); ?> 품목별 사용 내역</h2>
+	<p class="mds-hint">금액이 큰 순서입니다. 무엇에 비용이 쓰이는지 여기서 확인하세요.</p>
 	<div class="mds-tablewrap">
 		<table class="mds-table">
-			<thead><tr><th>품목</th><th class="num">수량</th><th class="num">금액</th></tr></thead>
+			<thead><tr><th>품목</th><th class="num">단가</th><th class="num">수량</th><th class="num">금액</th><th class="num">비중</th></tr></thead>
 			<tbody>
 			<?php if ( empty( $top ) ) : ?>
-				<tr><td colspan="3" class="mds-empty">기록이 없습니다.</td></tr>
-			<?php else : foreach ( $top as $r ) : ?>
+				<tr><td colspan="5" class="mds-empty">이 기간에 출고된 기록이 없습니다.</td></tr>
+			<?php else :
+				$base = $view ? max( 1, $mine ) : max( 1, $total );
+				foreach ( $top as $r ) : ?>
 				<tr>
 					<td class="mds-item"><b><?php echo esc_html( $r->name ); ?></b></td>
+					<td class="num"><?php echo esc_html( number_format( (int) $r->price ) ); ?></td>
 					<td class="num"><?php echo esc_html( number_format( (int) $r->qty ) . ( $r->unit ? ' ' . $r->unit : '' ) ); ?></td>
 					<td class="num"><?php echo esc_html( number_format( (int) $r->amount ) ); ?></td>
+					<td class="num"><?php echo esc_html( round( (int) $r->amount / $base * 100 ) . '%' ); ?></td>
 				</tr>
 			<?php endforeach; endif; ?>
 			</tbody>
@@ -567,10 +622,9 @@ function md_sup_render_inbound() {
 	$vendor = isset( $_GET['vendor'] ) ? sanitize_text_field( wp_unslash( $_GET['vendor'] ) ) : '';
 	$items  = ( '' === $search && '' === $vendor )
 		? md_sup_items( array( 'low_only' => true ) )
-		: md_sup_items( array( 'search' => $search, 'vendor' => $vendor, 'limit' => 120 ) );
+		: md_sup_items( array( 'search' => $search, 'vendor' => $vendor ) );
 
-	global $wpdb; $t = md_sup_tables();
-	$vendors = $wpdb->get_col( "SELECT DISTINCT vendor FROM {$t['items']} WHERE active = 1 AND vendor <> '' ORDER BY vendor" );
+	$vendors = md_sup_vendors();
 	?>
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="inbound">
@@ -630,7 +684,7 @@ function md_sup_render_inventory() {
 	$search = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
 	$cat    = isset( $_GET['cat'] ) ? sanitize_text_field( wp_unslash( $_GET['cat'] ) ) : '';
 	$low    = isset( $_GET['low'] ) && '1' === $_GET['low'];
-	$items  = md_sup_items( array( 'search' => $search, 'category' => $cat, 'low_only' => $low, 'limit' => 200 ) );
+	$items  = md_sup_items( array( 'search' => $search, 'category' => $cat, 'low_only' => $low ) );
 	?>
 	<form class="mds-filter" method="get" action="<?php echo esc_url( md_sup_url() ); ?>">
 		<input type="hidden" name="tab" value="inventory">

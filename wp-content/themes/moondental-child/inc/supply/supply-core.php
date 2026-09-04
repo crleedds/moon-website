@@ -105,6 +105,19 @@ function md_sup_categories() {
 	return $wpdb->get_col( "SELECT DISTINCT category FROM {$t['items']} WHERE active = 1 AND category <> '' ORDER BY category" );
 }
 
+function md_sup_vendors() {
+	global $wpdb;
+	$t = md_sup_tables();
+	return $wpdb->get_col( "SELECT DISTINCT vendor FROM {$t['items']} WHERE active = 1 AND vendor <> '' ORDER BY vendor" );
+}
+
+/** 등록된 품목 수 (활성) */
+function md_sup_item_count() {
+	global $wpdb;
+	$t = md_sup_tables();
+	return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$t['items']} WHERE active = 1" );
+}
+
 /* ============================================================
  * 원장 — 모든 수량 변화는 여기를 지난다
  * ============================================================ */
@@ -175,6 +188,57 @@ function md_sup_avg_monthly( $item_id, $team_id, $months = 3 ) {
 		$item_id, $team_id, $since
 	) );
 	return $months > 0 ? round( $total / $months, 1 ) : 0;
+}
+
+/**
+ * 한 팀의 전 품목 월평균을 한 번에 가져온다.
+ *
+ * 품목마다 md_sup_avg_monthly() 를 부르면 568개 × 2질의 = 1136질의가 되어
+ * 화면이 열리지 않는다. 그래서 목록 화면에서는 이 함수로 통째로 받아 쓴다.
+ *
+ * @return array [ item_id => 월평균 ]
+ */
+function md_sup_avg_map( $team_id, $months = 3 ) {
+	global $wpdb;
+	$t     = md_sup_tables();
+	$since = gmdate( 'Y-m-d H:i:s', strtotime( '-' . (int) $months . ' months', current_time( 'timestamp' ) ) );
+
+	$rows = $wpdb->get_results( $wpdb->prepare(
+		"SELECT item_id, SUM(-qty) AS total FROM {$t['ledger']}
+		 WHERE team_id = %d AND reason = 'out' AND created_at >= %s
+		 GROUP BY item_id",
+		$team_id, $since
+	) );
+
+	$map = array();
+	foreach ( $rows as $r ) {
+		$map[ (int) $r->item_id ] = $months > 0 ? round( (int) $r->total / $months, 1 ) : 0;
+	}
+	return $map;
+}
+
+/**
+ * 한 팀의 전 품목 「마지막 수령」을 한 번에.
+ *
+ * @return array [ item_id => (object) { created_at, qty } ]
+ */
+function md_sup_last_map( $team_id ) {
+	global $wpdb;
+	$t = md_sup_tables();
+
+	$rows = $wpdb->get_results( $wpdb->prepare(
+		"SELECT l.item_id, l.created_at, -l.qty AS qty
+		 FROM {$t['ledger']} l
+		 INNER JOIN (
+		     SELECT item_id, MAX(id) AS last_id FROM {$t['ledger']}
+		     WHERE team_id = %d AND reason = 'out' GROUP BY item_id
+		 ) m ON m.last_id = l.id",
+		$team_id
+	) );
+
+	$map = array();
+	foreach ( $rows as $r ) { $map[ (int) $r->item_id ] = $r; }
+	return $map;
 }
 
 /** 팀이 그 품목을 마지막으로 받아간 날짜와 수량 */
