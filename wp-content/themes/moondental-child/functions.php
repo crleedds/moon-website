@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.63' );
+define( 'MOONDENTAL_VERSION', '3.64' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2064,7 +2064,13 @@ require_once MOONDENTAL_DIR . '/inc/guides/guides.php'; // v3.44.175 · 종합 �
  * file_exists 로 감싸는 이유 — FTP 미러링이 중간에 끊겨 한 파일만 빠져도
  * require_once 는 치명적 오류를 내고 사이트 전체가 500 이 된다. 재고 기능만
  * 조용히 빠지는 편이 낫다. */
-foreach ( array( 'supply-schema', 'supply-core', 'supply-items', 'supply-page', 'supply-accounts' ) as $_md_sup_f ) {
+/* v3.64 · 탭마다 파일이 나뉘었다. 순서는 상관없다 — 전부 함수 선언뿐이라
+ * 실제로 불리는 시점(template_redirect 이후)에는 모두 올라와 있다. */
+foreach ( array(
+	'supply-schema', 'supply-core', 'supply-po',
+	'supply-request', 'supply-stats', 'supply-manage', 'supply-stockroom',
+	'supply-history', 'supply-items', 'supply-page', 'supply-accounts',
+) as $_md_sup_f ) {
 	$_md_sup_p = MOONDENTAL_DIR . '/inc/supply/' . $_md_sup_f . '.php';
 	if ( file_exists( $_md_sup_p ) ) { require_once $_md_sup_p; }
 }

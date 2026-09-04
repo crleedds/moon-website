@@ -177,3 +177,70 @@
     init();
   }
 })();
+
+/* =============================================================
+   v3.64 · 즐겨찾기를 그 자리에서
+
+   별표는 원래 링크였다. 하나 누를 때마다 서버에 갔다가 568줄을 통째로
+   다시 그려 돌아왔다 — 즐겨찾기 다섯 개를 고르면 다섯 번 새로고침이다.
+   여기서는 그 링크를 가로채 별표만 바꾼다.
+
+   링크는 그대로 둔다
+     JS 가 없거나 fetch 를 모르는 태블릿에서는 손대지 않고 지나가므로
+     예전처럼 새로고침으로 동작한다. 요청이 실패해도 원래 링크로 넘긴다.
+
+   정렬은 새로고침 전까지 그대로다
+     누르자마자 줄이 맨 위로 튀어 올라가면 지금 보던 자리를 잃는다.
+     다음에 화면을 열 때 위로 모이는 편이 낫다.
+   ============================================================= */
+(function () {
+  'use strict';
+
+  function setFav(a, on) {
+    var name = a.getAttribute('aria-label') || '';
+    name = name.replace(/\s*즐겨찾기(\s*해제)?$/, '');
+
+    a.classList.toggle('is-on', on);
+    a.setAttribute('data-on', on ? '1' : '0');
+    a.textContent = on ? '★' : '☆';
+    a.title = on ? '즐겨찾기에서 빼기' : '즐겨찾기에 넣기';
+    a.setAttribute('aria-label', name + (on ? ' 즐겨찾기 해제' : ' 즐겨찾기'));
+  }
+
+  function init() {
+    if (!window.fetch) return;   // 모르는 브라우저는 링크 그대로
+
+    var table = document.querySelector('.mds-table--items');
+    if (!table || !table.addEventListener) return;
+
+    table.addEventListener('click', function (e) {
+      var a = e.target.closest ? e.target.closest('.mds-fav') : null;
+      if (!a || !a.getAttribute('data-fav')) return;
+
+      e.preventDefault();
+      if (a.getAttribute('data-busy')) return;
+      a.setAttribute('data-busy', '1');
+
+      var href = a.href;
+      var url  = href + (href.indexOf('?') === -1 ? '?' : '&') + 'ajax=1';
+
+      fetch(url, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          a.removeAttribute('data-busy');
+          if (!d || !d.ok) { window.location.href = href; return; }
+          setFav(a, !!d.on);
+        })
+        .catch(function () {
+          a.removeAttribute('data-busy');
+          window.location.href = href;   // 실패하면 예전 방식으로
+        });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

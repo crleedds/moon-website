@@ -17,30 +17,114 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_SUP_DB_VERSION', '1.0.0' );
-define( 'MD_SUP_DB2_VERSION', '1.0.0' );
-define( 'MD_SUP_DB3_VERSION', '1.0.0' );
+/**
+ * 스키마 단계 번호.
+ *
+ * v3.63 까지는 MD_SUP_DB_VERSION / DB2 / DB3 세 상수와 maybe_install 세 개가
+ * 따로 돌았다. 단계가 늘 때마다 상수와 훅을 한 벌씩 더 만들어야 했고,
+ * 어느 단계까지 적용됐는지 한눈에 보이지 않았다.
+ * 이제는 번호 하나(md_sup_schema)와 단계 목록 하나로 끝난다.
+ */
+define( 'MD_SUP_SCHEMA', 4 );
 
 /** 테이블 이름 모음 */
 function md_sup_tables() {
 	global $wpdb;
 	$p = $wpdb->prefix . 'md_sup_';
 	return array(
-		'items'  => $p . 'items',
-		'teams'  => $p . 'teams',
-		'ledger' => $p . 'ledger',
-		'req'    => $p . 'req',
-		'line'   => $p . 'req_line',
-		'notice' => $p . 'notice',
-		'fav'    => $p . 'fav',
+		'items'   => $p . 'items',
+		'teams'   => $p . 'teams',
+		'ledger'  => $p . 'ledger',
+		'req'     => $p . 'req',
+		'line'    => $p . 'req_line',
+		'fav'     => $p . 'fav',
+		'po'      => $p . 'po',
+		'po_line' => $p . 'po_line',
+	);
+	/* 'notice' 는 뺐다 — v3.59 에 넣고 v3.61 에 화면을 지운 뒤로
+	 * 읽지도 쓰지도 않는다. 다만 그 사이에 쓴 글이 남아 있을 수 있어
+	 * 테이블 자체는 DROP 하지 않는다. 목록에서만 뺀다. */
+}
+
+/* ============================================================
+ * 마이그레이션 — 번호 하나로 관리한다
+ * ============================================================ */
+
+/** 단계 번호 → 실행할 함수 */
+function md_sup_schema_steps() {
+	return array(
+		1 => 'md_sup_schema_1',  // 기본 테이블 + 팀·품목 시드
+		2 => 'md_sup_schema_2',  // 즐겨찾기
+		3 => 'md_sup_schema_3',  // 신청 줄에 직접 적은 품목명
+		4 => 'md_sup_schema_4',  // 반려 사유 · 발주
 	);
 }
 
 /**
- * 테이블 생성 / 스키마 갱신.
+ * 지금 몇 단계까지 적용돼 있는가.
+ * 새 옵션이 없으면 예전 세 옵션을 보고 단계를 유추한다 —
+ * 이미 돌고 있는 설치에서 1~3단계가 다시 실행되지 않게 하기 위함이다.
+ */
+function md_sup_current_schema() {
+	$v = (int) get_option( 'md_sup_schema', 0 );
+	if ( $v > 0 ) { return $v; }
+
+	if ( get_option( 'md_sup_db3_version' ) ) { return 3; }
+	if ( get_option( 'md_sup_db2_version' ) ) { return 2; }
+	if ( get_option( 'md_sup_db_version' ) )  { return 1; }
+	return 0;
+}
+
+/**
+ * 밀린 단계를 순서대로 실행한다.
+ * 각 단계는 dbDelta 나 「없으면 만든다」 방식이라 두 번 돌아도 안전하다.
+ */
+function md_sup_migrate() {
+	$from = md_sup_current_schema();
+	if ( $from >= MD_SUP_SCHEMA ) { return; }
+
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+	foreach ( md_sup_schema_steps() as $n => $fn ) {
+		if ( $n <= $from ) { continue; }
+		if ( ! function_exists( $fn ) ) { continue; }
+		call_user_func( $fn );
+		update_option( 'md_sup_schema', $n );
+	}
+}
+
+/** 관리자가 wp-admin 에 들어올 때 확인한다 */
+function md_sup_maybe_migrate() {
+	if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) { return; }
+	md_sup_migrate();
+}
+add_action( 'admin_init', 'md_sup_maybe_migrate', 3 );
+
+/**
+ * 재료실 화면에서도 확인한다.
+ *
+ * 재고 담당자 계정은 wp-admin 에 들어가지 않는다. 관리자가 한동안
+ * 로그인하지 않으면 배포는 됐는데 테이블만 옛 모양인 상태가 이어져,
+ * 담당자 화면이 「알 수 없는 열」 오류로 죽는다. 그 구멍을 막는다.
+ * 동시 접속이 겹쳐 두 번 돌지 않게 짧은 자물쇠를 건다.
+ */
+function md_sup_maybe_migrate_front() {
+	if ( ! function_exists( 'md_sup_is_page' ) || ! md_sup_is_page() ) { return; }
+	if ( ! md_sup_can_manage() ) { return; }
+	if ( md_sup_current_schema() >= MD_SUP_SCHEMA ) { return; }
+	if ( get_transient( 'md_sup_migrating' ) ) { return; }
+
+	set_transient( 'md_sup_migrating', 1, MINUTE_IN_SECONDS );
+	md_sup_migrate();
+	delete_transient( 'md_sup_migrating' );
+}
+add_action( 'template_redirect', 'md_sup_maybe_migrate_front', 0 );
+
+/**
+ * 1단계 · 기본 테이블 생성과 초기 데이터.
  * dbDelta 는 있으면 두고 없으면 만드는 방식이라 여러 번 불러도 안전하다.
  */
-function md_sup_install() {
+function md_sup_schema_1() {
 	global $wpdb;
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
@@ -129,8 +213,6 @@ function md_sup_install() {
 
 	md_sup_seed_teams();
 	md_sup_seed_items();
-
-	update_option( 'md_sup_db_version', MD_SUP_DB_VERSION );
 }
 
 /**
@@ -214,17 +296,6 @@ function md_sup_flush_items( $chunk ) {
 		. implode( ',', $chunk )
 	);
 }
-
-/**
- * 스키마 버전이 다르면 설치를 다시 돌린다.
- * 관리자가 접속할 때만 확인해 일반 요청에는 부담을 주지 않는다.
- */
-function md_sup_maybe_install() {
-	if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) { return; }
-	if ( get_option( 'md_sup_db_version' ) === MD_SUP_DB_VERSION ) { return; }
-	md_sup_install();
-}
-add_action( 'admin_init', 'md_sup_maybe_install' );
 
 /**
  * 「직원」 페이지가 없으면 만든다.
@@ -364,32 +435,15 @@ function md_sup_user_column_value( $val, $col, $user_id ) {
 add_filter( 'manage_users_custom_column', 'md_sup_user_column_value', 10, 3 );
 
 /* ============================================================
- * v3.59 · 공지사항 · 즐겨찾기
+ * 2단계 · 즐겨찾기 (v3.59)
  * ============================================================ */
 
-/** 추가 테이블 (공지 · 즐겨찾기) */
-function md_sup_install_v2() {
+function md_sup_schema_2() {
 	global $wpdb;
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 	$t       = md_sup_tables();
 	$charset = $wpdb->get_charset_collate();
-
-	/* 공지사항 — 직원 전용. 본문은 서식 없는 글로 받고 출력할 때 줄바꿈만 살린다.
-	 * 에디터를 붙이지 않는 이유 · 재고 계정은 wp-admin 에 못 들어가므로
-	 * 프론트에서 써야 하는데, 리치 에디터는 HTML 이 섞여 들어와 위험하다. */
-	dbDelta( "CREATE TABLE {$t['notice']} (
-		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-		title VARCHAR(255) NOT NULL DEFAULT '',
-		body TEXT NULL,
-		pinned TINYINT(1) NOT NULL DEFAULT 0,
-		author_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
-		author_name VARCHAR(100) NOT NULL DEFAULT '',
-		created_at DATETIME NULL DEFAULT NULL,
-		updated_at DATETIME NULL DEFAULT NULL,
-		PRIMARY KEY (id),
-		KEY pinned_created (pinned, created_at)
-	) $charset;" );
 
 	/* 팀별 즐겨찾기 품목 */
 	dbDelta( "CREATE TABLE {$t['fav']} (
@@ -400,42 +454,84 @@ function md_sup_install_v2() {
 		UNIQUE KEY team_item (team_id, item_id)
 	) $charset;" );
 
-	update_option( 'md_sup_db2_version', MD_SUP_DB2_VERSION );
+	/* 같은 단계에 있던 공지사항 테이블은 만들지 않는다 — v3.61 에 화면이 사라졌다.
+	 * 이미 만들어진 곳에서는 그대로 두고 쓰지 않을 뿐이다. */
 }
-
-function md_sup_maybe_install_v2() {
-	if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) { return; }
-	if ( get_option( 'md_sup_db2_version' ) === MD_SUP_DB2_VERSION ) { return; }
-	md_sup_install_v2();
-}
-add_action( 'admin_init', 'md_sup_maybe_install_v2', 11 );
 
 /* ============================================================
- * v3.61 · 목록에 없는 품목을 직접 적어 신청
+ * 3단계 · 목록에 없는 품목을 직접 적어 신청 (v3.61)
+ *
+ * item_id 가 0 이고 custom_name 이 있으면 "직접 적은 품목" 이다.
+ * 담당자가 나중에 실제 품목으로 등록한다.
+ * ============================================================ */
+
+function md_sup_schema_3() {
+	global $wpdb;
+	$t = md_sup_tables();
+	md_sup_add_column( $t['line'], 'custom_name', "VARCHAR(255) NOT NULL DEFAULT '' AFTER item_id" );
+}
+
+/* ============================================================
+ * 4단계 · 반려 사유 분리 · 발주 (v3.64)
  * ============================================================ */
 
 /**
- * 신청 줄에 custom_name 을 더한다.
- * item_id 가 0 이고 custom_name 이 있으면 "직접 적은 품목" 이다.
- * 담당자가 나중에 실제 품목에 연결하거나 새 품목으로 등록한다.
+ * 열이 없을 때만 더한다.
+ *
+ * dbDelta 로도 되지만, dbDelta 는 CREATE TABLE 전문을 그대로 다시 적어야 해서
+ * 열 하나 붙이려고 표 정의를 통째로 복사하다 실수하기 쉽다.
  */
-function md_sup_install_v3() {
+function md_sup_add_column( $table, $column, $definition ) {
+	global $wpdb;
+	$has = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM `$table` LIKE %s", $column ) );
+	if ( $has ) { return false; }
+	$wpdb->query( "ALTER TABLE `$table` ADD COLUMN `$column` $definition" );
+	return true;
+}
+
+function md_sup_schema_4() {
 	global $wpdb;
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-	$t = md_sup_tables();
 
-	$has = $wpdb->get_var( "SHOW COLUMNS FROM {$t['line']} LIKE 'custom_name'" );
-	if ( ! $has ) {
-		$wpdb->query( "ALTER TABLE {$t['line']} ADD COLUMN custom_name VARCHAR(255) NOT NULL DEFAULT '' AFTER item_id" );
+	$t       = md_sup_tables();
+	$charset = $wpdb->get_charset_collate();
+
+	/* 반려 사유를 따로 담는다.
+	 * v3.63 까지는 반려하면 신청자가 적은 note 를 덮어써 버려,
+	 * 나중에 「무엇을 왜 요청했는데 왜 반려됐나」를 맞춰볼 수 없었다. */
+	md_sup_add_column( $t['req'], 'reject_reason', "VARCHAR(500) NOT NULL DEFAULT '' AFTER note" );
+
+	/* 발주서 — 「부족 → 주문 → 입고」 사이의 빈칸을 메운다.
+	 * 이게 없으면 주문을 넣었는데 안 온 건지 아직 안 넣은 건지 알 수 없다. */
+	dbDelta( "CREATE TABLE {$t['po']} (
+		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		vendor VARCHAR(100) NOT NULL DEFAULT '',
+		status VARCHAR(20) NOT NULL DEFAULT 'draft',
+		note VARCHAR(500) NOT NULL DEFAULT '',
+		user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		created_at DATETIME NULL DEFAULT NULL,
+		ordered_at DATETIME NULL DEFAULT NULL,
+		received_at DATETIME NULL DEFAULT NULL,
+		PRIMARY KEY (id),
+		KEY status (status),
+		KEY vendor (vendor),
+		KEY created_at (created_at)
+	) $charset;" );
+
+	dbDelta( "CREATE TABLE {$t['po_line']} (
+		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		po_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		item_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		qty_order INT NOT NULL DEFAULT 0,
+		qty_recv INT NOT NULL DEFAULT 0,
+		price INT NOT NULL DEFAULT 0,
+		PRIMARY KEY (id),
+		KEY po_id (po_id),
+		KEY item_id (item_id)
+	) $charset;" );
+
+	/* 대기 신청 알림을 받을 주소 — 비어 있으면 사이트 관리자 메일로 간다 */
+	if ( false === get_option( 'md_sup_notify_emails', false ) ) {
+		add_option( 'md_sup_notify_emails', '' );
 	}
-	/* item_id 0 이 들어갈 수 있으므로 인덱스는 그대로 두고 제약만 없다 */
-
-	update_option( 'md_sup_db3_version', MD_SUP_DB3_VERSION );
 }
-
-function md_sup_maybe_install_v3() {
-	if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) { return; }
-	if ( get_option( 'md_sup_db3_version' ) === MD_SUP_DB3_VERSION ) { return; }
-	md_sup_install_v3();
-}
-add_action( 'admin_init', 'md_sup_maybe_install_v3', 12 );

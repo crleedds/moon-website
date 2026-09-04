@@ -140,7 +140,7 @@ function md_sup_render_items() {
 			<?php else : foreach ( $items as $it ) : ?>
 				<tr class="<?php echo $it->active ? '' : 'is-off'; ?>">
 					<td class="mds-item" data-label="품목">
-						<b><?php echo esc_html( $it->name ); ?></b>
+						<b><a class="mds-plain" href="<?php echo esc_url( md_sup_url( array( 'tab' => 'history', 'item' => (int) $it->id ) ) ); ?>"><?php echo esc_html( $it->name ); ?></a></b>
 						<span class="mds-item__meta">
 							<?php echo esc_html( $it->code . ( $it->unit ? ' · ' . $it->unit : '' ) . ( $it->category ? ' · ' . $it->category : '' ) ); ?>
 							<?php echo $it->active ? '' : ' · 감춤'; ?>
@@ -179,12 +179,21 @@ function md_sup_render_items() {
 		<?php wp_nonce_field( 'md_sup_team', 'md_sup_nonce' ); ?>
 		<input type="hidden" name="md_sup_action" value="team">
 
+		<p class="mds-hint">
+			「순서」는 신청 화면의 팀 고르기 칸이 놓이는 차례입니다 — 작은 수가 앞입니다.
+			병원 층 배치를 그대로 옮긴 3행 × 5열이라, 직원분들이 자기 자리를 눈으로 찾습니다.
+			비워 두면 지금 순서를 그대로 둡니다.
+		</p>
+
 		<div class="mds-teamedit">
 			<?php foreach ( md_sup_teams( false ) as $tm ) : ?>
 				<div class="mds-teamedit__row<?php echo $tm->active ? '' : ' is-off'; ?>">
 					<input type="text" name="team_name[<?php echo (int) $tm->id; ?>]"
 					       value="<?php echo esc_attr( $tm->name ); ?>" maxlength="80"
 					       aria-label="<?php echo esc_attr( $tm->name . ' 이름' ); ?>">
+					<input type="number" class="mds-teamedit__sort" name="team_sort[<?php echo (int) $tm->id; ?>]"
+					       value="<?php echo (int) $tm->sort_no; ?>" step="10" min="0"
+					       aria-label="<?php echo esc_attr( $tm->name . ' 표시 순서' ); ?>" title="표시 순서">
 					<label class="mds-check">
 						<input type="checkbox" name="team_on[<?php echo (int) $tm->id; ?>]" value="1" <?php checked( (int) $tm->active, 1 ); ?>> 사용
 					</label>
@@ -204,5 +213,42 @@ function md_sup_render_items() {
 		</div>
 	</form>
 	<p class="mds-hint">「사용」을 끄면 신청 화면의 팀 선택에서 빠집니다. 지난 사용량 기록은 그대로 남습니다.</p>
+
+	<?php md_sup_render_notify_settings();
+}
+
+/**
+ * 대기 신청 알림 설정 (v3.64).
+ *
+ * 담당자가 화면에 들어와야만 대기 건을 알 수 있던 문제를 메일로 메운다.
+ * 주소를 비워 두면 사이트 관리자 메일로 가고, off 라고 적으면 보내지 않는다.
+ */
+function md_sup_render_notify_settings() {
+	$raw  = (string) get_option( 'md_sup_notify_emails', '' );
+	$now  = md_sup_notify_emails();
+	?>
+	<h2 class="mds-h2">신청 알림</h2>
+	<form class="mds-card" method="post" action="<?php echo esc_url( md_sup_url( array( 'tab' => 'items' ) ) ); ?>">
+		<?php wp_nonce_field( 'md_sup_notify', 'md_sup_nonce' ); ?>
+		<input type="hidden" name="md_sup_action" value="notify">
+
+		<label class="mds-formrow">
+			<span>알림 받을 메일 주소</span>
+			<input type="text" name="emails" maxlength="500" value="<?php echo esc_attr( $raw ); ?>"
+			       placeholder="담당자@example.com, 경영지원실@example.com">
+		</label>
+
+		<p class="mds-hint" style="margin:12px 0 0">
+			새 신청이 들어오면 이 주소로 품목 목록과 함께 메일이 갑니다. 긴급 신청은 제목에 <b>[긴급]</b>이 붙습니다.
+			여러 곳이면 쉼표로 나눠 적으세요.
+			<br>비워 두면 사이트 관리자 메일<b><?php echo esc_html( $now ? ' (' . implode( ', ', $now ) . ')' : '' ); ?></b>로 갑니다.
+			알림을 끄려면 <b>off</b> 라고만 적으세요.
+			<br>대기 건수는 메일과 별개로 「반출관리」 탭과 브라우저 제목에도 표시됩니다.
+		</p>
+
+		<div class="mds-formbtns" style="margin-top:14px">
+			<button type="submit" class="mds-btn mds-btn--fill">알림 설정 저장</button>
+		</div>
+	</form>
 	<?php
 }

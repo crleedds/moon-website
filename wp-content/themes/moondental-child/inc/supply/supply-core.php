@@ -75,6 +75,12 @@ function md_sup_items( $args = array() ) {
 	if ( '' !== $a['category'] ) { $where[] = 'i.category = %s'; $params[] = $a['category']; }
 	if ( '' !== $a['vendor'] )   { $where[] = 'i.vendor = %s';   $params[] = $a['vendor']; }
 
+	/* 부족한 것만.
+	 * v3.63 까지는 HAVING 을 붙였는데 이 질의에는 GROUP BY 가 없다.
+	 * MySQL 이 관대해 지금은 돌지만 ONLY_FULL_GROUP_BY 가 켜진 서버로 옮기면
+	 * 입고 화면이 통째로 죽는다. 파생표의 열을 WHERE 에서 직접 본다. */
+	if ( $a['low_only'] ) { $where[] = 'i.min_stock > 0 AND COALESCE(l.stock, 0) <= i.min_stock'; }
+
 	$sql = "SELECT i.*, COALESCE(l.stock, 0) AS stock
 	        FROM {$t['items']} i
 	        LEFT JOIN (
@@ -82,7 +88,6 @@ function md_sup_items( $args = array() ) {
 	        ) l ON l.item_id = i.id
 	        WHERE " . implode( ' AND ', $where );
 
-	if ( $a['low_only'] ) { $sql .= ' HAVING stock <= i.min_stock AND i.min_stock > 0'; }
 	$sql .= ' ORDER BY i.sort_no ASC, i.id ASC';
 	if ( $a['limit'] > 0 ) { $sql .= ' LIMIT ' . (int) $a['limit']; }
 
@@ -385,6 +390,10 @@ function md_sup_create_request( $team_id, $lines, $urgent = 0, $note = '', $cust
 		), array( '%d', '%d', '%s', '%d', '%d', '%s' ) );
 	}
 
+	/* 담당자에게 알린다. 줄을 다 넣은 뒤라야 메일에 품목이 담긴다.
+	 * 메일이 실패해도 신청은 이미 저장돼 있으므로 결과를 보지 않는다. */
+	md_sup_notify_new_request( $req_id );
+
 	return $req_id;
 }
 
@@ -431,43 +440,125 @@ function md_sup_request_lines( $req_id ) {
 /**
  * 신청을 출고 처리한다. 줄마다 실제 나간 수량을 받아 원장에 기록한다.
  *
+ * 두 사람이 동시에 눌러도 한 번만 나간다
+ *   v3.63 까지는 status 를 읽어 확인한 뒤 나중에 따로 고쳐 썼다.
+ *   그 사이에 다른 담당자가 같은 신청을 처리하면 원장에 두 번 기록됐다.
+ *   이제는 「pending 인 것을 done 으로 바꾼다」는 한 문장으로 선점하고,
+ *   바뀐 행이 없으면 남이 먼저 가져간 것이니 아무것도 하지 않는다.
+ *
+ * 재고보다 많이 나가면 막지 않고 알린다
+ *   막으면 실제로는 건네줬는데 기록만 못 하는 상태가 되어, 장부가 현실과
+ *   더 멀어진다. 그대로 기록하되 어떤 품목이 모자랐는지 돌려주고,
+ *   화면에서 「실사로 맞춰 주세요」라고 안내한다.
+ *
  * @param array $qty_map [ line_id => qty_out ]
+ * @return array|WP_Error array( 'short' => [ 품목명 => 모자란 수량 ] )
  */
 function md_sup_release_request( $req_id, $qty_map ) {
 	global $wpdb;
-	$t   = md_sup_tables();
+	$t      = md_sup_tables();
+	$req_id = (int) $req_id;
+
 	$req = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$t['req']} WHERE id = %d", $req_id ) );
 	if ( ! $req ) { return new WP_Error( 'not_found', '신청서를 찾을 수 없습니다.' ); }
-	if ( 'done' === $req->status ) { return new WP_Error( 'done', '이미 처리된 신청입니다.' ); }
+	if ( 'pending' !== $req->status ) {
+		return new WP_Error( 'done', '이미 처리된 신청입니다 — ' . md_sup_status_label( $req->status ) );
+	}
 
-	foreach ( md_sup_request_lines( $req_id ) as $ln ) {
+	$wpdb->query( 'START TRANSACTION' );
+
+	/* 선점 — pending 일 때만 바뀐다 */
+	$claimed = $wpdb->query( $wpdb->prepare(
+		"UPDATE {$t['req']} SET status = 'done', done_at = %s, done_by = %d
+		 WHERE id = %d AND status = 'pending'",
+		current_time( 'mysql' ), get_current_user_id(), $req_id
+	) );
+
+	if ( ! $claimed ) {
+		$wpdb->query( 'ROLLBACK' );
+		return new WP_Error( 'race', '다른 담당자가 방금 이 신청을 처리했습니다. 새로고침해 확인해 주세요.' );
+	}
+
+	$lines = md_sup_request_lines( $req_id );
+	$ids   = array();
+	foreach ( $lines as $ln ) { if ( (int) $ln->item_id > 0 ) { $ids[] = (int) $ln->item_id; } }
+	$stock = md_sup_stock_map( $ids );
+
+	$short = array();
+
+	foreach ( $lines as $ln ) {
 		$qty = isset( $qty_map[ $ln->id ] ) ? (int) $qty_map[ $ln->id ] : 0;
 		/* 직접 적은 품목(item_id 0)은 아직 등록된 품목이 없어 출고할 수 없다.
 		 * 담당자가 「품목·팀」에서 등록한 뒤 다시 신청받는다. */
 		if ( $qty <= 0 || 0 === (int) $ln->item_id ) { continue; }
+
+		$have = isset( $stock[ (int) $ln->item_id ] ) ? (int) $stock[ (int) $ln->item_id ] : 0;
+		if ( $qty > $have ) { $short[ $ln->name ] = $qty - $have; }
+
 		md_sup_move( $ln->item_id, -$qty, 'out', $req->team_id, $req_id, '신청 #' . $req_id . ' 출고' );
 		$wpdb->update( $t['line'], array( 'qty_out' => $qty ), array( 'id' => $ln->id ), array( '%d' ), array( '%d' ) );
 	}
 
-	$wpdb->update( $t['req'], array(
-		'status'  => 'done',
-		'done_at' => current_time( 'mysql' ),
-		'done_by' => get_current_user_id(),
-	), array( 'id' => $req_id ), array( '%s', '%s', '%d' ), array( '%d' ) );
+	$wpdb->query( 'COMMIT' );
 
-	return true;
+	return array( 'short' => $short );
 }
 
-/** 신청 반려 */
+/**
+ * 신청 반려.
+ *
+ * 사유는 reject_reason 에 따로 적는다 — note 는 신청자가 적은 글이라
+ * 덮어쓰면 「무엇을 왜 요청했는데 왜 반려됐나」를 맞춰볼 수 없게 된다.
+ */
 function md_sup_reject_request( $req_id, $reason = '' ) {
 	global $wpdb;
 	$t = md_sup_tables();
-	return $wpdb->update( $t['req'], array(
-		'status'  => 'rejected',
-		'note'    => mb_substr( (string) $reason, 0, 500 ),
-		'done_at' => current_time( 'mysql' ),
-		'done_by' => get_current_user_id(),
-	), array( 'id' => (int) $req_id ), array( '%s', '%s', '%s', '%d' ), array( '%d' ) );
+	return $wpdb->query( $wpdb->prepare(
+		"UPDATE {$t['req']} SET status = 'rejected', reject_reason = %s, done_at = %s, done_by = %d
+		 WHERE id = %d AND status = 'pending'",
+		mb_substr( (string) $reason, 0, 500 ),
+		current_time( 'mysql' ),
+		get_current_user_id(),
+		(int) $req_id
+	) );
+}
+
+/**
+ * 신청 취소 — 신청한 팀이 스스로 물린다.
+ *
+ * 아직 출고 전(pending)일 때만, 그리고 같은 팀에서만 된다.
+ * 수량을 잘못 적었다고 담당자에게 전화하게 만들 이유가 없다.
+ */
+function md_sup_cancel_request( $req_id, $team_id ) {
+	global $wpdb;
+	$t      = md_sup_tables();
+	$req_id = (int) $req_id;
+
+	$req = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$t['req']} WHERE id = %d", $req_id ) );
+	if ( ! $req ) { return new WP_Error( 'not_found', '신청서를 찾을 수 없습니다.' ); }
+
+	/* 담당자는 어느 팀 것이든 물릴 수 있다 */
+	if ( ! md_sup_can_manage() && (int) $req->team_id !== (int) $team_id ) {
+		return new WP_Error( 'other_team', '다른 팀의 신청은 취소할 수 없습니다.' );
+	}
+	if ( 'pending' !== $req->status ) {
+		return new WP_Error( 'done', '이미 처리된 신청은 취소할 수 없습니다 — ' . md_sup_status_label( $req->status ) );
+	}
+
+	$n = $wpdb->query( $wpdb->prepare(
+		"UPDATE {$t['req']} SET status = 'cancelled', done_at = %s, done_by = %d
+		 WHERE id = %d AND status = 'pending'",
+		current_time( 'mysql' ), get_current_user_id(), $req_id
+	) );
+
+	return $n ? true : new WP_Error( 'race', '방금 담당자가 이 신청을 처리했습니다.' );
+}
+
+/** 대기 중인 신청 건수 — 탭 배지와 브라우저 제목에 쓴다 */
+function md_sup_pending_count() {
+	global $wpdb;
+	$t = md_sup_tables();
+	return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$t['req']} WHERE status = 'pending'" );
 }
 
 /* ============================================================
@@ -480,9 +571,21 @@ function md_sup_won( $n ) {
 
 function md_sup_status_label( $status ) {
 	$map = array(
-		'pending'  => '신청됨',
-		'done'     => '출고 완료',
-		'rejected' => '반려',
+		'pending'   => '신청됨',
+		'done'      => '출고 완료',
+		'rejected'  => '반려',
+		'cancelled' => '취소함',
+	);
+	return isset( $map[ $status ] ) ? $map[ $status ] : $status;
+}
+
+/** 발주 상태 이름 */
+function md_sup_po_status_label( $status ) {
+	$map = array(
+		'draft'     => '작성 중',
+		'ordered'   => '주문함',
+		'received'  => '입고 완료',
+		'cancelled' => '취소함',
 	);
 	return isset( $map[ $status ] ) ? $map[ $status ] : $status;
 }
@@ -684,20 +787,38 @@ function md_sup_items_all( $search = '', $show_hidden = false ) {
 
 /* --- 팀 --------------------------------------------------- */
 
-function md_sup_team_save( $id, $name, $sort_no = 0 ) {
+/**
+ * 팀 저장.
+ *
+ * @param int      $id      0 이면 새로 만든다
+ * @param string   $name    팀 이름
+ * @param int|null $sort_no 표시 순서. null 이면 지금 값을 건드리지 않는다.
+ *
+ * sort_no 를 null 로 둔 이유
+ *   v3.63 까지 기본값이 0 이었고 수정할 때 항상 함께 써 넣었다.
+ *   「품목·팀」에서 팀 저장을 한 번 누르면 15개 팀의 순서가 모두 0 이 되어,
+ *   층 배치를 그대로 옮긴 3행 × 5열 그리드가 id 순으로 흐트러졌다.
+ *   이제 순서를 넘기지 않으면 이름·사용 여부만 바뀐다.
+ */
+function md_sup_team_save( $id, $name, $sort_no = null ) {
 	global $wpdb;
 	$t    = md_sup_tables();
 	$name = sanitize_text_field( $name );
 	if ( '' === trim( $name ) ) { return new WP_Error( 'empty', '팀 이름을 적어 주세요.' ); }
 
 	if ( $id > 0 ) {
-		$wpdb->update( $t['teams'], array( 'name' => $name, 'sort_no' => (int) $sort_no ), array( 'id' => (int) $id ), array( '%s', '%d' ), array( '%d' ) );
+		$row = array( 'name' => $name );
+		$fmt = array( '%s' );
+		if ( null !== $sort_no ) { $row['sort_no'] = (int) $sort_no; $fmt[] = '%d'; }
+		$wpdb->update( $t['teams'], $row, array( 'id' => (int) $id ), $fmt, array( '%d' ) );
 		return (int) $id;
 	}
 	$dup = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$t['teams']} WHERE name = %s", $name ) );
 	if ( $dup ) { return new WP_Error( 'dup', '같은 이름의 팀이 이미 있습니다.' ); }
 
-	$wpdb->insert( $t['teams'], array( 'name' => $name, 'sort_no' => (int) $sort_no, 'active' => 1 ), array( '%s', '%d', '%d' ) );
+	/* 새 팀은 순서를 안 주면 맨 뒤로 */
+	$sort = ( null === $sort_no ) ? 9999 : (int) $sort_no;
+	$wpdb->insert( $t['teams'], array( 'name' => $name, 'sort_no' => $sort, 'active' => 1 ), array( '%s', '%d', '%d' ) );
 	return (int) $wpdb->insert_id;
 }
 
@@ -756,4 +877,307 @@ function md_sup_team_delete( $id, $force = false ) {
 	$wpdb->delete( $t['fav'], array( 'team_id' => $id ), array( '%d' ) );
 	$wpdb->delete( $t['teams'], array( 'id' => $id ), array( '%d' ) );
 	return true;
+}
+
+/* ============================================================
+ * v3.64 · 여러 품목을 한 번에 (N+1 질의 없애기)
+ * ============================================================ */
+
+/**
+ * 품목 여러 개의 현재고를 한 번에.
+ *
+ * 반출관리 화면은 대기 신청 30건 × 줄마다 md_sup_stock() 을 불렀다.
+ * 신청 한 건이 20줄이면 600질의다. 한 번에 받아 온다.
+ *
+ * @param array $ids 품목 id 목록
+ * @return array [ item_id => 현재고 ] — 기록이 없는 품목은 0
+ */
+function md_sup_stock_map( $ids = array() ) {
+	global $wpdb;
+	$t = md_sup_tables();
+
+	$ids = array_values( array_unique( array_filter( array_map( 'intval', (array) $ids ) ) ) );
+	if ( empty( $ids ) ) { return array(); }
+
+	$in   = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+	$rows = $wpdb->get_results( $wpdb->prepare(
+		"SELECT item_id, SUM(qty) AS stock FROM {$t['ledger']} WHERE item_id IN ($in) GROUP BY item_id",
+		$ids
+	) );
+
+	$map = array_fill_keys( $ids, 0 );
+	foreach ( $rows as $r ) { $map[ (int) $r->item_id ] = (int) $r->stock; }
+	return $map;
+}
+
+/**
+ * 신청서 여러 건의 품목 줄을 한 번에.
+ *
+ * @param array $req_ids 신청 id 목록
+ * @return array [ req_id => 줄 목록 ]
+ */
+function md_sup_lines_for_requests( $req_ids ) {
+	global $wpdb;
+	$t = md_sup_tables();
+
+	$req_ids = array_values( array_unique( array_filter( array_map( 'intval', (array) $req_ids ) ) ) );
+	if ( empty( $req_ids ) ) { return array(); }
+
+	$in   = implode( ',', array_fill( 0, count( $req_ids ), '%d' ) );
+	$rows = $wpdb->get_results( $wpdb->prepare(
+		"SELECT ln.*,
+		        COALESCE(NULLIF(i.name,''), ln.custom_name) AS name,
+		        COALESCE(i.unit,'')  AS unit,
+		        COALESCE(i.price,0)  AS price,
+		        COALESCE(i.code,'')  AS code
+		 FROM {$t['line']} ln LEFT JOIN {$t['items']} i ON i.id = ln.item_id
+		 WHERE ln.req_id IN ($in) ORDER BY ln.req_id ASC, ln.id ASC",
+		$req_ids
+	) );
+
+	$map = array_fill_keys( $req_ids, array() );
+	foreach ( $rows as $r ) { $map[ (int) $r->req_id ][] = $r; }
+	return $map;
+}
+
+/* ============================================================
+ * v3.64 · 원장 조회 — 「왜 줄었는지」를 실제로 볼 수 있게
+ *
+ * 현재고를 저장하지 않고 원장 합계로 읽는 것이 이 시스템의 설계인데,
+ * v3.63 까지 그 원장을 보는 화면이 없었다. 설계의 값어치가 화면에
+ * 드러나지 않으면 그냥 느린 재고표일 뿐이다.
+ * ============================================================ */
+
+/** 입출고 사유 이름 */
+function md_sup_reason_label( $reason ) {
+	$map = array(
+		'in'      => '입고',
+		'out'     => '출고',
+		'dispose' => '폐기',
+		'adjust'  => '실사 조정',
+	);
+	return isset( $map[ $reason ] ) ? $map[ $reason ] : $reason;
+}
+
+/** 원장 조회 조건 기본값 */
+function md_sup_ledger_args( $args ) {
+	return wp_parse_args( $args, array(
+		'item_id' => 0,
+		'team_id' => 0,
+		'reason'  => '',
+		'ym'      => '',
+		'search'  => '',
+		'limit'   => 100,
+		'offset'  => 0,
+	) );
+}
+
+/** 조회 조건을 WHERE 절과 값으로 바꾼다 (목록·건수가 함께 쓴다) */
+function md_sup_ledger_where( $a ) {
+	global $wpdb;
+
+	$where  = array( '1=1' );
+	$params = array();
+
+	if ( $a['item_id'] > 0 )   { $where[] = 'l.item_id = %d'; $params[] = (int) $a['item_id']; }
+	if ( $a['team_id'] > 0 )   { $where[] = 'l.team_id = %d'; $params[] = (int) $a['team_id']; }
+	if ( '' !== $a['reason'] ) { $where[] = 'l.reason = %s';  $params[] = $a['reason']; }
+	if ( '' !== $a['ym'] )     { $where[] = 'l.ym = %s';      $params[] = $a['ym']; }
+	if ( '' !== $a['search'] ) {
+		$like     = '%' . $wpdb->esc_like( $a['search'] ) . '%';
+		$where[]  = '(i.name LIKE %s OR i.code LIKE %s)';
+		$params[] = $like;
+		$params[] = $like;
+	}
+
+	return array( implode( ' AND ', $where ), $params );
+}
+
+/**
+ * 입출고 기록 목록. 최신 순.
+ * 품목·팀·처리한 사람 이름을 함께 붙여 준다.
+ */
+function md_sup_ledger( $args = array() ) {
+	global $wpdb;
+	$t = md_sup_tables();
+	$a = md_sup_ledger_args( $args );
+
+	list( $where, $params ) = md_sup_ledger_where( $a );
+	$params[] = (int) $a['limit'];
+	$params[] = (int) $a['offset'];
+
+	return $wpdb->get_results( $wpdb->prepare(
+		"SELECT l.*,
+		        COALESCE(i.name,'') AS item_name, COALESCE(i.code,'') AS item_code,
+		        COALESCE(i.unit,'') AS unit,      COALESCE(i.price,0) AS price,
+		        COALESCE(tm.name,'') AS team_name,
+		        COALESCE(u.display_name,'') AS user_name
+		 FROM {$t['ledger']} l
+		 LEFT JOIN {$t['items']} i  ON i.id  = l.item_id
+		 LEFT JOIN {$t['teams']} tm ON tm.id = l.team_id
+		 LEFT JOIN {$wpdb->users} u ON u.ID  = l.user_id
+		 WHERE $where
+		 ORDER BY l.id DESC
+		 LIMIT %d OFFSET %d",
+		$params
+	) );
+}
+
+/** 같은 조건의 전체 건수 — 페이지 넘김에 쓴다 */
+function md_sup_ledger_count( $args = array() ) {
+	global $wpdb;
+	$t = md_sup_tables();
+	$a = md_sup_ledger_args( $args );
+
+	list( $where, $params ) = md_sup_ledger_where( $a );
+
+	$sql = "SELECT COUNT(*) FROM {$t['ledger']} l
+	        LEFT JOIN {$t['items']} i ON i.id = l.item_id
+	        WHERE $where";
+
+	if ( $params ) { $sql = $wpdb->prepare( $sql, $params ); }
+	return (int) $wpdb->get_var( $sql );
+}
+
+/**
+ * 한 품목을 팀별로 얼마나 받아갔는가 (최근 N개월).
+ * 품목 이력 화면에서 「어느 팀이 많이 쓰나」를 보여준다.
+ */
+function md_sup_item_team_usage( $item_id, $months = 3 ) {
+	global $wpdb;
+	$t     = md_sup_tables();
+	$since = gmdate( 'Y-m-d H:i:s', strtotime( '-' . (int) $months . ' months', current_time( 'timestamp' ) ) );
+
+	return $wpdb->get_results( $wpdb->prepare(
+		"SELECT l.team_id, COALESCE(tm.name,'') AS team_name, SUM(-l.qty) AS qty
+		 FROM {$t['ledger']} l LEFT JOIN {$t['teams']} tm ON tm.id = l.team_id
+		 WHERE l.item_id = %d AND l.reason = 'out' AND l.created_at >= %s
+		 GROUP BY l.team_id, tm.name
+		 ORDER BY qty DESC",
+		(int) $item_id, $since
+	) );
+}
+
+/* ============================================================
+ * v3.64 · 적정재고 제안
+ *
+ * min_stock 을 손으로 넣게 해 두면 대부분 0 으로 남는다. 0 이면
+ * 「부족」 표시가 영영 뜨지 않아 입고 화면이 빈 채로 있게 된다.
+ * 이미 계산하고 있는 사용량으로 제안값을 만들어 채워 넣는다.
+ * ============================================================ */
+
+/** 전 팀 합계 기준 품목별 월평균 사용량 [ item_id => 월평균 ] */
+function md_sup_avg_map_all( $months = 3 ) {
+	global $wpdb;
+	$t     = md_sup_tables();
+	$since = gmdate( 'Y-m-d H:i:s', strtotime( '-' . (int) $months . ' months', current_time( 'timestamp' ) ) );
+
+	$rows = $wpdb->get_results( $wpdb->prepare(
+		"SELECT item_id, SUM(-qty) AS total FROM {$t['ledger']}
+		 WHERE reason = 'out' AND created_at >= %s
+		 GROUP BY item_id",
+		$since
+	) );
+
+	$map = array();
+	foreach ( $rows as $r ) {
+		$map[ (int) $r->item_id ] = $months > 0 ? round( (int) $r->total / $months, 1 ) : 0;
+	}
+	return $map;
+}
+
+/**
+ * 제안 적정재고 = 월평균 × 여유 개월, 올림.
+ * 여유 개월은 「주문해서 들어오기까지 + 그동안 쓸 만큼」이다.
+ */
+function md_sup_suggest_min( $avg, $lead = 1.5 ) {
+	$avg  = (float) $avg;
+	$lead = (float) $lead;
+	if ( $avg <= 0 || $lead <= 0 ) { return 0; }
+	return (int) max( 1, ceil( $avg * $lead ) );
+}
+
+/**
+ * 제안값을 적정재고에 실제로 써 넣는다.
+ *
+ * @param float $lead      여유 개월
+ * @param bool  $only_zero 참이면 아직 0 인 품목만 (담당자가 손으로 정한 값은 건드리지 않는다)
+ * @return int 바뀐 품목 수
+ */
+function md_sup_apply_min_suggestions( $lead = 1.5, $only_zero = true ) {
+	global $wpdb;
+	$t   = md_sup_tables();
+	$avg = md_sup_avg_map_all( 3 );
+	if ( empty( $avg ) ) { return 0; }
+
+	$n = 0;
+	foreach ( md_sup_items() as $it ) {
+		if ( $only_zero && (int) $it->min_stock > 0 ) { continue; }
+		$want = md_sup_suggest_min( isset( $avg[ $it->id ] ) ? $avg[ $it->id ] : 0, $lead );
+		if ( $want <= 0 || $want === (int) $it->min_stock ) { continue; }
+		$wpdb->update( $t['items'], array( 'min_stock' => $want ), array( 'id' => (int) $it->id ), array( '%d' ), array( '%d' ) );
+		$n++;
+	}
+	return $n;
+}
+
+/* ============================================================
+ * v3.64 · 대기 신청 알림
+ *
+ * 담당자가 화면에 들어와야만 대기 건을 알 수 있었다.
+ * 긴급 신청이 오후 내내 방치되는 일을 메일 한 통으로 막는다.
+ * ============================================================ */
+
+/** 알림 받을 주소. 비워 두면 사이트 관리자 메일. 'off' 면 보내지 않는다. */
+function md_sup_notify_emails() {
+	$raw = trim( (string) get_option( 'md_sup_notify_emails', '' ) );
+	if ( 'off' === strtolower( $raw ) ) { return array(); }
+
+	$out = array();
+	foreach ( explode( ',', $raw ) as $e ) {
+		$e = trim( $e );
+		if ( is_email( $e ) ) { $out[] = $e; }
+	}
+
+	if ( empty( $out ) ) {
+		$admin = get_option( 'admin_email' );
+		if ( is_email( $admin ) ) { $out[] = $admin; }
+	}
+	return array_values( array_unique( $out ) );
+}
+
+/**
+ * 새 신청이 들어왔음을 알린다.
+ * 메일이 막힌 호스팅에서도 신청 자체는 이미 저장된 뒤이므로 조용히 넘어간다.
+ */
+function md_sup_notify_new_request( $req_id ) {
+	$to = md_sup_notify_emails();
+	if ( empty( $to ) ) { return false; }
+
+	$r = md_sup_request_summary( $req_id );
+	if ( ! $r ) { return false; }
+
+	$lines   = md_sup_request_lines( $req_id );
+	$urgent  = (int) $r->urgent;
+	$subject = ( $urgent ? '[긴급] ' : '' ) . '재료실 신청 — ' . $r->team_name . ' · ' . (int) $r->line_count . '개 품목';
+
+	$body  = $r->team_name . ' 에서 재료를 신청했습니다.' . "\n\n";
+	$body .= '신청 시각 · ' . mysql2date( 'Y-m-d H:i', $r->created_at ) . "\n";
+	$body .= '품목 수 · ' . (int) $r->line_count . "\n";
+	$body .= '예상 금액 · ' . md_sup_won( (int) $r->amount ) . "\n";
+	if ( $urgent ) { $body .= "\n※ 오늘 필요한 긴급 신청입니다.\n"; }
+	if ( '' !== trim( (string) $r->note ) ) { $body .= "\n메모 · " . $r->note . "\n"; }
+
+	$body .= "\n— 신청 품목 —\n";
+	foreach ( $lines as $ln ) {
+		$body .= '· ' . $ln->name . '  ' . (int) $ln->qty_req . ( $ln->unit ? ' ' . $ln->unit : '' ) . "\n";
+	}
+
+	$url = function_exists( 'md_sup_url' )
+		? md_sup_url( array( 'app' => 'stock', 'tab' => 'manage' ) )
+		: home_url( '/직원/' );
+	$body .= "\n반출관리에서 처리해 주세요 · " . $url . "\n";
+
+	/* 실패해도 신청은 이미 저장돼 있다 — 화면을 막지 않는다 */
+	return wp_mail( $to, $subject, $body );
 }
