@@ -643,15 +643,17 @@ function md_sup_item_archive( $id, $on = false ) {
 }
 
 /** 기록이 전혀 없는 품목만 진짜로 지운다 */
-function md_sup_item_delete( $id ) {
+function md_sup_item_delete( $id, $force = false ) {
 	global $wpdb;
-	$t   = md_sup_tables();
-	$id  = (int) $id;
-	$use = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t['ledger']} WHERE item_id = %d", $id ) );
-	$req = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t['line']} WHERE item_id = %d", $id ) );
-	if ( $use || $req ) {
-		return new WP_Error( 'inuse', '입출고나 신청 기록이 있어 지울 수 없습니다. 대신 「감추기」를 쓰세요.' );
+	$t  = md_sup_tables();
+	$id = (int) $id;
+	if ( $id <= 0 ) { return new WP_Error( 'bad', '품목을 찾을 수 없습니다.' ); }
+
+	$n = md_sup_item_records( $id );
+	if ( $n > 0 && ! $force ) {
+		return new WP_Error( 'records', '이 품목에 입출고·신청 기록 ' . number_format( $n ) . '건이 남아 있습니다.' );
 	}
+
 	$wpdb->delete( $t['fav'], array( 'item_id' => $id ), array( '%d' ) );
 	$wpdb->delete( $t['items'], array( 'id' => $id ), array( '%d' ) );
 	return true;
@@ -704,4 +706,54 @@ function md_sup_team_archive( $id, $on = false ) {
 	global $wpdb;
 	$t = md_sup_tables();
 	return $wpdb->update( $t['teams'], array( 'active' => $on ? 1 : 0 ), array( 'id' => (int) $id ), array( '%d' ), array( '%d' ) );
+}
+
+/* ============================================================
+ * v3.63 · 삭제 — 담당자가 직접 지울 수 있게
+ *
+ * 지우면 되돌릴 수 없으므로 두 단계로 나눈다.
+ *   1) 처음 누르면 "기록 N건이 딸려 있습니다" 하고 되돌려 보낸다.
+ *   2) 그래도 지우겠다고 다시 누르면 force 로 지운다.
+ * 자바스크립트가 없어도 확인 절차가 그대로 작동한다.
+ * ============================================================ */
+
+/** 이 품목에 딸린 기록 수 (입출고 + 신청) */
+function md_sup_item_records( $id ) {
+	global $wpdb;
+	$t  = md_sup_tables();
+	$id = (int) $id;
+	return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t['ledger']} WHERE item_id = %d", $id ) )
+	     + (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t['line']} WHERE item_id = %d", $id ) );
+}
+
+/** 이 팀에 딸린 기록 수 (입출고 + 신청서) */
+function md_sup_team_records( $id ) {
+	global $wpdb;
+	$t  = md_sup_tables();
+	$id = (int) $id;
+	return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t['ledger']} WHERE team_id = %d", $id ) )
+	     + (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t['req']} WHERE team_id = %d", $id ) );
+}
+
+/**
+ * 팀 삭제.
+ *
+ * 기록이 딸려 있으면 기본적으로 막고, force 를 주면 지운다.
+ * 지운 뒤에도 입출고 원장은 그대로 남는다 — 통계에서는 「(삭제된 팀)」으로 보인다.
+ * 원장을 같이 지우면 그 달 전체 사용액이 어긋나므로 건드리지 않는다.
+ */
+function md_sup_team_delete( $id, $force = false ) {
+	global $wpdb;
+	$t  = md_sup_tables();
+	$id = (int) $id;
+	if ( $id <= 0 ) { return new WP_Error( 'bad', '팀을 찾을 수 없습니다.' ); }
+
+	$n = md_sup_team_records( $id );
+	if ( $n > 0 && ! $force ) {
+		return new WP_Error( 'records', '이 팀에 입출고·신청 기록 ' . number_format( $n ) . '건이 남아 있습니다.' );
+	}
+
+	$wpdb->delete( $t['fav'], array( 'team_id' => $id ), array( '%d' ) );
+	$wpdb->delete( $t['teams'], array( 'id' => $id ), array( '%d' ) );
+	return true;
 }

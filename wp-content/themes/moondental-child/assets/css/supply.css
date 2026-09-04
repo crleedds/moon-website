@@ -786,3 +786,24 @@ body.mds-has-cart #mds-submit .mds-btn { display: none; }
   .mds-table tbody tr.is-custom { background: var(--color-surface-alt, #2F251C); }
   .mds-custom { background: var(--color-white, #2A211A); }
 }
+
+/* --- 삭제 확인 카드 (v3.63) --------------------------------- */
+.mds-confirm {
+  border-left: 4px solid var(--color-danger, #C66B5E);
+  margin-bottom: 18px;
+}
+.mds-confirm h2 {
+  margin: 0 0 10px; font-size: 1.15rem; font-weight: 800;
+  color: var(--color-danger, #C66B5E);
+}
+.mds-confirm > p { margin: 0 0 10px; font-size: .93rem; line-height: 1.8; color: var(--color-text-sub, #7A6B5F); }
+.mds-confirm > p b { color: var(--color-text, #3D2F26); }
+
+/* 팀 편집 줄에 삭제가 붙으면서 폭이 좁아진다 */
+.mds-teamedit__row { flex-wrap: wrap; }
+.mds-teamedit__row input[type="text"] { min-width: 120px; }
+
+@media (max-width: 600px) {
+  .mds-teamedit__row { gap: 6px; }
+  .mds-teamedit__row input[type="text"] { flex: 1 1 100%; }
+}

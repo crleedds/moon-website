@@ -21,7 +21,43 @@ function md_sup_render_items() {
 	$row    = $edit ? md_sup_item( $edit ) : null;
 	$items  = md_sup_items_all( $search, $hidden );
 	$units  = array( 'ea', 'box', '갑', '팩', '봉', '병', '통', '롤', '각' );
-	?>
+
+	/* 삭제를 한 번 막았을 때 — 무엇이 걸렸는지 보여주고 다시 물어본다.
+	 * 자바스크립트가 없어도 확인 절차가 그대로 작동한다. */
+	$confirm = isset( $_GET['confirm'] ) ? sanitize_key( wp_unslash( $_GET['confirm'] ) ) : '';
+	$cid     = isset( $_GET['cid'] ) ? (int) $_GET['cid'] : 0;
+	$cmsg    = isset( $_GET['cmsg'] ) ? sanitize_text_field( rawurldecode( wp_unslash( $_GET['cmsg'] ) ) ) : '';
+
+	if ( $confirm && $cid ) :
+		$is_item = ( 'item' === $confirm );
+		$label   = $is_item ? ( ( $o = md_sup_item( $cid ) ) ? $o->name : '' ) : md_sup_team_name( $cid );
+		$force   = wp_nonce_url(
+			md_sup_url( array(
+				'tab'                             => 'items',
+				$is_item ? 'delitem' : 'delteam'  => $cid,
+				'force'                           => 1,
+			) ),
+			'md_sup_' . ( $is_item ? 'delitem_' : 'delteam_' ) . $cid
+		);
+		?>
+		<div class="mds-card mds-confirm">
+			<h2><?php echo esc_html( ( $is_item ? '품목' : '팀' ) . ' 삭제 확인' ); ?></h2>
+			<p><b><?php echo esc_html( $label ); ?></b> — <?php echo esc_html( $cmsg ); ?></p>
+			<p class="mds-hint" style="margin:0 0 16px">
+				<?php if ( $is_item ) : ?>
+					지우면 그 기록들이 <b>이름 없는 품목</b>으로 남아 과거 사용량 통계를 읽기 어려워집니다.
+					목록에서만 치우실 거라면 <b>「감추기」</b>를 쓰세요 — 기록은 그대로 두고 신청 목록에서만 사라집니다.
+				<?php else : ?>
+					지워도 입출고 기록 자체는 남습니다. 다만 통계에서 <b>「(팀 없음)」</b>으로 표시됩니다.
+					목록에서만 치우실 거라면 팀 편집에서 <b>「사용」</b>을 꺼두시면 됩니다.
+				<?php endif; ?>
+			</p>
+			<div class="mds-formbtns">
+				<a class="mds-btn mds-btn--danger" href="<?php echo esc_url( $force ); ?>">그래도 삭제합니다</a>
+				<a class="mds-btn mds-btn--ghost" href="<?php echo esc_url( md_sup_url( array( 'tab' => 'items' ) ) ); ?>">취소</a>
+			</div>
+		</div>
+	<?php endif; ?>
 
 	<h2 class="mds-h2" style="margin-top:0"><?php echo $edit ? '품목 수정' : '새 품목 등록'; ?></h2>
 
@@ -117,10 +153,13 @@ function md_sup_render_items() {
 					<td data-label="관리">
 						<span class="mds-rowbtns">
 							<a class="mds-mini" href="<?php echo esc_url( md_sup_url( array( 'tab' => 'items', 'item' => (int) $it->id ) ) ); ?>">수정</a>
-							<a class="mds-mini mds-mini--warn"
+							<a class="mds-mini"
 							   href="<?php echo esc_url( wp_nonce_url( md_sup_url( array( 'tab' => 'items', 'toggle' => (int) $it->id, 'hidden' => $hidden ? 1 : 0, 'q' => $search ) ), 'md_sup_toggle_' . (int) $it->id ) ); ?>">
 								<?php echo $it->active ? '감추기' : '되살리기'; ?>
 							</a>
+							<a class="mds-mini mds-mini--warn"
+							   href="<?php echo esc_url( wp_nonce_url( md_sup_url( array( 'tab' => 'items', 'delitem' => (int) $it->id, 'hidden' => $hidden ? 1 : 0, 'q' => $search ) ), 'md_sup_delitem_' . (int) $it->id ) ); ?>"
+							   onclick="return confirm('<?php echo esc_js( $it->name ); ?> 품목을 지울까요?');">삭제</a>
 						</span>
 					</td>
 				</tr>
@@ -149,6 +188,9 @@ function md_sup_render_items() {
 					<label class="mds-check">
 						<input type="checkbox" name="team_on[<?php echo (int) $tm->id; ?>]" value="1" <?php checked( (int) $tm->active, 1 ); ?>> 사용
 					</label>
+					<a class="mds-mini mds-mini--warn"
+					   href="<?php echo esc_url( wp_nonce_url( md_sup_url( array( 'tab' => 'items', 'delteam' => (int) $tm->id ) ), 'md_sup_delteam_' . (int) $tm->id ) ); ?>"
+					   onclick="return confirm('<?php echo esc_js( $tm->name ); ?> 팀을 지울까요?');">삭제</a>
 				</div>
 			<?php endforeach; ?>
 			<div class="mds-teamedit__row">

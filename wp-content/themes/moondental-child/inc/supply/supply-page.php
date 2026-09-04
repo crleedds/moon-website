@@ -305,6 +305,40 @@ function md_sup_handle_get() {
 		exit;
 	}
 
+	/* 품목 삭제 — 기록이 있으면 한 번 되돌려 보내고, 다시 누르면 지운다 */
+	if ( isset( $_GET['delitem'] ) && isset( $_GET['_wpnonce'] ) && md_sup_can_manage() ) {
+		$id = (int) $_GET['delitem'];
+		if ( wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'md_sup_delitem_' . $id ) ) {
+			$force = isset( $_GET['force'] ) && '1' === $_GET['force'];
+			$res   = md_sup_item_delete( $id, $force );
+			$back  = remove_query_arg( array( 'delitem', '_wpnonce', 'force' ) );
+			if ( is_wp_error( $res ) ) {
+				$back = add_query_arg( array( 'confirm' => 'item', 'cid' => $id, 'cmsg' => rawurlencode( $res->get_error_message() ) ), $back );
+			} else {
+				$back = add_query_arg( 'msg', 'deleted', $back );
+			}
+			wp_safe_redirect( $back );
+			exit;
+		}
+	}
+
+	/* 팀 삭제 — 같은 방식 */
+	if ( isset( $_GET['delteam'] ) && isset( $_GET['_wpnonce'] ) && md_sup_can_manage() ) {
+		$id = (int) $_GET['delteam'];
+		if ( wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'md_sup_delteam_' . $id ) ) {
+			$force = isset( $_GET['force'] ) && '1' === $_GET['force'];
+			$res   = md_sup_team_delete( $id, $force );
+			$back  = remove_query_arg( array( 'delteam', '_wpnonce', 'force' ) );
+			if ( is_wp_error( $res ) ) {
+				$back = add_query_arg( array( 'confirm' => 'team', 'cid' => $id, 'cmsg' => rawurlencode( $res->get_error_message() ) ), $back );
+			} else {
+				$back = add_query_arg( 'msg', 'deleted', $back );
+			}
+			wp_safe_redirect( $back );
+			exit;
+		}
+	}
+
 	/* CSV 내보내기 */
 	if ( isset( $_GET['export'] ) ) {
 		$what = sanitize_key( wp_unslash( $_GET['export'] ) );
@@ -414,6 +448,7 @@ function md_sup_notice( $code ) {
 		'adjusted'   => array( 'ok',   '실사 결과를 반영했습니다.' ),
 		'item_saved' => array( 'ok',   '품목을 저장했습니다.' ),
 		'team_saved' => array( 'ok',   '팀을 저장했습니다.' ),
+		'deleted'    => array( 'ok',   '삭제했습니다.' ),
 	);
 	if ( ! isset( $map[ $code ] ) ) { return ''; }
 	list( $type, $text ) = $map[ $code ];
