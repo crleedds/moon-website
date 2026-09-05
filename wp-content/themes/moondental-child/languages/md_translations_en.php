@@ -269,7 +269,7 @@ return array(
 	'doc_single_qa_eyebrow'       => 'DOCTOR Q&A',
 	'doc_single_qa_title'         => 'Frequently Asked',
 	'doc_single_qa_lead'          => 'Common questions from patients answered by the doctor.',
-	'doc_single_interests_title'  => 'Areas of Interest',
+	'doc_single_interests_title'  => 'Practice Areas',
 	'doc_single_others_title'     => 'Other Doctors',
 
 	/* === Service page common === */

@@ -74,7 +74,7 @@ foreach ( preg_split( "/\r\n|\r|\n/", $qa_text ) as $line ) {
 	}
 }
 
-/* 관심 분야 */
+/* 진료 분야 */
 $interests = array_filter( array_map( 'trim',
 	preg_split( "/\r\n|\r|\n/", md_content( "doc_{$doc_key}_interests", '' ) )
 ) );
@@ -209,14 +209,14 @@ foreach ( $all_doctors as $m ) {
 </section>
 <?php endif; ?>
 
-<!-- ============ 관심 분야 (선택 · 별도 섹션) ============ -->
-<?php /* v3.30.8 · 학력·경력은 이미 사진 옆에 전체 표시 · 관심 분야만 별도 유지 */ ?>
+<!-- ============ 진료 분야 (선택 · 별도 섹션) ============ -->
+<?php /* v3.30.8 · 학력·경력은 이미 사진 옆에 전체 표시 · 진료 분야만 별도 유지 (v3.76 이름 변경) */ ?>
 <?php if ( ! empty( $interests ) ) : ?>
 <section class="md-section">
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'doc_single_edu_eyebrow', 'Focus' ) ); ?></span>
-			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'doc_single_interests_title', '관심 분야' ) ); ?></h2>
+			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'doc_single_interests_title', '진료 분야' ) ); ?></h2>
 		</header>
 
 		<div class="md-docsingle-tags md-docsingle-tags--center">
