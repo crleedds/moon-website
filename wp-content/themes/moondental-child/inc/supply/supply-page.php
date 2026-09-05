@@ -178,6 +178,24 @@ add_action( 'wp_enqueue_scripts', 'md_sup_trim_assets', 100 );
  *
  * 'wp' 훅에서 건다 — wp_enqueue_scripts 보다 먼저라 remove_action 이 듣는다.
  */
+/**
+ * 재료실은 절대 캐시하지 않는다 (v3.71).
+ *
+ * 이 화면은 보는 사람과 고른 팀에 따라 내용이 다르다 — 우리 팀 월평균,
+ * 최근 수령, 즐겨찾기, 우리 팀 최근 신청, 담당자에게만 보이는 탭까지.
+ * 캐시 플러그인이 한 사람의 화면을 저장해 다른 사람에게 그대로 내주면
+ * 남의 팀 숫자를 보게 되고, 더 나쁘게는 직원이 담당자 화면을 보게 된다.
+ *
+ * WP-Super-Cache·W3TC 등이 모두 이 상수를 본다. 로그인한 사람은 원래
+ * 캐시 대상이 아니지만, 설정 하나에 기대는 대신 여기서 못박아 둔다.
+ */
+function md_sup_never_cache() {
+	if ( ! md_sup_is_page() ) { return; }
+	if ( ! defined( 'DONOTCACHEPAGE' ) ) { define( 'DONOTCACHEPAGE', true ); }
+	nocache_headers();
+}
+add_action( 'wp', 'md_sup_never_cache', 1 );
+
 function md_sup_trim_head() {
 	if ( ! md_sup_is_page() ) { return; }
 
