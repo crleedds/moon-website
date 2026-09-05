@@ -6757,34 +6757,67 @@ a, button, .md-btn, .md-mobile-cta__item, .md-channel-card, .md-mapbtn {
   letter-spacing: -0.02em;
   color: var(--color-text);
 }
-.md-docsingle-card__creds {
+/* 약력 — 두 갈래 (v3.73)
+ *
+ * v3.72 까지는 줄마다 초록 체크를 달아 죽 늘어놓았다. 4~6줄인 원장님에게는
+ * 괜찮았지만 13줄이 되면 벽이 됐고, 체크가 전부 같은 모양이라 구분하는
+ * 기능은 없이 시선만 나눠 가졌다.
+ * 이제 학력·경력과 자격·소속 학회 두 단으로 묶고, 체크 대신 작은 점을 쓴다.
+ */
+.md-creds {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 22px 34px;
+}
+/* 한 갈래뿐인 경우(전부 직책인 원장님)는 한 덩어리를 두 단에 흘린다 */
+.md-creds--one { grid-template-columns: 1fr; }
+
+.md-creds__title {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  margin: 0 0 9px;
+  color: var(--color-accent-dark);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+}
+.md-creds__list {
   list-style: none;
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 10px;
+  gap: 7px;
 }
-.md-docsingle-card__creds li {
-  display: grid;
-  grid-template-columns: 22px 1fr;
-  align-items: center;
-  gap: 10px;
+.md-creds__list li {
+  position: relative;
+  padding-left: 12px;
   font-size: var(--fs-small);
   color: var(--color-text);
-  line-height: 1.55;
+  line-height: 1.6;
   word-break: keep-all;
 }
-.md-docsingle-card__creds li span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
+.md-creds__list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
-  background: var(--color-success);
-  color: #fff;
-  font-size: 0.6875rem;
-  font-weight: 800;
+  background: var(--color-accent);
+}
+/* 한 갈래일 때만 두 단으로 — columns 는 gap 이 아니라 column-gap 을 쓴다 */
+.md-creds__list--split {
+  display: block;
+  columns: 2;
+  column-gap: 34px;
+}
+.md-creds__list--split li {
+  break-inside: avoid;
+  margin-bottom: 7px;
+}
+@media (max-width: 700px) {
+  .md-creds__list--split { columns: 1; }
 }
 
 /* ── Q&A ── */

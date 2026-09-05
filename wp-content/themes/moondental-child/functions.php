@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.72' );
+define( 'MOONDENTAL_VERSION', '3.73' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -5268,6 +5268,57 @@ function moondental_get_team_with_customizer() {
 		}
 	}
 	return $doctors;
+}
+
+/**
+ * 약력 줄을 두 갈래로 나눈다 (v3.73).
+ *
+ * 환자분이 실제로 궁금해하시는 것은 두 가지다.
+ *   career · 어디서 배우고 무엇을 하셨나  (학력 · 경력)
+ *   cert   · 무슨 자격을 갖고 어디에 속하셨나 (자격 · 소속 학회)
+ *
+ * 말끝으로 가른다. 「대한치과이식임플란트학회아카데미 수료」처럼 양쪽 낱말이
+ * 다 들어 있는 줄이 있어서 학력·경력 쪽을 먼저 본다 — 수료·연수는 그 자체가
+ * 경력이고, 그 앞의 「학회」는 기관 이름의 일부일 뿐이다.
+ *
+ * 「이사」를 자격 쪽 낱말에 넣지 않는 이유
+ *   문은수 이사장님 약력은 이사장·대표이사·국제이사로 채워져 있다. 「이사」를
+ *   넣으면 그 직책들이 몽땅 학회 칸으로 넘어간다. 학회 임원 줄(「대한턱관절
+ *   교합학회 이사」)에는 「학회」가 이미 들어 있어 그쪽으로 잘 간다.
+ *
+ * 어느 쪽 낱말도 없으면 경력으로 둔다 — 「보존과 진료팀」처럼 직책을 적은 줄이다.
+ *
+ * @param array|string $lines 약력 줄
+ * @return array array( 'career' => 줄 목록, 'cert' => 줄 목록 )
+ */
+function moondental_split_bio( $lines ) {
+	if ( is_string( $lines ) ) {
+		$lines = preg_split( "/\r\n|\r|\n/", $lines );
+	}
+
+	$career_kw = array( '졸업', '수료', '석사', '박사', '학사', '인턴', '레지던트', '연수', '연구원', '과정', '수상', '교수' );
+	$cert_kw   = array( '면허', '인정의', '전문의', '정회원', '준회원', '학회', '협회', '위원' );
+
+	$career = array();
+	$cert   = array();
+
+	foreach ( (array) $lines as $line ) {
+		$line = trim( (string) $line );
+		if ( '' === $line ) { continue; }
+
+		$hit = false;
+		foreach ( $career_kw as $kw ) {
+			if ( false !== mb_strpos( $line, $kw ) ) { $career[] = $line; $hit = true; break; }
+		}
+		if ( $hit ) { continue; }
+
+		foreach ( $cert_kw as $kw ) {
+			if ( false !== mb_strpos( $line, $kw ) ) { $cert[] = $line; $hit = true; break; }
+		}
+		if ( ! $hit ) { $career[] = $line; }
+	}
+
+	return array( 'career' => $career, 'cert' => $cert );
 }
 
 /**

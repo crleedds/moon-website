@@ -130,12 +130,49 @@ foreach ( $all_doctors as $m ) {
 			<div class="md-docsingle-card__body">
 				<span class="md-docsingle-card__role"><?php echo esc_html( $doctor['role'] ); ?></span>
 				<h2 class="md-docsingle-card__name"><?php echo esc_html( $doctor['name'] ); ?></h2>
-				<?php if ( ! empty( $credentials ) ) : ?>
-					<ul class="md-docsingle-card__creds">
-						<?php foreach ( $credentials as $c ) : ?>
-							<li><span aria-hidden="true">✓</span> <?php echo esc_html( $c ); ?></li>
-						<?php endforeach; ?>
-					</ul>
+				<?php
+				/* 약력 · v3.73
+				 * 13줄을 초록 체크로 죽 늘어놓던 것을 두 갈래로 묶는다.
+				 * 한쪽이 비면(문은수 이사장님처럼 전부 직책인 경우) 빈 소제목을
+				 * 만들지 않고 한 덩어리로 두 단에 흘린다. */
+				if ( ! empty( $credentials ) ) :
+					$creds     = moondental_split_bio( $credentials );
+					$has_both  = ( ! empty( $creds['career'] ) && ! empty( $creds['cert'] ) );
+					?>
+					<div class="md-creds<?php echo $has_both ? '' : ' md-creds--one'; ?>">
+						<?php if ( $has_both ) : ?>
+							<div class="md-creds__group">
+								<h3 class="md-creds__title"><?php echo esc_html( md_content( 'doc_creds_career', '학력 · 경력' ) ); ?></h3>
+								<ul class="md-creds__list">
+									<?php foreach ( $creds['career'] as $c ) : ?>
+										<li><?php echo esc_html( $c ); ?></li>
+									<?php endforeach; ?>
+								</ul>
+							</div>
+							<div class="md-creds__group">
+								<h3 class="md-creds__title"><?php echo esc_html( md_content( 'doc_creds_cert', '자격 · 소속 학회' ) ); ?></h3>
+								<ul class="md-creds__list">
+									<?php foreach ( $creds['cert'] as $c ) : ?>
+										<li><?php echo esc_html( $c ); ?></li>
+									<?php endforeach; ?>
+								</ul>
+							</div>
+						<?php else :
+							$only  = ! empty( $creds['career'] ) ? $creds['career'] : $creds['cert'];
+							$title = ! empty( $creds['career'] )
+								? md_content( 'doc_creds_only_career', '주요 경력' )
+								: md_content( 'doc_creds_cert', '자격 · 소속 학회' );
+							?>
+							<div class="md-creds__group">
+								<h3 class="md-creds__title"><?php echo esc_html( $title ); ?></h3>
+								<ul class="md-creds__list md-creds__list--split">
+									<?php foreach ( $only as $c ) : ?>
+										<li><?php echo esc_html( $c ); ?></li>
+									<?php endforeach; ?>
+								</ul>
+							</div>
+						<?php endif; ?>
+					</div>
 				<?php endif; ?>
 			</div>
 		</article>
