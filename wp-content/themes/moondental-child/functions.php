@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.71' );
+define( 'MOONDENTAL_VERSION', '3.72' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -5157,6 +5157,7 @@ function moondental_get_team() {
 				'대한심미치과학회 인정의',
 				'미국 & 한국 치과의사 면허 보유',
 				'미국 치과의사 협회(ADA) 정회원',
+				'미국 심미치과학회(AACD) 정회원',
 				'미국 UCLA 구강암센터 연구원',
 				'대한국제치과의사회 학술위원',
 			),
