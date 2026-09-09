@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.82' );
+define( 'MOONDENTAL_VERSION', '3.83' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -5151,7 +5151,7 @@ function moondental_get_team() {
 				/* v3.80 · 원장님이 정해 주신 순서 그대로.
 				 *   moondental_split_bio() 가 학력·경력 / 자격·소속 학회로 나누고
 				 *   각 묶음 안에서는 이 배열 순서를 유지한다. */
-				'서울대학교 치의학대학원 박사과정 치과마취과학',
+				'서울대학교 치의학대학원 박사과정',
 				'미국 UCSF 치과대학 교정과 임상연수',
 				'미국 UCSF 치과대학 졸업',
 				'미국 UCLA 구강생물학 석사 졸업',
