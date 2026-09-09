@@ -245,7 +245,7 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			$park_1_url = $mc( 'footer_park_1_url', $info['naver_map_url'] ?? 'https://map.naver.com/p/entry/place/12772165' );
 			$park_2_url = $mc( 'footer_park_2_url', 'https://map.naver.com/p/search/%EC%8B%A0%EB%B6%80%EC%A0%9C5%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5' );
 
-			/* v3.44.224 · SUV 가능 여부를 제목에 명시 · 공통 안내(접수처 무료 등록)는
+			/* v3.44.224 · SUV 가능 여부를 제목에 명시 · 공통 안내(접수처 주차도장/주차권)는
 			 * 항목마다 반복하지 않고 리스트 하단 안내문 한 줄로 모은다.
 			 * v3.44.229 · 두 항목 모두 주소를 넣어 높이를 맞추고, 02 는 도보 시간까지 적어
 			 * '얼마나 먼가' 라는 첫 질문에 바로 답한다. */
@@ -253,7 +253,7 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 			$park_1_desc  = $mc( 'footer_park_1_desc',  '천안시 동남구 만남로 52 문타워' );
 			$park_2_title = $mc( 'footer_park_2_title', '신부 제5공영주차장 (SUV 가능)' );
 			$park_2_desc  = $mc( 'footer_park_2_desc',  '천안시 동남구 먹거리1길 10 (도보 5분)' );
-			$park_note    = $mc( 'footer_park_note',    '🎫 주차 후 병원 접수처에서 무료 등록 도와드리겠습니다' );
+			$park_note    = $mc( 'footer_park_note',    '🎫 주차 후 병원 접수처에서 주차도장/주차권을 받아가세요' );
 			/* v3.44.230 · 📍 핀만으로 부족할 때를 대비한 툴팁. title 은 마우스를 올리면
 			 * 보이고, aria-label 은 스크린리더가 읽는다. 문구는 한 곳에서 관리한다. */
 			$park_map_hint = $mc( 'footer_park_map_hint', '눌러서 네이버 지도로 위치 보기' );

@@ -242,8 +242,8 @@ $off_text = $info['hours_off'] ?: '휴진';
 				/* v3.44.232 · 푸터와 같은 안내문을 이 카드에도 노출.
 				 * loc_park_lead 는 Customizer 에 정의만 되어 있고 어디서도 출력되지 않았다. */
 				$park_lead = function_exists( 'md_content' )
-					? md_content( 'loc_park_lead', '🎫 주차 후 병원 접수처에서 무료 등록 도와드리겠습니다' )
-					: '🎫 주차 후 병원 접수처에서 무료 등록 도와드리겠습니다';
+					? md_content( 'loc_park_lead', '🎫 주차 후 병원 접수처에서 주차도장/주차권을 받아가세요' )
+					: '🎫 주차 후 병원 접수처에서 주차도장/주차권을 받아가세요';
 				if ( $park_lead ) : ?>
 					<p class="md-park__lead md-park__lead--note"><?php echo esc_html( $park_lead ); ?></p>
 				<?php endif; ?>

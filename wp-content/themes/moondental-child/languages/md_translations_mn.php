@@ -293,7 +293,7 @@ return array(
 	'loc_park_1_title'   => 'Эмнэлгийн зоорийн механик зогсоол',
 	'loc_park_1_desc'    => 'Зогсоод бүртгэлийн ширээнд бүртгүүлээрэй → үнэгүй',
 	'loc_park_2_title'   => 'SUV / Том машин — Sinbu 5-р нийтийн зогсоол (Meokgeori 1-gil 10)',
-	'loc_park_2_desc'    => 'Ойролцоох Sinbu 5-р нийтийн зогсоолд зогсоод бүртгүүлэх → үнэгүй',
+	'loc_park_2_desc'    => 'Ойролцоох Sinbu 5-р нийтийн зогсоолд зогсоод хүлээн авах хэсгээс тамга/тасалбар аваарай',
 	'loc_hours_naver_note'    => '🔔 Баярын өдрийн эмчилгээ ба өөрчлөлтийг Naver Place-с шалгаарай',
 	'loc_hours_aria'          => 'Naver Place дээр хамгийн сүүлийн цагийг харах',
 
@@ -313,7 +313,7 @@ return array(
 	'footer_park_1_desc' => 'Mannam-ro 52, Dongnam-gu, Cheonan (Moon Tower)',
 	'footer_park_2_title'=> 'Sinbu 5-р нийтийн зогсоол (SUV боломжтой)',
 	'footer_park_2_desc' => 'Meokgeori 1-gil 10, Dongnam-gu, Cheonan (5 мин алхам)',
-	'footer_park_note'   => '🎫 Зогсоосны дараа хүлээн авах хэсэгт үнэгүй бүртгүүлнэ',
+	'footer_park_note'   => '🎫 Зогсоолын дараа хүлээн авах хэсгээс зогсоолын тамга/тасалбар аваарай',
 	'footer_park_map_hint' => 'Naver Map дээр байршлыг харах',
 	'footer_park_walk'   => '🚌 Cheonan автобусны буудлаас 5 мин алхаж',
 	'footer_park_train'  => '🚆 Cheonan станцаас автобусаар 10 мин',

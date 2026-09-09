@@ -195,7 +195,7 @@ return array(
 	'loc_park_1_title'   => '院内地下機械式駐車場',
 	'loc_park_1_desc'    => '駐車後フロントで登録 → 無料',
 	'loc_park_2_title'   => 'SUV / 大型車 — 新富第5公営駐車場',
-	'loc_park_2_desc'    => '近くの新富第5公営駐車場に駐車後フロントで登録 → 無料',
+	'loc_park_2_desc'    => '近くの新富第5公営駐車場に駐車後、受付で駐車券をお受け取りください',
 	'loc_hours_naver_note'    => '🔔 祝日診療・臨時休診などの変更事項はネイバープレイスでご確認ください',
 	'loc_hours_aria'          => 'ネイバープレイスで最新の診療時間を確認',
 
@@ -216,7 +216,7 @@ return array(
 	'footer_park_1_desc' => '天安市東南区 マンナム路52 ムンタワー',
 	'footer_park_2_title'=> '新富第5公営駐車場（SUV可）',
 	'footer_park_2_desc' => '天安市東南区 モッコリ1キル10（徒歩5分）',
-	'footer_park_note'   => '🎫 駐車後、受付にて無料登録をお手伝いいたします',
+	'footer_park_note'   => '🎫 駐車後、受付で駐車スタンプ・駐車券をお受け取りください',
 	'footer_park_map_hint' => 'タップしてNAVERマップで位置を見る',
 	'footer_park_walk'   => '🚌 天安総合・高速バスターミナルから徒歩約5分',
 	'footer_park_train'  => '🚆 天安駅からバスで約10分',

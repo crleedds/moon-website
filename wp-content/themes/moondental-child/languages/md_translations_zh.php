@@ -296,7 +296,7 @@ return array(
 	'loc_park_1_title'   => '院内地下机械式停车场',
 	'loc_park_1_desc'    => '停车后在前台登记 → 免费',
 	'loc_park_2_title'   => 'SUV / 大型车 — 新富第5公营停车场 (东南区食街1街 10)',
-	'loc_park_2_desc'    => '就近新富第5公营停车场停车后在前台登记 → 免费',
+	'loc_park_2_desc'    => '就近新富第5公营停车场停车后，请至前台领取停车券',
 	'loc_hours_naver_note'    => '🔔 节假日诊疗和休诊等变动信息请在Naver最终确认',
 	'loc_hours_aria'          => '在Naver Place查看最新诊疗时间',
 
@@ -317,7 +317,7 @@ return array(
 	'footer_park_1_desc' => '天安市东南区 Mannam-ro 52 文塔大厦',
 	'footer_park_2_title'=> '新富第5公营停车场（SUV 可）',
 	'footer_park_2_desc' => '天安市东南区 食街1街10号（步行5分钟）',
-	'footer_park_note'   => '🎫 停车后请至医院前台，我们将为您免费登记',
+	'footer_park_note'   => '🎫 停车后请至前台领取停车印章／停车券',
 	'footer_park_map_hint' => '点击在 NAVER 地图查看位置',
 	'footer_park_walk'   => '🚌 从天安综合·高速巴士客运站步行约5分钟',
 	'footer_park_train'  => '🚆 从天安站乘公交约10分钟',

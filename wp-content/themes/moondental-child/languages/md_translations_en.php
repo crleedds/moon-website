@@ -371,7 +371,7 @@ return array(
 	'loc_park_1_title'   => 'Onsite basement mechanical parking',
 	'loc_park_1_desc'    => 'Free during treatment hours',
 	'loc_park_2_title'   => 'SUV / Large cars — Sinbu 5th Public Parking',
-	'loc_park_2_desc'    => 'Nearby Sinbu 5th Public Parking (Dongnam-gu Meokgeori 1-gil 10) · park then register free at the front desk',
+	'loc_park_2_desc'    => 'Nearby Sinbu 5th Public Parking (Dongnam-gu Meokgeori 1-gil 10) · pick up your parking stamp / ticket at the front desk',
 
 	/* === Address (moondental_get_info) === */
 	'flocation_address'  => 'Moon Tower 9·10·11·13F, 52 Mannam-ro, Dongnam-gu, Cheonan-si, Chungcheongnam-do (Sinbu-dong)',
@@ -396,7 +396,7 @@ return array(
 	'footer_park_1_desc' => '52 Mannam-ro, Dongnam-gu, Cheonan (Moon Tower)',
 	'footer_park_2_title'=> 'Sinbu 5th Public Parking (SUVs OK)',
 	'footer_park_2_desc' => '10 Meokgeori 1-gil, Dongnam-gu, Cheonan (5 min walk)',
-	'footer_park_note'   => '🎫 Park first — our front desk will validate it free of charge',
+	'footer_park_note'   => '🎫 After parking, pick up your parking stamp / ticket at the front desk',
 	'footer_park_map_hint' => 'Tap to view on Naver Map',
 	'footer_park_walk'   => '🚌 5 min walk from Cheonan Bus Terminal',
 	'footer_park_train'  => '🚆 10 min by bus from Cheonan Station',

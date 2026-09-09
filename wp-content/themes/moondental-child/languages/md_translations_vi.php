@@ -296,7 +296,7 @@ return array(
 	'loc_park_1_title'   => 'Đậu xe cơ khí tầng hầm tại bệnh viện',
 	'loc_park_1_desc'    => 'Đậu xe rồi đăng ký tại lễ tân → miễn phí',
 	'loc_park_2_title'   => 'SUV / Xe lớn — Bãi đậu xe công cộng Sinbu số 5 (Meokgeori 1-gil 10)',
-	'loc_park_2_desc'    => 'Đậu tại bãi công cộng Sinbu số 5 gần đó rồi đăng ký tại lễ tân → miễn phí',
+	'loc_park_2_desc'    => 'Đậu tại bãi công cộng Sinbu số 5 gần đó rồi nhận dấu/vé đỗ xe tại quầy lễ tân',
 	'loc_hours_naver_note'    => '🔔 Giờ ngày lễ và thay đổi lịch — vui lòng xác nhận trên Naver Place',
 	'loc_hours_aria'          => 'Xem giờ mới nhất trên Naver Place',
 
@@ -317,7 +317,7 @@ return array(
 	'footer_park_1_desc' => '52 Mannam-ro, Dongnam-gu, Cheonan (Moon Tower)',
 	'footer_park_2_title'=> 'Bãi đậu xe công cộng Sinbu số 5 (nhận SUV)',
 	'footer_park_2_desc' => '10 Meokgeori 1-gil, Dongnam-gu, Cheonan (đi bộ 5 phút)',
-	'footer_park_note'   => '🎫 Sau khi đậu xe, quầy lễ tân sẽ đăng ký miễn phí cho quý khách',
+	'footer_park_note'   => '🎫 Sau khi đậu xe, vui lòng nhận dấu/vé đỗ xe tại quầy lễ tân',
 	'footer_park_map_hint' => 'Nhấn để xem vị trí trên Naver Map',
 	'footer_park_walk'   => '🚌 5 phút đi bộ từ Bến xe Cheonan',
 	'footer_park_train'  => '🚆 10 phút xe buýt từ Ga Cheonan',

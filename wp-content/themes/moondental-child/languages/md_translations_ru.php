@@ -293,7 +293,7 @@ return array(
 	'loc_park_1_title'   => 'Механическая парковка в подвале',
 	'loc_park_1_desc'    => 'Припаркуйтесь и зарегистрируйте на стойке — бесплатно',
 	'loc_park_2_title'   => 'Внедорожники / Крупные авто — Общественная парковка Sinbu 5 (Meokgeori 1-gil 10)',
-	'loc_park_2_desc'    => 'Припаркуйтесь и зарегистрируйте на стойке — бесплатно',
+	'loc_park_2_desc'    => 'Припаркуйтесь и получите штамп/талон на стойке регистрации',
 	'loc_hours_naver_note'    => '🔔 Изменения в графике праздников — проверьте на Naver Place',
 	'loc_hours_aria'          => 'Актуальные часы на Naver Place',
 
@@ -313,7 +313,7 @@ return array(
 	'footer_park_1_desc' => 'Mannam-ro 52, Dongnam-gu, Cheonan (Moon Tower)',
 	'footer_park_2_title'=> 'Общественная парковка Sinbu 5 (для внедорожников)',
 	'footer_park_2_desc' => 'Meokgeori 1-gil 10, Dongnam-gu, Cheonan (5 мин пешком)',
-	'footer_park_note'   => '🎫 После парковки на стойке регистрации оформим бесплатно',
+	'footer_park_note'   => '🎫 После парковки получите штамп/талон на стойке регистрации',
 	'footer_park_map_hint' => 'Нажмите, чтобы открыть на Naver Map',
 	'footer_park_walk'   => '🚌 5 мин пешком от автовокзала Cheonan',
 	'footer_park_train'  => '🚆 10 мин на автобусе от станции Cheonan',
