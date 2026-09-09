@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.78' );
+define( 'MOONDENTAL_VERSION', '3.79' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -5129,6 +5129,7 @@ function moondental_get_team() {
 				'포항공과대학교 신소재공학과 석사 졸업',
 				'포항공과대학교 신소재공학과 학사 졸업',
 				'미국 SureSmile® 투명교정 인정의',
+				'대한턱관절교합학회 이사',
 				'대한구강악안면임플란트학회 정회원',
 				'미국 UCSF 치과대학 교정과 임상연수',
 				'미국 UPENN 치과대학 근관치료학 연수',
