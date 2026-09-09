@@ -168,6 +168,7 @@ function moondental_get_strengths() {
 <li>구강외과</li>
 <li>구강내과</li>
 <li>턱관절클리닉</li>
+<li>비서실</li>
 </ul>
 
 <h3>11F</h3>

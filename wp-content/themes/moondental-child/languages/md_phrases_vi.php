@@ -34,6 +34,7 @@ return array(
 	'예방클리닉'    => 'Phòng khám Dự phòng',
 	'신환접수'      => 'Tiếp nhận bệnh nhân mới',
 	'경영지원실'    => 'Phòng Hành chính',
+	'비서실'       => 'Phòng Thư ký',
 
 	/* ── 진료 항목 ── */
 	'자연치아 살리기'       => 'Bảo tồn răng thật',

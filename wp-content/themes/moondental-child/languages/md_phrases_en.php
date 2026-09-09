@@ -38,6 +38,7 @@ return array(
 	'예방클리닉' => 'Preventive Clinic',
 	'신환접수'   => 'New Patient Reception',
 	'경영지원실' => 'Administration Office',
+	'비서실' => 'Executive Office',
 
 	/* ── 진료 항목 ─────────────────────────────────── */
 	'자연치아 살리기'   => 'Natural Tooth Preservation',

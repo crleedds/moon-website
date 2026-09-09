@@ -187,6 +187,8 @@ $off_text = $info['hours_off'] ?: '휴진';
 							<span class="md-floor-guide__center">구강내과</span>
 							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
 							<span class="md-floor-guide__center">턱관절 클리닉</span>
+							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
+							<span class="md-floor-guide__center">비서실</span>
 						</span>
 					</li>
 					<li class="md-floor-guide__row">

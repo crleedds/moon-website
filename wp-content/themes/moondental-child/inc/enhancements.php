@@ -1185,6 +1185,7 @@ function moondental_floor_guide_data() {
 				array( 'name' => '구강외과' ),
 				array( 'name' => '구강내과' ),
 				array( 'name' => '턱관절 클리닉',      'slug' => '턱관절-클리닉' ),
+				array( 'name' => '비서실' ), // v3.77
 			),
 		),
 		array(
