@@ -42,7 +42,14 @@ get_header();
 		<?php get_template_part( 'template-parts/section', 'facility' ); ?>
 		<?php /* v3.44.164 · 후기·소식·발자취는 좌측 사이드바로 이동 · 우측 중복 제거 */ ?>
 		<?php get_template_part( 'template-parts/section', 'faq-home' ); ?>
-		<?php get_template_part( 'template-parts/section', 'quicknav' ); ?>
+		<?php /* v3.84 · 홈에서 「문치과병원을 둘러보세요」(quicknav) 제거.
+		 * 같은 링크들이 푸터 · 상단 메뉴에 전 페이지 공통으로 있어 홈 하단이
+		 * 링크 카드로만 길어졌다. 층별 안내(v3.44.233) 때와 같은 판단이다.
+		 * template-parts/section-quicknav.php 파일은 그대로 두었다 —
+		 * 되살리려면 이 자리에 아래 한 줄을 다시 넣으면 된다.
+		 *   get_template_part( 'template-parts/section', 'quicknav' );
+		 * 검색엔진용 SiteNavigationElement 구조화 데이터(inc/seo-boost.php)는
+		 * 이 섹션과 별개로 동작하므로 그대로 둔다. */ ?>
 	</main>
 </div>
 
