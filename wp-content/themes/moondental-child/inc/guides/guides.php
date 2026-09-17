@@ -18,11 +18,13 @@ function md_guide_slug_map() {
 		'implant'    => 'implant',
 		'suresmile'  => 'suresmile',
 		'laminate'   => 'laminate',
+		'preservation' => 'preservation', // v3.85 · NO. 04 자연치아보존센터
 		// 한글 (호환)
 		'임플란트'   => 'implant',
 		'투명교정'   => 'suresmile',
 		'슈어스마일' => 'suresmile',
 		'라미네이트' => 'laminate',
+		'자연치아보존' => 'preservation',
 	);
 }
 
@@ -85,13 +87,14 @@ function md_guide_index() {
 	static $cache = null;
 	if ( $cache !== null ) return $cache;
 	$cache = array();
-	foreach ( array( 'implant', 'suresmile', 'laminate' ) as $key ) {
+	foreach ( array( 'implant', 'suresmile', 'laminate', 'preservation' ) as $key ) {
 		$data = md_guide_load( $key );
 		if ( ! $data ) continue;
 		$path_map = array(
-			'implant'   => '/guide/implant/',
-			'suresmile' => '/guide/suresmile/',
-			'laminate'  => '/guide/laminate/',
+			'implant'      => '/guide/implant/',
+			'suresmile'    => '/guide/suresmile/',
+			'laminate'     => '/guide/laminate/',
+			'preservation' => '/guide/preservation/', // v3.85
 		);
 		$cache[] = array(
 			'slug'     => $key,

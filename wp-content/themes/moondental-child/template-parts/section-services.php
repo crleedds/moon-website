@@ -13,7 +13,7 @@ $services = moondental_get_services();
 			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'services_eyebrow', 'CLINICAL SERVICES · 천안·아산 진료항목' ) ); ?></span>
 			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'services_title', '천안·아산에서 한 곳에서, 평생 치아 건강을' ) ); ?></h2>
 			<p class="md-section-head__lead">
-				<?php echo nl2br( esc_html( md_content( 'services_lead', '천안·아산 임플란트·투명교정·라미네이트·자연치아 살리기·사랑니 발치까지 — 한 분의 환자를 오래 보는 천안 만남로 치과의 마음으로 진료합니다.' ) ) ); ?>
+				<?php echo nl2br( esc_html( md_content( 'services_lead', '천안·아산 임플란트·투명교정·라미네이트·자연치아보존·사랑니 발치까지 — 한 분의 환자를 오래 보는 천안 만남로 치과의 마음으로 진료합니다.' ) ) ); ?>
 			</p>
 		</header>
 
@@ -23,6 +23,7 @@ $services = moondental_get_services();
 			'임플란트-센터'   => 'md-service-card--implant',   // 임플란트센터
 			'투명교정-센터'   => 'md-service-card--suresmile', // 교정센터
 			'스마일디자인센터' => 'md-service-card--laminate',  // 스마일디자인센터
+			'자연치아-살리기'  => 'md-service-card--preservation', // v3.85 · 자연치아보존센터
 		);
 		?>
 		<div class="md-service-grid">

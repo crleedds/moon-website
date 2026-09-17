@@ -22,6 +22,7 @@ $path_map = array(
 	'implant'   => '/guide/implant/',
 	'suresmile' => '/guide/suresmile/',
 	'laminate'  => '/guide/laminate/',
+	'preservation' => '/guide/preservation/', // v3.85
 );
 if ( ! isset( $path_map[ $slug ] ) ) return;
 $href = home_url( $path_map[ $slug ] );

@@ -6,8 +6,10 @@
  *
  * @package moondental-child
  */
+/* v3.86 · 6 → 9 카드. 홈 CLINIC SYSTEM 의 '기술력/시설' 카드를 이 섹션으로 통합
+ *  (⑦ 물방울 레이저 · ⑧ One Day 디지털 보철 · ⑨ 원내 기공사 상주) · 하단에 /기술력-시설/ 링크 */
 $facility = array();
-for ( $i = 1; $i <= 6; $i++ ) {
+for ( $i = 1; $i <= 9; $i++ ) {
 	$facility[] = array(
 		'icon'  => md_content( "facility_{$i}_icon",  '' ),
 		'title' => md_content( "facility_{$i}_title", '' ),
@@ -35,5 +37,8 @@ for ( $i = 1; $i <= 6; $i++ ) {
 				</article>
 			<?php endforeach; ?>
 		</div>
+		<p class="md-facility-more">
+			<a class="md-btn md-btn-ghost md-btn--sm" href="<?php echo esc_url( home_url( '/기술력-시설/' ) ); ?>"><?php echo esc_html( md_content( 'facility_more_label', '기술력 / 시설 자세히 보기 →' ) ); ?></a>
+		</p>
 	</div>
 </section>

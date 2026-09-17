@@ -201,59 +201,29 @@ $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '�
 				<header class="md-hours__head">
 					<span class="md-hours__badge">🏥 층별 안내</span>
 				</header>
+				<?php /* v3.85 · 하드코딩 제거 · moondental_floor_guide_data() 단일 진실원에서 렌더 (푸터·사이드바와 동일 데이터) */ ?>
 				<ul class="md-floor-guide__list">
+					<?php foreach ( ( function_exists( 'moondental_floor_guide_data' ) ? moondental_floor_guide_data() : array() ) as $_fl ) : ?>
 					<li class="md-floor-guide__row">
-						<span class="md-floor-guide__floor">13F</span>
+						<span class="md-floor-guide__floor"><?php echo esc_html( $_fl['floor'] ); ?></span>
 						<span class="md-floor-guide__centers">
-							<span class="md-floor-guide__center">원내기공실</span>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">한아문화센터</span>
+							<?php
+							$_fp = array();
+							foreach ( $_fl['centers'] as $_c ) {
+								$_nm = esc_html( $_c['name'] );
+								$_cc = ! empty( $_c['center'] ) ? ' md-center-color--' . $_c['center'] : '';
+								if ( ! empty( $_c['center'] ) && ! empty( $_c['slug'] ) ) {
+									$_u = ( $_c['slug'] === '스마일디자인센터' ) ? home_url( '/스마일디자인센터/' ) : home_url( '/' . $_c['slug'] . '/' );
+									$_fp[] = '<a class="md-floor-guide__center md-floor-guide__center--link md-floor-guide__center--highlight' . $_cc . '" href="' . esc_url( $_u ) . '">' . $_nm . '</a>';
+								} else {
+									$_fp[] = '<span class="md-floor-guide__center">' . $_nm . '</span>';
+								}
+							}
+							echo implode( "\n\t\t\t\t\t\t\t" . '<span class="md-floor-guide__sep" aria-hidden="true">·</span>' . "\n\t\t\t\t\t\t\t", $_fp );
+							?>
 						</span>
 					</li>
-					<li class="md-floor-guide__row">
-						<span class="md-floor-guide__floor">11F</span>
-						<span class="md-floor-guide__centers">
-							<a class="md-floor-guide__center md-floor-guide__center--link md-floor-guide__center--highlight md-center-color--suresmile" href="<?php echo esc_url( home_url( '/진료항목/투명교정-센터/' ) ); ?>">교정센터</a>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">소아치과</span>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">치주과</span>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">디지털센터</span>
-						</span>
-					</li>
-					<li class="md-floor-guide__row">
-						<span class="md-floor-guide__floor">10F</span>
-						<span class="md-floor-guide__centers">
-							<a class="md-floor-guide__center md-floor-guide__center--link md-floor-guide__center--highlight md-center-color--implant" href="<?php echo esc_url( home_url( '/진료항목/임플란트-센터/' ) ); ?>">임플란트센터</a>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">슈어스마일 투명교정</span>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">구강외과</span>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">구강내과</span>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">턱관절 클리닉</span>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">비서실</span>
-						</span>
-					</li>
-					<li class="md-floor-guide__row">
-						<span class="md-floor-guide__floor">9F</span>
-						<span class="md-floor-guide__centers">
-							<a class="md-floor-guide__center md-floor-guide__center--link md-floor-guide__center--highlight md-center-color--laminate" href="<?php echo esc_url( home_url( '/스마일디자인센터/' ) ); ?>">스마일디자인센터</a>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">신환접수</span>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">보철과</span>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">보존과</span>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">예방클리닉</span>
-							<span class="md-floor-guide__sep" aria-hidden="true">·</span>
-							<span class="md-floor-guide__center">경영지원실</span>
-						</span>
-					</li>
+					<?php endforeach; ?>
 				</ul>
 			</aside>
 

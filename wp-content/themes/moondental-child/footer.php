@@ -9,6 +9,11 @@ $phone_link = $info['phone_link'] ?: preg_replace( '/[^0-9]/', '', $info['phone'
 $place_url  = $info['naver_map_url'] ?: ( $info['naver_place'] ?? '' );
 
 $md_skip_flocation = false;
+/* v3.85.3 · 홈에서는 오시는 길을 2단 영역 안(우측 본문 칸)에서 직접 출력한다 (front-page.php).
+ * 전체 폭으로 두면 바로 위 FAQ·CTA(본문 칸 폭)와 폭이 달라져 어색했다. */
+if ( is_front_page() ) {
+	$md_skip_flocation = true;
+}
 if ( is_page() ) {
 	$_pid  = get_queried_object_id();
 	$_tpl  = get_page_template_slug( $_pid );

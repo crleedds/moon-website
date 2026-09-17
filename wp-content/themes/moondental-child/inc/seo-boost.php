@@ -539,7 +539,7 @@ function moondental_jsonld_area_served() {
 	}
 	$provinces = moondental_get_regions_by_province();
 	$area_served = array();
-	$medical_specialty = array( '임플란트', '충치치료', '신경치료', '잇몸치료', '치주치료', '매복 사랑니 발치', '어려운 사랑니 발치', '사랑니 발치', '구강악안면외과', '라미네이트', '치아미백', '심미치료', '치아교정', '투명교정', '소아치과', '어린이치과', '턱관절 클리닉', '이갈이 치료', '스케일링', '예방클리닉' );
+	$medical_specialty = array( '임플란트', '충치치료', '신경치료', '잇몸치료', '치주치료', '매복 사랑니 발치', '어려운 사랑니 발치', '사랑니 발치', '구강악안면외과', '라미네이트', '치아미백', '심미치료', '치아교정', '투명교정', '소아치과', '어린이치과', '턱관절 클리닉', '이갈이 치료', '스케일링', '덴탈SPA' );
 	foreach ( $provinces as $prov => $regions ) {
 		foreach ( $regions as $r ) {
 			$area_served[] = array(
@@ -586,7 +586,7 @@ function moondental_jsonld_area_served() {
 			array( '@type' => 'MedicalProcedure', 'name' => '치아교정 · 투명교정', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
 			array( '@type' => 'MedicalProcedure', 'name' => '소아치과 · 어린이치과', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
 			array( '@type' => 'MedicalProcedure', 'name' => '턱관절 클리닉 · 이갈이', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
-			array( '@type' => 'MedicalProcedure', 'name' => '스케일링 · 예방클리닉', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
+			array( '@type' => 'MedicalProcedure', 'name' => '스케일링 · 덴탈SPA', 'procedureType' => 'https://schema.org/TherapeuticProcedure' ),
 		),
 	);
 	echo "\n<script type=\"application/ld+json\">\n";

@@ -16753,3 +16753,158 @@ a.md-center-color--laminate:hover  { color: #9C86B2 !important; }
 @media (prefers-reduced-motion: reduce) {
   .md-impl-card { transition: none; }
 }
+
+/* =============================================================
+   v3.85 · 자연치아보존센터 (4번째 전문센터) — 센터 고유색 "잎 초록"
+   기존: 임플란트 #5C8B82 세이지 · 교정 #E37B5C 살구 · 라미네이트 #B29CC7 퍼플
+   ============================================================= */
+.md-guide-rail--preservation {
+  --md-rail-accent: #5B8C3A;       /* 자연치아보존: 잎 초록 */
+  --md-rail-accent-2: #8FBF6A;
+}
+.md-guide-cta--preservation { --md-cta-accent: #5b8c3a; --md-cta-accent-2: #8fbf6a; }
+
+/* 상단 메뉴 센터 색 */
+.md-nav-center--preservation > a { color: #5B8C3A !important; }
+.md-nav-center--preservation > a:hover { color: #4A7530 !important; background: rgba(91, 140, 58, 0.08); }
+html body .md-header__nav .md-nav-center--preservation > a { color: #5B8C3A !important; }
+
+/* 층별 안내 · 본문 링크 색 */
+.md-center-color--preservation { color: #5B8C3A !important; }
+a.md-center-color--preservation:hover { color: #4A7530 !important; }
+.md-floor-rail__center--highlight.md-center-color--preservation,
+.md-floor-guide__center--highlight.md-center-color--preservation { color: #5B8C3A !important; font-weight: 700; }
+
+/* 홈 진료항목 카드 */
+.md-service-card--preservation .md-service-card__title { color: #5B8C3A; }
+.md-service-card--preservation .md-service-card__icon svg,
+.md-service-card--preservation .md-service-card__icon { color: #5B8C3A; }
+.md-service-card--preservation { border-top: 3px solid #7FAF63; }
+
+/* 푸터 (어두운 배경) */
+.md-footer__col--floors .md-center-color--preservation { color: #A9D18E !important; font-weight: 700; }
+
+/* 자연치아보존센터 페이지 · 덴탈SPA 섹션 */
+.md-section--spa { background: rgba(91, 140, 58, 0.06); }
+.md-section--spa .md-section-head__eyebrow { color: #5B8C3A; }
+.md-preservation-card.is-spa { border-top: 3px solid #7FAF63; }
+
+/* 다크모드에서 살짝 밝게 */
+@media (prefers-color-scheme: dark) {
+  .md-nav-center--preservation > a,
+  html body .md-header__nav .md-nav-center--preservation > a,
+  .md-center-color--preservation,
+  .md-service-card--preservation .md-service-card__title { color: #A9D18E !important; }
+  .md-section--spa { background: rgba(169, 209, 142, 0.06); }
+}
+
+/* =============================================================
+   v3.86 · 홈 CLINIC SYSTEM · 4개 전문센터 카드 + 종합안내서 링크
+   ============================================================= */
+.md-clinic-intro__grid { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 640px) { .md-clinic-intro__grid { grid-template-columns: 1fr; } }
+
+.md-clinic-card__guide {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid currentColor;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+  line-height: 1.4;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.md-clinic-card__guide:hover { transform: translateX(2px); box-shadow: 0 4px 12px rgba(30, 20, 14, 0.08); }
+.md-clinic-card__guide-icon { font-size: 1rem; }
+.md-clinic-card__guide-code { font-size: 0.68rem; letter-spacing: 0.08em; opacity: 0.8; }
+.md-clinic-card__guide-title { flex: 1; }
+.md-clinic-card__guide + .md-clinic-card__more { margin-top: 0; }
+.md-clinic-card__guide.md-center-color--implant      { background: rgba(92, 139, 130, 0.08); }
+.md-clinic-card__guide.md-center-color--suresmile    { background: rgba(227, 123, 92, 0.08); }
+.md-clinic-card__guide.md-center-color--laminate     { background: rgba(178, 156, 199, 0.12); }
+.md-clinic-card__guide.md-center-color--preservation { background: rgba(91, 140, 58, 0.08); }
+/* 카드 상단 센터 색 띠 */
+.md-clinic-card--implant      { border-top: 3px solid #5C8B82; }
+.md-clinic-card--suresmile    { border-top: 3px solid #E37B5C; }
+.md-clinic-card--laminate     { border-top: 3px solid #B29CC7; }
+.md-clinic-card--preservation { border-top: 3px solid #7FAF63; }
+
+/* v3.86 · 홈 Facility 섹션 · 하단 '기술력/시설 자세히' 링크 */
+.md-facility-more { text-align: center; margin-top: clamp(20px, 3vw, 32px); }
+
+/* =============================================================
+   v3.86.1 · 데스크탑 우측 하단 FAB 스택 · 원형 아이콘 + 말풍선 라벨
+   ---------------------------------------------------------------
+   알약+라벨(폭 약 140px)이 1280~1440px 화면에서 본문을 가렸다.
+   버튼은 48px 원형으로 고정하고(크기 변화 없음), 라벨은 hover/focus 때
+   버튼 왼쪽에 말풍선으로만 띄운다. 히어로 구간에서는 숨기고 스크롤 후 표시.
+   ============================================================= */
+.md-fab-stack { right: 20px; bottom: 20px; gap: 10px; }
+.md-fab {
+  position: relative;
+  width: 48px; height: 48px;
+  padding: 0;
+  gap: 0;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+}
+.md-fab:hover { transform: none; box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22); }
+.md-fab__icon { width: auto; height: auto; font-size: 1.3rem; background: transparent; }
+.md-fab--naver .md-fab__icon { width: 26px; height: 26px; font-size: 0.95rem; background: #fff; }
+.md-fab__icon--svg { width: 26px; height: 26px; }
+.md-fab--phone .md-fab__icon,
+.md-fab--directions .md-fab__icon { font-size: 1.25rem; }
+
+/* 말풍선 라벨 · 버튼 왼쪽 · 버튼 크기는 그대로 */
+.md-fab__label {
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  background: rgba(42, 33, 26, 0.94);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s var(--ease), transform 0.15s var(--ease);
+}
+.md-fab__label::after {
+  content: '';
+  position: absolute;
+  left: 100%; top: 50%;
+  margin-top: -5px;
+  border: 5px solid transparent;
+  border-left-color: rgba(42, 33, 26, 0.94);
+}
+.md-fab:hover .md-fab__label,
+.md-fab:focus-visible .md-fab__label {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* 스크롤 전 숨김 (JS 가 .md-fab-ready 를 붙였을 때만) */
+.md-fab-stack.md-fab-ready {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+.md-fab-stack.md-fab-ready.is-visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-fab__label, .md-fab-stack.md-fab-ready { transition: none; }
+}

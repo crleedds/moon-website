@@ -23,6 +23,7 @@ return array(
 	'related'      => array(
 		array( 'label' => '임플란트센터 종합안내서',    'href' => '/guide/implant/',   'icon' => '🦷' ),
 		array( 'label' => '교정센터 투명교정 종합안내서', 'href' => '/guide/suresmile/', 'icon' => '😁' ),
+		array( 'label' => '자연치아보존센터 자연치아보존 종합안내서', 'href' => '/guide/preservation/', 'icon' => '🌿' ), // v3.85
 	),
 	'toc' => array(
 		array( 'id' => 'what',       'label' => '라미네이트란' ),

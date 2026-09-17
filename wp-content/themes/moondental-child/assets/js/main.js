@@ -135,10 +135,15 @@
       try { new ResizeObserver(applyFixedHeader).observe(header); } catch (e) {}
     }
 
+    // v3.86.1 · 우측 하단 FAB 스택 · 히어로에서는 숨기고 스크롤 후 표시
+    //   JS 가 붙었을 때만(.md-fab-ready) 숨김이 적용되므로 JS 실패 시에도 버튼은 보인다.
+    var fabStack = document.querySelector('.md-fab-stack');
+    if (fabStack) fabStack.classList.add('md-fab-ready');
     var onScroll = function () {
       var y = window.scrollY;
       if (header) header.classList.toggle('is-scrolled', y > 12);
       if (toTop)  toTop.classList.toggle('is-visible', y > showAt);
+      if (fabStack) fabStack.classList.toggle('is-visible', y > showAt);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();

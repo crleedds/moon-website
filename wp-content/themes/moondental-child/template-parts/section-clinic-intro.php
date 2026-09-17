@@ -1,8 +1,7 @@
 <?php
 /**
- * Section: 30여년 이상 한자리에서 + 6개 진료 영역 카드
- *  사용자 제공 콘텐츠 — 메뉴 구조에 맞춰 6 카드로 정렬.
- *  순서: 임플란트센터 · 교정센터 · 스마일디자인센터 · 자연치아살리기 · 진료과 · 기술력/시설
+ * Section: 30여년 이상 한자리에서 + 4개 전문센터 카드 (v3.86)
+ *  순서: 임플란트센터 · 교정센터 · 스마일디자인센터 · 자연치아보존센터 — 각 카드에 종합안내서 링크
  *
  *  v3.27.7: 헤더·카드 제목·리드·야간진료·마무리 문구 모두 Customizer 편집 가능.
  *
@@ -22,9 +21,12 @@ $md_intro_list = function( $key, $default_lines ) {
 	return $out;
 };
 
+/* v3.86 · 4개 전문센터만 남김 (진료과·기술력/시설 카드 제거 · 기술력/시설은 아래 Facility 섹션으로 통합)
+ *  각 카드에 해당 센터의 종합안내서 링크 표시 (guide 키 = inc/guides 슬러그) */
 $cards = array(
 	array(
 		'key'  => 'implant',
+		'guide'=> 'implant',
 		'num'  => '01',
 		'icon' => $mc( 'clinic_intro_implant_icon', '🦷' ),
 		'title'=> $mc( 'clinic_intro_implant_title', '임플란트센터' ),
@@ -36,6 +38,7 @@ $cards = array(
 	),
 	array(
 		'key'  => 'ortho',
+		'guide'=> 'suresmile',
 		'num'  => '02',
 		'icon' => $mc( 'clinic_intro_ortho_icon', '✨' ),
 		'title'=> $mc( 'clinic_intro_ortho_title', '교정센터' ),
@@ -47,6 +50,7 @@ $cards = array(
 	),
 	array(
 		'key'  => 'smile',
+		'guide'=> 'laminate',
 		'num'  => '03',
 		'icon' => $mc( 'clinic_intro_smile_icon', '💎' ),
 		'title'=> $mc( 'clinic_intro_smile_title', '스마일디자인센터' ),
@@ -58,37 +62,18 @@ $cards = array(
 	),
 	array(
 		'key'  => 'preserve',
+		'guide'=> 'preservation',
 		'num'  => '04',
 		'icon' => $mc( 'clinic_intro_preserve_icon', '🌿' ),
-		'title'=> $mc( 'clinic_intro_preserve_title', '자연치아 살리기' ),
-		'lead' => $mc( 'clinic_intro_preserve_lead', '문치과병원은 발치 대신 자연치아를 최대한 보존하는 치료를 우선합니다.' ),
+		// v3.85 · 자연치아 살리기 → 자연치아보존센터 · 부분신경치료·덴탈SPA 추가 (예방클리닉 통합)
+		'title'=> $mc( 'clinic_intro_preserve_title', '자연치아보존센터' ),
+		'lead' => $mc( 'clinic_intro_preserve_lead', '발치 대신 자연치아를 최대한 보존합니다. 가장 작은 개입부터 차례로 — 충치·신경·잇몸 치료와 치료 뒤를 지키는 덴탈SPA까지 한 곳에서 이어집니다.' ),
 		'list' => $md_intro_list( 'clinic_intro_preserve_list',
-			"충치치료 — 초기 충치부터 정밀하게 진단·치료\n신경치료 — 손상된 치수를 살려 자연치아 보존\n잇몸치료 — 치주 질환 관리로 치아 수명 연장" ),
+			"충치치료 — 초기 충치부터 최소 삭제로 정밀 치료\n부분신경치료(치수보존술) — 신경을 전부 제거하지 않고 건강한 치수를 보존\n신경치료 — 미세현미경·CBCT 정밀 근관치료 · 재근관치료\n잇몸치료 — 치주 질환 단계별 치료와 유지관리\n덴탈SPA — 스케일링·에어플로우·불소도포·양치 코칭 60~90분 예방 프로그램" ),
 		'more_label' => $mc( 'clinic_intro_preserve_more', '자세히 보기 →' ),
 		'more_url'   => home_url( '/자연치아-살리기/' ),
 	),
-	array(
-		'key'  => 'dept',
-		'num'  => '05',
-		'icon' => $mc( 'clinic_intro_dept_icon', '🏥' ),
-		'title'=> $mc( 'clinic_intro_dept_title', '진료과' ),
-		'lead' => $mc( 'clinic_intro_dept_lead', '전 분과 전문 의료진이 분야별 진료를 한 자리에서 협진합니다.' ),
-		'list' => $md_intro_list( 'clinic_intro_dept_list',
-			"턱관절 클리닉 — 통증·기능 장애 진료\n이갈이 · 이악물기\n매복 사랑니 발치\n소아치과\n예방클리닉 — 전문예방치료실 · 덴탈 스파 프로그램" ),
-		'more_label' => $mc( 'clinic_intro_dept_more', '예방클리닉 자세히 →' ),
-		'more_url'   => home_url( '/예방클리닉/' ),
-	),
-	array(
-		'key'  => 'facility',
-		'num'  => '06',
-		'icon' => $mc( 'clinic_intro_facility_icon', '🔬' ),
-		'title'=> $mc( 'clinic_intro_facility_title', '기술력 / 시설' ),
-		'lead' => $mc( 'clinic_intro_facility_lead', '자체 디지털센터·기공소 운영. 물방울 레이저 5대 보유 — 통증·출혈 적고 빠른 회복.' ),
-		'list' => $md_intro_list( 'clinic_intro_facility_list',
-			"One Day 보철 치료까지 가능 (구강 정밀 스캔)\n의료진·기공사 긴밀 소통으로 맞춤형 보철\n오차 최소화 — 높은 정확도 · 내원 횟수 단축\n원내 기공소 신속 수정·A/S\n물방울 레이저 — 임플란트 주위염·잇몸 성형·시린이·신경치료·구내염·점액낭종" ),
-		'more_label' => $mc( 'clinic_intro_facility_more', '자세히 보기 →' ),
-		'more_url'   => home_url( '/기술력-시설/' ),
-	),
+	/* v3.86 · 진료과(05)·기술력/시설(06) 카드 제거 — 진료과는 상단 메뉴·푸터에서, 기술력/시설은 홈 Facility 섹션과 /기술력-시설/ 페이지에서 안내 */
 );
 
 $section_eyebrow = $mc( 'clinic_intro_eyebrow', 'CLINIC SYSTEM · 진료 시스템' );
@@ -112,8 +97,13 @@ $closer = $mc( 'clinic_intro_closer', '앞으로도 문치과병원은 봉사와
 
 		<div class="md-clinic-intro__grid">
 
-			<?php foreach ( $cards as $c ) : ?>
-				<article class="md-clinic-card">
+			<?php foreach ( $cards as $c ) :
+				// v3.86 · 센터별 종합안내서 (inc/guides 데이터에서 코드·제목을 읽음)
+				$_g = ( ! empty( $c['guide'] ) && function_exists( 'md_guide_load' ) ) ? md_guide_load( $c['guide'] ) : null;
+				$_g_href_map = array( 'implant' => '/guide/implant/', 'suresmile' => '/guide/suresmile/', 'laminate' => '/guide/laminate/', 'preservation' => '/guide/preservation/' );
+				$_g_href = ( $_g && isset( $_g_href_map[ $c['guide'] ] ) ) ? home_url( $_g_href_map[ $c['guide'] ] ) : '';
+			?>
+				<article class="md-clinic-card<?php echo ! empty( $c['guide'] ) ? ' md-clinic-card--' . esc_attr( $c['guide'] ) : ''; ?>">
 					<header>
 						<span class="md-clinic-card__num"><?php echo esc_html( $c['num'] ); ?></span>
 						<span class="md-clinic-card__icon" aria-hidden="true"><?php echo moondental_render_icon( $c['icon'] ); ?></span>
@@ -127,24 +117,23 @@ $closer = $mc( 'clinic_intro_closer', '앞으로도 문치과병원은 봉사와
 							<?php endforeach; ?>
 						</ul>
 					<?php endif; ?>
+					<?php if ( $_g && $_g_href ) : ?>
+						<a class="md-clinic-card__guide md-center-color--<?php echo esc_attr( $c['guide'] ); ?>" href="<?php echo esc_url( $_g_href ); ?>">
+							<span class="md-clinic-card__guide-icon" aria-hidden="true"><?php echo esc_html( $_g['icon'] ?? '📖' ); ?></span>
+							<span class="md-clinic-card__guide-code"><?php echo esc_html( $_g['code'] ?? '' ); ?></span>
+							<span class="md-clinic-card__guide-title"><?php echo esc_html( $_g['title'] ?? '종합안내서' ); ?></span>
+							<span aria-hidden="true">→</span>
+						</a>
+					<?php endif; ?>
 					<a class="md-clinic-card__more" href="<?php echo esc_url( $c['more_url'] ); ?>"><?php echo esc_html( $c['more_label'] ); ?></a>
 				</article>
 			<?php endforeach; ?>
 
 		</div>
 
-		<!-- 야간진료 강조 박스 -->
-		<aside class="md-clinic-night">
-			<span aria-hidden="true">🌙</span>
-			<div>
-				<strong><?php echo esc_html( $night_title ); ?></strong>
-				<p><?php echo esc_html( $night_desc ); ?></p>
-			</div>
-		</aside>
-
-		<!-- 마무리 메시지 -->
-		<p class="md-clinic-closer">
-			<?php echo esc_html( $closer ); ?>
-		</p>
+		<?php /* v3.86 · 야간진료 강조 박스·마무리 문구 제거 — 야간 진료는 Facility 섹션 카드와 푸터 진료시간에 있어 중복.
+		 * 되살리려면 아래 마크업을 다시 넣으면 된다 ($night_title·$night_desc·$closer 변수는 그대로 둠).
+		 *   <aside class="md-clinic-night"><span aria-hidden="true">🌙</span><div><strong>…</strong><p>…</p></div></aside>
+		 *   <p class="md-clinic-closer">…</p> */ ?>
 	</div>
 </section>

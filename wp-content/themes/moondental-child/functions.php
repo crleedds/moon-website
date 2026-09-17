@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.84' );
+define( 'MOONDENTAL_VERSION', '3.89.2' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -38,7 +38,25 @@ add_filter( 'pll_home_url_black_list', function ( $list ) {
 add_action( 'init', function () {
 	$langs = 'en|ja|zh|vi|ru|mn';
 	add_rewrite_rule( "^($langs)/?$",              'index.php',                        'top' );
+	// v3.88 · 의료진 상세 (/en/의료진/munes/ 등) · 일반 규칙보다 먼저 등록해야 pagename 으로 잡히지 않는다
+	add_rewrite_rule( "^($langs)/(의료진|doctors|%EC%9D%98%EB%A3%8C%EC%A7%84)/([a-z0-9_-]+)/?$", 'index.php?doctor_slug=$matches[3]', 'top' );
 	add_rewrite_rule( "^($langs)/(.+?)/?$",        'index.php?pagename=$matches[2]',   'top' );
+} );
+
+/* v3.88 · 언어 접두어 아래의 글(post) — /en/{post-slug}/ 는 pagename 으로 잡혀 404 가 나므로
+ *         해당 페이지가 없으면 같은 슬러그의 글(post)로 넘긴다. */
+add_filter( 'request', function ( $qv ) {
+	if ( empty( $qv['pagename'] ) ) return $qv;
+	$uri = isset( $_SERVER['REQUEST_URI'] ) ? rawurldecode( (string) $_SERVER['REQUEST_URI'] ) : '';
+	if ( ! preg_match( '#^/(en|ja|zh|vi|ru|mn)/#', $uri ) ) return $qv;
+	if ( get_page_by_path( $qv['pagename'] ) ) return $qv;
+	$slug = basename( $qv['pagename'] );
+	$post = get_page_by_path( $slug, OBJECT, 'post' );
+	if ( $post ) {
+		unset( $qv['pagename'] );
+		$qv['name'] = $slug;
+	}
+	return $qv;
 } );
 /* rewrite 규칙 최초 1회 flush */
 add_action( 'admin_init', function () {
@@ -1582,12 +1600,12 @@ add_action( 'after_setup_theme', function() {
 	if ( get_option( 'moondental_cheonan_asan_v3230' ) === 'done' ) return;
 	$cleanups = array(
 		'moondental_hero_title_a'  => '천안·아산에서 30여년,',
-		'moondental_hero_lead'     => "천안·아산 임플란트·천안·아산 투명교정·천안·아산 라미네이트·천안·아산 자연치아 살리기까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다.",
+		'moondental_hero_lead'     => "천안·아산 임플란트·천안·아산 투명교정·천안·아산 라미네이트·천안·아산 자연치아보존까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다.",
 		'moondental_doctor_lead'   => '1995년부터 천안에서, 한 분의 환자를 가족처럼 오래 보아왔습니다. 진료실 밖에서도 지역사회와 함께 가는 치과를 꿈꿉니다.',
 		'md_content_why_title'         => '천안에서 왜 문치과병원을 찾으시나요?',
 		'md_content_services_title'    => '천안에서 한 곳에서, 평생 치아 건강을',
 		'md_content_services_eyebrow'  => 'CLINICAL SERVICES · 천안 진료항목',
-		'md_content_services_lead'     => '천안·아산 임플란트·천안·아산 투명교정·천안·아산 라미네이트·천안·아산 자연치아 살리기·천안·아산 사랑니 발치까지 — 한 분의 환자를 오래 보는 천안 만남로 치과의 마음으로 진료합니다.',
+		'md_content_services_lead'     => '천안·아산 임플란트·천안·아산 투명교정·천안·아산 라미네이트·천안·아산 자연치아보존·천안·아산 사랑니 발치까지 — 한 분의 환자를 오래 보는 천안 만남로 치과의 마음으로 진료합니다.',
 	);
 	foreach ( $cleanups as $mod_key => $old_default ) {
 		if ( get_theme_mod( $mod_key ) === $old_default ) {
@@ -1713,7 +1731,7 @@ add_action( 'after_setup_theme', function() {
 
 		array( 'cat'=>'notice', 'title'=>'한아의료재단 문치과병원 — 천안 만남로 30여년의 진료',
 			'body'=>"<p>문치과병원은 1995년 천안에서 시작해 한아의료재단 산하 치과병원으로 자리잡아, 천안·아산 지역의 대표 치과병원으로 성장했습니다.</p>
-<p>현재는 동남구 만남로 52 문타워 9·10·11·13층의 병원급 시설에서 임플란트·교정·자연치아 살리기·턱관절·소아치과 등 전 진료과 협진 체계로 운영하고 있습니다.</p>
+<p>현재는 동남구 만남로 52 문타워 9·10·11·13층의 병원급 시설에서 임플란트·교정·자연치아보존·턱관절·소아치과 등 전 진료과 협진 체계로 운영하고 있습니다.</p>
 <p>오랜 진료 경험과 디지털 진단 장비(CBCT·구강스캐너)를 바탕으로 환자분께 꼭 필요한 치료만 권해드립니다.</p>" ),
 
 		array( 'cat'=>'notice', 'title'=>'예약 방법 — 네이버·전화·카카오톡 모두 가능',
@@ -2534,7 +2552,7 @@ function moondental_cta_copy( $context = null ) {
 
 		case 'preservation':
 			$copy = array(
-				'eyebrow' => '자연치아 살리기',
+				'eyebrow' => '자연치아보존센터',
 				'title'   => md_content( 'preservation_cta_title', "발치 권유받으셨나요?\n한 번 더 살펴보세요" ),
 				'lead'    => md_content( 'preservation_cta_lead',  '보존과·치주과 전문 의료진의 정밀 진단으로 자연치아를 살릴 수 있는지 검토해드립니다.' ),
 			);
@@ -2909,7 +2927,7 @@ function moondental_customize_register( $wp_customize ) {
 		'hero_eyebrow' => array( 'label' => '상단 작은 태그',     'type' => 'text',     'default' => '천안 만남로 · 1995년부터 한자리에서' ),
 		'hero_title_a' => array( 'label' => '메인 카피 1행',       'type' => 'text',     'default' => '천안·아산에서 30여년,' ),
 		'hero_title_b' => array( 'label' => '메인 카피 2행 (강조)', 'type' => 'text',     'default' => '환자 한 분의 평생 치아를' ),
-		'hero_lead'    => array( 'label' => '서브 카피',            'type' => 'textarea', 'default' => "천안·아산 임플란트·투명교정·라미네이트·자연치아 살리기까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다." ),
+		'hero_lead'    => array( 'label' => '서브 카피',            'type' => 'textarea', 'default' => "천안·아산 임플란트·투명교정·라미네이트·자연치아보존까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다." ),
 	);
 	foreach ( $hero_fields as $key => $f ) {
 		$id = 'moondental_' . $key;
@@ -3187,7 +3205,7 @@ function moondental_default_pages() {
 		array( 'slug' => '임상-케이스',       'title' => '임상 케이스',    'template' => 'page-templates/page-wide.php',         'order' => 4,  'parent' => '' ),
 		array( 'slug' => '임플란트-센터',     'title' => '임플란트 센터',  'template' => 'page-templates/page-service.php',      'order' => 5,  'parent' => '' ),
 		array( 'slug' => '투명교정-센터',     'title' => '투명교정 센터',  'template' => 'page-templates/page-service.php',      'order' => 6,  'parent' => '' ),
-		array( 'slug' => '자연치아-살리기',   'title' => '자연치아 살리기','template' => 'page-templates/page-service.php',      'order' => 7,  'parent' => '' ),
+		array( 'slug' => '자연치아-살리기',   'title' => '자연치아보존센터','template' => 'page-templates/page-service.php',      'order' => 7,  'parent' => '' ),
 		array( 'slug' => '턱관절-클리닉',     'title' => '턱관절 클리닉',  'template' => 'page-templates/page-service.php',      'order' => 8,  'parent' => '' ),
 		array( 'slug' => '사랑니-발치',       'title' => '사랑니 발치',   'template' => 'page-templates/page-service.php',      'order' => 9,  'parent' => '' ),
 		array( 'slug' => '심미치료',         'title' => '심미치료',      'template' => 'page-templates/page-service.php',      'order' => 10, 'parent' => '' ),
@@ -4497,18 +4515,20 @@ function moondental_primary_menu_data() {
 			array( 'label' => '브라켓 치아교정',     'url' => $home . '브라켓-치아교정/' ),
 		) ),
 		array( 'label' => '스마일디자인센터', 'url' => $home . '스마일디자인센터/',  'children' => array() ),
-		array( 'label' => '자연치아살리기',   'url' => $home . '자연치아-살리기/',   'children' => array(
-			array( 'label' => '충치치료',   'url' => $home . '자연치아-살리기/#cavity' ),
-			array( 'label' => '치수복조술', 'url' => $home . '자연치아-살리기/#pulpcap' ),
-			array( 'label' => '신경치료',   'url' => $home . '자연치아-살리기/#endo' ),
-			array( 'label' => '잇몸치료',   'url' => $home . '자연치아-살리기/#perio' ),
+		// v3.85 · 자연치아살리기 → 자연치아보존센터 (4번째 전문센터) · 부분신경치료·덴탈SPA 하위 추가
+		array( 'label' => '자연치아보존센터', 'url' => $home . '자연치아-살리기/',   'children' => array(
+			array( 'label' => '충치치료',                'url' => $home . '자연치아-살리기/#cavity' ),
+			array( 'label' => '부분신경치료(치수보존술)', 'url' => $home . '자연치아-살리기/#vpt' ),
+			array( 'label' => '신경치료',                'url' => $home . '자연치아-살리기/#endo' ),
+			array( 'label' => '잇몸치료',                'url' => $home . '자연치아-살리기/#perio' ),
+			array( 'label' => '덴탈SPA',                 'url' => $home . '자연치아-살리기/#spa' ),
 		) ),
 		array( 'label' => '진료과',           'url' => '#',           'children' => array(
 			array( 'label' => '턱관절클리닉',    'url' => $home . '턱관절-클리닉/' ),
 			array( 'label' => '이갈이·이악물기','url' => $home . '턱관절-클리닉/' ),
 			array( 'label' => '사랑니',          'url' => $home . '사랑니-발치/' ),
 			array( 'label' => '소아치과',        'url' => $home . '소아치과/' ),
-			array( 'label' => '예방클리닉',      'url' => $home . '예방클리닉/' ),
+			// v3.85 · 예방클리닉 항목 제거 (자연치아보존센터 › 덴탈SPA 로 통합)
 		) ),
 		array( 'label' => '의료진',           'url' => $home . '의료진/',             'children' => array() ),
 		array( 'label' => '비용안내',         'url' => $home . '비용-안내/',          'children' => array() ),
@@ -4669,7 +4689,7 @@ function moondental_service_visual( $slug ) {
 			'stats' => array(
 				array( 'value' => '30+', 'unit' => '년', 'label' => '임플란트 임상 경험' ),
 				array( 'value' => '±0.5', 'unit' => 'mm', 'label' => '가이드 수술 정확도' ),
-				array( 'value' => '10F',  'unit' => '',   'label' => '임플란트 전용층' ),
+				array( 'value' => '10F',  'unit' => '',   'label' => '임플란트센터' ), // v3.85 · 스마일디자인센터와 같은 층
 			),
 			'headline' => '천안·아산 임플란트, 30여년 임상으로 지키는 안정감',
 			'sub'      => 'CBCT 3D 정밀 진단 · 네비게이션 가이드 수술 · 발치부터 평생 관리까지 한 곳에서',
@@ -4733,6 +4753,9 @@ function moondental_menu_label_key( $label ) {
 		'스마일디자인센터'     => 'menu_smile',
 		'자연치아살리기'       => 'menu_preserve',
 		'자연치아 살리기'      => 'menu_preserve',
+		'자연치아보존센터'     => 'menu_preserve', // v3.85
+		'부분신경치료(치수보존술)' => 'menu_vpt',   // v3.85
+		'덴탈SPA'              => 'menu_spa',       // v3.85
 		'진료과'               => 'menu_dept',
 		'의료진'               => 'menu_doctors',
 		'비용안내'             => 'menu_pricing',
@@ -4785,6 +4808,7 @@ function moondental_render_primary_menu() {
 		if ( $_lbl_flat === '임플란트센터' )      $classes[] = 'md-nav-center md-nav-center--implant';
 		elseif ( $_lbl_flat === '교정센터' )      $classes[] = 'md-nav-center md-nav-center--suresmile';
 		elseif ( $_lbl_flat === '스마일디자인센터' ) $classes[] = 'md-nav-center md-nav-center--laminate';
+		elseif ( $_lbl_flat === '자연치아보존센터' ) $classes[] = 'md-nav-center md-nav-center--preservation'; // v3.85
 		// v3.44.22 · 라벨 번역 (파일 → API → 원본)
 		$_key   = function_exists( 'moondental_menu_label_key' ) ? moondental_menu_label_key( $item['label'] ) : null;
 		$_label = ( $_key && function_exists( 'md_content' ) ) ? md_content( $_key, $item['label'] ) : $item['label'];
@@ -4856,6 +4880,7 @@ add_filter( 'nav_menu_css_class', function ( $classes, $item ) {
 	if ( $t === '임플란트센터' )      { $classes[] = 'md-nav-center'; $classes[] = 'md-nav-center--implant'; }
 	elseif ( $t === '교정센터' )      { $classes[] = 'md-nav-center'; $classes[] = 'md-nav-center--suresmile'; }
 	elseif ( $t === '스마일디자인센터' ) { $classes[] = 'md-nav-center'; $classes[] = 'md-nav-center--laminate'; }
+	elseif ( $t === '자연치아보존센터' ) { $classes[] = 'md-nav-center'; $classes[] = 'md-nav-center--preservation'; } // v3.85
 	return $classes;
 }, 10, 2 );
 
@@ -4911,9 +4936,10 @@ function moondental_get_services() {
 		),
 		array(
 			'slug'  => '자연치아-살리기',
-			'title' => '천안·아산 자연치아 살리기',
+			// v3.85 · 자연치아 살리기 → 자연치아보존센터
+			'title' => '천안·아산 자연치아보존센터',
 			'icon'  => 'icon:preserve',
-			'desc'  => '천안·아산 신경치료·재근관치료·치주치료. 보존과 진료팀의 정밀 진료 — 발치보다 보존을 먼저 고민합니다.',
+			'desc'  => '천안·아산 충치·부분신경치료(VPT)·신경치료·잇몸치료·덴탈SPA. 보존과·치주과 협진 — 발치보다 보존을 먼저 고민합니다.',
 		),
 		array(
 			'slug'  => '턱관절-클리닉',
@@ -4990,16 +5016,16 @@ function moondental_get_service_areas() {
 		),
 		array(
 			'slug'  => '자연치아-살리기',
-			'title' => '자연치아 살리기',
+			'title' => '자연치아보존센터', // v3.85
 			'icon'  => 'icon:preserve',
-			'desc'  => '충치치료·신경치료·잇몸치료 — 발치보다 보존을 먼저 고민합니다.',
+			'desc'  => '충치·부분신경치료·신경치료·잇몸치료·덴탈SPA — 발치보다 보존을 먼저 고민합니다.',
 			'url'   => $home . '자연치아-살리기/',
 		),
 		array(
 			'slug'  => '진료항목',
 			'title' => '진료과',
 			'icon'  => 'icon:general',
-			'desc'  => '턱관절·이갈이·사랑니·소아치과·예방클리닉 — 전 진료과 협진 체계.',
+			'desc'  => '턱관절·이갈이·사랑니·소아치과 — 전 진료과 협진 체계.',
 			'url'   => '#',
 		),
 	);
@@ -5475,3 +5501,91 @@ function moondental_fetch_naver_blog( $limit = 20, $no_cache = false ) {
  * v3.45 · moondental_get_team() 이 이미 단일 리스트를 반환하므로 flatten 헬퍼 제거.
  * (호출처 없음 — 그룹 구분 폐지와 함께 삭제)
  */
+
+/* ============================================================
+ * 일회성 마이그레이션 v3.85 · 자연치아보존센터 신설
+ *  - 자연치아 살리기 → 자연치아보존센터 (4번째 전문센터)
+ *  - 예방클리닉 → 자연치아보존센터 › 덴탈SPA 로 통합
+ *  - 층별 안내 (스마일디자인센터 10F · 비서실 제거 · 13F 블루문드림)
+ *  - 비용안내 헤드라인 "투명한 비용 설명"
+ *  저장된 Customizer 값이 새 기본값을 덮어쓰지 않도록 관련 키를 비우고
+ *  (옵션 moondental_migrate_v385_backup 에 보관 · 되돌리기용), 페이지 제목을 갱신한다.
+ * ========================================================== */
+add_action( 'init', function () {
+	if ( get_option( 'moondental_migrate_v385' ) === 'done' ) return;
+
+	$keys = array(
+		'clinic_intro_preserve_title', 'clinic_intro_preserve_lead', 'clinic_intro_preserve_list', 'clinic_intro_preserve_more',
+		'clinic_intro_dept_list', 'clinic_intro_dept_more',
+		'services_lead', 'hero_lead', 'moondental_hero_lead',
+		'preservation_hero_eyebrow', 'preservation_hero_title_a', 'preservation_hero_lead', 'preservation_nav_items',
+		'preservation_pulpcap_eyebrow', 'preservation_pulpcap_title', 'preservation_pulpcap_lead',
+		'preservation_pulpcap_when_title', 'preservation_pulpcap_strength_title', 'preservation_pulpcap_callout_title',
+		'preservation_cta_chip',
+		'price_hero_title_a', 'price_hero_title_b', 'price_hero_title_c', 'price_hero_lead',
+		'price_promise_1_title', 'price_promise_1_desc', 'price_step_4_desc', 'price_policy_2_desc',
+		'process_5_desc', 'seo_pricing_desc',
+	);
+	// 옛 표현이 들어 있는 저장값만 비운다 (사용자가 전혀 다른 문구로 바꿔둔 값은 보존)
+	$old_phrases = array( '자연치아 살리기', '자연치아살리기', '예방클리닉', '치수복조술', '처음 들으신', '견적 그대로', '치료가 끝날 때까지', '그대로.', '추가 비용' );
+	$backup = array();
+	foreach ( $keys as $k ) {
+		foreach ( array( 'md_content_' . $k, $k ) as $mod ) {
+			$v = get_theme_mod( $mod, null );
+			if ( ! is_string( $v ) || $v === '' ) continue;
+			$hit = false;
+			foreach ( $old_phrases as $ph ) {
+				if ( strpos( $v, $ph ) !== false ) { $hit = true; break; }
+			}
+			if ( $hit ) {
+				$backup[ $mod ] = $v;
+				remove_theme_mod( $mod );
+			}
+		}
+	}
+	if ( $backup ) {
+		update_option( 'moondental_migrate_v385_backup', $backup, false );
+	}
+
+	// 페이지 제목 · 자연치아 살리기 → 자연치아보존센터 (슬러그 /자연치아-살리기/ 는 유지 · 검색 유입 보호)
+	$p = get_page_by_path( '자연치아-살리기' );
+	if ( $p && $p->post_title !== '자연치아보존센터' ) {
+		wp_update_post( array( 'ID' => $p->ID, 'post_title' => '자연치아보존센터' ) );
+	}
+
+	update_option( 'moondental_migrate_v385', 'done' );
+}, 30 );
+
+/**
+ * v3.85 · /예방클리닉/ → /자연치아-살리기/#spa 301 (예방클리닉 페이지 폐지 · 덴탈SPA 로 통합)
+ */
+add_action( 'template_redirect', function () {
+	if ( is_admin() || ! is_page() ) return;
+	$slug = get_post_field( 'post_name', get_queried_object_id() );
+	if ( $slug === '' ) return;
+	$slug = rawurldecode( $slug );
+	if ( $slug === '예방클리닉' || $slug === '예방-클리닉' ) {
+		wp_redirect( home_url( '/자연치아-살리기/#spa' ), 301 );
+		exit;
+	}
+}, 5 );
+
+/* 일회성 마이그레이션 v3.86 · 홈 층별 요약 문구 (hero 지표·Why 카드) — 층별 안내와 맞춤
+ *  옛 표현이 들어 있는 저장값만 비운다 (백업: moondental_migrate_v386_backup). */
+add_action( 'init', function () {
+	if ( get_option( 'moondental_migrate_v386' ) === 'done' ) return;
+	$keys = array( 'trust_2_sub', 'trust_3_sub', 'why_2_desc', 'facility_lead', 'services_lead' );
+	$old_phrases = array( '9F 보철·보존', '9F 스마일디자인', '보존·예방', '예방클리닉', '자연치아 살리기' );
+	$backup = array();
+	foreach ( $keys as $k ) {
+		foreach ( array( 'md_content_' . $k, $k ) as $mod ) {
+			$v = get_theme_mod( $mod, null );
+			if ( ! is_string( $v ) || $v === '' ) continue;
+			foreach ( $old_phrases as $ph ) {
+				if ( strpos( $v, $ph ) !== false ) { $backup[ $mod ] = $v; remove_theme_mod( $mod ); break; }
+			}
+		}
+	}
+	if ( $backup ) update_option( 'moondental_migrate_v386_backup', $backup, false );
+	update_option( 'moondental_migrate_v386', 'done' );
+}, 31 );

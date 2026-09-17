@@ -1104,7 +1104,7 @@ add_filter( 'nav_menu_css_class', 'moondental_strip_ancestor_classes_on_standalo
  *  하위 페이지 링크는 그대로 정상 클릭 가능.
  */
 function moondental_nolink_parent_menu_titles() {
-	return array( '병원안내', '병원 안내', '자연치아살리기', '자연치아 살리기', '진료과', '교정센터' );
+	return array( '병원안내', '병원 안내', '자연치아살리기', '자연치아 살리기', '자연치아보존센터', '진료과', '교정센터' );
 }
 
 /**
@@ -1166,6 +1166,7 @@ function moondental_floor_guide_data() {
 			'centers' => array(
 				array( 'name' => '원내기공실' ),
 				array( 'name' => '한아문화센터' ),
+				array( 'name' => '블루문드림' ), // v3.85
 			),
 		),
 		array(
@@ -1181,21 +1182,23 @@ function moondental_floor_guide_data() {
 			'floor'   => '10F',
 			'centers' => array(
 				array( 'name' => '임플란트센터',      'slug' => '임플란트-센터', 'center' => 'implant' ),
+				// v3.85 · 스마일디자인센터 9F → 10F 이전 · 비서실 항목 제거
+				array( 'name' => '스마일디자인센터',   'slug' => '스마일디자인센터', 'center' => 'laminate' ),
 				array( 'name' => '슈어스마일 투명교정', 'slug' => '투명교정-센터' ),
 				array( 'name' => '구강외과' ),
 				array( 'name' => '구강내과' ),
 				array( 'name' => '턱관절 클리닉',      'slug' => '턱관절-클리닉' ),
-				array( 'name' => '비서실' ), // v3.77
 			),
 		),
 		array(
 			'floor'   => '9F',
 			'centers' => array(
-				array( 'name' => '스마일디자인센터', 'slug' => '스마일디자인센터', 'center' => 'laminate' ),
+				// v3.85 · 자연치아 살리기 → 자연치아보존센터 (4번째 전문센터) · 예방클리닉은 덴탈SPA 로 통합
+				array( 'name' => '자연치아보존센터', 'slug' => '자연치아-살리기', 'center' => 'preservation' ),
 				array( 'name' => '신환접수' ),
 				array( 'name' => '보철과' ),
 				array( 'name' => '보존과' ),
-				array( 'name' => '예방클리닉',   'slug' => '예방클리닉' ),
+				array( 'name' => '덴탈SPA' ),
 				array( 'name' => '경영지원실' ), // v3.44.213
 			),
 		),
@@ -1227,7 +1230,7 @@ function moondental_slug_floor( $slug ) {
 		// 진료 페이지 슬러그 · 층 별칭 매핑 (실제 진료 담당 진료과의 층)
 		$aliases = array(
 			'자연치아-살리기' => '9F',  // 보존과 · 9F
-			'심미치료'         => '9F',  // 스마일디자인센터 · 9F (v3.44.199 · 층별 안내 기준으로 10F→9F 정정)
+			'심미치료'         => '10F', // 스마일디자인센터 · 10F (v3.85 · 스마일디자인센터 10F 이전)
 			'사랑니-발치'      => '10F', // 구강외과 · 10F
 			// v3.44.203 · 슈어스마일 투명교정 진료는 10F 에서 진행 (사용자 확인).
 			//   교정센터(11F)와 층이 다르므로 별칭을 분리해 둔다.
@@ -1266,8 +1269,9 @@ function moondental_text_floor( $text ) {
 		'턱관절'       => '턱관절 클리닉',
 		'소아'         => '소아치과',
 		'어린이'       => '소아치과',
-		'예방'         => '예방클리닉',
-		'스케일링'     => '예방클리닉',
+		'예방'         => '덴탈SPA', // v3.85 · 예방클리닉 → 덴탈SPA
+		'스케일링'     => '덴탈SPA',
+		'덴탈'         => '덴탈SPA',
 		'잇몸'         => '치주과',
 		'치주'         => '치주과',
 		'라미네이트'   => '스마일디자인센터',
@@ -1276,7 +1280,7 @@ function moondental_text_floor( $text ) {
 		'보철'         => '보철과',
 		'크라운'       => '보철과',
 		'틀니'         => '보철과',
-		'자연치아'     => '보존과',
+		'자연치아'     => '자연치아보존센터',
 		'신경'         => '보존과',
 		'충치'         => '보존과',
 	);
@@ -1954,7 +1958,7 @@ function moondental_clinic_comparison() {
 	$defaults = array(
 		1 => array( 'label' => '의료기관 종별',     'value' => '치과병원 (병원급)',                            'icon' => '🏥' ),
 		2 => array( 'label' => '의료진 협진',       'value' => '분야별 전문 의료진 협진',                       'icon' => '👨‍⚕️' ),
-		3 => array( 'label' => '전문 진료 영역',   'value' => '보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주',                'icon' => '🦷' ),
+		3 => array( 'label' => '전문 진료 영역',   'value' => '보철·보존·덴탈SPA·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주',                'icon' => '🦷' ),
 		4 => array( 'label' => '통합 진료센터',     'value' => '9·10·11·13F 4개 층 운영',                      'icon' => '🏢' ),
 		5 => array( 'label' => '디지털 진단 장비',  'value' => 'CBCT · 디지털 가이드 · 구강스캐너',            'icon' => '🔬' ),
 		6 => array( 'label' => '자체 보철 제작',    'value' => '한아 임플란트 보철연구소 · 원내 기공실 (13F)', 'icon' => '⚙️' ),

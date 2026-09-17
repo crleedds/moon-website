@@ -184,7 +184,7 @@ $step_defaults = array(
 	1 => array( 'icon' => '💬', 'title' => '편안한 상담',  'desc' => '증상·예산·일정·우려를 충분히 듣습니다. 전화·카톡·내원 모두 가능.' ),
 	2 => array( 'icon' => '🔬', 'title' => '정밀 진단',    'desc' => 'X-ray · CT · 구강 검사로 정확한 상태를 파악합니다.' ),
 	3 => array( 'icon' => '📄', 'title' => '상세 견적서',   'desc' => '치료 옵션별 비용·기간·과정을 문서로 안내드립니다.' ),
-	4 => array( 'icon' => '✅', 'title' => '동의 후 치료', 'desc' => '충분히 검토하시고 동의하신 항목만 진행. 추가 비용 0원.' ),
+	4 => array( 'icon' => '✅', 'title' => '동의 후 치료', 'desc' => '충분히 검토하시고 동의하신 항목만 진행합니다.' ),
 );
 $steps = array();
 for ( $i = 1; $i <= 4; $i++ ) {
@@ -200,7 +200,7 @@ for ( $i = 1; $i <= 4; $i++ ) {
 // 가격 정책 4 — Customizer 연동 (기본값은 Customizer 정의와 동일)
 $policy_defaults = array(
 	1 => array( 'title' => '환자 중심 결정',   'desc' => '비용보다 환자분의 치아 보존이 먼저입니다. 발치보다 보존, 임플란트보다 신경치료를 우선 검토합니다.' ),
-	2 => array( 'title' => '사전 견적서 제공', 'desc' => '치료 시작 전에 옵션별 비용·기간을 문서로 안내드립니다. 시작 후 추가 비용이 발생하지 않습니다.' ),
+	2 => array( 'title' => '사전 견적서 제공', 'desc' => '치료 시작 전에 옵션별 비용·기간을 문서로 안내드립니다. 안내드린 항목 외 비용은 사전 동의 없이 발생하지 않습니다.' ),
 	3 => array( 'title' => '난이도 단계 안내', 'desc' => '임플란트·교정 등은 케이스 난이도에 따라 가격대가 명확히 다릅니다. 어느 단계인지 사전에 설명드립니다.' ),
 	4 => array( 'title' => '평생 A/S 시스템',  'desc' => '시술 후 정기 검진·문제 발생 시 대응까지 함께 봅니다. 비용은 시술 시점에만 발생하지 않습니다.' ),
 );
@@ -247,11 +247,11 @@ for ( $i = 1; $i <= 4; $i++ ) {
 			<div class="md-priceX-hero__text">
 				<span class="md-priceX-hero__chip"><?php echo esc_html( md_content( 'price_hero_chip', 'BILLING TRANSPARENCY · 비용 안내' ) ); ?></span>
 				<h1 class="md-priceX-hero__title">
-					<?php echo esc_html( md_content( 'price_hero_title_a', '처음 들으신 견적,' ) ); ?><br>
-					<em><?php echo esc_html( md_content( 'price_hero_title_b', '치료가 끝날 때까지' ) ); ?></em> <?php echo esc_html( md_content( 'price_hero_title_c', '그대로.' ) ); ?>
+					<?php echo esc_html( md_content( 'price_hero_title_a', '치료를 결정하시기 전에,' ) ); ?><br>
+					<em><?php echo esc_html( md_content( 'price_hero_title_b', '투명한 비용 설명' ) ); ?></em><?php echo esc_html( md_content( 'price_hero_title_c', '부터.' ) ); ?>
 				</h1>
 				<p class="md-priceX-hero__lead">
-					<?php echo nl2br( esc_html( md_content( 'price_hero_lead', '문치과병원은 30여년 동안 정직한 진료비를 약속해왔습니다. 불필요한 치료를 권하지 않고, 시작 후 추가 비용이 발생하지 않습니다.' ) ) ); ?>
+					<?php echo nl2br( esc_html( md_content( 'price_hero_lead', '문치과병원은 30여년 동안 정직한 진료비를 약속해왔습니다. 불필요한 치료를 권하지 않고, 급여·비급여를 구분한 견적서로 비용을 먼저 설명드립니다.' ) ) ); ?>
 				</p>
 				<?php /* v3.37.5 · 비용안내 히어로 CTA 버튼 제거 (하단 통일 CTA와 중복) */ ?>
 			</div>
@@ -263,7 +263,7 @@ for ( $i = 1; $i <= 4; $i++ ) {
 				</header>
 				<?php
 				$promise_defaults = array(
-					1 => array( 'title' => '견적 그대로',          'desc' => '치료 시작 후 추가 비용 0원' ),
+					1 => array( 'title' => '투명한 비용 설명',      'desc' => '치료 전 모든 항목을 문서로 안내' ),
 					2 => array( 'title' => '모든 비급여 사전 안내', 'desc' => '한 항목도 빠뜨리지 않고 미리' ),
 					3 => array( 'title' => '치아 보존이 우선',     'desc' => '발치보다 살리기를 먼저 고민' ),
 				);

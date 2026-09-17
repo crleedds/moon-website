@@ -22,6 +22,7 @@ $path_map = array(
 	'implant'   => '/guide/implant/',
 	'suresmile' => '/guide/suresmile/',
 	'laminate'  => '/guide/laminate/',
+	'preservation' => '/guide/preservation/', // v3.85
 );
 $href = isset( $path_map[ $slug ] ) ? $path_map[ $slug ] : '/';
 

@@ -18,14 +18,14 @@ $stats = array(
 		'value' => md_content( 'trust_2_value', '11' ),
 		'unit'  => md_content( 'trust_2_unit',  '개' ),
 		'label' => md_content( 'trust_2_label', '전문 진료 영역' ),
-		'sub'   => md_content( 'trust_2_sub',   '보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주' ),
+		'sub'   => md_content( 'trust_2_sub',   '보철·보존·덴탈SPA·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주' ),
 		'icon'  => '🦷',
 	),
 	array(
 		'value' => md_content( 'trust_3_value', '4' ),
 		'unit'  => md_content( 'trust_3_unit',  '개층' ),
 		'label' => md_content( 'trust_3_label', '통합 진료센터' ),
-		'sub'   => md_content( 'trust_3_sub',   '9F 보철·보존 · 10F 임플란트·외과 · 11F 교정·소아 · 13F 기공' ),
+		'sub'   => md_content( 'trust_3_sub',   '9F 자연치아보존 · 10F 임플란트·스마일디자인 · 11F 교정·소아 · 13F 기공' ),
 		'icon'  => '🏢',
 	),
 	array(

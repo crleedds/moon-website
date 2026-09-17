@@ -106,6 +106,13 @@ function moondental_load_translations( $lang ) {
 	} else {
 		$cache[ $lang ] = array();
 	}
+	// v3.87 · 추가 번역 파일 (md_translations_{lang}_extra.php) 병합 · 같은 키는 extra 가 우선
+	//   기본 파일은 손대지 않고, 빠져 있던 키(홈·센터·비용·의료진 페이지 등)를 별도 파일로 채운다.
+	$extra = defined( 'MOONDENTAL_DIR' ) ? MOONDENTAL_DIR . '/languages/md_translations_' . $lang . '_extra.php' : '';
+	if ( $extra && file_exists( $extra ) ) {
+		$more = include $extra;
+		if ( is_array( $more ) ) $cache[ $lang ] = array_merge( $cache[ $lang ], $more );
+	}
 	return $cache[ $lang ];
 }
 
@@ -279,12 +286,12 @@ function moondental_home_content_fields() {
 				'trust_2_value' => array( 'default' => '11',    'label' => '②번 — 숫자',     'type' => 'text' ),
 				'trust_2_unit'  => array( 'default' => '개',    'label' => '②번 — 단위',     'type' => 'text' ),
 				'trust_2_label' => array( 'default' => '전문 진료 영역', 'label' => '②번 — 라벨', 'type' => 'text' ),
-				'trust_2_sub'   => array( 'default' => '보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주', 'label' => '②번 — 부제', 'type' => 'text' ),
+				'trust_2_sub'   => array( 'default' => '보철·보존·덴탈SPA·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주', 'label' => '②번 — 부제', 'type' => 'text' ),
 
 				'trust_3_value' => array( 'default' => '4',     'label' => '③번 — 숫자',     'type' => 'text' ),
 				'trust_3_unit'  => array( 'default' => '개층',   'label' => '③번 — 단위',     'type' => 'text' ),
 				'trust_3_label' => array( 'default' => '통합 진료센터', 'label' => '③번 — 라벨', 'type' => 'text' ),
-				'trust_3_sub'   => array( 'default' => '9F 보철·보존 · 10F 임플란트·외과 · 11F 교정·소아 · 13F 기공', 'label' => '③번 — 부제', 'type' => 'text' ),
+				'trust_3_sub'   => array( 'default' => '9F 자연치아보존 · 10F 임플란트·스마일디자인 · 11F 교정·소아 · 13F 기공', 'label' => '③번 — 부제', 'type' => 'text' ),
 
 				'trust_4_value' => array( 'default' => '1:1',   'label' => '④번 — 숫자',     'type' => 'text' ),
 				'trust_4_unit'  => array( 'default' => '',       'label' => '④번 — 단위',     'type' => 'text' ),
@@ -307,7 +314,7 @@ function moondental_home_content_fields() {
 
 				'why_2_icon'  => array( 'default' => '🏢', 'label' => '②번 — 아이콘', 'type' => 'text' ),
 				'why_2_title' => array( 'default' => '통합 진료센터', 'label' => '②번 — 제목', 'type' => 'text' ),
-				'why_2_desc'  => array( 'default' => '9F 스마일디자인·보철·보존 · 10F 임플란트·구강외과·턱관절 · 11F 교정·소아·치주 · 13F 원내기공실 — 분야별 전문 의료진의 협진을 한 곳에서 받으실 수 있습니다.', 'label' => '②번 — 설명', 'type' => 'textarea' ),
+				'why_2_desc'  => array( 'default' => '9F 자연치아보존센터·보철·덴탈SPA · 10F 임플란트센터·스마일디자인센터·구강외과·턱관절 · 11F 교정센터·소아·치주 · 13F 원내기공실·한아문화센터 — 분야별 전문 의료진의 협진을 한 곳에서 받으실 수 있습니다.', 'label' => '②번 — 설명', 'type' => 'textarea' ),
 
 				'why_3_icon'  => array( 'default' => '❤️', 'label' => '③번 — 아이콘', 'type' => 'text' ),
 				'why_3_title' => array( 'default' => '전신질환 안심 진료', 'label' => '③번 — 제목', 'type' => 'text' ),
@@ -432,7 +439,7 @@ function moondental_home_content_fields() {
 
 				'process_5_icon'  => array( 'default' => '🦷', 'label' => '05 — 아이콘', 'type' => 'text' ),
 				'process_5_title' => array( 'default' => '동의 후 치료', 'label' => '05 — 제목', 'type' => 'text' ),
-				'process_5_desc'  => array( 'default' => '충분히 검토하시고 시작 · 추가 비용 없음', 'label' => '05 — 설명', 'type' => 'textarea' ),
+				'process_5_desc'  => array( 'default' => '충분히 검토하시고 시작 · 안내 외 비용은 사전 동의 후에만', 'label' => '05 — 설명', 'type' => 'textarea' ),
 
 				'process_6_icon'  => array( 'default' => '🌿', 'label' => '06 — 아이콘', 'type' => 'text' ),
 				'process_6_title' => array( 'default' => '정기 관리 / A/S', 'label' => '06 — 제목', 'type' => 'text' ),
@@ -471,6 +478,17 @@ function moondental_home_content_fields() {
 				'facility_6_icon'  => array( 'default' => '🌙', 'label' => '⑥번 — 아이콘', 'type' => 'text' ),
 				'facility_6_title' => array( 'default' => '평일 야간 진료', 'label' => '⑥번 — 제목', 'type' => 'text' ),
 				'facility_6_desc'  => array( 'default' => '월·화·수·금 ~ 20:30 — 직장인 · 학생도 부담 없이 방문하실 수 있도록.', 'label' => '⑥번 — 설명', 'type' => 'textarea' ),
+				// v3.86 · 홈 CLINIC SYSTEM '기술력/시설' 카드 내용을 이 섹션으로 통합
+				'facility_7_icon'  => array( 'default' => '💧', 'label' => '⑦번 — 아이콘', 'type' => 'text' ),
+				'facility_7_title' => array( 'default' => '물방울 레이저 5대', 'label' => '⑦번 — 제목', 'type' => 'text' ),
+				'facility_7_desc'  => array( 'default' => '임플란트 주위염 · 잇몸 성형 · 시린이 · 신경치료 · 구내염 · 점액낭종 — 통증·출혈 적고 회복 빠른 레이저 진료.', 'label' => '⑦번 — 설명', 'type' => 'textarea' ),
+				'facility_8_icon'  => array( 'default' => '🖥️', 'label' => '⑧번 — 아이콘', 'type' => 'text' ),
+				'facility_8_title' => array( 'default' => 'One Day 디지털 보철', 'label' => '⑧번 — 제목', 'type' => 'text' ),
+				'facility_8_desc'  => array( 'default' => '구강 정밀 스캔 → 원내 기공소 제작 — 오차 최소화 · 높은 정확도 · 내원 횟수 단축. 당일 보철 치료까지 가능.', 'label' => '⑧번 — 설명', 'type' => 'textarea' ),
+				'facility_9_icon'  => array( 'default' => '🤝', 'label' => '⑨번 — 아이콘', 'type' => 'text' ),
+				'facility_9_title' => array( 'default' => '원내 기공사 상주 · 신속 A/S', 'label' => '⑨번 — 제목', 'type' => 'text' ),
+				'facility_9_desc'  => array( 'default' => '13F 원내기공실 — 의료진과 기공사가 직접 소통해 맞춤형 보철을 만들고, 수정·A/S 도 원내에서 빠르게.', 'label' => '⑨번 — 설명', 'type' => 'textarea' ),
+				'facility_more_label' => array( 'default' => '기술력 / 시설 자세히 보기 →', 'label' => '하단 링크 문구', 'type' => 'text' ),
 			),
 		),
 
@@ -682,7 +700,7 @@ function moondental_home_content_fields() {
 				'hero_eyebrow'            => array( 'default' => '천안·아산 대표 치과병원 · 전국에서 찾아오는', 'label' => 'Hero · eyebrow (신규 · 있으면 우선)', 'type' => 'text' ),
 				'hero_title_a'            => array( 'default' => '천안·아산에서 30여년,', 'label' => 'Hero · 제목 상단', 'type' => 'text' ),
 				'hero_title_b'            => array( 'default' => '전국 환자가 신뢰하는 통합 진료', 'label' => 'Hero · 제목 하단 (em 강조)', 'type' => 'text' ),
-				'hero_lead'               => array( 'default' => "천안·아산 임플란트·투명교정·라미네이트·자연치아 살리기까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다.", 'label' => 'Hero · 리드 문단 (단일 hero용)', 'type' => 'textarea' ),
+				'hero_lead'               => array( 'default' => "천안·아산 임플란트·투명교정·라미네이트·자연치아보존까지.\n분야별 전문 의료진이 한 자리에서 — 충분히 듣고, 꼭 필요한 치료만 권합니다.", 'label' => 'Hero · 리드 문단 (단일 hero용)', 'type' => 'textarea' ),
 				'hero_cta_url'            => array( 'default' => '/상담예약/', 'label' => 'Hero · CTA URL', 'type' => 'text' ),
 				'hero_cta_label'          => array( 'default' => '📅 상담 예약하기', 'label' => 'Hero · CTA 라벨', 'type' => 'text' ),
 				// v3.38.6 · 브레드크럼 추가 + 원장 이름→슬러그 매핑
@@ -728,8 +746,8 @@ function moondental_home_content_fields() {
 				'seo_ortho_desc'  => array( 'default' => '천안·아산 투명교정 슈어스마일 (Dentsply Sirona). 천안 만남로 치과교정과 진료, AI 3D 시뮬레이션, Lite·Standard·Advanced 단계별 합리적 가격(190만원~).', 'label' => '투명교정 · 설명', 'type' => 'textarea' ),
 				'seo_ortho_kw'    => array( 'default' => '천안·아산 투명교정, 아산 투명교정, 천안·아산 슈어스마일, 아산 슈어스마일, 천안·아산 교정, 아산 교정, 천안·아산 치아교정, 아산 치아교정, 천안 성인교정, 아산 성인교정, 천안 부분교정, 아산 부분교정, 천안·아산 투명교정 가격', 'label' => '투명교정 · 키워드', 'type' => 'textarea' ),
 				// 자연치아 살리기
-				'seo_preservation_title' => array( 'default' => '천안·아산 자연치아 살리기 | 신경치료·재근관치료·치주치료', 'label' => '자연치아 · 제목', 'type' => 'text' ),
-				'seo_preservation_desc'  => array( 'default' => '천안·아산 자연치아 살리기. 발치보다 보존 우선 — 신경치료·재근관치료·치주치료로 자연치아 최대한 살리는 천안 만남로 치과병원.', 'label' => '자연치아 · 설명', 'type' => 'textarea' ),
+				'seo_preservation_title' => array( 'default' => '천안·아산 자연치아보존센터 | 충치·부분신경치료·신경치료·잇몸치료·덴탈SPA', 'label' => '자연치아 · 제목', 'type' => 'text' ),
+				'seo_preservation_desc'  => array( 'default' => '천안·아산 자연치아보존센터. 발치보다 보존 우선 — 충치·부분신경치료(VPT)·신경치료·잇몸치료·덴탈SPA로 자연치아를 최대한 살리는 천안 만남로 치과병원.', 'label' => '자연치아 · 설명', 'type' => 'textarea' ),
 				'seo_preservation_kw'    => array( 'default' => '천안·아산 신경치료, 아산 신경치료, 천안·아산 자연치아 살리기, 아산 자연치아 살리기, 천안 치주치료, 아산 치주치료, 천안·아산 잇몸치료, 아산 잇몸치료, 천안 재근관치료, 천안 충치치료, 아산 충치치료', 'label' => '자연치아 · 키워드', 'type' => 'textarea' ),
 				// 턱관절
 				'seo_tmj_title' => array( 'default' => '천안·아산 턱관절 치료 | 통증·소리·개구장애', 'label' => '턱관절 · 제목', 'type' => 'text' ),
@@ -745,11 +763,11 @@ function moondental_home_content_fields() {
 				'seo_aesthetic_kw'    => array( 'default' => '천안·아산 라미네이트, 아산 라미네이트, 천안·아산 미백, 아산 미백, 천안 치아미백, 아산 치아미백, 천안·아산 심미치료, 아산 심미치료, 천안·아산 라미네이트 가격, 천안 앞니 라미네이트', 'label' => '심미치료 · 키워드', 'type' => 'textarea' ),
 				// 비용 안내
 				'seo_pricing_title' => array( 'default' => '천안·아산 치과 비용 안내 | 정직한 진료비', 'label' => '비용 안내 · 제목', 'type' => 'text' ),
-				'seo_pricing_desc'  => array( 'default' => '천안·아산 치과 비용 — 임플란트·투명교정·라미네이트·사랑니 발치 비용 안내. 사전 견적서 제공, 시작 후 추가 비용 0원.', 'label' => '비용 안내 · 설명', 'type' => 'textarea' ),
+				'seo_pricing_desc'  => array( 'default' => '천안·아산 치과 비용 — 임플란트·투명교정·라미네이트·사랑니 발치 비용 안내. 사전 견적서 제공, 급여·비급여 투명 안내.', 'label' => '비용 안내 · 설명', 'type' => 'textarea' ),
 				'seo_pricing_kw'    => array( 'default' => '천안·아산 치과 비용, 아산 치과 비용, 천안·아산 임플란트 비용, 아산 임플란트 비용, 천안·아산 투명교정 비용, 아산 투명교정 비용, 천안·아산 라미네이트 비용, 천안·아산 사랑니 비용, 천안·아산 치과 가격, 아산 치과 가격', 'label' => '비용 안내 · 키워드', 'type' => 'textarea' ),
 				// 의료진
 				'seo_doctors_title' => array( 'default' => '천안·아산 치과 의료진 | 분야별 전문 의료진 협진', 'label' => '의료진 · 제목', 'type' => 'text' ),
-				'seo_doctors_desc'  => array( 'default' => '천안 만남로 문치과병원 의료진 — 보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 분야별 전문 의료진이 한 케이스를 함께 봅니다.', 'label' => '의료진 · 설명', 'type' => 'textarea' ),
+				'seo_doctors_desc'  => array( 'default' => '천안 만남로 문치과병원 의료진 — 보철·보존·덴탈SPA·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 분야별 전문 의료진이 한 케이스를 함께 봅니다.', 'label' => '의료진 · 설명', 'type' => 'textarea' ),
 				'seo_doctors_kw'    => array( 'default' => '천안·아산 치과 의사, 아산 치과 의사, 천안·아산 치과 의료진, 아산 치과 의료진, 천안·아산 임플란트 진료팀, 아산 임플란트 진료팀, 천안·아산 교정과, 아산 교정과, 문치과병원 원장', 'label' => '의료진 · 키워드', 'type' => 'textarea' ),
 				// 오시는 길
 				'seo_location_title' => array( 'default' => '천안 만남로 치과 — 오시는 길 · 주차 · 진료시간', 'label' => '오시는 길 · 제목', 'type' => 'text' ),
@@ -965,10 +983,10 @@ function moondental_pricing_content_fields() {
 			'title'  => '비용 페이지 — Hero',
 			'fields' => array(
 				'price_hero_chip'    => array( 'default' => 'BILLING TRANSPARENCY · 비용 안내', 'label' => '상단 chip', 'type' => 'text' ),
-				'price_hero_title_a' => array( 'default' => '처음 들으신 견적,', 'label' => '제목 1행', 'type' => 'text' ),
-				'price_hero_title_b' => array( 'default' => '치료가 끝날 때까지', 'label' => '제목 2행 (강조)', 'type' => 'text' ),
-				'price_hero_title_c' => array( 'default' => '그대로.', 'label' => '제목 2행 끝부분', 'type' => 'text' ),
-				'price_hero_lead'    => array( 'default' => '문치과병원은 30여년 동안 정직한 진료비를 약속해왔습니다. 불필요한 치료를 권하지 않고, 시작 후 추가 비용이 발생하지 않습니다.', 'label' => '설명', 'type' => 'textarea' ),
+				'price_hero_title_a' => array( 'default' => '치료를 결정하시기 전에,', 'label' => '제목 1행', 'type' => 'text' ),
+				'price_hero_title_b' => array( 'default' => '투명한 비용 설명', 'label' => '제목 2행 (강조)', 'type' => 'text' ),
+				'price_hero_title_c' => array( 'default' => '부터.', 'label' => '제목 2행 끝부분', 'type' => 'text' ),
+				'price_hero_lead'    => array( 'default' => '문치과병원은 30여년 동안 정직한 진료비를 약속해왔습니다. 불필요한 치료를 권하지 않고, 급여·비급여를 구분한 견적서로 비용을 먼저 설명드립니다.', 'label' => '설명', 'type' => 'textarea' ),
 				'price_hero_btn1'    => array( 'default' => '📞 무료 비용 상담', 'label' => 'CTA 1 라벨 (전화번호 자동 추가)', 'type' => 'text' ),
 				'price_hero_btn2'    => array( 'default' => '🟢 네이버 예약', 'label' => 'CTA 2 라벨', 'type' => 'text' ),
 			),
@@ -981,8 +999,8 @@ function moondental_pricing_content_fields() {
 				'price_promise_year'  => array( 'default' => 'SINCE 1995', 'label' => '연도 라벨', 'type' => 'text' ),
 				'price_promise_title' => array( 'default' => '문치과의 3가지 약속', 'label' => '카드 제목', 'type' => 'text' ),
 
-				'price_promise_1_title' => array( 'default' => '견적 그대로', 'label' => '①번 — 제목', 'type' => 'text' ),
-				'price_promise_1_desc'  => array( 'default' => '치료 시작 후 추가 비용 0원', 'label' => '①번 — 설명', 'type' => 'text' ),
+				'price_promise_1_title' => array( 'default' => '투명한 비용 설명', 'label' => '①번 — 제목', 'type' => 'text' ),
+				'price_promise_1_desc'  => array( 'default' => '치료 전 모든 항목을 문서로 안내', 'label' => '①번 — 설명', 'type' => 'text' ),
 
 				'price_promise_2_title' => array( 'default' => '모든 비급여 사전 안내', 'label' => '②번 — 제목', 'type' => 'text' ),
 				'price_promise_2_desc'  => array( 'default' => '한 항목도 빠뜨리지 않고 미리', 'label' => '②번 — 설명', 'type' => 'text' ),
@@ -1014,7 +1032,7 @@ function moondental_pricing_content_fields() {
 
 				'price_step_4_icon'  => array( 'default' => '✅', 'label' => '04 — 아이콘', 'type' => 'text' ),
 				'price_step_4_title' => array( 'default' => '동의 후 치료', 'label' => '04 — 제목', 'type' => 'text' ),
-				'price_step_4_desc'  => array( 'default' => '충분히 검토하시고 동의하신 항목만 진행. 추가 비용 0원.', 'label' => '04 — 설명', 'type' => 'textarea' ),
+				'price_step_4_desc'  => array( 'default' => '충분히 검토하시고 동의하신 항목만 진행합니다.', 'label' => '04 — 설명', 'type' => 'textarea' ),
 			),
 		),
 
@@ -1029,7 +1047,7 @@ function moondental_pricing_content_fields() {
 				'price_policy_1_desc'  => array( 'default' => '비용보다 환자분의 치아 보존이 먼저입니다. 발치보다 보존, 임플란트보다 신경치료를 우선 검토합니다.', 'label' => '01 — 설명', 'type' => 'textarea' ),
 
 				'price_policy_2_title' => array( 'default' => '사전 견적서 제공', 'label' => '02 — 제목', 'type' => 'text' ),
-				'price_policy_2_desc'  => array( 'default' => '치료 시작 전에 옵션별 비용·기간을 문서로 안내드립니다. 시작 후 추가 비용이 발생하지 않습니다.', 'label' => '02 — 설명', 'type' => 'textarea' ),
+				'price_policy_2_desc'  => array( 'default' => '치료 시작 전에 옵션별 비용·기간을 문서로 안내드립니다. 안내드린 항목 외 비용은 사전 동의 없이 발생하지 않습니다.', 'label' => '02 — 설명', 'type' => 'textarea' ),
 
 				'price_policy_3_title' => array( 'default' => '난이도 단계 안내', 'label' => '03 — 제목', 'type' => 'text' ),
 				'price_policy_3_desc'  => array( 'default' => '임플란트·교정 등은 케이스 난이도에 따라 가격대가 명확히 다릅니다. 어느 단계인지 사전에 설명드립니다.', 'label' => '03 — 설명', 'type' => 'textarea' ),
@@ -1599,7 +1617,7 @@ function moondental_compare_content_fields() {
 	$defaults = array(
 		1 => array( 'label' => '의료기관 종별',     'value' => '치과병원 (병원급)',                            'icon' => '🏥' ),
 		2 => array( 'label' => '의료진 협진',       'value' => '분야별 전문 의료진 협진',                       'icon' => '👨‍⚕️' ),
-		3 => array( 'label' => '전문 진료 영역',   'value' => '보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주',                'icon' => '🦷' ),
+		3 => array( 'label' => '전문 진료 영역',   'value' => '보철·보존·덴탈SPA·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주',                'icon' => '🦷' ),
 		4 => array( 'label' => '통합 진료센터',     'value' => '9·10·11·13F 4개 층 운영',                      'icon' => '🏢' ),
 		5 => array( 'label' => '디지털 진단 장비',  'value' => 'CBCT · 디지털 가이드 · 구강스캐너',            'icon' => '🔬' ),
 		6 => array( 'label' => '자체 보철 제작',    'value' => '한아 임플란트 보철연구소 · 원내 기공실 (13F)', 'icon' => '⚙️' ),
@@ -2295,13 +2313,14 @@ add_action( 'customize_register', 'moondental_register_final_content_customizer'
 function moondental_preservation_content_fields() {
 	return array(
 		'hero' => array(
-			'title'  => '자연치아 살리기 · 히어로',
+			'title'  => '자연치아보존센터 · 히어로',
 			'fields' => array(
-				'preservation_hero_eyebrow' => array( 'default' => 'PRESERVATION · 자연치아 살리기', 'label' => '히어로 · eyebrow', 'type' => 'text' ),
-				'preservation_hero_title_a' => array( 'default' => '천안·아산 자연치아 살리기', 'label' => '히어로 · 제목 첫 줄', 'type' => 'text' ),
+				// v3.85 · 자연치아 살리기 → 자연치아보존센터 · 부분신경치료(#vpt)·덴탈SPA(#spa) 추가
+				'preservation_hero_eyebrow' => array( 'default' => 'PRESERVATION CENTER · 자연치아보존센터', 'label' => '히어로 · eyebrow', 'type' => 'text' ),
+				'preservation_hero_title_a' => array( 'default' => '천안·아산 자연치아보존센터', 'label' => '히어로 · 제목 첫 줄', 'type' => 'text' ),
 				'preservation_hero_title_b' => array( 'default' => '발치보다 보존이 먼저입니다', 'label' => '히어로 · 제목 강조 (em)', 'type' => 'text' ),
-				'preservation_hero_lead'    => array( 'default' => "충치치료·신경치료·잇몸치료 — 보존과·치주과 전문 진료로 환자분의 자연치아를 최대한 살립니다.\n천안 만남로 1995년 개원 30여년 임상.", 'label' => '히어로 · 리드 (줄바꿈 유지)', 'type' => 'textarea' ),
-				'preservation_nav_items'    => array( 'default' => "🦷 | 충치치료 | #cavity\n⭐ | 치수복조술 | #pulpcap\n⚡ | 신경치료 | #endo\n🌿 | 잇몸치료 | #perio", 'label' => '앵커 네비 항목 (한 줄에 1개, 형식: 아이콘 | 라벨 | 앵커)', 'type' => 'textarea' ),
+				'preservation_hero_lead'    => array( 'default' => "충치치료·부분신경치료·신경치료·잇몸치료, 그리고 치료 뒤를 지키는 덴탈SPA까지 — 보존과·치주과 협진으로 환자분의 자연치아를 최대한 살립니다.\n천안 만남로 1995년 개원 30여년 임상.", 'label' => '히어로 · 리드 (줄바꿈 유지)', 'type' => 'textarea' ),
+				'preservation_nav_items'    => array( 'default' => "🦷 | 충치치료 | #cavity\n⭐ | 부분신경치료 | #vpt\n⚡ | 신경치료 | #endo\n🌿 | 잇몸치료 | #perio\n🫧 | 덴탈SPA | #spa", 'label' => '앵커 네비 항목 (한 줄에 1개, 형식: 아이콘 | 라벨 | 앵커)', 'type' => 'textarea' ),
 			),
 		),
 		'cavity' => array(
@@ -2320,24 +2339,25 @@ function moondental_preservation_content_fields() {
 			),
 		),
 		'pulpcap' => array(
-			'title'  => '01.5 · 치수복조술 (Pulp Capping) · ⭐ 문치과병원 특별 술식',
+			'title'  => '01.5 · 부분신경치료 (VPT · 치수보존술) · ⭐ 문치과병원 특별 술식',
 			'fields' => array(
-				'preservation_pulpcap_eyebrow' => array( 'default' => '⭐ 문치과병원 특별 술식 · PULP CAPPING', 'label' => 'eyebrow', 'type' => 'text' ),
-				'preservation_pulpcap_title'   => array( 'default' => '치수복조술 — 신경을 제거하지 않고 살리는 최선의 방법', 'label' => '섹션 제목', 'type' => 'text' ),
-				'preservation_pulpcap_lead'    => array( 'default' => '충치가 신경 근처까지 도달했거나 노출됐을 때, 대부분의 치과에서는 곧바로 신경치료를 시작합니다. 문치과병원은 다릅니다. 치수복조술(Pulp Capping)로 신경(치수)을 그대로 보존해, 환자분의 자연치아 원래 감각과 수명을 최대한 지킵니다.', 'label' => '섹션 리드', 'type' => 'textarea' ),
-				'preservation_pulpcap_when_title' => array( 'default' => '언제 치수복조술이 가능한가요?', 'label' => '적응증 리스트 · 소제목', 'type' => 'text' ),
+				// v3.85 · 치수복조술 → 부분신경치료(VPT, 치수보존술) 로 확장
+				'preservation_pulpcap_eyebrow' => array( 'default' => '⭐ 문치과병원 특별 술식 · VITAL PULP THERAPY', 'label' => 'eyebrow', 'type' => 'text' ),
+				'preservation_pulpcap_title'   => array( 'default' => '부분신경치료(치수보존술) — 신경을 전부 제거하지 않고 살리는 방법', 'label' => '섹션 제목', 'type' => 'text' ),
+				'preservation_pulpcap_lead'    => array( 'default' => '깊은 충치가 발견되면 대부분 곧바로 신경치료를 시작합니다. 문치과병원은 한 단계를 더 둡니다. 부분신경치료(VPT, Vital Pulp Therapy)는 손상되거나 염증이 생긴 치수만 처리하고 남아 있는 건강한 치수를 MTA·Biodentine으로 보존해, 자연치아의 감각과 수명을 최대한 지킵니다. 간접·직접 치수복조술과 부분 치수절단술이 여기에 속합니다.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'preservation_pulpcap_when_title' => array( 'default' => '언제 부분신경치료가 가능한가요?', 'label' => '적응증 리스트 · 소제목', 'type' => 'text' ),
 				'preservation_pulpcap_when_list'  => array(
 					'default' => "<strong>깊은 충치를 제거하다 신경이 노출되기 직전(간접 치수복조술)</strong> 상태\n<strong>충치 제거 중 신경이 미세하게 노출(직접 치수복조술)</strong>됐지만 감염이 없는 경우\n<strong>외상이나 파절로 치수가 소량 노출</strong>된 젊은 영구치\n<strong>치아 신경이 아직 살아있고(생활 치수)</strong> 자발통이 없는 경우\n<strong>어린이·청소년의 미성숙 영구치</strong> — 신경을 살려야 치근이 완성됩니다",
 					'label' => '적응증 리스트 (한 줄에 1개, HTML 허용)',
 					'type'  => 'textarea',
 				),
-				'preservation_pulpcap_strength_title' => array( 'default' => '문치과병원 치수복조술의 강점', 'label' => '강점 카드 · 소제목', 'type' => 'text' ),
+				'preservation_pulpcap_strength_title' => array( 'default' => '문치과병원 부분신경치료의 강점', 'label' => '강점 카드 · 소제목', 'type' => 'text' ),
 				'preservation_pulpcap_strength_cards' => array(
 					'default' => "🔬 미세 현미경 진단 | 신경 노출 부위와 감염 여부를 미세 현미경으로 정밀 확인. \"살릴 수 있는 신경인가\"를 정확히 판단합니다.\n💠 MTA · Biodentine™ 사용 | 최신 생체적합성 재료(MTA, Biodentine)로 신경을 밀봉·재생 유도. 기존 수산화칼슘 대비 성공률 크게 향상.\n🎯 30여년 임상 노하우 | 치수복조술의 성패는 \"살릴 수 있는지\" 판단에서 결정됩니다. 30여년 보존과 임상 경력으로 케이스 판단.\n⏱️ 단계별 경과 관찰 | 시술 후 3·6·12개월 정기 관찰로 신경 생존 여부 확인. 만약 실패하면 최소 침습 신경치료로 즉시 전환.",
 					'label' => '강점 카드 (한 줄에 1개, 형식: 아이콘 + 제목 | 본문)',
 					'type'  => 'textarea',
 				),
-				'preservation_pulpcap_callout_title' => array( 'default' => '💡 치수복조술 vs 신경치료 — 무엇이 다른가?', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
+				'preservation_pulpcap_callout_title' => array( 'default' => '💡 부분신경치료 vs 신경치료 — 무엇이 다른가?', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
 				'preservation_pulpcap_callout_body'  => array( 'default' => '<strong>치수복조술</strong>: 신경 그대로 유지 → 자연치아 감각·경도·수명 최대 유지 · 크라운이 필요 없을 수 있음. <strong>신경치료</strong>: 신경 완전 제거 → 치아가 부러지기 쉬워져 크라운 필수 · 시간이 지나면 뿌리 흡수·재감염 위험. <strong>살릴 수 있는 신경은 살리는 것</strong>이 가장 보존적인 치료이며 문치과병원의 원칙입니다.', 'label' => '콜아웃 · 본문 (HTML 허용)', 'type' => 'textarea' ),
 			),
 		),
@@ -2379,10 +2399,33 @@ function moondental_preservation_content_fields() {
 				'preservation_perio_callout_body'  => array( 'default' => '✓ 양치 시 자주 피가 난다 / ✓ 잇몸이 부어 보인다 / ✓ 치아가 길어 보인다 / ✓ 입냄새가 심해졌다 / ✓ 음식 끼임이 잦아졌다 → 2가지 이상 해당되면 천안 만남로 문치과병원 잇몸 검진을 권해드립니다.', 'label' => '콜아웃 · 본문', 'type' => 'textarea' ),
 			),
 		),
-		'cta' => array(
-			'title'  => '자연치아 살리기 · CTA',
+		// v3.85 · 04 덴탈SPA — 예방클리닉 페이지 내용을 자연치아보존센터로 통합
+		'spa' => array(
+			'title'  => '04 · 덴탈SPA (예방 프로그램)',
 			'fields' => array(
-				'preservation_cta_chip'  => array( 'default' => '🦷 자연치아 살리기 상담', 'label' => 'CTA 칩', 'type' => 'text' ),
+				'preservation_spa_eyebrow' => array( 'default' => '04 · DENTAL SPA · 예방 프로그램', 'label' => 'eyebrow', 'type' => 'text' ),
+				'preservation_spa_title'   => array( 'default' => '덴탈SPA — 치료의 끝을 관리의 시작으로', 'label' => '섹션 제목', 'type' => 'text' ),
+				'preservation_spa_lead'    => array( 'default' => '스케일링·에어플로우·불소도포·양치 코칭을 하나로 묶은 60~90분 예방 프로그램입니다. 치석 제거에 세균막·착색 제거, 잇몸 관리, 재광화, 습관 교정을 더해 다음 방문까지 6개월을 건강하게 유지하도록 설계했습니다. 잇몸치료·임플란트·교정 후 유지관리도 이 프로그램으로 이어집니다.', 'label' => '섹션 리드', 'type' => 'textarea' ),
+				'preservation_spa_h3'      => array( 'default' => '덴탈SPA 6단계', 'label' => '단계 카드 · 소제목', 'type' => 'text' ),
+				'preservation_spa_cards'   => array(
+					'default' => "1단계 | 구강 진단 | 방사선 촬영과 구강 검사로 충치·잇몸·기존 치료 부위를 점검합니다. 필요한 치료가 발견되면 별도로 안내합니다.\n2단계 | 정밀 스케일링 | 초음파 스케일러로 잇몸 위와 잇몸 경계 아래의 치석을 제거합니다. 30~40분 소요. <strong>만 19세 이상 연 1회 건강보험 적용</strong>.\n3단계 | 에어플로우 | 미세 분말과 물을 분사해 치석이 되기 전의 세균막과 커피·차·담배 착색을 제거합니다. 임플란트·교정장치 주변 관리에 적합.\n4단계 | 잇몸 마사지·관리 | 잇몸 혈류를 개선하고 염증 부위를 점검합니다. 잇몸 주머니가 깊은 곳은 치주 검사로 이어집니다.\n5단계 | 불소도포 | 고농도 불소로 재광화를 돕고 초기 충치와 시림을 억제합니다. 어린이 충치 예방·성인 시린 증상·시니어 치근 충치 예방.\n6단계 | 맞춤 양치 코칭 | 칫솔·치실·치간칫솔 사용법을 개인의 치아 배열과 치료 부위에 맞춰 안내하고, 다음 방문까지의 관리 계획을 함께 정합니다.",
+					'label' => '카드 (한 줄에 1개, 형식: 스테이지 | 제목 | 본문)',
+					'type'  => 'textarea',
+				),
+				'preservation_spa_who_title' => array( 'default' => '이런 분께 권합니다', 'label' => '추천 대상 · 소제목', 'type' => 'text' ),
+				'preservation_spa_who_list'  => array(
+					'default' => "스케일링을 받은 지 1년이 넘은 분\n커피·홍차·와인·흡연으로 착색이 있는 분\n임플란트·크라운·교정장치가 있는 분\n잇몸치료를 받고 유지관리(SPT)가 필요한 분\n임산부 — 안정기 스케일링 가능, 임신 중 잇몸염이 흔합니다\n어린이·청소년 — 불소도포 · 실란트(만 18세 이하 제1·2대구치 보험)\n시린 증상이 있는 분 · 당뇨 등 전신질환으로 잇몸 관리가 중요한 분",
+					'label' => '추천 대상 리스트 (한 줄에 1개, HTML 허용)',
+					'type'  => 'textarea',
+				),
+				'preservation_spa_callout_title' => array( 'default' => '🗓️ 권장 주기', 'label' => '콜아웃 · 제목', 'type' => 'text' ),
+				'preservation_spa_callout_body'  => array( 'default' => '기본 6개월. 치주염 병력이 있거나 임플란트가 많은 분은 3~4개월. 방문 때마다 다음 예약을 함께 잡아 드립니다. 스케일링 부분은 건강보험이 적용되고, 에어플로우·불소도포 등 나머지는 비급여로 사전 안내드립니다.', 'label' => '콜아웃 · 본문', 'type' => 'textarea' ),
+			),
+		),
+		'cta' => array(
+			'title'  => '자연치아보존센터 · CTA',
+			'fields' => array(
+				'preservation_cta_chip'  => array( 'default' => '🌿 자연치아보존센터 상담', 'label' => 'CTA 칩', 'type' => 'text' ),
 				'preservation_cta_title' => array( 'default' => "발치 권유받으셨나요?\n천안·아산 문치과병원에서 한 번 더 살펴보세요", 'label' => 'CTA 제목 (줄바꿈 유지)', 'type' => 'textarea' ),
 				'preservation_cta_lead'  => array( 'default' => '보존과·치주과 전문 의료진의 정밀 진단으로 자연치아를 살릴 수 있는지 검토해드립니다.', 'label' => 'CTA 리드', 'type' => 'textarea' ),
 			),
@@ -2702,7 +2745,7 @@ function moondental_recruit_page_content_fields() {
 				'recruit_why_eyebrow' => array( 'default' => '✨ WHY MOON DENTAL', 'label' => '섹션 eyebrow', 'type' => 'text' ),
 				'recruit_why_title'   => array( 'default' => '문치과병원에서 일하면 좋은 점', 'label' => '섹션 제목', 'type' => 'text' ),
 				'recruit_why_cards'   => array(
-					'default' => "🕰️ 20년 넘게 함께한 동료들 | 1995년 개원 후 20년 넘게 근무하고 계신 선생님들이 여러 분 계십니다. 신뢰가 쌓인 동료와 오래 함께 일할 수 있는 환경입니다.\n🦷 30여년 임상 노하우 | 다양한 케이스를 직접 경험하며 임상 실력을 키울 수 있습니다.\n🏥 통합 진료센터 (4개 층) | 9F 보철·보존·예방 · 10F 임플란트·외과·턱관절 · 11F 교정·소아·치주·디지털 · 13F 기공 — 모든 진료를 한 건물에서 경험.\n🔬 디지털 진료 시스템 | CBCT·디지털 가이드·구강 스캐너 등 최신 장비. 디지털 치과 실무 경험 축적.\n👨‍⚕️ 분야별 전문 의료진 협진 | 보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 전문 의료진과 함께 — 다각도로 배울 수 있는 환경.\n📚 교육·세미나 지원 | 학회·세미나 참석 지원, 사내 임상 교육 — 성장하고 싶은 분께 적극 추천.",
+					'default' => "🕰️ 20년 넘게 함께한 동료들 | 1995년 개원 후 20년 넘게 근무하고 계신 선생님들이 여러 분 계십니다. 신뢰가 쌓인 동료와 오래 함께 일할 수 있는 환경입니다.\n🦷 30여년 임상 노하우 | 다양한 케이스를 직접 경험하며 임상 실력을 키울 수 있습니다.\n🏥 통합 진료센터 (4개 층) | 9F 자연치아보존·보철·덴탈SPA · 10F 임플란트·스마일디자인·외과·턱관절 · 11F 교정·소아·치주·디지털 · 13F 기공·문화센터 — 모든 진료를 한 건물에서 경험.\n🔬 디지털 진료 시스템 | CBCT·디지털 가이드·구강 스캐너 등 최신 장비. 디지털 치과 실무 경험 축적.\n👨‍⚕️ 분야별 전문 의료진 협진 | 보철·보존·덴탈SPA·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 전문 의료진과 함께 — 다각도로 배울 수 있는 환경.\n📚 교육·세미나 지원 | 학회·세미나 참석 지원, 사내 임상 교육 — 성장하고 싶은 분께 적극 추천.",
 					'label' => '강점 카드 (한 줄에 1개, 형식: 아이콘+제목 | 본문)',
 					'type'  => 'textarea',
 				),
@@ -2793,7 +2836,7 @@ function moondental_region_content_fields() {
 				'region_reasons_eyebrow' => array( 'default' => '✨ {region} 추천 치과 · 선택 이유', 'label' => 'eyebrow (토큰: {region})', 'type' => 'text' ),
 				'region_reasons_title'   => array( 'default' => '{region} 추천 치과 · 문치과병원을 선택하시는 이유', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
 				'region_reasons_cards'   => array(
-					'default' => "🦷 30여년 임상 경험 | {region}에서 천안까지 오시는 데는 이유가 있습니다. 1995년 개원부터 30여년 한자리 진료로 누적된 임상 경험.\n👨‍⚕️ 분야별 전문 의료진 협진 | 보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 전 분야 의료진이 한 케이스를 함께 보는 협진 시스템. {region}에서 따로따로 다닐 필요 없습니다.\n🔬 CBCT 디지털 진단 | 3D CBCT·디지털 가이드 수술·구강 스캐너 — 정확한 진단과 안전한 수술. {region}에서 정밀 진단이 필요한 케이스에 추천.\n⚙️ 자체 보철 제작 | 13층 한아 임플란트 보철연구소 원내 직접 제작. 빠른 수정·정확한 의사소통·품질 일관성 — {region}에서 오신 분들도 한 번에 끝.\n❤️ 전신질환 안심 진료 | 혈압·당검사·심전도·산소포화도 상시 측정. 고혈압·당뇨·심장질환자도 {region}에서 오셔서 안심하고 진료받으실 수 있습니다.\n🌙 평일 야간진료 | 월·화·수·금 9:00~20:30 점심시간 없이 진료 · 목 9:00~18:30 · 토 9:00~14:00. {region}에서 퇴근 후 출발하셔도 충분한 진료 시간.",
+					'default' => "🦷 30여년 임상 경험 | {region}에서 천안까지 오시는 데는 이유가 있습니다. 1995년 개원부터 30여년 한자리 진료로 누적된 임상 경험.\n👨‍⚕️ 분야별 전문 의료진 협진 | 보철·보존·덴탈SPA·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 전 분야 의료진이 한 케이스를 함께 보는 협진 시스템. {region}에서 따로따로 다닐 필요 없습니다.\n🔬 CBCT 디지털 진단 | 3D CBCT·디지털 가이드 수술·구강 스캐너 — 정확한 진단과 안전한 수술. {region}에서 정밀 진단이 필요한 케이스에 추천.\n⚙️ 자체 보철 제작 | 13층 한아 임플란트 보철연구소 원내 직접 제작. 빠른 수정·정확한 의사소통·품질 일관성 — {region}에서 오신 분들도 한 번에 끝.\n❤️ 전신질환 안심 진료 | 혈압·당검사·심전도·산소포화도 상시 측정. 고혈압·당뇨·심장질환자도 {region}에서 오셔서 안심하고 진료받으실 수 있습니다.\n🌙 평일 야간진료 | 월·화·수·금 9:00~20:30 점심시간 없이 진료 · 목 9:00~18:30 · 토 9:00~14:00. {region}에서 퇴근 후 출발하셔도 충분한 진료 시간.",
 					'label' => '이유 카드 (한 줄에 1개, 형식: 아이콘+제목 | 본문) · 토큰: {region}',
 					'type'  => 'textarea',
 				),

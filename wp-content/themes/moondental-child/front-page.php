@@ -28,17 +28,23 @@ get_header();
 		 * template-parts/section-floor-rail.php 파일은 그대로 두었다.
 		 * 되살리려면 이 자리에 floor-rail 을 부르는 get_template_part 한 줄을
 		 * 다시 넣으면 된다 (바로 아래 guide-rail 호출과 같은 형태). */ ?>
-		<?php /* v3.44.182 · 종합안내서 3개 별도 섹션 (임플란트센터·교정센터·스마일디자인센터) */ ?>
-		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'implant'   ) ); ?>
-		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'suresmile' ) ); ?>
-		<?php get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'laminate'  ) ); ?>
-		<?php /* v3.44.186 · 종합안내서 아래 · 환자분들의 이야기 (기존 위치에서 이동) */ ?>
+		<?php /* v3.85 · 홈 사이드바의 종합안내서 카드 4개 제거 (v3.44.182 에 추가했던 것).
+		 * 종합안내서는 각 센터 페이지의 배너(template-parts/section-guide-cta.php)에서
+		 * 센터 색에 맞춰 보여주는 것으로 통일 — 임플란트·교정·스마일디자인은 page-service.php /
+		 * page-smile-design.php, 자연치아보존센터는 page-preservation.php.
+		 * template-parts/section-guide-rail.php 파일은 그대로 두었다 — 되살리려면 이 자리에
+		 *   get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'implant' ) );
+		 * 형태로 slug 별로 한 줄씩 다시 넣으면 된다 (implant · suresmile · laminate · preservation). */ ?>
+		<?php /* v3.44.186 · 환자분들의 이야기 */ ?>
 		<?php get_template_part( 'template-parts/section', 'testimonials-rail' ); ?>
 	</aside>
 	<main class="md-home-2col__main">
 		<?php get_template_part( 'template-parts/section', 'why' ); ?>
 		<?php get_template_part( 'template-parts/section', 'clinic-intro' ); ?>
-		<?php get_template_part( 'template-parts/section', 'services' ); ?>
+		<?php /* v3.86 · 홈에서 CLINICAL SERVICES(진료항목 7카드) 섹션 제거.
+		 * 4개 전문센터 카드(clinic-intro)와 내용이 겹치고, 진료항목은 상단 메뉴·푸터에서 닿는다.
+		 * template-parts/section-services.php 는 그대로 두었다 — 되살리려면 아래 한 줄을 다시 넣으면 된다.
+		 *   get_template_part( 'template-parts/section', 'services' ); */ ?>
 		<?php get_template_part( 'template-parts/section', 'facility' ); ?>
 		<?php /* v3.44.164 · 후기·소식·발자취는 좌측 사이드바로 이동 · 우측 중복 제거 */ ?>
 		<?php get_template_part( 'template-parts/section', 'faq-home' ); ?>
@@ -50,10 +56,14 @@ get_header();
 		 *   get_template_part( 'template-parts/section', 'quicknav' );
 		 * 검색엔진용 SiteNavigationElement 구조화 데이터(inc/seo-boost.php)는
 		 * 이 섹션과 별개로 동작하므로 그대로 둔다. */ ?>
+		<?php /* v3.85.2 · 예약 CTA 를 2단 영역 안(우측 본문 칸)으로 이동.
+		 * 전체 폭으로 두면 바로 위 FAQ(본문 칸 폭)와 폭이 달라져 어색했다.
+		 * 좌측 사이드바 공간을 그대로 두고 FAQ → CTA 가 같은 폭으로 이어지게 한다. */ ?>
+		<?php get_template_part( 'template-parts/section', 'cta' ); ?>
+		<?php /* v3.85.3 · 오시는 길도 본문 칸 안으로 (footer.php 에서는 홈일 때 건너뜀) */ ?>
+		<?php get_template_part( 'template-parts/section-location' ); ?>
 	</main>
 </div>
-
-<?php get_template_part( 'template-parts/section', 'cta' ); ?>
 
 <?php
 get_footer();

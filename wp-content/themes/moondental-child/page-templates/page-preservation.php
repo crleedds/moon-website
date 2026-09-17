@@ -69,20 +69,23 @@ $pulpcap_strength_pair = $parse_pair( md_content( 'preservation_pulpcap_strength
 $endo_when_list     = md_parse_lines( md_content( 'preservation_endo_when_list', '' ) );
 $endo_strength_pair = $parse_pair( md_content( 'preservation_endo_strength_cards', '' ) );
 $perio_cards        = $parse_cards( md_content( 'preservation_perio_cards', '' ) );
+// v3.85 · 덴탈SPA (예방클리닉 통합)
+$spa_cards          = $parse_cards( md_content( 'preservation_spa_cards', '' ) );
+$spa_who_list       = md_parse_lines( md_content( 'preservation_spa_who_list', '' ) );
 ?>
 
 <!-- ============ Hero ============ -->
 <section class="md-page-hero md-page-hero--preservation">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( get_the_title() ?: '자연치아 살리기' ); ?></span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( get_the_title() ?: '자연치아보존센터' ); ?></span>
 		</nav>
 		<span class="md-page-hero__eyebrow"><?php echo esc_html( md_content( 'preservation_hero_eyebrow', '' ) ); ?></span>
 		<?php
 		$_pres_floor = function_exists( 'moondental_slug_floor' ) ? moondental_slug_floor( '자연치아-살리기' ) : '';
 		if ( $_pres_floor ) :
 		?>
-			<span class="md-service-floor-badge" aria-label="위치"><span aria-hidden="true">📍</span> 문타워 <?php echo esc_html( $_pres_floor ); ?> · 보존과</span>
+			<span class="md-service-floor-badge" aria-label="위치"><span aria-hidden="true">📍</span> 문타워 <?php echo esc_html( $_pres_floor ); ?> · 자연치아보존센터</span>
 		<?php endif; ?>
 		<h1 class="md-page-hero__title">
 			<?php echo esc_html( md_content( 'preservation_hero_title_a', '' ) ); ?><br>
@@ -94,7 +97,7 @@ $perio_cards        = $parse_cards( md_content( 'preservation_perio_cards', '' )
 
 <!-- ============ 앵커 네비게이션 ============ -->
 <?php if ( $nav_items ) : ?>
-<nav class="md-preservation-nav" aria-label="자연치아 살리기 섹션 이동">
+<nav class="md-preservation-nav" aria-label="자연치아보존센터 섹션 이동">
 	<div class="md-container">
 		<ul>
 			<?php foreach ( $nav_items as $n ) : ?>
@@ -159,7 +162,9 @@ $pcp_ttl  = md_content( 'preservation_pulpcap_title', '' );
 $pcp_lead = md_content( 'preservation_pulpcap_lead', '' );
 if ( $pcp_eb || $pcp_ttl || $pcp_lead || $pulpcap_when_list || $pulpcap_strength_pair ) :
 ?>
-<section class="md-section md-section--pulpcap" id="pulpcap">
+<?php /* v3.85 · 앵커 #pulpcap → #vpt (부분신경치료) · 옛 링크 호환용 빈 앵커 유지 */ ?>
+<span id="pulpcap" aria-hidden="true"></span>
+<section class="md-section md-section--pulpcap" id="vpt">
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">
 			<?php if ( $pcp_eb )   : ?><span class="md-section-head__eyebrow md-eyebrow--star"><?php echo esc_html( $pcp_eb ); ?></span><?php endif; ?>
@@ -276,6 +281,59 @@ if ( $pcp_eb || $pcp_ttl || $pcp_lead || $pulpcap_when_list || $pulpcap_strength
 		<?php endif; ?>
 	</div>
 </section>
+
+<!-- ============ 4. 덴탈SPA · v3.85 (예방클리닉 통합) ============ -->
+<?php
+$spa_eb   = md_content( 'preservation_spa_eyebrow', '' );
+$spa_ttl  = md_content( 'preservation_spa_title', '' );
+$spa_lead = md_content( 'preservation_spa_lead', '' );
+if ( $spa_eb || $spa_ttl || $spa_lead || $spa_cards || $spa_who_list ) :
+?>
+<section class="md-section md-section--spa" id="spa">
+	<div class="md-container md-container--narrow">
+		<header class="md-section-head">
+			<?php if ( $spa_eb )   : ?><span class="md-section-head__eyebrow"><?php echo esc_html( $spa_eb ); ?></span><?php endif; ?>
+			<?php if ( $spa_ttl )  : ?><h2 class="md-section-head__title"><?php echo esc_html( $spa_ttl ); ?></h2><?php endif; ?>
+			<?php if ( $spa_lead ) : ?><p class="md-section-head__lead"><?php echo esc_html( $spa_lead ); ?></p><?php endif; ?>
+		</header>
+
+		<?php if ( $spa_cards ) : ?>
+		<h3 class="md-preservation-h3"><?php echo esc_html( md_content( 'preservation_spa_h3', '' ) ); ?></h3>
+		<div class="md-preservation-grid">
+			<?php foreach ( $spa_cards as $c ) : ?>
+			<article class="md-preservation-card is-spa">
+				<?php if ( $c['stage'] !== '' ) : ?><span class="md-preservation-card__stage"><?php echo esc_html( $c['stage'] ); ?></span><?php endif; ?>
+				<h3><?php echo esc_html( $c['title'] ); ?></h3>
+				<p><?php echo wp_kses_post( $c['body'] ); ?></p>
+			</article>
+			<?php endforeach; ?>
+		</div>
+		<?php endif; ?>
+
+		<?php if ( $spa_who_list ) : ?>
+		<h3 class="md-preservation-h3"><?php echo esc_html( md_content( 'preservation_spa_who_title', '' ) ); ?></h3>
+		<ul class="md-preservation-list">
+			<?php foreach ( $spa_who_list as $item ) : ?>
+				<li><?php echo wp_kses_post( $item ); ?></li>
+			<?php endforeach; ?>
+		</ul>
+		<?php endif; ?>
+
+		<?php
+		$st = md_content( 'preservation_spa_callout_title', '' );
+		$sb = md_content( 'preservation_spa_callout_body', '' );
+		if ( $st || $sb ) : ?>
+		<aside class="md-preservation-callout">
+			<?php if ( $st ) : ?><strong><?php echo esc_html( $st ); ?></strong><?php endif; ?>
+			<?php if ( $sb ) : ?><p><?php echo wp_kses_post( $sb ); ?></p><?php endif; ?>
+		</aside>
+		<?php endif; ?>
+	</div>
+</section>
+<?php endif; ?>
+
+<?php /* v3.85 · NO. 04 자연치아보존 종합안내서 배너 (다른 센터 페이지와 같은 위치·형식) */ ?>
+<?php get_template_part( 'template-parts/section', 'guide-cta', array( 'slug' => 'preservation' ) ); ?>
 
 <?php get_template_part( 'template-parts/section', 'cta' ); ?>
 
