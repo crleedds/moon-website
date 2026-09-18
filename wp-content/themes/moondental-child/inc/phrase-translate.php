@@ -205,7 +205,7 @@ add_action( 'template_redirect', function () {
 		// v3.88 · 내부 링크에 언어 접두어 유지
 		return moondental_localize_internal_links( $html, $lang );
 	} );
-}, 5 );
+}, 0 ); // v3.93 · 의료진 가로채기(template_redirect 1, exit)보다 먼저 버퍼를 열어야 번역된다
 
 /**
  * v3.88 · 번역 페이지의 내부 링크에 언어 접두어(/en/ 등)를 붙인다.

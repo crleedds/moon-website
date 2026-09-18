@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.92' );
+define( 'MOONDENTAL_VERSION', '3.93.2' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -64,6 +64,12 @@ add_action( 'admin_init', function () {
 	flush_rewrite_rules( false );
 	update_option( 'md_lang_rewrite_v3449_ja', 'done' );
 } );
+/* v3.93 · v3.88 에 추가된 의료진 언어 접두어 규칙 반영을 위한 1회 flush */
+add_action( 'init', function () {
+	if ( get_option( 'md_lang_rewrite_v393_doctor' ) === 'done' ) return;
+	flush_rewrite_rules( false );
+	update_option( 'md_lang_rewrite_v393_doctor', 'done' );
+}, 999 );
 /* frontend에서도 최초 1회 flush (관리자 접속 안 해도 라이브 즉시 반영) */
 add_action( 'init', function () {
 	if ( get_option( 'md_lang_rewrite_frontend_v3449_ja' ) === 'done' ) return;
@@ -3965,7 +3971,8 @@ function moondental_doctor_intercept() {
 	$path = trim( urldecode( $path ), '/' );
 
 	// 패턴: 의료진/{slug}/ 또는 doctors/{slug}/
-	if ( ! preg_match( '#^(?:의료진|doctors)/([^/]+)/?$#u', $path, $m ) ) return;
+	// v3.93 · 언어 접두어(/en/ 등) 아래의 의료진 상세도 가로챈다 — rewrite 미반영 환경 대비
+	if ( ! preg_match( '#^(?:(?:en|ja|zh|vi|ru|mn)/)?(?:의료진|doctors)/([^/]+)/?$#u', $path, $m ) ) return;
 
 	$slug = trim( $m[1] );
 	if ( ! $slug ) return;
@@ -5178,7 +5185,7 @@ function moondental_get_team() {
 				 *   moondental_split_bio() 가 학력·경력 / 자격·소속 학회로 나누고
 				 *   각 묶음 안에서는 이 배열 순서를 유지한다. */
 				'서울대학교 치의학대학원 박사과정',
-				'미국 UCSF 치과대학 교정과 임상연수',
+				'미국 UCSF 치과대학 임상교정 연수',
 				'미국 UCSF 치과대학 졸업',
 				'미국 UCLA 구강생물학 석사 졸업',
 				'미국 UCLA 생화학 학사 졸업',

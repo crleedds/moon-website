@@ -152,6 +152,7 @@ return array(
 	'단국대학교 구강악안면외과 박사 수료' => 'PhD coursework in Oral & Maxillofacial Surgery, Dankook University',
 	'포항공과대학교 신소재공학과 석사 졸업' => 'MS in Materials Science & Engineering, POSTECH',
 	'포항공과대학교 신소재공학과 학사 졸업' => 'BS in Materials Science & Engineering, POSTECH',
+	'미국 UCSF 치과대학 임상교정 연수' => 'Clinical training in Orthodontics, UCSF School of Dentistry',
 	'미국 UCSF 치과대학 교정과 임상연수' => 'Clinical training in Orthodontics, UCSF School of Dentistry',
 	'미국 UPENN 치과대학 근관치료학 연수' => 'Training in Endodontics, University of Pennsylvania School of Dental Medicine',
 	'대한치과이식임플란트학회아카데미 수료' => 'Completed the Korean Academy of Oral Implantology Academy',

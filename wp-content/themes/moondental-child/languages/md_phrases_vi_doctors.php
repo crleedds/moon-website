@@ -152,6 +152,7 @@ return array(
 	'단국대학교 구강악안면외과 박사 수료' => 'Hoàn thành chương trình tiến sĩ Phẫu thuật hàm mặt, Đại học Dankook',
 	'포항공과대학교 신소재공학과 석사 졸업' => 'Thạc sĩ Khoa học vật liệu, POSTECH',
 	'포항공과대학교 신소재공학과 학사 졸업' => 'Cử nhân Khoa học vật liệu, POSTECH',
+	'미국 UCSF 치과대학 임상교정 연수' => 'Đào tạo lâm sàng chỉnh nha, Trường Nha UCSF (Mỹ)',
 	'미국 UCSF 치과대학 교정과 임상연수' => 'Đào tạo lâm sàng chỉnh nha, Trường Nha UCSF (Mỹ)',
 	'미국 UPENN 치과대학 근관치료학 연수' => 'Đào tạo nội nha, Trường Nha Đại học Pennsylvania (Mỹ)',
 	'대한치과이식임플란트학회아카데미 수료' => 'Hoàn thành Học viện Hội Cấy ghép Implant Hàn Quốc',
