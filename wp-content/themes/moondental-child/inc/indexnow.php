@@ -40,8 +40,21 @@ add_action( 'init', function () {
 }, 1 );
 
 /** URL 묶음을 IndexNow 로 전송 (비차단) */
+/** 한글 경로를 퍼센트 인코딩 — IndexNow 는 비ASCII URL 을 400 으로 거절한다 */
+function moondental_indexnow_normalize_url( $url ) {
+	$p = wp_parse_url( $url );
+	if ( empty( $p['host'] ) ) return '';
+	$path = isset( $p['path'] ) ? $p['path'] : '/';
+	$segs = array();
+	foreach ( explode( '/', $path ) as $seg ) $segs[] = rawurlencode( rawurldecode( $seg ) );
+	$out = ( $p['scheme'] ?? 'https' ) . '://' . $p['host'] . implode( '/', $segs );
+	if ( ! empty( $p['query'] ) ) $out .= '?' . $p['query'];
+	return $out;
+}
+
 function moondental_indexnow_submit( array $urls ) {
-	$urls = array_values( array_unique( array_filter( array_map( 'strval', $urls ) ) ) );
+	$urls = array_map( 'moondental_indexnow_normalize_url', array_map( 'strval', $urls ) );
+	$urls = array_values( array_unique( array_filter( $urls ) ) );
 	if ( ! $urls ) return false;
 	$host = wp_parse_url( home_url( '/' ), PHP_URL_HOST );
 	$key  = moondental_indexnow_key();
@@ -77,11 +90,11 @@ add_action( 'shutdown', function () {
 
 /** 최초 1회 · 공개 URL 전체 일괄 제출 (백과사전 851 + 페이지 + 글) */
 add_action( 'wp_loaded', function () {
-	if ( get_option( 'md_indexnow_bulk_v3941' ) === 'done' ) return;
+	if ( get_option( 'md_indexnow_bulk_v3942' ) === 'done' ) return;
 	// 키 파일이 먼저 공개되어 있어야 검증을 통과한다 — 키 생성 직후 같은 요청에서는 보내지 않는다
 	moondental_indexnow_key();
 	if ( time() - (int) get_option( 'md_indexnow_key_created', 0 ) < 60 ) return;
-	if ( ! add_option( 'md_indexnow_bulk_v3941_lock', (string) time(), '', 'no' ) ) return;
+	if ( ! add_option( 'md_indexnow_bulk_v3942_lock', (string) time(), '', 'no' ) ) return;
 
 	$urls = array( home_url( '/' ) );
 	$ids  = get_posts( array(
@@ -98,9 +111,9 @@ add_action( 'wp_loaded', function () {
 		if ( $u ) $urls[] = $u;
 	}
 	$ok = moondental_indexnow_submit( $urls );
-	update_option( 'md_indexnow_bulk_v3941', 'done' );
-	update_option( 'md_indexnow_bulk_v3941_result', array( 'ok' => $ok, 'count' => count( $urls ), 'time' => time() ), false );
-	delete_option( 'md_indexnow_bulk_v3941_lock' );
+	update_option( 'md_indexnow_bulk_v3942', 'done' );
+	update_option( 'md_indexnow_bulk_v3942_result', array( 'ok' => $ok, 'count' => count( $urls ), 'time' => time() ), false );
+	delete_option( 'md_indexnow_bulk_v3942_lock' );
 }, 50 );
 
 /** 상태 확인 · /?md_indexnow_status=1 (키 위치·마지막 전송 결과 — 키는 공개 값) */
@@ -111,7 +124,7 @@ add_action( 'init', function () {
 	header( 'X-Robots-Tag: noindex' );
 	echo wp_json_encode( array(
 		'keyLocation' => home_url( '/' . moondental_indexnow_key() . '.txt' ),
-		'bulk'        => get_option( 'md_indexnow_bulk_v3941_result', null ),
+		'bulk'        => get_option( 'md_indexnow_bulk_v3942_result', null ),
 		'last'        => get_option( 'md_indexnow_last', null ),
 	), JSON_UNESCAPED_SLASHES );
 	exit;
