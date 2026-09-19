@@ -10,15 +10,8 @@ get_header();
 // 카테고리 → 관련 진료 페이지 매핑
 // v3.44.110 · 7개 새 슬러그에 맞춰 재정비
 function moondental_md_term_related_service( $cat_slug ) {
-	$map = array(
-		'implant'     => array( 'name' => '임플란트 센터',     'url' => '/임플란트-센터/',     'icon' => '🦷' ),
-		'ortho'       => array( 'name' => '교정 센터',         'url' => '/투명교정-센터/',     'icon' => '✨' ),
-		'esthetic'    => array( 'name' => '스마일 디자인 센터', 'url' => '/스마일디자인센터/', 'icon' => '💎' ),
-		'general'     => array( 'name' => '자연치아 살리기',   'url' => '/자연치아-살리기/',   'icon' => '🌿' ),
-		'surgery'     => array( 'name' => '사랑니·턱관절',     'url' => '/사랑니-발치/',       'icon' => '🦷' ),
-		'pediatric'   => array( 'name' => '예방·소아 클리닉',  'url' => '/예방클리닉/',         'icon' => '👶' ),
-		'dental-info' => array( 'name' => '진료비 안내',       'url' => '/비용-안내/',         'icon' => '🛡️' ),
-	);
+	// v3.94 · inc/seo-encyclopedia.php 의 연결표를 단일 진실원으로 사용 (센터 이름·경로 최신화)
+	$map = function_exists( 'moondental_enc_center_map' ) ? moondental_enc_center_map() : array();
 	return $map[ $cat_slug ] ?? null;
 }
 
@@ -206,11 +199,11 @@ while ( have_posts() ) : the_post();
 		<aside class="md-term-related-service">
 			<div class="md-term-related-service__label">
 				<span class="md-term-related-service__icon" aria-hidden="true"><?php echo esc_html( $related_service['icon'] ); ?></span>
-				<span>관련 진료과 · 상담 받기</span>
-				<strong><?php the_title(); ?> 진료 상세 보기</strong>
+				<span>관련 진료 · 천안·아산 문치과병원 <?php echo esc_html( $related_service['name'] ); ?></span>
+				<strong><?php echo esc_html( $related_service['treat'] ?? '' ); ?></strong>
 			</div>
 			<a class="md-btn md-btn-primary md-btn--sm" href="<?php echo esc_url( home_url( $related_service['url'] ) ); ?>">
-				→ 진료 안내 바로가기
+				→ <?php echo esc_html( $related_service['name'] ); ?> 진료 안내 보기
 			</a>
 		</aside>
 		<?php endif; ?>

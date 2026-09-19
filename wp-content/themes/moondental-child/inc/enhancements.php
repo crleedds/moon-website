@@ -389,9 +389,8 @@ function moondental_jsonld_schema() {
 					'parentOrganization' => array( '@id' => $site . '#org' ),
 				);
 				if ( ! empty( $c['slug'] ) ) {
-					$dept['url'] = ( $c['slug'] === '스마일디자인센터' )
-						? home_url( '/스마일디자인센터/' )
-						: home_url( '/진료항목/' . $c['slug'] . '/' );
+					// v3.94 · 리다이렉트 없는 실제 경로 (구 /진료항목/ 경로는 301 이었음)
+					$dept['url'] = home_url( '/' . $c['slug'] . '/' );
 				}
 				$departments[] = $dept;
 			}
