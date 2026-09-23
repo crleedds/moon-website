@@ -739,3 +739,15 @@ add_filter( 'template_include', function ( $template ) {
 	$GLOBALS['md_current_template'] = $template;
 	return $template;
 }, 999 );
+
+/**
+ * v3.95 · 홈 검색 제목·설명 확정값 1회 반영
+ *   Customizer 에 저장된 옛 값이 파일 기본값보다 우선하므로 theme_mod 를 직접 덮어쓴다.
+ *   이후 관리자가 Customizer 에서 수정하면 그 값이 유지된다(플래그로 1회만 실행).
+ */
+add_action( 'wp_loaded', function () {
+	if ( get_option( 'md_seo_home_v395' ) === 'done' ) return;
+	set_theme_mod( 'md_content_seo_home_title', '한아의료재단 문치과병원 | 천안 아산에서 30여년을 한결같이' );
+	set_theme_mod( 'md_content_seo_home_desc',  '천안·아산 치과병원. 임플란트·교정·라미네이트·충치·잇몸·사랑니·소아, 4개 전문센터 협진. 평일 야간진료 20:30까지. 041-563-2875.' );
+	update_option( 'md_seo_home_v395', 'done' );
+}, 60 );
