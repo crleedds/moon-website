@@ -746,8 +746,8 @@ add_filter( 'template_include', function ( $template ) {
  *   이후 관리자가 Customizer 에서 수정하면 그 값이 유지된다(플래그로 1회만 실행).
  */
 add_action( 'wp_loaded', function () {
-	if ( get_option( 'md_seo_home_v3952' ) === 'done' ) return;
+	if ( get_option( 'md_seo_home_v3953' ) === 'done' ) return;
 	set_theme_mod( 'md_content_seo_home_title', '한아의료재단 문치과병원 | 천안 아산에서 30여년을 한결같이' );
-	set_theme_mod( 'md_content_seo_home_desc',  '천안·아산 치과병원 30여년. 임플란트·투명교정·라미네이트·충치·신경치료 4개 전문센터, 매복사랑니·턱관절·잇몸·소아치과 원내 협진.' );
-	update_option( 'md_seo_home_v3952', 'done' );
+	set_theme_mod( 'md_content_seo_home_desc',  '천안·아산 치과병원. 임플란트·투명교정·라미네이트·전문가 치아미백·신경치료·잇몸·매복사랑니·턱관절·소아 4개 전문센터 분과별 협진 시스템. 야간진료.' );
+	update_option( 'md_seo_home_v3953', 'done' );
 }, 60 );
