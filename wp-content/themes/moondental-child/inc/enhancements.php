@@ -325,7 +325,7 @@ function moondental_jsonld_schema() {
 		'description'     => $info['tagline'] . ' — 1995년부터 천안 만남로에서 진료해온 종합 치과병원.',
 		'url'             => $site,
 		'logo'            => $logo,
-		'image'           => $logo,
+		'image'           => function_exists( 'moondental_seo_share_image' ) ? array( moondental_seo_share_image(), $logo ) : $logo, // v3.97 · 사진 우선 (구글 썸네일·지식패널)
 		'telephone'       => $info['phone'],
 		'email'           => $info['email'] ?: 'moondental1995@naver.com',
 		'priceRange'      => '₩₩',

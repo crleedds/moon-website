@@ -228,6 +228,37 @@ add_filter( 'wpseo_twitter_title',   'moondental_wpseo_title', 20 );
 add_filter( 'wpseo_twitter_description', 'moondental_wpseo_metadesc', 20 );
 
 /**
+ * v3.97 · 대표 공유 이미지 — og:image / twitter:image / JSON-LD image
+ *  구글은 웹 결과 옆 썸네일을 페이지에서 눈에 띄는 이미지 중에서 고른다. og:image 가 없고 히어로가 CSS 배경이라
+ *  뉴스 블록의 휴진 안내 썸네일이 잡혔다. Customizer 「SEO」 패널의 seo_share_image 로 교체 가능.
+ */
+function moondental_seo_share_image() {
+	$default = MOONDENTAL_URI . '/assets/images/share/home-share.jpg';
+	$url = function_exists( 'md_content' ) ? md_content( 'seo_share_image', $default ) : $default;
+	$url = is_string( $url ) ? trim( $url ) : '';
+	if ( $url === '' ) $url = $default;
+	return preg_replace_callback( '/[^!-~]/u', function ( $m ) { return rawurlencode( $m[0] ); }, $url );
+}
+// Yoast · 글에 대표 이미지가 있으면 그것을 두고, 없을 때만 추가
+add_action( 'wpseo_add_opengraph_images', function ( $images ) {
+	if ( ! is_object( $images ) || ! method_exists( $images, 'add_image_by_url' ) ) return;
+	if ( method_exists( $images, 'has_images' ) && $images->has_images() ) return;
+	$images->add_image_by_url( moondental_seo_share_image() );
+} );
+add_filter( 'wpseo_twitter_image', function ( $img ) {
+	return ( is_string( $img ) && $img !== '' ) ? $img : moondental_seo_share_image();
+}, 20 );
+// Yoast 없을 때 직접 출력
+add_action( 'wp_head', function () {
+	if ( defined( 'WPSEO_VERSION' ) ) return;
+	$u = moondental_seo_share_image();
+	echo '<meta property="og:image" content="' . esc_url( $u ) . '" />' . "
+";
+	echo '<meta name="twitter:image" content="' . esc_url( $u ) . '" />' . "
+";
+}, 3 );
+
+/**
  * Yoast 없을 때 · document_title_parts 필터로 대체
  */
 add_filter( 'document_title_parts', function ( $parts ) {

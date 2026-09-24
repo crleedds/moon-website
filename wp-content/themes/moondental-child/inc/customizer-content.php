@@ -737,6 +737,7 @@ function moondental_home_content_fields() {
 				'seo_home_title' => array( 'default' => '한아의료재단 문치과병원 | 천안 아산에서 30여년을 한결같이', 'label' => '홈 · Google 검색 제목 (구글 파란 링크 문구)', 'type' => 'text' ),
 				'seo_home_desc'  => array( 'default' => '한아의료재단 문치과병원은 4개 전문센터와 분과별 협진 시스템을 운영하고 있는 천안 아산의 종합 치과병원입니다. 임플란트·교정·라미네이트·매복사랑니·턱관절.', 'label' => '홈 · Google 검색 설명 (구글 검은 요약 문구)', 'type' => 'textarea' ),
 				'seo_home_kw'    => array( 'default' => '천안·아산 치과, 아산 치과, 천안치과, 아산치과, 천안·아산 임플란트, 아산 임플란트, 천안·아산 투명교정, 아산 투명교정, 천안·아산 라미네이트, 아산 라미네이트, 천안·아산 자연치아 살리기, 아산 자연치아 살리기, 천안·아산 사랑니 발치, 아산 사랑니 발치, 천안·아산 턱관절, 아산 턱관절, 천안·아산 신경치료, 아산 신경치료, 천안·아산 미백, 아산 미백, 천안·아산 치과병원, 아산 치과병원, 천안 만남로 치과, 천안 신부동 치과, 천안 동남구 치과, 한아의료재단, 문치과병원, 슈어스마일 투명교정', 'label' => '홈 · 키워드', 'type' => 'textarea' ),
+				'seo_share_image' => array( 'default' => MOONDENTAL_URI . '/assets/images/share/home-share.jpg', 'label' => '대표 공유 이미지 URL · 구글 검색 썸네일·카카오·페이스북 공유 (1200×1200 권장 · 비우면 문타워 야경)', 'type' => 'text' ), // v3.97
 				// 임플란트
 				'seo_implant_title' => array( 'default' => '천안·아산 임플란트 | CBCT 디지털 가이드 수술', 'label' => '임플란트 센터 · 제목', 'type' => 'text' ),
 				'seo_implant_desc'  => array( 'default' => '천안·아산 임플란트 85만원~. 30여년 임상, CBCT 가이드 수술, 뼈이식·상악동거상술, 전신질환 안심 진료, 원내 기공실. 상담 041-563-2875.', 'label' => '임플란트 · 설명', 'type' => 'textarea' ),

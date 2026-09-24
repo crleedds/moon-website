@@ -81,6 +81,12 @@ $_hero_style = $_hero_bg_encoded
 	: '';
 ?>
 <section class="md-hero-combined<?php echo $_hero_bg ? ' md-hero-combined--has-bg' : ''; ?>" style="<?php echo esc_attr( $_hero_style ); ?>" aria-label="<?php echo esc_attr( md_content( 'aria_sec_hero_combined', '문치과병원 첫 화면' ) ); ?>">
+	<?php if ( $_hero_bg_encoded ) : /* v3.97 · 배경을 실제 <img> 로도 출력 — 구글은 CSS 배경을 사진으로 세지 않아 검색 썸네일에 엉뚱한 이미지가 잡혔다 */ ?>
+	<div class="md-hero-combined__bg">
+		<img class="md-hero-combined__bg-img" src="<?php echo esc_url( $_hero_bg_encoded ); ?>" alt="<?php echo esc_attr( md_content( 'hero_bg_alt', '천안 문치과병원 문타워 야경 — 한아의료재단 문치과병원' ) ); ?>" fetchpriority="high" decoding="async">
+		<span class="md-hero-combined__bg-shade" aria-hidden="true"></span>
+	</div>
+	<?php endif; ?>
 	<div class="md-container">
 
 		<!-- 1) 제목 -->
