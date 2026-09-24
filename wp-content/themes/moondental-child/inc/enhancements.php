@@ -311,6 +311,8 @@ function moondental_jsonld_schema() {
 	if ( ! empty( $info['instagram'] ) )   $sns[] = $info['instagram'];
 	if ( ! empty( $info['blog_url'] ) )    $sns[] = $info['blog_url'];
 	if ( ! empty( $info['facebook_url'] ) )$sns[] = $info['facebook_url'];
+	// v3.96 · 구글 지도 장소와 사이트를 연결 — 지식 패널·비즈니스 프로필 매칭에 쓰인다
+	$sns[] = 'https://maps.google.com/?cid=6470006738554739231';
 
 	$logo = MOONDENTAL_URI . '/assets/images/logo/logo-wide-noreg.png';
 
@@ -371,7 +373,8 @@ function moondental_jsonld_schema() {
 	$schema['availableLanguage']      = array( '한국어', 'English', '中文', '日本語', 'Русский', 'Монгол', 'Tiếng Việt' );
 
 	if ( ! empty( $info['naver_map_url'] ) ) {
-		$schema['hasMap'] = $info['naver_map_url'];
+		// v3.96 · 네이버·구글 지도 모두 명시
+		$schema['hasMap'] = array( $info['naver_map_url'], 'https://maps.google.com/?cid=6470006738554739231' );
 	}
 
 	/* 층별 전문 센터를 department 로 모델링.
