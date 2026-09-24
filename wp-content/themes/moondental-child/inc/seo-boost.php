@@ -227,6 +227,11 @@ add_filter( 'wpseo_opengraph_desc',  'moondental_wpseo_metadesc', 20 );
 add_filter( 'wpseo_twitter_title',   'moondental_wpseo_title', 20 );
 add_filter( 'wpseo_twitter_description', 'moondental_wpseo_metadesc', 20 );
 
+/** v3.97.2 · 태그 아카이브는 색인 제외(follow) — 얇은 페이지 56개가 크롤 예산을 먹고 있었다 */
+add_filter( 'wpseo_robots', function ( $robots ) {
+	return is_tag() ? 'noindex, follow' : $robots;
+}, 30 );
+
 /**
  * v3.97 · 대표 공유 이미지 — og:image / twitter:image / JSON-LD image
  *  구글은 웹 결과 옆 썸네일을 페이지에서 눈에 띄는 이미지 중에서 고른다. og:image 가 없고 히어로가 CSS 배경이라

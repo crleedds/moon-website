@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.97.1' );
+define( 'MOONDENTAL_VERSION', '3.97.2' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -580,22 +580,6 @@ add_action( 'template_redirect', function () {
 			header( 'X-Robots-Tag: noindex, nofollow, noarchive, nosnippet', true );
 			header( 'Content-Type: text/html; charset=UTF-8' );
 			echo '<!doctype html><html lang="ko"><head><meta charset="UTF-8"><title>410 Gone · 삭제된 페이지</title><meta name="robots" content="noindex,nofollow,noarchive,nosnippet"></head><body style="font-family:sans-serif;text-align:center;padding:60px 20px;"><h1>410 Gone</h1><p>이 페이지는 영구적으로 삭제되었습니다.</p><p><a href="' . esc_url( home_url( '/치과사전/' ) ) . '">치과 백과사전으로 이동</a> · <a href="' . esc_url( home_url( '/' ) ) . '">홈으로 이동</a></p></body></html>';
-			exit;
-		}
-	}
-
-	// v3.97.1 · 옛 백과사전 URL(개편 전 시드 제목) → 가장 가까운 현재 용어로 301
-	//   구글이 색인해 둔 옛 주소가 404 로 떨어지고 있었다. 확실히 대응되는 것만 맵으로 잇고 나머지는 404 유지.
-	if ( is_404() && preg_match( '#^/(?:(en|ja|zh|vi|ru|mn)/)?치과사전/([^/]+)/?$#u', $path_decoded, $m ) ) {
-		static $md_enc_map = null;
-		if ( $md_enc_map === null ) {
-			$map_file   = MOONDENTAL_DIR . '/inc/encyclopedia-redirect-map.php';
-			$md_enc_map = file_exists( $map_file ) ? (array) include $map_file : array();
-		}
-		$old_slug = strtolower( rtrim( $m[2], '/' ) );
-		if ( isset( $md_enc_map[ $old_slug ] ) ) {
-			$lang_prefix = ! empty( $m[1] ) ? '/' . $m[1] : '';
-			wp_safe_redirect( home_url( $lang_prefix . '/치과사전/' . $md_enc_map[ $old_slug ] . '/' ), 301 );
 			exit;
 		}
 	}
@@ -2087,6 +2071,7 @@ require_once MOONDENTAL_DIR . '/inc/enhancements.php';
 require_once MOONDENTAL_DIR . '/inc/seo-boost.php';
 require_once MOONDENTAL_DIR . '/inc/seo-encyclopedia.php'; // v3.94 · 백과사전 검색 노출
 require_once MOONDENTAL_DIR . '/inc/indexnow.php';         // v3.94 · IndexNow (Bing·Naver)
+require_once MOONDENTAL_DIR . '/inc/encyclopedia-redirects.php'; // v3.97.2 · 옛 주소 301/410
 require_once MOONDENTAL_DIR . '/inc/customizer-content.php';
 require_once MOONDENTAL_DIR . '/inc/auto-translate.php'; // v3.44.0
 require_once MOONDENTAL_DIR . '/inc/phrase-translate.php'; // v3.44.217 · 문구 기반 번역
