@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '4.7.4' );
+define( 'MOONDENTAL_VERSION', '4.8' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2074,6 +2074,7 @@ require_once MOONDENTAL_DIR . '/inc/indexnow.php';         // v3.94 · IndexNow 
 require_once MOONDENTAL_DIR . '/inc/encyclopedia-redirects.php'; // v3.97.2 · 옛 주소 301/410
 require_once MOONDENTAL_DIR . '/inc/care/care.php';           // v4.0 · Moon Dental Care (직원 전용 환자 설명 자료)
 if ( file_exists( MOONDENTAL_DIR . '/inc/support/support.php' ) ) { require_once MOONDENTAL_DIR . '/inc/support/support.php'; } // v4.3 · 지원 요청 (직원 전용)
+if ( file_exists( MOONDENTAL_DIR . '/inc/equipment/equipment.php' ) ) { require_once MOONDENTAL_DIR . '/inc/equipment/equipment.php'; } // v4.8 · 기구/장비 대장 (직원 전용)
 require_once MOONDENTAL_DIR . '/inc/customizer-content.php';
 require_once MOONDENTAL_DIR . '/inc/auto-translate.php'; // v3.44.0
 require_once MOONDENTAL_DIR . '/inc/phrase-translate.php'; // v3.44.217 · 문구 기반 번역

@@ -73,6 +73,12 @@ function md_sup_apps() {
 			'icon'  => '🛠️',
 			'desc'  => '수리 · 확인 요청을 경영지원실에 남기고 답변을 확인',
 		),
+		// v4.8 · 기구/장비 대장 (구글 시트 끼워 넣기 · 직원 열람, 관리자 수정)
+		'equipment' => array(
+			'label' => '기구 · 장비 대장',
+			'icon'  => '🔧',
+			'desc'  => '9 · 10 · 11층 장비대장 — 모델명 · 시리얼 · 수량 · 고장 여부',
+		),
 	);
 }
 
@@ -978,6 +984,8 @@ function md_sup_render_page() {
 		md_care_render(); // v4.0 · Moon Dental Care
 	} elseif ( 'support' === $app && function_exists( 'md_support_render' ) ) {
 		md_support_render(); // v4.3 · 지원 요청
+	} elseif ( 'equipment' === $app && function_exists( 'md_equipment_render' ) ) {
+		md_equipment_render(); // v4.8 · 기구/장비 대장
 	} elseif ( 'stock' !== $app ) {
 		md_sup_render_hub();
 	} else {

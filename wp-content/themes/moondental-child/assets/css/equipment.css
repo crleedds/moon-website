@@ -1,0 +1,24 @@
+/* =============================================================
+   직원 전용 · 기구/장비 대장 (v4.8)
+   구글 시트를 화면에 끼워 넣는다. 재료실(supply.css) 토큰을 그대로 쓴다.
+   ============================================================= */
+
+.mdeq__head {
+  display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: flex-start; justify-content: space-between;
+}
+.mdeq__title h2 { margin: 0 0 6px; font-size: 1.15rem; font-weight: 800; color: var(--color-text, #3D2F26); }
+.mdeq__title .mds-hint { margin: 0; line-height: 1.6; }
+.mdeq__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.mdeq__frame { padding: 0; overflow: hidden; margin-top: 12px; }
+.mdeq__frame iframe {
+  display: block; width: 100%; border: 0; background: var(--color-white, #fff);
+  height: calc(100vh - 260px); min-height: 520px;
+}
+
+.mdeq__foot { margin: 10px 2px 0; line-height: 1.6; }
+
+@media (max-width: 640px) {
+  .mdeq__frame iframe { height: 70vh; min-height: 420px; }
+  .mdeq__actions .mds-btn { width: 100%; }
+}
