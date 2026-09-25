@@ -1,18 +1,17 @@
 <?php
-/** Moon Dental Care · 임플란트 — 환자 설명용 */
+/** Moon Dental Care · 임플란트 — 환자 설명용 (자동 생성 + 손글 요약) */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 return array(
-	'slug'     => 'implant',
-	'order'    => 10,
-	'group'    => '임플란트센터',
-	'icon'     => '🦷',
-	'title'    => '임플란트',
-	'tagline'  => '빠진 치아 자리에 인공 치근을 심어 씹는 힘을 되돌립니다',
-	'center'   => '임플란트센터 · 10F',
-	'keywords' => '인공치아 식립 뼈이식 상악동 네비게이션',
-	'updated'  => '2026.09',
-
+	'slug' => 'implant',
+	'order' => 10,
+	'group' => '임플란트센터',
+	'icon' => '🦷',
+	'title' => '임플란트',
+	'tagline' => '빠진 치아 자리에 인공 치근을 심어 씹는 힘을 되돌립니다',
+	'center' => '임플란트센터 · 10F',
+	'keywords' => '인공치아 식립 뼈이식 상악동 네비게이션 틀니 풀아치',
+	'updated' => '2026.09',
 	'summary' => array(
 		'<strong>빠진 치아 뿌리 역할</strong>을 하는 티타늄 나사를 잇몸뼈에 심고, 그 위에 치아 모양의 보철을 올립니다.',
 		'옆 치아를 <strong>깎지 않아도</strong> 되고, 씹는 힘이 자연치아의 <strong>80~90%</strong>까지 회복됩니다.',
@@ -20,8 +19,350 @@ return array(
 		'만 65세 이상은 <strong>건강보험으로 평생 2개</strong>, 본인부담 30%.',
 		'문치과병원은 <strong>CBCT 진단 · 네비게이션 수술 · 원내 기공실</strong>로 정확하고 빠르게 진행합니다.',
 	),
-
 	'sections' => array(
+		array(
+			'id' => 'photos-1',
+			'title' => '사진 자료 (1/7)',
+			'images' => array(
+				array( 'src' => 'implant/01.jpg', 'caption' => 'Ari임플란트 디자인' ),
+				array( 'src' => 'implant/02.jpg', 'caption' => 'Ari임플란트 특허' ),
+				array( 'src' => 'implant/03.jpg', 'caption' => 'BD임플란트 강도' ),
+				array( 'src' => 'implant/04.jpg', 'caption' => 'BD임플란트 특허' ),
+				array( 'src' => 'implant/05.jpg', 'caption' => 'PCA' ),
+				array( 'src' => 'implant/06.jpg', 'caption' => 'PRF (자가혈 성장인자 세포치료)' ),
+				array( 'src' => 'implant/07.jpg', 'caption' => '꼼꼼하고 정확하게 진단하겠습니다' ),
+				array( 'src' => 'implant/08.jpg', 'caption' => '네비게이션 임플란트 진행과정' ),
+			),
+		),
+		array(
+			'id' => 'photos-2',
+			'title' => '사진 자료 (2/7)',
+			'images' => array(
+				array( 'src' => 'implant/09.jpg', 'caption' => '네비게이션 임플란트 치료과정' ),
+				array( 'src' => 'implant/10.jpg', 'caption' => '발치 후 방치 문제점' ),
+				array( 'src' => 'implant/11.jpg', 'caption' => '보험 임플란트 혜택' ),
+				array( 'src' => 'implant/12.jpg', 'caption' => '브릿지 임플란트' ),
+				array( 'src' => 'implant/13.jpg', 'caption' => '빠진 치아 방치되면' ),
+				array( 'src' => 'implant/14.jpg', 'caption' => '뼈 이식 꼭 해야하나요' ),
+				array( 'src' => 'implant/15.jpg', 'caption' => '뼈이식술의 종류' ),
+				array( 'src' => 'implant/16.jpg', 'caption' => '상악동 거상술' ),
+			),
+		),
+		array(
+			'id' => 'photos-3',
+			'title' => '사진 자료 (3/7)',
+			'images' => array(
+				array( 'src' => 'implant/17.jpg', 'caption' => '상악동이란' ),
+				array( 'src' => 'implant/18.jpg', 'caption' => '수술 후 주의사항' ),
+				array( 'src' => 'implant/19.jpg', 'caption' => '원데이 임플란트 치료과정' ),
+				array( 'src' => 'implant/20.jpg', 'caption' => '원데이 임플란트' ),
+				array( 'src' => 'implant/21.jpg', 'caption' => '임시치아 종류' ),
+				array( 'src' => 'implant/22.jpg', 'caption' => '임시틀니와 임시치아' ),
+				array( 'src' => 'implant/23.jpg', 'caption' => '임플란트 2차 수술' ),
+				array( 'src' => 'implant/24.jpg', 'caption' => '임플란트 2차 수술이 필요한 경우' ),
+			),
+		),
+		array(
+			'id' => 'photos-4',
+			'title' => '사진 자료 (4/7)',
+			'images' => array(
+				array( 'src' => 'implant/25.jpg', 'caption' => '임플란트 구조' ),
+				array( 'src' => 'implant/26.jpg', 'caption' => '임플란트 보철 체크 리스트' ),
+				array( 'src' => 'implant/27.jpg', 'caption' => '임플란트 볼씹힘' ),
+				array( 'src' => 'implant/28.jpg', 'caption' => '임플란트 브릿지' ),
+				array( 'src' => 'implant/29.jpg', 'caption' => '임플란트 빠짐' ),
+				array( 'src' => 'implant/30.jpg', 'caption' => '임플란트 뼈이식 (단순 vs 복잡)' ),
+				array( 'src' => 'implant/31.jpg', 'caption' => '임플란트 뼈이식' ),
+				array( 'src' => 'implant/32.jpg', 'caption' => '임플란트 임시치아 종류' ),
+			),
+		),
+		array(
+			'id' => 'photos-5',
+			'title' => '사진 자료 (5/7)',
+			'images' => array(
+				array( 'src' => 'implant/33.jpg', 'caption' => '임플란트 주위염' ),
+				array( 'src' => 'implant/34.jpg', 'caption' => '임플란트 치료과정' ),
+				array( 'src' => 'implant/35.jpg', 'caption' => '임플란트 틀니의 종류(똑딱이vs고정형)' ),
+				array( 'src' => 'implant/36.jpg', 'caption' => '임플란트 후 발생 가능한 사항' ),
+				array( 'src' => 'implant/37.jpg', 'caption' => '임플란트, 뼈랑 잘 붙었나요' ),
+				array( 'src' => 'implant/38.jpg', 'caption' => '임플란트에 구멍이 있어요' ),
+				array( 'src' => 'implant/39.jpg', 'caption' => '임플란트의 구조' ),
+				array( 'src' => 'implant/40.jpg', 'caption' => '전체 임플란트' ),
+			),
+		),
+		array(
+			'id' => 'photos-6',
+			'title' => '사진 자료 (6/7)',
+			'images' => array(
+				array( 'src' => 'implant/41.jpg', 'caption' => '정출 방지 와이어' ),
+				array( 'src' => 'implant/42.jpg', 'caption' => '추후 나타날 수 있는 임플란트 문제점 1' ),
+				array( 'src' => 'implant/43.jpg', 'caption' => '추후 나타날 수 있는 임플란트 문제점 2' ),
+				array( 'src' => 'implant/44.jpg', 'caption' => '추후 나타날 수 있는 임플란트 문제점 3' ),
+				array( 'src' => 'implant/45.jpg', 'caption' => '측방 접근법(Lateral)' ),
+				array( 'src' => 'implant/46.jpg', 'caption' => '치조정 접근법(Crestal)' ),
+				array( 'src' => 'implant/47.jpg', 'caption' => '커스텀 어버트먼트' ),
+				array( 'src' => 'implant/48.jpg', 'caption' => '틀니 오래 사용하시면' ),
+			),
+		),
+		array(
+			'id' => 'photos-7',
+			'title' => '사진 자료 (7/7)',
+			'images' => array(
+				array( 'src' => 'implant/49.jpg', 'caption' => '풀아치 임플란트' ),
+				array( 'src' => 'implant/50.jpg', 'caption' => '하이브리드 풀아치 임플란트' ),
+				array( 'src' => 'implant/51.jpg', 'caption' => '힐링 어버트먼트' ),
+			),
+		),
+		array(
+			'id' => 'v7',
+			'title' => '발치 후 방치 시 문제점',
+			'video' => '1cO_h3MUdpdaty9yo5B0CQzyJQa3Kj88E',
+		),
+		array(
+			'id' => 'v8',
+			'title' => '치아발치 방치 시 뼈흡수 과정',
+			'video' => '1ji-B79usefVhZrEXWpvbRAru68xO-Me-',
+		),
+		array(
+			'id' => 'v9',
+			'title' => '발치와 보존술',
+			'video' => '1bSK3jJSLOcWEyNXhpjkudrYdCctoqTpo',
+		),
+		array(
+			'id' => 'v10',
+			'title' => '임플란트 주위염',
+			'video' => '1wBi_qZ2FADmJnpksdLNQvnszSHfg-Ovy',
+		),
+		array(
+			'id' => 'v11',
+			'title' => '임플란트 주위염(상세)',
+			'video' => '184yBmJvLXl2UMWIogij2SHp2dmMGDfHu',
+		),
+		array(
+			'id' => 'v12',
+			'title' => '풀아치 임플란트',
+			'video' => '12ree8gTTjy9IfUO3amei3TcY_NRZvvFp',
+		),
+		array(
+			'id' => 'v13',
+			'title' => '임플란트 틀니(똑딱이)',
+			'video' => '1Z0oGNVBjnvFaiumKxfEf6tqPCsKd-R5T',
+		),
+		array(
+			'id' => 'v14',
+			'title' => '임플란트 틀니(고정형)',
+			'video' => '1QmanlX1gC7kRebFgMEnblJha1Vvec944',
+		),
+		array(
+			'id' => 'v15',
+			'title' => '임플란트 수술과정',
+			'video' => '1FldkprVnZt0Z5MBQHXmC01vpES1vJGL7',
+		),
+		array(
+			'id' => 'v16',
+			'title' => '임플란트 식립',
+			'video' => '1tN-Go493fE7Xd8Ye0xW0HNwxaShbwofK',
+		),
+		array(
+			'id' => 'v17',
+			'title' => '임플란트 2차 수술과정',
+			'video' => '1k0mYhdvh271yeTlFpw4RmTJ6CxvuvJj8',
+		),
+		array(
+			'id' => 'v18',
+			'title' => '상악동거상술 크레스탈',
+			'video' => '1mcdoWy_GOC91DGpLNJf4Ttjaf-S27evW',
+		),
+		array(
+			'id' => 'v19',
+			'title' => '상악동거상술 라테랄',
+			'video' => '1pK7SnYoTuujbzXwDtJizwruvIM5Sc2RM',
+		),
+		array(
+			'id' => 'v20',
+			'title' => '플리퍼',
+			'video' => '135i-c3PU8K25rVBO7wznXCgRKvJoobek',
+		),
+		array(
+			'id' => 'v21',
+			'title' => '플리퍼(상세)',
+			'video' => '1EAnw1H1lDXSZ_nOq_MiuioZdw_upmmc9',
+		),
+
+		array(
+			'id' => 'photos-1',
+			'title' => '사진 자료 (1/7)',
+			'images' => array(
+				array( 'src' => 'implant/01.jpg', 'caption' => 'Ari임플란트 디자인' ),
+				array( 'src' => 'implant/02.jpg', 'caption' => 'Ari임플란트 특허' ),
+				array( 'src' => 'implant/03.jpg', 'caption' => 'BD임플란트 강도' ),
+				array( 'src' => 'implant/04.jpg', 'caption' => 'BD임플란트 특허' ),
+				array( 'src' => 'implant/05.jpg', 'caption' => 'PCA' ),
+				array( 'src' => 'implant/06.jpg', 'caption' => 'PRF (자가혈 성장인자 세포치료)' ),
+				array( 'src' => 'implant/07.jpg', 'caption' => '꼼꼼하고 정확하게 진단하겠습니다' ),
+				array( 'src' => 'implant/08.jpg', 'caption' => '네비게이션 임플란트 진행과정' ),
+			),
+		),
+		array(
+			'id' => 'photos-2',
+			'title' => '사진 자료 (2/7)',
+			'images' => array(
+				array( 'src' => 'implant/09.jpg', 'caption' => '네비게이션 임플란트 치료과정' ),
+				array( 'src' => 'implant/10.jpg', 'caption' => '발치 후 방치 문제점' ),
+				array( 'src' => 'implant/11.jpg', 'caption' => '보험 임플란트 혜택' ),
+				array( 'src' => 'implant/12.jpg', 'caption' => '브릿지 임플란트' ),
+				array( 'src' => 'implant/13.jpg', 'caption' => '빠진 치아 방치되면' ),
+				array( 'src' => 'implant/14.jpg', 'caption' => '뼈 이식 꼭 해야하나요' ),
+				array( 'src' => 'implant/15.jpg', 'caption' => '뼈이식술의 종류' ),
+				array( 'src' => 'implant/16.jpg', 'caption' => '상악동 거상술' ),
+			),
+		),
+		array(
+			'id' => 'photos-3',
+			'title' => '사진 자료 (3/7)',
+			'images' => array(
+				array( 'src' => 'implant/17.jpg', 'caption' => '상악동이란' ),
+				array( 'src' => 'implant/18.jpg', 'caption' => '수술 후 주의사항' ),
+				array( 'src' => 'implant/19.jpg', 'caption' => '원데이 임플란트 치료과정' ),
+				array( 'src' => 'implant/20.jpg', 'caption' => '원데이 임플란트' ),
+				array( 'src' => 'implant/21.jpg', 'caption' => '임시치아 종류' ),
+				array( 'src' => 'implant/22.jpg', 'caption' => '임시틀니와 임시치아' ),
+				array( 'src' => 'implant/23.jpg', 'caption' => '임플란트 2차 수술' ),
+				array( 'src' => 'implant/24.jpg', 'caption' => '임플란트 2차 수술이 필요한 경우' ),
+			),
+		),
+		array(
+			'id' => 'photos-4',
+			'title' => '사진 자료 (4/7)',
+			'images' => array(
+				array( 'src' => 'implant/25.jpg', 'caption' => '임플란트 구조' ),
+				array( 'src' => 'implant/26.jpg', 'caption' => '임플란트 보철 체크 리스트' ),
+				array( 'src' => 'implant/27.jpg', 'caption' => '임플란트 볼씹힘' ),
+				array( 'src' => 'implant/28.jpg', 'caption' => '임플란트 브릿지' ),
+				array( 'src' => 'implant/29.jpg', 'caption' => '임플란트 빠짐' ),
+				array( 'src' => 'implant/30.jpg', 'caption' => '임플란트 뼈이식 (단순 vs 복잡)' ),
+				array( 'src' => 'implant/31.jpg', 'caption' => '임플란트 뼈이식' ),
+				array( 'src' => 'implant/32.jpg', 'caption' => '임플란트 임시치아 종류' ),
+			),
+		),
+		array(
+			'id' => 'photos-5',
+			'title' => '사진 자료 (5/7)',
+			'images' => array(
+				array( 'src' => 'implant/33.jpg', 'caption' => '임플란트 주위염' ),
+				array( 'src' => 'implant/34.jpg', 'caption' => '임플란트 치료과정' ),
+				array( 'src' => 'implant/35.jpg', 'caption' => '임플란트 틀니의 종류(똑딱이vs고정형)' ),
+				array( 'src' => 'implant/36.jpg', 'caption' => '임플란트 후 발생 가능한 사항' ),
+				array( 'src' => 'implant/37.jpg', 'caption' => '임플란트, 뼈랑 잘 붙었나요' ),
+				array( 'src' => 'implant/38.jpg', 'caption' => '임플란트에 구멍이 있어요' ),
+				array( 'src' => 'implant/39.jpg', 'caption' => '임플란트의 구조' ),
+				array( 'src' => 'implant/40.jpg', 'caption' => '전체 임플란트' ),
+			),
+		),
+		array(
+			'id' => 'photos-6',
+			'title' => '사진 자료 (6/7)',
+			'images' => array(
+				array( 'src' => 'implant/41.jpg', 'caption' => '정출 방지 와이어' ),
+				array( 'src' => 'implant/42.jpg', 'caption' => '추후 나타날 수 있는 임플란트 문제점 1' ),
+				array( 'src' => 'implant/43.jpg', 'caption' => '추후 나타날 수 있는 임플란트 문제점 2' ),
+				array( 'src' => 'implant/44.jpg', 'caption' => '추후 나타날 수 있는 임플란트 문제점 3' ),
+				array( 'src' => 'implant/45.jpg', 'caption' => '측방 접근법(Lateral)' ),
+				array( 'src' => 'implant/46.jpg', 'caption' => '치조정 접근법(Crestal)' ),
+				array( 'src' => 'implant/47.jpg', 'caption' => '커스텀 어버트먼트' ),
+				array( 'src' => 'implant/48.jpg', 'caption' => '틀니 오래 사용하시면' ),
+			),
+		),
+		array(
+			'id' => 'photos-7',
+			'title' => '사진 자료 (7/7)',
+			'images' => array(
+				array( 'src' => 'implant/49.jpg', 'caption' => '풀아치 임플란트' ),
+				array( 'src' => 'implant/50.jpg', 'caption' => '하이브리드 풀아치 임플란트' ),
+				array( 'src' => 'implant/51.jpg', 'caption' => '힐링 어버트먼트' ),
+			),
+		),
+		array(
+			'id' => 'v7',
+			'title' => '발치 후 방치 시 문제점',
+			'video' => '1cO_h3MUdpdaty9yo5B0CQzyJQa3Kj88E',
+		),
+		array(
+			'id' => 'v8',
+			'title' => '치아발치 방치 시 뼈흡수 과정',
+			'video' => '1ji-B79usefVhZrEXWpvbRAru68xO-Me-',
+		),
+		array(
+			'id' => 'v9',
+			'title' => '발치와 보존술',
+			'video' => '1bSK3jJSLOcWEyNXhpjkudrYdCctoqTpo',
+		),
+		array(
+			'id' => 'v10',
+			'title' => '치아발치 방치 시 뼈흡수 과정',
+			'video' => '1ji-B79usefVhZrEXWpvbRAru68xO-Me-',
+		),
+		array(
+			'id' => 'v11',
+			'title' => '임플란트 주위염',
+			'video' => '1wBi_qZ2FADmJnpksdLNQvnszSHfg-Ovy',
+		),
+		array(
+			'id' => 'v12',
+			'title' => '임플란트 주위염(상세)',
+			'video' => '184yBmJvLXl2UMWIogij2SHp2dmMGDfHu',
+		),
+		array(
+			'id' => 'v13',
+			'title' => '풀아치 임플란트',
+			'video' => '12ree8gTTjy9IfUO3amei3TcY_NRZvvFp',
+		),
+		array(
+			'id' => 'v14',
+			'title' => '임플란트 틀니(똑딱이)',
+			'video' => '1Z0oGNVBjnvFaiumKxfEf6tqPCsKd-R5T',
+		),
+		array(
+			'id' => 'v15',
+			'title' => '임플란트 틀니(고정형)',
+			'video' => '1QmanlX1gC7kRebFgMEnblJha1Vvec944',
+		),
+		array(
+			'id' => 'v16',
+			'title' => '임플란트 수술과정',
+			'video' => '1FldkprVnZt0Z5MBQHXmC01vpES1vJGL7',
+		),
+		array(
+			'id' => 'v17',
+			'title' => '임플란트 식립',
+			'video' => '1tN-Go493fE7Xd8Ye0xW0HNwxaShbwofK',
+		),
+		array(
+			'id' => 'v18',
+			'title' => '임플란트 2차 수술과정',
+			'video' => '1k0mYhdvh271yeTlFpw4RmTJ6CxvuvJj8',
+		),
+		array(
+			'id' => 'v19',
+			'title' => '상악동거상술 크레스탈',
+			'video' => '1mcdoWy_GOC91DGpLNJf4Ttjaf-S27evW',
+		),
+		array(
+			'id' => 'v20',
+			'title' => '상악동거상술 라테랄',
+			'video' => '1pK7SnYoTuujbzXwDtJizwruvIM5Sc2RM',
+		),
+		array(
+			'id' => 'v21',
+			'title' => '플리퍼',
+			'video' => '135i-c3PU8K25rVBO7wznXCgRKvJoobek',
+		),
+		array(
+			'id' => 'v22',
+			'title' => '플리퍼(상세)',
+			'video' => '1EAnw1H1lDXSZ_nOq_MiuioZdw_upmmc9',
+		),
+
 		array(
 			'id'    => 'why',
 			'title' => '왜 빈자리를 그냥 두면 안 되나요?',
@@ -51,7 +392,6 @@ return array(
 			'body'  => '<ul><li>비용은 <strong>임플란트 종류·뼈이식 여부·보철 재료</strong>에 따라 달라 진단 후 정확히 안내드립니다. 비급여 진료비는 홈페이지에 게시되어 있습니다.</li><li><strong>만 65세 이상</strong>: 건강보험 적용 — 평생 <strong>2개</strong>, 본인부담 <strong>30%</strong> (뼈이식은 비급여).</li><li>실비보험은 보통 적용되지 않으나, 세액공제(의료비)는 가능합니다.</li></ul>',
 		),
 	),
-
 	'steps_title' => '치료 과정 (보통 3~6개월)',
 	'steps' => array(
 		array( 'title' => '진단 · CT 촬영 · 상담', 'time' => '1일', 'desc' => '3D CT로 뼈 상태와 신경 위치를 확인하고 치료 계획·비용을 설명드립니다.' ),
@@ -93,10 +433,10 @@ return array(
 		array( 'q' => '당일 임플란트가 뭔가요?', 'a' => '<p>발치·뼈이식·식립을 하루에 마치는 방식입니다. 뼈 상태와 감염 여부가 조건에 맞을 때 가능하며, CT로 판단합니다.</p>' ),
 		array( 'q' => '다른 병원에서 한 임플란트가 흔들려요.', 'a' => '<p>임플란트 주위염이거나 나사 풀림일 수 있습니다. 살릴 수 있으면 살리는 치료를 먼저 하고, 단종된 부품도 원내 기공실에서 제작할 수 있습니다.</p>' ),
 	),
-
 	'links' => array(
 		array( 'label' => '임플란트 종합안내서', 'url' => '/guide/implant/' ),
 		array( 'label' => '임플란트센터 페이지', 'url' => '/임플란트-센터/' ),
+		array( 'label' => '임플란트센터 상담양식 (PDF)', 'url' => 'https://drive.google.com/file/d/1Vo6CVUVWrUequqMngL1xLLDpw8dd3jV2/view' ),
 		array( 'label' => '비급여 진료비', 'url' => '/비급여-진료비/' ),
 	),
 );

@@ -64,3 +64,18 @@
     if (Math.abs(dx) > 60) show(dx < 0 ? idx + 1 : idx - 1);
   }, { passive: true });
 })();
+
+/* v4.0 · 사진 크게 보기 */
+(function () {
+  'use strict';
+  var box = document.querySelector('[data-care-lightbox]');
+  if (!box) return;
+  var img = box.querySelector('img'), cap = box.querySelector('.mdc-zoom__cap');
+  function close() { box.hidden = true; img.src = ''; }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-care-zoom]');
+    if (a) { e.preventDefault(); img.src = a.getAttribute('href'); cap.textContent = a.getAttribute('title') || ''; box.hidden = false; return; }
+    if (!box.hidden && (e.target === box || e.target.closest('[data-care-lightbox-close]'))) close();
+  });
+  document.addEventListener('keydown', function (e) { if (!box.hidden && e.key === 'Escape') close(); });
+})();

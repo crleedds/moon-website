@@ -6,13 +6,24 @@
  *  태블릿·모니터로 띄워 놓고 쓰는 화면이다. 주제별 데이터는 inc/care/data/{slug}.php 에 두며
  *  파일 하나 = 주제 하나. 새 주제는 파일만 추가하면 목록에 자동으로 뜬다.
  *
- *  화면: 허브(주제 카드) → 주제 페이지(한눈에 · 설명 섹션 · 치료 과정 · 비교 · 주의 · FAQ)
+ *  구성은 기존 구글 사이트(Moon Dental CARE)를 따른다: 소주제마다 영상(구글 드라이브) 또는 사진을
+ *  큼직하게 보여 주고, 아래에 짧은 설명을 붙인다. 사진은 원본을 병원 서버(uploads/care/)에 둔다.
+ *
+ *  섹션 키:  'title' · 'body'(HTML) · 'tip'(직원용 설명 포인트) · 'video'(드라이브 파일 ID)
+ *           'images'(array of ['src'=>URL, 'caption'=>..]) · 'embed'(슬라이드·시트 임베드 URL)
  *  설명 모드: 섹션 하나가 화면 하나가 되는 큰 글씨 슬라이드 (← → 키, 터치 스와이프)
  *
  * @package moondental-child
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
+
+/** 사진 원본 저장 위치 (uploads/care/{topic}/…) */
+function md_care_media_url( $rel ) {
+	if ( preg_match( '#^https?://#', $rel ) ) return $rel;
+	$up = wp_upload_dir();
+	return rtrim( $up['baseurl'], '/' ) . '/care/' . ltrim( $rel, '/' );
+}
 
 /** 주제 목록 — data 폴더의 파일을 읽어 'order' 순으로 정렬 */
 function md_care_topics() {
@@ -56,19 +67,21 @@ function md_care_render_hub() {
 	?>
 	<div class="mdc-hub">
 		<div class="mdc-hub__top">
-			<p class="mdc-hub__lead">환자분께 치료를 설명할 때 띄워 놓는 화면입니다. 주제를 고르면 한눈에 요약 → 설명 → 과정 → 자주 묻는 질문 순서로 이어지고, <strong>설명 모드</strong>를 켜면 큰 글씨 슬라이드로 바뀝니다.</p>
-			<label class="mdc-search"><span class="md-sr-only">주제 찾기</span><input type="search" placeholder="주제 찾기 (예: 임플란트, 신경치료)" data-care-filter autocomplete="off"></label>
+			<p class="mdc-hub__lead">환자분께 치료를 설명할 때 띄워 놓는 화면입니다. 주제를 고르면 영상·사진과 함께 설명이 이어지고, <strong>설명 모드</strong>를 켜면 한 화면에 하나씩 큰 글씨로 넘겨 볼 수 있습니다.</p>
+			<label class="mdc-search"><span class="md-sr-only">주제 찾기</span><input type="search" placeholder="주제 찾기 (예: 임플란트, 신경치료, 스케일링)" data-care-filter autocomplete="off"></label>
 		</div>
 		<?php foreach ( $groups as $g => $items ) : ?>
 			<h2 class="mdc-hub__group"><?php echo esc_html( $g ); ?></h2>
 			<div class="mdc-cards">
-				<?php foreach ( $items as $slug => $t ) : ?>
+				<?php foreach ( $items as $slug => $t ) :
+					$nv = 0; $ni = 0;
+					foreach ( (array) ( $t['sections'] ?? array() ) as $s ) { if ( ! empty( $s['video'] ) ) $nv++; if ( ! empty( $s['images'] ) ) $ni += count( $s['images'] ); } ?>
 					<a class="mdc-card" href="<?php echo esc_url( md_sup_url( array( 'app' => 'care', 'topic' => $slug ) ) ); ?>" data-care-name="<?php echo esc_attr( $t['title'] . ' ' . ( $t['keywords'] ?? '' ) ); ?>">
 						<span class="mdc-card__icon" aria-hidden="true"><?php echo esc_html( $t['icon'] ?? '🦷' ); ?></span>
 						<span class="mdc-card__body">
 							<span class="mdc-card__title"><?php echo esc_html( $t['title'] ); ?></span>
 							<span class="mdc-card__tag"><?php echo esc_html( $t['tagline'] ?? '' ); ?></span>
-							<?php if ( ! empty( $t['center'] ) ) : ?><span class="mdc-card__center"><?php echo esc_html( $t['center'] ); ?></span><?php endif; ?>
+							<span class="mdc-card__center"><?php echo esc_html( trim( ( $t['center'] ?? '' ) . ( $nv ? "  · 영상 {$nv}" : '' ) . ( $ni ? " · 사진 {$ni}" : '' ), ' ·' ) ); ?></span>
 						</span>
 						<span class="mdc-card__go" aria-hidden="true">→</span>
 					</a>
@@ -78,6 +91,32 @@ function md_care_render_hub() {
 		<?php if ( ! $topics ) : ?><p class="mds-notice">아직 등록된 주제가 없습니다.</p><?php endif; ?>
 	</div>
 	<?php
+}
+
+/** 섹션 안의 미디어(영상 · 사진 · 임베드) */
+function md_care_render_media( $s ) {
+	if ( ! empty( $s['video'] ) ) {
+		$ids = (array) $s['video'];
+		echo '<div class="mdc-videos mdc-videos--' . count( $ids ) . '">';
+		foreach ( $ids as $vid ) {
+			echo '<div class="mdc-video"><iframe src="https://drive.google.com/file/d/' . esc_attr( $vid ) . '/preview" loading="lazy" allow="autoplay; fullscreen" allowfullscreen title="' . esc_attr( $s['title'] ?? '영상' ) . '"></iframe></div>';
+		}
+		echo '</div>';
+	}
+	if ( ! empty( $s['embed'] ) ) {
+		echo '<div class="mdc-embed"><iframe src="' . esc_url( $s['embed'] ) . '" loading="lazy" allowfullscreen title="' . esc_attr( $s['title'] ?? '자료' ) . '"></iframe></div>';
+	}
+	if ( ! empty( $s['images'] ) ) {
+		$imgs = (array) $s['images'];
+		echo '<div class="mdc-gallery mdc-gallery--' . min( 4, count( $imgs ) ) . '">';
+		foreach ( $imgs as $im ) {
+			$src = md_care_media_url( $im['src'] ); $cap = $im['caption'] ?? '';
+			echo '<figure class="mdc-fig"><a href="' . esc_url( $src ) . '" data-care-zoom title="' . esc_attr( $cap ) . '"><img src="' . esc_url( $src ) . '" alt="' . esc_attr( $cap ) . '" loading="lazy"></a>';
+			if ( $cap ) echo '<figcaption>' . esc_html( $cap ) . '</figcaption>';
+			echo '</figure>';
+		}
+		echo '</div>';
+	}
 }
 
 /** 주제 페이지 */
@@ -101,6 +140,13 @@ function md_care_render_topic( $slug ) {
 					<button type="button" class="mdc-btn" onclick="window.print()">🖨 인쇄</button>
 				</div>
 			</div>
+			<?php if ( ! empty( $t['sections'] ) ) : ?>
+			<nav class="mdc-toc" aria-label="소주제">
+				<?php $k = 0; foreach ( (array) $t['sections'] as $s ) : $k++; ?>
+					<a href="#<?php echo esc_attr( 'care-' . ( $s['id'] ?? $k ) ); ?>"><?php echo esc_html( $s['title'] ); ?></a>
+				<?php endforeach; ?>
+			</nav>
+			<?php endif; ?>
 		</header>
 
 		<?php if ( ! empty( $t['summary'] ) ) : ?>
@@ -113,9 +159,10 @@ function md_care_render_topic( $slug ) {
 		<?php endif; ?>
 
 		<?php foreach ( (array) ( $t['sections'] ?? array() ) as $s ) : $n++; ?>
-		<section class="mdc-sec" id="<?php echo esc_attr( 'care-' . ( $s['id'] ?? $n ) ); ?>" data-care-slide>
+		<section class="mdc-sec<?php echo ( ! empty( $s['video'] ) || ! empty( $s['images'] ) || ! empty( $s['embed'] ) ) ? ' mdc-sec--media' : ''; ?>" id="<?php echo esc_attr( 'care-' . ( $s['id'] ?? $n ) ); ?>" data-care-slide>
 			<h3 class="mdc-sec__title"><span class="mdc-sec__num"><?php echo esc_html( str_pad( (string) $n, 2, '0', STR_PAD_LEFT ) ); ?></span><?php echo esc_html( $s['title'] ); ?></h3>
-			<div class="mdc-sec__body"><?php echo wp_kses_post( $s['body'] ); ?></div>
+			<?php md_care_render_media( $s ); ?>
+			<?php if ( ! empty( $s['body'] ) ) : ?><div class="mdc-sec__body"><?php echo wp_kses_post( $s['body'] ); ?></div><?php endif; ?>
 			<?php if ( ! empty( $s['tip'] ) ) : ?><aside class="mdc-tip"><strong>설명 포인트</strong> <?php echo wp_kses_post( $s['tip'] ); ?></aside><?php endif; ?>
 		</section>
 		<?php endforeach; ?>
@@ -172,7 +219,7 @@ function md_care_render_topic( $slug ) {
 			<?php if ( ! empty( $t['links'] ) ) : ?>
 				<div class="mdc-links">
 					<?php foreach ( (array) $t['links'] as $l ) : ?>
-						<a class="mdc-link" href="<?php echo esc_url( home_url( $l['url'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $l['label'] ); ?> ↗</a>
+						<a class="mdc-link" href="<?php echo esc_url( preg_match( '#^https?://#', $l['url'] ) ? $l['url'] : home_url( $l['url'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $l['label'] ); ?> ↗</a>
 					<?php endforeach; ?>
 				</div>
 			<?php endif; ?>
@@ -195,6 +242,8 @@ function md_care_render_topic( $slug ) {
 		</div>
 		<div class="mdc-present__stage" data-care-stage-body></div>
 	</div>
+	<!-- 사진 크게 보기 -->
+	<div class="mdc-zoom" data-care-lightbox hidden><button type="button" class="mdc-zoom__close" data-care-lightbox-close aria-label="닫기">✕</button><img alt=""><p class="mdc-zoom__cap"></p></div>
 	<?php
 }
 
