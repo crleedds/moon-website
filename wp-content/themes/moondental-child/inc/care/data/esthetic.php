@@ -1,5 +1,5 @@
 <?php
-/** Moon Dental Care · 심미치료 — 환자 설명용 (자동 생성 + 손글 요약) */
+/** Moon Dental Care · 심미치료 — 환자 설명용 (v4.1 · 자동 생성 + 손글 요약) */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 return array(
@@ -17,49 +17,25 @@ return array(
 		'<strong>치아미백</strong>은 전문가 미백(병원)과 자가 미백(집)을 조합하면 효과가 오래 갑니다.',
 		'디지털 스마일 디자인으로 결과를 미리 보고 결정합니다.',
 	),
-	'sections' => array(
-		array(
-			'id' => 'photos-1',
-			'title' => '사진 자료 (1/2)',
-			'images' => array(
-				array( 'src' => 'esthetic/01.jpg', 'caption' => '라미네이트 치료' ),
-				array( 'src' => 'esthetic/02.jpg', 'caption' => '라미네이트 치료과정' ),
-				array( 'src' => 'esthetic/03.jpg', 'caption' => '미백 after' ),
-				array( 'src' => 'esthetic/04.jpg', 'caption' => '미백 before' ),
-				array( 'src' => 'esthetic/05.jpg', 'caption' => '미백이 안되는 경우' ),
-				array( 'src' => 'esthetic/06.jpg', 'caption' => '전문가 치아미백 시술과정' ),
-				array( 'src' => 'esthetic/07.jpg', 'caption' => '전문가 치아미백치료 사례' ),
-				array( 'src' => 'esthetic/08.jpg', 'caption' => '치아미백' ),
-			),
-		),
-		array(
-			'id' => 'photos-2',
-			'title' => '사진 자료 (2/2)',
-			'images' => array(
-				array( 'src' => 'esthetic/09.jpg', 'caption' => '치아미백과정' ),
-				array( 'src' => 'esthetic/10.jpg', 'caption' => '치아미백의 종류' ),
-			),
-		),
-		array(
-			'id' => 'v2',
-			'title' => '라미네이트 과정',
-			'video' => '1sTt6u_5ffxPNYxazI2uyITWRwx2V7zBj',
-		),
-		array(
-			'id' => 'v3',
-			'title' => '라미네이트 접착과정',
-			'video' => '1SJZ8icvXCepD0wx-8XqPqvcnmeugHcOa',
-		),
-		array(
-			'id' => 'v4',
-			'title' => '치아미백 과정',
-			'video' => '1OO7iryJDIekcjHmZI2ZmnAcRkeidFqlR',
-		),
-		array(
-			'id' => 'v5',
-			'title' => 'Teeth Whitening Process',
-			'video' => '1r8F13vng3k7lSzQrEzPsVeLtnSz57X2H',
-		),
+	'photos' => array(
+		array( 'src' => 'esthetic/01.jpg', 'caption' => '라미네이트 치료' ),
+		array( 'src' => 'esthetic/02.jpg', 'caption' => '라미네이트 치료과정' ),
+		array( 'src' => 'esthetic/03.jpg', 'caption' => '미백 after' ),
+		array( 'src' => 'esthetic/04.jpg', 'caption' => '미백 before' ),
+		array( 'src' => 'esthetic/05.jpg', 'caption' => '미백이 안되는 경우' ),
+		array( 'src' => 'esthetic/06.jpg', 'caption' => '전문가 치아미백 시술과정' ),
+		array( 'src' => 'esthetic/07.jpg', 'caption' => '전문가 치아미백치료 사례' ),
+		array( 'src' => 'esthetic/08.jpg', 'caption' => '치아미백' ),
+		array( 'src' => 'esthetic/09.jpg', 'caption' => '치아미백과정' ),
+		array( 'src' => 'esthetic/10.jpg', 'caption' => '치아미백의 종류' ),
+	),
+	'videos' => array(
+		array( 'title' => '라미네이트 과정', 'drive' => '1sTt6u_5ffxPNYxazI2uyITWRwx2V7zBj' ),
+		array( 'title' => '라미네이트 접착과정', 'drive' => '1SJZ8icvXCepD0wx-8XqPqvcnmeugHcOa' ),
+		array( 'title' => '치아미백 과정', 'drive' => '1OO7iryJDIekcjHmZI2ZmnAcRkeidFqlR' ),
+		array( 'title' => 'Teeth Whitening Process', 'drive' => '1r8F13vng3k7lSzQrEzPsVeLtnSz57X2H' ),
+	),
+	'embeds' => array(
 	),
 	'links' => array(
 		array( 'label' => '라미네이트 종합안내서', 'url' => '/guide/laminate/' ),
