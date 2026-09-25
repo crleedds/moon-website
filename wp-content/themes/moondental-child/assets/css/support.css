@@ -89,3 +89,11 @@
   .mdsp-search input[type="search"] { width: 100%; min-width: 0; }
   .mdsp-item__date { margin-left: 0; width: 100%; }
 }
+
+/* v4.5 · 신청 시 상태 선택 */
+.mdsp-status-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+.mdsp-status-pick__opt { cursor: pointer; }
+.mdsp-status-pick__opt input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.mdsp-status-pick__opt .mds-status { opacity: .45; border: 2px solid transparent; min-height: 36px; padding: 6px 14px; font-size: .9rem; }
+.mdsp-status-pick__opt input:checked + .mds-status { opacity: 1; border-color: currentColor; }
+.mdsp-status-pick__opt input:focus-visible + .mds-status { outline: 2px solid var(--color-primary, #D88062); }

@@ -1,6 +1,6 @@
 <?php
 /**
- * v4.4 · 지원 요청 — 직원 전용(/직원/) 허브의 도구 (요청팀 = 재고관리 팀 · 화면 단순화)
+ * v4.5 · 지원 요청 — 직원 전용(/직원/) 허브의 도구 (요청팀 목록 정리 · 신청 시 상태 선택 · 경영지원실이 내용도 수정)
  *
  *  경영지원실에 부탁할 일(수리 · 구매 · 확인 요청 …)을 적고, 경영지원실이 답변과
  *  처리 상태를 남기는 화면이다. 예전에는 구글 시트 「문치과병원 경영지원실 요청사항」에
@@ -184,8 +184,9 @@ function md_support_open_count() {
 	return $c['접수'];
 }
 
-function md_support_create( $requester, $dept, $content ) {
+function md_support_create( $requester, $dept, $content, $status = '접수' ) {
 	global $wpdb;
+	if ( ! isset( md_support_statuses()[ $status ] ) ) { $status = '접수'; }
 	$requester = mb_substr( sanitize_text_field( $requester ), 0, 60 );
 	$dept      = mb_substr( sanitize_text_field( $dept ), 0, 80 );
 	$content   = trim( sanitize_textarea_field( $content ) );
@@ -198,7 +199,8 @@ function md_support_create( $requester, $dept, $content ) {
 		'requester'  => $requester,
 		'dept'       => $dept,
 		'content'    => $content,
-		'status'     => '접수',
+		'status'     => $status,
+		'done_at'    => '완료' === $status ? current_time( 'Y-m-d' ) : null,
 		'updated_at' => current_time( 'mysql' ),
 	) );
 	if ( ! $ok ) { return new WP_Error( 'md_support', '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.' ); }
@@ -220,6 +222,7 @@ function md_support_answer( $id, $data ) {
 	if ( '완료' === $status && '' === $done ) { $done = current_time( 'Y-m-d' ); }
 
 	$upd = array(
+		'content'    => isset( $data['content'] ) && '' !== trim( sanitize_textarea_field( $data['content'] ) ) ? trim( sanitize_textarea_field( $data['content'] ) ) : $row->content,
 		'answer'     => isset( $data['answer'] ) ? trim( sanitize_textarea_field( $data['answer'] ) ) : $row->answer,
 		'owner'      => isset( $data['owner'] ) ? mb_substr( sanitize_text_field( $data['owner'] ), 0, 60 ) : $row->owner,
 		'status'     => $status,
@@ -288,7 +291,8 @@ function md_support_handle_post() {
 		case 'new':
 			$team = isset( $_POST['team'] ) ? sanitize_text_field( wp_unslash( $_POST['team'] ) ) : '';
 			$who  = isset( $_POST['requester'] ) ? sanitize_text_field( wp_unslash( $_POST['requester'] ) ) : '';
-			$res  = md_support_create( $who, $team, isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '' );
+			$stat = isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : '접수';
+			$res  = md_support_create( $who, $team, isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '', $stat );
 			if ( ! is_wp_error( $res ) ) {
 				/* 다음에 또 올릴 때 팀·이름을 다시 고르지 않아도 되게 30일 기억 */
 				$exp = time() + 30 * DAY_IN_SECONDS;
@@ -308,6 +312,7 @@ function md_support_handle_post() {
 		case 'answer':
 			if ( ! md_support_can_manage() ) { break; }
 			$res = md_support_answer( $id, array(
+				'content' => isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '',
 				'answer'  => isset( $_POST['answer'] ) ? wp_unslash( $_POST['answer'] ) : '',
 				'owner'   => isset( $_POST['owner'] ) ? wp_unslash( $_POST['owner'] ) : '',
 				'status'  => isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : '',
@@ -369,13 +374,18 @@ function md_support_fmt_date( $dt ) {
 	return $ts ? date_i18n( 'Y.m.d', $ts ) : '';
 }
 
-/** 요청팀 목록 — 재고관리의 팀 그대로 (v4.4) */
+/**
+ * 요청팀 목록 (v4.5 · 원장 지시)
+ *  재고관리 팀에서 출발했지만 지원 요청용으로 정리했다: 9·10·11층 데스크 → 서비스지원실 하나,
+ *  층별 공통은 뺌, Dr. 병원장팀 → Dr. 문은수팀, 기타 추가. 재고관리 팀 표는 그대로다.
+ */
 function md_support_teams() {
-	$names = array();
-	if ( function_exists( 'md_sup_teams' ) ) {
-		foreach ( md_sup_teams() as $tm ) { $names[] = $tm->name; }
-	}
-	return $names;
+	$teams = array(
+		'서비스지원실',
+		'Dr. 문은수팀', 'Dr. 이창률팀', 'Dr. 권혜진팀', 'Dr. 이승주팀', 'Dr. 이수연팀', 'Dr. 이영일팀', 'Dr. 김세일팀', 'Dr. 정석형팀',
+		'기공실', '예방과', '기타',
+	);
+	return (array) apply_filters( 'md_support_teams', $teams );
 }
 
 /** 마지막에 고른 팀·이름 (쿠키, 30일) */
@@ -412,6 +422,11 @@ function md_support_render_new( $err = '' ) {
 			<textarea name="content" required rows="3" placeholder="예) 10층 3번 체어 석션 약함 · 11층 데스크 전화기 끊김 · 프린터 토너 구매"></textarea>
 		</label>
 		<div class="mdsp-new__foot">
+			<div class="mdsp-status-pick" role="radiogroup" aria-label="상태">
+				<?php foreach ( md_support_statuses() as $st => $info ) : ?>
+					<label class="mdsp-status-pick__opt"><input type="radio" name="status" value="<?php echo esc_attr( $st ); ?>" <?php checked( '접수', $st ); ?>><span class="mds-status <?php echo esc_attr( $info['class'] ); ?>"><?php echo esc_html( $st ); ?></span></label>
+				<?php endforeach; ?>
+			</div>
 			<button type="submit" class="mds-btn mds-btn--fill mdsp-new__btn">요청 올리기</button>
 			<span class="mds-hint">경영지원실이 확인하면 이 페이지에 답변이 달립니다.</span>
 		</div>
@@ -454,9 +469,10 @@ function md_support_render_card( $r, $manage, $keep ) {
 					</form>
 				<?php endforeach; ?>
 				<details class="mdsp-more">
-					<summary class="mdsp-btn">✏️ 답변<?php echo $has_answer ? ' 고치기' : ' 쓰기'; ?></summary>
+					<summary class="mdsp-btn">✏️ 답변<?php echo $has_answer ? ' 고치기' : ' 쓰기'; ?> · 내용 수정</summary>
 					<form method="post" class="mdsp-answerform">
 						<input type="hidden" name="md_support_action" value="answer"><input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_answer' ) ); ?>"><?php echo $hidden; // phpcs:ignore ?>
+						<label class="mdsp-field"><span>요청 내용 (고칠 수 있음)</span><textarea name="content" rows="2"><?php echo esc_textarea( $r->content ); ?></textarea></label>
 						<label class="mdsp-field"><span>답변</span><textarea name="answer" rows="3" placeholder="처리 내용이나 예정을 적어 주세요"><?php echo esc_textarea( (string) $r->answer ); ?></textarea></label>
 						<div class="mdsp-answerform__row">
 							<label class="mdsp-field"><span>담당자</span><input type="text" name="owner" maxlength="60" value="<?php echo esc_attr( $r->owner ?: wp_get_current_user()->display_name ); ?>"></label>
