@@ -190,4 +190,5 @@ return array(
 	'아산 추천 치과'          => 'Nha khoa tại Asan',
 	'천안 추천 치과'          => 'Nha khoa tại Cheonan',
 	'충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층' => 'Số 52 đường Mannam, quận Dongnam, TP Cheonan, tỉnh Chungcheongnam — Tòa Moon Tower tầng 9/10/11/13', // v3.99.4
+	'충청남도 천안시 동남구 만남로 52, 문타워 9~13층' => 'Số 52 đường Mannam, quận Dongnam, TP Cheonan, tỉnh Chungcheongnam — Tòa Moon Tower tầng 9–13', // v3.99.5
 );
