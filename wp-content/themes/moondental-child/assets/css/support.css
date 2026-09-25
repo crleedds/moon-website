@@ -97,3 +97,9 @@
 .mdsp-status-pick__opt .mds-status { opacity: .45; border: 2px solid transparent; min-height: 36px; padding: 6px 14px; font-size: .9rem; }
 .mdsp-status-pick__opt input:checked + .mds-status { opacity: 1; border-color: currentColor; }
 .mdsp-status-pick__opt input:focus-visible + .mds-status { outline: 2px solid var(--color-primary, #D88062); }
+
+/* v4.6 · 신청 폼의 담당자·답변란 */
+.mdsp-new__row--office { grid-template-columns: 1fr 2fr; margin-top: 2px; padding-top: 12px; border-top: 1px dashed var(--color-border, #EDDFD0); }
+.mdsp-new__row--office textarea { min-height: 48px; }
+.mdsp-field > span small { font-weight: 500; color: var(--color-text-mute, #A89685); }
+@media (max-width: 640px) { .mdsp-new__row--office { grid-template-columns: 1fr; } }

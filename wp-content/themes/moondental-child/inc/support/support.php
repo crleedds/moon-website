@@ -1,6 +1,6 @@
 <?php
 /**
- * v4.5 · 지원 요청 — 직원 전용(/직원/) 허브의 도구 (요청팀 목록 정리 · 신청 시 상태 선택 · 경영지원실이 내용도 수정)
+ * v4.6 · 지원 요청 — 직원 전용(/직원/) 허브의 도구 (신청 폼에 담당자·답변란 · 누구나 답변·상태 수정 · 최근 것이 위로)
  *
  *  경영지원실에 부탁할 일(수리 · 구매 · 확인 요청 …)을 적고, 경영지원실이 답변과
  *  처리 상태를 남기는 화면이다. 예전에는 구글 시트 「문치과병원 경영지원실 요청사항」에
@@ -10,8 +10,8 @@
  *    접수 → 진행중 → 완료   (보류는 언제든)
  *
  *  누가 무엇을 하는가
- *    직원 공용 계정  요청 올리기 · 모든 요청과 답변 보기 · 접수 상태의 요청 내용 고치기
- *    담당자(관리자)  답변 · 담당자 · 상태 · 처리일자 · 삭제
+ *    직원 공용 계정  요청 올리기 · 내용 · 답변 · 담당자 · 상태 · 처리일자 고치기 (v4.6 · 누구나)
+ *    관리자          위 모두 + 삭제
  *
  *  저장은 전용 테이블 하나. 화면은 서버에서 그린다 — 자바스크립트가 없어도 전부 동작한다.
  *  폼은 POST → 처리 → 리다이렉트(PRG)라 새로고침해도 두 번 올라가지 않는다.
@@ -153,20 +153,21 @@ function md_support_get( $id ) {
 	return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . md_support_table() . ' WHERE id = %d', (int) $id ) );
 }
 
-/** 목록 — 열린 것(접수·진행중·보류)이 먼저, 그 안에서는 최근 것부터 */
+/** 목록 — 가장 최근 것이 위로 (v4.6). $status = 'open' 이면 접수·진행중·보류만 */
 function md_support_list( $status = '', $q = '' ) {
 	global $wpdb;
 	$t     = md_support_table();
 	$where = array( '1=1' );
 	$args  = array();
-	if ( '' !== $status && isset( md_support_statuses()[ $status ] ) ) { $where[] = 'status = %s'; $args[] = $status; }
+	if ( 'open' === $status ) { $where[] = "status <> '완료'"; }
+	elseif ( '' !== $status && isset( md_support_statuses()[ $status ] ) ) { $where[] = 'status = %s'; $args[] = $status; }
 	if ( '' !== $q ) {
 		$like    = '%' . $wpdb->esc_like( $q ) . '%';
 		$where[] = '(content LIKE %s OR requester LIKE %s OR dept LIKE %s OR answer LIKE %s OR owner LIKE %s)';
 		array_push( $args, $like, $like, $like, $like, $like );
 	}
 	$sql = "SELECT * FROM $t WHERE " . implode( ' AND ', $where )
-		. " ORDER BY FIELD(status, '접수', '진행중', '보류', '완료'), created_at DESC, id DESC LIMIT 400";
+		. ' ORDER BY created_at DESC, id DESC LIMIT 400';
 	return $wpdb->get_results( $args ? $wpdb->prepare( $sql, $args ) : $sql );
 }
 
@@ -184,9 +185,11 @@ function md_support_open_count() {
 	return $c['접수'];
 }
 
-function md_support_create( $requester, $dept, $content, $status = '접수' ) {
+function md_support_create( $requester, $dept, $content, $status = '접수', $owner = '', $answer = '' ) {
 	global $wpdb;
 	if ( ! isset( md_support_statuses()[ $status ] ) ) { $status = '접수'; }
+	$owner  = mb_substr( sanitize_text_field( $owner ), 0, 60 );
+	$answer = trim( sanitize_textarea_field( $answer ) );
 	$requester = mb_substr( sanitize_text_field( $requester ), 0, 60 );
 	$dept      = mb_substr( sanitize_text_field( $dept ), 0, 80 );
 	$content   = trim( sanitize_textarea_field( $content ) );
@@ -199,6 +202,8 @@ function md_support_create( $requester, $dept, $content, $status = '접수' ) {
 		'requester'  => $requester,
 		'dept'       => $dept,
 		'content'    => $content,
+		'answer'     => $answer,
+		'owner'      => $owner,
 		'status'     => $status,
 		'done_at'    => '완료' === $status ? current_time( 'Y-m-d' ) : null,
 		'updated_at' => current_time( 'mysql' ),
@@ -209,7 +214,7 @@ function md_support_create( $requester, $dept, $content, $status = '접수' ) {
 	return $id;
 }
 
-/** 담당자가 답변·상태를 저장한다 */
+/** 답변·담당자·상태·처리일자를 저장한다 — 공용 계정이라 누구나 (v4.6) */
 function md_support_answer( $id, $data ) {
 	global $wpdb;
 	$row = md_support_get( $id );
@@ -238,9 +243,6 @@ function md_support_edit_content( $id, $content ) {
 	global $wpdb;
 	$row = md_support_get( $id );
 	if ( ! $row ) { return new WP_Error( 'md_support', '그런 요청이 없습니다.' ); }
-	if ( '접수' !== $row->status && ! md_support_can_manage() ) {
-		return new WP_Error( 'md_support', '경영지원실이 이미 확인한 요청은 고칠 수 없습니다. 새 요청으로 올려 주세요.' );
-	}
 	$content = trim( sanitize_textarea_field( $content ) );
 	if ( '' === $content ) { return new WP_Error( 'md_support', '요청 내용을 적어 주세요.' ); }
 	$wpdb->update( md_support_table(), array( 'content' => $content, 'updated_at' => current_time( 'mysql' ) ), array( 'id' => (int) $id ) );
@@ -292,7 +294,11 @@ function md_support_handle_post() {
 			$team = isset( $_POST['team'] ) ? sanitize_text_field( wp_unslash( $_POST['team'] ) ) : '';
 			$who  = isset( $_POST['requester'] ) ? sanitize_text_field( wp_unslash( $_POST['requester'] ) ) : '';
 			$stat = isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : '접수';
-			$res  = md_support_create( $who, $team, isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '', $stat );
+			$res  = md_support_create(
+				$who, $team, isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '', $stat,
+				isset( $_POST['owner'] ) ? wp_unslash( $_POST['owner'] ) : '',
+				isset( $_POST['answer'] ) ? wp_unslash( $_POST['answer'] ) : ''
+			);
 			if ( ! is_wp_error( $res ) ) {
 				/* 다음에 또 올릴 때 팀·이름을 다시 고르지 않아도 되게 30일 기억 */
 				$exp = time() + 30 * DAY_IN_SECONDS;
@@ -310,7 +316,6 @@ function md_support_handle_post() {
 			break;
 
 		case 'answer':
-			if ( ! md_support_can_manage() ) { break; }
 			$res = md_support_answer( $id, array(
 				'content' => isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '',
 				'answer'  => isset( $_POST['answer'] ) ? wp_unslash( $_POST['answer'] ) : '',
@@ -322,7 +327,6 @@ function md_support_handle_post() {
 			break;
 
 		case 'status':
-			if ( ! md_support_can_manage() ) { break; }
 			$st  = isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : '';
 			$res = md_support_answer( $id, array( 'status' => $st ) );
 			$back = add_query_arg( is_wp_error( $res ) ? array( 'err' => $res->get_error_message() ) : array( 'msg' => 'status' ), $back ) . '#s' . $id;
@@ -357,7 +361,7 @@ add_action( 'wp_enqueue_scripts', 'md_support_enqueue', 31 );
 
 function md_support_notice( $code ) {
 	$map = array(
-		'sent'     => array( 'ok', '요청을 올렸습니다. 경영지원실이 확인하면 답변이 아래에 표시됩니다.' ),
+		'sent'     => array( 'ok', '요청을 올렸습니다. 맨 위에 표시됩니다.' ),
 		'edited'   => array( 'ok', '요청 내용을 고쳤습니다.' ),
 		'answered' => array( 'ok', '답변을 저장했습니다.' ),
 		'status'   => array( 'ok', '상태를 바꿨습니다.' ),
@@ -421,6 +425,16 @@ function md_support_render_new( $err = '' ) {
 			<span>무엇이 필요한가요?</span>
 			<textarea name="content" required rows="3" placeholder="예) 10층 3번 체어 석션 약함 · 11층 데스크 전화기 끊김 · 프린터 토너 구매"></textarea>
 		</label>
+		<div class="mdsp-new__row mdsp-new__row--office">
+			<label class="mdsp-field">
+				<span>경영지원실 담당자 <small>(비워 둬도 됨)</small></span>
+				<input type="text" name="owner" maxlength="60" placeholder="처리할 사람">
+			</label>
+			<label class="mdsp-field">
+				<span>경영지원실 답변 <small>(비워 둬도 됨)</small></span>
+				<textarea name="answer" rows="1" placeholder="처리 내용이나 예정 — 나중에 누구나 고칠 수 있습니다"></textarea>
+			</label>
+		</div>
 		<div class="mdsp-new__foot">
 			<div class="mdsp-status-pick" role="radiogroup" aria-label="상태">
 				<?php foreach ( md_support_statuses() as $st => $info ) : ?>
@@ -428,7 +442,7 @@ function md_support_render_new( $err = '' ) {
 				<?php endforeach; ?>
 			</div>
 			<button type="submit" class="mds-btn mds-btn--fill mdsp-new__btn">요청 올리기</button>
-			<span class="mds-hint">경영지원실이 확인하면 이 페이지에 답변이 달립니다.</span>
+			<span class="mds-hint">올린 뒤에도 내용 · 답변 · 담당자 · 상태를 누구나 고칠 수 있습니다.</span>
 		</div>
 	</form>
 	<?php
@@ -454,49 +468,40 @@ function md_support_render_card( $r, $manage, $keep ) {
 
 		<?php if ( $has_answer || $r->owner || $r->done_at ) : ?>
 			<div class="mdsp-answer">
-				<span class="mdsp-answer__label">답변</span>
+				<span class="mdsp-answer__label">경영지원실 답변</span>
 				<?php if ( $has_answer ) : ?><p><?php echo nl2br( esc_html( $r->answer ) ); ?></p><?php endif; ?>
 				<span class="mdsp-answer__meta"><?php if ( $r->owner ) : ?>담당 <?php echo esc_html( $r->owner ); ?><?php endif; ?><?php if ( $r->done_at ) : ?> · 처리 <?php echo esc_html( md_support_fmt_date( $r->done_at ) ); ?><?php endif; ?></span>
 			</div>
 		<?php endif; ?>
 
-		<?php if ( $manage ) : ?>
-			<div class="mdsp-actions">
-				<?php foreach ( array( '진행중' => '▶ 진행중', '보류' => '⏸ 보류', '완료' => '✓ 완료' ) as $st => $label ) : if ( $st === $r->status ) { continue; } ?>
+		<div class="mdsp-actions">
+				<?php foreach ( array( '접수' => '↩ 접수', '진행중' => '▶ 진행중', '보류' => '⏸ 보류', '완료' => '✓ 완료' ) as $st => $label ) : if ( $st === $r->status ) { continue; } ?>
 					<form method="post" class="mdsp-inline">
 						<input type="hidden" name="md_support_action" value="status"><input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_status' ) ); ?>"><input type="hidden" name="status" value="<?php echo esc_attr( $st ); ?>"><?php echo $hidden; // phpcs:ignore ?>
 						<button type="submit" class="mdsp-btn<?php echo '완료' === $st ? ' mdsp-btn--done' : ''; ?>"><?php echo esc_html( $label ); ?></button>
 					</form>
 				<?php endforeach; ?>
 				<details class="mdsp-more">
-					<summary class="mdsp-btn">✏️ 답변<?php echo $has_answer ? ' 고치기' : ' 쓰기'; ?> · 내용 수정</summary>
+					<summary class="mdsp-btn">✏️ 답변<?php echo $has_answer ? ' 고치기' : ' 쓰기'; ?> · 담당자 · 내용 수정</summary>
 					<form method="post" class="mdsp-answerform">
 						<input type="hidden" name="md_support_action" value="answer"><input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_answer' ) ); ?>"><?php echo $hidden; // phpcs:ignore ?>
 						<label class="mdsp-field"><span>요청 내용 (고칠 수 있음)</span><textarea name="content" rows="2"><?php echo esc_textarea( $r->content ); ?></textarea></label>
 						<label class="mdsp-field"><span>답변</span><textarea name="answer" rows="3" placeholder="처리 내용이나 예정을 적어 주세요"><?php echo esc_textarea( (string) $r->answer ); ?></textarea></label>
 						<div class="mdsp-answerform__row">
-							<label class="mdsp-field"><span>담당자</span><input type="text" name="owner" maxlength="60" value="<?php echo esc_attr( $r->owner ?: wp_get_current_user()->display_name ); ?>"></label>
+							<label class="mdsp-field"><span>경영지원실 담당자</span><input type="text" name="owner" maxlength="60" value="<?php echo esc_attr( (string) $r->owner ); ?>" placeholder="처리할 사람"></label>
 							<label class="mdsp-field"><span>상태</span><select name="status"><?php foreach ( $sts as $st => $info ) : ?><option value="<?php echo esc_attr( $st ); ?>" <?php selected( $st, $r->status ); ?>><?php echo esc_html( $st ); ?></option><?php endforeach; ?></select></label>
 							<label class="mdsp-field"><span>처리일</span><input type="date" name="done_at" value="<?php echo esc_attr( (string) $r->done_at ); ?>"></label>
 						</div>
 						<button type="submit" class="mds-btn mds-btn--fill mdsp-btn">저장</button>
 					</form>
 				</details>
+				<?php if ( $manage ) : ?>
 				<form method="post" class="mdsp-inline mdsp-del" onsubmit="return confirm('이 요청을 지울까요? 되돌릴 수 없습니다.');">
 					<input type="hidden" name="md_support_action" value="delete"><input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_delete' ) ); ?>"><?php echo $hidden; // phpcs:ignore ?>
 					<button type="submit" class="mdsp-btn mdsp-btn--del" title="삭제">🗑</button>
 				</form>
+				<?php endif; ?>
 			</div>
-		<?php elseif ( '접수' === $r->status ) : ?>
-			<details class="mdsp-more">
-				<summary class="mdsp-btn">✏️ 내용 고치기</summary>
-				<form method="post" class="mdsp-answerform">
-					<input type="hidden" name="md_support_action" value="edit"><input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_edit' ) ); ?>"><?php echo $hidden; // phpcs:ignore ?>
-					<label class="mdsp-field"><span>요청 내용</span><textarea name="content" rows="3" required><?php echo esc_textarea( $r->content ); ?></textarea></label>
-					<button type="submit" class="mds-btn mds-btn--fill mdsp-btn">저장</button>
-				</form>
-			</details>
-		<?php endif; ?>
 	</article>
 	<?php
 }
@@ -506,10 +511,12 @@ function md_support_render() {
 	$manage = md_support_can_manage();
 	$sts    = md_support_statuses();
 	$st     = isset( $_GET['st'] ) ? sanitize_text_field( wp_unslash( $_GET['st'] ) ) : '';
-	if ( '' !== $st && ! isset( $sts[ $st ] ) ) { $st = ''; }
+	if ( '' !== $st && 'all' !== $st && ! isset( $sts[ $st ] ) ) { $st = ''; }
+	/* 기본 화면은 열린 요청(접수·진행중·보류)만, 찾기를 하면 전체에서 찾는다 */
+	$list_st = 'all' === $st ? '' : ( '' === $st ? ( '' !== $q ? '' : 'open' ) : $st );
 	$q      = isset( $_GET['q'] ) ? trim( sanitize_text_field( wp_unslash( $_GET['q'] ) ) ) : '';
 	$counts = md_support_counts();
-	$rows   = md_support_list( $st, $q );
+	$rows   = md_support_list( $list_st, $q );
 	$keep   = array_filter( array( 'st' => $st, 'q' => $q ), 'strlen' );
 	$open_n = $counts['접수'] + $counts['진행중'] + $counts['보류'];
 
@@ -524,6 +531,7 @@ function md_support_render() {
 			<?php foreach ( $sts as $name => $info ) : ?>
 				<a class="mdsp-chip mdsp-chip--<?php echo esc_attr( $info['class'] ); ?><?php echo $st === $name ? ' is-on' : ''; ?>" href="<?php echo esc_url( md_sup_url( array( 'app' => 'support', 'st' => $name, 'q' => $q ) ) ); ?>"><?php echo esc_html( $name ); ?> <b><?php echo (int) $counts[ $name ]; ?></b></a>
 			<?php endforeach; ?>
+			<a class="mdsp-chip<?php echo 'all' === $st ? ' is-on' : ''; ?>" href="<?php echo esc_url( md_sup_url( array( 'app' => 'support', 'st' => 'all', 'q' => $q ) ) ); ?>">전체 <b><?php echo (int) array_sum( $counts ); ?></b></a>
 		</nav>
 		<form method="get" class="mdsp-search" action="<?php echo esc_url( md_sup_url( array( 'app' => 'support' ) ) ); ?>">
 			<?php md_sup_app_field(); ?>
@@ -535,19 +543,8 @@ function md_support_render() {
 	<?php if ( empty( $rows ) ) : ?>
 		<div class="mds-card"><div class="mds-empty"><?php echo '' !== $q ? '찾는 내용이 없습니다.' : '요청이 없습니다.'; ?></div></div>
 	<?php else : ?>
-		<?php
-		$cur = null;
-		foreach ( $rows as $r ) {
-			if ( '' === $st && '' === $q && '완료' === $r->status && $cur !== '완료' ) {
-				echo '<details class="mdsp-donewrap"><summary class="mdsp-group">완료된 요청 <b>' . (int) $counts['완료'] . '</b> — 눌러서 보기</summary>';
-			} elseif ( '' === $st && $r->status !== $cur ) {
-				echo '<h2 class="mdsp-group"><span class="mds-status ' . esc_attr( $sts[ $r->status ]['class'] ?? 'is-pending' ) . '">' . esc_html( $r->status ) . '</span><small>' . esc_html( $sts[ $r->status ]['desc'] ?? '' ) . '</small></h2>';
-			}
-			$cur = $r->status;
-			md_support_render_card( $r, $manage, $keep );
-		}
-		if ( '' === $st && '' === $q && $cur === '완료' ) { echo '</details>'; }
-		?>
+		<h2 class="mdsp-group"><?php echo '' !== $q ? '찾은 요청' : ( '' === $st ? '진행 중인 요청' : ( 'all' === $st ? '전체 요청' : esc_html( $st ) ) ); ?><small>최근 것이 위</small></h2>
+		<?php foreach ( $rows as $r ) { md_support_render_card( $r, $manage, $keep ); } ?>
 	<?php endif; ?>
 	<p class="mds-hint" style="margin-top:18px">2025년 10월 이전에 완료된 요청은 예전 시트 「문치과병원 경영지원실 요청사항 › 완료된 사항」에 있습니다.</p>
 	<?php
