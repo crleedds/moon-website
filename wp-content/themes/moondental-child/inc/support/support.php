@@ -193,9 +193,9 @@ function md_support_create( $requester, $dept, $content, $status = '접수', $ow
 	$requester = mb_substr( sanitize_text_field( $requester ), 0, 60 );
 	$dept      = mb_substr( sanitize_text_field( $dept ), 0, 80 );
 	$content   = trim( sanitize_textarea_field( $content ) );
-	if ( '' === $requester ) { return new WP_Error( 'md_support', '요청자 이름을 적어 주세요.' ); }
+	if ( '' === $requester ) { return new WP_Error( 'md_support', '요청자를 적어 주세요.' ); }
 	if ( '' === $dept )      { return new WP_Error( 'md_support', '요청팀을 골라 주세요.' ); }
-	if ( '' === $content )   { return new WP_Error( 'md_support', '요청 내용을 적어 주세요.' ); }
+	if ( '' === $content )   { return new WP_Error( 'md_support', '요청내용을 적어 주세요.' ); }
 
 	$ok = $wpdb->insert( md_support_table(), array(
 		'created_at' => current_time( 'mysql' ),
@@ -244,7 +244,7 @@ function md_support_edit_content( $id, $content ) {
 	$row = md_support_get( $id );
 	if ( ! $row ) { return new WP_Error( 'md_support', '그런 요청이 없습니다.' ); }
 	$content = trim( sanitize_textarea_field( $content ) );
-	if ( '' === $content ) { return new WP_Error( 'md_support', '요청 내용을 적어 주세요.' ); }
+	if ( '' === $content ) { return new WP_Error( 'md_support', '요청내용을 적어 주세요.' ); }
 	$wpdb->update( md_support_table(), array( 'content' => $content, 'updated_at' => current_time( 'mysql' ) ), array( 'id' => (int) $id ) );
 	return true;
 }
@@ -409,19 +409,19 @@ function md_support_render_new( $err = '' ) {
 		<input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_new' ) ); ?>">
 		<div class="mdsp-new__row">
 			<label class="mdsp-field">
-				<span>요청팀</span>
+				<span>요청팀 <em class="mdsp-req">*</em></span>
 				<select name="team" required>
 					<option value="">팀 선택</option>
 					<?php foreach ( $teams as $t ) : ?><option value="<?php echo esc_attr( $t ); ?>" <?php selected( $t, $team ); ?>><?php echo esc_html( $t ); ?></option><?php endforeach; ?>
 				</select>
 			</label>
 			<label class="mdsp-field">
-				<span>이름</span>
+				<span>요청자 <em class="mdsp-req">*</em></span>
 				<input type="text" name="requester" required maxlength="60" value="<?php echo esc_attr( $name ); ?>" placeholder="요청하는 사람">
 			</label>
 		</div>
 		<label class="mdsp-field">
-			<span>무엇이 필요한가요?</span>
+			<span>요청내용 <em class="mdsp-req">*</em></span>
 			<textarea name="content" required rows="3" placeholder="예) 10층 3번 체어 석션 약함 · 11층 데스크 전화기 끊김 · 프린터 토너 구매"></textarea>
 		</label>
 		<div class="mdsp-new__row mdsp-new__row--office">
@@ -492,7 +492,7 @@ function md_support_render_card( $r, $manage, $keep ) {
 			</summary>
 			<form method="post" class="mdsp-answerform" id="<?php echo esc_attr( $fid ); ?>">
 				<input type="hidden" name="md_support_action" value="answer"><input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_answer' ) ); ?>"><?php echo $hidden; // phpcs:ignore ?>
-				<label class="mdsp-field"><span>요청 내용</span><textarea name="content" rows="2"><?php echo esc_textarea( $r->content ); ?></textarea></label>
+				<label class="mdsp-field"><span>요청내용 <em class="mdsp-req">*</em></span><textarea name="content" rows="2" required><?php echo esc_textarea( $r->content ); ?></textarea></label>
 				<label class="mdsp-field"><span>경영지원실 답변</span><textarea name="answer" rows="2" placeholder="처리 내용이나 예정"><?php echo esc_textarea( (string) $r->answer ); ?></textarea></label>
 				<div class="mdsp-answerform__row mdsp-answerform__row--2">
 					<label class="mdsp-field"><span>경영지원실 담당자</span><input type="text" name="owner" maxlength="60" value="<?php echo esc_attr( (string) $r->owner ); ?>" placeholder="담당자 이름"></label>

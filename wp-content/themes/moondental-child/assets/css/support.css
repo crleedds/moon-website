@@ -130,3 +130,6 @@
 .mdsp-more[open] > .mdsp-answerform { margin-top: 0; }
 .mdsp-answerform__foot { padding-right: 96px; min-height: 44px; }
 @media (max-width: 640px) { .mdsp-more[open] > .mdsp-more__toggle { right: 10px; bottom: 10px; } .mdsp-answerform__foot { padding-right: 84px; } }
+
+/* v4.6.7 · 필수 표시 */
+.mdsp-req { font-style: normal; color: var(--color-danger, #C66B5E); font-weight: 800; }
