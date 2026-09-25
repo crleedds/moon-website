@@ -225,6 +225,8 @@ function md_support_answer( $id, $data ) {
 	if ( $status !== $row->status ) { $done = '접수' === $status ? '' : current_time( 'Y-m-d' ); }
 
 	$upd = array(
+		'requester'  => isset( $data['requester'] ) && '' !== trim( sanitize_text_field( $data['requester'] ) ) ? mb_substr( trim( sanitize_text_field( $data['requester'] ) ), 0, 60 ) : $row->requester,
+		'dept'       => isset( $data['dept'] ) && '' !== trim( sanitize_text_field( $data['dept'] ) ) ? mb_substr( trim( sanitize_text_field( $data['dept'] ) ), 0, 80 ) : $row->dept,
 		'content'    => isset( $data['content'] ) && '' !== trim( sanitize_textarea_field( $data['content'] ) ) ? trim( sanitize_textarea_field( $data['content'] ) ) : $row->content,
 		'answer'     => isset( $data['answer'] ) ? trim( sanitize_textarea_field( $data['answer'] ) ) : $row->answer,
 		'owner'      => isset( $data['owner'] ) ? mb_substr( sanitize_text_field( $data['owner'] ), 0, 60 ) : $row->owner,
@@ -315,6 +317,8 @@ function md_support_handle_post() {
 
 		case 'answer':
 			$res = md_support_answer( $id, array(
+				'requester' => isset( $_POST['requester'] ) ? wp_unslash( $_POST['requester'] ) : '',
+				'dept'      => isset( $_POST['team'] ) ? wp_unslash( $_POST['team'] ) : '',
 				'content' => isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '',
 				'answer'  => isset( $_POST['answer'] ) ? wp_unslash( $_POST['answer'] ) : '',
 				'owner'   => isset( $_POST['owner'] ) ? wp_unslash( $_POST['owner'] ) : '',
@@ -420,14 +424,14 @@ function md_support_render_new( $err = '' ) {
 			<span>요청내용 <em class="mdsp-req">*</em></span>
 			<textarea name="content" required rows="3" placeholder="예) 10층 3번 체어 석션 약함 · 11층 데스크 전화기 끊김 · 프린터 토너 구매"></textarea>
 		</label>
-		<div class="mdsp-new__row mdsp-new__row--office">
+		<div class="mdsp-new__office">
 			<label class="mdsp-field">
 				<span>경영지원실 담당자 <small>(비워 둬도 됨)</small></span>
 				<input type="text" name="owner" maxlength="60" placeholder="담당자 이름">
 			</label>
 			<label class="mdsp-field">
 				<span>경영지원실 답변 <small>(비워 둬도 됨)</small></span>
-				<textarea name="answer" rows="1" placeholder="처리 내용이나 예정"></textarea>
+				<textarea name="answer" rows="2" placeholder="처리 내용이나 예정"></textarea>
 			</label>
 		</div>
 		<div class="mdsp-new__foot">
@@ -486,9 +490,15 @@ function md_support_render_card( $r, $manage, $keep ) {
 			</summary>
 			<form method="post" class="mdsp-answerform" id="<?php echo esc_attr( $fid ); ?>">
 				<input type="hidden" name="md_support_action" value="answer"><input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_answer' ) ); ?>"><?php echo $hidden; // phpcs:ignore ?>
+				<?php $teams = md_support_teams(); if ( '' !== (string) $r->dept && ! in_array( $r->dept, $teams, true ) ) { array_unshift( $teams, $r->dept ); } ?>
+				<div class="mdsp-answerform__row mdsp-answerform__row--2">
+					<label class="mdsp-field"><span>요청팀 <em class="mdsp-req">*</em></span>
+						<select name="team" required><?php foreach ( $teams as $t ) : ?><option value="<?php echo esc_attr( $t ); ?>" <?php selected( $t, $r->dept ); ?>><?php echo esc_html( $t ); ?></option><?php endforeach; ?></select></label>
+					<label class="mdsp-field"><span>요청자 <em class="mdsp-req">*</em></span><input type="text" name="requester" maxlength="60" required value="<?php echo esc_attr( $r->requester ); ?>"></label>
+				</div>
 				<label class="mdsp-field"><span>요청내용 <em class="mdsp-req">*</em></span><textarea name="content" rows="2" required><?php echo esc_textarea( $r->content ); ?></textarea></label>
-				<label class="mdsp-field"><span>경영지원실 답변</span><textarea name="answer" rows="2" placeholder="처리 내용이나 예정"><?php echo esc_textarea( (string) $r->answer ); ?></textarea></label>
 				<label class="mdsp-field"><span>경영지원실 담당자</span><input type="text" name="owner" maxlength="60" value="<?php echo esc_attr( (string) $r->owner ); ?>" placeholder="담당자 이름"></label>
+				<label class="mdsp-field"><span>경영지원실 답변</span><textarea name="answer" rows="2" placeholder="처리 내용이나 예정"><?php echo esc_textarea( (string) $r->answer ); ?></textarea></label>
 				<div class="mdsp-answerform__foot">
 					<div class="mdsp-status-pick" role="radiogroup" aria-label="상태">
 						<?php foreach ( $sts as $st => $info ) : ?>

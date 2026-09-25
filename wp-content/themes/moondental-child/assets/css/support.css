@@ -30,8 +30,8 @@
   font-size: .92rem; font-weight: 700; text-decoration: none;
 }
 .mdsp-chip b { font-weight: 800; color: var(--color-text, #3D2F26); }
-.mdsp-chip.is-on { background: var(--color-text, #3D2F26); border-color: var(--color-text, #3D2F26); color: #fff; }
-.mdsp-chip.is-on b { color: #fff; }
+.mdsp-chip.is-on { background: var(--color-primary, #D88062); border-color: var(--color-primary, #D88062); color: var(--color-text-on-primary, #fff); }
+.mdsp-chip.is-on b { color: var(--color-text-on-primary, #fff); }
 .mdsp-search input[type="search"] {
   font: inherit; font-size: .95rem; min-height: 40px; min-width: 200px; padding: 6px 14px;
   border: 1px solid var(--color-border, #EDDFD0); border-radius: 999px; background: var(--color-white, #fff);
@@ -99,10 +99,8 @@
 .mdsp-status-pick__opt input:focus-visible + .mds-status { outline: 2px solid var(--color-primary, #D88062); }
 
 /* v4.6 · 신청 폼의 담당자·답변란 */
-.mdsp-new__row--office { grid-template-columns: 1fr 2fr; margin-top: 2px; padding-top: 12px; border-top: 1px dashed var(--color-border, #EDDFD0); }
-.mdsp-new__row--office textarea { min-height: 48px; }
+.mdsp-new__office { margin-top: 2px; padding-top: 12px; border-top: 1px dashed var(--color-border, #EDDFD0); }
 .mdsp-field > span small { font-weight: 500; color: var(--color-text-mute, #A89685); }
-@media (max-width: 640px) { .mdsp-new__row--office { grid-template-columns: 1fr; } }
 
 /* v4.6.4 · 수정 폼 — 왼쪽 아래 상태 선택, 오른쪽 아래 저장 */
 .mdsp-answerform__row--2 { grid-template-columns: 1fr 1fr; }
@@ -133,3 +131,46 @@
 
 /* v4.6.7 · 필수 표시 */
 .mdsp-req { font-style: normal; color: var(--color-danger, #C66B5E); font-weight: 800; }
+
+/* =============================================================
+   v4.7.1 · 모바일 · 다크모드
+   ============================================================= */
+@media (max-width: 640px) {
+  .mdsp-item { padding: 14px 14px 12px; border-left-width: 4px; }
+  .mdsp-item__head { gap: 6px 8px; font-size: .86rem; }
+  .mdsp-item__head .mdsp-del { margin-left: auto; }
+  .mdsp-item__date { margin-left: 0; width: auto; }
+  .mdsp-item__body { font-size: 1rem; }
+  .mdsp-filters { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .mdsp-filters::-webkit-scrollbar { display: none; }
+  .mdsp-chip { flex: 0 0 auto; }
+  .mdsp-answerform { padding: 12px; }
+  .mdsp-answerform__foot { padding-right: 0; flex-direction: column; align-items: stretch; }
+  .mdsp-status-pick { justify-content: space-between; }
+  .mdsp-status-pick__opt { flex: 1 1 0; }
+  .mdsp-status-pick__opt .mds-status { display: flex; justify-content: center; width: 100%; box-sizing: border-box; }
+  /* 펼친 폼: 저장 버튼을 폼 아래 한 줄로 (절대 위치 대신) */
+  .mdsp-more[open] { display: flex; flex-direction: column-reverse; }
+  .mdsp-more[open] > .mdsp-more__toggle { position: static; display: flex; justify-content: flex-end; margin-top: 10px; }
+  .mdsp-more[open] .mdsp-more__save { width: 100%; justify-content: center; min-height: 48px; }
+  .mdsp-more__toggle .mdsp-more__open { width: 100%; justify-content: center; }
+  .mdsp-more__toggle { width: 100%; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .mdsp-item--is-working { border-left-color: #E0B93A; }
+  .mds-status.is-working { background: rgba(224, 185, 58, .18); color: #F0CF5A; }
+  .mds-status.is-hold { background: var(--color-surface-alt, #2F251C); color: var(--color-text-sub, #C6B7A6); }
+  .mdsp-answer { background: rgba(143, 174, 146, .12); }
+  .mdsp-answer__label { color: var(--color-accent, #8FAE92); }
+  .mdsp-btn--done { background: var(--color-accent-dark, #6B8F72); color: #fff; }
+  .mdsp-status-pick__opt .mds-status { opacity: .55; }
+  .mdsp-status-pick__opt input:checked + .mds-status { opacity: 1; }
+  .mdsp-field input, .mdsp-field select, .mdsp-field textarea { background: var(--color-surface, #241C15); color: var(--color-text, #F0E6DA); border-color: var(--color-border, #3A2E24); }
+  .mdsp-field select { background-image: linear-gradient(45deg, transparent 50%, var(--color-text-sub, #C6B7A6) 50%), linear-gradient(135deg, var(--color-text-sub, #C6B7A6) 50%, transparent 50%); }
+  .mdsp-field input::placeholder, .mdsp-field textarea::placeholder { color: var(--color-text-mute, #8F7F6E); }
+  .mdsp-search input[type="search"] { background: var(--color-surface, #241C15); color: var(--color-text, #F0E6DA); }
+  .mdsp-item--is-done { opacity: .75; }
+  .mdsp-answerform { border-color: var(--color-border, #3A2E24); }
+  .mdsp-btn { background: var(--color-surface, #241C15); }
+}
