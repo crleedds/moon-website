@@ -307,12 +307,12 @@ function md_support_handle_post() {
 			}
 			$back = is_wp_error( $res )
 				? add_query_arg( array( 'err' => $res->get_error_message() ), $base ) . '#new'
-				: add_query_arg( array( 'msg' => 'sent' ), $base );
+				: $base . '#s' . (int) $res; /* v4.7.3 · 안내 배너 없이 새 요청 카드로 */
 			break;
 
 		case 'edit':
 			$res  = md_support_edit_content( $id, isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '' );
-			$back = add_query_arg( is_wp_error( $res ) ? array( 'err' => $res->get_error_message() ) : array( 'msg' => 'edited' ), $back ) . '#s' . $id;
+			$back = ( is_wp_error( $res ) ? add_query_arg( array( 'err' => $res->get_error_message() ), $back ) : $back ) . '#s' . $id;
 			break;
 
 		case 'answer':
@@ -331,12 +331,12 @@ function md_support_handle_post() {
 		case 'status':
 			$st  = isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : '';
 			$res = md_support_answer( $id, array( 'status' => $st ) );
-			$back = add_query_arg( is_wp_error( $res ) ? array( 'err' => $res->get_error_message() ) : array( 'msg' => 'status' ), $back ) . '#s' . $id;
+			$back = ( is_wp_error( $res ) ? add_query_arg( array( 'err' => $res->get_error_message() ), $back ) : $back ) . '#s' . $id;
 			break;
 
 		case 'delete':
 			md_support_delete( $id ); /* v4.6.9 · 누구나 (확인 창을 거친다) */
-			$back = add_query_arg( 'msg', 'deleted', $back );
+			/* v4.7.3 · 안내 배너 없음 */
 			break;
 	}
 
@@ -525,7 +525,6 @@ function md_support_render() {
 	$rows   = md_support_list( $list_st, $q );
 	$keep   = array_filter( array( 'st' => $st, 'q' => $q ), 'strlen' );
 
-	if ( isset( $_GET['msg'] ) ) { echo md_support_notice( sanitize_key( wp_unslash( $_GET['msg'] ) ) ); } // phpcs:ignore WordPress.Security.EscapeOutput
 	if ( isset( $_GET['err'] ) ) { echo '<div class="mds-notice mds-notice--warn">' . esc_html( wp_unslash( $_GET['err'] ) ) . '</div>'; }
 
 	md_support_render_new();
