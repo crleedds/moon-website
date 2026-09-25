@@ -67,6 +67,12 @@ function md_sup_apps() {
 			'icon'  => '🩺',
 			'desc'  => '환자 설명용 자료 · 임플란트·교정·보존·심미 — 태블릿으로 띄워 놓고 설명',
 		),
+		// v4.3 · 경영지원실 요청 (옛 구글 시트 「경영지원실 요청사항」을 옮김)
+		'support' => array(
+			'label' => '지원 요청',
+			'icon'  => '🛠️',
+			'desc'  => '수리 · 구매 · 확인 요청을 경영지원실에 남기고 답변을 확인',
+		),
 	);
 }
 
@@ -929,6 +935,9 @@ function md_sup_render_hub() {
 						<?php if ( 'stock' === $key && $pending ) : ?>
 							<span class="mds-app__badge"><?php echo (int) $pending; ?>건 대기</span>
 						<?php endif; ?>
+						<?php if ( 'support' === $key && function_exists( 'md_support_open_count' ) && md_sup_can_manage() && md_support_open_count() ) : ?>
+							<span class="mds-app__badge"><?php echo (int) md_support_open_count(); ?>건 접수</span>
+						<?php endif; ?>
 					</span>
 					<span class="mds-app__desc"><?php echo esc_html( $a['desc'] ); ?></span>
 				</span>
@@ -967,6 +976,8 @@ function md_sup_render_page() {
 
 	if ( 'care' === $app && function_exists( 'md_care_render' ) ) {
 		md_care_render(); // v4.0 · Moon Dental Care
+	} elseif ( 'support' === $app && function_exists( 'md_support_render' ) ) {
+		md_support_render(); // v4.3 · 지원 요청
 	} elseif ( 'stock' !== $app ) {
 		md_sup_render_hub();
 	} else {
