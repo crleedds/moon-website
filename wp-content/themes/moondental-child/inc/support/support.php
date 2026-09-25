@@ -220,10 +220,9 @@ function md_support_answer( $id, $data ) {
 	if ( ! $row ) { return new WP_Error( 'md_support', '그런 요청이 없습니다.' ); }
 
 	$status = isset( $data['status'] ) && isset( md_support_statuses()[ $data['status'] ] ) ? $data['status'] : $row->status;
-	$done   = isset( $data['done_at'] ) ? trim( (string) $data['done_at'] ) : (string) $row->done_at;
-	if ( '' !== $done && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $done ) ) { $done = ''; }
-	/* 완료로 바꾸면서 처리일자를 비워 두면 오늘로 채운다 — 매번 날짜를 고르지 않아도 되게 */
-	if ( '완료' === $status && '' === $done ) { $done = current_time( 'Y-m-d' ); }
+	/* v4.7 · 처리일은 손으로 넣지 않는다 — 상태가 바뀌어 저장되는 날이 처리일. 접수로 되돌리면 비운다 */
+	$done = (string) $row->done_at;
+	if ( $status !== $row->status ) { $done = '접수' === $status ? '' : current_time( 'Y-m-d' ); }
 
 	$upd = array(
 		'content'    => isset( $data['content'] ) && '' !== trim( sanitize_textarea_field( $data['content'] ) ) ? trim( sanitize_textarea_field( $data['content'] ) ) : $row->content,
@@ -320,7 +319,6 @@ function md_support_handle_post() {
 				'answer'  => isset( $_POST['answer'] ) ? wp_unslash( $_POST['answer'] ) : '',
 				'owner'   => isset( $_POST['owner'] ) ? wp_unslash( $_POST['owner'] ) : '',
 				'status'  => isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : '',
-				'done_at' => isset( $_POST['done_at'] ) ? sanitize_text_field( wp_unslash( $_POST['done_at'] ) ) : '',
 			) );
 			$back = add_query_arg( is_wp_error( $res ) ? array( 'err' => $res->get_error_message() ) : array( 'msg' => 'answered' ), $back ) . '#s' . $id;
 			break;
@@ -477,7 +475,7 @@ function md_support_render_card( $r, $manage, $keep ) {
 			<div class="mdsp-answer">
 				<span class="mdsp-answer__label">경영지원실 답변</span>
 				<?php if ( $has_answer ) : ?><p><?php echo nl2br( esc_html( $r->answer ) ); ?></p><?php endif; ?>
-				<span class="mdsp-answer__meta"><?php if ( $r->owner ) : ?>담당 <?php echo esc_html( $r->owner ); ?><?php endif; ?><?php if ( $r->done_at ) : ?> · 처리 <?php echo esc_html( md_support_fmt_date( $r->done_at ) ); ?><?php endif; ?></span>
+				<span class="mdsp-answer__meta"><?php if ( $r->owner ) : ?>담당 <?php echo esc_html( $r->owner ); ?><?php endif; ?><?php if ( $r->done_at ) : ?> · <?php echo esc_html( $r->status ); ?> <?php echo esc_html( md_support_fmt_date( $r->done_at ) ); ?><?php endif; ?></span>
 			</div>
 		<?php endif; ?>
 
@@ -490,10 +488,7 @@ function md_support_render_card( $r, $manage, $keep ) {
 				<input type="hidden" name="md_support_action" value="answer"><input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_answer' ) ); ?>"><?php echo $hidden; // phpcs:ignore ?>
 				<label class="mdsp-field"><span>요청내용 <em class="mdsp-req">*</em></span><textarea name="content" rows="2" required><?php echo esc_textarea( $r->content ); ?></textarea></label>
 				<label class="mdsp-field"><span>경영지원실 답변</span><textarea name="answer" rows="2" placeholder="처리 내용이나 예정"><?php echo esc_textarea( (string) $r->answer ); ?></textarea></label>
-				<div class="mdsp-answerform__row mdsp-answerform__row--2">
-					<label class="mdsp-field"><span>경영지원실 담당자</span><input type="text" name="owner" maxlength="60" value="<?php echo esc_attr( (string) $r->owner ); ?>" placeholder="담당자 이름"></label>
-					<label class="mdsp-field"><span>처리일</span><input type="date" name="done_at" value="<?php echo esc_attr( (string) $r->done_at ); ?>"></label>
-				</div>
+				<label class="mdsp-field"><span>경영지원실 담당자</span><input type="text" name="owner" maxlength="60" value="<?php echo esc_attr( (string) $r->owner ); ?>" placeholder="담당자 이름"></label>
 				<div class="mdsp-answerform__foot">
 					<div class="mdsp-status-pick" role="radiogroup" aria-label="상태">
 						<?php foreach ( $sts as $st => $info ) : ?>
