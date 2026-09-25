@@ -447,13 +447,20 @@ function md_support_render_new( $err = '' ) {
 	<?php
 }
 
-/** 요청 한 장 — 카드 자체가 수정 폼이다 (v4.6.5 · 버튼 줄·펼치기 없음) */
+/**
+ * 요청 한 장 (v4.6.6)
+ *  읽기: 상태 · 팀 · 이름 · 날짜, 요청 내용, 경영지원실 답변.
+ *  「내용 수정 · 담당자 답변」을 누르면 폼이 펼쳐지고, 그 버튼은 오른쪽 아래로 옮겨가 「저장」이 된다
+ *  (summary 안의 submit 버튼은 form 속성으로 폼에 묶여 있어 누르면 접히지 않고 바로 저장된다).
+ */
 function md_support_render_card( $r, $manage, $keep ) {
 	$sts  = md_support_statuses();
 	$cls  = isset( $sts[ $r->status ] ) ? $sts[ $r->status ]['class'] : 'is-pending';
 	$sid  = (int) $r->id;
+	$fid  = 'ans' . $sid;
 	$hidden = '<input type="hidden" name="sid" value="' . $sid . '">';
 	foreach ( $keep as $k => $v ) { $hidden .= '<input type="hidden" name="keep_' . esc_attr( $k ) . '" value="' . esc_attr( $v ) . '">'; }
+	$has_answer = '' !== trim( (string) $r->answer );
 	?>
 	<article class="mds-card mdsp-item mdsp-item--<?php echo esc_attr( $cls ); ?>" id="s<?php echo $sid; ?>">
 		<div class="mdsp-item__head">
@@ -468,23 +475,38 @@ function md_support_render_card( $r, $manage, $keep ) {
 			</form>
 			<?php endif; ?>
 		</div>
-		<form method="post" class="mdsp-answerform mdsp-answerform--open">
-			<input type="hidden" name="md_support_action" value="answer"><input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_answer' ) ); ?>"><?php echo $hidden; // phpcs:ignore ?>
-			<label class="mdsp-field"><span>요청 내용</span><textarea name="content" rows="2"><?php echo esc_textarea( $r->content ); ?></textarea></label>
-			<label class="mdsp-field"><span>경영지원실 답변</span><textarea name="answer" rows="2" placeholder="처리 내용이나 예정"><?php echo esc_textarea( (string) $r->answer ); ?></textarea></label>
-			<div class="mdsp-answerform__row mdsp-answerform__row--2">
-				<label class="mdsp-field"><span>경영지원실 담당자</span><input type="text" name="owner" maxlength="60" value="<?php echo esc_attr( (string) $r->owner ); ?>" placeholder="담당자 이름"></label>
-				<label class="mdsp-field"><span>처리일</span><input type="date" name="done_at" value="<?php echo esc_attr( (string) $r->done_at ); ?>"></label>
+		<p class="mdsp-item__body"><?php echo nl2br( esc_html( $r->content ) ); ?></p>
+
+		<?php if ( $has_answer || $r->owner || $r->done_at ) : ?>
+			<div class="mdsp-answer">
+				<span class="mdsp-answer__label">경영지원실 답변</span>
+				<?php if ( $has_answer ) : ?><p><?php echo nl2br( esc_html( $r->answer ) ); ?></p><?php endif; ?>
+				<span class="mdsp-answer__meta"><?php if ( $r->owner ) : ?>담당 <?php echo esc_html( $r->owner ); ?><?php endif; ?><?php if ( $r->done_at ) : ?> · 처리 <?php echo esc_html( md_support_fmt_date( $r->done_at ) ); ?><?php endif; ?></span>
 			</div>
-			<div class="mdsp-answerform__foot">
-				<div class="mdsp-status-pick" role="radiogroup" aria-label="상태">
-					<?php foreach ( $sts as $st => $info ) : ?>
-						<label class="mdsp-status-pick__opt"><input type="radio" name="status" value="<?php echo esc_attr( $st ); ?>" <?php checked( $st, $r->status ); ?>><span class="mds-status <?php echo esc_attr( $info['class'] ); ?>"><?php echo esc_html( $st ); ?></span></label>
-					<?php endforeach; ?>
+		<?php endif; ?>
+
+		<details class="mdsp-more">
+			<summary class="mdsp-more__toggle">
+				<span class="mdsp-btn mdsp-more__open">✏️ 내용 수정 · 담당자 답변</span>
+				<button type="submit" form="<?php echo esc_attr( $fid ); ?>" class="mds-btn mds-btn--fill mdsp-btn mdsp-btn--save mdsp-more__save">저장</button>
+			</summary>
+			<form method="post" class="mdsp-answerform" id="<?php echo esc_attr( $fid ); ?>">
+				<input type="hidden" name="md_support_action" value="answer"><input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_answer' ) ); ?>"><?php echo $hidden; // phpcs:ignore ?>
+				<label class="mdsp-field"><span>요청 내용</span><textarea name="content" rows="2"><?php echo esc_textarea( $r->content ); ?></textarea></label>
+				<label class="mdsp-field"><span>경영지원실 답변</span><textarea name="answer" rows="2" placeholder="처리 내용이나 예정"><?php echo esc_textarea( (string) $r->answer ); ?></textarea></label>
+				<div class="mdsp-answerform__row mdsp-answerform__row--2">
+					<label class="mdsp-field"><span>경영지원실 담당자</span><input type="text" name="owner" maxlength="60" value="<?php echo esc_attr( (string) $r->owner ); ?>" placeholder="담당자 이름"></label>
+					<label class="mdsp-field"><span>처리일</span><input type="date" name="done_at" value="<?php echo esc_attr( (string) $r->done_at ); ?>"></label>
 				</div>
-				<button type="submit" class="mds-btn mds-btn--fill mdsp-btn mdsp-btn--save">저장</button>
-			</div>
-		</form>
+				<div class="mdsp-answerform__foot">
+					<div class="mdsp-status-pick" role="radiogroup" aria-label="상태">
+						<?php foreach ( $sts as $st => $info ) : ?>
+							<label class="mdsp-status-pick__opt"><input type="radio" name="status" value="<?php echo esc_attr( $st ); ?>" <?php checked( $st, $r->status ); ?>><span class="mds-status <?php echo esc_attr( $info['class'] ); ?>"><?php echo esc_html( $st ); ?></span></label>
+						<?php endforeach; ?>
+					</div>
+				</div>
+			</form>
+		</details>
 	</article>
 	<?php
 }

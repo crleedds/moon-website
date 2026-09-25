@@ -117,3 +117,16 @@
 .mdsp-item__head .mdsp-del { margin-left: 6px; }
 .mdsp-item__head .mdsp-btn--del { min-height: 32px; padding: 2px 10px; }
 @media (max-width: 640px) { .mdsp-item__head .mdsp-del { margin-left: auto; } }
+
+/* v4.6.6 · 접힌 카드: 「내용 수정 · 담당자 답변」 버튼 하나. 펼치면 그 버튼이 오른쪽 아래 「저장」이 된다 */
+.mdsp-more { position: relative; margin-top: 12px; }
+.mdsp-more__toggle { list-style: none; cursor: pointer; display: inline-flex; }
+.mdsp-more__toggle::-webkit-details-marker { display: none; }
+.mdsp-more__save { display: none; }
+.mdsp-more[open] > .mdsp-more__toggle { position: absolute; right: 14px; bottom: 14px; cursor: default; }
+.mdsp-more[open] .mdsp-more__open { display: none; }
+.mdsp-more[open] .mdsp-more__save { display: inline-flex; margin: 0; }
+.mdsp-more[open] > summary { border-color: transparent; }
+.mdsp-more[open] > .mdsp-answerform { margin-top: 0; }
+.mdsp-answerform__foot { padding-right: 96px; min-height: 44px; }
+@media (max-width: 640px) { .mdsp-more[open] > .mdsp-more__toggle { right: 10px; bottom: 10px; } .mdsp-answerform__foot { padding-right: 84px; } }
