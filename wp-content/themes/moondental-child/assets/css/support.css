@@ -109,3 +109,11 @@
 .mdsp-answerform__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; }
 .mdsp-answerform .mdsp-btn--save { margin-top: 0; margin-left: auto; min-height: 44px; padding: 0 24px; font-size: .98rem; }
 .mdsp-answerform .mdsp-status-pick__opt { position: relative; }
+
+/* v4.6.5 · 카드 = 항상 열린 수정 폼 */
+.mdsp-answerform--open { margin-top: 6px; padding: 0; border: 0; }
+.mdsp-answerform--open .mdsp-field { margin-bottom: 10px; }
+.mdsp-answerform--open textarea { min-height: 56px; }
+.mdsp-item__head .mdsp-del { margin-left: 6px; }
+.mdsp-item__head .mdsp-btn--del { min-height: 32px; padding: 2px 10px; }
+@media (max-width: 640px) { .mdsp-item__head .mdsp-del { margin-left: auto; } }
