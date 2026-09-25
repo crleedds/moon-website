@@ -428,11 +428,11 @@ function md_support_render_new( $err = '' ) {
 		<div class="mdsp-new__row mdsp-new__row--office">
 			<label class="mdsp-field">
 				<span>경영지원실 담당자 <small>(비워 둬도 됨)</small></span>
-				<input type="text" name="owner" maxlength="60" placeholder="처리할 사람">
+				<input type="text" name="owner" maxlength="60" placeholder="담당자 이름">
 			</label>
 			<label class="mdsp-field">
 				<span>경영지원실 답변 <small>(비워 둬도 됨)</small></span>
-				<textarea name="answer" rows="1" placeholder="처리 내용이나 예정 — 나중에 누구나 고칠 수 있습니다"></textarea>
+				<textarea name="answer" rows="1" placeholder="처리 내용이나 예정"></textarea>
 			</label>
 		</div>
 		<div class="mdsp-new__foot">
@@ -488,7 +488,7 @@ function md_support_render_card( $r, $manage, $keep ) {
 						<label class="mdsp-field"><span>요청 내용 (고칠 수 있음)</span><textarea name="content" rows="2"><?php echo esc_textarea( $r->content ); ?></textarea></label>
 						<label class="mdsp-field"><span>답변</span><textarea name="answer" rows="3" placeholder="처리 내용이나 예정을 적어 주세요"><?php echo esc_textarea( (string) $r->answer ); ?></textarea></label>
 						<div class="mdsp-answerform__row">
-							<label class="mdsp-field"><span>경영지원실 담당자</span><input type="text" name="owner" maxlength="60" value="<?php echo esc_attr( (string) $r->owner ); ?>" placeholder="처리할 사람"></label>
+							<label class="mdsp-field"><span>경영지원실 담당자</span><input type="text" name="owner" maxlength="60" value="<?php echo esc_attr( (string) $r->owner ); ?>" placeholder="담당자 이름"></label>
 							<label class="mdsp-field"><span>상태</span><select name="status"><?php foreach ( $sts as $st => $info ) : ?><option value="<?php echo esc_attr( $st ); ?>" <?php selected( $st, $r->status ); ?>><?php echo esc_html( $st ); ?></option><?php endforeach; ?></select></label>
 							<label class="mdsp-field"><span>처리일</span><input type="date" name="done_at" value="<?php echo esc_attr( (string) $r->done_at ); ?>"></label>
 						</div>
@@ -511,14 +511,12 @@ function md_support_render() {
 	$manage = md_support_can_manage();
 	$sts    = md_support_statuses();
 	$st     = isset( $_GET['st'] ) ? sanitize_text_field( wp_unslash( $_GET['st'] ) ) : '';
-	if ( '' !== $st && 'all' !== $st && ! isset( $sts[ $st ] ) ) { $st = ''; }
-	/* 기본 화면은 열린 요청(접수·진행중·보류)만, 찾기를 하면 전체에서 찾는다 */
-	$list_st = 'all' === $st ? '' : ( '' === $st ? ( '' !== $q ? '' : 'open' ) : $st );
+	if ( '' !== $st && ! isset( $sts[ $st ] ) ) { $st = ''; }
+	$list_st = $st; /* 기본 화면은 전체(최근순) */
 	$q      = isset( $_GET['q'] ) ? trim( sanitize_text_field( wp_unslash( $_GET['q'] ) ) ) : '';
 	$counts = md_support_counts();
 	$rows   = md_support_list( $list_st, $q );
 	$keep   = array_filter( array( 'st' => $st, 'q' => $q ), 'strlen' );
-	$open_n = $counts['접수'] + $counts['진행중'] + $counts['보류'];
 
 	if ( isset( $_GET['msg'] ) ) { echo md_support_notice( sanitize_key( wp_unslash( $_GET['msg'] ) ) ); } // phpcs:ignore WordPress.Security.EscapeOutput
 	if ( isset( $_GET['err'] ) ) { echo '<div class="mds-notice mds-notice--warn">' . esc_html( wp_unslash( $_GET['err'] ) ) . '</div>'; }
@@ -527,11 +525,10 @@ function md_support_render() {
 	?>
 	<div class="mdsp-bar">
 		<nav class="mdsp-filters" aria-label="상태별 보기">
-			<a class="mdsp-chip<?php echo '' === $st ? ' is-on' : ''; ?>" href="<?php echo esc_url( md_sup_url( array( 'app' => 'support', 'q' => $q ) ) ); ?>">진행 중인 요청 <b><?php echo (int) $open_n; ?></b></a>
+			<a class="mdsp-chip<?php echo '' === $st ? ' is-on' : ''; ?>" href="<?php echo esc_url( md_sup_url( array( 'app' => 'support', 'q' => $q ) ) ); ?>">전체 <b><?php echo (int) array_sum( $counts ); ?></b></a>
 			<?php foreach ( $sts as $name => $info ) : ?>
 				<a class="mdsp-chip mdsp-chip--<?php echo esc_attr( $info['class'] ); ?><?php echo $st === $name ? ' is-on' : ''; ?>" href="<?php echo esc_url( md_sup_url( array( 'app' => 'support', 'st' => $name, 'q' => $q ) ) ); ?>"><?php echo esc_html( $name ); ?> <b><?php echo (int) $counts[ $name ]; ?></b></a>
 			<?php endforeach; ?>
-			<a class="mdsp-chip<?php echo 'all' === $st ? ' is-on' : ''; ?>" href="<?php echo esc_url( md_sup_url( array( 'app' => 'support', 'st' => 'all', 'q' => $q ) ) ); ?>">전체 <b><?php echo (int) array_sum( $counts ); ?></b></a>
 		</nav>
 		<form method="get" class="mdsp-search" action="<?php echo esc_url( md_sup_url( array( 'app' => 'support' ) ) ); ?>">
 			<?php md_sup_app_field(); ?>
@@ -543,7 +540,7 @@ function md_support_render() {
 	<?php if ( empty( $rows ) ) : ?>
 		<div class="mds-card"><div class="mds-empty"><?php echo '' !== $q ? '찾는 내용이 없습니다.' : '요청이 없습니다.'; ?></div></div>
 	<?php else : ?>
-		<h2 class="mdsp-group"><?php echo '' !== $q ? '찾은 요청' : ( '' === $st ? '진행 중인 요청' : ( 'all' === $st ? '전체 요청' : esc_html( $st ) ) ); ?><small>최근 것이 위</small></h2>
+		<h2 class="mdsp-group"><?php echo '' !== $q ? '찾은 요청' : ( '' === $st ? '전체 요청' : esc_html( $st ) ); ?><small>최근 것이 위</small></h2>
 		<?php foreach ( $rows as $r ) { md_support_render_card( $r, $manage, $keep ); } ?>
 	<?php endif; ?>
 	<p class="mds-hint" style="margin-top:18px">2025년 10월 이전에 완료된 요청은 예전 시트 「문치과병원 경영지원실 요청사항 › 완료된 사항」에 있습니다.</p>
