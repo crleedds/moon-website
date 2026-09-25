@@ -101,6 +101,19 @@ $off_text = $info['hours_off'] ?: '휴진';
 				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
 			</a>
 		</div>
+		<?php /* v3.98.1 · 구글 지도 임베드 (API 키·결제 불필요) — 외국인·미군 환자, 해외 내비게이션용 */
+		$gmap_src = function_exists( 'md_content' ) ? md_content( 'loc_gmap_embed_url', 'https://www.google.com/maps?q=%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90%20%EC%B2%9C%EC%95%88%20%EB%A7%8C%EB%82%A8%EB%A1%9C%2052&z=16&output=embed&hl=ko' ) : '';
+		if ( $gmap_src ) : ?>
+		<div class="md-gmap md-flocation__gmap">
+			<div class="md-gmap__head">
+				<h3 class="md-gmap__title"><?php echo esc_html( md_content( 'loc_gmap_title', '구글 지도 (Google Maps)' ) ); ?></h3>
+				<p class="md-gmap__sub"><?php echo esc_html( md_content( 'loc_gmap_sub', '외국인 환자·해외 내비게이션용 · 핀을 누르면 길찾기' ) ); ?></p>
+			</div>
+			<div class="md-gmap__frame">
+				<iframe src="<?php echo esc_url( $gmap_src ); ?>" title="<?php echo esc_attr( md_content( 'loc_gmap_iframe_title', '문치과병원 구글 지도' ) ); ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+			</div>
+		</div>
+		<?php endif; ?>
 	</div>
 </section>
 
