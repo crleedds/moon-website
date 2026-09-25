@@ -194,4 +194,5 @@ return array(
 	'최소삭제 라미네이트 종합안내서' => 'Complete Minimal-Prep Laminate Guide',
 	'아산 추천 치과'        => 'Dental Care in Asan',
 	'천안 추천 치과'        => 'Dental Care in Cheonan',
+	'충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층' => '52 Mannam-ro, Dongnam-gu, Cheonan-si, Chungcheongnam-do — Moon Tower, Floors 9/10/11/13', // v3.99.4
 );

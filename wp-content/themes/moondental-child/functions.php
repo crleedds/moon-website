@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '3.99.3' );
+define( 'MOONDENTAL_VERSION', '3.99.4' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2230,6 +2230,16 @@ add_action( 'wp_enqueue_scripts', 'moondental_enqueue_styles', 15 );
  * @param string $key 필드 키. 비어있으면 전체 배열 반환.
  * @return mixed
  */
+/** v3.99.4 · Customizer 에 저장된 주소에서 「(신부동)」 제거 (1회) */
+add_action( 'wp_loaded', function () {
+	if ( get_option( 'md_addr_sinbu_v3994' ) === 'done' ) return;
+	$cur = get_theme_mod( 'moondental_address', '' );
+	if ( is_string( $cur ) && strpos( $cur, '(신부동)' ) !== false ) {
+		set_theme_mod( 'moondental_address', trim( str_replace( '(신부동)', '', $cur ) ) );
+	}
+	update_option( 'md_addr_sinbu_v3994', 'done' );
+}, 62 );
+
 function moondental_get_info( $key = '' ) {
 	$defaults = array(
 		'name_full'    => '한아의료재단 문치과병원',
@@ -2238,7 +2248,7 @@ function moondental_get_info( $key = '' ) {
 		'tagline'      => '실력과 품격있는 진료',
 		'phone'        => '041-563-2875',
 		'phone_link'   => '0415632875',
-		'address'      => '충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층 (신부동)',
+		'address'      => '충청남도 천안시 동남구 만남로 52, 문타워 9·10·11·13층', // v3.99.4 · (신부동) 제거
 		'address_road' => '충남 천안시 동남구 만남로 52, 문타워 9·10·11·13층',
 		'hours_wd'     => '평일 09:00 – 20:30 (점심시간 없음)',
 		'hours_thu'    => '목요일 9:00 – 18:30',
