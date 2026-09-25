@@ -117,6 +117,29 @@ function md_support_seed() {
 	}
 }
 
+/** v4.4.1 · 2026-09-25 점검 중 실수로 지워진 요청 1건을 원래 값 그대로 되살린다 (1회) */
+function md_support_restore_v441() {
+	if ( get_option( 'md_support_restore_v441' ) === 'done' ) { return; }
+	global $wpdb;
+	$t = md_support_table();
+	$content = '11층 복도로 통하는 문 열었을때 자동으로 닫힐 수 있도록 도어클로저 수리가 필요합니다.';
+	$exists  = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $t WHERE content = %s", $content ) );
+	if ( ! $exists ) {
+		$wpdb->insert( $t, array(
+			'created_at' => '2026-05-19 09:00:00',
+			'requester'  => '이창률',
+			'dept'       => '10층 의국',
+			'content'    => $content,
+			'answer'     => '',
+			'owner'      => '',
+			'status'     => '접수',
+			'updated_at' => current_time( 'mysql' ),
+		) );
+	}
+	update_option( 'md_support_restore_v441', 'done' );
+}
+add_action( 'init', 'md_support_restore_v441', 21 );
+
 /* ============================================================
  * 읽기 · 쓰기
  * ============================================================ */
