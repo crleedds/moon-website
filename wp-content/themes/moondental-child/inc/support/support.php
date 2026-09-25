@@ -153,7 +153,7 @@ function md_support_get( $id ) {
 	return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . md_support_table() . ' WHERE id = %d', (int) $id ) );
 }
 
-/** 목록 — 가장 최근 것이 위로 (v4.6). $status = 'open' 이면 접수·진행중·보류만 */
+/** 목록 — 가장 최근 것이 위로, 완료된 것은 맨 아래 (v4.6.8). $status = 'open' 이면 접수·진행중·보류만 */
 function md_support_list( $status = '', $q = '' ) {
 	global $wpdb;
 	$t     = md_support_table();
@@ -167,7 +167,7 @@ function md_support_list( $status = '', $q = '' ) {
 		array_push( $args, $like, $like, $like, $like, $like );
 	}
 	$sql = "SELECT * FROM $t WHERE " . implode( ' AND ', $where )
-		. ' ORDER BY created_at DESC, id DESC LIMIT 400';
+		. " ORDER BY (status = '완료') ASC, created_at DESC, id DESC LIMIT 400"; /* v4.6.8 · 완료는 맨 아래, 나머지는 최근순 */
 	return $wpdb->get_results( $args ? $wpdb->prepare( $sql, $args ) : $sql );
 }
 
