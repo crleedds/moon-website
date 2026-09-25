@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '4.5' );
+define( 'MOONDENTAL_VERSION', '4.5.1' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2253,6 +2253,18 @@ add_action( 'wp_loaded', function () {
 	}
 	update_option( 'md_addr_floors_v3995', 'done' );
 }, 63 );
+
+/** v4.5.1 · 관리자 아이디 moonmanager → moondentalmanager (1회 · 비밀번호는 그대로) */
+add_action( 'init', function () {
+	if ( get_option( 'md_admin_rename_v451' ) === 'done' ) { return; }
+	global $wpdb;
+	$u = get_user_by( 'login', 'moonmanager' );
+	if ( $u && ! username_exists( 'moondentalmanager' ) ) {
+		$wpdb->update( $wpdb->users, array( 'user_login' => 'moondentalmanager', 'user_nicename' => 'moondentalmanager' ), array( 'ID' => (int) $u->ID ) );
+		clean_user_cache( (int) $u->ID );
+	}
+	update_option( 'md_admin_rename_v451', 'done' );
+}, 5 );
 
 function moondental_get_info( $key = '' ) {
 	$defaults = array(
