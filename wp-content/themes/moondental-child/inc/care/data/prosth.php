@@ -36,11 +36,11 @@ return array(
 		array( 'src' => 'prosth/15.jpg', 'caption' => '틀니 제작 과정' ),
 	),
 	'videos' => array(
-		array( 'title' => '인레이 과정', 'drive' => '1mRXoCBfVlVYyeopUkj6fzSMf97CxoB_e' ),
-		array( 'title' => '크라운 프렙', 'drive' => '1IMVLTnojNeRikBOc2cAcPHCfYFMtaAtM' ),
-		array( 'title' => '크라운의 접착과정', 'drive' => '1hUthPdsaJ188WocuXmbkzkGTY8RDxnN_' ),
-		array( 'title' => '크라운 프렙과 코어 빌드업', 'drive' => '1-e3ottWMWPWozl6k38bhQhDqpbZ8YYiX' ),
-		array( 'title' => '브릿지 치료', 'drive' => '1uUS8IueJKrsEP37oKP4SC_x_M33kVx8_' ),
+		array( 'title' => '인레이 과정', 'drive' => '1mRXoCBfVlVYyeopUkj6fzSMf97CxoB_e', 'file' => 'video/prosth/02.mp4', 'poster' => 'video/prosth/02.jpg' ),
+		array( 'title' => '크라운 프렙', 'drive' => '1IMVLTnojNeRikBOc2cAcPHCfYFMtaAtM', 'file' => 'video/prosth/05.mp4', 'poster' => 'video/prosth/05.jpg' ),
+		array( 'title' => '크라운의 접착과정', 'drive' => '1hUthPdsaJ188WocuXmbkzkGTY8RDxnN_', 'file' => 'video/prosth/04.mp4', 'poster' => 'video/prosth/04.jpg' ),
+		array( 'title' => '크라운 프렙과 코어 빌드업', 'drive' => '1-e3ottWMWPWozl6k38bhQhDqpbZ8YYiX', 'file' => 'video/prosth/03.mp4', 'poster' => 'video/prosth/03.jpg' ),
+		array( 'title' => '브릿지 치료', 'drive' => '1uUS8IueJKrsEP37oKP4SC_x_M33kVx8_', 'file' => 'video/prosth/01.mp4', 'poster' => 'video/prosth/01.jpg' ),
 	),
 	'embeds' => array(
 	),

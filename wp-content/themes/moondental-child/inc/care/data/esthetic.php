@@ -30,10 +30,10 @@ return array(
 		array( 'src' => 'esthetic/10.jpg', 'caption' => '치아미백의 종류' ),
 	),
 	'videos' => array(
-		array( 'title' => '라미네이트 과정', 'drive' => '1sTt6u_5ffxPNYxazI2uyITWRwx2V7zBj' ),
-		array( 'title' => '라미네이트 접착과정', 'drive' => '1SJZ8icvXCepD0wx-8XqPqvcnmeugHcOa' ),
-		array( 'title' => '치아미백 과정', 'drive' => '1OO7iryJDIekcjHmZI2ZmnAcRkeidFqlR' ),
-		array( 'title' => 'Teeth Whitening Process', 'drive' => '1r8F13vng3k7lSzQrEzPsVeLtnSz57X2H' ),
+		array( 'title' => '라미네이트 과정', 'drive' => '1sTt6u_5ffxPNYxazI2uyITWRwx2V7zBj', 'file' => 'video/esthetic/02.mp4', 'poster' => 'video/esthetic/02.jpg' ),
+		array( 'title' => '라미네이트 접착과정', 'drive' => '1SJZ8icvXCepD0wx-8XqPqvcnmeugHcOa', 'file' => 'video/esthetic/03.mp4', 'poster' => 'video/esthetic/03.jpg' ),
+		array( 'title' => '치아미백 과정', 'drive' => '1OO7iryJDIekcjHmZI2ZmnAcRkeidFqlR', 'file' => 'video/esthetic/04.mp4', 'poster' => 'video/esthetic/04.jpg' ),
+		array( 'title' => 'Teeth Whitening Process', 'drive' => '1r8F13vng3k7lSzQrEzPsVeLtnSz57X2H', 'file' => 'video/esthetic/01.mp4', 'poster' => 'video/esthetic/01.jpg' ),
 	),
 	'embeds' => array(
 	),

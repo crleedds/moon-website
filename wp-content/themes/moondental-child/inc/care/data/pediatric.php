@@ -29,7 +29,7 @@ return array(
 		array( 'src' => 'pediatric/09.jpg', 'caption' => '우리아이, 치약 얼마나 써야 할까요' ),
 	),
 	'videos' => array(
-		array( 'title' => '유치 맹출 순서', 'drive' => '1VizVkcLav6LReZ5_KBTYOU7ABaJc_6tk' ),
+		array( 'title' => '유치 맹출 순서', 'drive' => '1VizVkcLav6LReZ5_KBTYOU7ABaJc_6tk', 'file' => 'video/pediatric/01.mp4', 'poster' => 'video/pediatric/01.jpg' ),
 	),
 	'embeds' => array(
 	),
