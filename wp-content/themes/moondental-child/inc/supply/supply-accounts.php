@@ -19,7 +19,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 define( 'MD_SUP_MANAGER_LOGIN', 'moonmanager' );
-define( 'MD_SUP_STAFF_LOGIN', 'moondental' );
+define( 'MD_SUP_STAFF_LOGIN', 'moondentalhospital' ); // v4.2 · 직원 공용 계정 아이디 변경
 
 /**
  * 계정은 둘뿐이다.

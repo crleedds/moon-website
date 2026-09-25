@@ -19,6 +19,8 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+require_once __DIR__ . '/care-edit.php'; // v4.2 · 관리자 편집(업로드·삭제·순서·제목)
+
 function md_care_media_url( $rel ) {
 	if ( preg_match( '#^https?://#', $rel ) ) return $rel;
 	$up = wp_upload_dir();
@@ -60,7 +62,7 @@ function md_care_render_hub() {
 	<div class="mdc-hub">
 		<label class="mdc-search"><span class="md-sr-only">주제 찾기</span><input type="search" placeholder="🔍 주제 찾기" data-care-filter autocomplete="off"></label>
 		<div class="mdc-tiles">
-			<?php foreach ( $topics as $slug => $t ) : $np = count( $t['photos'] ?? array() ); $nv = count( $t['videos'] ?? array() ); $ne = count( $t['embeds'] ?? array() ); ?>
+			<?php foreach ( $topics as $slug => $t ) : $it = md_care_items( $slug, $t ); $np = count( $it['photos'] ); $nv = count( $it['videos'] ); $ne = count( $t['embeds'] ?? array() ); ?>
 				<a class="mdc-tile" href="<?php echo esc_url( md_sup_url( array( 'app' => 'care', 'topic' => $slug ) ) ); ?>" data-care-name="<?php echo esc_attr( $t['title'] . ' ' . ( $t['keywords'] ?? '' ) ); ?>">
 					<span class="mdc-tile__icon" aria-hidden="true"><?php echo esc_html( $t['icon'] ?? '🦷' ); ?></span>
 					<span class="mdc-tile__title"><?php echo esc_html( $t['title'] ); ?></span>
@@ -90,11 +92,12 @@ function md_care_video_html( $v, $big = false ) {
 /** ② 주제 화면 */
 function md_care_render_topic( $slug ) {
 	$topics = md_care_topics(); $t = $topics[ $slug ];
-	$photos = (array) ( $t['photos'] ?? array() ); $videos = (array) ( $t['videos'] ?? array() ); $embeds = (array) ( $t['embeds'] ?? array() );
+	$it = md_care_items( $slug, $t ); $photos = $it['photos']; $videos = $it['videos']; $embeds = (array) ( $t['embeds'] ?? array() );
+	$can_edit = md_care_can_edit(); $max_up = size_format( wp_max_upload_size() );
 	$has_text = ! empty( $t['summary'] ) || ! empty( $t['text'] ) || ! empty( $t['steps'] ) || ! empty( $t['faq'] ) || ! empty( $t['caution'] ) || ! empty( $t['compare'] );
 	$first = $photos ? 'photos' : ( $videos ? 'videos' : ( $embeds ? 'embeds' : 'text' ) );
 	?>
-	<article class="mdc-topic" data-care-topic>
+	<article class="mdc-topic" data-care-topic data-slug="<?php echo esc_attr( $slug ); ?>"<?php if ( $can_edit ) : ?> data-care-ajax="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" data-care-nonce="<?php echo esc_attr( wp_create_nonce( 'md_care_edit' ) ); ?>"<?php endif; ?>>
 		<header class="mdc-topic__head">
 			<a class="mdc-topic__back" href="<?php echo esc_url( md_sup_url( array( 'app' => 'care', 'topic' => '' ) ) ); ?>">← 주제 목록</a>
 			<div class="mdc-topic__row">
@@ -106,36 +109,59 @@ function md_care_render_topic( $slug ) {
 				<div class="mdc-topic__tools">
 					<?php if ( $photos || $videos ) : ?><button type="button" class="mdc-btn mdc-btn--primary" data-care-present>▶ 설명 모드</button><?php endif; ?>
 					<button type="button" class="mdc-btn" onclick="window.print()">🖨 인쇄</button>
+					<?php if ( $can_edit ) : ?><button type="button" class="mdc-btn mdc-btn--edit" data-care-edit-toggle aria-pressed="false">✏️ 편집</button><?php endif; ?>
 				</div>
 			</div>
+			<?php if ( $can_edit ) : ?>
+			<div class="mdc-editbar" data-care-editbar hidden>
+				<span>편집 중 — 카드의 <b>✕</b>로 삭제, <b>‹ ›</b>로 순서, 제목을 눌러 고칩니다. 파일 하나 최대 <b><?php echo esc_html( $max_up ); ?></b></span>
+				<button type="button" class="mdc-btn mdc-btn--ghost" data-care-reset>원래 목록으로 되돌리기</button>
+			</div>
+			<?php endif; ?>
 			<nav class="mdc-tabs" aria-label="자료 종류">
-				<?php if ( $photos ) : ?><button type="button" class="mdc-tab" data-care-tab="photos">📷 사진 <b><?php echo count( $photos ); ?></b></button><?php endif; ?>
-				<?php if ( $videos ) : ?><button type="button" class="mdc-tab" data-care-tab="videos">🎬 영상 <b><?php echo count( $videos ); ?></b></button><?php endif; ?>
+				<?php if ( $photos || $can_edit ) : ?><button type="button" class="mdc-tab" data-care-tab="photos">📷 사진 <b data-care-count="photo"><?php echo count( $photos ); ?></b></button><?php endif; ?>
+				<?php if ( $videos || $can_edit ) : ?><button type="button" class="mdc-tab" data-care-tab="videos">🎬 영상 <b data-care-count="video"><?php echo count( $videos ); ?></b></button><?php endif; ?>
 				<?php if ( $embeds ) : ?><button type="button" class="mdc-tab" data-care-tab="embeds">📊 자료 <b><?php echo count( $embeds ); ?></b></button><?php endif; ?>
 				<?php if ( $has_text ) : ?><button type="button" class="mdc-tab" data-care-tab="text">📝 설명</button><?php endif; ?>
 			</nav>
 		</header>
 
-		<?php if ( $photos ) : ?>
+		<?php if ( $photos || $can_edit ) : ?>
 		<section class="mdc-pane" data-care-pane="photos">
-			<div class="mdc-grid">
+			<?php if ( $can_edit ) : ?>
+			<label class="mdc-drop" data-care-drop="photo" hidden>
+				<input type="file" accept="image/jpeg,image/png,image/webp" multiple data-care-file="photo">
+				<span class="mdc-drop__icon">📷</span><span class="mdc-drop__text"><b>사진 추가</b> — 여기를 누르거나 파일을 끌어다 놓으세요 (JPG·PNG, 여러 장 가능)</span>
+				<span class="mdc-drop__prog" data-care-prog hidden></span>
+			</label>
+			<?php endif; ?>
+			<div class="mdc-grid" data-care-grid="photo">
 				<?php foreach ( $photos as $i => $p ) : $src = md_care_media_url( $p['src'] ); $cap = $p['caption'] ?? ''; ?>
-					<figure class="mdc-card" data-care-item="photo" data-src="<?php echo esc_url( $src ); ?>" data-caption="<?php echo esc_attr( $cap ); ?>">
+					<figure class="mdc-card" data-care-item="photo" data-index="<?php echo (int) $i; ?>" data-src="<?php echo esc_url( $src ); ?>" data-caption="<?php echo esc_attr( $cap ); ?>">
 						<a href="<?php echo esc_url( $src ); ?>" data-care-zoom="<?php echo (int) $i; ?>"><img src="<?php echo esc_url( $src ); ?>" alt="<?php echo esc_attr( $cap ); ?>" loading="lazy"></a>
-						<?php if ( $cap ) : ?><figcaption><?php echo esc_html( $cap ); ?></figcaption><?php endif; ?>
+						<figcaption data-care-caption><?php echo esc_html( $cap ); ?></figcaption>
+						<?php if ( $can_edit ) : ?><span class="mdc-card__tools"><button type="button" data-care-move="-1" title="앞으로">‹</button><button type="button" data-care-move="1" title="뒤로">›</button><button type="button" class="mdc-card__del" data-care-del title="삭제">✕</button></span><?php endif; ?>
 					</figure>
 				<?php endforeach; ?>
 			</div>
 		</section>
 		<?php endif; ?>
 
-		<?php if ( $videos ) : ?>
+		<?php if ( $videos || $can_edit ) : ?>
 		<section class="mdc-pane" data-care-pane="videos">
-			<div class="mdc-grid mdc-grid--video">
-				<?php foreach ( $videos as $v ) : ?>
-					<figure class="mdc-card mdc-card--video" data-care-item="video">
+			<?php if ( $can_edit ) : ?>
+			<label class="mdc-drop" data-care-drop="video" hidden>
+				<input type="file" accept="video/mp4,video/webm" data-care-file="video">
+				<span class="mdc-drop__icon">🎬</span><span class="mdc-drop__text"><b>영상 추가</b> — MP4 파일을 누르거나 끌어다 놓으세요 (썸네일은 자동 생성)</span>
+				<span class="mdc-drop__prog" data-care-prog hidden></span>
+			</label>
+			<?php endif; ?>
+			<div class="mdc-grid mdc-grid--video" data-care-grid="video">
+				<?php foreach ( $videos as $i => $v ) : ?>
+					<figure class="mdc-card mdc-card--video" data-care-item="video" data-index="<?php echo (int) $i; ?>">
 						<div class="mdc-card__player"><?php echo md_care_video_html( $v ); // phpcs:ignore ?></div>
-						<figcaption><?php echo esc_html( $v['title'] ?? '' ); ?></figcaption>
+						<figcaption data-care-caption><?php echo esc_html( $v['title'] ?? '' ); ?></figcaption>
+						<?php if ( $can_edit ) : ?><span class="mdc-card__tools"><button type="button" data-care-move="-1" title="앞으로">‹</button><button type="button" data-care-move="1" title="뒤로">›</button><button type="button" class="mdc-card__del" data-care-del title="삭제">✕</button></span><?php endif; ?>
 					</figure>
 				<?php endforeach; ?>
 			</div>

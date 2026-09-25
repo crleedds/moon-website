@@ -112,3 +112,26 @@
   .mdc-pane { display: block !important; }
   .mdc-card { break-inside: avoid; }
 }
+
+/* v4.2 · 관리자 편집 모드 */
+.mdc-btn--edit[aria-pressed="true"] { background: var(--color-accent-dark); border-color: var(--color-accent-dark); color: #fff; }
+.mdc-editbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: rgba(143, 174, 146, 0.14); border: 1px solid var(--color-accent-dark); font-size: 0.92rem; }
+.mdc-editbar span { flex: 1; }
+.mdc-drop { display: flex; align-items: center; gap: 14px; padding: 18px 20px; margin-bottom: 14px; border: 2px dashed var(--color-primary); border-radius: 16px; background: rgba(216, 128, 98, 0.06); cursor: pointer; transition: background 0.2s; }
+.mdc-drop:hover, .mdc-drop.is-over { background: rgba(216, 128, 98, 0.14); }
+.mdc-drop.is-busy { opacity: 0.7; pointer-events: none; }
+.mdc-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.mdc-drop__icon { font-size: 2rem; }
+.mdc-drop__text { font-size: 1rem; line-height: 1.5; }
+.mdc-drop__prog { margin-left: auto; font-weight: 700; color: var(--color-primary-dark); white-space: nowrap; }
+.mdc-card { position: relative; }
+.mdc-card__tools { display: none; position: absolute; top: 8px; right: 8px; gap: 4px; }
+.is-editing .mdc-card__tools { display: flex; }
+.mdc-card__tools button { width: 34px; height: 34px; border-radius: 50%; border: 0; background: rgba(0, 0, 0, 0.62); color: #fff; font-size: 1.1rem; font-weight: 800; cursor: pointer; }
+.mdc-card__tools button:hover { background: rgba(0, 0, 0, 0.85); }
+.mdc-card__tools .mdc-card__del { background: rgba(196, 85, 61, 0.9); }
+.is-editing .mdc-card a[data-care-zoom] { cursor: text; }
+.is-editing [data-care-caption] { outline: 1px dashed var(--color-primary); outline-offset: -1px; cursor: text; min-height: 1.4em; }
+.is-editing [data-care-caption]:focus { outline: 2px solid var(--color-primary); background: #fff; }
+.mdc-toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 16px); background: rgba(20, 20, 20, 0.92); color: #fff; padding: 12px 20px; border-radius: 999px; font-weight: 600; opacity: 0; transition: opacity 0.25s, transform 0.25s; z-index: 10005; pointer-events: none; }
+.mdc-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
