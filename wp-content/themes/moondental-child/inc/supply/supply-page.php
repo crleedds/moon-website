@@ -61,6 +61,12 @@ function md_sup_apps() {
 			'icon'  => '📦',
 			'desc'  => '재료 신청 · 우리 팀 사용량과 비용 · 입출고 관리',
 		),
+		// v4.0 · 환자 설명용 자료
+		'care'  => array(
+			'label' => 'Moon Dental Care',
+			'icon'  => '🩺',
+			'desc'  => '환자 설명용 자료 · 임플란트·교정·보존·심미 — 태블릿으로 띄워 놓고 설명',
+		),
 	);
 }
 
@@ -959,7 +965,9 @@ function md_sup_render_page() {
 			. '</div>';
 	}
 
-	if ( 'stock' !== $app ) {
+	if ( 'care' === $app && function_exists( 'md_care_render' ) ) {
+		md_care_render(); // v4.0 · Moon Dental Care
+	} elseif ( 'stock' !== $app ) {
 		md_sup_render_hub();
 	} else {
 		switch ( $tab ) {
