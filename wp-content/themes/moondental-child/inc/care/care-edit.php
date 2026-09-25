@@ -19,7 +19,19 @@ function md_care_can_edit() {
 }
 
 /** 주제의 사진·영상 목록 — 옵션(편집본)이 있으면 그것, 없으면 data 파일 */
+/** 편집본 저장 파일 · uploads/care/_data/{slug}.json */
+function md_care_store_path( $slug ) {
+	$up = wp_upload_dir(); $dir = rtrim( $up['basedir'], '/' ) . '/care/_data';
+	if ( ! is_dir( $dir ) ) wp_mkdir_p( $dir );
+	return $dir . '/' . sanitize_key( $slug ) . '.json';
+}
+
 function md_care_items( $slug, $t = null ) {
+	$file = md_care_store_path( $slug );
+	if ( is_file( $file ) ) {
+		$saved = json_decode( (string) file_get_contents( $file ), true );
+		if ( is_array( $saved ) && isset( $saved['photos'], $saved['videos'] ) ) return $saved;
+	}
 	$saved = get_option( 'md_care_items_' . $slug, null );
 	if ( is_array( $saved ) && isset( $saved['photos'], $saved['videos'] ) ) return $saved;
 	if ( $t === null ) { $topics = md_care_topics(); $t = $topics[ $slug ] ?? array(); }
@@ -27,7 +39,10 @@ function md_care_items( $slug, $t = null ) {
 }
 
 function md_care_save_items( $slug, $items ) {
-	update_option( 'md_care_items_' . $slug, array( 'photos' => array_values( $items['photos'] ), 'videos' => array_values( $items['videos'] ) ), false );
+	$data = array( 'photos' => array_values( $items['photos'] ), 'videos' => array_values( $items['videos'] ), 'updated' => current_time( 'mysql' ) );
+	$ok_file = (bool) file_put_contents( md_care_store_path( $slug ), wp_json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ) );
+	$ok_opt  = update_option( 'md_care_items_' . $slug, $data, 'no' );
+	return array( 'file' => $ok_file, 'option' => (bool) $ok_opt );
 }
 
 /** uploads/care/ 아래의 상대 경로만 실제 파일로 바꿔 지운다 */
@@ -99,8 +114,9 @@ function md_care_ajax_upload() {
 		$added[] = $item;
 	}
 	remove_filter( 'upload_dir', $dir_filter ); remove_filter( 'sanitize_file_name', $name_filter, 99 );
-	if ( $added ) md_care_save_items( $slug, $items );
-	wp_send_json_success( array( 'added' => $added, 'errors' => $errors, 'items' => $items ) );
+	$saved = $added ? md_care_save_items( $slug, $items ) : null;
+	$check = md_care_items( $slug, $t );
+	wp_send_json_success( array( 'added' => $added, 'errors' => $errors, 'items' => $items, 'saved' => $saved, 'persisted' => array( 'photos' => count( $check['photos'] ), 'videos' => count( $check['videos'] ) ) ) );
 }
 add_action( 'wp_ajax_md_care_upload', 'md_care_ajax_upload' );
 
@@ -153,6 +169,7 @@ add_action( 'wp_ajax_md_care_move', 'md_care_ajax_move' );
 function md_care_ajax_reset() {
 	list( $slug, $t ) = md_care_ajax_guard();
 	delete_option( 'md_care_items_' . $slug );
+	$f = md_care_store_path( $slug ); if ( is_file( $f ) ) @unlink( $f );
 	wp_send_json_success( array( 'items' => md_care_items( $slug, $t ) ) );
 }
 add_action( 'wp_ajax_md_care_reset', 'md_care_ajax_reset' );
