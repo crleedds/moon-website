@@ -10,8 +10,7 @@
  *    접수 → 진행중 → 완료   (보류는 언제든)
  *
  *  누가 무엇을 하는가
- *    직원 공용 계정  요청 올리기 · 내용 · 답변 · 담당자 · 상태 · 처리일자 고치기 (v4.6 · 누구나)
- *    관리자          위 모두 + 삭제
+ *    직원 공용 계정  요청 올리기 · 내용 · 답변 · 담당자 · 상태 · 처리일자 고치기 · 삭제 (v4.6.9 · 누구나, 삭제는 확인 창)
  *
  *  저장은 전용 테이블 하나. 화면은 서버에서 그린다 — 자바스크립트가 없어도 전부 동작한다.
  *  폼은 POST → 처리 → 리다이렉트(PRG)라 새로고침해도 두 번 올라가지 않는다.
@@ -333,8 +332,7 @@ function md_support_handle_post() {
 			break;
 
 		case 'delete':
-			if ( ! md_support_can_manage() ) { break; }
-			md_support_delete( $id );
+			md_support_delete( $id ); /* v4.6.9 · 누구나 (확인 창을 거친다) */
 			$back = add_query_arg( 'msg', 'deleted', $back );
 			break;
 	}
@@ -468,12 +466,10 @@ function md_support_render_card( $r, $manage, $keep ) {
 			<span class="mdsp-item__team"><?php echo esc_html( $r->dept ); ?></span>
 			<span class="mdsp-item__who"><?php echo esc_html( $r->requester ); ?></span>
 			<span class="mdsp-item__date"><?php echo esc_html( md_support_fmt_date( $r->created_at ) ); ?></span>
-			<?php if ( $manage ) : ?>
 			<form method="post" class="mdsp-inline mdsp-del" onsubmit="return confirm('이 요청을 지울까요? 되돌릴 수 없습니다.');">
 				<input type="hidden" name="md_support_action" value="delete"><input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_delete' ) ); ?>"><?php echo $hidden; // phpcs:ignore ?>
-				<button type="submit" class="mdsp-btn mdsp-btn--del" title="삭제">🗑</button>
+				<button type="submit" class="mdsp-btn mdsp-btn--del" title="이 요청 삭제">🗑 삭제</button>
 			</form>
-			<?php endif; ?>
 		</div>
 		<p class="mdsp-item__body"><?php echo nl2br( esc_html( $r->content ) ); ?></p>
 
