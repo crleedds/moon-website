@@ -22,3 +22,7 @@
   .mdeq__frame iframe { height: 70vh; min-height: 420px; }
   .mdeq__actions .mds-btn { width: 100%; }
 }
+
+/* v4.8.1 · 층 선택 탭 (층마다 시트 하나) */
+.mdeq__floors { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.mdeq__floors .mds-tab { min-width: 72px; justify-content: center; }
