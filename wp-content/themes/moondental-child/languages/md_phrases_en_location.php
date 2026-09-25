@@ -112,4 +112,9 @@ return array(
 	'주소가 복사되었습니다' => 'Address copied',
 	'이메일 복사' => 'Copy email',
 	'이메일 주소가 복사되었습니다' => 'Email address copied',
+	// v3.99.2 · 편의시설 · 휠체어·Wi-Fi
+	'휠체어 접근' => 'Wheelchair accessible',
+	'건물 입구·엘리베이터·진료실 휠체어 이동 가능' => 'Wheelchair access from the entrance to the elevator and treatment rooms',
+	'무료 Wi-Fi' => 'Free Wi-Fi',
+	'대기실 전체 무료 와이파이' => 'Free Wi-Fi throughout the waiting areas',
 );

@@ -112,4 +112,9 @@ return array(
 	'주소가 복사되었습니다' => 'Đã sao chép địa chỉ',
 	'이메일 복사' => 'Sao chép email',
 	'이메일 주소가 복사되었습니다' => 'Đã sao chép địa chỉ email',
+	// v3.99.2 · 편의시설 · 휠체어·Wi-Fi
+	'휠체어 접근' => 'Lối đi cho xe lăn',
+	'건물 입구·엘리베이터·진료실 휠체어 이동 가능' => 'Xe lăn di chuyển được từ lối vào, thang máy đến phòng khám',
+	'무료 Wi-Fi' => 'Wi-Fi miễn phí',
+	'대기실 전체 무료 와이파이' => 'Wi-Fi miễn phí toàn bộ khu chờ',
 );
