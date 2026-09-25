@@ -90,7 +90,7 @@ function md_equipment_render() {
 		</div>
 		<nav class="mdeq__floors" aria-label="층 선택">
 			<?php foreach ( $sheets as $f => $id ) : ?>
-				<a class="mds-tab<?php echo $f === $floor ? ' is-on' : ''; ?>" href="<?php echo esc_url( md_sup_url( array( 'app' => 'equipment', 'floor' => $f ) ) ); ?>"><?php echo esc_html( $f ); ?>층</a>
+				<a class="mds-tab<?php echo (string) $f === (string) $floor ? ' is-on' : ''; ?>" href="<?php echo esc_url( md_sup_url( array( 'app' => 'equipment', 'floor' => $f ) ) ); ?>"><?php echo esc_html( $f ); ?>층</a>
 			<?php endforeach; ?>
 		</nav>
 		<div class="mds-card mdeq__frame">
