@@ -2,7 +2,7 @@
 /**
  * v4.6 · 지원 요청 — 직원 전용(/직원/) 허브의 도구 (신청 폼에 담당자·답변란 · 누구나 답변·상태 수정 · 최근 것이 위로)
  *
- *  경영지원실에 부탁할 일(수리 · 구매 · 확인 요청 …)을 적고, 경영지원실이 답변과
+ *  경영지원실에 부탁할 일(수리 · 확인 요청 …)을 적고, 경영지원실이 답변과
  *  처리 상태를 남기는 화면이다. 예전에는 구글 시트 「문치과병원 경영지원실 요청사항」에
  *  줄을 추가해 썼다. 그 시트의 열(요청일자 · 요청사항 · 요청자 · 요청부서 · 답변 · 담당자 ·
  *  수리일자)을 그대로 옮기되, 자유롭게 적던 진행 상황을 상태 네 단계로 정리했다.
@@ -261,7 +261,7 @@ function md_support_notify_new( $id ) {
 	if ( empty( $to ) ) { return; }
 	$row = md_support_get( $id );
 	if ( ! $row ) { return; }
-	$subject = '[문치과병원] 지원 요청 — ' . $row->requester . ' · ' . $row->dept;
+	$subject = '[문치과병원] 경영지원실 지원 요청 — ' . $row->requester . ' · ' . $row->dept;
 	$body    = "새 지원 요청이 올라왔습니다.\n\n요청자: {$row->requester}\n요청팀: {$row->dept}\n\n{$row->content}\n\n"
 		. md_sup_url( array( 'app' => 'support' ) ) . "\n";
 	wp_mail( $to, $subject, $body );
