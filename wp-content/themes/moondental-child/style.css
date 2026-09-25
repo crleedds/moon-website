@@ -16958,7 +16958,10 @@ a.md-center-color--preservation:hover { color: #4A7530 !important; }
 .md-amen__desc { font-size: 0.85rem; color: var(--color-text-sub); line-height: 1.5; }
 
 /* v3.99.1 · 오시는 길 · 주소 복사 버튼 · 전화/이메일 칩 · 푸터 클릭 복사 · 토스트 */
-.md-loc-addr { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 14px; }
+.md-loc-addr { display: flex; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 10px 14px; }
+.md-loc-addr > a { min-width: 0; }
+.md-loc-addr .md-copybtn { flex: none; white-space: nowrap; }
+@media (max-width: 640px) { .md-loc-addr { flex-wrap: wrap; } }
 .md-copybtn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s var(--ease), transform 0.2s var(--ease); }
 .md-copybtn:hover { background: var(--color-bg); transform: translateY(-1px); }
 .md-copybtn svg { width: 16px; height: 16px; }

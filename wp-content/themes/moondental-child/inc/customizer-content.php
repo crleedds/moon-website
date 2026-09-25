@@ -2946,19 +2946,16 @@ function moondental_misc_pages_content_fields() {
 				'loc_amen_eyebrow' => array( 'default' => '시설 안내', 'label' => '오시는 길 · 편의시설 배지', 'type' => 'text' ), // v3.99
 				'loc_amen_title' => array( 'default' => '편의 시설', 'label' => '오시는 길 · 편의시설 제목', 'type' => 'text' ), // v3.99
 				'loc_amen_sub' => array( 'default' => '편안한 방문을 위해', 'label' => '오시는 길 · 편의시설 부제', 'type' => 'text' ), // v3.99
-				'loc_amenities' => array( 'default' => "🚗|무료 주차|건물 지하 기계식 주차장 · 진료 시간 중 무료
-				'loc_copy_addr' => array( 'default' => '주소 복사', 'label' => '오시는 길 · 주소 복사 버튼', 'type' => 'text' ), // v3.99.1
+				'loc_amenities' => array( 'default' => "				'loc_copy_addr' => array( 'default' => '주소 복사', 'label' => '오시는 길 · 주소 복사 버튼', 'type' => 'text' ), // v3.99.1
 				'loc_copied_addr' => array( 'default' => '주소가 복사되었습니다', 'label' => '오시는 길·푸터 · 주소 복사 안내 문구', 'type' => 'text' ), // v3.99.1
 				'loc_copy_email' => array( 'default' => '이메일 복사', 'label' => '오시는 길·푸터 · 이메일 복사 툴팁', 'type' => 'text' ), // v3.99.1
 				'loc_copied_email' => array( 'default' => '이메일 주소가 복사되었습니다', 'label' => '오시는 길·푸터 · 이메일 복사 안내 문구', 'type' => 'text' ), // v3.99.1
-🏢|엘리베이터|9·10·11·13층 진료 · 엘리베이터로 이동
+🏢|엘리베이터|9~13층 진료 · 엘리베이터로 이동
 🌙|야간진료|월·화·수·금 20:30까지 진료
 ♿|휠체어 접근|건물 입구·엘리베이터·진료실 휠체어 이동 가능
 📶|무료 Wi-Fi|대기실 전체 무료 와이파이
 🌐|외국어 안내|영어·러시아어·몽골어·베트남어·중국어 통역
-🦷|원내 기공실|보철물 색 맞춤·즉시 수정 (13층)
-👶|소아치과|어린이 전용 진료 공간 (11층)
-💬|카카오톡·네이버 예약|24시간 예약 접수", 'label' => '오시는 길 · 편의시설 목록 (한 줄에 하나 · 아이콘|이름|설명)', 'type' => 'textarea' ), // v3.99
+👶|소아치과|어린이 전용 진료 공간 (11층)", 'label' => '오시는 길 · 편의시설 목록 (한 줄에 하나 · 아이콘|이름|설명)', 'type' => 'textarea' ), // v3.99
 			),
 		),
 		'testimonials_extra' => array(
