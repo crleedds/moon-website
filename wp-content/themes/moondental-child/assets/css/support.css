@@ -103,3 +103,9 @@
 .mdsp-new__row--office textarea { min-height: 48px; }
 .mdsp-field > span small { font-weight: 500; color: var(--color-text-mute, #A89685); }
 @media (max-width: 640px) { .mdsp-new__row--office { grid-template-columns: 1fr; } }
+
+/* v4.6.4 · 수정 폼 — 왼쪽 아래 상태 선택, 오른쪽 아래 저장 */
+.mdsp-answerform__row--2 { grid-template-columns: 1fr 1fr; }
+.mdsp-answerform__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; }
+.mdsp-answerform .mdsp-btn--save { margin-top: 0; margin-left: auto; min-height: 44px; padding: 0 24px; font-size: .98rem; }
+.mdsp-answerform .mdsp-status-pick__opt { position: relative; }

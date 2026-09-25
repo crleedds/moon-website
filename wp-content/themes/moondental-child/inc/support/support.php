@@ -486,12 +486,18 @@ function md_support_render_card( $r, $manage, $keep ) {
 						<input type="hidden" name="md_support_action" value="answer"><input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_answer' ) ); ?>"><?php echo $hidden; // phpcs:ignore ?>
 						<label class="mdsp-field"><span>요청 내용 (고칠 수 있음)</span><textarea name="content" rows="2"><?php echo esc_textarea( $r->content ); ?></textarea></label>
 						<label class="mdsp-field"><span>답변</span><textarea name="answer" rows="3" placeholder="처리 내용이나 예정을 적어 주세요"><?php echo esc_textarea( (string) $r->answer ); ?></textarea></label>
-						<div class="mdsp-answerform__row">
+						<div class="mdsp-answerform__row mdsp-answerform__row--2">
 							<label class="mdsp-field"><span>경영지원실 담당자</span><input type="text" name="owner" maxlength="60" value="<?php echo esc_attr( (string) $r->owner ); ?>" placeholder="담당자 이름"></label>
-							<label class="mdsp-field"><span>상태</span><select name="status"><?php foreach ( $sts as $st => $info ) : ?><option value="<?php echo esc_attr( $st ); ?>" <?php selected( $st, $r->status ); ?>><?php echo esc_html( $st ); ?></option><?php endforeach; ?></select></label>
 							<label class="mdsp-field"><span>처리일</span><input type="date" name="done_at" value="<?php echo esc_attr( (string) $r->done_at ); ?>"></label>
 						</div>
-						<button type="submit" class="mds-btn mds-btn--fill mdsp-btn">저장</button>
+						<div class="mdsp-answerform__foot">
+							<div class="mdsp-status-pick" role="radiogroup" aria-label="상태">
+								<?php foreach ( $sts as $st => $info ) : ?>
+									<label class="mdsp-status-pick__opt"><input type="radio" name="status" value="<?php echo esc_attr( $st ); ?>" <?php checked( $st, $r->status ); ?>><span class="mds-status <?php echo esc_attr( $info['class'] ); ?>"><?php echo esc_html( $st ); ?></span></label>
+								<?php endforeach; ?>
+							</div>
+							<button type="submit" class="mds-btn mds-btn--fill mdsp-btn mdsp-btn--save">저장</button>
+						</div>
 					</form>
 				</details>
 				<?php if ( $manage ) : ?>
