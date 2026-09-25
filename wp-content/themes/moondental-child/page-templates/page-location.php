@@ -56,7 +56,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 		<?php /* v3.99.1 · 주소 + 복사 버튼 + 전화·이메일 (이메일은 클릭 복사) */
 		$loc_email = $info['email'] ?: 'moondental1995@naver.com'; ?>
 		<div class="md-page-hero__lead md-page-hero__lead--big md-loc-addr">
-			<a href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener" style="color:inherit; border-bottom:1px dashed var(--color-border);"><?php echo esc_html( $info['address'] ); ?></a>
+			<a class="md-loc-addr__link" href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener"><svg class="md-loc-addr__pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span><?php echo esc_html( $info['address'] ); ?></span></a>
 			<button type="button" class="md-copybtn" data-copy="<?php echo esc_attr( $info['address'] ); ?>" data-track="cta-locpage-copy-addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span><?php echo esc_html( md_content( 'loc_copy_addr', '주소 복사' ) ); ?></span><span hidden data-copy-msg><?php echo esc_html( md_content( 'loc_copied_addr', '주소가 복사되었습니다' ) ); ?></span></button>
 		</div>
 		<div class="md-loc-contact">
