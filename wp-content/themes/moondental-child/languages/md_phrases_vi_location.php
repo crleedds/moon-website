@@ -117,4 +117,6 @@ return array(
 	'건물 입구·엘리베이터·진료실 휠체어 이동 가능' => 'Xe lăn di chuyển được từ lối vào, thang máy đến phòng khám',
 	'무료 Wi-Fi' => 'Wi-Fi miễn phí',
 	'대기실 전체 무료 와이파이' => 'Wi-Fi miễn phí toàn bộ khu chờ',
+	// v3.99.3 · 엘리베이터 문구
+	'9~13층 진료 · 엘리베이터로 이동' => 'Khám ở tầng 9–13 · có thang máy',
 );

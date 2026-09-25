@@ -117,4 +117,6 @@ return array(
 	'건물 입구·엘리베이터·진료실 휠체어 이동 가능' => 'Wheelchair access from the entrance to the elevator and treatment rooms',
 	'무료 Wi-Fi' => 'Free Wi-Fi',
 	'대기실 전체 무료 와이파이' => 'Free Wi-Fi throughout the waiting areas',
+	// v3.99.3 · 엘리베이터 문구
+	'9~13층 진료 · 엘리베이터로 이동' => 'Clinics on floors 9–13 · elevator access',
 );
