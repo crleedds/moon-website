@@ -75,4 +75,6 @@ return array(
 	'40분' => '40 min',
 	'오산' => 'Osan',
 	'화성' => 'Hwaseong',
+	'구글 지도 (Google Maps)' => 'Google Maps', // v3.98.1
+	'외국인 환자·해외 내비게이션용 · 핀을 누르면 길찾기' => 'For international patients · tap the pin for directions',
 );

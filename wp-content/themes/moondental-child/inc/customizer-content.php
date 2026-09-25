@@ -2932,6 +2932,9 @@ function moondental_misc_pages_content_fields() {
 				'loc_day_sun'     => array( 'default' => '일요일', 'label' => '오시는 길 · 요일 라벨 (일요일)', 'type' => 'text' ),
 				'loc_day_closed'  => array( 'default' => '휴진', 'label' => '오시는 길 · 휴진 표시', 'type' => 'text' ),
 				'loc_map_fallback' => array( 'default' => '🗺️ 지도 이미지 열기 →', 'label' => '오시는 길 · 지도 대체 라벨', 'type' => 'text' ),
+				'loc_gmap_embed_url' => array( 'default' => 'https://www.google.com/maps?q=%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90%20%EC%B2%9C%EC%95%88%20%EB%A7%8C%EB%82%A8%EB%A1%9C%2052&z=16&output=embed&hl=ko', 'label' => '오시는 길 · 구글 지도 임베드 URL (비우면 숨김 · API 키 불필요)', 'type' => 'text' ), // v3.98.1
+				'loc_gmap_title' => array( 'default' => '구글 지도 (Google Maps)', 'label' => '오시는 길 · 구글 지도 제목', 'type' => 'text' ),
+				'loc_gmap_sub' => array( 'default' => '외국인 환자·해외 내비게이션용 · 핀을 누르면 길찾기', 'label' => '오시는 길 · 구글 지도 부제', 'type' => 'text' ),
 			),
 		),
 		'testimonials_extra' => array(
