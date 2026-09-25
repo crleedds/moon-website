@@ -20,7 +20,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_SUPPORT_SCHEMA', 1 );
+define( 'MD_SUPPORT_SCHEMA', 2 ); /* v4.7.4 · status_at 추가 */
 
 /* ============================================================
  * 테이블
@@ -68,6 +68,7 @@ function md_support_maybe_install() {
 		owner VARCHAR(60) NOT NULL DEFAULT '',
 		done_at DATE NULL,
 		updated_at DATETIME NULL,
+		status_at DATETIME NULL,
 		PRIMARY KEY  (id),
 		KEY status (status),
 		KEY created_at (created_at)
@@ -76,6 +77,8 @@ function md_support_maybe_install() {
 	if ( 0 === (int) $wpdb->get_var( "SELECT COUNT(*) FROM $t" ) ) {
 		md_support_seed();
 	}
+	/* v4.7.4 · 기존 행: 상태가 바뀐 시각을 모르므로 마지막 수정(없으면 올린 날짜)으로 채운다 */
+	$wpdb->query( "UPDATE $t SET status_at = COALESCE(updated_at, created_at) WHERE status_at IS NULL" );
 
 	update_option( 'md_support_schema', MD_SUPPORT_SCHEMA );
 	delete_option( 'md_support_installing' );
@@ -152,7 +155,7 @@ function md_support_get( $id ) {
 	return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . md_support_table() . ' WHERE id = %d', (int) $id ) );
 }
 
-/** 목록 — 가장 최근 것이 위로, 완료된 것은 맨 아래 (v4.6.8). $status = 'open' 이면 접수·진행중·보류만 */
+/** 목록 — 상태가 최근에 바뀐(또는 새로 올린) 것이 위로, 전체에서 완료는 맨 아래 (v4.7.4) */
 function md_support_list( $status = '', $q = '' ) {
 	global $wpdb;
 	$t     = md_support_table();
@@ -166,7 +169,7 @@ function md_support_list( $status = '', $q = '' ) {
 		array_push( $args, $like, $like, $like, $like, $like );
 	}
 	$sql = "SELECT * FROM $t WHERE " . implode( ' AND ', $where )
-		. " ORDER BY (status = '완료') ASC, created_at DESC, id DESC LIMIT 400"; /* v4.6.8 · 완료는 맨 아래, 나머지는 최근순 */
+		. " ORDER BY (status = '완료') ASC, COALESCE(status_at, created_at) DESC, id DESC LIMIT 400"; /* v4.7.4 · 완료는 맨 아래, 그 외는 상태가 바뀐 순 */
 	return $wpdb->get_results( $args ? $wpdb->prepare( $sql, $args ) : $sql );
 }
 
@@ -206,6 +209,7 @@ function md_support_create( $requester, $dept, $content, $status = '접수', $ow
 		'status'     => $status,
 		'done_at'    => '완료' === $status ? current_time( 'Y-m-d' ) : null,
 		'updated_at' => current_time( 'mysql' ),
+		'status_at'  => current_time( 'mysql' ),
 	) );
 	if ( ! $ok ) { return new WP_Error( 'md_support', '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.' ); }
 	$id = (int) $wpdb->insert_id;
@@ -234,6 +238,7 @@ function md_support_answer( $id, $data ) {
 		'done_at'    => '' === $done ? null : $done,
 		'updated_at' => current_time( 'mysql' ),
 	);
+	if ( $status !== $row->status ) { $upd['status_at'] = current_time( 'mysql' ); } /* v4.7.4 · 상태가 바뀐 요청이 맨 위로 */
 	$wpdb->update( md_support_table(), $upd, array( 'id' => (int) $id ) );
 	return true;
 }
