@@ -324,7 +324,8 @@ function md_support_handle_post() {
 				'owner'   => isset( $_POST['owner'] ) ? wp_unslash( $_POST['owner'] ) : '',
 				'status'  => isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : '',
 			) );
-			$back = add_query_arg( is_wp_error( $res ) ? array( 'err' => $res->get_error_message() ) : array( 'msg' => 'answered' ), $back ) . '#s' . $id;
+			/* v4.7.2 · 저장 안내 배너 없이 그 카드로 바로 돌아간다 */
+			$back = ( is_wp_error( $res ) ? add_query_arg( array( 'err' => $res->get_error_message() ), $back ) : $back ) . '#s' . $id;
 			break;
 
 		case 'status':
