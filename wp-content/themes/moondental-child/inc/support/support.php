@@ -407,7 +407,6 @@ function md_support_render_new( $err = '' ) {
 	<form method="post" class="mds-card mdsp-new" id="new">
 		<input type="hidden" name="md_support_action" value="new">
 		<input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_new' ) ); ?>">
-		<h2 class="mdsp-new__title">✍️ 경영지원실에 요청하기</h2>
 		<div class="mdsp-new__row">
 			<label class="mdsp-field">
 				<span>요청팀</span>
