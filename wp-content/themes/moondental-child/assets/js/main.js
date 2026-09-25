@@ -690,3 +690,42 @@
   /* v3.44.155 · JS 오버플로우 감지 제거 · 데스크탑은 항상 풀 nav 표시 (사용자 요청) */
   document.documentElement.classList.remove('is-mobile-menu');
 })();
+
+
+/* v3.99.1 · 클릭 복사 + 안내 토스트 — [data-copy] 요소(주소·이메일). 안내 문구는 안쪽 [data-copy-msg] 텍스트(번역 레이어를 거친 값) */
+(function () {
+  'use strict';
+  var toastEl = null, toastTimer = null;
+  function showToast(msg) {
+    if (!toastEl) {
+      toastEl = document.createElement('div');
+      toastEl.className = 'md-toast';
+      toastEl.setAttribute('role', 'status');
+      toastEl.setAttribute('aria-live', 'polite');
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = msg;
+    clearTimeout(toastTimer);
+    requestAnimationFrame(function () { toastEl.classList.add('is-on'); });
+    toastTimer = setTimeout(function () { toastEl.classList.remove('is-on'); }, 2200);
+  }
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy') ? resolve() : reject(new Error('copy failed')); } catch (e) { reject(e); }
+      document.body.removeChild(ta);
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-copy]');
+    if (!el) return;
+    e.preventDefault();
+    var val = el.getAttribute('data-copy') || '';
+    var m = el.querySelector('[data-copy-msg]');
+    var msg = m ? m.textContent.trim() : val;
+    copyText(val).then(function () { showToast(msg); }, function () { showToast(val); });
+  });
+})();

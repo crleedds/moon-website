@@ -53,11 +53,16 @@ $off_text = $info['hours_off'] ?: '휴진';
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( $locpage_title ); ?></span>
 		</nav>
 		<h1 class="md-page-hero__title"><?php echo esc_html( $locpage_title ); ?></h1>
-		<p class="md-page-hero__lead md-page-hero__lead--big">
-			<a href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener" style="color:inherit; border-bottom:1px dashed var(--color-border);">
-				<?php echo esc_html( $info['address'] ); ?>
-			</a>
-		</p>
+		<?php /* v3.99.1 · 주소 + 복사 버튼 + 전화·이메일 (이메일은 클릭 복사) */
+		$loc_email = $info['email'] ?: 'moondental1995@naver.com'; ?>
+		<div class="md-page-hero__lead md-page-hero__lead--big md-loc-addr">
+			<a href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener" style="color:inherit; border-bottom:1px dashed var(--color-border);"><?php echo esc_html( $info['address'] ); ?></a>
+			<button type="button" class="md-copybtn" data-copy="<?php echo esc_attr( $info['address'] ); ?>" data-track="cta-locpage-copy-addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span><?php echo esc_html( md_content( 'loc_copy_addr', '주소 복사' ) ); ?></span><span hidden data-copy-msg><?php echo esc_html( md_content( 'loc_copied_addr', '주소가 복사되었습니다' ) ); ?></span></button>
+		</div>
+		<div class="md-loc-contact">
+			<a class="md-loc-contact__item" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-locpage-call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.7.7a2 2 0 0 1 1.8 2z"/></svg><span><?php echo esc_html( $info['phone'] ); ?></span></a>
+			<button type="button" class="md-loc-contact__item" data-copy="<?php echo esc_attr( $loc_email ); ?>" data-track="cta-locpage-copy-email" title="<?php echo esc_attr( md_content( 'loc_copy_email', '이메일 복사' ) ); ?>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="M3 6.5l9 6 9-6"/></svg><span><?php echo esc_html( $loc_email ); ?></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span hidden data-copy-msg><?php echo esc_html( md_content( 'loc_copied_email', '이메일 주소가 복사되었습니다' ) ); ?></span></button>
+		</div>
 	</div>
 </section>
 
@@ -111,6 +116,50 @@ $off_text = $info['hours_off'] ?: '휴진';
 		</div>
 	</div>
 </section>
+
+<?php /* v3.99 · 주변 랜드마크 · 편의 시설 — Customizer 「오시는 길」에서 편집 (한 줄에 하나 · 아이콘|이름|소요시간|네이버 검색어 / 아이콘|이름|설명) */
+$md_lines  = function ( $raw ) { $out = array(); foreach ( preg_split( '/\r?\n/', (string) $raw ) as $l ) { $l = trim( $l ); if ( $l === '' ) continue; $out[] = array_map( 'trim', explode( '|', $l ) ); } return $out; };
+$landmarks = $md_lines( md_content( 'loc_landmarks', "🚌|천안종합터미널 (고속·시외)|도보 5분|천안종합버스터미널\n🏬|신세계백화점 천안아산점|도보 5분|신세계백화점 천안아산점\n🌳|신부문화공원|도보 3분|신부문화공원\n🚆|천안역|버스 10분|천안역\n🚄|천안아산역 (KTX)|버스 25분|천안아산역" ) );
+$amenities = $md_lines( md_content( 'loc_amenities', "🚗|무료 주차|건물 지하 기계식 주차장 · 진료 시간 중 무료\n🏢|엘리베이터|9·10·11·13층 진료 · 엘리베이터로 이동\n🌙|야간진료|월·화·수·금 20:30까지 진료\n🌐|외국어 안내|영어·러시아어·몽골어·베트남어·중국어 통역\n🦷|원내 기공실|보철물 색 맞춤·즉시 수정 (13층)\n👶|소아치과|어린이 전용 진료 공간 (11층)\n💬|카카오톡·네이버 예약|24시간 예약 접수" ) );
+if ( $landmarks ) : ?>
+<section class="md-section md-section--tight" id="landmarks">
+	<div class="md-container">
+		<header class="md-locx__head">
+			<span class="md-locx__eyebrow"><span aria-hidden="true">📍</span> <span><?php echo esc_html( md_content( 'loc_lm_eyebrow', '주변 정보' ) ); ?></span></span>
+			<h2 class="md-locx__title"><?php echo esc_html( md_content( 'loc_lm_title', '주변 랜드마크' ) ); ?></h2>
+			<p class="md-locx__sub"><?php echo esc_html( md_content( 'loc_lm_sub', '찾아오실 때 참고하세요 · 누르면 네이버 지도로 이동' ) ); ?></p>
+		</header>
+		<div class="md-lm-grid">
+		<?php foreach ( $landmarks as $lm ) : if ( count( $lm ) < 2 ) continue; $q = ! empty( $lm[3] ) ? $lm[3] : $lm[1]; ?>
+			<a class="md-lm" href="https://map.naver.com/p/search/<?php echo rawurlencode( $q ); ?>" target="_blank" rel="noopener" data-track="cta-locpage-landmark">
+				<span class="md-lm__icon" aria-hidden="true"><?php echo esc_html( $lm[0] ); ?></span>
+				<span class="md-lm__name"><?php echo esc_html( $lm[1] ); ?></span>
+				<?php if ( ! empty( $lm[2] ) ) : ?><span class="md-lm__time"><?php echo esc_html( $lm[2] ); ?></span><?php endif; ?>
+			</a>
+		<?php endforeach; ?>
+		</div>
+	</div>
+</section>
+<?php endif; if ( $amenities ) : ?>
+<section class="md-section md-section--surface" id="amenities">
+	<div class="md-container">
+		<header class="md-locx__head">
+			<span class="md-locx__eyebrow"><span aria-hidden="true">🏥</span> <span><?php echo esc_html( md_content( 'loc_amen_eyebrow', '시설 안내' ) ); ?></span></span>
+			<h2 class="md-locx__title"><?php echo esc_html( md_content( 'loc_amen_title', '편의 시설' ) ); ?></h2>
+			<p class="md-locx__sub"><?php echo esc_html( md_content( 'loc_amen_sub', '편안한 방문을 위해' ) ); ?></p>
+		</header>
+		<div class="md-amen-grid">
+		<?php foreach ( $amenities as $am ) : if ( count( $am ) < 2 ) continue; ?>
+			<div class="md-amen">
+				<div class="md-amen__icon" aria-hidden="true"><?php echo esc_html( $am[0] ); ?></div>
+				<div class="md-amen__name"><?php echo esc_html( $am[1] ); ?></div>
+				<?php if ( ! empty( $am[2] ) ) : ?><div class="md-amen__desc"><?php echo esc_html( $am[2] ); ?></div><?php endif; ?>
+			</div>
+		<?php endforeach; ?>
+		</div>
+	</div>
+</section>
+<?php endif; ?>
 
 <!-- ============ 2. 진료시간 + 층별 안내 + 주차 안내 (3-col 그리드 · v3.44.167) ============ -->
 <section class="md-section" id="hours">

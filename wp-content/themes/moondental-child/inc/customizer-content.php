@@ -2935,6 +2935,28 @@ function moondental_misc_pages_content_fields() {
 				'loc_gmap_embed_url' => array( 'default' => 'https://www.google.com/maps?q=%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90%20%EC%B2%9C%EC%95%88%20%EB%A7%8C%EB%82%A8%EB%A1%9C%2052&z=16&output=embed&hl=ko', 'label' => '오시는 길 · 구글 지도 임베드 URL (비우면 숨김 · API 키 불필요)', 'type' => 'text' ), // v3.98.1
 				'loc_gmap_title' => array( 'default' => '구글 지도 (Google Maps)', 'label' => '오시는 길 · 구글 지도 제목', 'type' => 'text' ),
 				'loc_gmap_sub' => array( 'default' => '외국인 환자·해외 내비게이션용 · 핀을 누르면 길찾기', 'label' => '오시는 길 · 구글 지도 부제', 'type' => 'text' ),
+				'loc_lm_eyebrow' => array( 'default' => '주변 정보', 'label' => '오시는 길 · 랜드마크 배지', 'type' => 'text' ), // v3.99
+				'loc_lm_title' => array( 'default' => '주변 랜드마크', 'label' => '오시는 길 · 랜드마크 제목', 'type' => 'text' ), // v3.99
+				'loc_lm_sub' => array( 'default' => '찾아오실 때 참고하세요 · 누르면 네이버 지도로 이동', 'label' => '오시는 길 · 랜드마크 부제', 'type' => 'text' ), // v3.99
+				'loc_landmarks' => array( 'default' => "🚌|천안종합터미널 (고속·시외)|도보 5분|천안종합버스터미널
+🏬|신세계백화점 천안아산점|도보 5분|신세계백화점 천안아산점
+🌳|신부문화공원|도보 3분|신부문화공원
+🚆|천안역|버스 10분|천안역
+🚄|천안아산역 (KTX)|버스 25분|천안아산역", 'label' => '오시는 길 · 랜드마크 목록 (한 줄에 하나 · 아이콘|이름|소요시간|네이버 검색어)', 'type' => 'textarea' ), // v3.99
+				'loc_amen_eyebrow' => array( 'default' => '시설 안내', 'label' => '오시는 길 · 편의시설 배지', 'type' => 'text' ), // v3.99
+				'loc_amen_title' => array( 'default' => '편의 시설', 'label' => '오시는 길 · 편의시설 제목', 'type' => 'text' ), // v3.99
+				'loc_amen_sub' => array( 'default' => '편안한 방문을 위해', 'label' => '오시는 길 · 편의시설 부제', 'type' => 'text' ), // v3.99
+				'loc_amenities' => array( 'default' => "🚗|무료 주차|건물 지하 기계식 주차장 · 진료 시간 중 무료
+				'loc_copy_addr' => array( 'default' => '주소 복사', 'label' => '오시는 길 · 주소 복사 버튼', 'type' => 'text' ), // v3.99.1
+				'loc_copied_addr' => array( 'default' => '주소가 복사되었습니다', 'label' => '오시는 길·푸터 · 주소 복사 안내 문구', 'type' => 'text' ), // v3.99.1
+				'loc_copy_email' => array( 'default' => '이메일 복사', 'label' => '오시는 길·푸터 · 이메일 복사 툴팁', 'type' => 'text' ), // v3.99.1
+				'loc_copied_email' => array( 'default' => '이메일 주소가 복사되었습니다', 'label' => '오시는 길·푸터 · 이메일 복사 안내 문구', 'type' => 'text' ), // v3.99.1
+🏢|엘리베이터|9·10·11·13층 진료 · 엘리베이터로 이동
+🌙|야간진료|월·화·수·금 20:30까지 진료
+🌐|외국어 안내|영어·러시아어·몽골어·베트남어·중국어 통역
+🦷|원내 기공실|보철물 색 맞춤·즉시 수정 (13층)
+👶|소아치과|어린이 전용 진료 공간 (11층)
+💬|카카오톡·네이버 예약|24시간 예약 접수", 'label' => '오시는 길 · 편의시설 목록 (한 줄에 하나 · 아이콘|이름|설명)', 'type' => 'textarea' ), // v3.99
 			),
 		),
 		'testimonials_extra' => array(

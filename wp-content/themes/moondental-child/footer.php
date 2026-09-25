@@ -91,7 +91,7 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				$footer_email = $info['email'] ?: 'moondental1995@naver.com';
 				if ( $footer_email ) : ?>
 					<p class="md-footer__email">
-						<a href="mailto:<?php echo esc_attr( $footer_email ); ?>" data-track="cta-footer-email">
+						<a href="mailto:<?php echo esc_attr( $footer_email ); ?>" data-track="cta-footer-email" data-copy="<?php echo esc_attr( $footer_email ); ?>" title="<?php echo esc_attr( $mc( 'loc_copy_email', '이메일 복사' ) ); ?>">
 							<span class="md-footer__cicon" aria-hidden="true">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 									<rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/>
@@ -99,6 +99,7 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 								</svg>
 							</span>
 							<?php echo esc_html( $footer_email ); ?>
+							<span hidden data-copy-msg><?php echo esc_html( $mc( 'loc_copied_email', '이메일 주소가 복사되었습니다' ) ); ?></span>
 						</a>
 					</p>
 				<?php endif; ?>
@@ -110,8 +111,9 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				if ( $footer_addr ) : ?>
 					<p class="md-footer__addr">
 						<?php if ( $place_url ) : ?>
-							<a href="<?php echo esc_url( $place_url ); ?>" target="_blank" rel="noopener" data-track="cta-footer-address">
+							<a href="<?php echo esc_url( $place_url ); ?>" target="_blank" rel="noopener" data-track="cta-footer-address" data-copy="<?php echo esc_attr( $info['address'] ?? $footer_addr ); ?>" title="<?php echo esc_attr( $mc( 'loc_copy_addr', '주소 복사' ) ); ?>">
 								<?php echo esc_html( $footer_addr ); ?>
+								<span hidden data-copy-msg><?php echo esc_html( $mc( 'loc_copied_addr', '주소가 복사되었습니다' ) ); ?></span>
 							</a>
 						<?php else : ?>
 							<?php echo md_address_link( $footer_addr ); ?>

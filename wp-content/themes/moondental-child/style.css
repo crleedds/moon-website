@@ -16937,3 +16937,36 @@ a.md-center-color--preservation:hover { color: #4A7530 !important; }
 .md-locmap--gmap:hover, .md-locmap--gmap:focus-visible { transform: none; box-shadow: none; }
 .md-locmap--gmap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
 @media (max-width: 640px) { .md-locmap--gmap { aspect-ratio: 4 / 3; max-height: none; } }
+
+/* =============================================================
+   v3.99 · 오시는 길 · 주변 랜드마크 · 편의 시설
+   ============================================================= */
+.md-locx__head { text-align: center; margin-bottom: 28px; }
+.md-locx__eyebrow { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; background: var(--color-surface); border: 1px solid var(--color-border); font-size: 0.8rem; font-weight: 700; color: var(--color-primary); }
+.md-locx__title { margin: 12px 0 6px; font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; }
+.md-locx__sub { margin: 0; color: var(--color-text-sub); }
+.md-lm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+.md-lm { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 22px 14px; border-radius: var(--radius-lg); border: 1px solid var(--color-border); background: var(--color-surface); text-decoration: none; color: var(--color-text); text-align: center; transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease); }
+.md-lm:hover, .md-lm:focus-visible { transform: translateY(-3px); box-shadow: var(--shadow-hover); color: var(--color-text); }
+.md-lm__icon { font-size: 1.6rem; line-height: 1; }
+.md-lm__name { font-weight: 700; }
+.md-lm__time { font-size: 0.85rem; color: var(--color-text-sub); }
+.md-amen-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 20px 14px; }
+.md-amen { text-align: center; }
+.md-amen__icon { width: 54px; height: 54px; margin: 0 auto 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--color-bg); border: 1px solid var(--color-border); font-size: 1.4rem; }
+.md-amen__name { font-weight: 700; margin-bottom: 4px; }
+.md-amen__desc { font-size: 0.85rem; color: var(--color-text-sub); line-height: 1.5; }
+
+/* v3.99.1 · 오시는 길 · 주소 복사 버튼 · 전화/이메일 칩 · 푸터 클릭 복사 · 토스트 */
+.md-loc-addr { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 14px; }
+.md-copybtn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s var(--ease), transform 0.2s var(--ease); }
+.md-copybtn:hover { background: var(--color-bg); transform: translateY(-1px); }
+.md-copybtn svg { width: 16px; height: 16px; }
+.md-loc-contact { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 14px; margin: 16px 0 0; }
+.md-loc-contact__item { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text); text-decoration: none; font: inherit; font-weight: 600; cursor: pointer; transition: border-color 0.2s var(--ease), transform 0.2s var(--ease); }
+.md-loc-contact__item:hover { border-color: var(--color-primary); transform: translateY(-1px); color: var(--color-text); }
+.md-loc-contact__item svg { width: 18px; height: 18px; color: var(--color-primary); flex: none; }
+.md-loc-contact__item svg + span + svg { width: 14px; height: 14px; color: var(--color-text-sub); }
+.md-footer [data-copy] { cursor: pointer; }
+.md-toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px); background: rgba(20, 20, 20, 0.92); color: #fff; padding: 12px 20px; border-radius: 999px; font-size: 0.95rem; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.25s var(--ease), transform 0.25s var(--ease); z-index: 9999; white-space: nowrap; }
+.md-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
