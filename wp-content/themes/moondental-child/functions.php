@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '4.9.2' );
+define( 'MOONDENTAL_VERSION', '4.9.3' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -1137,15 +1137,15 @@ add_action( 'after_setup_theme', function() {
 		. "서비스지원실|책임코디|박혜령\n"
 		. "서비스지원실|책임코디|정소리\n"
 		. "서비스지원실|책임코디|황진아\n"
-		. "경영지원본부|행정원장|양병욱\n"
-		. "경영지원본부|실장|김동현\n"
-		. "경영지원본부|차장|이충현\n"
-		. "경영지원본부|과장|민종기\n"
-		. "경영지원본부|대리|김하진\n"
-		. "경영지원본부|대리|이슬기\n"
-		. "경영지원본부|대리|카밀라\n"
-		. "경영지원본부|주임|게를레\n"
-		. "경영지원본부|주임|오혜정\n"
+		. "경영지원실|행정원장|양병욱\n"
+		. "경영지원실|실장|김동현\n"
+		. "경영지원실|차장|이충현\n"
+		. "경영지원실|과장|민종기\n"
+		. "경영지원실|대리|김하진\n"
+		. "경영지원실|대리|이슬기\n"
+		. "경영지원실|대리|카밀라\n"
+		. "경영지원실|주임|게를레\n"
+		. "경영지원실|주임|오혜정\n"
 		. "관리사무소|소장|강성하";
 	set_theme_mod( 'md_content_staff_list', $sorted_roster );
 	update_option( 'moondental_staff_sort_v3469', 'done' );
@@ -1200,15 +1200,15 @@ add_action( 'after_setup_theme', function() {
 		. "서비스지원실|책임코디|정소리\n"
 		. "서비스지원실|책임코디|황진아\n"
 		. "서비스지원실|책임코디|박혜령\n"
-		. "경영지원본부|행정원장|양병욱\n"
-		. "경영지원본부|실장|김동현\n"
-		. "경영지원본부|차장|이충현\n"
-		. "경영지원본부|과장|민종기\n"
-		. "경영지원본부|대리|김하진\n"
-		. "경영지원본부|대리|이슬기\n"
-		. "경영지원본부|대리|카밀라\n"
-		. "경영지원본부|주임|게를레\n"
-		. "경영지원본부|주임|오혜정\n"
+		. "경영지원실|행정원장|양병욱\n"
+		. "경영지원실|실장|김동현\n"
+		. "경영지원실|차장|이충현\n"
+		. "경영지원실|과장|민종기\n"
+		. "경영지원실|대리|김하진\n"
+		. "경영지원실|대리|이슬기\n"
+		. "경영지원실|대리|카밀라\n"
+		. "경영지원실|주임|게를레\n"
+		. "경영지원실|주임|오혜정\n"
 		. "관리사무소|소장|강성하";
 	set_theme_mod( 'md_content_staff_list', $new_roster );
 	update_option( 'moondental_staff_v3292', 'done' );
@@ -1296,6 +1296,16 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3316', 'done' );
 }, 48 );
+
+/* 일회성 마이그레이션 v4.9.3 · 원장 지시 · 의료진 페이지의 「경영지원본부」 → 「경영지원실」 */
+add_action( 'after_setup_theme', function() {
+	if ( get_option( 'moondental_staff_v493' ) === 'done' ) return;
+	$saved = get_theme_mod( 'md_content_staff_list' );
+	if ( is_string( $saved ) && strpos( $saved, '경영지원본부|' ) !== false ) {
+		set_theme_mod( 'md_content_staff_list', str_replace( '경영지원본부|', '경영지원실|', $saved ) );
+	}
+	update_option( 'moondental_staff_v493', 'done' );
+}, 49 );
 
 /* 일회성 마이그레이션 v3.34.8 · SEO 강 강도 · 지역+전국 신뢰 워딩 통합.
  *  이전 default가 저장돼 있으면 새 default로 갱신.

@@ -29,6 +29,7 @@ return array(
 	'기공실' => 'Dental Laboratory',
 	'서비스지원실' => 'Patient Services',
 	'경영지원본부' => 'Administration',
+	'경영지원실' => 'Administration',
 	'관리사무소' => 'Building Management',
 	'이사' => 'Director',
 	'실장' => 'Head',

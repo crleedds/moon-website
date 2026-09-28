@@ -220,7 +220,7 @@ function moondental_render_content_dashboard() {
 
 			<div class="md-cm-card">
 				<h2>전체 직원 명단<span class="md-cm-badge md-cm-badge--customizer">Customizer</span></h2>
-				<p class="md-cm-desc">진료실·기공실·경영지원본부 등 전체 스태프.</p>
+				<p class="md-cm-desc">진료실·기공실·경영지원실 등 전체 스태프.</p>
 				<a class="button button-primary" href="<?php echo esc_url( $panel_link( 'md_panel_doctor_content' ) ); ?>">편집 →</a>
 			</div>
 

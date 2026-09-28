@@ -29,6 +29,7 @@ return array(
 	'기공실' => 'Phòng labo',
 	'서비스지원실' => 'Phòng hỗ trợ dịch vụ',
 	'경영지원본부' => 'Bộ phận hành chính',
+	'경영지원실' => 'Bộ phận hành chính',
 	'관리사무소' => 'Văn phòng quản lý',
 	'이사' => 'Giám đốc',
 	'실장' => 'Trưởng phòng',
