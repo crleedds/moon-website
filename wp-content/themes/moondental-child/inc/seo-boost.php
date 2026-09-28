@@ -21,6 +21,11 @@ function moondental_seo_page_map() {
 			'title' => '천안·아산 치과 문치과병원 · 임플란트·매복 사랑니·충치·교정 30여년',
 			'desc'  => '천안·아산 문치과병원 30여년 전통. 임플란트·매복 사랑니 잘 뽑는 치과·충치·신경치료·잇몸치료·라미네이트·소아치과·턱관절·교정 진료과 협진. 카카오톡·네이버 24시간 예약, 041-563-2875.',
 		),
+		// v4.9 · 소식(글 목록)
+		'_news' => array(
+			'title' => '병원 소식 · 공지사항·치아 이야기 | 문치과병원',
+			'desc'  => '한아의료재단 문치과병원의 공지사항과 치아 건강 이야기. 진료·휴진 안내, 새 장비와 시설, 이벤트 소식을 전합니다.',
+		),
 		// 진료 페이지
 		'임플란트-센터' => array(
 			'title' => '천안 임플란트 · 네비게이션 임플란트센터 | 문치과병원',
@@ -121,7 +126,8 @@ function moondental_seo_page_map() {
  * 현재 페이지의 SEO 키 (슬러그 or 특수 키) 반환
  */
 function moondental_seo_current_key() {
-	if ( is_front_page() || is_home() ) return '_home';
+	if ( is_front_page() ) return '_home';
+	if ( is_home() )       return '_news'; /* v4.9 · 소식 목록 — 홈과 같은 제목·설명이 붙어 구글이 '아산'·'Новости' 사이트링크로 보여 주던 문제 */
 	// v3.44.76 · 지역 페이지 · region_slug 우선 처리
 	$region_slug = get_query_var( 'region_slug' );
 	if ( $region_slug ) return '_region:' . $region_slug;
@@ -204,6 +210,137 @@ function moondental_wpseo_title( $title ) {
 	return $title;
 }
 add_filter( 'wpseo_title', 'moondental_wpseo_title', 20 );
+
+/* ============================================================
+ * v4.9 · 외국어 페이지(/en/ /ja/ /zh/ /vi/ /ru/ /mn/)의 제목·설명
+ *
+ *  문구 사전(phrase-translate)은 본문 텍스트만 바꾸고 <title> 과 meta description 은
+ *  건드리지 않아서, /ru/소식/ 같은 페이지가 구글에 한국어 홈 설명을 달고 나왔다.
+ *  홈·소식은 언어별 문장을 직접 두고, 나머지 페이지는 제목 조각을 사전으로 옮기되
+ *  한 조각이라도 못 옮기면 「페이지 이름 | 병원 이름」으로 줄인다. 설명은 언어별 공통 문장.
+ * ========================================================== */
+function moondental_seo_lang() {
+	if ( ! function_exists( 'moondental_current_language' ) ) return 'ko';
+	$lang = (string) moondental_current_language();
+	return ( '' === $lang ) ? 'ko' : $lang;
+}
+
+function moondental_seo_lang_strings( $lang ) {
+	$all = array(
+		'en' => array(
+			'site'       => 'Moon Dental Hospital',
+			'home_title' => 'Moon Dental Hospital · Cheonan, Korea | Implants · Orthodontics · Aesthetics',
+			'home_desc'  => 'Moon Dental Hospital in Cheonan (near Asan): four specialty centers for implants, orthodontics, smile design and tooth preservation. Interpreters for English, Russian, Mongolian, Vietnamese and Chinese. Call 041-563-2875.',
+			'news_title' => 'Hospital News | Moon Dental Hospital',
+			'news_desc'  => 'Notices and dental health stories from Moon Dental Hospital, Cheonan.',
+			'desc'       => 'Moon Dental Hospital, Cheonan (Korea): implants, orthodontics, aesthetic and preventive dentistry with specialist collaboration. Interpreters available. 041-563-2875.',
+		),
+		'ja' => array(
+			'site'       => 'ムン歯科病院',
+			'home_title' => 'ムン歯科病院 · 天安（韓国）| インプラント · 矯正 · 審美',
+			'home_desc'  => '韓国・天安のムン歯科病院。インプラント・矯正・スマイルデザイン・自然歯保存の4専門センターが連携して診療します。英語・ロシア語・モンゴル語・ベトナム語・中国語の通訳に対応。041-563-2875。',
+			'news_title' => '病院のお知らせ | ムン歯科病院',
+			'news_desc'  => '天安ムン歯科病院のお知らせと歯の健康情報。',
+			'desc'       => '韓国・天安のムン歯科病院。インプラント・矯正・審美・予防歯科を専門医が連携して診療。通訳対応。041-563-2875。',
+		),
+		'zh' => array(
+			'site'       => '文牙科医院',
+			'home_title' => '文牙科医院 · 韩国天安 | 种植牙 · 正畸 · 美学修复',
+			'home_desc'  => '韩国天安文牙科医院：种植、正畸、微笑设计、天然牙保存四大专科中心协同诊疗。提供英语、俄语、蒙古语、越南语、中文翻译。电话 041-563-2875。',
+			'news_title' => '医院动态 | 文牙科医院',
+			'news_desc'  => '天安文牙科医院的公告与口腔健康资讯。',
+			'desc'       => '韩国天安文牙科医院：种植牙、正畸、美学与预防牙科，专科医生协同诊疗。提供翻译。041-563-2875。',
+		),
+		'vi' => array(
+			'site'       => 'Bệnh viện Nha khoa Moon',
+			'home_title' => 'Bệnh viện Nha khoa Moon · Cheonan, Hàn Quốc | Implant · Chỉnh nha · Thẩm mỹ',
+			'home_desc'  => 'Bệnh viện Nha khoa Moon tại Cheonan (Hàn Quốc): 4 trung tâm chuyên khoa implant, chỉnh nha, thiết kế nụ cười và bảo tồn răng thật. Có phiên dịch tiếng Anh, Nga, Mông Cổ, Việt, Trung. Điện thoại 041-563-2875.',
+			'news_title' => 'Tin tức bệnh viện | Bệnh viện Nha khoa Moon',
+			'news_desc'  => 'Thông báo và câu chuyện sức khỏe răng miệng từ Bệnh viện Nha khoa Moon, Cheonan.',
+			'desc'       => 'Bệnh viện Nha khoa Moon, Cheonan (Hàn Quốc): implant, chỉnh nha, nha khoa thẩm mỹ và dự phòng với đội ngũ chuyên khoa. Có phiên dịch. 041-563-2875.',
+		),
+		'ru' => array(
+			'site'       => 'Стоматология Moon',
+			'home_title' => 'Стоматология Moon · Чхонан, Корея | Импланты · Ортодонтия · Эстетика',
+			'home_desc'  => 'Стоматологическая больница Moon в Чхонане (Корея): четыре специализированных центра — имплантация, ортодонтия, дизайн улыбки, сохранение зубов. Переводчики: английский, русский, монгольский, вьетнамский, китайский. Тел. 041-563-2875.',
+			'news_title' => 'Новости больницы | Стоматология Moon',
+			'news_desc'  => 'Объявления и статьи о здоровье зубов от стоматологии Moon, Чхонан.',
+			'desc'       => 'Стоматология Moon, Чхонан (Корея): импланты, ортодонтия, эстетическая и профилактическая стоматология, совместная работа специалистов. Есть переводчики. 041-563-2875.',
+		),
+		'mn' => array(
+			'site'       => 'Мун шүдний эмнэлэг',
+			'home_title' => 'Мун шүдний эмнэлэг · Чонан, Солонгос | Имплант · Гажиг засал · Гоо сайхан',
+			'home_desc'  => 'Солонгосын Чонан хот дахь Мун шүдний эмнэлэг: имплант, гажиг засал, инээмсэглэлийн дизайн, шүд хадгалах 4 мэргэжлийн төв. Англи, орос, монгол, вьетнам, хятад хэлний орчуулагчтай. Утас 041-563-2875.',
+			'news_title' => 'Эмнэлгийн мэдээ | Мун шүдний эмнэлэг',
+			'news_desc'  => 'Чонаны Мун шүдний эмнэлгийн мэдэгдэл, шүдний эрүүл мэндийн зөвлөгөө.',
+			'desc'       => 'Мун шүдний эмнэлэг, Чонан (Солонгос): имплант, гажиг засал, гоо сайхны болон урьдчилан сэргийлэх эмчилгээ, мэргэжилтнүүдийн хамтарсан үйлчилгээ. Орчуулагчтай. 041-563-2875.',
+		),
+	);
+	return isset( $all[ $lang ] ) ? $all[ $lang ] : null;
+}
+
+/** 문구 사전으로 한 조각 옮기기 — 없으면 null */
+function moondental_seo_phrase( $text, $lang ) {
+	static $maps = array();
+	if ( ! function_exists( 'moondental_phrase_map' ) ) return null;
+	if ( ! isset( $maps[ $lang ] ) ) { $maps[ $lang ] = moondental_phrase_map( $lang ); }
+	$key = preg_replace( '/\s+/u', ' ', trim( (string) $text ) );
+	if ( '' === $key ) return '';
+	if ( ! preg_match( '/[가-힣]/u', $key ) ) return $key; // 이미 외국어·숫자
+	return isset( $maps[ $lang ][ $key ] ) ? $maps[ $lang ][ $key ] : null;
+}
+
+function moondental_seo_localize_title( $title ) {
+	$lang = moondental_seo_lang();
+	if ( 'ko' === $lang ) return $title;
+	$L = moondental_seo_lang_strings( $lang );
+	if ( ! $L ) return $title;
+	$key = moondental_seo_current_key();
+	if ( '_home' === $key ) return $L['home_title'];
+	if ( '_news' === $key ) return $L['news_title'];
+	if ( ! preg_match( '/[가-힣]/u', $title ) ) return $title;
+
+	/* 「A · B | 문치과병원」 — 조각마다 사전으로 옮긴다 */
+	$parts = preg_split( '/\s*\|\s*/u', $title );
+	$main  = array_shift( $parts );
+	$segs  = preg_split( '/\s*·\s*/u', $main );
+	$done  = array();
+	$ok    = true;
+	foreach ( $segs as $seg ) {
+		$tr = moondental_seo_phrase( $seg, $lang );
+		if ( null === $tr ) { $ok = false; break; }
+		$done[] = $tr;
+	}
+	if ( $ok ) return implode( ' · ', $done ) . ' | ' . $L['site'];
+
+	/* 못 옮기면 페이지 이름만 */
+	$name = '';
+	if ( is_singular() ) {
+		$name = moondental_seo_phrase( get_the_title(), $lang );
+		if ( null === $name ) { $name = ''; }
+	}
+	if ( '' === $name && ! empty( $done ) ) { $name = $done[0]; }
+	return '' !== $name ? $name . ' | ' . $L['site'] : $title;
+}
+add_filter( 'wpseo_title', 'moondental_seo_localize_title', 40 );
+add_filter( 'wpseo_opengraph_title', 'moondental_seo_localize_title', 40 );
+add_filter( 'wpseo_twitter_title',   'moondental_seo_localize_title', 40 );
+
+function moondental_seo_localize_desc( $desc ) {
+	$lang = moondental_seo_lang();
+	if ( 'ko' === $lang ) return $desc;
+	$L = moondental_seo_lang_strings( $lang );
+	if ( ! $L ) return $desc;
+	$key = moondental_seo_current_key();
+	if ( '_home' === $key ) return $L['home_desc'];
+	if ( '_news' === $key ) return $L['news_desc'];
+	if ( ! preg_match( '/[가-힣]/u', (string) $desc ) && '' !== (string) $desc ) return $desc;
+	$tr = moondental_seo_phrase( $desc, $lang );
+	return ( null !== $tr && '' !== $tr ) ? $tr : $L['desc'];
+}
+add_filter( 'wpseo_metadesc', 'moondental_seo_localize_desc', 40 );
+add_filter( 'wpseo_opengraph_desc',  'moondental_seo_localize_desc', 40 );
+add_filter( 'wpseo_twitter_description', 'moondental_seo_localize_desc', 40 );
 
 /**
  * Yoast meta description 오버라이드
