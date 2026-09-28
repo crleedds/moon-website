@@ -339,6 +339,17 @@ function moondental_seo_localize_desc( $desc ) {
 	return ( null !== $tr && '' !== $tr ) ? $tr : $L['desc'];
 }
 add_filter( 'wpseo_metadesc', 'moondental_seo_localize_desc', 40 );
+
+/**
+ * v4.9.1 · 외국어(/en/ /ru/ …) 화면 가운데 소식 목록·글·아카이브·검색은 색인 제외(follow).
+ *  글 본문은 번역되지 않아 한국어 중복이고, 한국어 검색 결과에 /ru/소식/ 같은 페이지가
+ *  사이트링크로 끼어들던 원인이었다. 번역되는 고정 페이지(의료진·오시는 길 …)는 그대로 색인.
+ */
+add_filter( 'wpseo_robots', function ( $robots ) {
+	if ( 'ko' === moondental_seo_lang() ) return $robots;
+	if ( is_home() || is_archive() || is_singular( 'post' ) || is_search() || is_404() ) return 'noindex, follow';
+	return $robots;
+}, 35 );
 add_filter( 'wpseo_opengraph_desc',  'moondental_seo_localize_desc', 40 );
 add_filter( 'wpseo_twitter_description', 'moondental_seo_localize_desc', 40 );
 

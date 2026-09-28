@@ -16999,3 +16999,36 @@ a.md-center-color--preservation:hover { color: #4A7530 !important; }
   .md-loc-addr__link { font-size: 1rem; text-align: left; }
   .md-page-hero--location .md-loc-contact__item { width: 100%; justify-content: center; }
 }
+
+/* =============================================================
+   v4.9.1 · 외국어 상단 메뉴 — 러시아어·몽골어·베트남어·영어는 단어가 길어
+   한 줄(nowrap)로 두면 서로 겹쳤다. 외국어에서는 두 줄까지 접고 글자를 조금 줄인다.
+   ============================================================= */
+@media (min-width: 1081px) {
+  html:not([lang^="ko"]) .md-header__nav > ul,
+  html:not([lang^="ko"]) .md-nav {
+    flex-wrap: wrap; justify-content: center; row-gap: 0;
+    gap: clamp(2px, .7vw, 14px);
+  }
+  html:not([lang^="ko"]) .md-header__nav > ul > li > a,
+  html:not([lang^="ko"]) .md-nav > li > a {
+    white-space: normal; text-align: center; line-height: 1.15;
+    font-size: .82rem; padding: 10px 3px; max-width: 8.5em; overflow-wrap: anywhere;
+  }
+  html:not([lang^="ko"]) .md-header__nav .sub-menu > li > a { white-space: normal; line-height: 1.3; }
+  html:not([lang^="ko"]) .md-header__nav .sub-menu { min-width: 240px; }
+  html:not([lang^="ko"]) .md-header__info { display: none; } /* 전화번호는 예약 버튼 옆에서 빠져 메뉴 자리를 준다 */
+}
+@media (min-width: 1081px) and (max-width: 1440px) {
+  html:not([lang^="ko"]) .md-header__nav > ul > li > a,
+  html:not([lang^="ko"]) .md-nav > li > a { font-size: .76rem; max-width: 7.5em; padding-inline: 2px; }
+  html:not([lang^="ko"]) .md-header__cta .mds-btn,
+  html:not([lang^="ko"]) .md-header__cta-btn { padding-inline: 14px; }
+}
+/* 일본어·중국어는 짧아 원래 크기로 */
+@media (min-width: 1081px) {
+  html[lang^="ja"] .md-header__nav > ul > li > a,
+  html[lang^="zh"] .md-header__nav > ul > li > a { font-size: .9rem; max-width: none; }
+  html[lang^="ja"] .md-header__info,
+  html[lang^="zh"] .md-header__info { display: flex; }
+}
