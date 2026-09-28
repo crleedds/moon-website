@@ -500,9 +500,7 @@ function moondental_jsonld_sitenav() {
 		array( 'name' => '임플란트 센터',       'url' => $home . '임플란트-센터/',       'desc' => '천안·아산 임플란트 · CBCT 3D 네비게이션' ),
 		array( 'name' => '교정 센터',           'url' => $home . '투명교정-센터/',       'desc' => '슈어스마일 · 브라켓 치아교정' ),
 		array( 'name' => '자연치아 살리기',     'url' => $home . '자연치아-살리기/',     'desc' => '신경치료·치주치료·치수복조술' ),
-		array( 'name' => '치과 백과사전',       'url' => $home . '치과사전/',           'desc' => '치과 용어·치료·질환 총정리' ),
-		array( 'name' => '천안 추천 치과',       'url' => $home . '오시는-길/cheonan/',    'desc' => '천안에서 오시는 길 · 30여년 진료 · 진료과 협진' ),
-		array( 'name' => '아산 추천 치과',       'url' => $home . '오시는-길/asan/',       'desc' => '아산에서 20분 · 진료과 협진 · 문치과병원' ),
+		/* v4.9.2 · 백과사전·지역 페이지는 뺐다 — 원장이 원하는 사이트링크는 의료진·오시는 길·센터·예약·비용 */
 	);
 
 	$graph = array();
