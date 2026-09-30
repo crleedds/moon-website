@@ -308,7 +308,6 @@ function md_support_handle_post() {
 				/* 다음에 또 올릴 때 팀·이름을 다시 고르지 않아도 되게 30일 기억 */
 				$exp = time() + 30 * DAY_IN_SECONDS;
 				setcookie( 'md_support_team', $team, $exp, '/', '', is_ssl(), true );
-				setcookie( 'md_support_name', $who,  $exp, '/', '', is_ssl(), true );
 			}
 			$back = is_wp_error( $res )
 				? add_query_arg( array( 'err' => $res->get_error_message() ), $base ) . '#new'
@@ -407,8 +406,7 @@ function md_support_remembered( $key ) {
 function md_support_render_new( $err = '' ) {
 	$teams = md_support_teams();
 	$team  = md_support_remembered( 'team' );
-	$name  = md_support_remembered( 'name' );
-	if ( '' === $name && md_support_can_manage() ) { $name = wp_get_current_user()->display_name; }
+	$name  = ''; /* v4.10.4 · 작성자는 항상 빈칸 (공용 계정 이름·지난 이름을 채우지 않는다 · 원장 지시) */
 	?>
 	<form method="post" class="mds-card mdsp-new" id="new">
 		<input type="hidden" name="md_support_action" value="new">
