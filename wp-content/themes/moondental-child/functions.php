@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '4.9.3' );
+define( 'MOONDENTAL_VERSION', '4.10.0' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2085,6 +2085,7 @@ require_once MOONDENTAL_DIR . '/inc/encyclopedia-redirects.php'; // v3.97.2 · �
 require_once MOONDENTAL_DIR . '/inc/care/care.php';           // v4.0 · Moon Dental Care (직원 전용 환자 설명 자료)
 if ( file_exists( MOONDENTAL_DIR . '/inc/support/support.php' ) ) { require_once MOONDENTAL_DIR . '/inc/support/support.php'; } // v4.3 · 지원 요청 (직원 전용)
 if ( file_exists( MOONDENTAL_DIR . '/inc/equipment/equipment.php' ) ) { require_once MOONDENTAL_DIR . '/inc/equipment/equipment.php'; } // v4.8 · 기구/장비 대장 (직원 전용)
+if ( file_exists( MOONDENTAL_DIR . '/inc/survey/survey.php' ) ) { require_once MOONDENTAL_DIR . '/inc/survey/survey.php'; } // v4.10 · 환자 만족도 조사 (/만족도/ + 직원 전용 관리)
 require_once MOONDENTAL_DIR . '/inc/customizer-content.php';
 require_once MOONDENTAL_DIR . '/inc/auto-translate.php'; // v3.44.0
 require_once MOONDENTAL_DIR . '/inc/phrase-translate.php'; // v3.44.217 · 문구 기반 번역
@@ -4634,6 +4635,8 @@ function moondental_pagecache_skip() {
 	if ( defined( 'WP_CLI' ) && WP_CLI ) return true;
 	// GET 만 · POST/PUT/DELETE 스킵
 	if ( isset( $_SERVER['REQUEST_METHOD'] ) && strtoupper( $_SERVER['REQUEST_METHOD'] ) !== 'GET' ) return true;
+	// v4.10 · 환자 만족도 조사(/만족도/)는 사람마다 다른 화면 — 캐시하지 않는다
+	if ( function_exists( 'md_survey_is_public_path' ) && md_survey_is_public_path() ) return true;
 	// query string 있으면 스킵 (검색·페이지네이션은 캐시 안 함 · 안전)
 	if ( ! empty( $_GET ) ) return true;
 	// 로그인 사용자 스킵 (Customizer 미리보기·편집 상태 등)

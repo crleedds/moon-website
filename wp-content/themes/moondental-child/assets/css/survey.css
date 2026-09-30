@@ -1,0 +1,57 @@
+/* =============================================================
+   직원 전용 · 환자 만족도 조사 (v4.10)
+   재료실(supply.css)의 토큰과 부품을 그대로 쓴다. 환자용 /만족도/ 화면은
+   inc/survey/survey.php 안에 인라인 스타일로 따로 있다 (테마 CSS 를 싣지 않는다).
+   ============================================================= */
+
+.mdsv-bar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; justify-content: space-between; margin: 18px 0 12px; }
+.mdsv-datepick, .mdsv-range { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.mdsv-datepick input[type="date"], .mdsv-range input[type="date"], .mdsv-range select {
+  font: inherit; font-size: .95rem; min-height: 40px; padding: 6px 12px;
+  border: 1px solid var(--color-border, #EDDFD0); border-radius: 10px; background: var(--color-white, #fff); color: var(--color-text, #3D2F26);
+}
+.mdsv-count { font-size: .95rem; color: var(--color-text-sub, #7A6B5F); }
+.mdsv-count b { color: var(--color-text, #3D2F26); }
+.mdsv-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.mds-btn--sm { min-height: 36px; padding: 4px 12px; font-size: .85rem; }
+.mds-btn--ghost.is-on { border-color: var(--color-primary, #D88062); color: var(--color-primary, #D88062); }
+
+.mdsv-h { display: flex; align-items: baseline; gap: 10px; margin: 0 0 14px; font-size: 1.1rem; font-weight: 800; }
+.mdsv-h small { font-weight: 500; color: var(--color-text-mute, #A89685); }
+.mdsv-add { padding: 20px 22px 16px; }
+.mdsv-add .mds-formrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.mdsv-add .mds-field input { min-height: 46px; font-size: 1.02rem; }
+
+.mdsv-import { padding: 16px 22px; margin-top: 12px; }
+.mdsv-import > summary { cursor: pointer; font-weight: 800; list-style: none; }
+.mdsv-import > summary::-webkit-details-marker { display: none; }
+.mdsv-import > summary::before { content: "▸ "; color: var(--color-text-mute, #A89685); }
+.mdsv-import[open] > summary::before { content: "▾ "; }
+.mdsv-import form { margin-top: 12px; }
+.mdsv-import textarea {
+  width: 100%; font: inherit; font-size: .92rem; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  padding: 10px 12px; border: 1px solid var(--color-border, #EDDFD0); border-radius: 10px; background: var(--color-white, #fff); color: var(--color-text, #3D2F26);
+}
+
+.mdsv-table { min-width: 640px; }
+.mdsv-table tr.is-answered td { background: var(--color-accent-bg, rgba(143,174,146,.08)); }
+.mdsv-table tr.is-lowrow td { background: rgba(198,107,94,.06); }
+.mdsv-link { width: 100%; min-width: 220px; font: inherit; font-size: .78rem; padding: 4px 8px; border: 1px solid var(--color-border, #EDDFD0); border-radius: 6px; background: var(--color-surface, #FBF2E8); color: var(--color-text-sub, #7A6B5F); }
+.mdsv-comment { max-width: 32ch; font-size: .86rem; line-height: 1.5; word-break: keep-all; overflow-wrap: anywhere; }
+.mds-status.is-done    { background: var(--color-accent-bg, rgba(143,174,146,.12)); color: var(--color-accent-dark, #6B8F72); }
+.mds-status.is-pending { background: var(--color-surface-alt, #F5E8D8); color: var(--color-text-mute, #A89685); }
+
+.mdsv-settings { padding: 20px 22px; margin-top: 14px; }
+.mdsv-settings .mds-formrow { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
+.mdsv-settings textarea, .mdsv-settings input[type="number"] {
+  width: 100%; font: inherit; font-size: .98rem; padding: 10px 12px; min-height: 44px;
+  border: 1px solid var(--color-border, #EDDFD0); border-radius: 10px; background: var(--color-white, #fff); color: var(--color-text, #3D2F26);
+}
+.mdsv-settings h2 + .mdsv-url { margin-top: -6px; }
+.mdsv-url { margin: 0 0 6px; }
+.mdsv-url code { display: inline-block; padding: 8px 12px; border-radius: 8px; background: var(--color-surface, #FBF2E8); font-size: .95rem; word-break: break-all; }
+.mdsv-settings .mds-check { display: flex; align-items: center; gap: 8px; margin: 8px 0 14px; font-size: .92rem; }
+
+@media (max-width: 640px) {
+  .mdsv-bar { flex-direction: column; align-items: stretch; }
+}
