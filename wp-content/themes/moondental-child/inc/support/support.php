@@ -428,7 +428,7 @@ function md_support_render_new( $err = '' ) {
 		</div>
 		<label class="mdsp-field">
 			<span>요청·건의사항 <em class="mdsp-req">*</em></span>
-			<textarea name="content" required rows="3" placeholder="예) 10층 3번 체어 석션 약함 · 11층 데스크 전화기 끊김 · 프린터 토너 구매"></textarea>
+			<textarea name="content" required rows="3" placeholder="요청 예) 10층 3번 체어 석션 약함 · 11층 데스크 전화기 끊김 · 프린터 토너 구매&#10;건의 예) 대기실에 휴대폰 충전기 비치 · 어르신용 돋보기 준비 · 수술 후 주의사항 안내문을 외국어로도"></textarea>
 		</label>
 		<div class="mdsp-new__office">
 			<label class="mdsp-field">
