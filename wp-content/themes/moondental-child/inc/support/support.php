@@ -460,9 +460,8 @@ function md_support_render_new( $err = '' ) {
 			</label>
 		</div>
 		<label class="mdsp-field">
-			<span>알림 받을 이메일 <small>(선택 · 적으면 답변이 달리거나 상태가 바뀔 때 메일로 알려 드립니다)</small></span>
+			<span>알림 받을 이메일 <small>(선택사항 · 적으면 답변이 달리거나 상태가 바뀔 때 메일로 알려 드립니다. 메일이 안 보이면 스팸메일함을 확인해 주세요.)</small></span>
 			<input type="email" name="email" maxlength="120" placeholder="예) name@naver.com" autocomplete="email">
-			<small class="mdsp-field__note">메일이 안 보이면 스팸메일함을 확인해 주세요. 스팸함에 있으면 「스팸 아님」으로 표시하면 다음부터 받은편지함으로 옵니다.</small>
 		</label>
 		<label class="mdsp-field">
 			<span>요청·건의사항 <em class="mdsp-req">*</em></span>
