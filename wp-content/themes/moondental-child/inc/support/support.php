@@ -421,7 +421,7 @@ function md_support_render_new( $err = '' ) {
 			</label>
 			<label class="mdsp-field">
 				<span>작성자 <em class="mdsp-req">*</em></span>
-				<input type="text" name="requester" required maxlength="60" value="<?php echo esc_attr( $name ); ?>" placeholder="요청하는 사람">
+				<input type="text" name="requester" required maxlength="60" value="<?php echo esc_attr( $name ); ?>" placeholder="작성자 이름">
 			</label>
 		</div>
 		<label class="mdsp-field">
