@@ -440,7 +440,7 @@ function md_survey_public_render() {
 
 	$method = isset( $_SERVER['REQUEST_METHOD'] ) ? $_SERVER['REQUEST_METHOD'] : 'GET';
 
-	/* v4.10.1 · 알림톡 링크에 이름이 실려 오면(?n=#{환자명}) 휴대폰 뒷 4자리만 묻는다.
+	/* v4.10.1 · 알림톡 링크에 이름이 실려 오면(?n=#환자명#) 휴대폰 뒷 4자리만 묻는다.
 	 * 이름은 GET 으로 받아 폼에 숨겨 두고, POST 때 그대로 돌려받는다. */
 	$pname = '';
 	if ( isset( $_GET['n'] ) )  { $pname = md_survey_norm_name( wp_unslash( $_GET['n'] ) ); }
@@ -1125,8 +1125,8 @@ function md_survey_render_settings() {
 		<input type="hidden" name="md_survey_action" value="settings">
 		<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_settings' ) ); ?>">
 		<h2 class="mdsv-h">알림톡에 넣을 링크</h2>
-		<p class="mdsv-url"><code><?php echo esc_html( home_url( '/survey/?n=#{환자명}' ) ); ?></code></p>
-		<p class="mds-hint">덴트웹 진료 후 알림톡 템플릿 본문에 이 주소를 그대로 넣습니다. 덴트웹이 <code>#{환자명}</code>을 환자 이름으로 바꿔 보내므로, 환자는 휴대전화 뒷 4자리만 넣고 설문에 들어옵니다. 이름이 링크에 실리지 않은 경우(<code><?php echo esc_html( home_url( '/survey/' ) ); ?></code>)에는 생년월일까지 확인합니다.</p>
+		<p class="mdsv-url"><code><?php echo esc_html( home_url( '/survey/?n=#환자명#' ) ); ?></code></p>
+		<p class="mds-hint">덴트웹 진료 후 알림톡 템플릿 본문에 이 주소를 그대로 넣습니다. 덴트웹이 <code>#환자명#</code>을 환자 이름으로 바꿔 보내므로, 환자는 휴대전화 뒷 4자리만 넣고 설문에 들어옵니다. 이름이 링크에 실리지 않은 경우(<code><?php echo esc_html( home_url( '/survey/' ) ); ?></code>)에는 생년월일까지 확인합니다.</p>
 
 		<div class="mds-formrow">
 			<label class="mds-field"><span>응답 허용 기간 (진료일부터 며칠)</span><input type="number" name="window_days" min="1" max="30" value="<?php echo (int) $s['window_days']; ?>"></label>
