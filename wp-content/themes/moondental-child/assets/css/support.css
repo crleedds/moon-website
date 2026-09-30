@@ -174,3 +174,6 @@
   .mdsp-answerform { border-color: var(--color-border, #3A2E24); }
   .mdsp-btn { background: var(--color-surface, #241C15); }
 }
+
+/* v4.11.1 · 이메일 칸 아래 스팸함 안내 */
+.mdsp-field__note { display: block; margin-top: 6px; font-size: .8rem; line-height: 1.5; color: var(--color-text-mute, #A89685); }
