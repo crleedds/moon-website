@@ -20,7 +20,8 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_SUPPORT_SCHEMA', 2 ); /* v4.7.4 · status_at 추가 */
+define( 'MD_SUPPORT_SCHEMA', 3 ); /* v4.7.4 · status_at · v4.11 · email(작성자 알림) */
+define( 'MD_SUPPORT_OFFICE_EMAIL', 'moondental1995@naver.com' ); /* v4.11 · 새 요청·건의 알림 받는 곳 (원장 지시) */
 
 /* ============================================================
  * 테이블
@@ -69,6 +70,7 @@ function md_support_maybe_install() {
 		done_at DATE NULL,
 		updated_at DATETIME NULL,
 		status_at DATETIME NULL,
+		email VARCHAR(120) NOT NULL DEFAULT '',
 		PRIMARY KEY  (id),
 		KEY status (status),
 		KEY created_at (created_at)
@@ -187,8 +189,10 @@ function md_support_open_count() {
 	return $c['접수'];
 }
 
-function md_support_create( $requester, $dept, $content, $status = '접수', $owner = '', $answer = '' ) {
+function md_support_create( $requester, $dept, $content, $status = '접수', $owner = '', $answer = '', $email = '' ) {
 	global $wpdb;
+	$email = sanitize_email( (string) $email );
+	if ( '' !== $email && ! is_email( $email ) ) { $email = ''; }
 	if ( ! isset( md_support_statuses()[ $status ] ) ) { $status = '접수'; }
 	$owner  = mb_substr( sanitize_text_field( $owner ), 0, 60 );
 	$answer = trim( sanitize_textarea_field( $answer ) );
@@ -210,6 +214,7 @@ function md_support_create( $requester, $dept, $content, $status = '접수', $ow
 		'done_at'    => '완료' === $status ? current_time( 'Y-m-d' ) : null,
 		'updated_at' => current_time( 'mysql' ),
 		'status_at'  => current_time( 'mysql' ),
+		'email'      => $email,
 	) );
 	if ( ! $ok ) { return new WP_Error( 'md_support', '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.' ); }
 	$id = (int) $wpdb->insert_id;
@@ -239,7 +244,15 @@ function md_support_answer( $id, $data ) {
 		'updated_at' => current_time( 'mysql' ),
 	);
 	if ( $status !== $row->status ) { $upd['status_at'] = current_time( 'mysql' ); } /* v4.7.4 · 상태가 바뀐 요청이 맨 위로 */
+	if ( isset( $data['email'] ) ) {
+		$em = sanitize_email( (string) $data['email'] );
+		$upd['email'] = ( '' !== $em && is_email( $em ) ) ? $em : '';
+	}
 	$wpdb->update( md_support_table(), $upd, array( 'id' => (int) $id ) );
+	/* v4.11 · 답변이나 상태가 바뀌면 작성자 이메일로 알림 */
+	if ( $status !== $row->status || (string) $upd['answer'] !== (string) $row->answer ) {
+		md_support_notify_requester( $id, $row );
+	}
 	return true;
 }
 
@@ -261,15 +274,35 @@ function md_support_delete( $id ) {
 
 /** 새 요청이 오면 재료실과 같은 주소로 메일을 보낸다 (주소가 없으면 조용히 넘어간다) */
 function md_support_notify_new( $id ) {
-	if ( ! function_exists( 'md_sup_notify_emails' ) ) { return; }
-	$to = md_sup_notify_emails();
-	if ( empty( $to ) ) { return; }
+	$to = function_exists( 'md_sup_notify_emails' ) ? (array) md_sup_notify_emails() : array();
+	$to[] = MD_SUPPORT_OFFICE_EMAIL;
+	$to = array_values( array_unique( array_filter( array_map( 'trim', $to ) ) ) );
 	$row = md_support_get( $id );
 	if ( ! $row ) { return; }
 	$subject = '[문치과병원] 경영지원실 요청·건의 — ' . $row->requester . ' · ' . $row->dept;
 	$body    = "새 요청·건의가 올라왔습니다.\n\n작성자: {$row->requester}\n작성팀: {$row->dept}\n\n{$row->content}\n\n"
+		. ( '' !== (string) $row->email ? "알림 받을 이메일: {$row->email}\n\n" : '' )
 		. md_sup_url( array( 'app' => 'support' ) ) . "\n";
 	wp_mail( $to, $subject, $body );
+}
+
+/** v4.11 · 답변이 달리거나 상태가 바뀌면 작성자가 적어 둔 이메일로 알린다 */
+function md_support_notify_requester( $id, $before ) {
+	$row = md_support_get( $id );
+	if ( ! $row || '' === (string) $row->email || ! is_email( $row->email ) ) { return; }
+	$what = array();
+	if ( $row->status !== $before->status ) { $what[] = '상태: ' . $before->status . ' → ' . $row->status; }
+	if ( (string) $row->answer !== (string) $before->answer ) { $what[] = '경영지원실 답변이 ' . ( '' === trim( (string) $before->answer ) ? '달렸습니다' : '바뀌었습니다' ); }
+	$subject = '[문치과병원] 요청·건의 ' . ( $row->status !== $before->status ? '「' . $row->status . '」' : '답변' ) . ' 알림 — ' . mb_substr( preg_replace( '/\s+/u', ' ', $row->content ), 0, 30 );
+	$body    = "경영지원실에 올리신 요청·건의에 변경이 있습니다.\n\n"
+		. implode( "\n", $what ) . "\n\n"
+		. "요청·건의사항\n{$row->content}\n\n"
+		. "현재 상태: {$row->status}\n"
+		. ( '' !== (string) $row->owner ? "경영지원실 담당자: {$row->owner}\n" : '' )
+		. ( '' !== trim( (string) $row->answer ) ? "\n경영지원실 답변\n{$row->answer}\n" : '' )
+		. "\n" . md_sup_url( array( 'app' => 'support' ) ) . '#s' . (int) $row->id . "\n\n"
+		. "※ 이 메일은 발신 전용입니다. 문의는 경영지원실로 해 주세요.\n";
+	wp_mail( $row->email, $subject, $body );
 }
 
 /* ============================================================
@@ -302,7 +335,8 @@ function md_support_handle_post() {
 			$res  = md_support_create(
 				$who, $team, isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '', $stat,
 				isset( $_POST['owner'] ) ? wp_unslash( $_POST['owner'] ) : '',
-				isset( $_POST['answer'] ) ? wp_unslash( $_POST['answer'] ) : ''
+				isset( $_POST['answer'] ) ? wp_unslash( $_POST['answer'] ) : '',
+				isset( $_POST['email'] ) ? wp_unslash( $_POST['email'] ) : ''
 			);
 			if ( ! is_wp_error( $res ) ) {
 				/* 다음에 또 올릴 때 팀·이름을 다시 고르지 않아도 되게 30일 기억 */
@@ -322,6 +356,7 @@ function md_support_handle_post() {
 		case 'answer':
 			$res = md_support_answer( $id, array(
 				'requester' => isset( $_POST['requester'] ) ? wp_unslash( $_POST['requester'] ) : '',
+				'email'     => isset( $_POST['email'] ) ? wp_unslash( $_POST['email'] ) : '',
 				'dept'      => isset( $_POST['team'] ) ? wp_unslash( $_POST['team'] ) : '',
 				'content' => isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '',
 				'answer'  => isset( $_POST['answer'] ) ? wp_unslash( $_POST['answer'] ) : '',
@@ -425,6 +460,10 @@ function md_support_render_new( $err = '' ) {
 			</label>
 		</div>
 		<label class="mdsp-field">
+			<span>알림 받을 이메일 <small>(선택 · 적으면 답변이 달리거나 상태가 바뀔 때 메일로 알려 드립니다)</small></span>
+			<input type="email" name="email" maxlength="120" placeholder="예) name@naver.com" autocomplete="email">
+		</label>
+		<label class="mdsp-field">
 			<span>요청·건의사항 <em class="mdsp-req">*</em></span>
 			<textarea name="content" required rows="3" placeholder="요청 예) 10층 3번 체어 석션 약함 · 11층 데스크 전화기 끊김 · 프린터 토너 구매&#10;건의 예) 대기실에 휴대폰 충전기 비치 · 어르신용 돋보기 준비 · 수술 후 주의사항 안내문을 외국어로도"></textarea>
 		</label>
@@ -471,6 +510,7 @@ function md_support_render_card( $r, $manage, $keep ) {
 			<span class="mds-status <?php echo esc_attr( $cls ); ?>"><?php echo esc_html( $r->status ); ?></span>
 			<span class="mdsp-item__team"><?php echo esc_html( $r->dept ); ?></span>
 			<span class="mdsp-item__who"><?php echo esc_html( $r->requester ); ?></span>
+			<?php if ( ! empty( $r->email ) ) : ?><span class="mdsp-item__mail" title="변경 시 작성자에게 메일 알림">✉️</span><?php endif; ?>
 			<span class="mdsp-item__date"><?php echo esc_html( md_support_fmt_date( $r->created_at ) ); ?></span>
 			<form method="post" class="mdsp-inline mdsp-del" onsubmit="return confirm('이 요청을 지울까요? 되돌릴 수 없습니다.');">
 				<input type="hidden" name="md_support_action" value="delete"><input type="hidden" name="md_support_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_support_delete' ) ); ?>"><?php echo $hidden; // phpcs:ignore ?>
@@ -500,6 +540,7 @@ function md_support_render_card( $r, $manage, $keep ) {
 						<select name="team" required><?php foreach ( $teams as $t ) : ?><option value="<?php echo esc_attr( $t ); ?>" <?php selected( $t, $r->dept ); ?>><?php echo esc_html( $t ); ?></option><?php endforeach; ?></select></label>
 					<label class="mdsp-field"><span>작성자 <em class="mdsp-req">*</em></span><input type="text" name="requester" maxlength="60" required value="<?php echo esc_attr( $r->requester ); ?>"></label>
 				</div>
+				<label class="mdsp-field"><span>알림 받을 이메일 <small>(선택)</small></span><input type="email" name="email" maxlength="120" value="<?php echo esc_attr( (string) ( $r->email ?? '' ) ); ?>" placeholder="예) name@naver.com"></label>
 				<label class="mdsp-field"><span>요청·건의사항 <em class="mdsp-req">*</em></span><textarea name="content" rows="2" required><?php echo esc_textarea( $r->content ); ?></textarea></label>
 				<label class="mdsp-field"><span>경영지원실 담당자</span><input type="text" name="owner" maxlength="60" value="<?php echo esc_attr( (string) $r->owner ); ?>" placeholder="담당자 이름"></label>
 				<label class="mdsp-field"><span>경영지원실 답변</span><textarea name="answer" rows="2" placeholder="처리 내용이나 예정"><?php echo esc_textarea( (string) $r->answer ); ?></textarea></label>
