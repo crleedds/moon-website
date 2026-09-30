@@ -57,8 +57,9 @@ function md_sup_current_tab() {
 function md_sup_apps() {
 	return array(
 		'stock' => array(
-			'label' => '재료실',
+			'label' => '재료실 요청',
 			'icon'  => '📦',
+			'url'   => 'https://www.appsheet.com/start/27720143-2dc0-4c72-bb78-888903789d2f', /* v4.10.1 · 재고관리 AppSheet 앱으로 (원장 지시) */
 			'desc'  => '재료 신청 · 우리 팀 사용량과 비용 · 입출고 관리',
 		),
 		// v4.0 · 환자 설명용 자료
@@ -69,7 +70,7 @@ function md_sup_apps() {
 		),
 		// v4.3 · 경영지원실 요청 (옛 구글 시트 「경영지원실 요청사항」을 옮김)
 		'support' => array(
-			'label' => '경영지원실 지원 요청',
+			'label' => '경영지원실 요청',
 			'icon'  => '🛠️',
 			'desc'  => '수리 · 확인 요청을 경영지원실에 남기고 답변을 확인',
 		),
@@ -935,23 +936,19 @@ function md_sup_render_header( $app, $tab ) {
 
 /** 첫 화면 — 어떤 도구로 들어갈지 고른다 */
 function md_sup_render_hub() {
-	$pending = md_sup_can_manage() ? md_sup_pending_count() : 0;
 	?>
-	<div class="mds-apps">
+	<div class="mds-apps"><!-- v4.10.1 · 설명 문구 없이 이름만 (원장 지시) -->
 		<?php foreach ( md_sup_apps() as $key => $a ) : ?>
-			<a class="mds-app" href="<?php echo esc_url( md_sup_url( array( 'app' => $key ) ) ); ?>">
+			<?php $ext = ! empty( $a['url'] ); ?>
+			<a class="mds-app" href="<?php echo esc_url( $ext ? $a['url'] : md_sup_url( array( 'app' => $key ) ) ); ?>"<?php echo $ext ? ' target="_blank" rel="noopener"' : ''; ?>>
 				<span class="mds-app__icon" aria-hidden="true"><?php echo esc_html( $a['icon'] ); ?></span>
 				<span class="mds-app__body">
 					<span class="mds-app__label">
 						<?php echo esc_html( $a['label'] ); ?>
-						<?php if ( 'stock' === $key && $pending ) : ?>
-							<span class="mds-app__badge"><?php echo (int) $pending; ?>건 대기</span>
-						<?php endif; ?>
 						<?php if ( 'support' === $key && function_exists( 'md_support_open_count' ) && md_sup_can_manage() && md_support_open_count() ) : ?>
 							<span class="mds-app__badge"><?php echo (int) md_support_open_count(); ?>건 접수</span>
 						<?php endif; ?>
 					</span>
-					<span class="mds-app__desc"><?php echo esc_html( $a['desc'] ); ?></span>
 				</span>
 				<span class="mds-app__go" aria-hidden="true">→</span>
 			</a>
