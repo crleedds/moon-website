@@ -84,6 +84,28 @@ function md_staff_import_from_site() {
 	return $added;
 }
 
+/**
+ * v4.18.1 · 직원 정보 → 홈페이지 의료진 페이지의 직원 명단(부서|직책|이름) 자동 반영.
+ *  원장(의료진)은 사진 · 약력과 함께 코드에서 관리하므로 여기서는 건드리지 않는다.
+ */
+function md_staff_sync_site() {
+	$order = array( '진료실', '기공실', '서비스지원실', '경영지원실', '관리사무소', '예방과', '기타' );
+	$by    = array();
+	foreach ( md_staff_all( true ) as $r ) {
+		if ( '의료진' === $r->dept || '' === trim( $r->name ) ) { continue; }
+		$by[ $r->dept ?: '기타' ][] = $r;
+	}
+	$lines = array();
+	foreach ( array_values( array_unique( array_merge( $order, array_keys( $by ) ) ) ) as $d ) {
+		foreach ( $by[ $d ] ?? array() as $r ) {
+			$lines[] = str_replace( '|', ' ', $r->dept ?: '기타' ) . '|' . str_replace( '|', ' ', $r->position ?: '사원' ) . '|' . str_replace( '|', ' ', $r->name );
+		}
+	}
+	set_theme_mod( 'md_content_staff_list', implode( "\n", $lines ) );
+	if ( function_exists( 'wp_cache_flush' ) ) { wp_cache_flush(); }
+	if ( function_exists( 'wp_cache_clear_cache' ) ) { wp_cache_clear_cache(); } /* WP Super Cache */
+}
+
 /* ============================================================
  * 데이터
  * ============================================================ */
@@ -118,7 +140,6 @@ function md_staff_save( $data, $id = 0 ) {
 		'position'   => mb_substr( trim( sanitize_text_field( $data['position'] ?? '' ) ), 0, 60 ),
 		'birthday'   => md_staff_norm_date( $data['birthday'] ?? '' ),
 		'hired'      => md_staff_norm_date( $data['hired'] ?? '' ),
-		'active'     => empty( $data['inactive'] ) ? 1 : 0,
 		'note'       => mb_substr( trim( sanitize_text_field( $data['note'] ?? '' ) ), 0, 200 ),
 		'updated_at' => current_time( 'mysql' ),
 	);
@@ -145,23 +166,21 @@ function md_staff_handle_post() {
 	$id   = isset( $_POST['sid'] ) ? (int) $_POST['sid'] : 0;
 	$data = array();
 	foreach ( array( 'name', 'dept', 'position', 'birthday', 'hired', 'note' ) as $k ) { $data[ $k ] = isset( $_POST[ $k ] ) ? sanitize_text_field( wp_unslash( $_POST[ $k ] ) ) : ''; }
-	$data['inactive'] = ! empty( $_POST['inactive'] );
 	if ( '' === $data['dept'] && ! empty( $_POST['dept_new'] ) ) { $data['dept'] = sanitize_text_field( wp_unslash( $_POST['dept_new'] ) ); }
 	switch ( $action ) {
 		case 'add':
 			$res = md_staff_save( $data );
 			$back = is_wp_error( $res ) ? add_query_arg( 'err', $res->get_error_message(), $back ) : $back . '#s' . (int) $res;
+			if ( ! is_wp_error( $res ) ) { md_staff_sync_site(); }
 			break;
 		case 'edit':
 			$res = md_staff_save( $data, $id );
 			$back = is_wp_error( $res ) ? add_query_arg( 'err', $res->get_error_message(), $back ) : $back . '#s' . $id;
+			if ( ! is_wp_error( $res ) ) { md_staff_sync_site(); }
 			break;
 		case 'delete':
 			md_staff_delete( $id );
-			break;
-		case 'import':
-			$n = md_staff_import_from_site();
-			$back = add_query_arg( 'imported', (int) $n, $back );
+			md_staff_sync_site();
 			break;
 	}
 	wp_safe_redirect( $back );
@@ -191,15 +210,10 @@ function md_staff_render_row_form( $r, $depts ) {
 		<label class="mdst-f mdst-f--date"><span>🎂 생일</span><input type="date" name="birthday" value="<?php echo esc_attr( $r->birthday ?? '' ); ?>"></label>
 		<label class="mdst-f mdst-f--date"><span>🎉 입사일</span><input type="date" name="hired" value="<?php echo esc_attr( $r->hired ?? '' ); ?>"></label>
 		<label class="mdst-f mdst-f--note"><span>메모</span><input type="text" name="note" maxlength="200" value="<?php echo esc_attr( $r->note ?? '' ); ?>" placeholder="선택"></label>
-		<?php if ( $edit ) : ?>
-			<label class="mdst-f mdst-f--chk mds-check"><input type="checkbox" name="inactive" value="1" <?php checked( ! (int) $r->active ); ?>> 퇴사 · 숨김</label>
-		<?php else : ?>
-			<input type="hidden" name="dept_new" value="">
-		<?php endif; ?>
 		<button type="submit" class="mds-btn mds-btn--fill mdst-save"><?php echo $edit ? '저장' : '추가'; ?></button>
 	</form>
 	<?php if ( $edit ) : ?>
-	<form method="post" class="mdst-del" onsubmit="return confirm('<?php echo esc_js( $r->name ); ?> 님을 명단에서 지울까요? 달력의 생일·기념일도 같이 사라집니다. 퇴사자는 지우는 대신 「퇴사 · 숨김」을 권합니다.');">
+	<form method="post" class="mdst-del" onsubmit="return confirm('<?php echo esc_js( $r->name ); ?> 님을 명단에서 지울까요? 홈페이지 의료진 페이지와 달력에서도 함께 빠집니다.');">
 		<input type="hidden" name="md_staff_action" value="delete"><input type="hidden" name="md_staff_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_staff_delete' ) ); ?>"><input type="hidden" name="sid" value="<?php echo (int) $r->id; ?>">
 		<button type="submit" class="mdst-delbtn" title="명단에서 삭제">🗑</button>
 	</form>
@@ -211,20 +225,16 @@ function md_staff_render() {
 	$rows  = md_staff_all();
 	$depts = md_staff_depts();
 	if ( isset( $_GET['err'] ) ) { echo '<div class="mds-notice mds-notice--warn">' . esc_html( wp_unslash( $_GET['err'] ) ) . '</div>'; }
-	if ( isset( $_GET['imported'] ) ) { echo '<div class="mds-notice mds-notice--ok">홈페이지 명단에서 ' . (int) $_GET['imported'] . '명을 새로 가져왔습니다.</div>'; }
 	$n_b = 0; $n_h = 0; $n_a = 0;
 	foreach ( $rows as $r ) { if ( (int) $r->active ) { $n_a++; if ( $r->birthday ) $n_b++; if ( $r->hired ) $n_h++; } }
 	?>
 	<div class="mdst">
 		<div class="mds-card mdst-head">
 			<p class="mds-hint" style="margin:0">
-				재직 <strong><?php echo (int) $n_a; ?>명</strong> · 생일 입력 <strong><?php echo (int) $n_b; ?></strong> · 입사일 입력 <strong><?php echo (int) $n_h; ?></strong>.
-				생일과 입사일을 넣으면 달력에 🎂 생일 · 🎉 입사 N주년이 자동으로 표시됩니다. 생일의 연도는 표시하지 않습니다.
+				<strong><?php echo (int) $n_a; ?>명</strong> · 생일 입력 <strong><?php echo (int) $n_b; ?></strong> · 입사일 입력 <strong><?php echo (int) $n_h; ?></strong>.
+				여기서 추가 · 수정 · 삭제하면 홈페이지 <a href="<?php echo esc_url( home_url( '/의료진/' ) ); ?>" target="_blank" rel="noopener">의료진 페이지</a>의 직원 명단이 바로 바뀌고, 생일 · 입사일은 라운지 달력에 🎂 🎉 로 표시됩니다(생일 연도는 표시하지 않음).
+				원장(의료진)은 사진 · 약력과 함께 관리되므로 이름 · 직책은 홈페이지 설정에서, 생일 · 입사일만 여기서 넣습니다.
 			</p>
-			<form method="post" class="mdst-import">
-				<input type="hidden" name="md_staff_action" value="import"><input type="hidden" name="md_staff_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_staff_import' ) ); ?>">
-				<button type="submit" class="mds-btn mds-btn--ghost">홈페이지 명단에서 새 사람 가져오기</button>
-			</form>
 		</div>
 
 		<section class="mds-card mdst-new">
@@ -238,7 +248,7 @@ function md_staff_render() {
 		$order = array_values( array_unique( array_merge( $depts, array_keys( $by ) ) ) );
 		foreach ( $order as $d ) : if ( empty( $by[ $d ] ) ) continue; ?>
 			<section class="mds-card mdst-dept">
-				<h2 class="mdst-title"><?php echo esc_html( $d ); ?> <small><?php echo count( $by[ $d ] ); ?>명</small></h2>
+				<h2 class="mdst-title"><?php echo esc_html( $d ); ?> <small><?php echo count( $by[ $d ] ); ?>명<?php echo '의료진' === $d ? ' · 생일 · 입사일만 여기서' : ''; ?></small></h2>
 				<div class="mdst-rows">
 					<?php foreach ( $by[ $d ] as $r ) : ?>
 						<div class="mdst-item"><?php md_staff_render_row_form( $r, $depts ); ?></div>

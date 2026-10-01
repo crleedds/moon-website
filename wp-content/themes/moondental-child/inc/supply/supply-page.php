@@ -64,9 +64,10 @@ function md_sup_apps() {
 		),
 		// v4.17 · 달력 (생일 · 입사 기념일 · 병원 행사)
 		'calendar' => array(
-			'label' => '달력',
-			'icon'  => '📅',
-			'desc'  => '생일 · 입사 기념일 · 병원 행사 · 휴진',
+			'label'  => '달력',
+			'icon'   => '📅',
+			'desc'   => '생일 · 입사 기념일 · 병원 행사 · 휴진',
+			'hidden' => true, /* v4.18.1 · 첫 화면에 달력이 바로 있으므로 타일은 없음 (원장 지시) */
 		),
 		// v4.18 · 직원 정보 (관리자) — 생일 · 입사일 → 달력
 		'staff' => array(
@@ -958,7 +959,7 @@ function md_sup_render_hub() {
 	if ( function_exists( 'md_cal_render_hub' ) ) { md_cal_render_hub(); } /* v4.18 · 라운지 첫 화면에 월 달력 바로 */
 	?>
 	<div class="mds-apps"><!-- v4.10.1 · 설명 문구 없이 이름만 (원장 지시) -->
-		<?php foreach ( md_sup_apps() as $key => $a ) : if ( ! empty( $a['manage'] ) && ! md_sup_can_manage() ) continue; /* v4.18 · 관리자 전용 타일 */ ?>
+		<?php foreach ( md_sup_apps() as $key => $a ) : if ( ! empty( $a['hidden'] ) ) continue; if ( ! empty( $a['manage'] ) && ! md_sup_can_manage() ) continue; /* v4.18 · 관리자 전용 타일 */ ?>
 			<?php $ext = ! empty( $a['url'] ); ?>
 			<a class="mds-app" href="<?php echo esc_url( $ext ? $a['url'] : md_sup_url( array( 'app' => $key ) ) ); ?>"<?php echo $ext ? ' target="_blank" rel="noopener"' : ''; ?>>
 				<span class="mds-app__icon" aria-hidden="true"><?php echo esc_html( $a['icon'] ); ?></span>
