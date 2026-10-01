@@ -67,7 +67,8 @@ $hours_line = implode( ' · ', array_filter( array(
 
 /* 자주 묻는 것 — 검색용 문장이 아니라 실제로 묻는 것 3가지 */
 $faq_items = array(
-	array( '주차는 어디에 하나요?', '승용차는 병원 지하 기계식 주차장에 세우고 데스크에 접수하면 무료로 등록됩니다. 기계식이라 SUV · 대형차는 들어가지 못하므로, 걸어서 5분 거리의 신부 제5공영주차장(동남구 먹거리1길 10)에 세운 뒤 접수처에서 주차 도장 · 주차권을 받으면 무료입니다.' ),
+	array( '예약하고 가야 하나요?', '예약 없이 와도 진료는 받을 수 있지만, 멀리서 오시는 분은 전화(041-563-2875) · 네이버 예약 · 카카오톡으로 미리 시간을 잡으면 기다리지 않습니다. 예약할 때 「' . $region_name . '에서 간다」고 말씀하시면 한 번에 볼 수 있는 진료를 묶어 드립니다.' ),
+	array( 'SUV · 대형차는 어디에 세우나요?', '병원 지하 주차장은 기계식이라 SUV · 대형차가 들어가지 못합니다. 걸어서 5분 거리의 신부 제5공영주차장(동남구 먹거리1길 10)에 세운 뒤 접수처에서 주차 도장 · 주차권을 받으면 무료입니다.' ),
 	array( '진료 시간이 어떻게 되나요?', $hours_line ? $hours_line . '. 평일 저녁 진료가 있어 퇴근 후 출발해도 됩니다.' : '평일 저녁 진료가 있어 퇴근 후 출발해도 됩니다. 요일별 시간은 아래 상담 안내에 있습니다.' ),
 	array( '처음 갈 때 무엇을 챙기나요?', '신분증(건강보험증)과 드시는 약 정보를 챙겨 주세요. 다른 치과에서 찍은 X-ray가 있으면 USB나 이메일로 가져오시면 진단이 빨라집니다. 전화 · 네이버 · 카카오톡으로 미리 예약하면 기다리지 않습니다.' ),
 );
@@ -92,9 +93,10 @@ if ( function_exists( 'moondental_get_regions_by_province' ) ) {
 			<span><?php echo esc_html( $region_name ); ?></span>
 		</nav>
 		<span class="md-region-hero__eyebrow"><?php echo esc_html( $province ); ?> · 오시는 길</span>
+		<?php $is_city_all = false !== strpos( $region_long, '전 지역' ); ?>
 		<h1 class="md-region-hero__title">
-			<?php echo esc_html( $region_long ); ?>에서<br>
-			<em>문치과병원까지 <?php echo esc_html( $duration_label ); ?></em>
+			<?php echo esc_html( $is_city_all ? $region_name . ' 어디서나' : $region_long . '에서' ); ?><br>
+			<em>문치과병원까지 <?php echo esc_html( $duration_label ); ?><?php echo $is_city_all ? ' 안팎' : ''; ?></em>
 		</h1>
 		<p class="md-region-hero__lead">
 			천안고속버스터미널 옆 문타워 9~13층입니다. <?php echo esc_html( $is_walking ? '걸어서 오실 수 있는 거리입니다.' : '자동차 기준이며, 기차와 버스로도 올 수 있습니다.' ); ?>
@@ -150,12 +152,65 @@ if ( function_exists( 'moondental_get_regions_by_province' ) ) {
 			<?php endif; ?>
 		</div>
 
+		<?php
+		/* v4.15 · 길찾기 — 구글은 출발지를 이 지역으로 미리 넣는다 */
+		$dest_q   = rawurlencode( '문치과병원 천안시 동남구 만남로 52' );
+		$origin_q = rawurlencode( $is_walking ? $region_long : $region_long );
+		$dir_google = 'https://www.google.com/maps/dir/?api=1&origin=' . $origin_q . '&destination=' . $dest_q . '&travelmode=' . ( $is_walking ? 'walking' : 'driving' );
+		$dir_naver  = $info['naver_map_url'] ?: 'https://map.naver.com/p/search/' . rawurlencode( '문치과병원' );
+		$dir_kakao  = 'https://map.kakao.com/?q=' . rawurlencode( '문치과병원 천안' );
+		?>
+		<div class="md-mapbtn-grid md-mapbtn-grid--top md-mapbtn-grid--region">
+			<a class="md-mapbtn md-mapbtn--google" href="<?php echo esc_url( $dir_google ); ?>" target="_blank" rel="noopener" data-track="cta-region-dir-google">
+				<span class="md-mapbtn__logo" aria-hidden="true">G</span>
+				<span class="md-mapbtn__body"><span class="md-mapbtn__name"><?php echo esc_html( $region_name ); ?> → 문치과병원 길찾기</span><span class="md-mapbtn__sub">Google 지도 · 출발지 입력돼 있음</span></span>
+				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
+			</a>
+			<a class="md-mapbtn md-mapbtn--naver" href="<?php echo esc_url( $dir_naver ); ?>" target="_blank" rel="noopener" data-track="cta-region-dir-naver">
+				<span class="md-mapbtn__logo" aria-hidden="true">N</span>
+				<span class="md-mapbtn__body"><span class="md-mapbtn__name">네이버 지도</span><span class="md-mapbtn__sub">길찾기 · 대중교통</span></span>
+				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
+			</a>
+			<a class="md-mapbtn md-mapbtn--kakao" href="<?php echo esc_url( $dir_kakao ); ?>" target="_blank" rel="noopener" data-track="cta-region-dir-kakao">
+				<span class="md-mapbtn__logo" aria-hidden="true">k</span>
+				<span class="md-mapbtn__body"><span class="md-mapbtn__name">카카오맵</span><span class="md-mapbtn__sub">길찾기 · 로드뷰</span></span>
+				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
+			</a>
+		</div>
+
 		<?php if ( $note ) : ?>
 		<aside class="md-region-callout">
 			<strong>📍 <?php echo esc_html( $region_name ); ?>에서 오시는 분께</strong>
 			<p><?php echo esc_html( $note ); ?></p>
 		</aside>
 		<?php endif; ?>
+	</div>
+</section>
+
+<!-- ============ 1-1. 진료시간 · 주차 (v4.15 · 오시는 길 페이지와 같은 카드) ============ -->
+<section class="md-section md-section--sm">
+	<div class="md-container">
+		<div class="md-info-pair md-region-pair">
+			<aside class="md-hours">
+				<header class="md-hours__head"><span class="md-hours__badge">🕐 진료시간</span></header>
+				<?php $today_dow = (int) wp_date( 'w' ); $tr = function_exists( 'moondental_extract_time_range' ) ? 'moondental_extract_time_range' : 'strval'; ?>
+				<ul class="md-hours__list">
+					<li<?php echo in_array( $today_dow, array( 1, 2, 3, 5 ), true ) ? ' class="is-today"' : ''; ?>><span class="md-hours__day">평일 (월·화·수·금)</span><span class="md-hours__time"><?php echo esc_html( $tr( $hours_wd ) ); ?></span></li>
+					<li<?php echo 4 === $today_dow ? ' class="is-today"' : ''; ?>><span class="md-hours__day">목요일</span><span class="md-hours__time"><?php echo esc_html( $tr( $hours_thu ) ); ?></span></li>
+					<li<?php echo 6 === $today_dow ? ' class="is-today"' : ''; ?>><span class="md-hours__day">토요일</span><span class="md-hours__time"><?php echo esc_html( $tr( $hours_sat ) ); ?></span></li>
+					<li class="md-hours__off<?php echo 0 === $today_dow ? ' is-today' : ''; ?>"><span class="md-hours__day">일요일</span><span class="md-hours__time">휴진</span></li>
+				</ul>
+				<p class="md-hours__note-naver">공휴일 진료 · 휴진은 네이버 플레이스에서 최종 확인해 주세요. 멀리서 오실 때는 전화로 한 번 더 확인하면 안전합니다.</p>
+			</aside>
+			<aside class="md-park md-park--compact">
+				<header class="md-park__head"><span class="md-park__badge">🅿️ 무료 주차 안내</span></header>
+				<ul class="md-park__list">
+					<li><span class="md-park__num">01</span><div><strong>병원 지하 기계식 주차장 (SUV 불가)</strong><span>천안시 동남구 만남로 52 문타워 · 데스크 접수 시 무료 등록</span></div></li>
+					<li><span class="md-park__num">02</span><div><strong>신부 제5공영주차장 (SUV 가능)</strong><span>천안시 동남구 먹거리1길 10 · 도보 5분</span></div></li>
+				</ul>
+				<p class="md-park__lead md-park__lead--note">🎫 주차 후 병원 접수처에서 주차도장/주차권을 받아가세요</p>
+			</aside>
+		</div>
 	</div>
 </section>
 

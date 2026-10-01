@@ -53,6 +53,8 @@ $off_text = $info['hours_off'] ?: '휴진';
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( $locpage_title ); ?></span>
 		</nav>
 		<h1 class="md-page-hero__title"><?php echo esc_html( $locpage_title ); ?></h1>
+		<?php /* v4.15 · 지금 진료 중 / 오늘 진료 전 / 진료 끝 / 오늘 휴진 — main.js 가 data-hours 로 계산 */ ?>
+		<span class="md-open-status" data-hours="<?php echo esc_attr( wp_json_encode( array( 'wd' => $time_wd, 'thu' => $time_thu, 'sat' => $time_sat ) ) ); ?>" hidden></span>
 		<?php /* v3.99.1 · 주소 + 복사 버튼 + 전화·이메일 (이메일은 클릭 복사) */
 		$loc_email = $info['email'] ?: 'moondental1995@naver.com'; ?>
 		<div class="md-page-hero__lead md-page-hero__lead--big md-loc-addr">
@@ -67,8 +69,12 @@ $off_text = $info['hours_off'] ?: '휴진';
 </section>
 
 <!-- ============ 1. 지도 + 3 맵 버튼 ============ -->
-<section class="md-section md-section--tight">
+<section class="md-section md-section--tight" id="map">
 	<div class="md-container">
+		<header class="md-locx__head md-locx__head--tight">
+			<span class="md-locx__eyebrow"><span aria-hidden="true">🗺️</span> <span>지도 · 길찾기</span></span>
+			<p class="md-locx__sub">천안고속버스터미널 옆 문타워 · 지도를 누르면 크게 볼 수 있고, 아래 버튼으로 길찾기를 엽니다</p>
+		</header>
 		<?php /* v3.98.3 · 상단 지도 = 구글 지도 임베드 (API 키·결제 불필요). Customizer URL 을 비우면 예전 네이버 이미지 타일 */
 		$gmap_src = function_exists( 'md_content' ) ? md_content( 'loc_gmap_embed_url', 'https://www.google.com/maps?q=%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90%20%EC%B2%9C%EC%95%88%20%EB%A7%8C%EB%82%A8%EB%A1%9C%2052&z=16&output=embed&hl=ko' ) : '';
 		if ( $gmap_src ) : ?>
@@ -166,6 +172,11 @@ if ( $landmarks ) : ?>
 <!-- ============ 2. 진료시간 + 층별 안내 + 주차 안내 (3-col 그리드 · v3.44.167) ============ -->
 <section class="md-section" id="hours">
 	<div class="md-container">
+		<header class="md-locx__head">
+			<span class="md-locx__eyebrow"><span aria-hidden="true">🕐</span> <span>진료시간 · 층별 안내 · 주차</span></span>
+			<h2 class="md-locx__title">방문 전에 확인하세요</h2>
+			<p class="md-locx__sub">평일 저녁 8시 30분까지 진료 · 9~13층 · 지하 기계식 주차(SUV는 제5공영주차장)</p>
+		</header>
 		<div class="md-info-pair md-info-pair--3col">
 
 			<!-- 진료시간 카드 · v3.44.11 · 네이버 플레이스 링크 -->
@@ -315,7 +326,8 @@ if ( $landmarks ) : ?>
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'locpage_region_eyebrow', '🌐 지역별 오시는 길' ) ); ?></span>
 			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'locpage_region_title', '각 지역에서 문치과병원까지' ) ); ?></h2>
-			<p class="md-section-head__lead"><?php echo nl2br( esc_html( md_content( 'locpage_region_lead', "충남·충북·세종·대전·경기 중부권 28개 지역별 상세 교통 안내.\n지역명을 클릭하시면 해당 지역에서 천안 만남로까지의 상세 경로와 진료 안내를 보실 수 있습니다." ) ) ); ?></p>
+			<?php $md_region_total = 0; foreach ( moondental_get_regions_by_province() as $_l ) { $md_region_total += count( $_l ); } ?>
+			<p class="md-section-head__lead">충남 · 충북 · 세종 · 대전 · 경기 남부 <?php echo (int) $md_region_total; ?>개 지역에서 오는 길과 걸리는 시간입니다. 지역을 누르면 자동차 · 기차 · 버스 경로를 볼 수 있습니다.</p>
 		</header>
 
 		<?php foreach ( moondental_get_regions_by_province() as $prov => $list ) :
@@ -330,7 +342,7 @@ if ( $landmarks ) : ?>
 				<h3 class="md-region-province__title">
 					<span aria-hidden="true"><?php echo esc_html( $emoji ); ?></span>
 					<?php echo esc_html( $prov ); ?>
-					<small>(<?php echo count( $list ); ?>개 지역)</small>
+					<small><?php echo count( $list ); ?>곳 · 가까운 순</small>
 				</h3>
 				<?php if ( '천안·아산 시내' === $prov ) :
 					/* v4.14 · 시 전체 2장은 크게, 동·읍·면은 작은 칩으로 (원장 지시 · 14장 격자가 복잡해 보임) */
@@ -362,14 +374,13 @@ if ( $landmarks ) : ?>
 							</div>
 						<?php endforeach; ?>
 					</div>
-				<?php else : ?>
-				<div class="md-region-grid">
-					<?php foreach ( $list as $r ) :
-						$icon = ! empty( $r['icon'] ) ? $r['icon'] : '🚗'; ?>
-						<a class="md-region-pill" href="<?php echo esc_url( home_url( '/오시는-길/' . $r['slug'] . '/' ) ); ?>" data-track="cta-region-<?php echo esc_attr( $r['slug'] ); ?>">
-							<span class="md-region-pill__icon" aria-hidden="true"><?php echo $icon; ?></span>
-							<span class="md-region-pill__name"><?php echo esc_html( $r['name'] ); ?></span>
-							<span class="md-region-pill__time"><?php echo esc_html( ! empty( $r['duration_label'] ) ? $r['duration_label'] : ( $r['duration_min'] . '분' ) ); ?></span>
+				<?php else : /* v4.15 · 다른 권역도 같은 칩 — 가까운 순 */
+					usort( $list, function ( $a, $b ) { return (int) $a['duration_min'] <=> (int) $b['duration_min']; } ); ?>
+				<div class="md-region-chips md-region-chips--lg">
+					<?php foreach ( $list as $r ) : ?>
+						<a class="md-region-chip" href="<?php echo esc_url( home_url( '/오시는-길/' . $r['slug'] . '/' ) ); ?>" data-track="cta-region-<?php echo esc_attr( $r['slug'] ); ?>">
+							<span class="md-region-chip__name"><?php echo esc_html( $r['name'] ); ?></span>
+							<span class="md-region-chip__time"><?php echo esc_html( ! empty( $r['duration_label'] ) ? $r['duration_label'] : ( $r['duration_min'] . '분' ) ); ?></span>
 						</a>
 					<?php endforeach; ?>
 				</div>

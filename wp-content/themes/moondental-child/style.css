@@ -17057,3 +17057,24 @@ a.md-center-color--preservation:hover { color: #4A7530 !important; }
   .md-region-chip { background: var(--color-surface-alt, #2F251C); }
   .md-region-chip:hover { background: var(--color-primary); }
 }
+
+/* v4.15 · 오시는 길 · 지금 진료 중 배지 · 섹션 제목 · 권역 칩 */
+.md-open-status { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 6px 14px; border-radius: 999px; font-size: .9rem; font-weight: 700; background: var(--color-surface-alt, #F5E8D8); color: var(--color-text-sub); }
+.md-open-status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.md-open-status.is-open { background: rgba(107, 143, 114, .14); color: var(--color-accent-dark, #6B8F72); }
+.md-open-status.is-before { background: rgba(201, 162, 39, .14); color: #8A6D0B; }
+.md-open-status.is-closed { color: var(--color-text-mute); }
+.md-locx__head--tight { margin-bottom: 16px; }
+.md-locx__head--tight .md-locx__sub { margin-top: 8px; font-size: .92rem; }
+.md-region-chips--lg .md-region-chip { padding: 9px 14px; font-size: .95rem; background: var(--color-white); border: 1px solid var(--color-border); }
+.md-region-chips--lg .md-region-chip:hover { background: var(--color-primary); border-color: var(--color-primary); }
+.md-region-chips--lg .md-region-chip__time { font-size: .84rem; }
+.md-mapbtn-grid--region { margin-top: 20px; }
+.md-region-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 760px) { .md-region-pair { grid-template-columns: 1fr; } }
+@media (prefers-color-scheme: dark) {
+  .md-open-status { background: var(--color-surface-alt, #2F251C); }
+  .md-open-status.is-open { background: rgba(143, 174, 146, .18); color: var(--color-accent, #8FAE92); }
+  .md-open-status.is-before { background: rgba(224, 185, 58, .18); color: #F0CF5A; }
+  .md-region-chips--lg .md-region-chip { background: var(--color-surface, #241C15); }
+}

@@ -729,3 +729,26 @@
     copyText(val).then(function () { showToast(msg); }, function () { showToast(val); });
   });
 })();
+
+/* v4.15 · 오시는 길 · 지금 진료 중 배지 — 서버는 캐시된 HTML 을 주므로 브라우저에서 계산 */
+(function () {
+  'use strict';
+  var el = document.querySelector('.md-open-status[data-hours]');
+  if (!el) return;
+  var hours; try { hours = JSON.parse(el.getAttribute('data-hours') || '{}'); } catch (e) { return; }
+  function range(str) {
+    var m = /(\d{1,2})\s*:\s*(\d{2})\s*[~\-–—]\s*(\d{1,2})\s*:\s*(\d{2})/.exec(str || '');
+    return m ? [parseInt(m[1], 10) * 60 + parseInt(m[2], 10), parseInt(m[3], 10) * 60 + parseInt(m[4], 10)] : null;
+  }
+  /* 한국 시간 기준 */
+  var now = new Date(Date.now() + (new Date().getTimezoneOffset() + 540) * 60000);
+  var dow = now.getDay(), mins = now.getHours() * 60 + now.getMinutes();
+  var key = dow === 0 ? null : dow === 4 ? 'thu' : dow === 6 ? 'sat' : 'wd';
+  var r = key ? range(hours[key]) : null;
+  var text, cls;
+  if (!r) { text = '오늘 휴진'; cls = 'is-closed'; }
+  else if (mins < r[0]) { text = '오늘 ' + Math.floor(r[0] / 60) + ':' + ('0' + (r[0] % 60)).slice(-2) + ' 진료 시작'; cls = 'is-before'; }
+  else if (mins < r[1]) { text = '지금 진료 중 · ' + Math.floor(r[1] / 60) + ':' + ('0' + (r[1] % 60)).slice(-2) + '까지'; cls = 'is-open'; }
+  else { text = '오늘 진료 끝 · ' + (dow === 6 ? '월요일' : dow === 5 ? '토요일' : '내일') + ' 9:00부터'; cls = 'is-closed'; }
+  el.textContent = text; el.classList.add(cls); el.hidden = false;
+})();
