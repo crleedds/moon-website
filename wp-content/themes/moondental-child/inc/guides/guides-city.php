@@ -59,7 +59,7 @@ function md_guide_block_route( $slug ) {
 	$html = '<div class="md-guide-tablewrap"><table class="md-guide-table"><tbody>';
 	foreach ( $rows as $row ) $html .= '<tr><th style="white-space:nowrap">' . esc_html( $row[0] ) . '</th><td>' . esc_html( $row[1] ) . '</td></tr>';
 	$html .= '</tbody></table></div>';
-	$html .= '<p>도착하면 천안고속버스터미널 옆 문타워입니다. 주차는 문타워 주차장을 이용합니다. 자세한 안내는 <a href="/오시는-길/' . esc_attr( $slug ) . '/">' . esc_html( $r['name'] ) . '에서 오시는 길</a>에 있습니다.</p>';
+	$html .= '<p>도착하면 천안고속버스터미널 옆 문타워입니다. 병원 지하 기계식 주차장은 무료이지만 기계식이라 SUV · 대형차는 들어가지 못합니다. SUV · 대형차는 걸어서 5분 거리의 신부 제5공영주차장(동남구 먹거리1길 10)에 세우고, 접수처에서 주차 도장 · 주차권을 받으면 무료입니다. 자세한 안내는 <a href="/오시는-길/' . esc_attr( $slug ) . '/">' . esc_html( $r['name'] ) . '에서 오시는 길</a>에 있습니다.</p>';
 	return $html;
 }
 

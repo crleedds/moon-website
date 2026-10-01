@@ -67,7 +67,7 @@ $hours_line = implode( ' · ', array_filter( array(
 
 /* 자주 묻는 것 — 검색용 문장이 아니라 실제로 묻는 것 3가지 */
 $faq_items = array(
-	array( '주차는 어디에 하나요?', '문타워 지하 주차장을 이용하시면 됩니다. 진료 후 데스크에서 주차 등록을 해 드립니다. 만차일 때는 천안고속버스터미널 주차장이 바로 옆에 있습니다.' ),
+	array( '주차는 어디에 하나요?', '승용차는 병원 지하 기계식 주차장에 세우고 데스크에 접수하면 무료로 등록됩니다. 기계식이라 SUV · 대형차는 들어가지 못하므로, 걸어서 5분 거리의 신부 제5공영주차장(동남구 먹거리1길 10)에 세운 뒤 접수처에서 주차 도장 · 주차권을 받으면 무료입니다.' ),
 	array( '진료 시간이 어떻게 되나요?', $hours_line ? $hours_line . '. 평일 저녁 진료가 있어 퇴근 후 출발해도 됩니다.' : '평일 저녁 진료가 있어 퇴근 후 출발해도 됩니다. 요일별 시간은 아래 상담 안내에 있습니다.' ),
 	array( '처음 갈 때 무엇을 챙기나요?', '신분증(건강보험증)과 드시는 약 정보를 챙겨 주세요. 다른 치과에서 찍은 X-ray가 있으면 USB나 이메일로 가져오시면 진단이 빨라집니다. 전화 · 네이버 · 카카오톡으로 미리 예약하면 기다리지 않습니다.' ),
 );
@@ -101,7 +101,7 @@ if ( function_exists( 'moondental_get_regions_by_province' ) ) {
 		</p>
 		<div class="md-region-hero__badges">
 			<span><?php echo $is_walking ? '🚶 ' : '🚗 '; ?><?php echo esc_html( $duration_label ); ?></span>
-			<span>🅿️ 문타워 주차장</span>
+			<span>🅿️ 무료 주차 · SUV는 제5공영주차장</span>
 			<?php if ( $hours_wd ) : ?><span>🌙 평일 <?php echo esc_html( $hours_wd ); ?></span><?php endif; ?>
 		</div>
 	</div>
@@ -122,7 +122,7 @@ if ( function_exists( 'moondental_get_regions_by_province' ) ) {
 					<span class="md-region-route__time"><?php echo esc_html( $duration_label ); ?></span>
 				</div>
 				<?php if ( $highway ) : ?><p><?php echo esc_html( $highway ); ?></p><?php endif; ?>
-				<p class="md-region-route__detail">내비게이션에 「문치과병원」 또는 「천안시 동남구 만남로 52」를 넣으세요. 문타워 지하 주차장에 세우고 엘리베이터로 9층 데스크로 올라오시면 됩니다.</p>
+				<p class="md-region-route__detail">내비게이션에 「문치과병원」 또는 「천안시 동남구 만남로 52」를 넣으세요. 승용차는 병원 지하 기계식 주차장(무료 · 데스크 접수 시 등록), SUV · 대형차는 걸어서 5분 거리의 신부 제5공영주차장(먹거리1길 10 · 접수처에서 주차권)을 이용하세요.</p>
 			</article>
 
 			<?php if ( $ktx ) : ?>
