@@ -19,12 +19,16 @@ function md_guide_slug_map() {
 		'suresmile'  => 'suresmile',
 		'laminate'   => 'laminate',
 		'preservation' => 'preservation', // v3.85 · NO. 04 자연치아보존센터
+		'cheonan'    => 'cheonan',   // v4.12 · 천안 치과 추천, 무엇을 보고 고를까
+		'asan'       => 'asan',      // v4.12 · 아산 치과 추천, 무엇을 보고 고를까
 		// 한글 (호환)
 		'임플란트'   => 'implant',
 		'투명교정'   => 'suresmile',
 		'슈어스마일' => 'suresmile',
 		'라미네이트' => 'laminate',
 		'자연치아보존' => 'preservation',
+		'천안치과추천' => 'cheonan',
+		'아산치과추천' => 'asan',
 	);
 }
 
@@ -203,6 +207,27 @@ add_filter( 'pre_get_document_title', function ( $title ) {
 	$head   = $center ? ( $center . ' · ' . $title ) : $title;
 	return $head . ' | ' . $hospital;
 }, 20 );
+
+/**
+ * v4.12 · 메타 설명·캐노니컬 — 가이드는 가짜 쿼리라 Yoast 가 최근 글의 설명을 가져다 붙이던 문제.
+ */
+function md_guide_seo_desc( $desc ) {
+	if ( empty( $GLOBALS['md_guide_data'] ) ) return $desc;
+	$d = $GLOBALS['md_guide_data'];
+	$sum = isset( $d['summary'] ) ? trim( wp_strip_all_tags( $d['summary'] ) ) : '';
+	return '' !== $sum ? $sum : $desc;
+}
+add_filter( 'wpseo_metadesc', 'md_guide_seo_desc', 50 );
+add_filter( 'wpseo_opengraph_desc', 'md_guide_seo_desc', 50 );
+add_filter( 'wpseo_twitter_description', 'md_guide_seo_desc', 50 );
+add_filter( 'wpseo_canonical', function ( $url ) {
+	if ( empty( $GLOBALS['md_guide_data']['slug'] ) ) return $url;
+	return home_url( '/guide/' . $GLOBALS['md_guide_data']['slug'] . '/' );
+}, 50 );
+add_filter( 'wpseo_opengraph_url', function ( $url ) {
+	if ( empty( $GLOBALS['md_guide_data']['slug'] ) ) return $url;
+	return home_url( '/guide/' . $GLOBALS['md_guide_data']['slug'] . '/' );
+}, 50 );
 
 /**
  * body_class 추가 · 스타일 스코프.

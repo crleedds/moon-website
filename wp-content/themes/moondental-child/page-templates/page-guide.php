@@ -113,7 +113,7 @@ $data = array_merge( array(
 					<!-- CTA -->
 					<section class="md-guide__cta">
 						<div class="md-guide__cta-inner">
-							<?php $_cta_head = $data['center'] ?: $data['title']; ?>
+							<?php $_cta_head = ! empty( $data['cta_head'] ) ? $data['cta_head'] : ( $data['center'] ?: $data['title'] ); // v4.12 · cta_head ?>
 							<h3>천안·아산 <?php echo esc_html( $_cta_head ); ?> 상담이 필요하신가요?</h3>
 							<p>30여년 임상 경험과 다학제 협진으로 <strong>1:1 충분한 사전 상담</strong>부터 시작합니다.</p>
 							<div class="md-guide__cta-btns">

@@ -125,6 +125,7 @@ function md_survey_settings() {
 		'window_days' => 3,   /* 진료일 이후 며칠까지 응답할 수 있나 */
 		'doctors'     => '',  /* 한 줄에 한 명 */
 		'staff'       => '',
+		'review_url'  => '',  /* v4.12 · 구글 리뷰 바로가기 (비우면 구글 지도에서 병원을 찾는 링크) */
 	);
 	$s = get_option( 'md_survey_settings', array() );
 	return is_array( $s ) ? array_merge( $d, $s ) : $d;
@@ -148,6 +149,13 @@ function md_survey_name_list( $key ) {
 
 function md_survey_public_url() {
 	return home_url( '/만족도/' );
+}
+
+/** v4.12 · 구글 리뷰 링크 — 설정에 없으면 구글 지도에서 병원을 찾는 주소 */
+function md_survey_review_url() {
+	$u = (string) md_survey_setting( 'review_url' );
+	if ( '' !== $u ) return $u;
+	return 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( '문치과병원 천안 만남로 52' );
 }
 
 /* ============================================================
@@ -589,6 +597,10 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-done{text-align:center;padding:36px 20px}
 .sv-done .mark{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:rgba(107,143,114,.15);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:2rem}
 .sv-done h1{font-size:1.35rem}
+.sv-review{margin-top:18px;padding-top:16px;border-top:1px dashed rgba(0,0,0,.12)}
+.sv-review p{font-size:.92rem;margin:0 0 12px}
+.sv-review__btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border-radius:999px;background:#4285F4;color:#fff;font-weight:700;text-decoration:none}
+.sv-review__btn:hover{background:#3367D6;color:#fff}
 .sv-foot{margin-top:18px;text-align:center;font-size:.78rem;color:var(--mute)}
 .sv-foot a{color:inherit}
 </style>
@@ -611,6 +623,10 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<div class="mark" aria-hidden="true">✓</div>
 		<h1>응답이 저장되었습니다</h1>
 		<p><?php echo esc_html( $name ); ?>님의 의견은 병원 관리자에게만 전달되어 더 나은 진료를 만드는 데 쓰입니다.</p>
+		<div class="sv-review">
+			<p>진료가 만족스러우셨다면 구글에도 한 줄 남겨 주세요. 다른 분들이 치과를 고를 때 큰 도움이 됩니다.</p>
+			<a class="sv-review__btn" href="<?php echo esc_url( md_survey_review_url() ); ?>" target="_blank" rel="noopener">구글 리뷰 남기기</a>
+		</div>
 	</section>
 
 <?php elseif ( 'already' === $step ) : ?>
@@ -805,6 +821,8 @@ function md_survey_handle_post() {
 			$s['window_days'] = max( 1, min( 30, isset( $_POST['window_days'] ) ? (int) $_POST['window_days'] : 3 ) );
 			$s['doctors']     = isset( $_POST['doctors'] ) ? sanitize_textarea_field( wp_unslash( $_POST['doctors'] ) ) : '';
 			$s['staff']       = isset( $_POST['staff'] ) ? sanitize_textarea_field( wp_unslash( $_POST['staff'] ) ) : '';
+			$ru = isset( $_POST['review_url'] ) ? esc_url_raw( trim( wp_unslash( $_POST['review_url'] ) ) ) : '';
+			$s['review_url'] = ( '' !== $ru && preg_match( '#^https://(search\.google\.com|g\.page|maps\.app\.goo\.gl|www\.google\.com|maps\.google\.com|goo\.gl)/#', $ru ) ) ? $ru : '';
 			update_option( 'md_survey_settings', $s, 'no' );
 			if ( ! empty( $_POST['regen_key'] ) ) { update_option( 'md_survey_api_key', wp_generate_password( 40, false ), 'no' ); }
 			$back = md_survey_admin_url( array( 'sv' => 'settings', 'msg' => 'saved' ) );
@@ -1136,6 +1154,12 @@ function md_survey_render_settings() {
 			<label class="mds-field mds-field--grow"><span>스탭 목록 (한 줄에 한 명)</span><textarea name="staff" rows="8"><?php echo esc_textarea( $s['staff'] ); ?></textarea></label>
 		</div>
 		<p class="mds-hint">명단을 넣을 때 이름을 고르는 목록입니다. 목록에 없는 이름도 직접 쓸 수 있습니다.</p>
+
+		<h2 class="mdsv-h">구글 리뷰 바로가기</h2>
+		<div class="mds-formrow">
+			<label class="mds-field mds-field--grow"><span>리뷰 링크 (비우면 구글 지도에서 병원을 찾는 링크를 씁니다)</span><input type="url" name="review_url" value="<?php echo esc_attr( (string) $s['review_url'] ); ?>" placeholder="https://g.page/r/…/review"></label>
+		</div>
+		<p class="mds-hint">응답을 마친 환자에게 「구글 리뷰 남기기」 버튼으로 보여 줍니다. 구글 비즈니스 프로필 → 「리뷰 받기」에서 복사한 짧은 링크(g.page/r/…/review)를 넣으면 리뷰 창이 바로 열립니다.</p>
 
 		<h2 class="mdsv-h">덴트웹 자동 연동 키</h2>
 		<p class="mdsv-url"><code><?php echo esc_html( (string) get_option( 'md_survey_api_key' ) ); ?></code></p>
