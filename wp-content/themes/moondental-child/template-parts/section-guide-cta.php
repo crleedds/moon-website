@@ -23,6 +23,8 @@ $path_map = array(
 	'suresmile' => '/guide/suresmile/',
 	'laminate'  => '/guide/laminate/',
 	'preservation' => '/guide/preservation/', // v3.85
+	'cheonan'   => '/guide/cheonan/', // v4.12.1 · 천안 치과 추천, 무엇을 보고 고를까
+	'asan'      => '/guide/asan/',    // v4.12.1 · 아산 치과 추천, 무엇을 보고 고를까
 );
 if ( ! isset( $path_map[ $slug ] ) ) return;
 $href = home_url( $path_map[ $slug ] );

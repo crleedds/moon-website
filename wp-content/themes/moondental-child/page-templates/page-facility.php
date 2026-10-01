@@ -56,6 +56,10 @@ get_header();
 	</div>
 </section>
 
+<!-- ============ 2-1. 치과 선택 안내 (v4.12.1 · 장비·시설 기준으로 치과를 고르는 법) ============ -->
+<?php get_template_part( 'template-parts/section', 'guide-cta', array( 'slug' => 'cheonan' ) ); ?>
+<?php get_template_part( 'template-parts/section', 'guide-cta', array( 'slug' => 'asan' ) ); ?>
+
 <!-- ============ 3. CTA ============ -->
 <?php get_template_part( 'template-parts/section', 'cta' ); ?>
 
