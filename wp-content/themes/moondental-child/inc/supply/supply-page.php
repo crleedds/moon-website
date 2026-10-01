@@ -62,6 +62,12 @@ function md_sup_apps() {
 			'url'   => 'https://www.appsheet.com/start/27720143-2dc0-4c72-bb78-888903789d2f', /* v4.10.1 · 재고관리 AppSheet 앱으로 (원장 지시) */
 			'desc'  => '재료 신청 · 우리 팀 사용량과 비용 · 입출고 관리',
 		),
+		// v4.17 · 달력 (생일 · 입사 기념일 · 병원 행사)
+		'calendar' => array(
+			'label' => '달력',
+			'icon'  => '📅',
+			'desc'  => '생일 · 입사 기념일 · 병원 행사 · 휴진',
+		),
 		// v4.0 · 환자 설명용 자료
 		'care'  => array(
 			'label' => 'Moon Dental Care',
@@ -942,6 +948,7 @@ function md_sup_render_header( $app, $tab ) {
 
 /** 첫 화면 — 어떤 도구로 들어갈지 고른다 */
 function md_sup_render_hub() {
+	if ( function_exists( 'md_cal_render_hub_strip' ) ) { md_cal_render_hub_strip(); } /* v4.17 · 오늘 · 2주 안의 생일 · 기념일 · 행사 */
 	?>
 	<div class="mds-apps"><!-- v4.10.1 · 설명 문구 없이 이름만 (원장 지시) -->
 		<?php foreach ( md_sup_apps() as $key => $a ) : ?>
@@ -951,6 +958,9 @@ function md_sup_render_hub() {
 				<span class="mds-app__body">
 					<span class="mds-app__label">
 						<?php echo esc_html( $a['label'] ); ?>
+						<?php if ( 'calendar' === $key && function_exists( 'md_cal_today_count' ) && md_cal_today_count() ) : ?>
+							<span class="mds-app__badge">오늘 <?php echo (int) md_cal_today_count(); ?>건</span>
+						<?php endif; ?>
 						<?php if ( 'support' === $key && function_exists( 'md_support_open_count' ) && md_sup_can_manage() && md_support_open_count() ) : ?>
 							<span class="mds-app__badge"><?php echo (int) md_support_open_count(); ?>건 접수</span>
 						<?php endif; ?>
@@ -995,6 +1005,8 @@ function md_sup_render_page() {
 		md_support_render(); // v4.3 · 지원 요청
 	} elseif ( 'equipment' === $app && function_exists( 'md_equipment_render' ) ) {
 		md_equipment_render(); // v4.8 · 기구/장비 대장
+	} elseif ( 'calendar' === $app && function_exists( 'md_cal_render' ) ) {
+		md_cal_render(); // v4.17 · 달력
 	} elseif ( 'fees' === $app && function_exists( 'md_fees_render' ) ) {
 		md_fees_render(); // v4.13 · 진료비
 	} elseif ( 'survey' === $app && function_exists( 'md_survey_render' ) ) {

@@ -1,0 +1,101 @@
+/* =============================================================
+   직원 라운지 · 달력 (v4.17) — 생일 · 입사 기념일 · 병원 행사
+   재료실(supply.css)의 토큰과 부품을 그대로 쓴다.
+   ============================================================= */
+
+/* 종류별 색 */
+.is-birthday { --cal: #D88062; --cal-bg: rgba(216, 128, 98, .16); }
+.is-anniv    { --cal: #6B8F72; --cal-bg: rgba(107, 143, 114, .16); }
+.is-event    { --cal: #4A7BD0; --cal-bg: rgba(74, 123, 208, .14); }
+.is-closed   { --cal: #8F7F6E; --cal-bg: rgba(143, 127, 110, .16); }
+.is-edu      { --cal: #8A6D0B; --cal-bg: rgba(201, 162, 39, .16); }
+.is-other    { --cal: #7A6B5F; --cal-bg: rgba(122, 107, 95, .14); }
+
+/* 라운지 첫 화면 띠 */
+.mdcal-strip { margin-bottom: 18px; padding: 16px 20px; }
+.mdcal-strip__head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.mdcal-strip__head h2 { margin: 0; font-size: 1.05rem; font-weight: 800; }
+.mdcal-strip__more { font-size: .88rem; font-weight: 700; color: var(--color-primary-dark, #B86347); text-decoration: none; white-space: nowrap; }
+.mdcal-strip__empty { margin: 0; font-size: .92rem; color: var(--color-text-sub, #7A6B5F); }
+.mdcal-strip__list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.mdcal-strip__list li { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px; border-radius: 999px; background: var(--cal-bg); font-size: .9rem; }
+.mdcal-strip__list li.is-today { outline: 2px solid var(--cal); }
+.mdcal-strip__date { font-size: .78rem; font-weight: 800; color: var(--cal); white-space: nowrap; }
+.mdcal-strip__list a { color: var(--color-text, #3D2F26); text-decoration: none; font-weight: 700; }
+
+/* 상단 바 */
+.mdcal-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 12px; }
+.mdcal-bar__title { margin: 0; font-size: 1.3rem; font-weight: 800; min-width: 7.5em; text-align: center; }
+.mdcal-bar__nav { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--color-border, #EDDFD0); background: var(--color-white, #fff); color: var(--color-text, #3D2F26); text-decoration: none; font-size: 1.4rem; line-height: 1; }
+.mdcal-bar__nav:hover { border-color: var(--color-primary, #D88062); color: var(--color-primary-dark, #B86347); }
+.mdcal-bar__today { font-size: .88rem; font-weight: 700; color: var(--color-primary-dark, #B86347); text-decoration: none; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--color-border, #EDDFD0); }
+.mdcal-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.mdcal-legend__item { font-size: .78rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--cal-bg); color: var(--cal); }
+
+/* 월 격자 */
+.mdcal-gridwrap { padding: 12px; margin-bottom: 18px; }
+.mdcal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.mdcal-dow { text-align: center; font-size: .78rem; font-weight: 800; color: var(--color-text-mute, #A89685); padding: 6px 0; }
+.mdcal-dow.is-sun { color: var(--color-danger, #C66B5E); }
+.mdcal-dow.is-sat { color: #4A7BD0; }
+.mdcal-cell { min-height: 92px; padding: 6px; border-radius: 10px; background: var(--color-bg, #FFFAF4); border: 1px solid transparent; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.mdcal-cell.is-pad { background: transparent; }
+.mdcal-cell.is-today { border-color: var(--color-primary, #D88062); background: var(--color-white, #fff); }
+.mdcal-cell__day { display: flex; align-items: center; gap: 6px; font-size: .9rem; font-weight: 800; }
+.mdcal-cell.is-sun .mdcal-cell__day span { color: var(--color-danger, #C66B5E); }
+.mdcal-cell.is-sat .mdcal-cell__day span { color: #4A7BD0; }
+.mdcal-cell__day em { font-style: normal; font-size: .68rem; font-weight: 800; color: var(--color-primary-dark, #B86347); }
+.mdcal-item { display: block; padding: 3px 7px; border-radius: 6px; background: var(--cal-bg); color: var(--color-text, #3D2F26); border-left: 3px solid var(--cal); font-size: .78rem; font-weight: 700; line-height: 1.3; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mdcal-item:hover { background: var(--cal); color: #fff; }
+
+/* 입력 폼 */
+.mdcal-form { padding: 18px 20px; margin-bottom: 18px; }
+.mdcal-form__title { margin: 0 0 12px; font-size: 1.05rem; font-weight: 800; }
+.mdcal-form__row { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-bottom: 12px; }
+.mdcal-form__row:nth-of-type(2) { grid-template-columns: 1fr 1fr 1fr; }
+.mdcal-form .mds-field { margin-bottom: 0; }
+.mdcal-form .mds-field > span small { font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--color-text-mute, #A89685); }
+.mdcal-form input[type="date"], .mdcal-form input[type="number"], .mdcal-form input[type="text"], .mdcal-form select { width: 100%; font: inherit; min-height: 44px; padding: 8px 12px; border: 1px solid var(--color-border, #EDDFD0); border-radius: 10px; background: var(--color-white, #fff); color: var(--color-text, #3D2F26); }
+.mdcal-form__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
+.mdcal-form__foot .mds-check small { font-weight: 500; color: var(--color-text-mute, #A89685); }
+.mdcal-form--edit { margin: 10px 0 0; padding: 14px; border: 1px dashed var(--color-border, #EDDFD0); border-radius: 12px; }
+
+/* 이 달의 일정 */
+.mdcal-list__title { margin: 22px 0 10px; font-size: 1rem; font-weight: 800; }
+.mdcal-list__title small { font-weight: 500; color: var(--color-text-mute, #A89685); }
+.mdcal-row { margin-bottom: 10px; padding: 12px 16px; border-left: 5px solid var(--cal); }
+.mdcal-row__head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.mdcal-row__date { font-weight: 800; color: var(--cal); white-space: nowrap; font-feature-settings: 'tnum'; }
+.mdcal-row__title { font-weight: 700; }
+.mdcal-row__memo { color: var(--color-text-sub, #7A6B5F); font-size: .9rem; }
+.mdcal-row__del { margin-left: auto; }
+.mdcal-btn { display: inline-flex; align-items: center; gap: 4px; min-height: 34px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--color-border, #EDDFD0); background: var(--color-white, #fff); color: var(--color-text-sub, #7A6B5F); font: inherit; font-size: .84rem; font-weight: 700; cursor: pointer; list-style: none; }
+.mdcal-btn::-webkit-details-marker { display: none; }
+.mdcal-btn:hover { border-color: var(--color-primary, #D88062); color: var(--color-primary-dark, #B86347); }
+.mdcal-btn--del:hover { border-color: var(--color-danger, #C66B5E); color: var(--color-danger, #C66B5E); }
+.mdcal-row__edit { margin-top: 8px; }
+.mdcal-row__edit > summary { display: inline-flex; }
+
+/* 모바일 — 격자 대신 날짜 목록 */
+@media (max-width: 640px) {
+  .mdcal-bar__title { font-size: 1.15rem; min-width: 0; }
+  .mdcal-legend { width: 100%; margin-left: 0; }
+  .mdcal-gridwrap { padding: 8px; }
+  .mdcal-grid { display: block; }
+  .mdcal-dow, .mdcal-cell.is-pad { display: none; }
+  .mdcal-cell { min-height: 0; flex-direction: row; align-items: flex-start; flex-wrap: wrap; gap: 6px; padding: 8px 10px; border-radius: 8px; margin-bottom: 4px; }
+  .mdcal-cell:not(.has-items):not(.is-today) { display: none; }
+  .mdcal-cell__day { min-width: 3.2em; }
+  .mdcal-item { white-space: normal; }
+  .mdcal-form__row, .mdcal-form__row:nth-of-type(2) { grid-template-columns: 1fr; }
+  .mdcal-row__del { margin-left: 0; width: 100%; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .mdcal-cell { background: var(--color-surface, #241C15); }
+  .mdcal-cell.is-today { background: var(--color-surface-alt, #2F251C); }
+  .mdcal-item { color: var(--color-text, #F0E6DA); }
+  .mdcal-strip__list a { color: var(--color-text, #F0E6DA); }
+  .mdcal-form input, .mdcal-form select { background: var(--color-surface, #241C15); color: var(--color-text, #F0E6DA); border-color: var(--color-border, #3A2E24); }
+  .mdcal-bar__nav, .mdcal-btn { background: var(--color-surface, #241C15); }
+}
