@@ -348,7 +348,7 @@ function md_survey_import_xlsx( $path, $date ) {
 
 /** 공통 — 행 배열(첫 줄이 제목이면 제목으로 열을 찾음) → 명단 */
 function md_survey_import_rows( $rows, $date ) {
-	$ok = 0; $upd = 0; $skip = 0; $errs = array();
+	$ok = 0; $upd = 0; $skip = 0; $errs = array(); $dates = array();
 	$map = null;
 	$aliases = array(
 		'date'     => array( '접수시각', '접수일', '진료일', '날짜', 'date' ),
@@ -387,12 +387,13 @@ function md_survey_import_rows( $rows, $date ) {
 			else { $d['date'] = $date; }
 		}
 		if ( ! isset( $d['staff'] ) || '' === trim( (string) $d['staff'] ) ) { $skip++; continue; }
+		$dates[ $d['date'] ] = true;
 		$r = md_survey_visit_upsert( $d, 'import' );
 		if ( is_wp_error( $r ) ) { $errs[] = $n . '줄: ' . $r->get_error_message(); }
 		elseif ( $r['updated'] ) { $upd++; }
 		else { $ok++; }
 	}
-	return array( 'added' => $ok, 'updated' => $upd, 'skipped' => $skip, 'errors' => $errs );
+	return array( 'added' => $ok, 'updated' => $upd, 'skipped' => $skip, 'errors' => $errs, 'dates' => array_keys( $dates ) );
 }
 
 /* ============================================================
@@ -861,6 +862,13 @@ function md_survey_handle_post() {
 			} else {
 				$r = md_survey_import_xlsx( $f['tmp_name'], $date );
 				@unlink( $f['tmp_name'] );
+				/* 파일 안의 접수일이 고른 날짜와 다르면 그 날짜 화면으로 보내고 알린다 */
+				$fd = ! empty( $r['dates'] ) ? $r['dates'] : array();
+				if ( 1 === count( $fd ) && $fd[0] !== $date ) {
+					$back = md_survey_admin_url( array( 'sv' => 'roster', 'd' => $fd[0], 'fd' => $fd[0] ) );
+				} elseif ( count( $fd ) > 1 ) {
+					$back = add_query_arg( 'fd', implode( ',', $fd ), $back );
+				}
 				$back = add_query_arg( array( 'msg' => 'imported', 'a' => $r['added'], 'u' => $r['updated'], 's' => $r['skipped'] ), $back );
 				if ( $r['errors'] ) { $back = add_query_arg( 'err', implode( ' / ', array_slice( $r['errors'], 0, 5 ) ), $back ); }
 			}
@@ -964,7 +972,16 @@ function md_survey_notice() {
 		'saved'    => '설정을 저장했습니다.',
 		'imported' => sprintf( '붙여넣기 완료 — 새로 %d명, 고침 %d명, 담당직원이 없어 건너뜀 %d명.', isset( $_GET['a'] ) ? (int) $_GET['a'] : 0, isset( $_GET['u'] ) ? (int) $_GET['u'] : 0, isset( $_GET['s'] ) ? (int) $_GET['s'] : 0 ),
 	);
-	if ( isset( $map[ $m ] ) ) { echo '<div class="mds-notice mds-notice--ok">' . esc_html( $map[ $m ] ) . '</div>'; }
+	if ( isset( $map[ $m ] ) ) {
+		$text = $map[ $m ];
+		if ( 'imported' === $m && isset( $_GET['fd'] ) ) {
+			$fd = array_filter( array_map( 'sanitize_text_field', explode( ',', wp_unslash( $_GET['fd'] ) ) ) );
+			$labels = array();
+			foreach ( $fd as $x ) { if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $x ) ) { $labels[] = date_i18n( 'n월 j일', strtotime( $x ) ); } }
+			if ( $labels ) { $text .= ' 파일의 접수일에 따라 ' . implode( ' · ', $labels ) . ' 명단에 들어갔습니다.'; }
+		}
+		echo '<div class="mds-notice mds-notice--ok">' . esc_html( $text ) . '</div>';
+	}
 }
 
 function md_survey_render() {
@@ -1050,7 +1067,7 @@ function md_survey_render_roster() {
 		<p class="mds-hint">덴트웹 데스크 화면 → 접수목록 → <b>기간별 목록</b> → 오늘 → <b>엑셀저장</b>(사유: 만족도 조사 명단). 저장된 파일을 여기에 고르고 올리면 끝입니다. 파일을 열어 볼 필요가 없고, 서버에는 파일이 남지 않습니다. 담당직원이 빈 환자는 건너뜁니다.</p>
 		<div class="mdsv-upload__row">
 			<input type="file" name="xlsx" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
-			<button type="submit" class="mds-btn mds-btn--fill">명단에 넣기</button>
+			<button type="submit" class="mds-btn mds-btn--fill"><?php echo esc_html( date_i18n( 'n월 j일', strtotime( $date ) ) ); ?> 명단에 넣기</button>
 		</div>
 	</form>
 
