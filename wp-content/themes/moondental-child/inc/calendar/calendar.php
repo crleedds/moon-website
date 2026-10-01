@@ -179,7 +179,13 @@ function md_cal_handle_post() {
 		case 'add':
 			$res = md_cal_save( $data );
 			if ( is_wp_error( $res ) ) { $back = add_query_arg( 'err', $res->get_error_message(), $back ); }
-			else { $back = md_sup_url( array( 'app' => 'calendar', 'm' => substr( $data['date_start'], 0, 7 ) ) ) . '#e' . (int) $res; }
+			else {
+				/* 매년 반복(생일 등)은 올해의 그 달로, 아니면 입력한 달로 */
+				$types_all = md_cal_types();
+				$is_yearly = ! empty( $data['yearly'] ) || ! empty( $types_all[ $data['type'] ]['yearly'] );
+				$goto = $is_yearly ? current_time( 'Y' ) . substr( $data['date_start'], 4, 3 ) : substr( $data['date_start'], 0, 7 );
+				$back = md_sup_url( array( 'app' => 'calendar', 'm' => $goto ) ) . '#e' . (int) $res;
+			}
 			break;
 		case 'edit':
 			$res = md_cal_save( $data, $id );
