@@ -69,7 +69,6 @@ $hours_line = implode( ' · ', array_filter( array(
 $faq_items = array(
 	array( '예약하고 가야 하나요?', '예약 없이 와도 진료는 받을 수 있지만, 멀리서 오시는 분은 전화(041-563-2875) · 네이버 예약 · 카카오톡으로 미리 시간을 잡으면 기다리지 않습니다. 예약할 때 「' . $region_name . '에서 간다」고 말씀하시면 한 번에 볼 수 있는 진료를 묶어 드립니다.' ),
 	array( 'SUV · 대형차는 어디에 세우나요?', '병원 지하 주차장은 기계식이라 SUV · 대형차가 들어가지 못합니다. 걸어서 5분 거리의 신부 제5공영주차장(동남구 먹거리1길 10)에 세운 뒤 접수처에서 주차 도장 · 주차권을 받으면 무료입니다.' ),
-	array( '진료 시간이 어떻게 되나요?', $hours_line ? $hours_line . '. 평일 저녁 진료가 있어 퇴근 후 출발해도 됩니다.' : '평일 저녁 진료가 있어 퇴근 후 출발해도 됩니다. 요일별 시간은 아래 상담 안내에 있습니다.' ),
 	array( '처음 갈 때 무엇을 챙기나요?', '신분증(건강보험증)과 드시는 약 정보를 챙겨 주세요. 다른 치과에서 찍은 X-ray가 있으면 USB나 이메일로 가져오시면 진단이 빨라집니다. 전화 · 네이버 · 카카오톡으로 미리 예약하면 기다리지 않습니다.' ),
 );
 
@@ -155,7 +154,7 @@ if ( function_exists( 'moondental_get_regions_by_province' ) ) {
 		<?php
 		/* v4.15 · 길찾기 — 구글은 출발지를 이 지역으로 미리 넣는다 */
 		$dest_q   = rawurlencode( '문치과병원 천안시 동남구 만남로 52' );
-		$origin_q = rawurlencode( $is_walking ? $region_long : $region_long );
+		$origin_q = rawurlencode( $is_city_all ? $region_name . '시' : $region_long ); /* '(전 지역)' 은 출발지로 못 쓴다 */
 		$dir_google = 'https://www.google.com/maps/dir/?api=1&origin=' . $origin_q . '&destination=' . $dest_q . '&travelmode=' . ( $is_walking ? 'walking' : 'driving' );
 		$dir_naver  = $info['naver_map_url'] ?: 'https://map.naver.com/p/search/' . rawurlencode( '문치과병원' );
 		$dir_kakao  = 'https://map.kakao.com/?q=' . rawurlencode( '문치과병원 천안' );
