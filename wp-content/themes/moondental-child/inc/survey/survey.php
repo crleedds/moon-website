@@ -316,9 +316,42 @@ function md_survey_visits_on( $date ) {
  */
 function md_survey_import_text( $text, $date ) {
 	$lines = preg_split( '/\r\n|\r|\n/', (string) $text );
+	$rows  = array();
+	foreach ( $lines as $line ) {
+		$line = trim( $line );
+		if ( '' === $line ) { continue; }
+		$cols   = ( false !== strpos( $line, "\t" ) ) ? explode( "\t", $line ) : str_getcsv( $line );
+		$rows[] = array_map( 'trim', $cols );
+	}
+	return md_survey_import_rows( $rows, $date );
+}
+
+/**
+ * v4.14.4 · 엑셀 파일(.xlsx) → 명단. 덴트웹 「기간별 접수환자 목록」 엑셀저장 파일을 그대로 올린다.
+ * 접수시각 열이 있으면 그 날짜를 쓰므로 여러 날이 섞인 파일도 된다.
+ */
+function md_survey_import_xlsx( $path, $date ) {
+	require_once __DIR__ . '/xlsx-reader.php';
+	$rows = md_xlsx_rows( $path );
+	if ( ! is_array( $rows ) ) { return array( 'added' => 0, 'updated' => 0, 'skipped' => 0, 'errors' => array( $rows ) ); }
+	/* 열 번호 키 배열 → 빈 칸을 채운 순서 배열 */
+	$max = 0;
+	foreach ( $rows as $r ) { $max = max( $max, empty( $r ) ? 0 : max( array_keys( $r ) ) + 1 ); }
+	$flat = array();
+	foreach ( $rows as $r ) {
+		$line = array_fill( 0, $max, '' );
+		foreach ( $r as $i => $v ) { $line[ $i ] = $v; }
+		$flat[] = $line;
+	}
+	return md_survey_import_rows( $flat, $date );
+}
+
+/** 공통 — 행 배열(첫 줄이 제목이면 제목으로 열을 찾음) → 명단 */
+function md_survey_import_rows( $rows, $date ) {
 	$ok = 0; $upd = 0; $skip = 0; $errs = array();
 	$map = null;
 	$aliases = array(
+		'date'     => array( '접수시각', '접수일', '진료일', '날짜', 'date' ),
 		'chart_no' => array( '차트번호', '차트', '등록번호', '차트no', 'chart' ),
 		'name'     => array( '이름', '성명', '환자명', '환자', 'name' ),
 		'phone'    => array( '휴대폰', '휴대전화', '핸드폰', '전화', '연락처', 'phone', '가운데4자리', '뒷자리' ),
@@ -327,11 +360,7 @@ function md_survey_import_text( $text, $date ) {
 		'staff'    => array( '담당직원', '담당스탭', '스탭', '직원', '위생사', '어시스트', 'staff' ),
 	);
 	$n = 0;
-	foreach ( $lines as $line ) {
-		$line = trim( $line );
-		if ( '' === $line ) { continue; }
-		$cols = ( false !== strpos( $line, "\t" ) ) ? explode( "\t", $line ) : str_getcsv( $line );
-		$cols = array_map( 'trim', $cols );
+	foreach ( $rows as $cols ) {
 		$n++;
 		if ( null === $map ) {
 			/* 머리글인가 */
@@ -350,6 +379,13 @@ function md_survey_import_text( $text, $date ) {
 		}
 		$d = array( 'date' => $date );
 		foreach ( $map as $field => $i ) { $d[ $field ] = isset( $cols[ $i ] ) ? $cols[ $i ] : ''; }
+		/* 접수시각 열이 있으면 그 날짜로 (2026-10-01 11:40:32 · 20261001114032 · 엑셀 일련번호 모두 받음) */
+		if ( isset( $map['date'] ) ) {
+			$dv = trim( (string) $d['date'] );
+			if ( preg_match( '/^(\d{4})[-.\/]?(\d{2})[-.\/]?(\d{2})/', $dv, $m ) ) { $d['date'] = $m[1] . '-' . $m[2] . '-' . $m[3]; }
+			elseif ( is_numeric( $dv ) && (float) $dv > 30000 && function_exists( 'md_xlsx_serial_to_date' ) ) { $d['date'] = md_xlsx_serial_to_date( $dv ); }
+			else { $d['date'] = $date; }
+		}
 		if ( ! isset( $d['staff'] ) || '' === trim( (string) $d['staff'] ) ) { $skip++; continue; }
 		$r = md_survey_visit_upsert( $d, 'import' );
 		if ( is_wp_error( $r ) ) { $errs[] = $n . '줄: ' . $r->get_error_message(); }
@@ -814,6 +850,22 @@ function md_survey_handle_post() {
 			if ( $r['errors'] ) { $back = add_query_arg( 'err', implode( ' / ', array_slice( $r['errors'], 0, 5 ) ), $back ); }
 			break;
 
+		case 'upload': /* v4.14.4 · 엑셀 파일 그대로 올리기. 파일은 읽고 바로 버린다 — 서버에 남기지 않는다 */
+			$f = isset( $_FILES['xlsx'] ) ? $_FILES['xlsx'] : null;
+			if ( ! $f || ! isset( $f['error'] ) || UPLOAD_ERR_OK !== (int) $f['error'] || empty( $f['tmp_name'] ) ) {
+				$back = add_query_arg( 'err', '파일이 올라오지 않았습니다. .xlsx 파일을 골라 주세요.', $back );
+			} elseif ( (int) $f['size'] > 8 * 1024 * 1024 ) {
+				$back = add_query_arg( 'err', '파일이 너무 큽니다 (8MB 이하).', $back );
+			} elseif ( ! preg_match( '/\.xlsx$/i', (string) $f['name'] ) ) {
+				$back = add_query_arg( 'err', '.xlsx 파일만 올릴 수 있습니다. 덴트웹 「엑셀저장」으로 만든 파일을 그대로 올려 주세요.', $back );
+			} else {
+				$r = md_survey_import_xlsx( $f['tmp_name'], $date );
+				@unlink( $f['tmp_name'] );
+				$back = add_query_arg( array( 'msg' => 'imported', 'a' => $r['added'], 'u' => $r['updated'], 's' => $r['skipped'] ), $back );
+				if ( $r['errors'] ) { $back = add_query_arg( 'err', implode( ' / ', array_slice( $r['errors'], 0, 5 ) ), $back ); }
+			}
+			break;
+
 		case 'delete':
 			$res = md_survey_visit_delete( isset( $_POST['vid'] ) ? (int) $_POST['vid'] : 0 );
 			if ( is_wp_error( $res ) ) { $back = add_query_arg( 'err', $res->get_error_message(), $back ); }
@@ -990,8 +1042,20 @@ function md_survey_render_roster() {
 		<p class="mds-hint">이름과 휴대폰 가운데 4자리는 환자가 본인 확인에 쓰는 값입니다. 휴대폰은 저장할 때 암호화되어 이 화면에서도 다시 볼 수 없습니다. 같은 날 같은 차트번호를 다시 넣으면 그 줄을 고칩니다.</p>
 	</form>
 
+	<form method="post" enctype="multipart/form-data" class="mds-card mdsv-upload">
+		<input type="hidden" name="md_survey_action" value="upload">
+		<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_upload' ) ); ?>">
+		<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
+		<h2 class="mdsv-h">덴트웹 엑셀 파일 올리기 <small>하루 한 번 · 가장 쉬운 방법</small></h2>
+		<p class="mds-hint">덴트웹 데스크 화면 → 접수목록 → <b>기간별 목록</b> → 오늘 → <b>엑셀저장</b>(사유: 만족도 조사 명단). 저장된 파일을 여기에 고르고 올리면 끝입니다. 파일을 열어 볼 필요가 없고, 서버에는 파일이 남지 않습니다. 담당직원이 빈 환자는 건너뜁니다.</p>
+		<div class="mdsv-upload__row">
+			<input type="file" name="xlsx" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+			<button type="submit" class="mds-btn mds-btn--fill">명단에 넣기</button>
+		</div>
+	</form>
+
 	<details class="mds-card mdsv-import">
-		<summary>여러 명 한꺼번에 붙여넣기</summary>
+		<summary>엑셀 내용을 복사해 붙여넣기 (파일 올리기가 안 될 때)</summary>
 		<form method="post">
 			<input type="hidden" name="md_survey_action" value="import">
 			<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_import' ) ); ?>">

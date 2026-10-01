@@ -55,3 +55,9 @@
 @media (max-width: 640px) {
   .mdsv-bar { flex-direction: column; align-items: stretch; }
 }
+
+/* v4.14.4 · 엑셀 파일 올리기 */
+.mdsv-upload { padding: 20px 22px 18px; margin-top: 12px; }
+.mdsv-upload__row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.mdsv-upload__row input[type="file"] { flex: 1 1 260px; font: inherit; font-size: .95rem; min-height: 46px; padding: 8px 12px; border: 1px dashed var(--color-border, #EDDFD0); border-radius: 10px; background: var(--color-surface, #FBF2E8); color: var(--color-text, #3D2F26); }
+.mdsv-upload__row .mds-btn { min-height: 46px; padding: 0 22px; }
