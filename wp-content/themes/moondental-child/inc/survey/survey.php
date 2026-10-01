@@ -8,7 +8,7 @@
  *
  *    1. 데스크가 그날 접수 명단(차트번호 · 이름 · 휴대폰 · 담당 원장 · 담당 스탭)을
  *       직원 허브에 올린다 (덴트웹 기간별 접수환자 목록 엑셀 붙여넣기, 한 명씩 입력, 또는 REST 로 자동 전송).
- *    2. 환자가 링크를 열면 링크에 실린 이름(?n=#환자명#)과 환자가 넣은 휴대폰 뒷 4자리를 명단과 대조한다.
+ *    2. 환자가 링크를 열면 링크에 실린 이름(?n=#환자명#)과 환자가 넣은 휴대폰 가운데 4자리를 명단과 대조한다.
  *       이름이 링크에 없으면 환자가 이름을 적는다. 맞으면 그날 담당 원장 · 담당 스탭 이름이 보이고 설문이 열린다.
  *    3. 제출하면 그 진료(명단 한 줄)는 응답 완료로 잠긴다 — 같은 진료에 두 번 쓸 수 없다.
  *
@@ -17,7 +17,7 @@
  *    관리자           응답 열람 · 스탭별 집계 · CSV · 설정 (원장·스탭 목록 · 응답 허용 일수 · 연동 키)
  *
  *  개인정보
- *    명단의 휴대폰 뒷 4자리는 비밀키로 HMAC 해시해 저장한다 (원문은 남기지 않는다). 생년월일은 받지 않는다 (v4.10.8).
+ *    명단의 휴대폰 가운데 4자리는 비밀키로 HMAC 해시해 저장한다 (원문은 남기지 않는다). 생년월일은 받지 않는다 (v4.10.8).
  *    환자가 입력한 값도 저장하지 않는다 — 해시해서 비교만 한다.
  *    본인 확인이 5번 틀리면 그 접속은 30분 동안 막는다.
  *    명단은 90일이 지나면 지운다. 응답은 남긴다 (차트번호 · 이름 · 담당자 · 점수 · 의견).
@@ -30,7 +30,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_SURVEY_SCHEMA', 2 ); /* v4.10.1 · phone_hash 추가 — 링크에 이름이 실려 오면 휴대폰 뒷 4자리만 묻는다 */
+define( 'MD_SURVEY_SCHEMA', 2 ); /* v4.10.1 · phone_hash 추가 — 링크에 이름이 실려 오면 휴대폰 가운데 4자리만 묻는다 */
 
 /* ============================================================
  * 테이블 · 설치
@@ -162,10 +162,19 @@ function md_survey_review_url() {
  * 정규화 · 해시
  * ============================================================ */
 
-/** 휴대폰 → 뒷 4자리. 숫자가 4개 미만이면 '' */
+/**
+ * 휴대폰 → 가운데 4자리 (010-XXXX-0000 의 XXXX). (v4.14.3)
+ *  덴트웹이 전자서명 없이 저장한 엑셀은 뒷자리를 「010-1234-56**」처럼 가리므로 뒷 4자리는 쓸 수 없다.
+ *  가운데 4자리는 그대로 남아 있어 이것을 본인 확인 값으로 쓴다.
+ *  입력이 딱 4자리면 그 값을 가운데 4자리로 본다 (데스크가 손으로 넣을 때).
+ *  11자리(가려진 자리는 * 로 세어서)면 4~7번째, 그 밖에는 ''.
+ */
 function md_survey_norm_phone4( $v ) {
-	$d = preg_replace( '/\D+/', '', (string) $v );
-	return strlen( $d ) >= 4 ? substr( $d, -4 ) : '';
+	$s = preg_replace( '/[^0-9*]+/', '', (string) $v );
+	if ( preg_match( '/^\d{4}$/', $s ) ) { return $s; }
+	if ( 11 === strlen( $s ) && preg_match( '/^\d{7}/', $s ) ) { return substr( $s, 3, 4 ); }
+	if ( 10 === strlen( $s ) && preg_match( '/^\d{6}/', $s ) ) { return substr( $s, 3, 3 ) . '0'; } /* 옛 10자리 번호 — 거의 없음 */
+	return '';
 }
 
 /**
@@ -194,7 +203,7 @@ function md_survey_ident_hash( $phone4, $birth6 ) {
 	return hash_hmac( 'sha256', $phone4 . '|' . $birth6, md_survey_secret() );
 }
 
-/** 휴대폰 뒷 4자리만의 해시 — 링크에 이름이 실려 온 환자는 이것과 이름으로 확인한다 (v4.10.1) */
+/** 휴대폰 가운데 4자리만의 해시 — 링크에 이름이 실려 온 환자는 이것과 이름으로 확인한다 (v4.10.1) */
 function md_survey_phone_hash( $phone4 ) {
 	return hash_hmac( 'sha256', 'p|' . $phone4, md_survey_secret() );
 }
@@ -257,8 +266,7 @@ function md_survey_visit_upsert( $d, $source = 'manual' ) {
 
 	if ( '' === $chart )  { return new WP_Error( 'md_survey', '차트번호가 없습니다.' ); }
 	if ( '' === $name )   { return new WP_Error( 'md_survey', '이름이 없습니다.' ); }
-	if ( false !== strpos( (string) ( isset( $d['phone'] ) ? $d['phone'] : '' ), '*' ) ) { return new WP_Error( 'md_survey', '전화번호 뒷자리가 가려져 있습니다 (' . $name . ').' ); }
-	if ( '' === $phone4 ) { return new WP_Error( 'md_survey', '휴대폰 번호(뒷 4자리)가 없습니다.' ); }
+	if ( '' === $phone4 ) { return new WP_Error( 'md_survey', '휴대폰 번호(가운데 4자리)를 읽지 못했습니다 (' . $name . ').' ); }
 	if ( '' === $staff )  { return new WP_Error( 'md_survey', '담당 스탭이 없습니다.' ); }
 
 	$t   = md_survey_table_visit();
@@ -313,7 +321,7 @@ function md_survey_import_text( $text, $date ) {
 	$aliases = array(
 		'chart_no' => array( '차트번호', '차트', '등록번호', '차트no', 'chart' ),
 		'name'     => array( '이름', '성명', '환자명', '환자', 'name' ),
-		'phone'    => array( '휴대폰', '휴대전화', '핸드폰', '전화', '연락처', 'phone', '뒷4자리', '뒷자리' ),
+		'phone'    => array( '휴대폰', '휴대전화', '핸드폰', '전화', '연락처', 'phone', '가운데4자리', '뒷자리' ),
 		'birth'    => array( '생년월일', '생일', '주민번호', '주민', 'birth' ),
 		'doctor'   => array( '담당의사', '담당원장', '의사', '원장', '진료의', 'doctor' ),
 		'staff'    => array( '담당직원', '담당스탭', '스탭', '직원', '위생사', '어시스트', 'staff' ),
@@ -450,7 +458,7 @@ function md_survey_public_render() {
 
 	$method = isset( $_SERVER['REQUEST_METHOD'] ) ? $_SERVER['REQUEST_METHOD'] : 'GET';
 
-	/* v4.10.1 · 알림톡 링크에 이름이 실려 오면(?n=#환자명#) 휴대폰 뒷 4자리만 묻는다.
+	/* v4.10.1 · 알림톡 링크에 이름이 실려 오면(?n=#환자명#) 휴대폰 가운데 4자리만 묻는다.
 	 * 이름은 GET 으로 받아 폼에 숨겨 두고, POST 때 그대로 돌려받는다. */
 	$pname = '';
 	if ( isset( $_GET['n'] ) )  { $pname = md_survey_norm_name( wp_unslash( $_GET['n'] ) ); }
@@ -475,7 +483,7 @@ function md_survey_public_render() {
 			if ( md_survey_is_locked() ) {
 				$step = 'locked';
 			} else {
-				/* v4.10.8 · 본인 확인은 이름 + 휴대폰 뒷 4자리. 이름은 링크(?n=)에서 오거나, 없으면 환자가 적는다. */
+				/* v4.10.8 · 본인 확인은 이름 + 휴대폰 가운데 4자리. 이름은 링크(?n=)에서 오거나, 없으면 환자가 적는다. */
 				$phone4 = md_survey_norm_phone4( isset( $_POST['phone4'] ) ? wp_unslash( $_POST['phone4'] ) : '' );
 				$typed  = isset( $_POST['name'] ) ? mb_substr( md_survey_norm_name( wp_unslash( $_POST['name'] ) ), 0, 40 ) : '';
 				$from_link = '' !== $pname;
@@ -484,7 +492,7 @@ function md_survey_public_render() {
 				if ( ! $agree ) {
 					$err = '개인정보 수집·이용에 동의해 주세요.';
 				} elseif ( '' === $pname || '' === $phone4 ) {
-					$err = '이름과 휴대전화 뒷 4자리를 확인해 주세요.';
+					$err = '이름과 휴대전화 가운데 4자리를 확인해 주세요.';
 				} else {
 					global $wpdb;
 					$tv   = md_survey_table_visit();
@@ -689,10 +697,10 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<?php if ( '' !== $pname ) : ?>
 		<input type="hidden" name="pn" value="<?php echo esc_attr( $pname ); ?>">
 		<h1><?php echo esc_html( $pname ); ?>님, 본인 확인</h1>
-		<p>진료받으신 분만 참여할 수 있습니다. 휴대전화 뒷 4자리만 확인합니다.</p>
+		<p>진료받으신 분만 참여할 수 있습니다. 휴대전화 가운데 4자리만 확인합니다.</p>
 		<?php else : ?>
 		<h1>진료받으신 본인 확인</h1>
-		<p>진료받으신 분만 참여할 수 있습니다. 이름과 휴대전화 뒷 4자리를 확인합니다.</p>
+		<p>진료받으신 분만 참여할 수 있습니다. 이름과 휴대전화 가운데 4자리를 확인합니다.</p>
 		<label class="sv-field">
 			<span>이름</span>
 			<input type="text" name="name" maxlength="40" required placeholder="홍길동" autocomplete="off" autofocus>
@@ -700,16 +708,16 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		</label>
 		<?php endif; ?>
 		<label class="sv-field">
-			<span>휴대전화 뒷 4자리</span>
+			<span>휴대전화 가운데 4자리</span>
 			<input type="tel" name="phone4" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="1234" autocomplete="off" <?php echo '' !== $pname ? 'autofocus' : ''; ?>>
-			<small>병원에 등록된 휴대전화 번호의 마지막 4자리</small>
+			<small>010-<b>1234</b>-5678 이라면 <b>1234</b></small>
 		</label>
 		<label class="sv-agree">
 			<input type="checkbox" name="agree" value="1" required>
 			<span>개인정보 수집·이용에 동의합니다 (필수)</span>
 		</label>
 		<div class="sv-consent">
-			<b>수집 항목</b> 이름 · 휴대전화 뒷 4자리(본인 확인에만 사용, 저장하지 않음), 설문 응답<br>
+			<b>수집 항목</b> 이름 · 휴대전화 가운데 4자리(본인 확인에만 사용, 저장하지 않음), 설문 응답<br>
 			<b>이용 목적</b> 진료 만족도 조사와 서비스 개선 · 담당 직원 평가<br>
 			<b>보유 기간</b> 응답일로부터 2년<br>
 			동의하지 않으면 설문에 참여할 수 없습니다. 응답은 병원 관리자만 열람합니다.
@@ -972,14 +980,14 @@ function md_survey_render_roster() {
 		<div class="mds-formrow">
 			<label class="mds-field"><span>차트번호</span><input type="text" name="chart_no" inputmode="numeric" maxlength="20" required placeholder="12345"></label>
 			<label class="mds-field"><span>이름</span><input type="text" name="name" maxlength="40" required placeholder="홍길동"></label>
-			<label class="mds-field"><span>휴대폰 (뒷 4자리만 써도 됨)</span><input type="tel" name="phone" inputmode="numeric" maxlength="20" required placeholder="1234"></label>
+			<label class="mds-field"><span>휴대폰 (전체 또는 가운데 4자리)</span><input type="tel" name="phone" inputmode="numeric" maxlength="20" required placeholder="010-1234-5678"></label>
 		</div>
 		<div class="mds-formrow">
 			<?php md_survey_name_field( 'doctor', '담당 원장', 'doctors', md_survey_remembered( 'doctor' ) ); ?>
 			<?php md_survey_name_field( 'staff', '담당 스탭 (평가 대상)', 'staff', md_survey_remembered( 'staff' ) ); ?>
 			<div class="mds-field"><span>&nbsp;</span><button type="submit" class="mds-btn mds-btn--fill">넣기</button></div>
 		</div>
-		<p class="mds-hint">이름과 휴대폰 뒷 4자리는 환자가 본인 확인에 쓰는 값입니다. 휴대폰은 저장할 때 암호화되어 이 화면에서도 다시 볼 수 없습니다. 같은 날 같은 차트번호를 다시 넣으면 그 줄을 고칩니다.</p>
+		<p class="mds-hint">이름과 휴대폰 가운데 4자리는 환자가 본인 확인에 쓰는 값입니다. 휴대폰은 저장할 때 암호화되어 이 화면에서도 다시 볼 수 없습니다. 같은 날 같은 차트번호를 다시 넣으면 그 줄을 고칩니다.</p>
 	</form>
 
 	<details class="mds-card mdsv-import">
@@ -1139,7 +1147,7 @@ function md_survey_render_settings() {
 		<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_settings' ) ); ?>">
 		<h2 class="mdsv-h">알림톡에 넣을 링크</h2>
 		<p class="mdsv-url"><code><?php echo esc_html( home_url( '/survey/?n=#환자명#' ) ); ?></code></p>
-		<p class="mds-hint">덴트웹 진료 후 알림톡 템플릿 본문에 이 주소를 그대로 넣습니다. 덴트웹이 <code>#환자명#</code>을 환자 이름으로 바꿔 보내므로, 환자는 휴대전화 뒷 4자리만 넣고 설문에 들어옵니다. 이름이 링크에 실리지 않은 경우(<code><?php echo esc_html( home_url( '/survey/' ) ); ?></code>)에는 환자가 이름을 직접 적습니다.</p>
+		<p class="mds-hint">덴트웹 진료 후 알림톡 템플릿 본문에 이 주소를 그대로 넣습니다. 덴트웹이 <code>#환자명#</code>을 환자 이름으로 바꿔 보내므로, 환자는 휴대전화 가운데 4자리만 넣고 설문에 들어옵니다. 이름이 링크에 실리지 않은 경우(<code><?php echo esc_html( home_url( '/survey/' ) ); ?></code>)에는 환자가 이름을 직접 적습니다.</p>
 
 		<div class="mds-formrow">
 			<label class="mds-field"><span>응답 허용 기간 (진료일부터 며칠)</span><input type="number" name="window_days" min="1" max="30" value="<?php echo (int) $s['window_days']; ?>"></label>
