@@ -17080,6 +17080,7 @@ a.md-center-color--preservation:hover { color: #4A7530 !important; }
 }
 
 /* v4.16 · 주소 복사 — 이메일 옆 복사 아이콘처럼 작게 */
-.md-copybtn--icon { width: 34px; height: 34px; padding: 0; justify-content: center; border-radius: 50%; color: var(--color-text-sub); }
-.md-copybtn--icon svg { width: 15px; height: 15px; }
-.md-copybtn--icon:hover { color: var(--color-primary-dark); }
+/* v4.18.8 · 테두리·배경 없이 이메일 옆 아이콘과 같은 모양 */
+.md-copybtn--icon { width: auto; height: auto; padding: 6px; border: 0; background: transparent; box-shadow: none; border-radius: 8px; color: var(--color-text-sub); }
+.md-copybtn--icon svg { width: 16px; height: 16px; }
+.md-copybtn--icon:hover { color: var(--color-primary-dark); background: transparent; transform: none; }
