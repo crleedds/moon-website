@@ -12,6 +12,7 @@ return array(
 	'치수보존술'                => 'Bảo tồn tủy',
 	'덴탈SPA'                   => 'Dental SPA',
 	'블루문드림'                => 'Blue Moon Dream',
+	'직원 라운지'               => 'Phòng nhân viên',
 	'직원 전용'                 => 'Dành cho nhân viên',
 	'더 많은 후기 보기 →'       => 'Xem thêm đánh giá →',
 	'더 많은 후기 보기'         => 'Xem thêm đánh giá',

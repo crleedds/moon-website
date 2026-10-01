@@ -3110,7 +3110,7 @@ function moondental_finish_content_fields() {
 		'location_page' => array(
 			'title'  => '오시는 길 페이지 · 히어로·지역·채널',
 			'fields' => array(
-				'locpage_hero_title' => array( 'default' => '오시는 길', 'label' => '히어로 · 제목', 'type' => 'text' ),
+				'locpage_hero_title' => array( 'default' => '오시는길 · 진료시간 · 안내', 'label' => '히어로 · 제목', 'type' => 'text' ),
 				'locpage_region_eyebrow' => array( 'default' => '🌐 지역별 오시는 길', 'label' => '지역 그리드 · eyebrow', 'type' => 'text' ),
 				'locpage_region_title'   => array( 'default' => '각 지역에서 문치과병원까지', 'label' => '지역 그리드 · 제목', 'type' => 'text' ),
 				'locpage_region_lead'    => array( 'default' => "충남·충북·세종·대전·경기 중부권 28개 지역별 상세 교통 안내.\n지역명을 클릭하시면 해당 지역에서 천안 만남로까지의 상세 경로와 진료 안내를 보실 수 있습니다.", 'label' => '지역 그리드 · 리드 (줄바꿈 유지)', 'type' => 'textarea' ),

@@ -48,7 +48,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 
 <section class="md-page-hero md-page-hero--location">
 	<div class="md-container">
-		<?php $locpage_title = md_content( 'locpage_hero_title', '오시는 길' ); ?>
+		<?php $locpage_title = md_content( 'locpage_hero_title', '오시는길 · 진료시간 · 안내' ); /* v4.16 · 원장 지시 */ ?>
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( $locpage_title ); ?></span>
 		</nav>
@@ -57,7 +57,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 		$loc_email = $info['email'] ?: 'moondental1995@naver.com'; ?>
 		<div class="md-page-hero__lead md-page-hero__lead--big md-loc-addr">
 			<a class="md-loc-addr__link" href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener"><svg class="md-loc-addr__pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span><?php echo esc_html( $info['address'] ); ?></span></a>
-			<button type="button" class="md-copybtn" data-copy="<?php echo esc_attr( $info['address'] ); ?>" data-track="cta-locpage-copy-addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span><?php echo esc_html( md_content( 'loc_copy_addr', '주소 복사' ) ); ?></span><span hidden data-copy-msg><?php echo esc_html( md_content( 'loc_copied_addr', '주소가 복사되었습니다' ) ); ?></span></button>
+			<button type="button" class="md-copybtn md-copybtn--icon" data-copy="<?php echo esc_attr( $info['address'] ); ?>" data-track="cta-locpage-copy-addr" title="<?php echo esc_attr( md_content( 'loc_copy_addr', '주소 복사' ) ); ?>" aria-label="<?php echo esc_attr( md_content( 'loc_copy_addr', '주소 복사' ) ); ?>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span hidden data-copy-msg><?php echo esc_html( md_content( 'loc_copied_addr', '주소가 복사되었습니다' ) ); ?></span></button>
 		</div>
 		<div class="md-loc-contact">
 			<a class="md-loc-contact__item" href="tel:<?php echo esc_attr( $phone_link ); ?>" data-track="cta-locpage-call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.7.7a2 2 0 0 1 1.8 2z"/></svg><span><?php echo esc_html( $info['phone'] ); ?></span></a>

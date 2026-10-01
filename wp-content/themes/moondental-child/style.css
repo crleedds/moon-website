@@ -17078,3 +17078,8 @@ a.md-center-color--preservation:hover { color: #4A7530 !important; }
   .md-open-status.is-before { background: rgba(224, 185, 58, .18); color: #F0CF5A; }
   .md-region-chips--lg .md-region-chip { background: var(--color-surface, #241C15); }
 }
+
+/* v4.16 · 주소 복사 — 이메일 옆 복사 아이콘처럼 작게 */
+.md-copybtn--icon { width: 34px; height: 34px; padding: 0; justify-content: center; border-radius: 50%; color: var(--color-text-sub); }
+.md-copybtn--icon svg { width: 15px; height: 15px; }
+.md-copybtn--icon:hover { color: var(--color-primary-dark); }

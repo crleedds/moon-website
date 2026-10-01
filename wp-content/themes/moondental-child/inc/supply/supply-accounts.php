@@ -148,7 +148,7 @@ function md_sup_accounts_screen() {
 	<div class="wrap">
 		<h1>재고 계정</h1>
 		<p>
-			직원 전용 페이지(<a href="<?php echo esc_url( home_url( '/직원/' ) ); ?>" target="_blank" rel="noopener">/직원/</a>)의 재료실에서 쓸 계정입니다.
+			직원 라운지(<a href="<?php echo esc_url( home_url( '/직원/' ) ); ?>" target="_blank" rel="noopener">/직원/</a>)의 재료실에서 쓸 계정입니다.
 			<strong>재고 담당자 하나, 직원 공용 하나</strong> 총 두 개입니다.
 			직원분들은 공용 계정으로 로그인해 신청 화면에서 자기 팀을 고릅니다.
 		</p>

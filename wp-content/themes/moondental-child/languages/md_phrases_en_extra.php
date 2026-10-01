@@ -12,6 +12,7 @@ return array(
 	'치수보존술'                => 'Pulp Preservation',
 	'덴탈SPA'                   => 'Dental SPA',
 	'블루문드림'                => 'Blue Moon Dream',
+	'직원 라운지'               => 'Staff Lounge',
 	'직원 전용'                 => 'Staff Only',
 	'더 많은 후기 보기 →'       => 'More reviews →',
 	'더 많은 후기 보기'         => 'More reviews',

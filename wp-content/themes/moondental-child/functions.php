@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '4.15.3' );
+define( 'MOONDENTAL_VERSION', '4.16' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -1296,6 +1296,21 @@ add_action( 'after_setup_theme', function() {
 	}
 	update_option( 'moondental_staff_v3316', 'done' );
 }, 48 );
+
+/* 일회성 마이그레이션 v4.16 · 원장 지시 · 「직원 전용」 → 「직원 라운지」, 오시는 길 제목 */
+add_action( 'init', function() {
+	if ( get_option( 'moondental_lounge_v416' ) === 'done' ) return;
+	$pid = (int) get_option( 'md_sup_page_id' );
+	$p   = $pid ? get_post( $pid ) : null;
+	if ( $p && 'page' === $p->post_type && '직원 전용' === $p->post_title ) {
+		wp_update_post( array( 'ID' => $pid, 'post_title' => '직원 라운지' ) );
+	}
+	$fl = get_theme_mod( 'md_content_footer_link_staff', null );
+	if ( is_string( $fl ) && 0 === strpos( $fl, '직원 전용|' ) ) { set_theme_mod( 'md_content_footer_link_staff', '직원 라운지|' . substr( $fl, strlen( '직원 전용|' ) ) ); }
+	$lt = get_theme_mod( 'md_content_locpage_hero_title', null );
+	if ( is_string( $lt ) && in_array( trim( $lt ), array( '', '오시는 길' ), true ) ) { set_theme_mod( 'md_content_locpage_hero_title', '오시는길 · 진료시간 · 안내' ); }
+	update_option( 'moondental_lounge_v416', 'done' );
+}, 30 );
 
 /* 일회성 마이그레이션 v4.9.3 · 원장 지시 · 의료진 페이지의 「경영지원본부」 → 「경영지원실」 */
 add_action( 'after_setup_theme', function() {

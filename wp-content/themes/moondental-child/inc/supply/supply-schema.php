@@ -336,7 +336,7 @@ function md_sup_ensure_page() {
 	}
 
 	$id = wp_insert_post( array(
-		'post_title'     => '직원 전용',
+		'post_title'     => '직원 라운지',
 		'post_name'      => '직원',
 		'post_type'      => 'page',
 		'post_status'    => 'publish',

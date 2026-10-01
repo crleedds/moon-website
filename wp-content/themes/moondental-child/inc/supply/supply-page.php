@@ -857,7 +857,7 @@ function md_sup_render_login() {
 	<div class="mds-gate">
 		<div class="mds-gate__box">
 			<span class="mds-gate__eyebrow">한아의료재단 문치과병원</span>
-			<h1>직원 전용</h1>
+			<h1>직원 라운지</h1>
 			<p>병원에서 발급받은 계정으로 로그인해 주세요.</p>
 			<?php
 			wp_login_form( array(
@@ -886,7 +886,7 @@ function md_sup_render_denied() {
 	<div class="mds-gate">
 		<div class="mds-gate__box">
 			<span class="mds-gate__eyebrow">접근 권한 없음</span>
-			<h1>직원 전용 페이지 이용 권한이 없습니다</h1>
+			<h1>직원 라운지 이용 권한이 없습니다</h1>
 			<p>
 				<?php echo esc_html( wp_get_current_user()->display_name ); ?> 님 계정에는 이 페이지 이용 권한이 없습니다.
 				경영지원실에 권한 부여를 요청해 주세요.
@@ -908,12 +908,12 @@ function md_sup_render_header( $app, $tab ) {
 			<div>
 				<span class="mds-head__eyebrow">
 					<?php if ( $app ) : ?>
-						<a class="mds-head__back" href="<?php echo esc_url( md_sup_url( array( 'app' => '' ) ) ); ?>">← 직원 전용</a>
+						<a class="mds-head__back" href="<?php echo esc_url( md_sup_url( array( 'app' => '' ) ) ); ?>">← 직원 라운지</a>
 					<?php else : ?>
 						한아의료재단 문치과병원
 					<?php endif; ?>
 				</span>
-				<h1><?php echo esc_html( $app ? $apps[ $app ]['label'] : '직원 전용' ); ?></h1>
+				<h1><?php echo esc_html( $app ? $apps[ $app ]['label'] : '직원 라운지' ); ?></h1>
 			</div>
 			<div class="mds-head__me">
 				<span class="mds-head__name"><?php echo esc_html( $user->display_name ); ?></span>
@@ -1017,7 +1017,7 @@ function md_sup_render_page() {
 	/* 사이트 푸터를 감췄으니 필요한 안내만 여기서 */
 	?>
 	<div class="mds-foot">
-		<span>한아의료재단 문치과병원 · 직원 전용</span>
+		<span>한아의료재단 문치과병원 · 직원 라운지</span>
 		<a href="<?php echo esc_url( home_url( '/' ) ); ?>">병원 홈페이지</a>
 		<a href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">로그아웃</a>
 	</div>
