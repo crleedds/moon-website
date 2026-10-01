@@ -6,10 +6,10 @@
  *  덴트웹은 담당 스탭 이름이나 환자별 링크를 자동으로 채우지 못하므로, 그 둘은
  *  이 페이지가 맡는다.
  *
- *    1. 데스크가 그날 접수 명단(차트번호 · 이름 · 휴대폰 뒷 4자리 · 생년월일 · 담당 원장 · 담당 스탭)을
- *       직원 허브에 올린다 (한 명씩 입력, 붙여넣기, 또는 REST 로 자동 전송).
- *    2. 환자가 링크를 열고 휴대폰 뒷 4자리와 생년월일을 넣으면 명단과 대조한다.
- *       맞으면 그날 담당 원장 · 담당 스탭 이름이 보이고 설문이 열린다.
+ *    1. 데스크가 그날 접수 명단(차트번호 · 이름 · 휴대폰 · 담당 원장 · 담당 스탭)을
+ *       직원 허브에 올린다 (덴트웹 기간별 접수환자 목록 엑셀 붙여넣기, 한 명씩 입력, 또는 REST 로 자동 전송).
+ *    2. 환자가 링크를 열면 링크에 실린 이름(?n=#환자명#)과 환자가 넣은 휴대폰 뒷 4자리를 명단과 대조한다.
+ *       이름이 링크에 없으면 환자가 이름을 적는다. 맞으면 그날 담당 원장 · 담당 스탭 이름이 보이고 설문이 열린다.
  *    3. 제출하면 그 진료(명단 한 줄)는 응답 완료로 잠긴다 — 같은 진료에 두 번 쓸 수 없다.
  *
  *  누가 무엇을 하는가
@@ -17,7 +17,7 @@
  *    관리자           응답 열람 · 스탭별 집계 · CSV · 설정 (원장·스탭 목록 · 응답 허용 일수 · 연동 키)
  *
  *  개인정보
- *    명단의 휴대폰 뒷 4자리와 생년월일은 비밀키로 HMAC 해시해 저장한다 (원문은 남기지 않는다).
+ *    명단의 휴대폰 뒷 4자리는 비밀키로 HMAC 해시해 저장한다 (원문은 남기지 않는다). 생년월일은 받지 않는다 (v4.10.8).
  *    환자가 입력한 값도 저장하지 않는다 — 해시해서 비교만 한다.
  *    본인 확인이 5번 틀리면 그 접속은 30분 동안 막는다.
  *    명단은 90일이 지나면 지운다. 응답은 남긴다 (차트번호 · 이름 · 담당자 · 점수 · 의견).
@@ -257,15 +257,15 @@ function md_survey_visit_upsert( $d, $source = 'manual' ) {
 
 	if ( '' === $chart )  { return new WP_Error( 'md_survey', '차트번호가 없습니다.' ); }
 	if ( '' === $name )   { return new WP_Error( 'md_survey', '이름이 없습니다.' ); }
+	if ( false !== strpos( (string) ( isset( $d['phone'] ) ? $d['phone'] : '' ), '*' ) ) { return new WP_Error( 'md_survey', '전화번호 뒷자리가 가려져 있습니다 (' . $name . ').' ); }
 	if ( '' === $phone4 ) { return new WP_Error( 'md_survey', '휴대폰 번호(뒷 4자리)가 없습니다.' ); }
-	if ( '' === $birth6 ) { return new WP_Error( 'md_survey', '생년월일이 맞지 않습니다 (예 800101 또는 19800101).' ); }
 	if ( '' === $staff )  { return new WP_Error( 'md_survey', '담당 스탭이 없습니다.' ); }
 
 	$t   = md_survey_table_visit();
 	$row = $wpdb->get_row( $wpdb->prepare( "SELECT id, responded_at FROM $t WHERE visit_date = %s AND chart_no = %s", $date, $chart ) );
 	$data = array(
 		'patient_name' => $name,
-		'ident_hash'   => md_survey_ident_hash( $phone4, $birth6 ),
+		'ident_hash'   => '' !== $birth6 ? md_survey_ident_hash( $phone4, $birth6 ) : '', /* 생년월일은 있으면 저장(v4.10.8부터 선택) */
 		'phone_hash'   => md_survey_phone_hash( $phone4 ),
 		'source'       => $source,
 	);
@@ -302,12 +302,13 @@ function md_survey_visits_on( $date ) {
 
 /**
  * 붙여넣은 표 → 명단. 탭 · 쉼표 구분 모두 받는다.
- * 첫 줄에 「차트」「이름」 같은 머리글이 있으면 그걸로 열을 찾고, 없으면
- * 차트번호 · 이름 · 휴대폰 · 생년월일 · 담당의사 · 담당직원 순서로 본다.
+ * 첫 줄에 「차트」「이름」 같은 머리글이 있으면 그걸로 열을 찾고 (덴트웹 「기간별 접수환자 목록」
+ * 엑셀을 통째로 붙여 넣으면 이 경우), 없으면 차트번호 · 이름 · 휴대폰 · 담당의사 · 담당직원 순서로 본다.
+ * 담당직원이 빈 줄은 오류가 아니라 「건너뜀」으로 센다 — 접수 때 지정하지 않은 환자는 설문 대상이 아니다.
  */
 function md_survey_import_text( $text, $date ) {
 	$lines = preg_split( '/\r\n|\r|\n/', (string) $text );
-	$ok = 0; $upd = 0; $errs = array();
+	$ok = 0; $upd = 0; $skip = 0; $errs = array();
 	$map = null;
 	$aliases = array(
 		'chart_no' => array( '차트번호', '차트', '등록번호', '차트no', 'chart' ),
@@ -337,16 +338,17 @@ function md_survey_import_text( $text, $date ) {
 				}
 			}
 			if ( isset( $found['chart_no'] ) && isset( $found['name'] ) ) { $map = $found; continue; }
-			$map = array( 'chart_no' => 0, 'name' => 1, 'phone' => 2, 'birth' => 3, 'doctor' => 4, 'staff' => 5 );
+			$map = array( 'chart_no' => 0, 'name' => 1, 'phone' => 2, 'doctor' => 3, 'staff' => 4 );
 		}
 		$d = array( 'date' => $date );
 		foreach ( $map as $field => $i ) { $d[ $field ] = isset( $cols[ $i ] ) ? $cols[ $i ] : ''; }
+		if ( ! isset( $d['staff'] ) || '' === trim( (string) $d['staff'] ) ) { $skip++; continue; }
 		$r = md_survey_visit_upsert( $d, 'import' );
 		if ( is_wp_error( $r ) ) { $errs[] = $n . '줄: ' . $r->get_error_message(); }
 		elseif ( $r['updated'] ) { $upd++; }
 		else { $ok++; }
 	}
-	return array( 'added' => $ok, 'updated' => $upd, 'errors' => $errs );
+	return array( 'added' => $ok, 'updated' => $upd, 'skipped' => $skip, 'errors' => $errs );
 }
 
 /* ============================================================
@@ -473,32 +475,28 @@ function md_survey_public_render() {
 			if ( md_survey_is_locked() ) {
 				$step = 'locked';
 			} else {
+				/* v4.10.8 · 본인 확인은 이름 + 휴대폰 뒷 4자리. 이름은 링크(?n=)에서 오거나, 없으면 환자가 적는다. */
 				$phone4 = md_survey_norm_phone4( isset( $_POST['phone4'] ) ? wp_unslash( $_POST['phone4'] ) : '' );
-				$birth6 = md_survey_norm_birth6( isset( $_POST['birth'] ) ? wp_unslash( $_POST['birth'] ) : '' );
+				$typed  = isset( $_POST['name'] ) ? mb_substr( md_survey_norm_name( wp_unslash( $_POST['name'] ) ), 0, 40 ) : '';
+				$from_link = '' !== $pname;
+				if ( ! $from_link ) { $pname = $typed; }
 				$agree  = ! empty( $_POST['agree'] );
-				$by_name = '' !== $pname; /* 이름 + 뒷 4자리 방식인가 */
 				if ( ! $agree ) {
 					$err = '개인정보 수집·이용에 동의해 주세요.';
-				} elseif ( '' === $phone4 || ( ! $by_name && '' === $birth6 ) ) {
-					$err = $by_name ? '휴대전화 뒷 4자리를 확인해 주세요.' : '휴대전화 뒷 4자리와 생년월일 6자리를 확인해 주세요.';
+				} elseif ( '' === $pname || '' === $phone4 ) {
+					$err = '이름과 휴대전화 뒷 4자리를 확인해 주세요.';
 				} else {
 					global $wpdb;
-					$tv = md_survey_table_visit();
-					if ( $by_name ) {
-						$rows = $wpdb->get_results( $wpdb->prepare(
-							"SELECT * FROM $tv WHERE phone_hash = %s AND REPLACE(patient_name, ' ', '') = %s AND visit_date BETWEEN %s AND %s ORDER BY visit_date DESC, id DESC",
-							md_survey_phone_hash( $phone4 ), $pname, $since, $today ) );
-					} else {
-						$rows = $wpdb->get_results( $wpdb->prepare(
-							"SELECT * FROM $tv WHERE ident_hash = %s AND visit_date BETWEEN %s AND %s ORDER BY visit_date DESC, id DESC",
-							md_survey_ident_hash( $phone4, $birth6 ), $since, $today ) );
-					}
+					$tv   = md_survey_table_visit();
+					$rows = $wpdb->get_results( $wpdb->prepare(
+						"SELECT * FROM $tv WHERE phone_hash = %s AND REPLACE(patient_name, ' ', '') = %s AND visit_date BETWEEN %s AND %s ORDER BY visit_date DESC, id DESC",
+						md_survey_phone_hash( $phone4 ), $pname, $since, $today ) );
 					if ( empty( $rows ) ) {
 						$n = md_survey_note_fail();
 						$step = $n >= 5 ? 'locked' : 'identify';
 						if ( 'identify' === $step ) {
-							$err = '최근 ' . $win . '일 안의 진료 기록에서 일치하는 분을 찾지 못했습니다. 입력한 숫자를 다시 확인해 주세요. 진료 직후라면 잠시 후 다시 시도해 주세요.';
-							if ( $by_name ) { $pname = ''; $err .= ' 아래에서 생년월일까지 넣어 다시 확인해 주세요.'; } /* 이름 방식이 실패하면 전체 확인으로 */
+							$err = '최근 ' . $win . '일 안의 진료 기록에서 일치하는 분을 찾지 못했습니다. 이름과 숫자를 다시 확인해 주세요. 진료 직후라면 잠시 후 다시 시도해 주세요.';
+							$pname = ''; /* 링크의 이름이 틀렸을 수도 있으니 이름 칸을 열어 준다 */
 						}
 					} else {
 						delete_transient( md_survey_fail_key() );
@@ -694,26 +692,24 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<p>진료받으신 분만 참여할 수 있습니다. 휴대전화 뒷 4자리만 확인합니다.</p>
 		<?php else : ?>
 		<h1>진료받으신 본인 확인</h1>
-		<p>진료받으신 분만 참여할 수 있습니다. 두 가지만 확인합니다.</p>
+		<p>진료받으신 분만 참여할 수 있습니다. 이름과 휴대전화 뒷 4자리를 확인합니다.</p>
+		<label class="sv-field">
+			<span>이름</span>
+			<input type="text" name="name" maxlength="40" required placeholder="홍길동" autocomplete="off" autofocus>
+			<small>병원에 등록된 이름</small>
+		</label>
 		<?php endif; ?>
 		<label class="sv-field">
 			<span>휴대전화 뒷 4자리</span>
-			<input type="tel" name="phone4" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="1234" autocomplete="off" autofocus>
+			<input type="tel" name="phone4" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="1234" autocomplete="off" <?php echo '' !== $pname ? 'autofocus' : ''; ?>>
 			<small>병원에 등록된 휴대전화 번호의 마지막 4자리</small>
 		</label>
-		<?php if ( '' === $pname ) : ?>
-		<label class="sv-field">
-			<span>생년월일 6자리</span>
-			<input type="tel" name="birth" inputmode="numeric" pattern="[0-9]{6,8}" maxlength="8" required placeholder="800101" autocomplete="off">
-			<small>예) 1980년 1월 1일 → 800101</small>
-		</label>
-		<?php endif; ?>
 		<label class="sv-agree">
 			<input type="checkbox" name="agree" value="1" required>
 			<span>개인정보 수집·이용에 동의합니다 (필수)</span>
 		</label>
 		<div class="sv-consent">
-			<b>수집 항목</b> <?php echo '' !== $pname ? '이름 · 휴대전화 뒷 4자리' : '휴대전화 뒷 4자리 · 생년월일'; ?>(본인 확인에만 사용, 저장하지 않음), 설문 응답<br>
+			<b>수집 항목</b> 이름 · 휴대전화 뒷 4자리(본인 확인에만 사용, 저장하지 않음), 설문 응답<br>
 			<b>이용 목적</b> 진료 만족도 조사와 서비스 개선 · 담당 직원 평가<br>
 			<b>보유 기간</b> 응답일로부터 2년<br>
 			동의하지 않으면 설문에 참여할 수 없습니다. 응답은 병원 관리자만 열람합니다.
@@ -806,7 +802,7 @@ function md_survey_handle_post() {
 
 		case 'import':
 			$r = md_survey_import_text( isset( $_POST['rows'] ) ? wp_unslash( $_POST['rows'] ) : '', $date );
-			$back = add_query_arg( array( 'msg' => 'imported', 'a' => $r['added'], 'u' => $r['updated'] ), $back );
+			$back = add_query_arg( array( 'msg' => 'imported', 'a' => $r['added'], 'u' => $r['updated'], 's' => $r['skipped'] ), $back );
 			if ( $r['errors'] ) { $back = add_query_arg( 'err', implode( ' / ', array_slice( $r['errors'], 0, 5 ) ), $back ); }
 			break;
 
@@ -906,7 +902,7 @@ function md_survey_notice() {
 		'added'    => '명단에 넣었습니다.',
 		'updated'  => '같은 날 같은 차트번호가 있어 그 줄을 고쳤습니다.',
 		'saved'    => '설정을 저장했습니다.',
-		'imported' => sprintf( '붙여넣기 완료 — 새로 %d명, 고침 %d명.', isset( $_GET['a'] ) ? (int) $_GET['a'] : 0, isset( $_GET['u'] ) ? (int) $_GET['u'] : 0 ),
+		'imported' => sprintf( '붙여넣기 완료 — 새로 %d명, 고침 %d명, 담당직원이 없어 건너뜀 %d명.', isset( $_GET['a'] ) ? (int) $_GET['a'] : 0, isset( $_GET['u'] ) ? (int) $_GET['u'] : 0, isset( $_GET['s'] ) ? (int) $_GET['s'] : 0 ),
 	);
 	if ( isset( $map[ $m ] ) ) { echo '<div class="mds-notice mds-notice--ok">' . esc_html( $map[ $m ] ) . '</div>'; }
 }
@@ -977,14 +973,13 @@ function md_survey_render_roster() {
 			<label class="mds-field"><span>차트번호</span><input type="text" name="chart_no" inputmode="numeric" maxlength="20" required placeholder="12345"></label>
 			<label class="mds-field"><span>이름</span><input type="text" name="name" maxlength="40" required placeholder="홍길동"></label>
 			<label class="mds-field"><span>휴대폰 (뒷 4자리만 써도 됨)</span><input type="tel" name="phone" inputmode="numeric" maxlength="20" required placeholder="1234"></label>
-			<label class="mds-field"><span>생년월일</span><input type="tel" name="birth" inputmode="numeric" maxlength="14" required placeholder="800101"></label>
 		</div>
 		<div class="mds-formrow">
 			<?php md_survey_name_field( 'doctor', '담당 원장', 'doctors', md_survey_remembered( 'doctor' ) ); ?>
 			<?php md_survey_name_field( 'staff', '담당 스탭 (평가 대상)', 'staff', md_survey_remembered( 'staff' ) ); ?>
 			<div class="mds-field"><span>&nbsp;</span><button type="submit" class="mds-btn mds-btn--fill">넣기</button></div>
 		</div>
-		<p class="mds-hint">휴대폰과 생년월일은 환자가 본인 확인에 쓰는 값입니다. 저장할 때 암호화되어 이 화면에서도 다시 볼 수 없습니다. 같은 날 같은 차트번호를 다시 넣으면 그 줄을 고칩니다.</p>
+		<p class="mds-hint">이름과 휴대폰 뒷 4자리는 환자가 본인 확인에 쓰는 값입니다. 휴대폰은 저장할 때 암호화되어 이 화면에서도 다시 볼 수 없습니다. 같은 날 같은 차트번호를 다시 넣으면 그 줄을 고칩니다.</p>
 	</form>
 
 	<details class="mds-card mdsv-import">
@@ -993,8 +988,8 @@ function md_survey_render_roster() {
 			<input type="hidden" name="md_survey_action" value="import">
 			<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_import' ) ); ?>">
 			<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
-			<p class="mds-hint">엑셀에서 복사해 붙여 넣습니다. 열 순서는 <b>차트번호 · 이름 · 휴대폰 · 생년월일 · 담당원장 · 담당스탭</b>. 첫 줄이 제목이면 제목 이름으로 열을 찾습니다.</p>
-			<textarea name="rows" rows="6" placeholder="12345	홍길동	010-1234-5678	1980-01-01	이창률	김OO"></textarea>
+			<p class="mds-hint">덴트웹 <b>접수목록 → 기간별 목록 → 엑셀저장</b>으로 받은 파일을 열어 전체 선택(Ctrl+A) · 복사(Ctrl+C)한 뒤 여기에 붙여 넣습니다. 제목 줄(차트번호 · 이름 · 담당의사 · 담당직원 · 전화번호)로 열을 알아서 찾습니다. 담당직원이 빈 환자는 건너뜁니다. 제목 없이 붙일 때의 열 순서는 차트번호 · 이름 · 휴대폰 · 담당원장 · 담당스탭.</p>
+			<textarea name="rows" rows="6" placeholder="접수시각	상태	차트번호	이름	…	담당의사	담당직원	체어	전화번호	…"></textarea>
 			<div class="mds-formbtns"><button type="submit" class="mds-btn mds-btn--fill"><?php echo esc_html( date_i18n( 'n월 j일', strtotime( $date ) ) ); ?> 명단에 넣기</button></div>
 		</form>
 	</details>
@@ -1144,7 +1139,7 @@ function md_survey_render_settings() {
 		<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_settings' ) ); ?>">
 		<h2 class="mdsv-h">알림톡에 넣을 링크</h2>
 		<p class="mdsv-url"><code><?php echo esc_html( home_url( '/survey/?n=#환자명#' ) ); ?></code></p>
-		<p class="mds-hint">덴트웹 진료 후 알림톡 템플릿 본문에 이 주소를 그대로 넣습니다. 덴트웹이 <code>#환자명#</code>을 환자 이름으로 바꿔 보내므로, 환자는 휴대전화 뒷 4자리만 넣고 설문에 들어옵니다. 이름이 링크에 실리지 않은 경우(<code><?php echo esc_html( home_url( '/survey/' ) ); ?></code>)에는 생년월일까지 확인합니다.</p>
+		<p class="mds-hint">덴트웹 진료 후 알림톡 템플릿 본문에 이 주소를 그대로 넣습니다. 덴트웹이 <code>#환자명#</code>을 환자 이름으로 바꿔 보내므로, 환자는 휴대전화 뒷 4자리만 넣고 설문에 들어옵니다. 이름이 링크에 실리지 않은 경우(<code><?php echo esc_html( home_url( '/survey/' ) ); ?></code>)에는 환자가 이름을 직접 적습니다.</p>
 
 		<div class="mds-formrow">
 			<label class="mds-field"><span>응답 허용 기간 (진료일부터 며칠)</span><input type="number" name="window_days" min="1" max="30" value="<?php echo (int) $s['window_days']; ?>"></label>
