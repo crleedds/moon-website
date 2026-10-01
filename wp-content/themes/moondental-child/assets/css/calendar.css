@@ -99,3 +99,42 @@
   .mdcal-form input, .mdcal-form select { background: var(--color-surface, #241C15); color: var(--color-text, #F0E6DA); border-color: var(--color-border, #3A2E24); }
   .mdcal-bar__nav, .mdcal-btn { background: var(--color-surface, #241C15); }
 }
+
+/* v4.18 · 허브 달력 · 다가오는 2주 띠 · 직원 정보 */
+.mdcal--hub { margin-bottom: 22px; }
+.mdcal--hub .mdcal-gridwrap { margin-bottom: 10px; }
+.mdcal-bar__add { background: var(--color-primary, #D88062); color: var(--color-text-on-primary, #fff); border-color: var(--color-primary, #D88062); }
+.mdcal-bar__add:hover { background: var(--color-primary-dark, #B86347); }
+.mdcal-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 4px 2px 0; margin: 0; }
+.mdcal-strip__label { font-size: .8rem; font-weight: 800; letter-spacing: .06em; color: var(--color-text-mute, #A89685); }
+.mdcal-form__title small { font-weight: 500; font-size: .82rem; color: var(--color-text-mute, #A89685); margin-left: 8px; }
+.mdcal-row__staff { text-decoration: none; margin-left: auto; }
+
+.mdst-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin-bottom: 14px; }
+.mdst-title { margin: 0 0 12px; font-size: 1.05rem; font-weight: 800; }
+.mdst-title small { font-weight: 500; color: var(--color-text-mute, #A89685); }
+.mdst-new, .mdst-dept { margin-bottom: 14px; }
+.mdst-rows { display: flex; flex-direction: column; gap: 8px; }
+.mdst-item { display: flex; align-items: flex-end; gap: 8px; padding: 10px 0; border-top: 1px dashed var(--color-border, #EDDFD0); }
+.mdst-item:first-child { border-top: 0; padding-top: 0; }
+.mdst-row { display: grid; grid-template-columns: 1.1fr 1fr 1fr 1.1fr 1.1fr 1.2fr auto auto; gap: 8px; align-items: end; flex: 1 1 auto; min-width: 0; }
+.mdst-row--new { grid-template-columns: 1.1fr 1fr 1fr 1.1fr 1.1fr 1.2fr auto; }
+.mdst-f { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.mdst-f > span { font-size: .7rem; font-weight: 800; letter-spacing: .04em; color: var(--color-text-mute, #A89685); white-space: nowrap; }
+.mdst-f input, .mdst-f select { width: 100%; font: inherit; font-size: .92rem; min-height: 40px; padding: 6px 10px; border: 1px solid var(--color-border, #EDDFD0); border-radius: 9px; background: var(--color-white, #fff); color: var(--color-text, #3D2F26); }
+.mdst-f input:focus, .mdst-f select:focus { outline: 2px solid var(--color-primary, #D88062); border-color: var(--color-primary, #D88062); }
+.mdst-f--chk { flex-direction: row; align-items: center; min-height: 40px; white-space: nowrap; font-size: .85rem; }
+.mdst-save { min-height: 40px; padding: 0 16px; white-space: nowrap; }
+.mdst-row.is-inactive .mdst-f input, .mdst-row.is-inactive .mdst-f select { opacity: .55; }
+.mdst-del { flex: none; }
+.mdst-delbtn { min-height: 40px; min-width: 40px; border-radius: 999px; border: 1px solid var(--color-border, #EDDFD0); background: var(--color-white, #fff); color: var(--color-text-mute, #A89685); cursor: pointer; font-size: 1rem; }
+.mdst-delbtn:hover { border-color: var(--color-danger, #C66B5E); color: var(--color-danger, #C66B5E); }
+@media (max-width: 900px) {
+  .mdst-item { flex-wrap: wrap; }
+  .mdst-row, .mdst-row--new { grid-template-columns: 1fr 1fr; }
+  .mdst-f--note { grid-column: 1 / -1; }
+  .mdst-save { grid-column: 1 / -1; }
+}
+@media (prefers-color-scheme: dark) {
+  .mdst-f input, .mdst-f select, .mdst-delbtn { background: var(--color-surface, #241C15); color: var(--color-text, #F0E6DA); border-color: var(--color-border, #3A2E24); }
+}

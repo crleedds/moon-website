@@ -68,6 +68,13 @@ function md_sup_apps() {
 			'icon'  => '📅',
 			'desc'  => '생일 · 입사 기념일 · 병원 행사 · 휴진',
 		),
+		// v4.18 · 직원 정보 (관리자) — 생일 · 입사일 → 달력
+		'staff' => array(
+			'label'  => '직원 정보',
+			'icon'   => '👥',
+			'desc'   => '이름 · 부서 · 생일 · 입사일 — 달력에 자동 표시',
+			'manage' => true,
+		),
 		// v4.0 · 환자 설명용 자료
 		'care'  => array(
 			'label' => 'Moon Dental Care',
@@ -948,10 +955,10 @@ function md_sup_render_header( $app, $tab ) {
 
 /** 첫 화면 — 어떤 도구로 들어갈지 고른다 */
 function md_sup_render_hub() {
-	if ( function_exists( 'md_cal_render_hub_strip' ) ) { md_cal_render_hub_strip(); } /* v4.17 · 오늘 · 2주 안의 생일 · 기념일 · 행사 */
+	if ( function_exists( 'md_cal_render_hub' ) ) { md_cal_render_hub(); } /* v4.18 · 라운지 첫 화면에 월 달력 바로 */
 	?>
 	<div class="mds-apps"><!-- v4.10.1 · 설명 문구 없이 이름만 (원장 지시) -->
-		<?php foreach ( md_sup_apps() as $key => $a ) : ?>
+		<?php foreach ( md_sup_apps() as $key => $a ) : if ( ! empty( $a['manage'] ) && ! md_sup_can_manage() ) continue; /* v4.18 · 관리자 전용 타일 */ ?>
 			<?php $ext = ! empty( $a['url'] ); ?>
 			<a class="mds-app" href="<?php echo esc_url( $ext ? $a['url'] : md_sup_url( array( 'app' => $key ) ) ); ?>"<?php echo $ext ? ' target="_blank" rel="noopener"' : ''; ?>>
 				<span class="mds-app__icon" aria-hidden="true"><?php echo esc_html( $a['icon'] ); ?></span>
@@ -999,6 +1006,7 @@ function md_sup_render_page() {
 			. '</div>';
 	}
 
+	if ( 'staff' === $app && ! md_sup_can_manage() ) { $app = ''; } /* v4.18 */
 	if ( 'care' === $app && function_exists( 'md_care_render' ) ) {
 		md_care_render(); // v4.0 · Moon Dental Care
 	} elseif ( 'support' === $app && function_exists( 'md_support_render' ) ) {
@@ -1007,6 +1015,8 @@ function md_sup_render_page() {
 		md_equipment_render(); // v4.8 · 기구/장비 대장
 	} elseif ( 'calendar' === $app && function_exists( 'md_cal_render' ) ) {
 		md_cal_render(); // v4.17 · 달력
+	} elseif ( 'staff' === $app && function_exists( 'md_staff_render' ) ) {
+		md_staff_render(); // v4.18 · 직원 정보
 	} elseif ( 'fees' === $app && function_exists( 'md_fees_render' ) ) {
 		md_fees_render(); // v4.13 · 진료비
 	} elseif ( 'survey' === $app && function_exists( 'md_survey_render' ) ) {
