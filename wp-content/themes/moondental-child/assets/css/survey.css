@@ -95,3 +95,7 @@
 .mdsv-file__icon { font-size: 1.6rem; }
 .mdsv-file b { display: block; font-size: 1.02rem; }
 .mdsv-file__meta { display: block; margin-top: 2px; font-size: .84rem; color: var(--color-text-mute, #A89685); }
+
+/* v4.19.1 · 파일 카드 버튼 묶음 */
+.mdsv-file__btns { display: flex; gap: 8px; }
+.mdsv-file b small { font-weight: 500; color: var(--color-text-mute, #A89685); margin-left: 4px; }

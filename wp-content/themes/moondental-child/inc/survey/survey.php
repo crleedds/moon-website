@@ -30,7 +30,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_SURVEY_SCHEMA', 3 ); /* v4.19 · doctor 칸 120자 — 진료의사 여러 명(「문은수 · 정석형」) 표시 */
+define( 'MD_SURVEY_SCHEMA', 4 ); /* v4.19.1 · 올린 파일 보관 표 추가 (3: doctor 칸 120자 — 진료의사 여러 명 표시) */
 
 /* ============================================================
  * 테이블 · 설치
@@ -38,6 +38,7 @@ define( 'MD_SURVEY_SCHEMA', 3 ); /* v4.19 · doctor 칸 120자 — 진료의사 
 
 function md_survey_table_visit()    { global $wpdb; return $wpdb->prefix . 'md_survey_visit'; }
 function md_survey_table_response() { global $wpdb; return $wpdb->prefix . 'md_survey_response'; }
+function md_survey_table_file()     { global $wpdb; return $wpdb->prefix . 'md_survey_file'; }
 
 /** 없으면 만든다. add_option 으로 잠가 한 번만 돈다 (지원 요청과 같은 방식). */
 function md_survey_maybe_install() {
@@ -92,6 +93,23 @@ function md_survey_maybe_install() {
 		UNIQUE KEY visit (visit_id),
 		KEY staff_date (staff, visit_date),
 		KEY visit_date (visit_date)
+	) $charset;" );
+
+	/* v4.19.1 · 올린 엑셀 파일 자체를 보관 — 내려받기·삭제·바꿔 올리기. 로그인한 직원만 내려받을 수 있게 DB 에 둔다 */
+	$tf = md_survey_table_file();
+	dbDelta( "CREATE TABLE $tf (
+		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		visit_date DATE NOT NULL,
+		file_name VARCHAR(190) NOT NULL DEFAULT '',
+		file_size INT UNSIGNED NOT NULL DEFAULT 0,
+		content LONGBLOB NULL,
+		uploaded_by VARCHAR(60) NOT NULL DEFAULT '',
+		uploaded_at DATETIME NOT NULL,
+		added INT UNSIGNED NOT NULL DEFAULT 0,
+		updated INT UNSIGNED NOT NULL DEFAULT 0,
+		skipped INT UNSIGNED NOT NULL DEFAULT 0,
+		PRIMARY KEY  (id),
+		UNIQUE KEY visit_date (visit_date)
 	) $charset;" );
 
 	if ( ! get_option( 'md_survey_secret' ) ) {
@@ -290,6 +308,45 @@ function md_survey_visit_upsert( $d, $source = 'manual' ) {
 	$data['created_at'] = current_time( 'mysql' );
 	if ( ! $wpdb->insert( $t, $data ) ) { return new WP_Error( 'md_survey', '저장하지 못했습니다.' ); }
 	return array( 'id' => (int) $wpdb->insert_id, 'updated' => false );
+}
+
+/* ---- 올린 파일 (v4.19.1) ---- */
+
+/** 그날 올린 파일 한 건 (내용 제외). 없으면 null */
+function md_survey_file_get( $date ) {
+	global $wpdb;
+	return $wpdb->get_row( $wpdb->prepare( 'SELECT id, visit_date, file_name, file_size, uploaded_by, uploaded_at, added, updated, skipped FROM ' . md_survey_table_file() . ' WHERE visit_date = %s', $date ) );
+}
+
+/** 파일 내용까지 */
+function md_survey_file_get_full( $id ) {
+	global $wpdb;
+	return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . md_survey_table_file() . ' WHERE id = %d', (int) $id ) );
+}
+
+/** 그날 파일을 바꿔 넣는다 (있으면 덮어씀) */
+function md_survey_file_store( $date, $name, $content, $r ) {
+	global $wpdb;
+	$t = md_survey_table_file();
+	$wpdb->delete( $t, array( 'visit_date' => $date ) );
+	return (bool) $wpdb->insert( $t, array(
+		'visit_date'  => $date,
+		'file_name'   => mb_substr( sanitize_file_name( (string) $name ), 0, 190 ),
+		'file_size'   => strlen( (string) $content ),
+		'content'     => $content,
+		'uploaded_by' => mb_substr( wp_get_current_user()->display_name, 0, 60 ),
+		'uploaded_at' => current_time( 'mysql' ),
+		'added'       => (int) $r['added'],
+		'updated'     => (int) $r['updated'],
+		'skipped'     => (int) $r['skipped'],
+	), array( '%s', '%s', '%d', '%s', '%s', '%s', '%d', '%d', '%d' ) );
+}
+
+/** 그날 파일과 그 명단을 지운다 (응답은 남는다) */
+function md_survey_file_delete( $date ) {
+	global $wpdb;
+	$wpdb->delete( md_survey_table_file(), array( 'visit_date' => $date ) );
+	return md_survey_visits_delete_day( $date );
 }
 
 /** 그날 명단 전체 삭제 — 응답(별도 표)은 그대로 둔다. 지운 줄 수를 돌려준다 (v4.18.9) */
@@ -877,6 +934,9 @@ function md_survey_handle_post() {
 			} elseif ( ! preg_match( '/\.xlsx$/i', (string) $f['name'] ) ) {
 				$back = add_query_arg( 'err', '.xlsx 파일만 올릴 수 있습니다. 덴트웹 「엑셀저장」으로 만든 파일을 그대로 올려 주세요.', $back );
 			} else {
+				/* v4.19.1 · 새 파일을 올리면 그날 명단은 새 파일 기준으로 바뀐다 — 이전 명단은 지우고 다시 넣는다 (응답은 남음) */
+				md_survey_visits_delete_day( $date );
+				$content = (string) file_get_contents( $f['tmp_name'] );
 				try {
 					$r = md_survey_import_xlsx( $f['tmp_name'], $date );
 				} catch ( Throwable $e ) {
@@ -884,8 +944,9 @@ function md_survey_handle_post() {
 					$r = array( 'added' => 0, 'updated' => 0, 'skipped' => 0, 'errors' => array( '엑셀을 읽는 중 오류: ' . $e->getMessage() ), 'dates' => array() );
 				}
 				@unlink( $f['tmp_name'] );
-				/* 파일 안의 접수일이 고른 날짜와 다르면 그 날짜 화면으로 보내고 알린다 */
+				/* 파일 안의 접수일이 고른 날짜와 다르면 그 날짜 화면으로 보내고 알린다. 파일도 그 날짜에 보관한다 */
 				$fd = ! empty( $r['dates'] ) ? $r['dates'] : array();
+				md_survey_file_store( 1 === count( $fd ) ? $fd[0] : $date, $f['name'], $content, $r );
 				if ( 1 === count( $fd ) && $fd[0] !== $date ) {
 					$back = md_survey_admin_url( array( 'sv' => 'roster', 'd' => $fd[0], 'fd' => $fd[0] ) );
 				} elseif ( count( $fd ) > 1 ) {
@@ -901,10 +962,20 @@ function md_survey_handle_post() {
 			if ( is_wp_error( $res ) ) { $back = add_query_arg( 'err', $res->get_error_message(), $back ); }
 			break;
 
-		case 'delete_day': /* v4.18.9 · 그날 올린 명단 전체 삭제 (응답은 남는다) */
-			$n = md_survey_visits_delete_day( $date );
+		case 'delete_day': /* v4.18.9 · 그날 올린 명단 전체 삭제 (응답은 남는다) · v4.19.1 부터 파일도 함께 */
+			$n = md_survey_file_delete( $date );
 			$back = add_query_arg( array( 'msg' => 'daydeleted', 'n' => (int) $n ), $back );
 			break;
+
+		case 'download': /* v4.19.1 · 올린 파일 내려받기 — 로그인한 직원만 (이 핸들러는 can_view 를 이미 지났다) */
+			$file = md_survey_file_get_full( isset( $_POST['fid'] ) ? (int) $_POST['fid'] : 0 );
+			if ( ! $file || null === $file->content ) { wp_die( '파일이 없습니다.' ); }
+			nocache_headers();
+			header( 'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' );
+			header( 'Content-Length: ' . strlen( $file->content ) );
+			header( "Content-Disposition: attachment; filename*=UTF-8''" . rawurlencode( $file->file_name ? $file->file_name : $file->visit_date . '.xlsx' ) );
+			echo $file->content; // phpcs:ignore
+			exit;
 
 		case 'settings':
 			if ( ! md_survey_can_manage() ) { wp_die( '권한이 없습니다.' ); }
@@ -997,8 +1068,8 @@ function md_survey_notice() {
 		'added'    => '명단에 넣었습니다.',
 		'updated'  => '같은 날 같은 차트번호가 있어 그 줄을 고쳤습니다.',
 		'saved'    => '설정을 저장했습니다.',
-		'daydeleted' => sprintf( '명단 %d명을 지웠습니다.', isset( $_GET['n'] ) ? (int) $_GET['n'] : 0 ),
-		'imported' => sprintf( '붙여넣기 완료 — 새로 %d명, 고침 %d명, 담당직원이 없어 건너뜀 %d명.', isset( $_GET['a'] ) ? (int) $_GET['a'] : 0, isset( $_GET['u'] ) ? (int) $_GET['u'] : 0, isset( $_GET['s'] ) ? (int) $_GET['s'] : 0 ),
+		'daydeleted' => sprintf( '파일과 명단 %d명을 지웠습니다.', isset( $_GET['n'] ) ? (int) $_GET['n'] : 0 ),
+		'imported' => sprintf( '올렸습니다 — 명단 %d명, 담당직원이 없어 건너뜀 %d명.', ( isset( $_GET['a'] ) ? (int) $_GET['a'] : 0 ) + ( isset( $_GET['u'] ) ? (int) $_GET['u'] : 0 ), isset( $_GET['s'] ) ? (int) $_GET['s'] : 0 ),
 	);
 	if ( isset( $map[ $m ] ) ) {
 		$text = $map[ $m ];
@@ -1116,43 +1187,55 @@ function md_survey_render_roster() {
 		</div>
 	</div>
 
-	<form method="post" enctype="multipart/form-data" class="mds-card mdsv-upload">
+	<?php $file = md_survey_file_get( $date ); ?>
+	<form method="post" enctype="multipart/form-data" class="mds-card mdsv-upload" action="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'roster', 'd' => $date ) ) ); ?>">
 		<input type="hidden" name="md_survey_action" value="upload">
 		<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_upload' ) ); ?>">
 		<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
-		<h2 class="mdsv-h"><?php echo esc_html( date_i18n( 'n월 j일 (D)', strtotime( $date ) ) ); ?> 명단 <small><?php echo count( $rows ) ? count( $rows ) . '명 올림 · 응답 ' . (int) $answered . '명' : '아직 올리지 않음'; ?></small></h2>
-		<p class="mds-hint">덴트웹 접수목록 → <b>기간별 목록</b> → 오늘 → <b>엑셀저장</b>(사유: 만족도 조사 명단, 인증서는 취소) 한 파일을 고르고 넣기. 담당직원이 빈 환자는 건너뜁니다.</p>
+		<h2 class="mdsv-h"><?php echo esc_html( date_i18n( 'n월 j일 (D)', strtotime( $date ) ) ); ?> <small><?php echo $file ? '파일 올림 · 명단 ' . count( $rows ) . '명 · 응답 ' . (int) $answered . '명' : '아직 올리지 않음'; ?></small></h2>
+		<p class="mds-hint">덴트웹 접수목록 → <b>기간별 목록</b> → 오늘 → <b>엑셀저장</b>(사유: 만족도 조사 명단, 인증서는 취소) 한 파일을 골라 올리기. 다시 올리면 새 파일로 바뀝니다.</p>
 		<?php if ( md_survey_can_manage() ) : /* v4.18.7 · 관리자에게만 서버 상태 — 안 될 때 원인 찾기용 */
 			$pcl = file_exists( ABSPATH . 'wp-admin/includes/class-pclzip.php' ); ?>
 			<p class="mds-hint mdsv-diag">서버: 파일 업로드 <?php echo ini_get( 'file_uploads' ) ? '켜짐' : '꺼짐'; ?> · 최대 <?php echo esc_html( ini_get( 'upload_max_filesize' ) ); ?> · ZipArchive <?php echo class_exists( 'ZipArchive' ) ? '있음' : '없음'; ?> · PclZip <?php echo $pcl ? '있음' : '없음'; ?> · SimpleXML <?php echo function_exists( 'simplexml_load_string' ) ? '있음' : '없음'; ?> · PHP <?php echo esc_html( PHP_VERSION ); ?></p>
 		<?php endif; ?>
 		<div class="mdsv-upload__row">
 			<input type="file" name="xlsx" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
-			<button type="submit" class="mds-btn mds-btn--fill"><?php echo count( $rows ) ? '다시 넣기' : '명단에 넣기'; ?></button>
+			<button type="submit" class="mds-btn mds-btn--fill"><?php echo $file ? '새 파일로 바꾸기' : '올리기'; ?></button>
 		</div>
 	</form>
 
-	<?php if ( ! empty( $rows ) ) :
-		/* v4.18.9 · 환자 한 줄씩 보여 주던 표 대신, 올린 파일 요약 하나와 삭제 버튼만 (원장 지시) */
-		$by_staff = array(); $last = '';
-		foreach ( $rows as $r ) { $by_staff[ $r->staff ] = isset( $by_staff[ $r->staff ] ) ? $by_staff[ $r->staff ] + 1 : 1; if ( $r->created_at > $last ) { $last = $r->created_at; } }
+	<?php if ( $file || ! empty( $rows ) ) :
+		/* v4.19.1 · 올린 파일 한 장 — 내려받기 · 삭제. 환자 명단은 보여 주지 않는다 (원장 지시) */
+		$by_staff = array();
+		foreach ( $rows as $r ) { $by_staff[ $r->staff ] = isset( $by_staff[ $r->staff ] ) ? $by_staff[ $r->staff ] + 1 : 1; }
 		arsort( $by_staff );
 		$staff_txt = array();
 		foreach ( $by_staff as $s => $n ) { $staff_txt[] = $s . ' ' . $n; }
+		$fname = $file && $file->file_name ? $file->file_name : date_i18n( 'n월 j일', strtotime( $date ) ) . ' 명단';
+		$fsize = $file ? ( $file->file_size >= 1024 * 1024 ? number_format( $file->file_size / 1048576, 1 ) . 'MB' : number_format( $file->file_size / 1024 ) . 'KB' ) : '';
 		?>
 		<div class="mds-card mdsv-file">
 			<div class="mdsv-file__body">
 				<span class="mdsv-file__icon" aria-hidden="true">📄</span>
 				<div>
-					<b><?php echo esc_html( date_i18n( 'n월 j일', strtotime( $date ) ) ); ?> 명단 · <?php echo count( $rows ); ?>명</b>
-					<span class="mdsv-file__meta">올린 시각 <?php echo esc_html( date_i18n( 'n/j H:i', strtotime( $last ) ) ); ?> · 응답 <?php echo (int) $answered; ?>명 · 스탭별 <?php echo esc_html( implode( ' · ', $staff_txt ) ); ?></span>
+					<b><?php echo esc_html( $fname ); ?><?php if ( $fsize ) : ?> <small><?php echo esc_html( $fsize ); ?></small><?php endif; ?></b>
+					<span class="mdsv-file__meta"><?php if ( $file ) : ?><?php echo esc_html( date_i18n( 'n/j H:i', strtotime( $file->uploaded_at ) ) ); ?> <?php echo esc_html( $file->uploaded_by ); ?> 올림 · <?php endif; ?>명단 <?php echo count( $rows ); ?>명<?php if ( $file && $file->skipped ) : ?> · 담당직원 없음 <?php echo (int) $file->skipped; ?>명<?php endif; ?> · 응답 <?php echo (int) $answered; ?>명<?php if ( $staff_txt ) : ?> · 스탭별 <?php echo esc_html( implode( ' · ', $staff_txt ) ); ?><?php endif; ?></span>
 				</div>
 			</div>
-			<form method="post" class="mds-inline" onsubmit="return confirm('<?php echo esc_js( date_i18n( 'n월 j일', strtotime( $date ) ) ); ?> 명단 <?php echo count( $rows ); ?>명을 지울까요? 이미 받은 응답은 남고, 다시 올리면 환자가 다시 응답할 수 있게 됩니다.');">
-				<input type="hidden" name="md_survey_action" value="delete_day"><input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_delete_day' ) ); ?>">
-				<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
-				<button type="submit" class="mds-btn mds-btn--ghost">삭제</button>
-			</form>
+			<div class="mdsv-file__btns">
+				<?php if ( $file ) : ?>
+				<form method="post" class="mds-inline">
+					<input type="hidden" name="md_survey_action" value="download"><input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_download' ) ); ?>">
+					<input type="hidden" name="fid" value="<?php echo (int) $file->id; ?>"><input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
+					<button type="submit" class="mds-btn mds-btn--ghost">내려받기</button>
+				</form>
+				<?php endif; ?>
+				<form method="post" class="mds-inline" onsubmit="return confirm('<?php echo esc_js( date_i18n( 'n월 j일', strtotime( $date ) ) ); ?> 파일과 명단 <?php echo count( $rows ); ?>명을 지울까요? 이미 받은 응답은 남습니다.');">
+					<input type="hidden" name="md_survey_action" value="delete_day"><input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_delete_day' ) ); ?>">
+					<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
+					<button type="submit" class="mds-btn mds-btn--ghost">삭제</button>
+				</form>
+			</div>
 		</div>
 	<?php endif; ?>
 
