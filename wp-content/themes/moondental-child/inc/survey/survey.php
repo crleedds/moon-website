@@ -854,13 +854,21 @@ function md_survey_handle_post() {
 		case 'upload': /* v4.14.4 · 엑셀 파일 그대로 올리기. 파일은 읽고 바로 버린다 — 서버에 남기지 않는다 */
 			$f = isset( $_FILES['xlsx'] ) ? $_FILES['xlsx'] : null;
 			if ( ! $f || ! isset( $f['error'] ) || UPLOAD_ERR_OK !== (int) $f['error'] || empty( $f['tmp_name'] ) ) {
-				$back = add_query_arg( 'err', '파일이 올라오지 않았습니다. .xlsx 파일을 골라 주세요.', $back );
+				/* v4.18.7 · 무엇이 막혔는지 그대로 보여 준다 */
+				$codes = array( 1 => '서버 최대 크기 초과(upload_max_filesize)', 2 => '폼 최대 크기 초과', 3 => '일부만 전송됨', 4 => '파일이 선택되지 않음', 6 => '임시 폴더 없음', 7 => '디스크 쓰기 실패', 8 => '확장 모듈이 차단' );
+				$why = ! $f ? '브라우저가 파일을 보내지 않음(폼 enctype 또는 서버 설정)' : ( isset( $codes[ (int) $f['error'] ] ) ? $codes[ (int) $f['error'] ] : '알 수 없음(' . (int) $f['error'] . ')' );
+				$back = add_query_arg( 'err', '파일이 올라오지 않았습니다 — ' . $why . '. 서버 file_uploads=' . ( ini_get( 'file_uploads' ) ? 'on' : 'off' ) . ', 최대 ' . ini_get( 'upload_max_filesize' ), $back );
 			} elseif ( (int) $f['size'] > 8 * 1024 * 1024 ) {
 				$back = add_query_arg( 'err', '파일이 너무 큽니다 (8MB 이하).', $back );
 			} elseif ( ! preg_match( '/\.xlsx$/i', (string) $f['name'] ) ) {
 				$back = add_query_arg( 'err', '.xlsx 파일만 올릴 수 있습니다. 덴트웹 「엑셀저장」으로 만든 파일을 그대로 올려 주세요.', $back );
 			} else {
-				$r = md_survey_import_xlsx( $f['tmp_name'], $date );
+				try {
+					$r = md_survey_import_xlsx( $f['tmp_name'], $date );
+				} catch ( Throwable $e ) {
+					error_log( 'md_survey upload: ' . $e->getMessage() );
+					$r = array( 'added' => 0, 'updated' => 0, 'skipped' => 0, 'errors' => array( '엑셀을 읽는 중 오류: ' . $e->getMessage() ), 'dates' => array() );
+				}
 				@unlink( $f['tmp_name'] );
 				/* 파일 안의 접수일이 고른 날짜와 다르면 그 날짜 화면으로 보내고 알린다 */
 				$fd = ! empty( $r['dates'] ) ? $r['dates'] : array();
@@ -1093,6 +1101,10 @@ function md_survey_render_roster() {
 		<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
 		<h2 class="mdsv-h"><?php echo esc_html( date_i18n( 'n월 j일 (D)', strtotime( $date ) ) ); ?> 명단 <small><?php echo count( $rows ) ? count( $rows ) . '명 올림 · 응답 ' . (int) $answered . '명' : '아직 올리지 않음'; ?></small></h2>
 		<p class="mds-hint">덴트웹 접수목록 → <b>기간별 목록</b> → 오늘 → <b>엑셀저장</b>(사유: 만족도 조사 명단, 인증서는 취소) 한 파일을 고르고 넣기. 담당직원이 빈 환자는 건너뜁니다.</p>
+		<?php if ( md_survey_can_manage() ) : /* v4.18.7 · 관리자에게만 서버 상태 — 안 될 때 원인 찾기용 */
+			$pcl = file_exists( ABSPATH . 'wp-admin/includes/class-pclzip.php' ); ?>
+			<p class="mds-hint mdsv-diag">서버: 파일 업로드 <?php echo ini_get( 'file_uploads' ) ? '켜짐' : '꺼짐'; ?> · 최대 <?php echo esc_html( ini_get( 'upload_max_filesize' ) ); ?> · ZipArchive <?php echo class_exists( 'ZipArchive' ) ? '있음' : '없음'; ?> · PclZip <?php echo $pcl ? '있음' : '없음'; ?> · SimpleXML <?php echo function_exists( 'simplexml_load_string' ) ? '있음' : '없음'; ?> · PHP <?php echo esc_html( PHP_VERSION ); ?></p>
+		<?php endif; ?>
 		<div class="mdsv-upload__row">
 			<input type="file" name="xlsx" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
 			<button type="submit" class="mds-btn mds-btn--fill"><?php echo count( $rows ) ? '다시 넣기' : '명단에 넣기'; ?></button>
