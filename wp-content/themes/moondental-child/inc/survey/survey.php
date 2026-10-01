@@ -1038,7 +1038,7 @@ function md_survey_day_counts( $from, $to ) {
  *   1. 최근 2주 날짜 띠 — 올린 날(명단 수)과 안 올린 날이 한눈에 보인다
  *   2. 고른 날짜의 엑셀 올리기
  *   3. 그날 명단
- *   4. 접어 둔 「직접 넣기」 — 엑셀에 담당직원이 빠진 환자를 한 명씩 넣거나 붙여 넣을 때
+ *   (한 명 넣기·붙여넣기 화면은 v4.18.6 에서 뺐다 — 원장 지시. 처리 함수는 REST·호환을 위해 남겨 둔다)
  */
 function md_survey_render_roster() {
 	$today = current_time( 'Y-m-d' );
@@ -1127,33 +1127,6 @@ function md_survey_render_roster() {
 		</div>
 	<?php endif; ?>
 
-	<details class="mds-card mdsv-import">
-		<summary>직접 넣기 <small>엑셀에 담당직원이 빠진 환자를 한 명씩 넣을 때</small></summary>
-		<form method="post" class="mdsv-add" id="add">
-			<input type="hidden" name="md_survey_action" value="add">
-			<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_add' ) ); ?>">
-			<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
-			<div class="mds-formrow">
-				<label class="mds-field"><span>차트번호</span><input type="text" name="chart_no" inputmode="numeric" maxlength="20" required placeholder="12345"></label>
-				<label class="mds-field"><span>이름</span><input type="text" name="name" maxlength="40" required placeholder="홍길동"></label>
-				<label class="mds-field"><span>휴대폰 (전체 또는 가운데 4자리)</span><input type="tel" name="phone" inputmode="numeric" maxlength="20" required placeholder="010-1234-5678"></label>
-			</div>
-			<div class="mds-formrow">
-				<?php md_survey_name_field( 'doctor', '담당 원장', 'doctors', md_survey_remembered( 'doctor' ) ); ?>
-				<?php md_survey_name_field( 'staff', '담당 스탭 (평가 대상)', 'staff', md_survey_remembered( 'staff' ) ); ?>
-				<div class="mds-field"><span>&nbsp;</span><button type="submit" class="mds-btn mds-btn--fill"><?php echo esc_html( date_i18n( 'n월 j일', strtotime( $date ) ) ); ?> 명단에 넣기</button></div>
-			</div>
-			<p class="mds-hint">같은 날 같은 차트번호를 다시 넣으면 그 줄을 고칩니다. 휴대폰은 암호화되어 저장됩니다.</p>
-		</form>
-		<form method="post" class="mdsv-paste">
-			<input type="hidden" name="md_survey_action" value="import">
-			<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_import' ) ); ?>">
-			<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
-			<p class="mds-hint">파일 올리기가 안 될 때: 엑셀을 열어 전체 선택(Ctrl+A) · 복사(Ctrl+C) 한 내용을 붙여 넣어도 됩니다.</p>
-			<textarea name="rows" rows="4" placeholder="접수시각	상태	차트번호	이름	…	담당의사	담당직원	체어	전화번호	…"></textarea>
-			<div class="mds-formbtns"><button type="submit" class="mds-btn mds-btn--ghost">붙여넣은 내용 넣기</button></div>
-		</form>
-	</details>
 	<?php
 }
 
