@@ -61,3 +61,27 @@
 .mdsv-upload__row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .mdsv-upload__row input[type="file"] { flex: 1 1 260px; font: inherit; font-size: .95rem; min-height: 46px; padding: 8px 12px; border: 1px dashed var(--color-border, #EDDFD0); border-radius: 10px; background: var(--color-surface, #FBF2E8); color: var(--color-text, #3D2F26); }
 .mdsv-upload__row .mds-btn { min-height: 46px; padding: 0 22px; }
+
+/* v4.18.5 · 날짜 띠 — 올린 날 / 안 올린 날 */
+.mdsv-days-card { padding: 14px 16px 12px; margin-top: 14px; }
+.mdsv-days { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 6px; }
+.mdsv-day { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 10px; border: 1px solid var(--color-border, #EDDFD0); background: var(--color-white, #fff); text-decoration: none; color: var(--color-text-sub, #7A6B5F); }
+.mdsv-day__d { font-size: .82rem; font-weight: 700; white-space: nowrap; }
+.mdsv-day__d small { font-weight: 500; color: var(--color-text-mute, #A89685); }
+.mdsv-day__n { font-size: .95rem; font-weight: 800; }
+.mdsv-day.is-ok    { background: var(--color-accent-bg, rgba(143,174,146,.12)); border-color: var(--color-accent, #8FAE92); }
+.mdsv-day.is-ok .mdsv-day__n { color: var(--color-accent-dark, #6B8F72); }
+.mdsv-day.is-none  { background: rgba(198,107,94,.08); border-color: rgba(198,107,94,.45); }
+.mdsv-day.is-none .mdsv-day__n { color: var(--color-danger, #C66B5E); }
+.mdsv-day.is-today { border-style: dashed; }
+.mdsv-day.is-today .mdsv-day__n { color: var(--color-text-mute, #A89685); }
+.mdsv-day.is-off   { opacity: .55; }
+.mdsv-day.is-sel   { outline: 2px solid var(--color-primary, #D88062); outline-offset: 1px; }
+.mdsv-days__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px; margin-top: 10px; font-size: .9rem; }
+.mdsv-days__foot label { display: inline-flex; align-items: center; gap: 8px; color: var(--color-text-mute, #A89685); font-size: .85rem; }
+.mdsv-missing { font-weight: 700; color: var(--color-danger, #C66B5E); }
+.mdsv-missing.is-clear { color: var(--color-accent-dark, #6B8F72); }
+.mdsv-import > summary small { margin-left: 8px; font-weight: 500; color: var(--color-text-mute, #A89685); }
+.mdsv-import .mdsv-add { padding: 12px 0 0; }
+.mdsv-paste { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--color-border, #EDDFD0); }
+.mdsv-upload { margin-top: 14px; }

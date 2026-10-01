@@ -1022,73 +1022,87 @@ function md_survey_name_field( $field, $label, $list_key, $value ) {
 }
 
 /** 오늘 명단 — 한 명씩 넣기 · 붙여넣기 · 그날 목록 */
+/** 날짜별 명단 수 · 응답 수 · 마지막으로 올린 시각 (v4.18.5 · 날짜 띠용) */
+function md_survey_day_counts( $from, $to ) {
+	global $wpdb;
+	$tv  = md_survey_table_visit();
+	$out = array();
+	$rows = $wpdb->get_results( $wpdb->prepare(
+		"SELECT visit_date, COUNT(*) AS n, SUM(responded_at IS NOT NULL) AS a, MAX(created_at) AS last_at FROM $tv WHERE visit_date BETWEEN %s AND %s GROUP BY visit_date", $from, $to ) );
+	foreach ( (array) $rows as $r ) { $out[ $r->visit_date ] = $r; }
+	return $out;
+}
+
+/**
+ * 오늘 명단 (v4.18.5 · 데스크가 매일 한 번 엑셀을 올리는 흐름에 맞춰 정리)
+ *   1. 최근 2주 날짜 띠 — 올린 날(명단 수)과 안 올린 날이 한눈에 보인다
+ *   2. 고른 날짜의 엑셀 올리기
+ *   3. 그날 명단
+ *   4. 접어 둔 「직접 넣기」 — 엑셀에 담당직원이 빠진 환자를 한 명씩 넣거나 붙여 넣을 때
+ */
 function md_survey_render_roster() {
-	$date = isset( $_GET['d'] ) ? sanitize_text_field( wp_unslash( $_GET['d'] ) ) : current_time( 'Y-m-d' );
-	if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) { $date = current_time( 'Y-m-d' ); }
-	$rows   = md_survey_visits_on( $date );
+	$today = current_time( 'Y-m-d' );
+	$date  = isset( $_GET['d'] ) ? sanitize_text_field( wp_unslash( $_GET['d'] ) ) : $today;
+	if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) { $date = $today; }
+	$rows     = md_survey_visits_on( $date );
 	$answered = 0;
 	foreach ( $rows as $r ) { if ( $r->response_id ) { $answered++; } }
-	$manage = md_survey_can_manage();
-	?>
-	<div class="mdsv-bar">
-		<form method="get" class="mdsv-datepick" action="<?php echo esc_url( md_survey_admin_url() ); ?>">
-			<?php md_sup_app_field(); ?><input type="hidden" name="sv" value="roster">
-			<a class="mds-btn mds-btn--ghost" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'roster', 'd' => gmdate( 'Y-m-d', strtotime( $date ) - DAY_IN_SECONDS ) ) ) ); ?>" aria-label="전날">‹</a>
-			<input type="date" name="d" value="<?php echo esc_attr( $date ); ?>" onchange="this.form.submit()">
-			<a class="mds-btn mds-btn--ghost" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'roster', 'd' => gmdate( 'Y-m-d', strtotime( $date ) + DAY_IN_SECONDS ) ) ) ); ?>" aria-label="다음날">›</a>
-			<?php if ( $date !== current_time( 'Y-m-d' ) ) : ?><a class="mds-btn mds-btn--ghost" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'roster' ) ) ); ?>">오늘</a><?php endif; ?>
-		</form>
-		<div class="mdsv-count"><b><?php echo count( $rows ); ?>명</b> 명단 · <b><?php echo (int) $answered; ?>명</b> 응답</div>
-	</div>
 
-	<form method="post" class="mds-card mdsv-add" id="add">
-		<input type="hidden" name="md_survey_action" value="add">
-		<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_add' ) ); ?>">
-		<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
-		<h2 class="mdsv-h">명단에 한 명 넣기 <small><?php echo esc_html( date_i18n( 'n월 j일 (D)', strtotime( $date ) ) ); ?></small></h2>
-		<div class="mds-formrow">
-			<label class="mds-field"><span>차트번호</span><input type="text" name="chart_no" inputmode="numeric" maxlength="20" required placeholder="12345"></label>
-			<label class="mds-field"><span>이름</span><input type="text" name="name" maxlength="40" required placeholder="홍길동"></label>
-			<label class="mds-field"><span>휴대폰 (전체 또는 가운데 4자리)</span><input type="tel" name="phone" inputmode="numeric" maxlength="20" required placeholder="010-1234-5678"></label>
+	/* 날짜 띠 — 오늘까지 14일. 고른 날짜가 그 밖이면 그 날짜까지 */
+	$days   = 14;
+	$end_ts = max( strtotime( $today ), strtotime( $date ) );
+	$start  = gmdate( 'Y-m-d', $end_ts - ( $days - 1 ) * DAY_IN_SECONDS );
+	$end    = gmdate( 'Y-m-d', $end_ts );
+	if ( $date < $start ) { $start = $date; }
+	$counts  = md_survey_day_counts( $start, $end );
+	$missing = array();
+	$wd = array( '일', '월', '화', '수', '목', '금', '토' );
+	?>
+	<div class="mds-card mdsv-days-card">
+		<div class="mdsv-days">
+			<?php for ( $ts = strtotime( $start ); $ts <= $end_ts; $ts += DAY_IN_SECONDS ) :
+				$d   = gmdate( 'Y-m-d', $ts );
+				$w   = (int) gmdate( 'w', $ts );
+				$c   = isset( $counts[ $d ] ) ? $counts[ $d ] : null;
+				$cls = $c ? 'is-ok' : ( 0 === $w ? 'is-off' : ( $d === $today ? 'is-today' : 'is-none' ) );
+				if ( ! $c && 0 !== $w && $d < $today ) { $missing[] = $d; }
+				$title = $c ? sprintf( '명단 %d명 · 응답 %d명 · 마지막 올림 %s', (int) $c->n, (int) $c->a, date_i18n( 'n/j H:i', strtotime( $c->last_at ) ) ) : ( 0 === $w ? '일요일' : '올리지 않음' );
+				?>
+				<a class="mdsv-day <?php echo esc_attr( $cls ); ?><?php echo $d === $date ? ' is-sel' : ''; ?>" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'roster', 'd' => $d ) ) ); ?>" title="<?php echo esc_attr( $title ); ?>">
+					<span class="mdsv-day__d"><?php echo esc_html( gmdate( 'n/j', $ts ) ); ?> <small><?php echo esc_html( $wd[ $w ] ); ?></small></span>
+					<span class="mdsv-day__n"><?php echo $c ? (int) $c->n . '명' : ( 0 === $w ? '휴' : ( $d === $today ? '아직' : '없음' ) ); ?></span>
+				</a>
+			<?php endfor; ?>
 		</div>
-		<div class="mds-formrow">
-			<?php md_survey_name_field( 'doctor', '담당 원장', 'doctors', md_survey_remembered( 'doctor' ) ); ?>
-			<?php md_survey_name_field( 'staff', '담당 스탭 (평가 대상)', 'staff', md_survey_remembered( 'staff' ) ); ?>
-			<div class="mds-field"><span>&nbsp;</span><button type="submit" class="mds-btn mds-btn--fill">넣기</button></div>
+		<div class="mdsv-days__foot">
+			<form method="get" class="mdsv-datepick" action="<?php echo esc_url( md_survey_admin_url() ); ?>">
+				<?php md_sup_app_field(); ?><input type="hidden" name="sv" value="roster">
+				<label>다른 날짜 <input type="date" name="d" value="<?php echo esc_attr( $date ); ?>" onchange="this.form.submit()"></label>
+			</form>
+			<?php if ( $missing ) : ?>
+				<span class="mdsv-missing">올리지 않은 날: <?php echo esc_html( implode( ' · ', array_map( function ( $x ) { return date_i18n( 'n/j', strtotime( $x ) ); }, $missing ) ) ); ?></span>
+			<?php else : ?>
+				<span class="mdsv-missing is-clear">최근 2주 모두 올렸습니다.</span>
+			<?php endif; ?>
 		</div>
-		<p class="mds-hint">이름과 휴대폰 가운데 4자리는 환자가 본인 확인에 쓰는 값입니다. 휴대폰은 저장할 때 암호화되어 이 화면에서도 다시 볼 수 없습니다. 같은 날 같은 차트번호를 다시 넣으면 그 줄을 고칩니다.</p>
-	</form>
+	</div>
 
 	<form method="post" enctype="multipart/form-data" class="mds-card mdsv-upload">
 		<input type="hidden" name="md_survey_action" value="upload">
 		<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_upload' ) ); ?>">
 		<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
-		<h2 class="mdsv-h">덴트웹 엑셀 파일 올리기 <small>하루 한 번 · 가장 쉬운 방법</small></h2>
-		<p class="mds-hint">덴트웹 데스크 화면 → 접수목록 → <b>기간별 목록</b> → 오늘 → <b>엑셀저장</b>(사유: 만족도 조사 명단). 저장된 파일을 여기에 고르고 올리면 끝입니다. 파일을 열어 볼 필요가 없고, 서버에는 파일이 남지 않습니다. 담당직원이 빈 환자는 건너뜁니다.</p>
+		<h2 class="mdsv-h"><?php echo esc_html( date_i18n( 'n월 j일 (D)', strtotime( $date ) ) ); ?> 명단 <small><?php echo count( $rows ) ? count( $rows ) . '명 올림 · 응답 ' . (int) $answered . '명' : '아직 올리지 않음'; ?></small></h2>
+		<p class="mds-hint">덴트웹 접수목록 → <b>기간별 목록</b> → 오늘 → <b>엑셀저장</b>(사유: 만족도 조사 명단, 인증서는 취소) 한 파일을 고르고 넣기. 담당직원이 빈 환자는 건너뜁니다.</p>
 		<div class="mdsv-upload__row">
 			<input type="file" name="xlsx" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
-			<button type="submit" class="mds-btn mds-btn--fill"><?php echo esc_html( date_i18n( 'n월 j일', strtotime( $date ) ) ); ?> 명단에 넣기</button>
+			<button type="submit" class="mds-btn mds-btn--fill"><?php echo count( $rows ) ? '다시 넣기' : '명단에 넣기'; ?></button>
 		</div>
 	</form>
 
-	<details class="mds-card mdsv-import">
-		<summary>엑셀 내용을 복사해 붙여넣기 (파일 올리기가 안 될 때)</summary>
-		<form method="post">
-			<input type="hidden" name="md_survey_action" value="import">
-			<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_import' ) ); ?>">
-			<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
-			<p class="mds-hint">덴트웹 <b>접수목록 → 기간별 목록 → 엑셀저장</b>으로 받은 파일을 열어 전체 선택(Ctrl+A) · 복사(Ctrl+C)한 뒤 여기에 붙여 넣습니다. 제목 줄(차트번호 · 이름 · 담당의사 · 담당직원 · 전화번호)로 열을 알아서 찾습니다. 담당직원이 빈 환자는 건너뜁니다. 제목 없이 붙일 때의 열 순서는 차트번호 · 이름 · 휴대폰 · 담당원장 · 담당스탭.</p>
-			<textarea name="rows" rows="6" placeholder="접수시각	상태	차트번호	이름	…	담당의사	담당직원	체어	전화번호	…"></textarea>
-			<div class="mds-formbtns"><button type="submit" class="mds-btn mds-btn--fill"><?php echo esc_html( date_i18n( 'n월 j일', strtotime( $date ) ) ); ?> 명단에 넣기</button></div>
-		</form>
-	</details>
-
-	<?php if ( empty( $rows ) ) : ?>
-		<div class="mds-card"><div class="mds-empty">이 날 명단이 없습니다.</div></div>
-	<?php else : ?>
+	<?php if ( ! empty( $rows ) ) : ?>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>차트번호</th><th>이름</th><th>담당 원장</th><th>담당 스탭</th><th>응답</th><th>전용 링크</th><th></th></tr></thead>
+				<thead><tr><th>차트번호</th><th>이름</th><th>담당 원장</th><th>담당 스탭</th><th>응답</th><th></th></tr></thead>
 				<tbody>
 				<?php foreach ( $rows as $r ) : ?>
 					<tr class="<?php echo $r->response_id ? 'is-answered' : ''; ?>">
@@ -1097,7 +1111,6 @@ function md_survey_render_roster() {
 						<td><?php echo esc_html( $r->doctor ); ?></td>
 						<td><b><?php echo esc_html( $r->staff ); ?></b></td>
 						<td><?php if ( $r->response_id ) : ?><span class="mds-status is-done">응답 <?php echo esc_html( date_i18n( 'H:i', strtotime( $r->answered_at ) ) ); ?></span><?php else : ?><span class="mds-status is-pending">대기</span><?php endif; ?></td>
-						<td><input type="text" class="mdsv-link" readonly value="<?php echo esc_attr( add_query_arg( 't', $r->token, md_survey_public_url() ) ); ?>" onclick="this.select()" aria-label="전용 링크"></td>
 						<td>
 							<?php if ( ! $r->response_id ) : ?>
 							<form method="post" class="mds-inline" onsubmit="return confirm('명단에서 뺄까요?');">
@@ -1112,8 +1125,35 @@ function md_survey_render_roster() {
 				</tbody>
 			</table>
 		</div>
-		<p class="mds-hint">전용 링크는 본인 확인 없이 바로 설문이 열리는 환자별 주소입니다. 알림톡에 공통 링크(<?php echo esc_html( md_survey_public_url() ); ?>)를 쓰면 필요 없습니다.</p>
 	<?php endif; ?>
+
+	<details class="mds-card mdsv-import">
+		<summary>직접 넣기 <small>엑셀에 담당직원이 빠진 환자를 한 명씩 넣을 때</small></summary>
+		<form method="post" class="mdsv-add" id="add">
+			<input type="hidden" name="md_survey_action" value="add">
+			<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_add' ) ); ?>">
+			<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
+			<div class="mds-formrow">
+				<label class="mds-field"><span>차트번호</span><input type="text" name="chart_no" inputmode="numeric" maxlength="20" required placeholder="12345"></label>
+				<label class="mds-field"><span>이름</span><input type="text" name="name" maxlength="40" required placeholder="홍길동"></label>
+				<label class="mds-field"><span>휴대폰 (전체 또는 가운데 4자리)</span><input type="tel" name="phone" inputmode="numeric" maxlength="20" required placeholder="010-1234-5678"></label>
+			</div>
+			<div class="mds-formrow">
+				<?php md_survey_name_field( 'doctor', '담당 원장', 'doctors', md_survey_remembered( 'doctor' ) ); ?>
+				<?php md_survey_name_field( 'staff', '담당 스탭 (평가 대상)', 'staff', md_survey_remembered( 'staff' ) ); ?>
+				<div class="mds-field"><span>&nbsp;</span><button type="submit" class="mds-btn mds-btn--fill"><?php echo esc_html( date_i18n( 'n월 j일', strtotime( $date ) ) ); ?> 명단에 넣기</button></div>
+			</div>
+			<p class="mds-hint">같은 날 같은 차트번호를 다시 넣으면 그 줄을 고칩니다. 휴대폰은 암호화되어 저장됩니다.</p>
+		</form>
+		<form method="post" class="mdsv-paste">
+			<input type="hidden" name="md_survey_action" value="import">
+			<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_import' ) ); ?>">
+			<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
+			<p class="mds-hint">파일 올리기가 안 될 때: 엑셀을 열어 전체 선택(Ctrl+A) · 복사(Ctrl+C) 한 내용을 붙여 넣어도 됩니다.</p>
+			<textarea name="rows" rows="4" placeholder="접수시각	상태	차트번호	이름	…	담당의사	담당직원	체어	전화번호	…"></textarea>
+			<div class="mds-formbtns"><button type="submit" class="mds-btn mds-btn--ghost">붙여넣은 내용 넣기</button></div>
+		</form>
+	</details>
 	<?php
 }
 
