@@ -85,3 +85,13 @@
 .mdsv-import .mdsv-add { padding: 12px 0 0; }
 .mdsv-paste { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--color-border, #EDDFD0); }
 .mdsv-upload { margin-top: 14px; }
+
+/* v4.18.9 · 날짜 띠에 앞으로 올 날 · 올린 파일 요약 카드 */
+.mdsv-day.is-future { opacity: .6; border-style: dotted; }
+.mdsv-day.is-future .mdsv-day__n { color: var(--color-text-mute, #A89685); font-weight: 600; }
+.mdsv-day.is-now .mdsv-day__d { color: var(--color-primary-dark, #B86347); }
+.mdsv-file { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 16px 20px; margin-top: 12px; }
+.mdsv-file__body { display: flex; align-items: center; gap: 12px; }
+.mdsv-file__icon { font-size: 1.6rem; }
+.mdsv-file b { display: block; font-size: 1.02rem; }
+.mdsv-file__meta { display: block; margin-top: 2px; font-size: .84rem; color: var(--color-text-mute, #A89685); }

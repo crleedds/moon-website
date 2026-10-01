@@ -292,6 +292,13 @@ function md_survey_visit_upsert( $d, $source = 'manual' ) {
 	return array( 'id' => (int) $wpdb->insert_id, 'updated' => false );
 }
 
+/** 그날 명단 전체 삭제 — 응답(별도 표)은 그대로 둔다. 지운 줄 수를 돌려준다 (v4.18.9) */
+function md_survey_visits_delete_day( $date ) {
+	global $wpdb;
+	if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $date ) ) { return 0; }
+	return (int) $wpdb->query( $wpdb->prepare( 'DELETE FROM ' . md_survey_table_visit() . ' WHERE visit_date = %s', $date ) );
+}
+
 function md_survey_visit_delete( $id ) {
 	global $wpdb;
 	$v = md_survey_visit( $id );
@@ -887,6 +894,11 @@ function md_survey_handle_post() {
 			if ( is_wp_error( $res ) ) { $back = add_query_arg( 'err', $res->get_error_message(), $back ); }
 			break;
 
+		case 'delete_day': /* v4.18.9 · 그날 올린 명단 전체 삭제 (응답은 남는다) */
+			$n = md_survey_visits_delete_day( $date );
+			$back = add_query_arg( array( 'msg' => 'daydeleted', 'n' => (int) $n ), $back );
+			break;
+
 		case 'settings':
 			if ( ! md_survey_can_manage() ) { wp_die( '권한이 없습니다.' ); }
 			$s = md_survey_settings();
@@ -978,6 +990,7 @@ function md_survey_notice() {
 		'added'    => '명단에 넣었습니다.',
 		'updated'  => '같은 날 같은 차트번호가 있어 그 줄을 고쳤습니다.',
 		'saved'    => '설정을 저장했습니다.',
+		'daydeleted' => sprintf( '명단 %d명을 지웠습니다.', isset( $_GET['n'] ) ? (int) $_GET['n'] : 0 ),
 		'imported' => sprintf( '붙여넣기 완료 — 새로 %d명, 고침 %d명, 담당직원이 없어 건너뜀 %d명.', isset( $_GET['a'] ) ? (int) $_GET['a'] : 0, isset( $_GET['u'] ) ? (int) $_GET['u'] : 0, isset( $_GET['s'] ) ? (int) $_GET['s'] : 0 ),
 	);
 	if ( isset( $map[ $m ] ) ) {
@@ -1056,29 +1069,30 @@ function md_survey_render_roster() {
 	$answered = 0;
 	foreach ( $rows as $r ) { if ( $r->response_id ) { $answered++; } }
 
-	/* 날짜 띠 — 오늘까지 14일. 고른 날짜가 그 밖이면 그 날짜까지 */
-	$days   = 14;
-	$end_ts = max( strtotime( $today ), strtotime( $date ) );
-	$start  = gmdate( 'Y-m-d', $end_ts - ( $days - 1 ) * DAY_IN_SECONDS );
-	$end    = gmdate( 'Y-m-d', $end_ts );
-	if ( $date < $start ) { $start = $date; }
+	/* 날짜 띠 — 열흘 전부터 엿새 뒤까지 (v4.18.9 · 오늘 이후도 보이게). 고른 날짜가 그 밖이면 거기까지 */
+	$start_ts = min( strtotime( $today ) - 10 * DAY_IN_SECONDS, strtotime( $date ) );
+	$end_ts   = max( strtotime( $today ) + 6 * DAY_IN_SECONDS, strtotime( $date ) );
+	$start    = gmdate( 'Y-m-d', $start_ts );
+	$end      = gmdate( 'Y-m-d', $end_ts );
 	$counts  = md_survey_day_counts( $start, $end );
 	$missing = array();
 	$wd = array( '일', '월', '화', '수', '목', '금', '토' );
 	?>
 	<div class="mds-card mdsv-days-card">
 		<div class="mdsv-days">
-			<?php for ( $ts = strtotime( $start ); $ts <= $end_ts; $ts += DAY_IN_SECONDS ) :
+			<?php for ( $ts = $start_ts; $ts <= $end_ts; $ts += DAY_IN_SECONDS ) :
 				$d   = gmdate( 'Y-m-d', $ts );
 				$w   = (int) gmdate( 'w', $ts );
 				$c   = isset( $counts[ $d ] ) ? $counts[ $d ] : null;
-				$cls = $c ? 'is-ok' : ( 0 === $w ? 'is-off' : ( $d === $today ? 'is-today' : 'is-none' ) );
-				if ( ! $c && 0 !== $w && $d < $today ) { $missing[] = $d; }
-				$title = $c ? sprintf( '명단 %d명 · 응답 %d명 · 마지막 올림 %s', (int) $c->n, (int) $c->a, date_i18n( 'n/j H:i', strtotime( $c->last_at ) ) ) : ( 0 === $w ? '일요일' : '올리지 않음' );
+				if ( $c )                 { $cls = 'is-ok';     $label = (int) $c->n . '명'; $title = sprintf( '명단 %d명 · 응답 %d명 · 마지막 올림 %s', (int) $c->n, (int) $c->a, date_i18n( 'n/j H:i', strtotime( $c->last_at ) ) ); }
+				elseif ( 0 === $w )       { $cls = 'is-off';    $label = '휴';   $title = '일요일'; }
+				elseif ( $d > $today )    { $cls = 'is-future'; $label = '예정'; $title = '아직 오지 않은 날'; }
+				elseif ( $d === $today )  { $cls = 'is-today';  $label = '아직'; $title = '오늘 — 아직 올리지 않음'; }
+				else                      { $cls = 'is-none';   $label = '없음'; $title = '올리지 않음'; $missing[] = $d; }
 				?>
-				<a class="mdsv-day <?php echo esc_attr( $cls ); ?><?php echo $d === $date ? ' is-sel' : ''; ?>" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'roster', 'd' => $d ) ) ); ?>" title="<?php echo esc_attr( $title ); ?>">
+				<a class="mdsv-day <?php echo esc_attr( $cls ); ?><?php echo $d === $date ? ' is-sel' : ''; ?><?php echo $d === $today ? ' is-now' : ''; ?>" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'roster', 'd' => $d ) ) ); ?>" title="<?php echo esc_attr( $title ); ?>">
 					<span class="mdsv-day__d"><?php echo esc_html( gmdate( 'n/j', $ts ) ); ?> <small><?php echo esc_html( $wd[ $w ] ); ?></small></span>
-					<span class="mdsv-day__n"><?php echo $c ? (int) $c->n . '명' : ( 0 === $w ? '휴' : ( $d === $today ? '아직' : '없음' ) ); ?></span>
+					<span class="mdsv-day__n"><?php echo esc_html( $label ); ?></span>
 				</a>
 			<?php endfor; ?>
 		</div>
@@ -1090,7 +1104,7 @@ function md_survey_render_roster() {
 			<?php if ( $missing ) : ?>
 				<span class="mdsv-missing">올리지 않은 날: <?php echo esc_html( implode( ' · ', array_map( function ( $x ) { return date_i18n( 'n/j', strtotime( $x ) ); }, $missing ) ) ); ?></span>
 			<?php else : ?>
-				<span class="mdsv-missing is-clear">최근 2주 모두 올렸습니다.</span>
+				<span class="mdsv-missing is-clear">최근 열흘 모두 올렸습니다.</span>
 			<?php endif; ?>
 		</div>
 	</div>
@@ -1111,31 +1125,27 @@ function md_survey_render_roster() {
 		</div>
 	</form>
 
-	<?php if ( ! empty( $rows ) ) : ?>
-		<div class="mds-tablewrap">
-			<table class="mds-table mdsv-table">
-				<thead><tr><th>차트번호</th><th>이름</th><th>담당 원장</th><th>담당 스탭</th><th>응답</th><th></th></tr></thead>
-				<tbody>
-				<?php foreach ( $rows as $r ) : ?>
-					<tr class="<?php echo $r->response_id ? 'is-answered' : ''; ?>">
-						<td class="num"><?php echo esc_html( $r->chart_no ); ?></td>
-						<td><b><?php echo esc_html( $r->patient_name ); ?></b></td>
-						<td><?php echo esc_html( $r->doctor ); ?></td>
-						<td><b><?php echo esc_html( $r->staff ); ?></b></td>
-						<td><?php if ( $r->response_id ) : ?><span class="mds-status is-done">응답 <?php echo esc_html( date_i18n( 'H:i', strtotime( $r->answered_at ) ) ); ?></span><?php else : ?><span class="mds-status is-pending">대기</span><?php endif; ?></td>
-						<td>
-							<?php if ( ! $r->response_id ) : ?>
-							<form method="post" class="mds-inline" onsubmit="return confirm('명단에서 뺄까요?');">
-								<input type="hidden" name="md_survey_action" value="delete"><input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_delete' ) ); ?>">
-								<input type="hidden" name="vid" value="<?php echo (int) $r->id; ?>"><input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
-								<button type="submit" class="mds-btn mds-btn--ghost mds-btn--sm">빼기</button>
-							</form>
-							<?php endif; ?>
-						</td>
-					</tr>
-				<?php endforeach; ?>
-				</tbody>
-			</table>
+	<?php if ( ! empty( $rows ) ) :
+		/* v4.18.9 · 환자 한 줄씩 보여 주던 표 대신, 올린 파일 요약 하나와 삭제 버튼만 (원장 지시) */
+		$by_staff = array(); $last = '';
+		foreach ( $rows as $r ) { $by_staff[ $r->staff ] = isset( $by_staff[ $r->staff ] ) ? $by_staff[ $r->staff ] + 1 : 1; if ( $r->created_at > $last ) { $last = $r->created_at; } }
+		arsort( $by_staff );
+		$staff_txt = array();
+		foreach ( $by_staff as $s => $n ) { $staff_txt[] = $s . ' ' . $n; }
+		?>
+		<div class="mds-card mdsv-file">
+			<div class="mdsv-file__body">
+				<span class="mdsv-file__icon" aria-hidden="true">📄</span>
+				<div>
+					<b><?php echo esc_html( date_i18n( 'n월 j일', strtotime( $date ) ) ); ?> 명단 · <?php echo count( $rows ); ?>명</b>
+					<span class="mdsv-file__meta">올린 시각 <?php echo esc_html( date_i18n( 'n/j H:i', strtotime( $last ) ) ); ?> · 응답 <?php echo (int) $answered; ?>명 · 스탭별 <?php echo esc_html( implode( ' · ', $staff_txt ) ); ?></span>
+				</div>
+			</div>
+			<form method="post" class="mds-inline" onsubmit="return confirm('<?php echo esc_js( date_i18n( 'n월 j일', strtotime( $date ) ) ); ?> 명단 <?php echo count( $rows ); ?>명을 지울까요? 이미 받은 응답은 남고, 다시 올리면 환자가 다시 응답할 수 있게 됩니다.');">
+				<input type="hidden" name="md_survey_action" value="delete_day"><input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_delete_day' ) ); ?>">
+				<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
+				<button type="submit" class="mds-btn mds-btn--ghost">삭제</button>
+			</form>
 		</div>
 	<?php endif; ?>
 
