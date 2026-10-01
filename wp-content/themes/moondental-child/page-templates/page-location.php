@@ -310,7 +310,7 @@ if ( $landmarks ) : ?>
 
 <!-- ============ 3. 각 지역에서 문치과병원까지 (28개 지역 SEO 그리드) ============ -->
 <?php if ( function_exists( 'moondental_get_regions_by_province' ) ) : ?>
-<section class="md-section md-section--surface" aria-label="지역별 오시는 길">
+<section class="md-section md-section--surface" aria-label="지역별 오시는 길" id="regions">
 	<div class="md-container">
 		<header class="md-section-head">
 			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'locpage_region_eyebrow', '🌐 지역별 오시는 길' ) ); ?></span>
@@ -332,6 +332,37 @@ if ( $landmarks ) : ?>
 					<?php echo esc_html( $prov ); ?>
 					<small>(<?php echo count( $list ); ?>개 지역)</small>
 				</h3>
+				<?php if ( '천안·아산 시내' === $prov ) :
+					/* v4.14 · 시 전체 2장은 크게, 동·읍·면은 작은 칩으로 (원장 지시 · 14장 격자가 복잡해 보임) */
+					$cities = array(); $subs = array( 'cheonan' => array(), 'asan' => array() );
+					foreach ( $list as $r ) {
+						if ( in_array( $r['slug'], array( 'cheonan', 'asan' ), true ) ) { $cities[ $r['slug'] ] = $r; continue; }
+						$k = ( false !== mb_strpos( (string) ( $r['name_long'] ?? $r['name'] ), '아산' ) ) ? 'asan' : 'cheonan';
+						$subs[ $k ][] = $r;
+					}
+					$short = function ( $name ) { return trim( preg_replace( '/^(천안|아산)\s*/u', '', (string) $name ) ); };
+					?>
+					<div class="md-region-cities">
+						<?php foreach ( array( 'cheonan', 'asan' ) as $ck ) : if ( empty( $cities[ $ck ] ) ) continue; $c = $cities[ $ck ]; ?>
+							<div class="md-region-city">
+								<a class="md-region-city__main" href="<?php echo esc_url( home_url( '/오시는-길/' . $c['slug'] . '/' ) ); ?>" data-track="cta-region-<?php echo esc_attr( $c['slug'] ); ?>">
+									<span class="md-region-city__name"><?php echo esc_html( $c['name'] ); ?> 전 지역</span>
+									<span class="md-region-city__time">차로 <?php echo esc_html( $c['duration_min'] ); ?>분 안팎</span>
+								</a>
+								<?php if ( ! empty( $subs[ $ck ] ) ) : ?>
+								<div class="md-region-chips">
+									<?php foreach ( $subs[ $ck ] as $r ) : ?>
+										<a class="md-region-chip" href="<?php echo esc_url( home_url( '/오시는-길/' . $r['slug'] . '/' ) ); ?>" data-track="cta-region-<?php echo esc_attr( $r['slug'] ); ?>">
+											<span class="md-region-chip__name"><?php echo esc_html( $short( $r['name'] ) ); ?></span>
+											<span class="md-region-chip__time"><?php echo esc_html( ! empty( $r['duration_label'] ) ? $r['duration_label'] : ( $r['duration_min'] . '분' ) ); ?></span>
+										</a>
+									<?php endforeach; ?>
+								</div>
+								<?php endif; ?>
+							</div>
+						<?php endforeach; ?>
+					</div>
+				<?php else : ?>
 				<div class="md-region-grid">
 					<?php foreach ( $list as $r ) :
 						$icon = ! empty( $r['icon'] ) ? $r['icon'] : '🚗'; ?>
@@ -342,6 +373,7 @@ if ( $landmarks ) : ?>
 						</a>
 					<?php endforeach; ?>
 				</div>
+				<?php endif; ?>
 			</div>
 		<?php endforeach; ?>
 
