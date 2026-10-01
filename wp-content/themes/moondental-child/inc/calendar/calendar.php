@@ -12,7 +12,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_CAL_SCHEMA', 1 );
+define( 'MD_CAL_SCHEMA', 1 ); /* v4.18.3 · 달 파라미터는 cm — 'm' 은 워드프레스 날짜 아카이브 예약어라 404 */
 
 function md_cal_table() { global $wpdb; return $wpdb->prefix . 'md_events'; }
 
@@ -184,9 +184,9 @@ function md_cal_handle_post() {
 	if ( ! isset( $_POST['md_cal_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['md_cal_nonce'] ), 'md_cal_' . $action ) ) {
 		wp_die( '요청이 만료되었습니다. 뒤로 가서 다시 시도해 주세요.' );
 	}
-	$month = isset( $_POST['m'] ) ? sanitize_text_field( wp_unslash( $_POST['m'] ) ) : '';
+	$month = isset( $_POST['cm'] ) ? sanitize_text_field( wp_unslash( $_POST['cm'] ) ) : '';
 	$month = preg_match( '/^\d{4}-\d{2}$/', $month ) ? $month : null;
-	$back  = md_sup_url( array( 'app' => 'calendar', 'm' => $month ) );
+	$back  = md_sup_url( array( 'app' => 'calendar', 'cm' => $month ) );
 	$id    = isset( $_POST['eid'] ) ? (int) $_POST['eid'] : 0;
 	$data  = array(
 		'title'      => isset( $_POST['title'] ) ? wp_unslash( $_POST['title'] ) : '',
@@ -203,7 +203,7 @@ function md_cal_handle_post() {
 			if ( is_wp_error( $res ) ) { $back = add_query_arg( 'err', $res->get_error_message(), $back ); }
 			else {
 				$goto = $data['yearly'] ? current_time( 'Y' ) . substr( $data['date_start'], 4, 3 ) : substr( $data['date_start'], 0, 7 );
-				$back = md_sup_url( array( 'app' => 'calendar', 'm' => $goto ) ) . '#e' . (int) $res;
+				$back = md_sup_url( array( 'app' => 'calendar', 'cm' => $goto ) ) . '#e' . (int) $res;
 			}
 			break;
 		case 'edit':
@@ -257,10 +257,10 @@ function md_cal_render_grid( $m, $nav_app = 'calendar' ) {
 	$prev  = date( 'Y-m', strtotime( $first . ' -1 month' ) );
 	$next  = date( 'Y-m', strtotime( $first . ' +1 month' ) );
 	$cur   = current_time( 'Y-m' );
-	$nav   = function ( $month ) use ( $nav_app ) { return md_sup_url( array( 'app' => $nav_app, 'm' => $month ) ); };
+	$nav   = function ( $month ) use ( $nav_app ) { return md_sup_url( array( 'app' => $nav_app, 'cm' => $month ) ); };
 	$link  = function ( $r, $d ) use ( $nav_app ) {
 		if ( ! empty( $r->auto ) ) { return md_sup_url( array( 'app' => 'staff' ) ) . '#s' . (int) substr( $r->id, 1 ); }
-		return md_sup_url( array( 'app' => 'calendar', 'm' => substr( $d, 0, 7 ) ) ) . '#e' . (int) $r->id;
+		return md_sup_url( array( 'app' => 'calendar', 'cm' => substr( $d, 0, 7 ) ) ) . '#e' . (int) $r->id;
 	};
 	?>
 	<div class="mdcal-bar">
@@ -268,7 +268,7 @@ function md_cal_render_grid( $m, $nav_app = 'calendar' ) {
 		<h2 class="mdcal-bar__title"><?php echo esc_html( date_i18n( 'Y년 n월', strtotime( $first ) ) ); ?></h2>
 		<a class="mdcal-bar__nav" href="<?php echo esc_url( $nav( $next ) ); ?>" aria-label="다음 달">›</a>
 		<?php if ( $m !== $cur ) : ?><a class="mdcal-bar__today" href="<?php echo esc_url( $nav( $cur ) ); ?>">이번 달</a><?php endif; ?>
-		<?php if ( 'calendar' !== $nav_app ) : ?><a class="mdcal-bar__today mdcal-bar__add" href="<?php echo esc_url( md_sup_url( array( 'app' => 'calendar', 'm' => $m ) ) . '#add' ); ?>">＋ 일정 추가 · 목록</a><?php endif; ?>
+		<?php if ( 'calendar' !== $nav_app ) : ?><a class="mdcal-bar__today mdcal-bar__add" href="<?php echo esc_url( md_sup_url( array( 'app' => 'calendar', 'cm' => $m ) ) . '#add' ); ?>">＋ 일정 추가 · 목록</a><?php endif; ?>
 		<div class="mdcal-legend">
 			<?php foreach ( $types as $k => $t ) : ?><span class="mdcal-legend__item <?php echo esc_attr( $t['class'] ); ?>"><?php echo esc_html( $t['icon'] . ' ' . $t['label'] ); ?></span><?php endforeach; ?>
 		</div>
@@ -296,7 +296,7 @@ function md_cal_render_grid( $m, $nav_app = 'calendar' ) {
 
 /** 라운지 첫 화면 — 월 달력 + 다가오는 2주 */
 function md_cal_render_hub() {
-	$m     = md_cal_month( $_GET['m'] ?? '' );
+	$m     = md_cal_month( $_GET['cm'] ?? '' );
 	$today = current_time( 'Y-m-d' );
 	echo '<div class="mdcal mdcal--hub">';
 	md_cal_render_grid( $m, '' );
@@ -327,7 +327,7 @@ function md_cal_render_form( $r = null, $month = '' ) {
 	<form method="post" class="mdcal-form<?php echo $edit ? ' mdcal-form--edit' : ' mds-card'; ?>" <?php echo $edit ? '' : 'id="add"'; ?>>
 		<input type="hidden" name="md_cal_action" value="<?php echo esc_attr( $act ); ?>">
 		<input type="hidden" name="md_cal_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_cal_' . $act ) ); ?>">
-		<input type="hidden" name="m" value="<?php echo esc_attr( $month ); ?>">
+		<input type="hidden" name="cm" value="<?php echo esc_attr( $month ); ?>">
 		<?php if ( $edit ) : ?><input type="hidden" name="eid" value="<?php echo (int) $r->id; ?>"><?php endif; ?>
 		<?php if ( ! $edit ) : ?><h2 class="mdcal-form__title">일정 추가 <small>생일 · 입사일은 <a href="<?php echo esc_url( md_sup_url( array( 'app' => 'staff' ) ) ); ?>">직원 정보</a>에서 넣으면 자동으로 표시됩니다</small></h2><?php endif; ?>
 		<div class="mdcal-form__row">
@@ -355,7 +355,7 @@ function md_cal_render_form( $r = null, $month = '' ) {
 /** 달력 화면 (전체 · 추가 · 목록) */
 function md_cal_render() {
 	$types = md_cal_types();
-	$m     = md_cal_month( $_GET['m'] ?? '' );
+	$m     = md_cal_month( $_GET['cm'] ?? '' );
 	if ( isset( $_GET['err'] ) ) { echo '<div class="mds-notice mds-notice--warn">' . esc_html( wp_unslash( $_GET['err'] ) ) . '</div>'; }
 	echo '<div class="mdcal">';
 	$map = md_cal_render_grid( $m, 'calendar' );
@@ -377,7 +377,7 @@ function md_cal_render() {
 							<a class="mdcal-btn mdcal-row__staff" href="<?php echo esc_url( md_sup_url( array( 'app' => 'staff' ) ) . '#s' . (int) substr( $r->id, 1 ) ); ?>">직원 정보에서 고치기</a>
 						<?php else : ?>
 							<form method="post" class="mdcal-row__del" onsubmit="return confirm('이 일정을 지울까요?');">
-								<input type="hidden" name="md_cal_action" value="delete"><input type="hidden" name="md_cal_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_cal_delete' ) ); ?>"><input type="hidden" name="eid" value="<?php echo (int) $r->id; ?>"><input type="hidden" name="m" value="<?php echo esc_attr( $m ); ?>">
+								<input type="hidden" name="md_cal_action" value="delete"><input type="hidden" name="md_cal_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_cal_delete' ) ); ?>"><input type="hidden" name="eid" value="<?php echo (int) $r->id; ?>"><input type="hidden" name="cm" value="<?php echo esc_attr( $m ); ?>">
 								<button type="submit" class="mdcal-btn mdcal-btn--del">🗑 삭제</button>
 							</form>
 						<?php endif; ?>
