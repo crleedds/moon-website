@@ -11,7 +11,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_STAFF_SCHEMA', 1 );
+define( 'MD_STAFF_SCHEMA', 2 ); /* v4.18.2 · phone · email · photo */
 
 function md_staff_table() { global $wpdb; return $wpdb->prefix . 'md_staff'; }
 
@@ -40,6 +40,9 @@ function md_staff_maybe_install() {
 		active TINYINT(1) NOT NULL DEFAULT 1,
 		sort INT NOT NULL DEFAULT 0,
 		note VARCHAR(200) NOT NULL DEFAULT '',
+		phone VARCHAR(40) NOT NULL DEFAULT '',
+		email VARCHAR(120) NOT NULL DEFAULT '',
+		photo VARCHAR(255) NOT NULL DEFAULT '',
 		created_at DATETIME NOT NULL,
 		updated_at DATETIME NULL,
 		PRIMARY KEY  (id),
@@ -141,6 +144,8 @@ function md_staff_save( $data, $id = 0 ) {
 		'birthday'   => md_staff_norm_date( $data['birthday'] ?? '' ),
 		'hired'      => md_staff_norm_date( $data['hired'] ?? '' ),
 		'note'       => mb_substr( trim( sanitize_text_field( $data['note'] ?? '' ) ), 0, 200 ),
+		'phone'      => mb_substr( trim( sanitize_text_field( $data['phone'] ?? '' ) ), 0, 40 ),
+		'email'      => ( '' !== trim( (string) ( $data['email'] ?? '' ) ) && is_email( trim( $data['email'] ) ) ) ? sanitize_email( trim( $data['email'] ) ) : '',
 		'updated_at' => current_time( 'mysql' ),
 	);
 	if ( $id ) { $wpdb->update( md_staff_table(), $row, array( 'id' => (int) $id ) ); return (int) $id; }
@@ -150,7 +155,60 @@ function md_staff_save( $data, $id = 0 ) {
 	return $ok ? (int) $wpdb->insert_id : new WP_Error( 'md_staff', '저장하지 못했습니다.' );
 }
 
-function md_staff_delete( $id ) { global $wpdb; return (bool) $wpdb->delete( md_staff_table(), array( 'id' => (int) $id ) ); }
+function md_staff_delete( $id ) {
+	global $wpdb;
+	md_staff_photo_remove( $id );
+	return (bool) $wpdb->delete( md_staff_table(), array( 'id' => (int) $id ) );
+}
+
+/** 사진 보관 폴더 — uploads/staff/ */
+function md_staff_photo_dir() {
+	$u = wp_upload_dir();
+	$dir = trailingslashit( $u['basedir'] ) . 'staff';
+	if ( ! is_dir( $dir ) ) { wp_mkdir_p( $dir ); @file_put_contents( $dir . '/index.php', "<?php // silence" ); }
+	return array( 'dir' => $dir, 'url' => trailingslashit( $u['baseurl'] ) . 'staff' );
+}
+
+function md_staff_photo_url( $r ) {
+	if ( empty( $r->photo ) ) return '';
+	$p = md_staff_photo_dir();
+	return $p['url'] . '/' . rawurlencode( $r->photo ) . '?v=' . ( $r->updated_at ? strtotime( $r->updated_at ) : 0 );
+}
+
+function md_staff_photo_remove( $id ) {
+	global $wpdb;
+	$r = $wpdb->get_row( $wpdb->prepare( 'SELECT photo FROM ' . md_staff_table() . ' WHERE id = %d', (int) $id ) );
+	if ( $r && $r->photo ) {
+		$p = md_staff_photo_dir();
+		$f = $p['dir'] . '/' . basename( $r->photo );
+		if ( is_file( $f ) ) { @unlink( $f ); }
+		$wpdb->update( md_staff_table(), array( 'photo' => '' ), array( 'id' => (int) $id ) );
+	}
+}
+
+/** 올린 사진을 480px 정사각 JPG 로 줄여 보관 */
+function md_staff_photo_save( $id, $file ) {
+	if ( empty( $file['name'] ) || ! empty( $file['error'] ) ) { return ''; }
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+	$mimes = array( 'jpg|jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp', 'heic' => 'image/heic' );
+	$up = wp_handle_upload( $file, array( 'test_form' => false, 'mimes' => $mimes ) );
+	if ( ! $up || ! empty( $up['error'] ) ) { return new WP_Error( 'md_staff', '사진을 올리지 못했습니다: ' . ( $up['error'] ?? '' ) ); }
+	$p    = md_staff_photo_dir();
+	$name = 's' . (int) $id . '-' . substr( md5( (string) microtime( true ) ), 0, 8 ) . '.jpg';
+	$dest = $p['dir'] . '/' . $name;
+	$ed   = wp_get_image_editor( $up['file'] );
+	if ( is_wp_error( $ed ) ) { @unlink( $up['file'] ); return new WP_Error( 'md_staff', '이미지 파일이 아니거나 열 수 없습니다.' ); }
+	$ed->resize( 480, 480, true );
+	$ed->set_quality( 86 );
+	$ok = $ed->save( $dest, 'image/jpeg' );
+	@unlink( $up['file'] );
+	if ( is_wp_error( $ok ) ) { return new WP_Error( 'md_staff', '사진을 저장하지 못했습니다.' ); }
+	md_staff_photo_remove( $id );
+	global $wpdb;
+	$wpdb->update( md_staff_table(), array( 'photo' => $name, 'updated_at' => current_time( 'mysql' ) ), array( 'id' => (int) $id ) );
+	return $name;
+}
 
 /* ============================================================
  * 폼 처리 (관리자만 · PRG)
@@ -165,18 +223,21 @@ function md_staff_handle_post() {
 	$back = md_sup_url( array( 'app' => 'staff' ) );
 	$id   = isset( $_POST['sid'] ) ? (int) $_POST['sid'] : 0;
 	$data = array();
-	foreach ( array( 'name', 'dept', 'position', 'birthday', 'hired', 'note' ) as $k ) { $data[ $k ] = isset( $_POST[ $k ] ) ? sanitize_text_field( wp_unslash( $_POST[ $k ] ) ) : ''; }
+	foreach ( array( 'name', 'dept', 'position', 'birthday', 'hired', 'note', 'phone', 'email' ) as $k ) { $data[ $k ] = isset( $_POST[ $k ] ) ? sanitize_text_field( wp_unslash( $_POST[ $k ] ) ) : ''; }
 	if ( '' === $data['dept'] && ! empty( $_POST['dept_new'] ) ) { $data['dept'] = sanitize_text_field( wp_unslash( $_POST['dept_new'] ) ); }
 	switch ( $action ) {
 		case 'add':
-			$res = md_staff_save( $data );
-			$back = is_wp_error( $res ) ? add_query_arg( 'err', $res->get_error_message(), $back ) : $back . '#s' . (int) $res;
-			if ( ! is_wp_error( $res ) ) { md_staff_sync_site(); }
-			break;
 		case 'edit':
-			$res = md_staff_save( $data, $id );
-			$back = is_wp_error( $res ) ? add_query_arg( 'err', $res->get_error_message(), $back ) : $back . '#s' . $id;
-			if ( ! is_wp_error( $res ) ) { md_staff_sync_site(); }
+			$res = 'add' === $action ? md_staff_save( $data ) : md_staff_save( $data, $id );
+			if ( is_wp_error( $res ) ) { $back = add_query_arg( 'err', $res->get_error_message(), $back ); break; }
+			$sid = (int) $res;
+			if ( ! empty( $_POST['photo_remove'] ) ) { md_staff_photo_remove( $sid ); }
+			if ( ! empty( $_FILES['photo']['name'] ) ) {
+				$ph = md_staff_photo_save( $sid, $_FILES['photo'] );
+				if ( is_wp_error( $ph ) ) { $back = add_query_arg( 'err', $ph->get_error_message(), $back ); }
+			}
+			md_staff_sync_site();
+			$back .= '#s' . $sid;
 			break;
 		case 'delete':
 			md_staff_delete( $id );
@@ -195,7 +256,13 @@ function md_staff_render_row_form( $r, $depts ) {
 	$edit = $r && ! empty( $r->id );
 	$act  = $edit ? 'edit' : 'add';
 	?>
-	<form method="post" class="mdst-row<?php echo $edit ? '' : ' mdst-row--new'; ?><?php echo ( $edit && ! (int) $r->active ) ? ' is-inactive' : ''; ?>" id="<?php echo $edit ? 's' . (int) $r->id : 'new'; ?>">
+	<?php $photo = $edit ? md_staff_photo_url( $r ) : ''; ?>
+	<form method="post" enctype="multipart/form-data" class="mdst-row<?php echo $edit ? '' : ' mdst-row--new'; ?>" id="<?php echo $edit ? 's' . (int) $r->id : 'new'; ?>">
+		<label class="mdst-f mdst-f--photo" title="사진 올리기 (JPG · PNG · HEIC)">
+			<span>사진</span>
+			<span class="mdst-photo<?php echo $photo ? ' has-photo' : ''; ?>"><?php if ( $photo ) : ?><img src="<?php echo esc_url( $photo ); ?>" alt=""><?php else : ?><em>＋</em><?php endif; ?></span>
+			<input type="file" name="photo" accept="image/*" class="mdst-photo__input">
+		</label>
 		<input type="hidden" name="md_staff_action" value="<?php echo esc_attr( $act ); ?>">
 		<input type="hidden" name="md_staff_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_staff_' . $act ) ); ?>">
 		<?php if ( $edit ) : ?><input type="hidden" name="sid" value="<?php echo (int) $r->id; ?>"><?php endif; ?>
@@ -209,7 +276,10 @@ function md_staff_render_row_form( $r, $depts ) {
 		<label class="mdst-f mdst-f--pos"><span>직책</span><input type="text" name="position" maxlength="60" value="<?php echo esc_attr( $r->position ?? '' ); ?>" placeholder="예) 실장"></label>
 		<label class="mdst-f mdst-f--date"><span>🎂 생일</span><input type="date" name="birthday" value="<?php echo esc_attr( $r->birthday ?? '' ); ?>"></label>
 		<label class="mdst-f mdst-f--date"><span>🎉 입사일</span><input type="date" name="hired" value="<?php echo esc_attr( $r->hired ?? '' ); ?>"></label>
+		<label class="mdst-f mdst-f--phone"><span>📞 전화</span><input type="tel" name="phone" maxlength="40" value="<?php echo esc_attr( $r->phone ?? '' ); ?>" placeholder="010-0000-0000"></label>
+		<label class="mdst-f mdst-f--email"><span>✉️ 이메일</span><input type="email" name="email" maxlength="120" value="<?php echo esc_attr( $r->email ?? '' ); ?>" placeholder="name@example.com"></label>
 		<label class="mdst-f mdst-f--note"><span>메모</span><input type="text" name="note" maxlength="200" value="<?php echo esc_attr( $r->note ?? '' ); ?>" placeholder="선택"></label>
+		<?php if ( $photo ) : ?><label class="mdst-f mdst-f--chk mds-check"><input type="checkbox" name="photo_remove" value="1"> 사진 지움</label><?php endif; ?>
 		<button type="submit" class="mds-btn mds-btn--fill mdst-save"><?php echo $edit ? '저장' : '추가'; ?></button>
 	</form>
 	<?php if ( $edit ) : ?>
