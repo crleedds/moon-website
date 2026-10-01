@@ -9,6 +9,8 @@
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+require_once __DIR__ . '/guides-city.php'; // v4.13 · 지역별 안내서 공통 조각
+
 /**
  * URL 슬러그 → 데이터 파일 매핑.
  */
@@ -21,6 +23,12 @@ function md_guide_slug_map() {
 		'preservation' => 'preservation', // v3.85 · NO. 04 자연치아보존센터
 		'cheonan'    => 'cheonan',   // v4.12 · 천안 치과 추천, 무엇을 보고 고를까
 		'asan'       => 'asan',      // v4.12 · 아산 치과 추천, 무엇을 보고 고를까
+		'sejong'     => 'sejong',    // v4.13 · 도시별 안내서
+		'pyeongtaek' => 'pyeongtaek',
+		'yesan'      => 'yesan',
+		'anseong'    => 'anseong',
+		'gongju'     => 'gongju',
+		'region'     => 'region',    // v4.13 · 충청·경기 남부 통합
 		// 한글 (호환)
 		'임플란트'   => 'implant',
 		'투명교정'   => 'suresmile',

@@ -350,6 +350,19 @@ $faq_items     = $parse_pair( md_content( 'region_faq_items', '' ) );
 </section>
 <?php endif; ?>
 
+<?php
+/* v4.13 · 「{도시}에서 천안 치과 고를 때 보는 기준」 안내서 배너
+ *   도시별 안내서가 있는 곳은 그것으로, 천안 동 단위는 천안, 나머지는 통합 안내서로 */
+$md_guide_for_region = function_exists( 'md_guide_for_region' ) ? md_guide_for_region( $region ) : '';
+if ( $md_guide_for_region ) {
+	get_template_part( 'template-parts/section', 'guide-cta', array(
+		'slug'     => $md_guide_for_region,
+		'title'    => $region_name . '에서 천안 치과 고를 때 보는 기준',
+		'subtitle' => '진료과 · 장비 · 비용 고지 · 사후관리 · 거리 — ' . $region_name . '에서 할 치료와 천안까지 올 치료를 나누는 법',
+	) );
+}
+?>
+
 <?php get_template_part( 'template-parts/section', 'cta' ); ?>
 
 <?php

@@ -80,6 +80,12 @@ function md_sup_apps() {
 			'icon'  => '🔧',
 			'desc'  => '9 · 10 · 11층 장비대장 — 모델명 · 시리얼 · 수량 · 고장 여부',
 		),
+		// v4.13 · 진료비 (구글 시트 「문치과병원 진료비 2026」 끼워 넣기)
+		'fees' => array(
+			'label' => '진료비',
+			'icon'  => '💳',
+			'desc'  => '보험 · 비급여 진료비 표',
+		),
 		// v4.10 · 환자 만족도 조사 (진료 후 알림톡 링크 → 그날 담당 원장·스탭 표시 → 스탭 평가)
 		'survey' => array(
 			'label' => '환자 만족도 조사',
@@ -989,6 +995,8 @@ function md_sup_render_page() {
 		md_support_render(); // v4.3 · 지원 요청
 	} elseif ( 'equipment' === $app && function_exists( 'md_equipment_render' ) ) {
 		md_equipment_render(); // v4.8 · 기구/장비 대장
+	} elseif ( 'fees' === $app && function_exists( 'md_fees_render' ) ) {
+		md_fees_render(); // v4.13 · 진료비
 	} elseif ( 'survey' === $app && function_exists( 'md_survey_render' ) ) {
 		md_survey_render(); // v4.10 · 환자 만족도 조사
 	} elseif ( 'stock' !== $app ) {

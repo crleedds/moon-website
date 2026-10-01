@@ -11,7 +11,7 @@
  */
 if ( ! function_exists( 'md_guide_load' ) ) return;
 
-$args = wp_parse_args( isset( $args ) ? $args : array(), array( 'slug' => '' ) );
+$args = wp_parse_args( isset( $args ) ? $args : array(), array( 'slug' => '', 'title' => '', 'subtitle' => '' ) ); // v4.13 · title/subtitle 덮어쓰기
 $slug = $args['slug'];
 if ( ! $slug ) return;
 
@@ -26,8 +26,9 @@ $path_map = array(
 	'cheonan'   => '/guide/cheonan/', // v4.12.1 · 천안 치과 추천, 무엇을 보고 고를까
 	'asan'      => '/guide/asan/',    // v4.12.1 · 아산 치과 추천, 무엇을 보고 고를까
 );
-if ( ! isset( $path_map[ $slug ] ) ) return;
-$href = home_url( $path_map[ $slug ] );
+$href = home_url( isset( $path_map[ $slug ] ) ? $path_map[ $slug ] : '/guide/' . $slug . '/' ); // v4.13 · 지역 안내서 등
+if ( '' !== $args['title'] )    { $data['title'] = $args['title']; }
+if ( '' !== $args['subtitle'] ) { $data['subtitle'] = $args['subtitle']; }
 
 $num = '';
 if ( ! empty( $data['code'] ) && preg_match( '/(\d+)/', $data['code'], $mm ) ) {
