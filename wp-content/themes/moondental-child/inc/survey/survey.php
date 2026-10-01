@@ -30,7 +30,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_SURVEY_SCHEMA', 2 ); /* v4.10.1 · phone_hash 추가 — 링크에 이름이 실려 오면 휴대폰 가운데 4자리만 묻는다 */
+define( 'MD_SURVEY_SCHEMA', 3 ); /* v4.19 · doctor 칸 120자 — 진료의사 여러 명(「문은수 · 정석형」) 표시 */
 
 /* ============================================================
  * 테이블 · 설치
@@ -61,7 +61,7 @@ function md_survey_maybe_install() {
 		patient_name VARCHAR(40) NOT NULL DEFAULT '',
 		ident_hash CHAR(64) NOT NULL,
 		phone_hash CHAR(64) NOT NULL DEFAULT '',
-		doctor VARCHAR(40) NOT NULL DEFAULT '',
+		doctor VARCHAR(120) NOT NULL DEFAULT '',
 		staff VARCHAR(40) NOT NULL DEFAULT '',
 		token CHAR(24) NOT NULL,
 		source VARCHAR(12) NOT NULL DEFAULT 'manual',
@@ -80,7 +80,7 @@ function md_survey_maybe_install() {
 		visit_date DATE NOT NULL,
 		chart_no VARCHAR(20) NOT NULL,
 		patient_name VARCHAR(40) NOT NULL DEFAULT '',
-		doctor VARCHAR(40) NOT NULL DEFAULT '',
+		doctor VARCHAR(120) NOT NULL DEFAULT '',
 		staff VARCHAR(40) NOT NULL DEFAULT '',
 		q_service TINYINT UNSIGNED NOT NULL,
 		q_explain TINYINT UNSIGNED NOT NULL,
@@ -261,7 +261,7 @@ function md_survey_visit_upsert( $d, $source = 'manual' ) {
 	$name   = mb_substr( trim( sanitize_text_field( isset( $d['name'] ) ? $d['name'] : '' ) ), 0, 40 );
 	$phone4 = md_survey_norm_phone4( isset( $d['phone'] ) ? $d['phone'] : '' );
 	$birth6 = md_survey_norm_birth6( isset( $d['birth'] ) ? $d['birth'] : '' );
-	$doctor = mb_substr( trim( sanitize_text_field( isset( $d['doctor'] ) ? $d['doctor'] : '' ) ), 0, 40 );
+	$doctor = mb_substr( trim( sanitize_text_field( isset( $d['doctor'] ) ? $d['doctor'] : '' ) ), 0, 120 );
 	$staff  = mb_substr( trim( sanitize_text_field( isset( $d['staff'] ) ? $d['staff'] : '' ) ), 0, 40 );
 
 	if ( '' === $chart )  { return new WP_Error( 'md_survey', '차트번호가 없습니다.' ); }
@@ -363,7 +363,8 @@ function md_survey_import_rows( $rows, $date ) {
 		'name'     => array( '이름', '성명', '환자명', '환자', 'name' ),
 		'phone'    => array( '휴대폰', '휴대전화', '핸드폰', '전화', '연락처', 'phone', '가운데4자리', '뒷자리' ),
 		'birth'    => array( '생년월일', '생일', '주민번호', '주민', 'birth' ),
-		'doctor'   => array( '담당의사', '담당원장', '의사', '원장', '진료의', 'doctor' ),
+		'doctor'   => array( '담당의사', '담당원장', '의사', '원장', 'doctor' ),
+		'doctors'  => array( '진료의사' ), /* v4.19 · 덴트웹 엑셀의 진료의사 열 — 여러 명이 쉼표로 들어 있다. 있으면 담당의사보다 우선 */
 		'staff'    => array( '담당직원', '담당스탭', '스탭', '직원', '위생사', '어시스트', 'staff' ),
 	);
 	$n = 0;
@@ -386,6 +387,12 @@ function md_survey_import_rows( $rows, $date ) {
 		}
 		$d = array( 'date' => $date );
 		foreach ( $map as $field => $i ) { $d[ $field ] = isset( $cols[ $i ] ) ? $cols[ $i ] : ''; }
+		/* v4.19 · 진료의사 열이 있고 값이 있으면 그걸 담당 원장으로 — 여러 명이면 「문은수 · 정석형」 */
+		if ( isset( $d['doctors'] ) && '' !== trim( (string) $d['doctors'] ) ) {
+			$names = array_filter( array_map( 'trim', preg_split( '/[,\/·;]+/u', (string) $d['doctors'] ) ) );
+			if ( $names ) { $d['doctor'] = implode( ' · ', array_unique( $names ) ); }
+		}
+		unset( $d['doctors'] );
 		/* 접수시각 열이 있으면 그 날짜로 (2026-10-01 11:40:32 · 20261001114032 · 엑셀 일련번호 모두 받음) */
 		if ( isset( $map['date'] ) ) {
 			$dv = trim( (string) $d['date'] );
@@ -696,7 +703,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<p>치료 결과가 아닌, 담당 스탭의 안내와 응대에 대해 여쭙습니다. 30초면 됩니다.</p>
 		<div class="sv-who">
 			<span>진료일</span><b><?php echo esc_html( date_i18n( 'Y년 n월 j일', strtotime( $visit->visit_date ) ) ); ?></b>
-			<?php if ( '' !== $visit->doctor ) : ?><span>담당 원장</span><b><?php echo esc_html( $visit->doctor ); ?></b><?php endif; ?>
+			<?php if ( '' !== $visit->doctor ) : ?><span><?php echo false !== strpos( $visit->doctor, ' · ' ) ? '진료 원장' : '담당 원장'; ?></span><b><?php echo esc_html( $visit->doctor ); ?></b><?php endif; ?>
 			<span>담당 스탭</span><b class="staff"><?php echo esc_html( $staff ); ?></b>
 		</div>
 
