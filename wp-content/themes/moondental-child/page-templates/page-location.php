@@ -53,8 +53,6 @@ $off_text = $info['hours_off'] ?: '휴진';
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( $locpage_title ); ?></span>
 		</nav>
 		<h1 class="md-page-hero__title"><?php echo esc_html( $locpage_title ); ?></h1>
-		<?php /* v4.15 · 지금 진료 중 / 오늘 진료 전 / 진료 끝 / 오늘 휴진 — main.js 가 data-hours 로 계산 */ ?>
-		<span class="md-open-status" data-hours="<?php echo esc_attr( wp_json_encode( array( 'wd' => $time_wd, 'thu' => $time_thu, 'sat' => $time_sat ) ) ); ?>" hidden></span>
 		<?php /* v3.99.1 · 주소 + 복사 버튼 + 전화·이메일 (이메일은 클릭 복사) */
 		$loc_email = $info['email'] ?: 'moondental1995@naver.com'; ?>
 		<div class="md-page-hero__lead md-page-hero__lead--big md-loc-addr">
@@ -68,115 +66,9 @@ $off_text = $info['hours_off'] ?: '휴진';
 	</div>
 </section>
 
-<!-- ============ 1. 지도 + 3 맵 버튼 ============ -->
-<section class="md-section md-section--tight" id="map">
-	<div class="md-container">
-		<header class="md-locx__head md-locx__head--tight">
-			<span class="md-locx__eyebrow"><span aria-hidden="true">🗺️</span> <span>지도 · 길찾기</span></span>
-			<p class="md-locx__sub">천안고속버스터미널 옆 문타워 · 지도를 누르면 크게 볼 수 있고, 아래 버튼으로 길찾기를 엽니다</p>
-		</header>
-		<?php /* v3.98.3 · 상단 지도 = 구글 지도 임베드 (API 키·결제 불필요). Customizer URL 을 비우면 예전 네이버 이미지 타일 */
-		$gmap_src = function_exists( 'md_content' ) ? md_content( 'loc_gmap_embed_url', 'https://www.google.com/maps?q=%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90%20%EC%B2%9C%EC%95%88%20%EB%A7%8C%EB%82%A8%EB%A1%9C%2052&z=16&output=embed&hl=ko' ) : '';
-		if ( $gmap_src ) : ?>
-		<div class="md-locmap md-locmap--gmap">
-			<iframe src="<?php echo esc_url( $gmap_src ); ?>" title="<?php echo esc_attr( md_content( 'loc_gmap_iframe_title', '문치과병원 구글 지도' ) ); ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-		</div>
-		<?php else : ?>
-		<a class="md-locmap<?php echo $map_image ? ' md-locmap--has-image' : ''; ?>"
-		   href="<?php echo esc_url( $map_naver ); ?>"
-		   target="_blank" rel="noopener"
-		   data-track="cta-location-mainmap"
-		   aria-label="네이버 지도에서 문치과병원 위치 보기"
-		   <?php echo $map_image ? 'style="background-image:url(' . esc_url( $map_image ) . ');"' : ''; ?>>
-			<?php if ( ! $map_image ) : ?>
-				<div class="md-locmap__pattern" aria-hidden="true"></div>
-			<?php endif; ?>
-		</a>
-		<?php endif; ?>
-
-		<div class="md-mapbtn-grid md-mapbtn-grid--top">
-			<a class="md-mapbtn md-mapbtn--naver" href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener" data-track="cta-location-map-naver">
-				<span class="md-mapbtn__logo" aria-hidden="true">N</span>
-				<span class="md-mapbtn__body">
-					<span class="md-mapbtn__name"><?php echo esc_html( md_content( 'flocation_btn_naver', '네이버 지도' ) ); ?></span>
-					<span class="md-mapbtn__sub"><?php echo esc_html( md_content( 'flocation_btn_naver_sub', '길찾기 · 대중교통' ) ); ?></span>
-				</span>
-				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
-			</a>
-			<a class="md-mapbtn md-mapbtn--kakao" href="<?php echo esc_url( $map_kakao ); ?>" target="_blank" rel="noopener" data-track="cta-location-map-kakao">
-				<span class="md-mapbtn__logo" aria-hidden="true">k</span>
-				<span class="md-mapbtn__body">
-					<span class="md-mapbtn__name"><?php echo esc_html( md_content( 'flocation_btn_kakao', '카카오맵' ) ); ?></span>
-					<span class="md-mapbtn__sub"><?php echo esc_html( md_content( 'flocation_btn_kakao_sub', '길찾기 · 로드뷰' ) ); ?></span>
-				</span>
-				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
-			</a>
-			<a class="md-mapbtn md-mapbtn--google" href="<?php echo esc_url( $map_google ); ?>" target="_blank" rel="noopener" data-track="cta-location-map-google">
-				<span class="md-mapbtn__logo" aria-hidden="true">G</span>
-				<span class="md-mapbtn__body">
-					<span class="md-mapbtn__name"><?php echo esc_html( md_content( 'flocation_btn_google', 'Google Maps' ) ); ?></span>
-					<span class="md-mapbtn__sub"><?php echo esc_html( md_content( 'flocation_btn_google_sub', 'Directions · Street View' ) ); ?></span>
-				</span>
-				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
-			</a>
-		</div>
-	</div>
-</section>
-
-<?php /* v3.99 · 주변 랜드마크 · 편의 시설 — Customizer 「오시는 길」에서 편집 (한 줄에 하나 · 아이콘|이름|소요시간|네이버 검색어 / 아이콘|이름|설명) */
-$md_lines  = function ( $raw ) { $out = array(); foreach ( preg_split( '/\r?\n/', (string) $raw ) as $l ) { $l = trim( $l ); if ( $l === '' ) continue; $out[] = array_map( 'trim', explode( '|', $l ) ); } return $out; };
-$landmarks = $md_lines( md_content( 'loc_landmarks', "🚌|천안종합터미널 (고속·시외)|도보 5분|천안종합버스터미널\n🏬|신세계백화점 천안아산점|도보 5분|신세계백화점 천안아산점\n🌳|신부문화공원|도보 3분|신부문화공원\n🚆|천안역|버스 10분|천안역\n🚄|천안아산역 (KTX)|버스 25분|천안아산역" ) );
-$amenities = $md_lines( md_content( 'loc_amenities', "🏢|엘리베이터|9~13층 진료 · 엘리베이터로 이동\n🌙|야간진료|월·화·수·금 20:30까지 진료\n♿|휠체어 접근|건물 입구·엘리베이터·진료실 휠체어 이동 가능
-📶|무료 Wi-Fi|대기실 전체 무료 와이파이
-🌐|외국어 안내|영어·러시아어·몽골어·베트남어·중국어 통역\n👶|소아치과|어린이 전용 진료 공간 (11층)" ) );
-if ( $landmarks ) : ?>
-<section class="md-section md-section--tight" id="landmarks">
-	<div class="md-container">
-		<header class="md-locx__head">
-			<span class="md-locx__eyebrow"><span aria-hidden="true">📍</span> <span><?php echo esc_html( md_content( 'loc_lm_eyebrow', '주변 정보' ) ); ?></span></span>
-			<h2 class="md-locx__title"><?php echo esc_html( md_content( 'loc_lm_title', '주변 랜드마크' ) ); ?></h2>
-			<p class="md-locx__sub"><?php echo esc_html( md_content( 'loc_lm_sub', '찾아오실 때 참고하세요 · 누르면 네이버 지도로 이동' ) ); ?></p>
-		</header>
-		<div class="md-lm-grid">
-		<?php foreach ( $landmarks as $lm ) : if ( count( $lm ) < 2 ) continue; $q = ! empty( $lm[3] ) ? $lm[3] : $lm[1]; ?>
-			<a class="md-lm" href="https://map.naver.com/p/search/<?php echo rawurlencode( $q ); ?>" target="_blank" rel="noopener" data-track="cta-locpage-landmark">
-				<span class="md-lm__icon" aria-hidden="true"><?php echo esc_html( $lm[0] ); ?></span>
-				<span class="md-lm__name"><?php echo esc_html( $lm[1] ); ?></span>
-				<?php if ( ! empty( $lm[2] ) ) : ?><span class="md-lm__time"><?php echo esc_html( $lm[2] ); ?></span><?php endif; ?>
-			</a>
-		<?php endforeach; ?>
-		</div>
-	</div>
-</section>
-<?php endif; if ( $amenities ) : ?>
-<section class="md-section md-section--surface" id="amenities">
-	<div class="md-container">
-		<header class="md-locx__head">
-			<span class="md-locx__eyebrow"><span aria-hidden="true">🏥</span> <span><?php echo esc_html( md_content( 'loc_amen_eyebrow', '시설 안내' ) ); ?></span></span>
-			<h2 class="md-locx__title"><?php echo esc_html( md_content( 'loc_amen_title', '편의 시설' ) ); ?></h2>
-			<p class="md-locx__sub"><?php echo esc_html( md_content( 'loc_amen_sub', '편안한 방문을 위해' ) ); ?></p>
-		</header>
-		<div class="md-amen-grid">
-		<?php foreach ( $amenities as $am ) : if ( count( $am ) < 2 ) continue; ?>
-			<div class="md-amen">
-				<div class="md-amen__icon" aria-hidden="true"><?php echo esc_html( $am[0] ); ?></div>
-				<div class="md-amen__name"><?php echo esc_html( $am[1] ); ?></div>
-				<?php if ( ! empty( $am[2] ) ) : ?><div class="md-amen__desc"><?php echo esc_html( $am[2] ); ?></div><?php endif; ?>
-			</div>
-		<?php endforeach; ?>
-		</div>
-	</div>
-</section>
-<?php endif; ?>
-
-<!-- ============ 2. 진료시간 + 층별 안내 + 주차 안내 (3-col 그리드 · v3.44.167) ============ -->
+<!-- ============ 1. 진료시간 + 층별 안내 + 주차 안내 (3-col 그리드 · v4.15.2 · 맨 위로) ============ -->
 <section class="md-section" id="hours">
 	<div class="md-container">
-		<header class="md-locx__head">
-			<span class="md-locx__eyebrow"><span aria-hidden="true">🕐</span> <span>진료시간 · 층별 안내 · 주차</span></span>
-			<h2 class="md-locx__title">방문 전에 확인하세요</h2>
-			<p class="md-locx__sub">평일 저녁 8시 30분까지 진료 · 9~13층 · 지하 기계식 주차(SUV는 제5공영주차장)</p>
-		</header>
 		<div class="md-info-pair md-info-pair--3col">
 
 			<!-- 진료시간 카드 · v3.44.11 · 네이버 플레이스 링크 -->
@@ -316,6 +208,103 @@ if ( $landmarks ) : ?>
 		</div>
 	</div>
 </section>
+
+<!-- ============ 2. 지도 + 3 맵 버튼 ============ -->
+<section class="md-section md-section--tight" id="map">
+	<div class="md-container">
+		<?php /* v3.98.3 · 상단 지도 = 구글 지도 임베드 (API 키·결제 불필요). Customizer URL 을 비우면 예전 네이버 이미지 타일 */
+		$gmap_src = function_exists( 'md_content' ) ? md_content( 'loc_gmap_embed_url', 'https://www.google.com/maps?q=%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90%20%EC%B2%9C%EC%95%88%20%EB%A7%8C%EB%82%A8%EB%A1%9C%2052&z=16&output=embed&hl=ko' ) : '';
+		if ( $gmap_src ) : ?>
+		<div class="md-locmap md-locmap--gmap">
+			<iframe src="<?php echo esc_url( $gmap_src ); ?>" title="<?php echo esc_attr( md_content( 'loc_gmap_iframe_title', '문치과병원 구글 지도' ) ); ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+		</div>
+		<?php else : ?>
+		<a class="md-locmap<?php echo $map_image ? ' md-locmap--has-image' : ''; ?>"
+		   href="<?php echo esc_url( $map_naver ); ?>"
+		   target="_blank" rel="noopener"
+		   data-track="cta-location-mainmap"
+		   aria-label="네이버 지도에서 문치과병원 위치 보기"
+		   <?php echo $map_image ? 'style="background-image:url(' . esc_url( $map_image ) . ');"' : ''; ?>>
+			<?php if ( ! $map_image ) : ?>
+				<div class="md-locmap__pattern" aria-hidden="true"></div>
+			<?php endif; ?>
+		</a>
+		<?php endif; ?>
+
+		<div class="md-mapbtn-grid md-mapbtn-grid--top">
+			<a class="md-mapbtn md-mapbtn--naver" href="<?php echo esc_url( $map_naver ); ?>" target="_blank" rel="noopener" data-track="cta-location-map-naver">
+				<span class="md-mapbtn__logo" aria-hidden="true">N</span>
+				<span class="md-mapbtn__body">
+					<span class="md-mapbtn__name"><?php echo esc_html( md_content( 'flocation_btn_naver', '네이버 지도' ) ); ?></span>
+					<span class="md-mapbtn__sub"><?php echo esc_html( md_content( 'flocation_btn_naver_sub', '길찾기 · 대중교통' ) ); ?></span>
+				</span>
+				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
+			</a>
+			<a class="md-mapbtn md-mapbtn--kakao" href="<?php echo esc_url( $map_kakao ); ?>" target="_blank" rel="noopener" data-track="cta-location-map-kakao">
+				<span class="md-mapbtn__logo" aria-hidden="true">k</span>
+				<span class="md-mapbtn__body">
+					<span class="md-mapbtn__name"><?php echo esc_html( md_content( 'flocation_btn_kakao', '카카오맵' ) ); ?></span>
+					<span class="md-mapbtn__sub"><?php echo esc_html( md_content( 'flocation_btn_kakao_sub', '길찾기 · 로드뷰' ) ); ?></span>
+				</span>
+				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
+			</a>
+			<a class="md-mapbtn md-mapbtn--google" href="<?php echo esc_url( $map_google ); ?>" target="_blank" rel="noopener" data-track="cta-location-map-google">
+				<span class="md-mapbtn__logo" aria-hidden="true">G</span>
+				<span class="md-mapbtn__body">
+					<span class="md-mapbtn__name"><?php echo esc_html( md_content( 'flocation_btn_google', 'Google Maps' ) ); ?></span>
+					<span class="md-mapbtn__sub"><?php echo esc_html( md_content( 'flocation_btn_google_sub', 'Directions · Street View' ) ); ?></span>
+				</span>
+				<span class="md-mapbtn__arrow" aria-hidden="true">→</span>
+			</a>
+		</div>
+	</div>
+</section>
+
+<?php /* v3.99 · 주변 랜드마크 · 편의 시설 — Customizer 「오시는 길」에서 편집 (한 줄에 하나 · 아이콘|이름|소요시간|네이버 검색어 / 아이콘|이름|설명) */
+$md_lines  = function ( $raw ) { $out = array(); foreach ( preg_split( '/\r?\n/', (string) $raw ) as $l ) { $l = trim( $l ); if ( $l === '' ) continue; $out[] = array_map( 'trim', explode( '|', $l ) ); } return $out; };
+$landmarks = $md_lines( md_content( 'loc_landmarks', "🚌|천안종합터미널 (고속·시외)|도보 5분|천안종합버스터미널\n🏬|신세계백화점 천안아산점|도보 5분|신세계백화점 천안아산점\n🌳|신부문화공원|도보 3분|신부문화공원\n🚆|천안역|버스 10분|천안역\n🚄|천안아산역 (KTX)|버스 25분|천안아산역" ) );
+$amenities = $md_lines( md_content( 'loc_amenities', "🏢|엘리베이터|9~13층 진료 · 엘리베이터로 이동\n🌙|야간진료|월·화·수·금 20:30까지 진료\n♿|휠체어 접근|건물 입구·엘리베이터·진료실 휠체어 이동 가능
+📶|무료 Wi-Fi|대기실 전체 무료 와이파이
+🌐|외국어 안내|영어·러시아어·몽골어·베트남어·중국어 통역\n👶|소아치과|어린이 전용 진료 공간 (11층)" ) );
+if ( $landmarks ) : ?>
+<section class="md-section md-section--tight" id="landmarks">
+	<div class="md-container">
+		<header class="md-locx__head">
+			<span class="md-locx__eyebrow"><span aria-hidden="true">📍</span> <span><?php echo esc_html( md_content( 'loc_lm_eyebrow', '주변 정보' ) ); ?></span></span>
+			<h2 class="md-locx__title"><?php echo esc_html( md_content( 'loc_lm_title', '주변 랜드마크' ) ); ?></h2>
+			<p class="md-locx__sub"><?php echo esc_html( md_content( 'loc_lm_sub', '찾아오실 때 참고하세요 · 누르면 네이버 지도로 이동' ) ); ?></p>
+		</header>
+		<div class="md-lm-grid">
+		<?php foreach ( $landmarks as $lm ) : if ( count( $lm ) < 2 ) continue; $q = ! empty( $lm[3] ) ? $lm[3] : $lm[1]; ?>
+			<a class="md-lm" href="https://map.naver.com/p/search/<?php echo rawurlencode( $q ); ?>" target="_blank" rel="noopener" data-track="cta-locpage-landmark">
+				<span class="md-lm__icon" aria-hidden="true"><?php echo esc_html( $lm[0] ); ?></span>
+				<span class="md-lm__name"><?php echo esc_html( $lm[1] ); ?></span>
+				<?php if ( ! empty( $lm[2] ) ) : ?><span class="md-lm__time"><?php echo esc_html( $lm[2] ); ?></span><?php endif; ?>
+			</a>
+		<?php endforeach; ?>
+		</div>
+	</div>
+</section>
+<?php endif; if ( $amenities ) : ?>
+<section class="md-section md-section--surface" id="amenities">
+	<div class="md-container">
+		<header class="md-locx__head">
+			<span class="md-locx__eyebrow"><span aria-hidden="true">🏥</span> <span><?php echo esc_html( md_content( 'loc_amen_eyebrow', '시설 안내' ) ); ?></span></span>
+			<h2 class="md-locx__title"><?php echo esc_html( md_content( 'loc_amen_title', '편의 시설' ) ); ?></h2>
+			<p class="md-locx__sub"><?php echo esc_html( md_content( 'loc_amen_sub', '편안한 방문을 위해' ) ); ?></p>
+		</header>
+		<div class="md-amen-grid">
+		<?php foreach ( $amenities as $am ) : if ( count( $am ) < 2 ) continue; ?>
+			<div class="md-amen">
+				<div class="md-amen__icon" aria-hidden="true"><?php echo esc_html( $am[0] ); ?></div>
+				<div class="md-amen__name"><?php echo esc_html( $am[1] ); ?></div>
+				<?php if ( ! empty( $am[2] ) ) : ?><div class="md-amen__desc"><?php echo esc_html( $am[2] ); ?></div><?php endif; ?>
+			</div>
+		<?php endforeach; ?>
+		</div>
+	</div>
+</section>
+<?php endif; ?>
 
 <?php /* v3.44.167 · 층별 안내는 이제 진료시간·주차 사이 3열 그리드 내부로 이동 (아래 별도 섹션 제거) */ ?>
 
