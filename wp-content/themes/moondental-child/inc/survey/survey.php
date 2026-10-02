@@ -30,7 +30,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_SURVEY_SCHEMA', 7 ); /* v4.21.4 · q_doctor 추가 — 원장·선생님·병원 각 1~5 (6: staff_orig·staff_changed) */
+define( 'MD_SURVEY_SCHEMA', 8 ); /* v4.21.7 · want_call (환자가 연락을 원함) — 7: q_doctor */
 
 /* ============================================================
  * 테이블 · 설치
@@ -86,6 +86,7 @@ function md_survey_maybe_install() {
 		staff_orig VARCHAR(40) NOT NULL DEFAULT '',
 		staff_changed TINYINT UNSIGNED NOT NULL DEFAULT 0,
 		q_doctor TINYINT UNSIGNED NOT NULL DEFAULT 0,
+		want_call TINYINT UNSIGNED NOT NULL DEFAULT 0,
 		q_service TINYINT UNSIGNED NOT NULL,
 		q_explain TINYINT UNSIGNED NOT NULL,
 		q_recommend TINYINT UNSIGNED NOT NULL,
@@ -536,15 +537,15 @@ function md_survey_response_by_visit( $visit_id ) {
  * @param string $staff   실제로 평가받는 직원 (환자가 바로잡았으면 그 이름, 모르면 '')
  * @param int    $changed 0 명단 그대로 · 1 환자가 다른 직원으로 바꿈 · 2 모르겠다
  */
-function md_survey_response_insert( $visit, $q1, $q2, $q3, $comment, $staff = null, $changed = 0, $qd = 0 ) {
+function md_survey_response_insert( $visit, $q1, $q2, $q3, $comment, $staff = null, $changed = 0, $qd = 0, $call = 0 ) {
 	global $wpdb;
 	$tr = md_survey_table_response();
 	if ( null === $staff ) { $staff = $visit->staff; }
 	$ok = $wpdb->query( $wpdb->prepare(
-		"INSERT IGNORE INTO $tr (visit_id, visit_date, chart_no, patient_name, doctor, staff, staff_orig, staff_changed, q_doctor, q_service, q_explain, q_recommend, comment, ip_hash, created_at)
-		 VALUES (%d, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %s, %s, %s)",
+		"INSERT IGNORE INTO $tr (visit_id, visit_date, chart_no, patient_name, doctor, staff, staff_orig, staff_changed, q_doctor, q_service, q_explain, q_recommend, comment, want_call, ip_hash, created_at)
+		 VALUES (%d, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %s, %d, %s, %s)",
 		(int) $visit->id, $visit->visit_date, $visit->chart_no, $visit->patient_name, $visit->doctor, $staff, $visit->staff, (int) $changed,
-		(int) $qd, (int) $q1, (int) $q2, (int) $q3, $comment, md_survey_ip_hash(), current_time( 'mysql' )
+		(int) $qd, (int) $q1, (int) $q2, (int) $q3, $comment, (int) $call, md_survey_ip_hash(), current_time( 'mysql' )
 	) );
 	if ( ! $ok ) { return false; } /* 0 = 이미 있음 (UNIQUE visit) */
 	$wpdb->update( md_survey_table_visit(), array( 'responded_at' => current_time( 'mysql' ) ), array( 'id' => (int) $visit->id ) );
@@ -722,28 +723,22 @@ function md_survey_public_render() {
 			} else {
 				$visit = $v;
 				/* v4.21.4 · 원장(q_doctor) · 선생님(q_staff → q_service) · 병원(q_hospital → q_recommend), 모두 1~5 */
-				$qd = isset( $_POST['q_doctor'] ) ? (int) $_POST['q_doctor'] : 0;
-				$q1 = isset( $_POST['q_staff'] ) ? (int) $_POST['q_staff'] : 0;
+				/* v4.21.7 · 원장·담당직원은 선택(0 = 잘 기억나지 않아요 · 무응답), 병원은 필수 */
+				$clip = function ( $k ) { $x = isset( $_POST[ $k ] ) ? (int) $_POST[ $k ] : 0; return ( $x >= 1 && $x <= 5 ) ? $x : 0; };
+				$qd = $clip( 'q_doctor' );
+				$q1 = $clip( 'q_staff' );
 				$q2 = 0;
 				$q3 = isset( $_POST['q_hospital'] ) ? (int) $_POST['q_hospital'] : 0;
 				$has_doc = '' !== trim( (string) $v->doctor );
 				$cm = isset( $_POST['comment'] ) ? mb_substr( trim( sanitize_textarea_field( wp_unslash( $_POST['comment'] ) ) ), 0, 1000 ) : '';
-				/* v4.21.3 · 환자가 담당 선생님을 바로잡은 경우 — 명단의 직원 이름 중에서만 받는다 */
-				$pick = isset( $_POST['staff_pick'] ) ? sanitize_text_field( wp_unslash( $_POST['staff_pick'] ) ) : '';
-				$who  = $v->staff; $changed = 0;
-				if ( '__unknown' === $pick ) { $who = ''; $changed = 2; }
-				elseif ( '' !== $pick && $pick !== $v->staff ) {
-					foreach ( md_survey_staff_choices( $v->staff ) as $o ) { if ( $o['name'] === $pick ) { $who = $pick; $changed = 1; break; } }
-				}
-				$need_staff = 2 !== $changed;
+				$call = ! empty( $_POST['want_call'] ) ? 1 : 0;
 				if ( $v->responded_at || md_survey_response_by_visit( $v->id ) ) {
 					$step = 'already';
-				} elseif ( $q3 < 1 || $q3 > 5 || ( $has_doc && ( $qd < 1 || $qd > 5 ) ) || ( $need_staff && ( $q1 < 1 || $q1 > 5 ) ) ) {
+				} elseif ( $q3 < 1 || $q3 > 5 ) {
 					$step = 'form';
-					$err  = '점수 문항을 모두 골라 주세요.';
+					$err  = '「오늘 하루는 어떠셨나요?」 문항을 골라 주세요.';
 				} else {
-					if ( ! $need_staff ) { $q1 = 0; } /* 누가 도왔는지 모르면 선생님 문항은 0(무응답)으로 */
-					$step = md_survey_response_insert( $v, $q1, $q2, $q3, $cm, $who, $changed, $has_doc ? $qd : 0 ) ? 'done' : 'already';
+					$step = md_survey_response_insert( $v, $q1, $q2, $q3, $cm, $v->staff, 0, $has_doc ? $qd : 0, $call ) ? 'done' : 'already';
 				}
 			}
 		}
@@ -832,6 +827,16 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-scale--11 span{min-height:44px;border-radius:9px;font-size:.92rem}
 .sv-scale input:checked+span{background:var(--primary);border-color:var(--primary);color:#fff}
 .sv-scale input:focus-visible+span{outline:2px solid var(--primary);outline-offset:2px}
+.sv-q h2 small.sv-opt,.sv-q h2 small.sv-req{margin-left:4px;padding:1px 8px;border-radius:999px;font-size:.72rem;font-weight:700;vertical-align:2px}
+.sv-q h2 small.sv-opt{background:var(--soft);color:var(--mute)}
+.sv-q h2 small.sv-req{background:rgba(216,128,98,.14);color:var(--primary-dk)}
+.sv-unsure{display:block;margin-top:8px}
+.sv-unsure input{position:absolute;opacity:0;width:1px;height:1px}
+.sv-unsure span{display:flex;align-items:center;justify-content:center;min-height:44px;border:1px dashed var(--line);border-radius:12px;background:var(--card);font-size:.92rem;font-weight:700;color:var(--mute);cursor:pointer}
+.sv-unsure input:checked+span{border-style:solid;border-color:var(--sub);background:var(--soft);color:var(--text)}
+.sv-unsure input:focus-visible+span{outline:2px solid var(--primary);outline-offset:2px}
+.sv-call{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:.88rem;color:var(--sub);cursor:pointer}
+.sv-call input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--primary)}
 .sv-ends{display:flex;justify-content:space-between;margin-top:6px;font-size:.76rem;color:var(--mute)}
 .sv-q textarea{width:100%;font:inherit;min-height:110px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);resize:vertical}
 .sv-q textarea:focus{outline:2px solid var(--primary);outline-offset:0;border-color:var(--primary)}
@@ -862,8 +867,9 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 <?php elseif ( 'done' === $step ) : ?>
 	<section class="sv-card sv-done">
 		<div class="mark" aria-hidden="true">✓</div>
-		<h1>응답이 저장되었습니다</h1>
-		<p><?php echo esc_html( $name ); ?>님의 의견은 병원 관리자에게만 전달되어 더 나은 진료를 만드는 데 쓰입니다.</p>
+		<h1>소중한 말씀 감사합니다</h1>
+		<p><?php echo esc_html( $name ); ?>님이 남겨 주신 이야기는 더 편안한 진료를 만드는 데 소중히 쓰겠습니다. 고마운 마음은 해당 분께 꼭 전해 드릴게요.</p>
+		<p>궁금한 점이 있으시면 언제든 병원으로 연락 주세요.</p>
 		<div class="sv-review">
 			<p>진료가 만족스러우셨다면 구글에도 한 줄 남겨 주세요. 다른 분들이 치과를 고를 때 큰 도움이 됩니다.</p>
 			<a class="sv-review__btn" href="<?php echo esc_url( md_survey_review_url() ); ?>" target="_blank" rel="noopener">구글 리뷰 남기기</a>
@@ -885,13 +891,18 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 	$others = array(); /* v4.21.6 · 「담당직원이 다른 분이셨나요?」 고르기 제거 (원장 지시) */
 	$sel    = isset( $_POST['staff_pick'] ) ? sanitize_text_field( wp_unslash( $_POST['staff_pick'] ) ) : '';
 	$doc_titles = array_map( 'md_survey_doctor_title', $docs );
-	$pv = function ( $k ) { return isset( $_POST[ $k ] ) ? (int) $_POST[ $k ] : 0; };
-	$scale = function ( $field, $label, $lo, $hi, $req = true ) use ( $pv ) { ?>
+	/* v4.21.7 · 원장·담당직원 문항은 선택 + 「잘 기억나지 않아요」, 병원 문항은 필수 (원장 지시) */
+	$pv = function ( $k ) { return isset( $_POST[ $k ] ) && '' !== $_POST[ $k ] ? (int) $_POST[ $k ] : -1; };
+	$scale = function ( $field, $label, $lo, $hi, $req = true, $unsure = false ) use ( $pv ) { ?>
 		<div class="sv-scale sv-scale--5" role="radiogroup" aria-label="<?php echo esc_attr( $label ); ?>">
 			<?php for ( $i = 1; $i <= 5; $i++ ) : ?><label><input type="radio" name="<?php echo esc_attr( $field ); ?>" value="<?php echo $i; ?>"<?php echo $req ? ' required' : ''; ?> <?php checked( $i, $pv( $field ) ); ?>><span><?php echo $i; ?></span></label><?php endfor; ?>
 		</div>
 		<div class="sv-ends"><span><?php echo esc_html( $lo ); ?></span><span><?php echo esc_html( $hi ); ?></span></div>
+		<?php if ( $unsure ) : ?>
+			<label class="sv-unsure"><input type="radio" name="<?php echo esc_attr( $field ); ?>" value="0" <?php checked( 0, $pv( $field ) ); ?>><span>잘 기억나지 않아요</span></label>
+		<?php endif; ?>
 	<?php };
+	$qn = 0;
 	?>
 	<form method="post" class="sv-card" action="<?php echo esc_url( md_survey_public_url() ); ?>">
 		<input type="hidden" name="md_sv" value="submit">
@@ -900,37 +911,40 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<p>오늘 하루가 어떠셨는지 편하게 들려주세요. 30초면 됩니다.</p>
 
 		<div class="sv-who">
-			<span>진료일</span><b><?php echo esc_html( date_i18n( 'Y년 n월 j일', strtotime( $visit->visit_date ) ) ); ?></b>
+			<span>진료일</span><b><?php echo esc_html( date_i18n( 'Y년 n월 j일 (D)', strtotime( $visit->visit_date ) ) ); ?></b>
 			<?php if ( $doc_titles ) : ?><span>담당의사</span><b><?php echo esc_html( $doc_titles[0] ); ?></b><?php endif; ?>
 			<span>담당직원</span><b><?php echo esc_html( $staff ); ?> 선생님</b>
 		</div>
 
-
-		<?php if ( $doc_titles ) : ?>
+		<?php if ( $doc_titles ) : $qn++; ?>
 		<div class="sv-q">
-			<h2>1. 오늘 <?php echo esc_html( $doc_titles[0] ); ?>께 진료받으시는 동안 마음이 편안하셨나요?</h2>
-			<?php $scale( 'q_doctor', '원장님', '조금 불편했어요', '아주 편안했어요' ); ?>
+			<h2><?php echo $qn; ?>. 오늘 <?php echo esc_html( $doc_titles[0] ); ?>께 진료받으시는 동안 마음이 편안하셨나요? <small class="sv-opt">선택</small></h2>
+			<?php $scale( 'q_doctor', '담당의사', '조금 불편했어요', '아주 편안했어요', false, true ); ?>
 		</div>
 		<?php endif; ?>
 
+		<?php $qn++; ?>
 		<div class="sv-q">
-			<h2><?php echo $doc_titles ? '2' : '1'; ?>. 곁에서 도와드린 담당직원분 덕분에 진료가 수월하셨나요?</h2>
-			<?php $scale( 'q_staff', '담당직원', '조금 아쉬웠어요', '아주 든든했어요' ); ?>
+			<h2><?php echo $qn; ?>. 곁에서 도와드린 담당직원분 덕분에 진료가 수월하셨나요? <small class="sv-opt">선택</small></h2>
+			<?php $scale( 'q_staff', '담당직원', '조금 아쉬웠어요', '아주 든든했어요', false, true ); ?>
 		</div>
 
+		<?php $qn++; ?>
 		<div class="sv-q">
-			<h2><?php echo $doc_titles ? '3' : '2'; ?>. 접수부터 귀가까지, 문치과병원에서의 오늘 하루는 어떠셨나요?</h2>
-			<?php $scale( 'q_hospital', '병원', '아쉬웠어요', '아주 좋았어요' ); ?>
+			<h2><?php echo $qn; ?>. 접수부터 귀가까지, 문치과병원에서의 오늘 하루는 어떠셨나요? <small class="sv-req">필수</small></h2>
+			<?php $scale( 'q_hospital', '병원', '아쉬웠어요', '아주 좋았어요', true, false ); ?>
 		</div>
 
+		<?php $qn++; ?>
 		<div class="sv-q">
-			<h2><?php echo $doc_titles ? '4' : '3'; ?>. 고마웠던 점이나 바라는 점을 들려주세요 <small style="font-weight:500;color:var(--mute)">(선택)</small></h2>
+			<h2><?php echo $qn; ?>. 고마웠던 점이나 바라는 점을 들려주세요 <small class="sv-opt">선택</small></h2>
 			<textarea name="comment" maxlength="1000" placeholder="예) 아프지 않게 살펴 주셔서 고마웠어요 · 대기 시간이 조금 길었어요"><?php echo isset( $_POST['comment'] ) ? esc_textarea( wp_unslash( $_POST['comment'] ) ) : ''; ?></textarea>
 			<p class="sv-hint">고마운 마음은 해당 분께 꼭 전해 드릴게요.</p>
+			<label class="sv-call"><input type="checkbox" name="want_call" value="1" <?php checked( ! empty( $_POST['want_call'] ) ); ?>><span>이 내용으로 병원에서 연락드려도 괜찮아요</span></label>
 		</div>
 
 		<button type="submit" class="sv-btn">보내기</button>
-		<p class="sv-foot">이 진료에 대한 응답은 한 번만 보낼 수 있어요.</p>
+		<p class="sv-foot">응답은 병원 관리자만 봅니다 · 이 진료에 대한 응답은 한 번만 보낼 수 있어요.</p>
 	</form>
 
 <?php else : ?>
@@ -1438,7 +1452,7 @@ function md_survey_render_responses() {
 						<td class="num <?php echo $lowf( $qd ); ?>"><?php echo $qd ? $qd : '–'; ?></td>
 						<td class="num <?php echo $lowf( $r->q_service ); ?>"><?php echo $r->q_service ? (int) $r->q_service : '–'; ?></td>
 						<td class="num <?php echo $lowf( $r->q_recommend ); ?>"><?php echo (int) $r->q_recommend; ?></td>
-						<td class="mdsv-comment"><?php echo nl2br( esc_html( (string) $r->comment ) ); ?></td>
+						<td class="mdsv-comment"><?php echo nl2br( esc_html( (string) $r->comment ) ); ?><?php if ( ! empty( $r->want_call ) ) : ?><span class="mds-flag">📞 연락 원함</span><?php endif; ?></td>
 						<td class="mds-last"><?php echo esc_html( date_i18n( 'm.d H:i', strtotime( $r->created_at ) ) ); ?></td>
 					</tr>
 				<?php endforeach; ?>
