@@ -1610,14 +1610,30 @@ function md_survey_render_stats() {
 			<?php foreach ( $presets as $label => $p ) : ?><a class="mds-btn mds-btn--ghost mds-btn--sm<?php echo ( $p[0] === $from && $p[1] === $to ) ? ' is-on' : ''; ?>" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'stats', 'from' => $p[0], 'to' => $p[1] ) ) ); ?>"><?php echo esc_html( $label ); ?></a><?php endforeach; ?>
 		</nav>
 	</div>
-	<?php if ( empty( $rows ) ) : ?>
+	<?php /* v4.21.34 · 담당의사별 → 담당직원별 순서 (원장 지시). 평균만, 이름을 누르면 그 사람 응답 목록 */
+	$docs = md_survey_stats_doctor( $from, $to ); ?>
+	<?php if ( empty( $rows ) && empty( $docs ) ) : ?>
 		<div class="mds-card"><div class="mds-empty">이 기간에 응답이 없습니다.</div></div>
 	<?php else : ?>
+		<h2 class="mdsv-h">담당의사별</h2>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<?php /* v4.21.30 · 이 화면은 평균만 (원장 지시). 이름을 누르면 그 사람 응답 목록 */ ?>
+				<thead><tr><th>담당의사</th><th class="num">평균</th></tr></thead>
+				<tbody>
+				<?php if ( ! $docs ) : ?><tr><td colspan="2" class="mds-empty">응답 없음</td></tr><?php endif; ?>
+				<?php foreach ( $docs as $dn => $d ) : $n = max( 1, $d['n'] ); ?>
+					<tr><td><a class="mdsv-name" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'responses', 'from' => $from, 'to' => $to, 'doctor' => $dn ) ) ); ?>"><b><?php echo esc_html( $dn ); ?></b></a></td><td class="num"><b><?php echo number_format( $d['sum'] / $n, 2 ); ?></b></td></tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+
+		<h2 class="mdsv-h" style="margin-top:22px">담당직원별</h2>
+		<div class="mds-tablewrap">
+			<table class="mds-table mdsv-table">
 				<thead><tr><th>담당직원</th><th class="num">평균</th></tr></thead>
 				<tbody>
+				<?php if ( ! $rows ) : ?><tr><td colspan="2" class="mds-empty">응답 없음</td></tr><?php endif; ?>
 				<?php foreach ( $rows as $r ) : ?>
 					<tr>
 						<td><a class="mdsv-name" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'responses', 'from' => $from, 'to' => $to, 'staff' => $r->staff ) ) ); ?>"><b><?php echo esc_html( $r->staff ); ?></b></a></td>
@@ -1627,19 +1643,6 @@ function md_survey_render_stats() {
 				</tbody>
 			</table>
 		</div>
-		<?php $docs = md_survey_stats_doctor( $from, $to ); if ( $docs ) : ?>
-		<h2 class="mdsv-h" style="margin-top:22px">담당의사별</h2>
-		<div class="mds-tablewrap">
-			<table class="mds-table mdsv-table">
-				<thead><tr><th>담당의사</th><th class="num">평균</th></tr></thead>
-				<tbody>
-				<?php foreach ( $docs as $dn => $d ) : $n = max( 1, $d['n'] ); ?>
-					<tr><td><a class="mdsv-name" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'responses', 'from' => $from, 'to' => $to, 'doctor' => $dn ) ) ); ?>"><b><?php echo esc_html( $dn ); ?></b></a></td><td class="num"><b><?php echo number_format( $d['sum'] / $n, 2 ); ?></b></td></tr>
-				<?php endforeach; ?>
-				</tbody>
-			</table>
-		</div>
-		<?php endif; ?>
 		<p class="mds-hint">이름을 누르면 그 사람의 응답을 모두 볼 수 있습니다. 평균은 1~5점입니다.</p>
 	<?php endif; ?>
 	<?php
