@@ -915,6 +915,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-q textarea{width:100%;font:inherit;min-height:110px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);resize:vertical}
 .sv-q textarea:focus{outline:2px solid var(--primary);outline-offset:0;border-color:var(--primary)}
 .sv-done{text-align:center;padding:36px 20px}
+.sv-chat{color:var(--primary-dk);font-weight:700;word-break:break-all}
 .sv-done .mark{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:rgba(107,143,114,.15);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:2rem}
 .sv-done h1{font-size:1.35rem}
 .sv-review{margin-top:18px;padding-top:16px;border-top:1px dashed rgba(0,0,0,.12)}
@@ -938,16 +939,13 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<p>본인 확인이 여러 번 맞지 않아 30분 동안 참여를 멈췄습니다.<br>입력 정보가 확실한데도 계속 실패하면 병원 데스크에 말씀해 주세요.</p>
 	</section>
 
-<?php elseif ( 'done' === $step ) : ?>
+<?php elseif ( 'done' === $step ) : /* v4.21.20 · 감사 화면 문구 (원장 지정) · 구글 리뷰 버튼 제거 */ ?>
 	<section class="sv-card sv-done">
 		<div class="mark" aria-hidden="true">✓</div>
 		<h1>소중한 말씀 감사합니다</h1>
-		<p><?php echo esc_html( $name ); ?>님이 남겨 주신 이야기는 더 편안한 진료를 만드는 데 소중히 쓰겠습니다. 고마운 마음은 해당 분께 꼭 전해 드릴게요.</p>
-		<p>궁금한 점이 있으시면 언제든 병원으로 연락 주세요.</p>
-		<div class="sv-review">
-			<p>진료가 만족스러우셨다면 구글에도 한 줄 남겨 주세요. 다른 분들이 치과를 고를 때 큰 도움이 됩니다.</p>
-			<a class="sv-review__btn" href="<?php echo esc_url( md_survey_review_url() ); ?>" target="_blank" rel="noopener">구글 리뷰 남기기</a>
-		</div>
+		<p><?php echo esc_html( $name ); ?>님이 남겨 주신 이야기는 더 편안한 진료를 만드는 데 소중히 쓰겠습니다.</p>
+		<p>궁금한 점이 있으시면 언제든 병원으로 연락 주세요.<br><a class="sv-chat" href="http://pf.kakao.com/_VTcgE/chat" target="_blank" rel="noopener">http://pf.kakao.com/_VTcgE/chat</a></p>
+		<p>한아의료재단 문치과병원은 최고의 진료를 위해 최선의 노력을 다하겠습니다.</p>
 	</section>
 
 <?php elseif ( 'already' === $step ) : ?>
