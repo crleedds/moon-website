@@ -802,7 +802,7 @@ function md_survey_public_render() {
 					$step = 'form';
 					$err  = '「오늘 하루는 어떠셨나요?」 문항을 골라 주세요.';
 				} else {
-					$step = md_survey_response_insert( $v, $q1, $q2, $q3, $cm, $v->staff, 0, $has_doc ? $qd : 0, $call ) ? 'done' : 'already';
+					$step = md_survey_response_insert( $v, $q1, $q2, $q3, $cm, $v->staff, 0, $qd, $call ) ? 'done' : 'already';
 				}
 			}
 		}
@@ -989,19 +989,17 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 			<?php if ( '' !== trim( (string) $staff ) ) : ?><span>담당직원</span><b><?php echo esc_html( $staff ); ?></b><?php endif; ?>
 		</div>
 
-		<?php if ( $doc_titles ) : $qn++; ?>
+		<?php $qn++; /* v4.21.18 · 담당의사가 엑셀에 없어도 문항은 항상 */ ?>
 		<div class="sv-q">
-			<h2><?php echo $qn; ?>. 오늘 <?php echo false !== strpos( $doc_titles[0], '병원장님' ) ? '병원장님' : '원장님'; ?>께 진료받으시는 동안 마음이 편안하셨나요? <small class="sv-opt">선택</small></h2>
+			<h2><?php echo $qn; ?>. 오늘 <?php echo ( $doc_titles && false !== strpos( $doc_titles[0], '병원장님' ) ) ? '병원장님' : '원장님'; ?>께 진료받으시는 동안 마음이 편안하셨나요? <small class="sv-opt">선택</small></h2>
 			<?php $scale( 'q_doctor', '담당의사', '조금 불편했어요', '아주 편안했어요', false, true ); ?>
 		</div>
-		<?php endif; ?>
 
-		<?php if ( '' !== trim( (string) $staff ) ) : $qn++; ?>
+		<?php $qn++; /* v4.21.18 · 담당직원이 엑셀에 없어도 문항은 항상 (원장 지시) */ ?>
 		<div class="sv-q">
 			<h2><?php echo $qn; ?>. 곁에서 도와드린 담당직원 덕분에 진료가 수월하셨나요? <small class="sv-opt">선택</small></h2>
 			<?php $scale( 'q_staff', '담당직원', '조금 아쉬웠어요', '아주 든든했어요', false, true ); ?>
 		</div>
-		<?php endif; ?>
 
 		<?php $qn++; ?>
 		<div class="sv-q">
