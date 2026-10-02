@@ -1226,10 +1226,7 @@ function md_survey_handle_post() {
 			if ( ! md_survey_can_manage() ) { wp_die( '권한이 없습니다.' ); }
 			$s = md_survey_settings();
 			$s['window_days'] = max( 1, min( 30, isset( $_POST['window_days'] ) ? (int) $_POST['window_days'] : 3 ) );
-			$s['doctors']     = isset( $_POST['doctors'] ) ? sanitize_textarea_field( wp_unslash( $_POST['doctors'] ) ) : '';
-			$s['staff']       = isset( $_POST['staff'] ) ? sanitize_textarea_field( wp_unslash( $_POST['staff'] ) ) : '';
-			$ru = isset( $_POST['review_url'] ) ? esc_url_raw( trim( wp_unslash( $_POST['review_url'] ) ) ) : '';
-			$s['review_url'] = ( '' !== $ru && preg_match( '#^https://(search\.google\.com|g\.page|maps\.app\.goo\.gl|www\.google\.com|maps\.google\.com|goo\.gl)/#', $ru ) ) ? $ru : '';
+			/* v4.21.24 · 화면에서 뺀 값(원장·스탭 목록, 리뷰 링크)은 건드리지 않는다 */
 			update_option( 'md_survey_settings', $s, 'no' );
 			if ( ! empty( $_POST['regen_key'] ) ) { update_option( 'md_survey_api_key', wp_generate_password( 40, false ), 'no' ); }
 			$back = md_survey_admin_url( array( 'sv' => 'settings', 'msg' => 'saved' ) );
@@ -1617,33 +1614,22 @@ function md_survey_render_stats() {
 function md_survey_render_settings() {
 	if ( ! md_survey_can_manage() ) { echo '<div class="mds-card"><div class="mds-empty">관리자만 볼 수 있습니다.</div></div>'; return; }
 	$s = md_survey_settings();
+	/* v4.21.24 · 필요한 것만 (원장 지시) — 알림톡 링크 · 응답 허용 기간.
+	 * 원장·스탭 목록(직접 넣기 화면이 없어져 안 씀) · 구글 리뷰(감사 화면에서 뺌) · 연동 키(엑셀 올리기로 운영)는 화면에서 뺐다.
+	 * 저장할 때 이 값들은 그대로 둔다 (settings 처리기에서 keep_extra). */
 	?>
 	<form method="post" class="mds-card mdsv-settings">
 		<input type="hidden" name="md_survey_action" value="settings">
 		<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_settings' ) ); ?>">
+		<input type="hidden" name="keep_extra" value="1">
 		<h2 class="mdsv-h">알림톡에 넣을 링크</h2>
 		<p class="mdsv-url"><code><?php echo esc_html( home_url( '/survey/?n=#환자명#' ) ); ?></code></p>
-		<p class="mds-hint">덴트웹 진료 후 알림톡 템플릿 본문에 이 주소를 그대로 넣습니다. 덴트웹이 <code>#환자명#</code>을 환자 이름으로 바꿔 보내므로, 환자는 휴대전화 가운데 4자리만 넣고 설문에 들어옵니다. 이름이 링크에 실리지 않은 경우(<code><?php echo esc_html( home_url( '/survey/' ) ); ?></code>)에는 환자가 이름을 직접 적습니다.</p>
+		<p class="mds-hint">덴트웹 진료 후 알림톡 템플릿 본문에 이 주소를 그대로 넣습니다.</p>
 
+		<h2 class="mdsv-h" style="margin-top:20px">응답 받는 기간</h2>
 		<div class="mds-formrow">
-			<label class="mds-field"><span>응답 허용 기간 (진료일부터 며칠)</span><input type="number" name="window_days" min="1" max="30" value="<?php echo (int) $s['window_days']; ?>"></label>
+			<label class="mds-field"><span>진료일부터 며칠까지 응답을 받을까요</span><input type="number" name="window_days" min="1" max="30" value="<?php echo (int) $s['window_days']; ?>"></label>
 		</div>
-		<div class="mds-formrow">
-			<label class="mds-field mds-field--grow"><span>원장 목록 (한 줄에 한 명)</span><textarea name="doctors" rows="8"><?php echo esc_textarea( $s['doctors'] ); ?></textarea></label>
-			<label class="mds-field mds-field--grow"><span>스탭 목록 (한 줄에 한 명)</span><textarea name="staff" rows="8"><?php echo esc_textarea( $s['staff'] ); ?></textarea></label>
-		</div>
-		<p class="mds-hint">명단을 넣을 때 이름을 고르는 목록입니다. 목록에 없는 이름도 직접 쓸 수 있습니다.</p>
-
-		<h2 class="mdsv-h">구글 리뷰 바로가기</h2>
-		<div class="mds-formrow">
-			<label class="mds-field mds-field--grow"><span>리뷰 링크 (비우면 구글 지도에서 병원을 찾는 링크를 씁니다)</span><input type="url" name="review_url" value="<?php echo esc_attr( (string) $s['review_url'] ); ?>" placeholder="https://g.page/r/…/review"></label>
-		</div>
-		<p class="mds-hint">응답을 마친 환자에게 「구글 리뷰 남기기」 버튼으로 보여 줍니다. 구글 비즈니스 프로필 → 「리뷰 받기」에서 복사한 짧은 링크(g.page/r/…/review)를 넣으면 리뷰 창이 바로 열립니다.</p>
-
-		<h2 class="mdsv-h">덴트웹 자동 연동 키</h2>
-		<p class="mdsv-url"><code><?php echo esc_html( (string) get_option( 'md_survey_api_key' ) ); ?></code></p>
-		<p class="mds-hint">덴트웹 접수 명단을 프로그램이 자동으로 올릴 때 쓰는 키입니다. 주소 <code><?php echo esc_html( rest_url( 'md-survey/v1/visits' ) ); ?></code>에 헤더 <code>X-MD-Survey-Key</code>로 보냅니다. 외부에 알려지면 아래에서 새로 만드세요.</p>
-		<label class="mds-check"><input type="checkbox" name="regen_key" value="1"> 연동 키를 새로 만든다 (기존 연동은 끊김)</label>
 
 		<div class="mds-formbtns"><button type="submit" class="mds-btn mds-btn--fill">저장</button></div>
 	</form>
