@@ -985,8 +985,8 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 
 		<div class="sv-who">
 			<span>진료일</span><b><?php echo esc_html( date_i18n( 'Y년 n월 j일 (D)', strtotime( $visit->visit_date ) ) ); ?></b>
-			<?php if ( $doc_titles ) : ?><span>담당의사</span><b><?php echo esc_html( $doc_titles[0] ); ?></b><?php endif; ?>
-			<?php if ( '' !== trim( (string) $staff ) ) : ?><span>담당직원</span><b><?php echo esc_html( $staff ); ?> 선생님</b><?php endif; ?>
+			<?php if ( $doc_titles ) : ?><span>담당의사</span><b><?php echo esc_html( preg_replace( '/님$/u', '', $doc_titles[0] ) ); /* v4.21.15 · 「○○○ 원장」 */ ?></b><?php endif; ?>
+			<?php if ( '' !== trim( (string) $staff ) ) : ?><span>담당직원</span><b><?php echo esc_html( $staff ); ?></b><?php endif; ?>
 		</div>
 
 		<?php if ( $doc_titles ) : $qn++; ?>
