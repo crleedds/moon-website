@@ -18,7 +18,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_SUP_MANAGER_LOGIN', 'moondentalmanager' ); // v4.5.1 · 관리자 아이디 변경
+define( 'MD_SUP_MANAGER_LOGIN', 'moondentalhub' ); // v4.19.8 · 허브 관리자 계정을 워드프레스 관리자(moondentalmanager)와 분리 — 원장 지시. 이 계정은 wp-admin 에 못 들어가고 관리자 바도 없다
 define( 'MD_SUP_STAFF_LOGIN', 'moondentalhospital' ); // v4.2 · 직원 공용 계정 아이디 변경
 
 /**
@@ -34,9 +34,9 @@ function md_sup_account_rows() {
 	return array(
 		array(
 			'login' => MD_SUP_MANAGER_LOGIN,
-			'name'  => '재고 담당자',
+			'name'  => '허브 관리자',
 			'role'  => 'md_stock_manager',
-			'desc'  => '신청 승인 · 출고 · 입고 · 재고 실사까지 전부',
+			'desc'  => '직원 라운지 관리자 — 만족도 결과 · 직원 정보 · 경영지원실 답변 등 관리 기능 전부 (워드프레스 관리 화면은 못 들어감)',
 			'team'  => 0,
 			'user'  => get_user_by( 'login', MD_SUP_MANAGER_LOGIN ),
 		),
