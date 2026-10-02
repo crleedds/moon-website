@@ -882,7 +882,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 	?>
 	<?php /* v4.21.4 · 원장·선생님·병원 각 1문항(1~5) + 주관식. 사진은 아직 쓰지 않는다. 문항은 평가보다 「환자의 경험」을 묻는 말투로 (원장 지시) */
 	$docs   = '' !== $visit->doctor ? array_slice( array_values( array_filter( array_map( 'trim', explode( '·', $visit->doctor ) ) ) ), 0, 1 ) : array(); /* v4.21.5 · 담당의사는 한 명 */
-	$others = md_survey_staff_choices( $staff );
+	$others = array(); /* v4.21.6 · 「담당직원이 다른 분이셨나요?」 고르기 제거 (원장 지시) */
 	$sel    = isset( $_POST['staff_pick'] ) ? sanitize_text_field( wp_unslash( $_POST['staff_pick'] ) ) : '';
 	$doc_titles = array_map( 'md_survey_doctor_title', $docs );
 	$pv = function ( $k ) { return isset( $_POST[ $k ] ) ? (int) $_POST[ $k ] : 0; };
@@ -905,19 +905,6 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 			<span>담당직원</span><b><?php echo esc_html( $staff ); ?> 선생님</b>
 		</div>
 
-		<?php if ( $others ) : ?>
-		<details class="sv-fix"<?php echo '' !== $sel ? ' open' : ''; ?>>
-			<summary>담당직원이 다른 분이셨나요?</summary>
-			<p>기억나는 분을 골라 주세요. 잘 모르시면 「잘 모르겠어요」를 고르시면 됩니다.</p>
-			<div class="sv-pick">
-				<label><input type="radio" name="staff_pick" value="" <?php checked( '', $sel ); ?>><b><?php echo esc_html( $staff ); ?></b><small>맞아요</small></label>
-				<?php foreach ( $others as $o ) : ?>
-					<label><input type="radio" name="staff_pick" value="<?php echo esc_attr( $o['name'] ); ?>" <?php checked( $o['name'], $sel ); ?>><b><?php echo esc_html( $o['name'] ); ?></b></label>
-				<?php endforeach; ?>
-				<label><input type="radio" name="staff_pick" value="__unknown" <?php checked( '__unknown', $sel ); ?>><b>잘 모르겠어요</b></label>
-			</div>
-		</details>
-		<?php endif; ?>
 
 		<?php if ( $doc_titles ) : ?>
 		<div class="sv-q">
@@ -928,7 +915,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 
 		<div class="sv-q">
 			<h2><?php echo $doc_titles ? '2' : '1'; ?>. 곁에서 도와드린 담당직원분 덕분에 진료가 수월하셨나요?</h2>
-			<?php $scale( 'q_staff', '선생님', '조금 아쉬웠어요', '아주 든든했어요', false ); ?>
+			<?php $scale( 'q_staff', '담당직원', '조금 아쉬웠어요', '아주 든든했어요' ); ?>
 		</div>
 
 		<div class="sv-q">
