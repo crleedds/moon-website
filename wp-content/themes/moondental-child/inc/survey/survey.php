@@ -1046,7 +1046,7 @@ function md_survey_enqueue() {
 add_action( 'wp_enqueue_scripts', 'md_survey_enqueue', 31 );
 
 function md_survey_tabs() {
-	$tabs = array( 'roster' => array( 'label' => '오늘 명단', 'icon' => '📋', 'manage' => false ) );
+	$tabs = array( 'roster' => array( 'label' => '접수수납목록', 'icon' => '📋', 'manage' => false ) );
 	if ( md_survey_can_manage() ) {
 		$tabs['responses'] = array( 'label' => '응답',   'icon' => '💬', 'manage' => true );
 		$tabs['stats']     = array( 'label' => '스탭별 집계', 'icon' => '📊', 'manage' => true );
@@ -1086,7 +1086,7 @@ function md_survey_notice() {
 function md_survey_render() {
 	$tab = md_survey_current_tab();
 	?>
-	<nav class="mds-tabs" aria-label="만족도 조사 메뉴">
+	<nav class="mds-tabs" aria-label="접수수납목록 메뉴">
 		<?php foreach ( md_survey_tabs() as $key => $t ) : ?>
 			<a class="mds-tab<?php echo $tab === $key ? ' is-on' : ''; ?>" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => $key ) ) ); ?>"<?php echo $tab === $key ? ' aria-current="page"' : ''; ?>>
 				<span aria-hidden="true"><?php echo esc_html( $t['icon'] ); ?></span><?php echo esc_html( $t['label'] ); ?>
@@ -1128,7 +1128,18 @@ function md_survey_day_counts( $from, $to ) {
 	$out = array();
 	$rows = $wpdb->get_results( $wpdb->prepare(
 		"SELECT visit_date, COUNT(*) AS n, SUM(responded_at IS NOT NULL) AS a, MAX(created_at) AS last_at FROM $tv WHERE visit_date BETWEEN %s AND %s GROUP BY visit_date", $from, $to ) );
-	foreach ( (array) $rows as $r ) { $out[ $r->visit_date ] = $r; }
+	foreach ( (array) $rows as $r ) { $r->skipped = 0; $r->total = (int) $r->n; $out[ $r->visit_date ] = $r; }
+	/* v4.19.4 · 올린 파일의 「담당직원 없음」 수를 더해 총 접수 환자 수를 만든다 */
+	$files = $wpdb->get_results( $wpdb->prepare(
+		'SELECT visit_date, skipped, uploaded_at FROM ' . md_survey_table_file() . ' WHERE visit_date BETWEEN %s AND %s', $from, $to ) );
+	foreach ( (array) $files as $f ) {
+		if ( ! isset( $out[ $f->visit_date ] ) ) {
+			$out[ $f->visit_date ] = (object) array( 'visit_date' => $f->visit_date, 'n' => 0, 'a' => 0, 'last_at' => $f->uploaded_at, 'skipped' => 0, 'total' => 0 );
+		}
+		$out[ $f->visit_date ]->skipped = (int) $f->skipped;
+		$out[ $f->visit_date ]->total   = (int) $out[ $f->visit_date ]->n + (int) $f->skipped;
+		if ( $f->uploaded_at > $out[ $f->visit_date ]->last_at ) { $out[ $f->visit_date ]->last_at = $f->uploaded_at; }
+	}
 	return $out;
 }
 
@@ -1162,7 +1173,7 @@ function md_survey_render_roster() {
 				$d   = gmdate( 'Y-m-d', $ts );
 				$w   = (int) gmdate( 'w', $ts );
 				$c   = isset( $counts[ $d ] ) ? $counts[ $d ] : null;
-				if ( $c )                 { $cls = 'is-ok';     $label = (int) $c->n . '명'; $title = sprintf( '명단 %d명 · 응답 %d명 · 마지막 올림 %s', (int) $c->n, (int) $c->a, date_i18n( 'n/j H:i', strtotime( $c->last_at ) ) ); }
+				if ( $c )                 { $cls = 'is-ok';     $label = (int) $c->total . '명'; $title = sprintf( '담당직원 있음 %d명 · 없음 %d명 · 총 %d명 · 응답 %d명 · 올림 %s', (int) $c->n, (int) $c->skipped, (int) $c->total, (int) $c->a, date_i18n( 'n/j H:i', strtotime( $c->last_at ) ) ); }
 
 				elseif ( $d > $today )    { $cls = 'is-future'; $label = '예정'; $title = '아직 오지 않은 날'; }
 				elseif ( $d === $today )  { $cls = 'is-today';  $label = '아직'; $title = '오늘 — 아직 올리지 않음'; }
