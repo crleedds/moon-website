@@ -30,7 +30,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_SURVEY_SCHEMA', 8 ); /* v4.21.7 · want_call (환자가 연락을 원함) — 7: q_doctor */
+define( 'MD_SURVEY_SCHEMA', 9 ); /* v4.21.8 · dev_hash · flags (대리 작성 감지) — 8: want_call */
 
 /* ============================================================
  * 테이블 · 설치
@@ -87,6 +87,8 @@ function md_survey_maybe_install() {
 		staff_changed TINYINT UNSIGNED NOT NULL DEFAULT 0,
 		q_doctor TINYINT UNSIGNED NOT NULL DEFAULT 0,
 		want_call TINYINT UNSIGNED NOT NULL DEFAULT 0,
+		dev_hash CHAR(32) NOT NULL DEFAULT '',
+		flags VARCHAR(80) NOT NULL DEFAULT '',
 		q_service TINYINT UNSIGNED NOT NULL,
 		q_explain TINYINT UNSIGNED NOT NULL,
 		q_recommend TINYINT UNSIGNED NOT NULL,
@@ -290,6 +292,67 @@ function md_survey_norm_name( $v ) {
 function md_survey_ip_hash() {
 	$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
 	return substr( hash_hmac( 'md5', $ip, md_survey_secret() ), 0, 32 );
+}
+
+/* ============================================================
+ * v4.21.8 · 대리 작성 감지 (원장 지시 — 당사자만, 직원이 대신 쓰지 못하게)
+ *   덴트웹 알림톡에는 환자별 비밀 링크를 넣을 수 없어, 환자 정보를 아는 직원이 마음먹으면
+ *   막을 수는 없다. 대신 흔적을 남기고 집계에서 뺀다.
+ *   ① 기기 표시 — 설문을 연 브라우저에 1년짜리 무작위 쿠키. 한 기기에서 다른 환자 응답이 또 오면 둘 다 표시
+ *   ② 병원 인터넷 — 직원 라운지에 로그인해 쓰는 인터넷(IP)을 기억해 두고, 같은 곳에서 온 응답을 표시
+ *   표시된 응답은 스탭·원장 집계에서 빠지고, 응답 목록에 ⚠ 로 보인다.
+ * ============================================================ */
+
+function md_survey_device_cookie() {
+	if ( ! empty( $_COOKIE['md_sv_dev'] ) && preg_match( '/^[A-Za-z0-9]{20,40}$/', (string) $_COOKIE['md_sv_dev'] ) ) { return; }
+	$id = wp_generate_password( 32, false );
+	setcookie( 'md_sv_dev', $id, time() + YEAR_IN_SECONDS, '/', '', is_ssl(), true );
+	$_COOKIE['md_sv_dev'] = $id;
+}
+
+function md_survey_dev_hash() {
+	$id = isset( $_COOKIE['md_sv_dev'] ) ? (string) $_COOKIE['md_sv_dev'] : '';
+	return '' === $id ? '' : substr( hash_hmac( 'md5', 'dev|' . $id, md_survey_secret() ), 0, 32 );
+}
+
+/** 직원 라운지를 쓰는 인터넷(IP 해시)을 60일간 기억 */
+function md_survey_note_staff_ip() {
+	if ( ! function_exists( 'md_sup_is_page' ) || ! md_sup_is_page() || ! is_user_logged_in() ) { return; }
+	$h    = md_survey_ip_hash();
+	$list = get_option( 'md_survey_staff_ips', array() );
+	if ( ! is_array( $list ) ) { $list = array(); }
+	if ( isset( $list[ $h ] ) && $list[ $h ] > time() - DAY_IN_SECONDS ) { return; } /* 하루 한 번만 갱신 */
+	$list[ $h ] = time();
+	foreach ( $list as $k => $t ) { if ( $t < time() - 60 * DAY_IN_SECONDS ) { unset( $list[ $k ] ); } }
+	arsort( $list );
+	update_option( 'md_survey_staff_ips', array_slice( $list, 0, 100, true ), false );
+}
+add_action( 'template_redirect', 'md_survey_note_staff_ip', 5 );
+
+/** 지금 응답의 의심 표시 — 'dev'(같은 기기에서 다른 환자) · 'net'(병원 인터넷) */
+function md_survey_flags_for( $chart_no ) {
+	global $wpdb;
+	$flags = array();
+	$dev   = md_survey_dev_hash();
+	if ( '' !== $dev ) {
+		$other = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . md_survey_table_response() . ' WHERE dev_hash = %s AND chart_no <> %s', $dev, (string) $chart_no ) );
+		if ( $other > 0 ) {
+			$flags[] = 'dev';
+			/* 먼저 들어온 같은 기기 응답에도 표시 */
+			$wpdb->query( $wpdb->prepare( "UPDATE " . md_survey_table_response() . " SET flags = TRIM(BOTH ',' FROM CONCAT(flags, ',dev')) WHERE dev_hash = %s AND FIND_IN_SET('dev', flags) = 0", $dev ) );
+		}
+	}
+	$ips = get_option( 'md_survey_staff_ips', array() );
+	if ( is_array( $ips ) && isset( $ips[ md_survey_ip_hash() ] ) ) { $flags[] = 'net'; }
+	return implode( ',', $flags );
+}
+
+/** 표시 → 사람이 읽는 말 */
+function md_survey_flag_labels( $flags ) {
+	$map = array( 'dev' => '같은 기기에서 다른 환자 응답', 'net' => '병원 인터넷에서 작성' );
+	$out = array();
+	foreach ( array_filter( explode( ',', (string) $flags ) ) as $f ) { if ( isset( $map[ $f ] ) ) { $out[] = $map[ $f ]; } }
+	return $out;
 }
 
 /** 설문 화면 ↔ 제출 사이를 잇는 서명 (명단 id · 만료 시각). 쿠키를 쓰지 않는다. */
@@ -542,10 +605,10 @@ function md_survey_response_insert( $visit, $q1, $q2, $q3, $comment, $staff = nu
 	$tr = md_survey_table_response();
 	if ( null === $staff ) { $staff = $visit->staff; }
 	$ok = $wpdb->query( $wpdb->prepare(
-		"INSERT IGNORE INTO $tr (visit_id, visit_date, chart_no, patient_name, doctor, staff, staff_orig, staff_changed, q_doctor, q_service, q_explain, q_recommend, comment, want_call, ip_hash, created_at)
-		 VALUES (%d, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %s, %d, %s, %s)",
+		"INSERT IGNORE INTO $tr (visit_id, visit_date, chart_no, patient_name, doctor, staff, staff_orig, staff_changed, q_doctor, q_service, q_explain, q_recommend, comment, want_call, dev_hash, flags, ip_hash, created_at)
+		 VALUES (%d, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %s, %d, %s, %s, %s, %s)",
 		(int) $visit->id, $visit->visit_date, $visit->chart_no, $visit->patient_name, $visit->doctor, $staff, $visit->staff, (int) $changed,
-		(int) $qd, (int) $q1, (int) $q2, (int) $q3, $comment, (int) $call, md_survey_ip_hash(), current_time( 'mysql' )
+		(int) $qd, (int) $q1, (int) $q2, (int) $q3, $comment, (int) $call, md_survey_dev_hash(), md_survey_flags_for( $visit->chart_no ), md_survey_ip_hash(), current_time( 'mysql' )
 	) );
 	if ( ! $ok ) { return false; } /* 0 = 이미 있음 (UNIQUE visit) */
 	$wpdb->update( md_survey_table_visit(), array( 'responded_at' => current_time( 'mysql' ) ), array( 'id' => (int) $visit->id ) );
@@ -574,13 +637,13 @@ function md_survey_stats( $from, $to ) {
 			SUM(q_service BETWEEN 1 AND 2) AS low_n,
 			SUM(comment IS NOT NULL AND comment <> '') AS comment_n,
 			SUM(staff_changed = 1) AS changed_n
-		 FROM $tr WHERE visit_date BETWEEN %s AND %s AND staff <> '' AND q_service > 0 GROUP BY staff ORDER BY n DESC, avg_service DESC", $from, $to ) );
+		 FROM $tr WHERE visit_date BETWEEN %s AND %s AND staff <> '' AND q_service > 0 AND flags = '' GROUP BY staff ORDER BY n DESC, avg_service DESC", $from, $to ) );
 }
 
 /** v4.21.4 · 원장별 — 그날 진료한 원장이 여럿이면 각자에게 같은 점수로 센다 */
 function md_survey_stats_doctor( $from, $to ) {
 	global $wpdb;
-	$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT doctor, q_doctor FROM ' . md_survey_table_response() . ' WHERE visit_date BETWEEN %s AND %s AND q_doctor > 0', $from, $to ) );
+	$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT doctor, q_doctor FROM ' . md_survey_table_response() . ' WHERE visit_date BETWEEN %s AND %s AND q_doctor > 0 AND flags = %s', $from, $to, '' ) );
 	$by = array();
 	foreach ( (array) $rows as $r ) {
 		foreach ( array_filter( array_map( 'trim', explode( '·', (string) $r->doctor ) ) ) as $d ) {
@@ -613,6 +676,7 @@ function md_survey_public_intercept() {
 	header( 'X-Robots-Tag: noindex, nofollow, noarchive' );
 	header( 'X-LiteSpeed-Cache-Control: no-cache' );
 	status_header( 200 );
+	md_survey_device_cookie(); /* v4.21.8 · 같은 기기에서 여러 환자 응답을 잡기 위한 기기 표시 */
 	md_survey_public_render();
 	exit;
 }
@@ -688,7 +752,7 @@ function md_survey_public_render() {
 				$typed  = isset( $_POST['name'] ) ? mb_substr( md_survey_norm_name( wp_unslash( $_POST['name'] ) ), 0, 40 ) : '';
 				$from_link = '' !== $pname;
 				if ( ! $from_link ) { $pname = $typed; }
-				$agree  = ! empty( $_POST['agree'] );
+				$agree  = true; /* v4.21.8 · 「동의하고 설문 시작」 버튼을 누르는 것이 동의 (체크칸 제거 — 입력 최소화) */
 				if ( ! $agree ) {
 					$err = '개인정보 수집·이용에 동의해 주세요.';
 				} elseif ( '' === $pname || '' === $phone4 ) {
@@ -809,6 +873,8 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-agree{display:flex;gap:10px;align-items:flex-start;margin:16px 0 6px;font-size:.9rem;color:var(--sub)}
 .sv-agree input{width:22px;height:22px;margin:2px 0 0;flex:none;accent-color:var(--primary)}
 .sv-consent{margin:8px 0 0;padding:12px 14px;border-radius:10px;background:var(--soft);font-size:.8rem;line-height:1.6;color:var(--sub)}
+.sv-consent-d{margin-top:12px;font-size:.82rem;color:var(--mute)}
+.sv-consent-d summary{cursor:pointer;text-align:center}
 .sv-consent b{color:var(--text)}
 .sv-btn{display:block;width:100%;min-height:56px;margin-top:18px;border:0;border-radius:14px;background:var(--primary);color:#fff;font:inherit;font-size:1.1rem;font-weight:800;cursor:pointer}
 .sv-btn:active{background:var(--primary-dk)}
@@ -968,18 +1034,23 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 			<input type="tel" name="phone4" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="1234" autocomplete="off" <?php echo '' !== $pname ? 'autofocus' : ''; ?>>
 			<small>010-<b>1234</b>-5678 이라면 <b>1234</b></small>
 		</label>
-		<label class="sv-agree">
-			<input type="checkbox" name="agree" value="1" required>
-			<span>개인정보 수집·이용에 동의합니다 (필수)</span>
-		</label>
-		<div class="sv-consent">
-			<b>수집 항목</b> 이름 · 휴대전화 가운데 4자리(본인 확인에만 사용, 저장하지 않음), 설문 응답<br>
-			<b>이용 목적</b> 진료 만족도 조사와 서비스 개선 · 담당 직원 평가<br>
-			<b>보유 기간</b> 응답일로부터 2년<br>
-			동의하지 않으면 설문에 참여할 수 없습니다. 응답은 병원 관리자만 열람합니다.
-		</div>
-		<button type="submit" class="sv-btn">확인하고 설문 시작</button>
+		<?php /* v4.21.8 · 체크칸 없이 버튼으로 동의 — 입력 최소화. 링크로 이름이 왔으면 4자리를 다 치는 순간 넘어간다 */ ?>
+		<button type="submit" class="sv-btn">동의하고 설문 시작</button>
+		<details class="sv-consent-d">
+			<summary>개인정보 수집·이용 안내</summary>
+			<div class="sv-consent">
+				<b>수집 항목</b> 이름 · 휴대전화 가운데 4자리(본인 확인에만 사용, 저장하지 않음), 설문 응답<br>
+				<b>이용 목적</b> 진료 만족도 조사와 서비스 개선<br>
+				<b>보유 기간</b> 응답일로부터 2년<br>
+				동의하지 않으시면 이 화면을 닫으시면 됩니다. 응답은 병원 관리자만 열람합니다.
+			</div>
+		</details>
 	</form>
+	<?php if ( '' !== $pname ) : ?>
+	<script>
+	(function(){var i=document.querySelector('input[name="phone4"]');if(!i)return;i.addEventListener('input',function(){var v=i.value.replace(/\D/g,'');if(v!==i.value)i.value=v;if(v.length===4){i.blur();i.form.submit();}});})();
+	</script>
+	<?php endif; ?>
 	<p class="sv-foot">진료일로부터 <?php echo (int) $win; ?>일 안에만 참여할 수 있습니다.</p>
 <?php endif; ?>
 	<p class="sv-foot">한아의료재단 문치과병원 · <a href="<?php echo esc_url( home_url( '/' ) ); ?>">moondental.co.kr</a></p>
@@ -1452,7 +1523,7 @@ function md_survey_render_responses() {
 						<td class="num <?php echo $lowf( $qd ); ?>"><?php echo $qd ? $qd : '–'; ?></td>
 						<td class="num <?php echo $lowf( $r->q_service ); ?>"><?php echo $r->q_service ? (int) $r->q_service : '–'; ?></td>
 						<td class="num <?php echo $lowf( $r->q_recommend ); ?>"><?php echo (int) $r->q_recommend; ?></td>
-						<td class="mdsv-comment"><?php echo nl2br( esc_html( (string) $r->comment ) ); ?><?php if ( ! empty( $r->want_call ) ) : ?><span class="mds-flag">📞 연락 원함</span><?php endif; ?></td>
+						<td class="mdsv-comment"><?php echo nl2br( esc_html( (string) $r->comment ) ); ?><?php if ( ! empty( $r->want_call ) ) : ?><span class="mds-flag">📞 연락 원함</span><?php endif; ?><?php foreach ( md_survey_flag_labels( isset( $r->flags ) ? $r->flags : '' ) as $fl ) : ?><span class="mds-flag">⚠ <?php echo esc_html( $fl ); ?> · 집계 제외</span><?php endforeach; ?></td>
 						<td class="mds-last"><?php echo esc_html( date_i18n( 'm.d H:i', strtotime( $r->created_at ) ) ); ?></td>
 					</tr>
 				<?php endforeach; ?>
