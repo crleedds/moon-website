@@ -286,7 +286,8 @@ function md_survey_staff_choices( $current = '' ) {
 
 /** 이름 비교용 — 공백 제거 */
 function md_survey_norm_name( $v ) {
-	return preg_replace( '/\s+/u', '', trim( sanitize_text_field( (string) $v ) ) );
+	/* v4.21.31 · 공백과 치환문 껍데기(#{ } #)를 뗀다 — 덴트웹이 치환을 못 하고 #{이름} 이 그대로 와도 이름만 남게 */
+	return preg_replace( '/[\s#{}]+/u', '', trim( sanitize_text_field( (string) $v ) ) );
 }
 
 /** 이름 비교 키 — 공백 제거 + 한글 이름 끝의 덴트웹 접미사(B, 2 …) 제거 (v4.21.27) */
@@ -1060,7 +1061,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<p>진료받으신 분만 참여할 수 있습니다. 이름과 휴대전화 가운데 4자리를 확인합니다.</p>
 		<label class="sv-field">
 			<span>이름</span>
-			<input type="text" name="name" maxlength="40" required placeholder="홍길동" autocomplete="off" autofocus>
+			<input type="text" name="name" maxlength="40" required placeholder="이름을 적어 주세요" id="sv-name" autocomplete="off" autofocus>
 			<small>병원에 등록된 이름</small>
 		</label>
 		<?php endif; ?>
@@ -1086,6 +1087,11 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 			</div>
 		</details>
 	</form>
+	<?php if ( '' === $pname ) : /* v4.21.31 · 주소가 ?n=#{이름} 처럼 # 로 시작하면 브라우저가 # 뒤를 서버에 보내지 않는다 — 화면에서 꺼내 이름 칸을 채운다 */ ?>
+	<script>
+	(function(){var h=location.hash;if(!h)return;var v='';try{v=decodeURIComponent(h)}catch(e){v=h}v=v.replace(/[#{}\s]/g,'');var i=document.getElementById('sv-name');if(i&&v&&/[가-힣]/.test(v)){i.value=v;var p=document.querySelector('input[name="phone4"]');if(p)p.focus();}})();
+	</script>
+	<?php endif; ?>
 	<?php if ( '' !== $pname ) : ?>
 	<script>
 	(function(){var i=document.querySelector('input[name="phone4"]');if(!i)return;i.addEventListener('input',function(){var v=i.value.replace(/\D/g,'');if(v!==i.value)i.value=v;if(v.length===4){i.blur();i.form.submit();}});})();
