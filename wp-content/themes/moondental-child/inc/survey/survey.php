@@ -1587,18 +1587,28 @@ function md_survey_render_stats() {
 	<?php else : ?>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>담당직원</th><th class="num">응답 수</th><th class="num">평균</th><th class="num">5점 비율</th><th class="num">1~2점</th><th class="num">병원 평균</th><th class="num">의견</th><th class="num">환자가 바로잡음</th></tr></thead>
+				<?php /* v4.21.29 · 「환자가 바로잡음」 열 제거(그 기능을 뺐다) · 담당 환자 수와 응답률 추가 · 이름을 누르면 그 사람 응답만 */
+				global $wpdb;
+				$tv = md_survey_table_visit();
+				$vis_staff = array(); $vis_doc = array();
+				foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT staff, COUNT(*) AS c FROM $tv WHERE visit_date BETWEEN %s AND %s AND staff <> '' GROUP BY staff", $from, $to ) ) as $x ) { $vis_staff[ $x->staff ] = (int) $x->c; }
+				foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT doctor, COUNT(*) AS c FROM $tv WHERE visit_date BETWEEN %s AND %s AND doctor <> '' GROUP BY doctor", $from, $to ) ) as $x ) {
+					foreach ( array_filter( array_map( 'trim', explode( '·', $x->doctor ) ) ) as $dn ) { $vis_doc[ $dn ] = ( isset( $vis_doc[ $dn ] ) ? $vis_doc[ $dn ] : 0 ) + (int) $x->c; }
+				}
+				$rate = function ( $n, $base ) { return $base > 0 ? round( 100 * $n / $base ) . '%' : '–'; };
+				?>
+				<thead><tr><th>담당직원</th><th class="num">담당 환자</th><th class="num">응답</th><th class="num">응답률</th><th class="num">평균</th><th class="num">5점 비율</th><th class="num">1~2점</th><th class="num">의견</th></tr></thead>
 				<tbody>
-				<?php foreach ( $rows as $r ) : $n = max( 1, (int) $r->n ); ?>
+				<?php foreach ( $rows as $r ) : $n = max( 1, (int) $r->n ); $base = isset( $vis_staff[ $r->staff ] ) ? $vis_staff[ $r->staff ] : 0; ?>
 					<tr>
-						<td><b><?php echo esc_html( $r->staff ); ?></b><?php if ( $n < 30 ) : ?><span class="mds-flag">표본 <?php echo $n; ?></span><?php endif; ?></td>
-						<td class="num"><?php echo $n; ?></td>
+						<td><a class="mdsv-name" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'responses', 'from' => $from, 'to' => $to, 'staff' => $r->staff ) ) ); ?>"><b><?php echo esc_html( $r->staff ); ?></b></a><?php if ( (int) $r->n < 30 ) : ?><span class="mds-flag">응답 적음</span><?php endif; ?></td>
+						<td class="num"><?php echo $base ? (int) $base : '–'; ?></td>
+						<td class="num"><?php echo (int) $r->n; ?></td>
+						<td class="num"><?php echo esc_html( $rate( (int) $r->n, $base ) ); ?></td>
 						<td class="num"><?php echo number_format( (float) $r->avg_service, 2 ); ?></td>
 						<td class="num"><b><?php echo round( 100 * (int) $r->top_service / $n ); ?>%</b></td>
 						<td class="num <?php echo (int) $r->low_n ? 'is-low' : ''; ?>"><?php echo (int) $r->low_n; ?></td>
-						<td class="num"><?php echo number_format( (float) $r->avg_recommend, 2 ); ?></td>
 						<td class="num"><?php echo (int) $r->comment_n; ?></td>
-						<td class="num"><?php echo (int) $r->changed_n; ?></td>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>
@@ -1608,16 +1618,16 @@ function md_survey_render_stats() {
 		<h2 class="mdsv-h" style="margin-top:22px">담당의사별</h2>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>담당의사</th><th class="num">응답 수</th><th class="num">평균</th><th class="num">5점 비율</th><th class="num">1~2점</th></tr></thead>
+				<thead><tr><th>담당의사</th><th class="num">담당 환자</th><th class="num">응답</th><th class="num">응답률</th><th class="num">평균</th><th class="num">5점 비율</th><th class="num">1~2점</th></tr></thead>
 				<tbody>
-				<?php foreach ( $docs as $dn => $d ) : $n = max( 1, $d['n'] ); ?>
-					<tr><td><b><?php echo esc_html( $dn ); ?></b></td><td class="num"><?php echo (int) $d['n']; ?></td><td class="num"><?php echo number_format( $d['sum'] / $n, 2 ); ?></td><td class="num"><b><?php echo round( 100 * $d['top'] / $n ); ?>%</b></td><td class="num <?php echo $d['low'] ? 'is-low' : ''; ?>"><?php echo (int) $d['low']; ?></td></tr>
+				<?php foreach ( $docs as $dn => $d ) : $n = max( 1, $d['n'] ); $base = isset( $vis_doc[ $dn ] ) ? $vis_doc[ $dn ] : 0; ?>
+					<tr><td><b><?php echo esc_html( $dn ); ?></b><?php if ( $d['n'] < 30 ) : ?><span class="mds-flag">응답 적음</span><?php endif; ?></td><td class="num"><?php echo $base ? (int) $base : '–'; ?></td><td class="num"><?php echo (int) $d['n']; ?></td><td class="num"><?php echo esc_html( $rate( (int) $d['n'], $base ) ); ?></td><td class="num"><?php echo number_format( $d['sum'] / $n, 2 ); ?></td><td class="num"><b><?php echo round( 100 * $d['top'] / $n ); ?>%</b></td><td class="num <?php echo $d['low'] ? 'is-low' : ''; ?>"><?php echo (int) $d['low']; ?></td></tr>
 				<?php endforeach; ?>
 				</tbody>
 			</table>
 		</div>
 		<?php endif; ?>
-		<p class="mds-hint">기간 전체 <?php echo (int) $total; ?>건. 평균보다 <b>5점 비율</b>로 비교하세요 — 대부분 4~5점을 주므로 평균은 차이가 잘 나지 않습니다. 응답 30건 미만(표본 표시)은 우연에 좌우되니 비교에 쓰지 마세요. 발치·신경치료처럼 힘든 진료는 점수가 낮게 나오는 경향이 있습니다.</p>
+		<p class="mds-hint">기간 전체 응답 <?php echo (int) $total; ?>건 · 이름을 누르면 그 사람의 응답만 봅니다.<br>비교는 평균보다 <b>5점 비율</b>로 — 대부분 4~5점을 주어 평균은 차이가 잘 나지 않습니다. 「응답 적음」(30건 미만)은 우연에 좌우되니 비교에 쓰지 마세요. 응답률은 명단(담당 환자) 대비 응답 비율입니다.</p>
 	<?php endif; ?>
 	<?php
 }

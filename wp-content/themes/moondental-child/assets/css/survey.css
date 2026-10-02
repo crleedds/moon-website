@@ -38,6 +38,8 @@
 .mdsv-table tr.is-lowrow td { background: rgba(198,107,94,.06); }
 .mdsv-link { width: 100%; min-width: 220px; font: inherit; font-size: .78rem; padding: 4px 8px; border: 1px solid var(--color-border, #EDDFD0); border-radius: 6px; background: var(--color-surface, #FBF2E8); color: var(--color-text-sub, #7A6B5F); }
 .mdsv-comment { max-width: 32ch; font-size: .86rem; line-height: 1.5; word-break: keep-all; overflow-wrap: anywhere; }
+.mdsv-name{color:inherit;text-decoration:none;border-bottom:1px dashed var(--color-border, #EDDFD0)}
+.mdsv-name:hover{color:var(--color-primary, #D88062)}
 .mds-status.is-done    { background: var(--color-accent-bg, rgba(143,174,146,.12)); color: var(--color-accent-dark, #6B8F72); }
 .mds-status.is-pending { background: var(--color-surface-alt, #F5E8D8); color: var(--color-text-mute, #A89685); }
 
