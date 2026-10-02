@@ -1660,7 +1660,11 @@ function md_survey_render_settings() {
 		<input type="hidden" name="md_survey_action" value="settings">
 		<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_settings' ) ); ?>">
 		<input type="hidden" name="keep_extra" value="1">
-		<h2 class="mdsv-h">알림톡에 넣을 링크</h2>
+		<?php /* v4.21.35 · 알림톡과 문자의 치환문 형식이 달라 두 줄로 */ ?>
+		<h2 class="mdsv-h">덴트웹 진료 후 메시지에 넣을 링크</h2>
+		<p class="mds-hint" style="margin-bottom:4px"><b>카카오 알림톡</b>으로 보낼 때</p>
+		<p class="mdsv-url"><code><?php echo esc_html( home_url( '/survey/?n=#{환자명}' ) ); ?></code></p>
+		<p class="mds-hint" style="margin:10px 0 4px"><b>문자(SMS·LMS)</b>로 보낼 때</p>
 		<p class="mdsv-url"><code><?php echo esc_html( home_url( '/survey/?n=#환자명#' ) ); ?></code></p>
 		<p class="mds-hint">덴트웹 진료 후 템플릿 본문에 넣습니다. 알림톡은 <code>#{환자명}</code>, 문자(SMS·LMS)는 <code>#환자명#</code> 형식입니다.</p>
 
