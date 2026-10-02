@@ -937,7 +937,7 @@ function md_sup_render_header( $app, $tab ) {
 				<h1><?php echo esc_html( $app ? $apps[ $app ]['label'] : '직원 라운지' ); ?></h1>
 			</div>
 			<div class="mds-head__me">
-				<span class="mds-head__name"><?php echo esc_html( $user->display_name ); ?></span>
+				<span class="mds-head__name"><?php echo esc_html( $user->user_login ); /* v4.21.1 · 표시 이름 대신 로그인 아이디 (관리자 계정의 표시 이름이 옛 아이디 moondentalhospital 로 남아 있었음) */ ?></span>
 				<a class="mds-head__out" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">로그아웃</a>
 			</div>
 		</div>
