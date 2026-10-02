@@ -30,7 +30,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_SURVEY_SCHEMA', 9 ); /* v4.21.8 · dev_hash · flags (대리 작성 감지) — 8: want_call */
+define( 'MD_SURVEY_SCHEMA', 10 ); /* v4.21.33 · ip (응답한 인터넷 주소 — 대리 작성 식별용) — 9: dev_hash · flags */
 
 /* ============================================================
  * 테이블 · 설치
@@ -89,6 +89,7 @@ function md_survey_maybe_install() {
 		want_call TINYINT UNSIGNED NOT NULL DEFAULT 0,
 		dev_hash CHAR(32) NOT NULL DEFAULT '',
 		flags VARCHAR(80) NOT NULL DEFAULT '',
+		ip VARCHAR(45) NOT NULL DEFAULT '',
 		q_service TINYINT UNSIGNED NOT NULL,
 		q_explain TINYINT UNSIGNED NOT NULL,
 		q_recommend TINYINT UNSIGNED NOT NULL,
@@ -613,10 +614,10 @@ function md_survey_response_insert( $visit, $q1, $q2, $q3, $comment, $staff = nu
 	$tr = md_survey_table_response();
 	if ( null === $staff ) { $staff = $visit->staff; }
 	$ok = $wpdb->query( $wpdb->prepare(
-		"INSERT IGNORE INTO $tr (visit_id, visit_date, chart_no, patient_name, doctor, staff, staff_orig, staff_changed, q_doctor, q_service, q_explain, q_recommend, comment, want_call, dev_hash, flags, ip_hash, created_at)
-		 VALUES (%d, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %s, %d, %s, %s, %s, %s)",
+		"INSERT IGNORE INTO $tr (visit_id, visit_date, chart_no, patient_name, doctor, staff, staff_orig, staff_changed, q_doctor, q_service, q_explain, q_recommend, comment, want_call, dev_hash, flags, ip, ip_hash, created_at)
+		 VALUES (%d, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %s, %d, %s, %s, %s, %s, %s)",
 		(int) $visit->id, $visit->visit_date, $visit->chart_no, $visit->patient_name, $visit->doctor, $staff, $visit->staff, (int) $changed,
-		(int) $qd, (int) $q1, (int) $q2, (int) $q3, $comment, (int) $call, md_survey_dev_hash(), md_survey_flags_for( $visit->chart_no ), md_survey_ip_hash(), current_time( 'mysql' )
+		(int) $qd, (int) $q1, (int) $q2, (int) $q3, $comment, (int) $call, md_survey_dev_hash(), md_survey_flags_for( $visit->chart_no ), substr( (string) ( isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : '' ), 0, 45 ), md_survey_ip_hash(), current_time( 'mysql' )
 	) );
 	if ( ! $ok ) { return false; } /* 0 = 이미 있음 (UNIQUE visit) */
 	$wpdb->update( md_survey_table_visit(), array( 'responded_at' => current_time( 'mysql' ) ), array( 'id' => (int) $visit->id ) );
@@ -646,7 +647,7 @@ function md_survey_stats( $from, $to ) {
 			SUM(q_service BETWEEN 1 AND 2) AS low_n,
 			SUM(comment IS NOT NULL AND comment <> '') AS comment_n,
 			SUM(staff_changed = 1) AS changed_n
-		 FROM $tr WHERE visit_date BETWEEN %s AND %s AND staff <> '' AND q_service > 0 AND flags = '' GROUP BY staff ORDER BY n DESC, avg_service DESC", $from, $to ) );
+		 FROM $tr WHERE visit_date BETWEEN %s AND %s AND staff <> '' AND q_service > 0 GROUP BY staff ORDER BY n DESC, avg_service DESC", $from, $to ) );
 }
 
 /** 응답에 나온 담당의사 이름 목록 (보기 필터용) */
@@ -664,7 +665,7 @@ function md_survey_doctor_names() {
 /** v4.21.4 · 원장별 — 그날 진료한 원장이 여럿이면 각자에게 같은 점수로 센다 */
 function md_survey_stats_doctor( $from, $to ) {
 	global $wpdb;
-	$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT doctor, q_doctor FROM ' . md_survey_table_response() . ' WHERE visit_date BETWEEN %s AND %s AND q_doctor > 0 AND flags = %s', $from, $to, '' ) );
+	$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT doctor, q_doctor FROM ' . md_survey_table_response() . ' WHERE visit_date BETWEEN %s AND %s AND q_doctor > 0', $from, $to ) );
 	$by = array();
 	foreach ( (array) $rows as $r ) {
 		foreach ( array_filter( array_map( 'trim', explode( '·', (string) $r->doctor ) ) ) as $d ) {
@@ -1287,9 +1288,9 @@ function md_survey_export_csv( $from, $to, $staff, $doctor = '' ) {
 	header( 'Content-Disposition: attachment; filename="만족도조사_' . $from . '_' . $to . '.csv"' );
 	echo "\xEF\xBB\xBF"; /* 엑셀이 한글을 제대로 읽도록 BOM */
 	$out = fopen( 'php://output', 'w' );
-	fputcsv( $out, array( '진료일', '차트번호', '이름', '담당의사', '담당직원', '명단상 담당직원', '담당의사 점수', '담당직원 점수', '병원 점수', '의견', '작성시각' ) );
+	fputcsv( $out, array( '진료일', '차트번호', '이름', '담당의사', '담당직원', '명단상 담당직원', '담당의사 점수', '담당직원 점수', '병원 점수', '의견', '작성시각', 'IP' ) );
 	foreach ( $rows as $r ) {
-		fputcsv( $out, array( $r->visit_date, $r->chart_no, $r->patient_name, $r->doctor, $r->staff, isset( $r->staff_orig ) ? $r->staff_orig : '', isset( $r->q_doctor ) ? $r->q_doctor : '', $r->q_service, $r->q_recommend, (string) $r->comment, $r->created_at ) );
+		fputcsv( $out, array( $r->visit_date, $r->chart_no, $r->patient_name, $r->doctor, $r->staff, isset( $r->staff_orig ) ? $r->staff_orig : '', isset( $r->q_doctor ) ? $r->q_doctor : '', $r->q_service, $r->q_recommend, (string) $r->comment, $r->created_at, isset( $r->ip ) ? $r->ip : '' ) );
 	}
 	fclose( $out );
 }
@@ -1322,7 +1323,7 @@ add_action( 'wp_enqueue_scripts', 'md_survey_enqueue', 31 );
 function md_survey_tabs() {
 	return array(
 		'responses' => array( 'label' => '응답',        'icon' => '💬' ),
-		'stats'     => array( 'label' => '담당직원별 집계', 'icon' => '📊' ),
+		'stats'     => array( 'label' => '개별 집계', 'icon' => '📊' ),
 		'settings'  => array( 'label' => '설정',        'icon' => '⚙️' ),
 	);
 }
@@ -1560,9 +1561,10 @@ function md_survey_render_responses() {
 	<?php else : ?>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>진료일</th><th>환자</th><th>담당의사</th><th>담당직원</th><th class="num">담당의사</th><th class="num">담당직원</th><th class="num">병원</th><th>의견</th><th>작성</th></tr></thead>
+				<thead><tr><th>진료일</th><th>환자</th><th>담당의사</th><th>담당직원</th><th class="num">담당의사</th><th class="num">담당직원</th><th class="num">병원</th><th>의견</th><th>작성</th><th>IP</th></tr></thead>
 				<tbody>
-				<?php $lowf = function ( $v ) { return ( (int) $v >= 1 && (int) $v <= 2 ) ? 'is-low' : ''; };
+				<?php $ipcount = array(); foreach ( $rows as $x ) { if ( ! empty( $x->ip ) ) { $ipcount[ $x->ip ] = ( isset( $ipcount[ $x->ip ] ) ? $ipcount[ $x->ip ] : 0 ) + 1; } } /* v4.21.33 · 같은 IP 응답 수 */
+				$lowf = function ( $v ) { return ( (int) $v >= 1 && (int) $v <= 2 ) ? 'is-low' : ''; };
 				foreach ( $rows as $r ) : $qd = isset( $r->q_doctor ) ? (int) $r->q_doctor : 0; $low = $lowf( $qd ) || $lowf( $r->q_service ) || $lowf( $r->q_recommend ); ?>
 					<tr class="<?php echo $low ? 'is-lowrow' : ''; ?>">
 						<td><?php echo esc_html( date_i18n( 'm.d', strtotime( $r->visit_date ) ) ); ?></td>
@@ -1572,14 +1574,15 @@ function md_survey_render_responses() {
 						<td class="num <?php echo $lowf( $qd ); ?>"><?php echo $qd ? $qd : '–'; ?></td>
 						<td class="num <?php echo $lowf( $r->q_service ); ?>"><?php echo $r->q_service ? (int) $r->q_service : '–'; ?></td>
 						<td class="num <?php echo $lowf( $r->q_recommend ); ?>"><?php echo (int) $r->q_recommend; ?></td>
-						<td class="mdsv-comment"><?php echo nl2br( esc_html( (string) $r->comment ) ); ?><?php if ( ! empty( $r->want_call ) ) : ?><span class="mds-flag">📞 연락 원함</span><?php endif; ?><?php foreach ( md_survey_flag_labels( isset( $r->flags ) ? $r->flags : '' ) as $fl ) : ?><span class="mds-flag">⚠ <?php echo esc_html( $fl ); ?> · 집계 제외</span><?php endforeach; ?></td>
+						<td class="mdsv-comment"><?php echo nl2br( esc_html( (string) $r->comment ) ); ?><?php if ( ! empty( $r->want_call ) ) : ?><span class="mds-flag">📞 연락 원함</span><?php endif; ?></td>
 						<td class="mds-last"><?php echo esc_html( date_i18n( 'm.d H:i', strtotime( $r->created_at ) ) ); ?></td>
+						<td class="mds-last mdsv-ip"><?php $ip = isset( $r->ip ) ? (string) $r->ip : ''; echo '' !== $ip ? esc_html( $ip ) : '–'; if ( '' !== $ip && ! empty( $ipcount[ $ip ] ) && $ipcount[ $ip ] > 1 ) : ?><span class="mds-item__meta">같은 IP <?php echo (int) $ipcount[ $ip ]; ?>건</span><?php endif; ?></td>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>
 			</table>
 		</div>
-		<p class="mds-hint">모든 문항은 1~5점입니다. 1~2점은 붉게 표시됩니다. 낮은 점수는 당일 실장이 전화로 확인하는 것을 권합니다.</p>
+		<p class="mds-hint">모든 문항은 1~5점입니다. 1~2점은 붉게 표시됩니다. IP는 응답한 인터넷 주소로, 같은 IP에서 여러 환자의 응답이 오면 「같은 IP n건」이 붙습니다.</p>
 	<?php endif; ?>
 	<?php
 }
