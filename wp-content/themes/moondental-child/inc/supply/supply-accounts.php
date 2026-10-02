@@ -388,7 +388,9 @@ add_filter( 'login_form_bottom', 'md_sup_lounge_login_field', 10, 2 );
 /** 로그인 성공 시 — 라운지에서 왔으면 표시 쿠키, 아니면(wp-login.php 직접) 표시 삭제 */
 function md_sup_lounge_mark( $user_login, $user ) {
 	$secure = is_ssl();
-	if ( ! empty( $_POST['md_lounge'] ) ) {
+	/* 라운지 폼의 숨은 필드가 없어도(캐시된 옛 폼) redirect_to 가 라운지면 라운지 로그인으로 본다 (v4.20.4) */
+	$rt = isset( $_REQUEST['redirect_to'] ) ? rawurldecode( (string) wp_unslash( $_REQUEST['redirect_to'] ) ) : '';
+	if ( ! empty( $_POST['md_lounge'] ) || ( '' !== $rt && preg_match( '#/(직원|staff|supply|재료실|재고관리)/#u', $rt ) ) ) {
 		setcookie( 'md_lounge', '1', time() + 14 * DAY_IN_SECONDS, '/', '', $secure, true );
 		$_COOKIE['md_lounge'] = '1';
 	} else {

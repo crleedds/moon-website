@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '4.20.3' );
+define( 'MOONDENTAL_VERSION', '4.20.4' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -4676,6 +4676,8 @@ function moondental_pagecache_skip() {
 	if ( isset( $_SERVER['REQUEST_METHOD'] ) && strtoupper( $_SERVER['REQUEST_METHOD'] ) !== 'GET' ) return true;
 	// v4.10 · 환자 만족도 조사(/만족도/)는 사람마다 다른 화면 — 캐시하지 않는다
 	if ( function_exists( 'md_survey_is_public_path' ) && md_survey_is_public_path() ) return true;
+	// v4.20.4 · 직원 라운지(로그인 폼 포함)도 캐시하지 않는다
+	if ( function_exists( 'md_sup_is_page' ) && md_sup_is_page() ) return true;
 	// query string 있으면 스킵 (검색·페이지네이션은 캐시 안 함 · 안전)
 	if ( ! empty( $_GET ) ) return true;
 	// 로그인 사용자 스킵 (Customizer 미리보기·편집 상태 등)

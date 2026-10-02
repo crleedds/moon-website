@@ -990,7 +990,7 @@ function md_sup_render_hub() {
 
 /** 전체 페이지 진입점 */
 function md_sup_render_page() {
-	if ( ! is_user_logged_in() ) { md_sup_render_login(); return; }
+	if ( ! is_user_logged_in() ) { if ( ! defined( 'DONOTCACHEPAGE' ) ) { define( 'DONOTCACHEPAGE', true ); } md_sup_render_login(); return; } /* v4.20.4 · 로그인 폼은 캐시하지 않는다 (WP Super Cache) */
 	if ( ! md_sup_can_use() )    { md_sup_render_denied(); return; }
 
 	$app = md_sup_current_app();
