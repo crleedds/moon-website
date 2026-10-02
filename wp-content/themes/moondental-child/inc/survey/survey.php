@@ -795,7 +795,7 @@ function md_survey_public_render() {
 				$q3 = isset( $_POST['q_hospital'] ) ? (int) $_POST['q_hospital'] : 0;
 				$has_doc = '' !== trim( (string) $v->doctor );
 				$cm = isset( $_POST['comment'] ) ? mb_substr( trim( sanitize_textarea_field( wp_unslash( $_POST['comment'] ) ) ), 0, 1000 ) : '';
-				$call = empty( $_POST['no_call'] ) ? 1 : 0; /* v4.21.14 · 기본은 연락 가능, 원하지 않으면 체크 (원장 지시) */
+				$call = ! empty( $_POST['want_call'] ) ? 1 : 0; /* v4.21.17 · 다시 「연락드려도 괜찮아요」 체크 방식 (원장 지시) */
 				if ( $v->responded_at || md_survey_response_by_visit( $v->id ) ) {
 					$step = 'already';
 				} elseif ( $q3 < 1 || $q3 > 5 ) {
@@ -1014,7 +1014,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 			<h2><?php echo $qn; ?>. 고마웠던 점이나 바라는 점을 들려주세요 <small class="sv-opt">선택</small></h2>
 			<textarea name="comment" maxlength="1000" placeholder="예) 아프지 않게 살펴 주셔서 고마웠어요 · 대기 시간이 조금 길었어요"><?php echo isset( $_POST['comment'] ) ? esc_textarea( wp_unslash( $_POST['comment'] ) ) : ''; ?></textarea>
 			<p class="sv-hint">고마운 마음은 해당 분께 꼭 전해 드릴게요.</p>
-			<label class="sv-call"><input type="checkbox" name="no_call" value="1" <?php checked( ! empty( $_POST['no_call'] ) ); ?>><span>병원에서 따로 연락받지 않기를 원해요</span></label>
+			<label class="sv-call"><input type="checkbox" name="want_call" value="1" <?php checked( ! empty( $_POST['want_call'] ) ); ?>><span>이 내용으로 병원에서 연락드려도 괜찮아요</span></label>
 		</div>
 
 		<button type="submit" class="sv-btn">보내기</button>
@@ -1536,7 +1536,7 @@ function md_survey_render_responses() {
 						<td class="num <?php echo $lowf( $qd ); ?>"><?php echo $qd ? $qd : '–'; ?></td>
 						<td class="num <?php echo $lowf( $r->q_service ); ?>"><?php echo $r->q_service ? (int) $r->q_service : '–'; ?></td>
 						<td class="num <?php echo $lowf( $r->q_recommend ); ?>"><?php echo (int) $r->q_recommend; ?></td>
-						<td class="mdsv-comment"><?php echo nl2br( esc_html( (string) $r->comment ) ); ?><?php if ( empty( $r->want_call ) ) : ?><span class="mds-flag">📵 연락 원하지 않음</span><?php endif; ?><?php foreach ( md_survey_flag_labels( isset( $r->flags ) ? $r->flags : '' ) as $fl ) : ?><span class="mds-flag">⚠ <?php echo esc_html( $fl ); ?> · 집계 제외</span><?php endforeach; ?></td>
+						<td class="mdsv-comment"><?php echo nl2br( esc_html( (string) $r->comment ) ); ?><?php if ( ! empty( $r->want_call ) ) : ?><span class="mds-flag">📞 연락 원함</span><?php endif; ?><?php foreach ( md_survey_flag_labels( isset( $r->flags ) ? $r->flags : '' ) as $fl ) : ?><span class="mds-flag">⚠ <?php echo esc_html( $fl ); ?> · 집계 제외</span><?php endforeach; ?></td>
 						<td class="mds-last"><?php echo esc_html( date_i18n( 'm.d H:i', strtotime( $r->created_at ) ) ); ?></td>
 					</tr>
 				<?php endforeach; ?>
