@@ -1267,7 +1267,7 @@ function md_survey_export_csv( $from, $to, $staff ) {
 	header( 'Content-Disposition: attachment; filename="만족도조사_' . $from . '_' . $to . '.csv"' );
 	echo "\xEF\xBB\xBF"; /* 엑셀이 한글을 제대로 읽도록 BOM */
 	$out = fopen( 'php://output', 'w' );
-	fputcsv( $out, array( '진료일', '차트번호', '이름', '원장', '선생님', '명단상 선생님', '원장 점수', '선생님 점수', '병원 점수', '의견', '작성시각' ) );
+	fputcsv( $out, array( '진료일', '차트번호', '이름', '담당의사', '담당직원', '명단상 담당직원', '담당의사 점수', '담당직원 점수', '병원 점수', '의견', '작성시각' ) );
 	foreach ( $rows as $r ) {
 		fputcsv( $out, array( $r->visit_date, $r->chart_no, $r->patient_name, $r->doctor, $r->staff, isset( $r->staff_orig ) ? $r->staff_orig : '', isset( $r->q_doctor ) ? $r->q_doctor : '', $r->q_service, $r->q_recommend, (string) $r->comment, $r->created_at ) );
 	}
@@ -1302,7 +1302,7 @@ add_action( 'wp_enqueue_scripts', 'md_survey_enqueue', 31 );
 function md_survey_tabs() {
 	return array(
 		'responses' => array( 'label' => '응답',        'icon' => '💬' ),
-		'stats'     => array( 'label' => '스탭별 집계', 'icon' => '📊' ),
+		'stats'     => array( 'label' => '담당직원별 집계', 'icon' => '📊' ),
 		'settings'  => array( 'label' => '설정',        'icon' => '⚙️' ),
 	);
 }
@@ -1535,7 +1535,7 @@ function md_survey_render_responses() {
 	<?php else : ?>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>진료일</th><th>환자</th><th>원장</th><th>선생님</th><th class="num">원장</th><th class="num">선생님</th><th class="num">병원</th><th>의견</th><th>작성</th></tr></thead>
+				<thead><tr><th>진료일</th><th>환자</th><th>담당의사</th><th>담당직원</th><th class="num">담당의사</th><th class="num">담당직원</th><th class="num">병원</th><th>의견</th><th>작성</th></tr></thead>
 				<tbody>
 				<?php $lowf = function ( $v ) { return ( (int) $v >= 1 && (int) $v <= 2 ) ? 'is-low' : ''; };
 				foreach ( $rows as $r ) : $qd = isset( $r->q_doctor ) ? (int) $r->q_doctor : 0; $low = $lowf( $qd ) || $lowf( $r->q_service ) || $lowf( $r->q_recommend ); ?>
@@ -1587,7 +1587,7 @@ function md_survey_render_stats() {
 	<?php else : ?>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>선생님</th><th class="num">응답 수</th><th class="num">평균</th><th class="num">5점 비율</th><th class="num">1~2점</th><th class="num">병원 평균</th><th class="num">의견</th><th class="num">환자가 바로잡음</th></tr></thead>
+				<thead><tr><th>담당직원</th><th class="num">응답 수</th><th class="num">평균</th><th class="num">5점 비율</th><th class="num">1~2점</th><th class="num">병원 평균</th><th class="num">의견</th><th class="num">환자가 바로잡음</th></tr></thead>
 				<tbody>
 				<?php foreach ( $rows as $r ) : $n = max( 1, (int) $r->n ); ?>
 					<tr>
@@ -1605,13 +1605,13 @@ function md_survey_render_stats() {
 			</table>
 		</div>
 		<?php $docs = md_survey_stats_doctor( $from, $to ); if ( $docs ) : ?>
-		<h2 class="mdsv-h" style="margin-top:22px">원장님별</h2>
+		<h2 class="mdsv-h" style="margin-top:22px">담당의사별</h2>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>원장</th><th class="num">응답 수</th><th class="num">평균</th><th class="num">5점 비율</th><th class="num">1~2점</th></tr></thead>
+				<thead><tr><th>담당의사</th><th class="num">응답 수</th><th class="num">평균</th><th class="num">5점 비율</th><th class="num">1~2점</th></tr></thead>
 				<tbody>
 				<?php foreach ( $docs as $dn => $d ) : $n = max( 1, $d['n'] ); ?>
-					<tr><td><b><?php echo esc_html( md_survey_doctor_title( $dn ) ); ?></b></td><td class="num"><?php echo (int) $d['n']; ?></td><td class="num"><?php echo number_format( $d['sum'] / $n, 2 ); ?></td><td class="num"><b><?php echo round( 100 * $d['top'] / $n ); ?>%</b></td><td class="num <?php echo $d['low'] ? 'is-low' : ''; ?>"><?php echo (int) $d['low']; ?></td></tr>
+					<tr><td><b><?php echo esc_html( $dn ); ?></b></td><td class="num"><?php echo (int) $d['n']; ?></td><td class="num"><?php echo number_format( $d['sum'] / $n, 2 ); ?></td><td class="num"><b><?php echo round( 100 * $d['top'] / $n ); ?>%</b></td><td class="num <?php echo $d['low'] ? 'is-low' : ''; ?>"><?php echo (int) $d['low']; ?></td></tr>
 				<?php endforeach; ?>
 				</tbody>
 			</table>
@@ -1636,7 +1636,7 @@ function md_survey_render_settings() {
 		<input type="hidden" name="keep_extra" value="1">
 		<h2 class="mdsv-h">알림톡에 넣을 링크</h2>
 		<p class="mdsv-url"><code><?php echo esc_html( home_url( '/survey/?n=#환자명#' ) ); ?></code></p>
-		<p class="mds-hint">덴트웹 진료 후 알림톡 템플릿 본문에 이 주소를 그대로 넣습니다.</p>
+		<p class="mds-hint">덴트웹 진료 후 템플릿 본문에 넣습니다. 알림톡은 <code>#{환자명}</code>, 문자(SMS·LMS)는 <code>#환자명#</code> 형식입니다.</p>
 
 		<h2 class="mdsv-h" style="margin-top:20px">응답 받는 기간</h2>
 		<div class="mds-formrow">
