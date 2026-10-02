@@ -1791,6 +1791,9 @@ function moondental_default_location_content() {
 	if ( $map_embed ) {
 		// 관리자가 직접 임베드 코드를 넣은 경우 (Naver/Kakao API 키로 받은 iframe)
 		$html .= '<div class="md-map-embed">' . $map_embed . '</div>';
+	} elseif ( function_exists( 'md_content' ) && ( $gsrc = md_content( 'loc_gmap_embed_url', 'https://www.google.com/maps?q=%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90%20%EC%B2%9C%EC%95%88%20%EB%A7%8C%EB%82%A8%EB%A1%9C%2052&z=16&output=embed&hl=ko' ) ) ) {
+		/* v4.21 · 지도 그림 대신 구글 지도 (오시는 길 페이지와 동일) */
+		$html .= '<div class="md-locmap md-locmap--gmap"><iframe src="' . esc_url( $gsrc ) . '" title="문치과병원 구글 지도" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>';
 	} elseif ( $map_url ) {
 		// assets/images/map/naver-map.* 파일이 있으면 실제 지도 스크린샷 사용,
 		// 없으면 CSS 그라데이션 카드로 fallback

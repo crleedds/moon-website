@@ -93,6 +93,10 @@ $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '�
 				);
 				?>
 			</div>
+		<?php elseif ( ( $md_gmap_src = ( function_exists( 'md_content' ) ? md_content( 'loc_gmap_embed_url', 'https://www.google.com/maps?q=%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90%20%EC%B2%9C%EC%95%88%20%EB%A7%8C%EB%82%A8%EB%A1%9C%2052&z=16&output=embed&hl=ko' ) : '' ) ) ) : /* v4.21 · 오시는 길 페이지처럼 구글 지도 (원장 지시) */ ?>
+			<div class="md-locmap md-locmap--gmap md-flocation__map">
+				<iframe src="<?php echo esc_url( $md_gmap_src ); ?>" title="<?php echo esc_attr( md_content( 'loc_gmap_iframe_title', '문치과병원 구글 지도' ) ); ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+			</div>
 		<?php else : ?>
 			<a class="md-locmap md-flocation__map<?php echo $map_image ? ' md-locmap--has-image' : ''; ?>"
 			   href="<?php echo esc_url( $map_naver ); ?>"
