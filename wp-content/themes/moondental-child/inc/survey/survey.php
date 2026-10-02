@@ -722,8 +722,8 @@ function md_survey_public_render() {
 		$visit = (object) array(
 			'id' => 0, 'visit_date' => $today, 'chart_no' => '', 'responded_at' => null,
 			'patient_name' => '홍길동',
-			'doctor'       => isset( $_GET['doc'] ) ? sanitize_text_field( wp_unslash( $_GET['doc'] ) ) : '문은수',
-			'staff'        => isset( $_GET['staff'] ) ? sanitize_text_field( wp_unslash( $_GET['staff'] ) ) : '김정애',
+			'doctor'       => isset( $_GET['doc'] ) ? sanitize_text_field( wp_unslash( $_GET['doc'] ) ) : '○○○', /* v4.21.12 · 예시 화면은 이름 대신 ○○○ */
+			'staff'        => isset( $_GET['staff'] ) ? sanitize_text_field( wp_unslash( $_GET['staff'] ) ) : '○○○',
 		);
 		$step = 'form';
 		$err  = '미리보기 화면입니다. 제출해도 저장되지 않습니다.';
