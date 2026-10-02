@@ -871,8 +871,9 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-phone{display:flex;align-items:center;gap:8px;font-size:1.35rem;font-weight:800;letter-spacing:.06em;color:var(--sub)}
 .sv-phone__fix.is-hidden{color:var(--mute);letter-spacing:.1em}
 .sv-phone__dash{color:var(--mute)}
-.sv-phone input[type=tel]{flex:0 0 7.2em;width:7.2em;min-width:0;text-align:center;font-weight:800;font-size:1.35rem;letter-spacing:.2em;padding:10px 8px;border:2px solid var(--primary)}
-.sv-phone input::placeholder{color:var(--line);letter-spacing:.2em}
+.sv-phone__br{font-size:1.9rem;font-weight:400;color:var(--primary);margin:0 -4px;line-height:1}
+.sv-phone input[type=tel]{flex:0 0 6.6em;width:6.6em;min-width:0;text-align:center;font-weight:800;font-size:1.35rem;letter-spacing:.2em;padding:10px 6px;border:0;border-bottom:2px solid var(--primary);border-radius:0;background:transparent}
+.sv-phone input::placeholder{color:var(--mute);opacity:.45;letter-spacing:.25em}
 .sv-field>small{display:block;margin-top:6px;font-size:.8rem;color:var(--mute)}
 .sv-field input:focus{outline:2px solid var(--primary);outline-offset:0;border-color:var(--primary)}
 .sv-field small{display:block;margin-top:5px;font-size:.8rem;color:var(--mute)}
@@ -1040,7 +1041,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 			<span id="sv-ph-l">휴대전화 가운데 4자리</span>
 			<div class="sv-phone" aria-hidden="false">
 				<span class="sv-phone__fix">010</span><span class="sv-phone__dash">-</span>
-				<input type="tel" name="phone4" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="○○○○" autocomplete="off" aria-labelledby="sv-ph-l" <?php echo '' !== $pname ? 'autofocus' : ''; ?>>
+				<span class="sv-phone__br" aria-hidden="true">[</span><input type="tel" name="phone4" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="○○○○" autocomplete="off" aria-labelledby="sv-ph-l" <?php echo '' !== $pname ? 'autofocus' : ''; ?>><span class="sv-phone__br" aria-hidden="true">]</span>
 				<span class="sv-phone__dash">-</span><span class="sv-phone__fix is-hidden">●●●●</span>
 			</div>
 			<small>○ 자리에 휴대전화 번호 가운데 4자리를 넣어 주세요</small>
