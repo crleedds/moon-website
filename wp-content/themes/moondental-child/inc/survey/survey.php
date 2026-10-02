@@ -1028,7 +1028,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<input type="hidden" name="pn" value="<?php echo esc_attr( $pname ); ?>">
 		<h1><?php echo esc_html( $pname ); ?>님, 본인 확인</h1>
 		<p class="sv-time">⏱ 약 30초면 끝나요</p>
-		<p>진료받으신 분만 참여할 수 있습니다. 휴대전화 가운데 4자리만 확인합니다.</p>
+		<p>진료받으신 분만 참여할 수 있습니다.</p>
 		<?php else : ?>
 		<h1>진료받으신 본인 확인</h1>
 		<p class="sv-time">⏱ 약 30초면 끝나요</p>
