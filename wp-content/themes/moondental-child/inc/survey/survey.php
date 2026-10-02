@@ -1177,7 +1177,7 @@ function md_survey_render_roster() {
 				$d   = gmdate( 'Y-m-d', $ts );
 				$w   = (int) gmdate( 'w', $ts );
 				$c   = isset( $counts[ $d ] ) ? $counts[ $d ] : null;
-				if ( $c )                 { $cls = 'is-ok';     $label = '총 ' . (int) $c->total . '명'; $title = sprintf( '입력 %d명 · 미입력 %d명 · 총 %d명 · 응답 %d명', (int) $c->n, (int) $c->skipped, (int) $c->total, (int) $c->a ); }
+				if ( $c )                 { $cls = 'is-ok';     $label = '총 ' . (int) $c->total . '명'; $title = sprintf( '입력 %d명 · 미입력 %d명', (int) $c->n, (int) $c->skipped ); }
 
 				elseif ( $d > $today )    { $cls = 'is-future'; $label = '예정'; $title = '아직 오지 않은 날'; }
 				elseif ( $d === $today )  { $cls = 'is-today';  $label = '아직'; $title = '오늘 — 아직 올리지 않음'; }
