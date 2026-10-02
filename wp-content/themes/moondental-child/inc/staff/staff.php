@@ -170,6 +170,13 @@ function md_staff_photo_dir() {
 }
 
 function md_staff_photo_url( $r ) {
+	/* v4.21.2 · 원장은 올린 사진이 없으면 홈페이지 의료진 사진을 쓴다 */
+	if ( empty( $r->photo ) && isset( $r->dept ) && '의료진' === $r->dept && function_exists( 'moondental_doctor_photo_url' ) ) {
+		$team = function_exists( 'moondental_get_team_with_customizer' ) ? moondental_get_team_with_customizer() : ( function_exists( 'moondental_get_team' ) ? moondental_get_team() : array() );
+		foreach ( (array) $team as $m ) {
+			if ( isset( $m['name'] ) && trim( $m['name'] ) === trim( $r->name ) && ! empty( $m['photo'] ) ) { $u = moondental_doctor_photo_url( $m['photo'] ); return $u ? $u : ''; }
+		}
+	}
 	if ( empty( $r->photo ) ) return '';
 	$p = md_staff_photo_dir();
 	return $p['url'] . '/' . rawurlencode( $r->photo ) . '?v=' . ( $r->updated_at ? strtotime( $r->updated_at ) : 0 );

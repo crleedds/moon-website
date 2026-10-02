@@ -226,6 +226,32 @@ function md_survey_phone_hash( $phone4 ) {
 	return hash_hmac( 'sha256', 'p|' . $phone4, md_survey_secret() );
 }
 
+/**
+ * v4.21.2 · 설문 화면의 사람 사진.
+ *   원장 — 직원 정보에 올린 사진이 있으면 그것, 없으면 홈페이지 의료진 사진
+ *   스탭 — 직원 정보(라운지)에 관리자가 올린 사진
+ * 없으면 '' (화면에는 이름 첫 글자).
+ */
+function md_survey_person_photo( $name, $kind = 'staff' ) {
+	$name = trim( preg_replace( '/\s*(원장|대표원장|병원장)\s*$/u', '', (string) $name ) );
+	if ( '' === $name ) { return ''; }
+	if ( function_exists( 'md_staff_all' ) && function_exists( 'md_staff_photo_url' ) ) {
+		foreach ( md_staff_all( true ) as $r ) {
+			if ( preg_replace( '/\s+/u', '', $r->name ) === preg_replace( '/\s+/u', '', $name ) && ! empty( $r->photo ) ) { return md_staff_photo_url( $r ); }
+		}
+	}
+	if ( 'doctor' === $kind && function_exists( 'moondental_doctor_photo_url' ) ) {
+		$team = function_exists( 'moondental_get_team_with_customizer' ) ? moondental_get_team_with_customizer() : ( function_exists( 'moondental_get_team' ) ? moondental_get_team() : array() );
+		foreach ( (array) $team as $m ) {
+			if ( isset( $m['name'] ) && $m['name'] === $name && ! empty( $m['photo'] ) ) {
+				$u = moondental_doctor_photo_url( $m['photo'] );
+				return $u ? $u : '';
+			}
+		}
+	}
+	return '';
+}
+
 /** 이름 비교용 — 공백 제거 */
 function md_survey_norm_name( $v ) {
 	return preg_replace( '/\s+/u', '', trim( sanitize_text_field( (string) $v ) ) );
@@ -574,6 +600,18 @@ function md_survey_public_render() {
 	if ( isset( $_POST['pn'] ) ) { $pname = md_survey_norm_name( wp_unslash( $_POST['pn'] ) ); }
 	$pname = mb_substr( $pname, 0, 40 );
 
+	/* v4.21.2 · 관리자 미리보기 — /survey/?preview=1&doc=문은수&staff=김정애 (저장되지 않음) */
+	if ( 'GET' === $method && isset( $_GET['preview'] ) && md_survey_can_manage() ) {
+		$visit = (object) array(
+			'id' => 0, 'visit_date' => $today, 'chart_no' => '', 'responded_at' => null,
+			'patient_name' => '홍길동',
+			'doctor'       => isset( $_GET['doc'] ) ? sanitize_text_field( wp_unslash( $_GET['doc'] ) ) : '문은수',
+			'staff'        => isset( $_GET['staff'] ) ? sanitize_text_field( wp_unslash( $_GET['staff'] ) ) : '김정애',
+		);
+		$step = 'form';
+		$err  = '미리보기 화면입니다. 제출해도 저장되지 않습니다.';
+	}
+
 	/* 환자별 전용 링크 (?t=…) — 본인 확인 없이 바로 설문 */
 	if ( 'GET' === $method && isset( $_GET['t'] ) ) {
 		$v = md_survey_visit_by_token( wp_unslash( $_GET['t'] ) );
@@ -680,6 +718,17 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-who span{color:var(--mute);font-size:.8rem;font-weight:800;letter-spacing:.06em;align-self:center}
 .sv-who b{font-weight:800}
 .sv-who b.staff{font-size:1.15rem;color:var(--primary-dk)}
+.sv-date{margin:12px 0 0 !important;font-size:.88rem;font-weight:700;color:var(--mute) !important}
+.sv-people{display:flex;flex-wrap:wrap;gap:12px;margin:10px 0 4px;padding:14px;border-radius:12px;background:var(--soft)}
+.sv-person{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px;width:104px;text-align:center}
+.sv-person__ph{display:flex;align-items:center;justify-content:center;width:88px;height:88px;border-radius:50%;overflow:hidden;background:var(--card);border:2px solid var(--line)}
+.sv-person__ph img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+.sv-person__ph em{font-style:normal;font-size:1.8rem;font-weight:800;color:var(--mute)}
+.sv-person figcaption small{display:block;font-size:.72rem;font-weight:700;color:var(--mute)}
+.sv-person figcaption b{display:block;font-size:1rem;font-weight:800}
+.sv-person.is-staff .sv-person__ph{width:104px;height:104px;border:3px solid var(--primary)}
+.sv-person.is-staff figcaption b{color:var(--primary-dk);font-size:1.12rem}
+.sv-person.is-staff figcaption small{color:var(--primary-dk)}
 .sv-field{display:block;margin:14px 0}
 .sv-field>span{display:block;margin-bottom:6px;font-size:.86rem;font-weight:700;color:var(--sub)}
 .sv-field input[type=tel]{width:100%;font:inherit;font-size:1.25rem;letter-spacing:.12em;min-height:54px;padding:10px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text)}
@@ -759,10 +808,21 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<input type="hidden" name="tok" value="<?php echo esc_attr( $tok ); ?>">
 		<h1><?php echo esc_html( $name ); ?>님, <?php echo esc_html( $date_label ); ?> 진료는 어떠셨나요?</h1>
 		<p>치료 결과가 아닌, 담당 스탭의 안내와 응대에 대해 여쭙습니다. 30초면 됩니다.</p>
-		<div class="sv-who">
-			<span>진료일</span><b><?php echo esc_html( date_i18n( 'Y년 n월 j일', strtotime( $visit->visit_date ) ) ); ?></b>
-			<?php if ( '' !== $visit->doctor ) : ?><span><?php echo false !== strpos( $visit->doctor, ' · ' ) ? '진료 원장' : '담당 원장'; ?></span><b><?php echo esc_html( $visit->doctor ); ?></b><?php endif; ?>
-			<span>담당 스탭</span><b class="staff"><?php echo esc_html( $staff ); ?></b>
+		<?php /* v4.21.2 · 이름만으로는 기억하기 어려우니 사진과 함께 (원장 지시) */
+		$docs = '' !== $visit->doctor ? array_filter( array_map( 'trim', explode( '·', $visit->doctor ) ) ) : array(); ?>
+		<p class="sv-date"><?php echo esc_html( date_i18n( 'Y년 n월 j일', strtotime( $visit->visit_date ) ) ); ?> 진료</p>
+		<div class="sv-people">
+			<?php foreach ( $docs as $dn ) : $ph = md_survey_person_photo( $dn, 'doctor' ); ?>
+				<figure class="sv-person">
+					<span class="sv-person__ph"><?php if ( $ph ) : ?><img src="<?php echo esc_url( $ph ); ?>" alt="<?php echo esc_attr( $dn ); ?> 원장" loading="lazy"><?php else : ?><em><?php echo esc_html( mb_substr( $dn, 0, 1 ) ); ?></em><?php endif; ?></span>
+					<figcaption><small><?php echo count( $docs ) > 1 ? '진료 원장' : '담당 원장'; ?></small><b><?php echo esc_html( $dn ); ?></b></figcaption>
+				</figure>
+			<?php endforeach; ?>
+			<?php $ph = md_survey_person_photo( $staff, 'staff' ); ?>
+			<figure class="sv-person is-staff">
+				<span class="sv-person__ph"><?php if ( $ph ) : ?><img src="<?php echo esc_url( $ph ); ?>" alt="<?php echo esc_attr( $staff ); ?>" loading="lazy"><?php else : ?><em><?php echo esc_html( mb_substr( $staff, 0, 1 ) ); ?></em><?php endif; ?></span>
+				<figcaption><small>담당 스탭 · 평가 대상</small><b><?php echo esc_html( $staff ); ?></b></figcaption>
+			</figure>
 		</div>
 
 		<div class="sv-q">
