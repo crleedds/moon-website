@@ -148,6 +148,7 @@ add_action( 'init', function () {
 function md_survey_settings() {
 	$d = array(
 		'window_days' => 3,   /* 진료일 이후 며칠까지 응답할 수 있나 */
+		'notify_email' => 'moondentaldigital@gmail.com', /* v4.21.36 · 새 응답 알림 받을 메일 (원장 지시) */
 		'doctors'     => '',  /* 한 줄에 한 명 */
 		'staff'       => '',
 		'review_url'  => '',  /* v4.12 · 구글 리뷰 바로가기 (비우면 구글 지도에서 병원을 찾는 링크) */
@@ -621,8 +622,54 @@ function md_survey_response_insert( $visit, $q1, $q2, $q3, $comment, $staff = nu
 	) );
 	if ( ! $ok ) { return false; } /* 0 = 이미 있음 (UNIQUE visit) */
 	$wpdb->update( md_survey_table_visit(), array( 'responded_at' => current_time( 'mysql' ) ), array( 'id' => (int) $visit->id ) );
+	md_survey_notify_new( (int) $wpdb->insert_id ); /* v4.21.36 · 새 응답 메일 */
 	return true;
 }
+
+/**
+ * v4.21.36 · 새 응답이 오면 메일 (원장 지시 — moondentaldigital@gmail.com, 설정에서 바꿀 수 있음)
+ * 낮은 점수(1~2점)나 연락 요청이 있으면 제목 앞에 표시해 먼저 보이게 한다.
+ */
+function md_survey_notify_new( $rid ) {
+	$to = trim( (string) md_survey_setting( 'notify_email' ) );
+	if ( '' === $to || ! $rid ) { return; }
+	global $wpdb;
+	$r = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . md_survey_table_response() . ' WHERE id = %d', (int) $rid ) );
+	if ( ! $r ) { return; }
+	$sc  = function ( $v ) { return (int) $v > 0 ? (int) $v . '점' : '기억나지 않음'; };
+	$low = ( (int) $r->q_doctor >= 1 && (int) $r->q_doctor <= 2 ) || ( (int) $r->q_service >= 1 && (int) $r->q_service <= 2 ) || ( (int) $r->q_recommend >= 1 && (int) $r->q_recommend <= 2 );
+	$tag = ( $low ? '[낮은 점수] ' : '' ) . ( ! empty( $r->want_call ) ? '[연락 원함] ' : '' );
+	$subject = '[문치과병원 만족도] ' . $tag . $r->patient_name . ' · 병원 ' . $sc( $r->q_recommend );
+	$body  = "새 만족도 응답이 들어왔습니다.\n\n";
+	$body .= '진료일: ' . $r->visit_date . "\n";
+	$body .= '환자: ' . $r->patient_name . ' (차트 ' . $r->chart_no . ")\n";
+	$body .= '담당의사: ' . ( '' !== $r->doctor ? $r->doctor : '-' ) . ' — ' . $sc( $r->q_doctor ) . "\n";
+	$body .= '담당직원: ' . ( '' !== $r->staff ? $r->staff : '-' ) . ' — ' . $sc( $r->q_service ) . "\n";
+	$body .= '병원: ' . $sc( $r->q_recommend ) . "\n";
+	$body .= '연락: ' . ( ! empty( $r->want_call ) ? '연락드려도 괜찮다고 함' : '-' ) . "\n";
+	if ( '' !== trim( (string) $r->comment ) ) { $body .= "\n의견:\n" . $r->comment . "\n"; }
+	$body .= "\n모든 응답 보기: " . home_url( '/직원/?app=survey_result' ) . "\n";
+	wp_mail( array_map( 'trim', explode( ',', $to ) ), $subject, $body );
+}
+
+/** 응답 한 건 삭제 — 그 진료는 다시 응답할 수 있게 된다 (v4.21.36) */
+function md_survey_response_delete( $rid ) {
+	global $wpdb;
+	$r = $wpdb->get_row( $wpdb->prepare( 'SELECT id, visit_id FROM ' . md_survey_table_response() . ' WHERE id = %d', (int) $rid ) );
+	if ( ! $r ) { return false; }
+	$wpdb->delete( md_survey_table_response(), array( 'id' => (int) $r->id ) );
+	if ( $r->visit_id ) { $wpdb->update( md_survey_table_visit(), array( 'responded_at' => null ), array( 'id' => (int) $r->visit_id ) ); }
+	return true;
+}
+
+/** v4.21.36 · 원장이 시험으로 쓴 응답 정리 (1회) — 2026-10-02 · 차트 171500(이창률) · 77840(문지현) */
+add_action( 'init', function () {
+	if ( get_option( 'md_survey_cleanup_v42136' ) ) { return; }
+	if ( ! add_option( 'md_survey_cleanup_v42136', time(), '', 'no' ) ) { return; }
+	global $wpdb;
+	$ids = $wpdb->get_col( "SELECT id FROM " . md_survey_table_response() . " WHERE visit_date = '2026-10-02' AND chart_no IN ('171500','77840')" );
+	foreach ( (array) $ids as $id ) { md_survey_response_delete( (int) $id ); }
+}, 40 );
 
 function md_survey_responses( $from, $to, $staff = '', $doctor = '' ) {
 	global $wpdb;
@@ -1243,6 +1290,21 @@ function md_survey_handle_post() {
 			$back = add_query_arg( array( 'msg' => 'daydeleted', 'n' => (int) $n ), $back );
 			break;
 
+		case 'test_mail': /* v4.21.36 · 알림 메일 시험 */
+			if ( ! md_survey_can_manage() ) { wp_die( '권한이 없습니다.' ); }
+			$to = trim( (string) md_survey_setting( 'notify_email' ) );
+			$ok = '' !== $to && wp_mail( array_map( 'trim', explode( ',', $to ) ), '[문치과병원 만족도] 알림 메일 시험', "새 응답 알림 메일이 이 주소로 잘 오는지 확인하는 시험 메일입니다.
+
+" . home_url( '/직원/?app=survey_result' ) );
+			$back = md_survey_admin_url( array( 'sv' => 'settings', 'msg' => $ok ? 'mailok' : 'mailfail' ) );
+			break;
+
+		case 'delete_resp': /* v4.21.36 · 응답 한 건 삭제 (관리자) */
+			if ( ! md_survey_can_manage() ) { wp_die( '권한이 없습니다.' ); }
+			md_survey_response_delete( isset( $_POST['rid'] ) ? (int) $_POST['rid'] : 0 );
+			$back = md_survey_admin_url( array( 'sv' => 'responses', 'from' => isset( $_POST['from'] ) ? sanitize_text_field( wp_unslash( $_POST['from'] ) ) : '', 'to' => isset( $_POST['to'] ) ? sanitize_text_field( wp_unslash( $_POST['to'] ) ) : '' ) );
+			break;
+
 		case 'download': /* v4.19.1 · 올린 파일 내려받기 — 로그인한 직원만 (이 핸들러는 can_view 를 이미 지났다) */
 			$file = md_survey_file_get_full( isset( $_POST['fid'] ) ? (int) $_POST['fid'] : 0 );
 			if ( ! $file || null === $file->content || '' === $file->content ) { wp_die( '파일이 없습니다.' ); }
@@ -1258,6 +1320,7 @@ function md_survey_handle_post() {
 			if ( ! md_survey_can_manage() ) { wp_die( '권한이 없습니다.' ); }
 			$s = md_survey_settings();
 			$s['window_days'] = max( 1, min( 30, isset( $_POST['window_days'] ) ? (int) $_POST['window_days'] : 3 ) );
+			if ( isset( $_POST['notify_email'] ) ) { $em = array_filter( array_map( 'sanitize_email', array_map( 'trim', explode( ',', wp_unslash( $_POST['notify_email'] ) ) ) ) ); $s['notify_email'] = implode( ', ', $em ); }
 			/* v4.21.24 · 화면에서 뺀 값(원장·스탭 목록, 리뷰 링크)은 건드리지 않는다 */
 			update_option( 'md_survey_settings', $s, 'no' );
 			if ( ! empty( $_POST['regen_key'] ) ) { update_option( 'md_survey_api_key', wp_generate_password( 40, false ), 'no' ); }
@@ -1342,6 +1405,8 @@ function md_survey_notice() {
 		'added'    => '명단에 넣었습니다.',
 		'updated'  => '같은 날 같은 차트번호가 있어 그 줄을 고쳤습니다.',
 		'saved'    => '설정을 저장했습니다.',
+		'mailok'   => '시험 메일을 보냈습니다. 메일함(스팸함 포함)을 확인해 주세요.',
+		'mailfail' => '메일을 보내지 못했습니다. 주소를 확인하거나, 서버 메일 설정이 필요할 수 있습니다.',
 		'imported' => sprintf( '파일을 올렸습니다 — 총 %d명 (담당직원 입력 %d명 · 미입력 %d명).', ( isset( $_GET['a'] ) ? (int) $_GET['a'] : 0 ) + ( isset( $_GET['u'] ) ? (int) $_GET['u'] : 0 ), max( 0, ( isset( $_GET['a'] ) ? (int) $_GET['a'] : 0 ) + ( isset( $_GET['u'] ) ? (int) $_GET['u'] : 0 ) - ( isset( $_GET['sk'] ) ? (int) $_GET['sk'] : 0 ) ), isset( $_GET['sk'] ) ? (int) $_GET['sk'] : 0 ),
 	);
 	if ( isset( $map[ $m ] ) ) {
@@ -1561,7 +1626,7 @@ function md_survey_render_responses() {
 	<?php else : ?>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>진료일</th><th>환자</th><th>담당의사</th><th>담당직원</th><th class="num">담당의사</th><th class="num">담당직원</th><th class="num">병원</th><th>의견</th><th>작성</th><th>IP</th></tr></thead>
+				<thead><tr><th>진료일</th><th>환자</th><th>담당의사</th><th>담당직원</th><th class="num">담당의사</th><th class="num">담당직원</th><th class="num">병원</th><th>의견</th><th>작성</th><th>IP</th><th></th></tr></thead>
 				<tbody>
 				<?php $ipcount = array(); foreach ( $rows as $x ) { if ( ! empty( $x->ip ) ) { $ipcount[ $x->ip ] = ( isset( $ipcount[ $x->ip ] ) ? $ipcount[ $x->ip ] : 0 ) + 1; } } /* v4.21.33 · 같은 IP 응답 수 */
 				$lowf = function ( $v ) { return ( (int) $v >= 1 && (int) $v <= 2 ) ? 'is-low' : ''; };
@@ -1577,6 +1642,7 @@ function md_survey_render_responses() {
 						<td class="mdsv-comment"><?php echo nl2br( esc_html( (string) $r->comment ) ); ?><?php if ( ! empty( $r->want_call ) ) : ?><span class="mds-flag">📞 연락 원함</span><?php endif; ?></td>
 						<td class="mds-last"><?php echo esc_html( date_i18n( 'm.d H:i', strtotime( $r->created_at ) ) ); ?></td>
 						<td class="mds-last mdsv-ip"><?php $ip = isset( $r->ip ) ? (string) $r->ip : ''; echo '' !== $ip ? esc_html( $ip ) : '–'; if ( '' !== $ip && ! empty( $ipcount[ $ip ] ) && $ipcount[ $ip ] > 1 ) : ?><span class="mds-item__meta">같은 IP <?php echo (int) $ipcount[ $ip ]; ?>건</span><?php endif; ?></td>
+						<td><form method="post" class="mds-inline" onsubmit="return confirm('이 응답을 지울까요? 되돌릴 수 없고, 이 진료는 다시 응답할 수 있게 됩니다.');"><input type="hidden" name="md_survey_action" value="delete_resp"><input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_delete_resp' ) ); ?>"><input type="hidden" name="rid" value="<?php echo (int) $r->id; ?>"><input type="hidden" name="from" value="<?php echo esc_attr( $from ); ?>"><input type="hidden" name="to" value="<?php echo esc_attr( $to ); ?>"><button type="submit" class="mds-btn mds-btn--ghost mds-btn--sm">삭제</button></form></td>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>
@@ -1668,6 +1734,13 @@ function md_survey_render_settings() {
 		<p class="mdsv-url"><code><?php echo esc_html( home_url( '/survey/?n=#환자명#' ) ); ?></code></p>
 		<p class="mds-hint">덴트웹 진료 후 템플릿 본문에 넣습니다. 알림톡은 <code>#{환자명}</code>, 문자(SMS·LMS)는 <code>#환자명#</code> 형식입니다.</p>
 
+		<h2 class="mdsv-h" style="margin-top:20px">새 응답 알림 메일</h2>
+		<div class="mds-formrow">
+			<label class="mds-field mds-field--grow"><span>새 응답이 오면 이 주소로 메일을 보냅니다 (여러 개는 쉼표로)</span><input type="text" name="notify_email" value="<?php echo esc_attr( (string) $s['notify_email'] ); ?>" placeholder="moondentaldigital@gmail.com" style="width:100%;font:inherit;padding:10px 12px;min-height:44px;border:1px solid var(--color-border, #EDDFD0);border-radius:10px"></label>
+		</div>
+		<p class="mds-hint">비우면 메일을 보내지 않습니다. 낮은 점수(1~2점)나 연락 요청이 있으면 제목 앞에 [낮은 점수] · [연락 원함]이 붙습니다.</p>
+		<p><button type="submit" form="md-sv-testmail" class="mds-btn mds-btn--ghost mds-btn--sm">시험 메일 보내기</button></p>
+
 		<h2 class="mdsv-h" style="margin-top:20px">응답 받는 기간</h2>
 		<div class="mds-formrow">
 			<label class="mds-field"><span>진료일부터 며칠까지 응답을 받을까요</span><input type="number" name="window_days" min="1" max="30" value="<?php echo (int) $s['window_days']; ?>"></label>
@@ -1675,5 +1748,6 @@ function md_survey_render_settings() {
 
 		<div class="mds-formbtns"><button type="submit" class="mds-btn mds-btn--fill">저장</button></div>
 	</form>
+	<form method="post" id="md-sv-testmail"><input type="hidden" name="md_survey_action" value="test_mail"><input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_test_mail' ) ); ?>"></form>
 	<?php
 }
