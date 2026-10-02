@@ -872,7 +872,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-phone__fix.is-hidden{color:var(--mute);letter-spacing:.1em}
 .sv-phone__dash{color:var(--mute)}
 .sv-phone__br{font-size:1.9rem;font-weight:400;color:var(--primary);margin:0 -4px;line-height:1}
-.sv-phone input[type=tel]{flex:0 0 6.6em;width:6.6em;min-width:0;text-align:center;font-weight:800;font-size:1.35rem;letter-spacing:.2em;padding:10px 6px;border:0;border-bottom:2px solid var(--primary);border-radius:0;background:transparent}
+.sv-phone input[type=tel]{flex:0 0 6.6em;width:6.6em;min-width:0;text-align:left;font-weight:800;font-size:1.35rem;letter-spacing:.2em;padding:10px 6px 10px 10px;border:0;border-bottom:2px solid var(--primary);border-radius:0;background:transparent}
 .sv-phone input::placeholder{color:var(--mute);opacity:.45;letter-spacing:.25em}
 .sv-field>small{display:block;margin-top:6px;font-size:.8rem;color:var(--mute)}
 .sv-field input:focus{outline:2px solid var(--primary);outline-offset:0;border-color:var(--primary)}
