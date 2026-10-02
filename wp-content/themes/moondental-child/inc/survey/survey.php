@@ -727,6 +727,7 @@ function md_survey_public_render() {
 		);
 		$step = 'form';
 		$err  = '미리보기 화면입니다. 제출해도 저장되지 않습니다.';
+		if ( 'done' === $_GET['preview'] ) { $step = 'done'; $err = ''; } /* v4.21.19 · 감사 화면 미리보기 ?preview=done */
 	}
 
 	/* 환자별 전용 링크 (?t=…) — 본인 확인 없이 바로 설문 */
