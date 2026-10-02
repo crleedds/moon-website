@@ -30,7 +30,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_SURVEY_SCHEMA', 5 ); /* v4.19.2 · 파일 내용을 base64 문자열(LONGTEXT)로 (4: 파일 보관 표, 3: doctor 칸 120자) */
+define( 'MD_SURVEY_SCHEMA', 6 ); /* v4.21.3 · 응답에 staff_orig · staff_changed (환자가 담당 선생님을 바로잡음) — 5: 파일 base64 */
 
 /* ============================================================
  * 테이블 · 설치
@@ -83,6 +83,8 @@ function md_survey_maybe_install() {
 		patient_name VARCHAR(40) NOT NULL DEFAULT '',
 		doctor VARCHAR(120) NOT NULL DEFAULT '',
 		staff VARCHAR(40) NOT NULL DEFAULT '',
+		staff_orig VARCHAR(40) NOT NULL DEFAULT '',
+		staff_changed TINYINT UNSIGNED NOT NULL DEFAULT 0,
 		q_service TINYINT UNSIGNED NOT NULL,
 		q_explain TINYINT UNSIGNED NOT NULL,
 		q_recommend TINYINT UNSIGNED NOT NULL,
@@ -233,23 +235,42 @@ function md_survey_phone_hash( $phone4 ) {
  * 없으면 '' (화면에는 이름 첫 글자).
  */
 function md_survey_person_photo( $name, $kind = 'staff' ) {
-	$name = trim( preg_replace( '/\s*(원장|대표원장|병원장)\s*$/u', '', (string) $name ) );
+	$name = trim( preg_replace( '/\s*(원장|대표원장|병원장|선생님)\s*$/u', '', (string) $name ) );
 	if ( '' === $name ) { return ''; }
-	if ( function_exists( 'md_staff_all' ) && function_exists( 'md_staff_photo_url' ) ) {
-		foreach ( md_staff_all( true ) as $r ) {
-			if ( preg_replace( '/\s+/u', '', $r->name ) === preg_replace( '/\s+/u', '', $name ) && ! empty( $r->photo ) ) { return md_staff_photo_url( $r ); }
-		}
-	}
-	if ( 'doctor' === $kind && function_exists( 'moondental_doctor_photo_url' ) ) {
-		$team = function_exists( 'moondental_get_team_with_customizer' ) ? moondental_get_team_with_customizer() : ( function_exists( 'moondental_get_team' ) ? moondental_get_team() : array() );
-		foreach ( (array) $team as $m ) {
-			if ( isset( $m['name'] ) && $m['name'] === $name && ! empty( $m['photo'] ) ) {
-				$u = moondental_doctor_photo_url( $m['photo'] );
-				return $u ? $u : '';
+	$key = preg_replace( '/\s+/u', '', $name );
+	/* 원장은 홈페이지 의료진 사진을 먼저 (v4.21.3 · 원장 지시 — 이미 있는 사진을 끌어 쓴다) */
+	if ( 'doctor' === $kind && function_exists( 'moondental_get_team' ) ) {
+		foreach ( (array) moondental_get_team() as $m ) {
+			if ( isset( $m['name'] ) && preg_replace( '/\s+/u', '', $m['name'] ) === $key && ! empty( $m['photo'] ) ) {
+				$base = pathinfo( $m['photo'], PATHINFO_FILENAME );
+				foreach ( array( 'jpg', 'png', 'jpeg', 'webp' ) as $ext ) {
+					if ( file_exists( MOONDENTAL_DIR . '/assets/images/doctors/' . $base . '.' . $ext ) ) { return MOONDENTAL_URI . '/assets/images/doctors/' . $base . '.' . $ext; }
+				}
 			}
 		}
 	}
+	/* 직원 정보에 관리자가 올린 사진 — 파일이 실제로 있을 때만 */
+	if ( function_exists( 'md_staff_all' ) && function_exists( 'md_staff_photo_dir' ) ) {
+		$dir = md_staff_photo_dir();
+		foreach ( md_staff_all( true ) as $r ) {
+			if ( preg_replace( '/\s+/u', '', $r->name ) !== $key || empty( $r->photo ) ) { continue; }
+			if ( file_exists( $dir['dir'] . '/' . basename( $r->photo ) ) ) { return md_staff_photo_url( $r ); }
+		}
+	}
 	return '';
+}
+
+/** 「다른 선생님이었어요」 고르기 목록 — 직원 정보의 재직 직원(의료진 제외) 중 명단의 담당 스탭이 아닌 사람 */
+function md_survey_staff_choices( $current = '' ) {
+	if ( ! function_exists( 'md_staff_all' ) ) { return array(); }
+	$out = array();
+	foreach ( md_staff_all( true ) as $r ) {
+		$n = trim( (string) $r->name );
+		if ( '' === $n || '의료진' === $r->dept || $n === trim( (string) $current ) ) { continue; }
+		if ( ! in_array( $r->dept, array( '진료실', '예방과', '서비스지원실' ), true ) && '' !== (string) $r->dept ) { continue; } /* 환자를 직접 응대하는 부서만 */
+		$out[] = array( 'name' => $n, 'photo' => md_survey_person_photo( $n, 'staff' ) );
+	}
+	return $out;
 }
 
 /** 이름 비교용 — 공백 제거 */
@@ -503,13 +524,18 @@ function md_survey_response_by_visit( $visit_id ) {
 	return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . md_survey_table_response() . ' WHERE visit_id = %d', (int) $visit_id ) );
 }
 
-function md_survey_response_insert( $visit, $q1, $q2, $q3, $comment ) {
+/**
+ * @param string $staff   실제로 평가받는 직원 (환자가 바로잡았으면 그 이름, 모르면 '')
+ * @param int    $changed 0 명단 그대로 · 1 환자가 다른 직원으로 바꿈 · 2 모르겠다
+ */
+function md_survey_response_insert( $visit, $q1, $q2, $q3, $comment, $staff = null, $changed = 0 ) {
 	global $wpdb;
 	$tr = md_survey_table_response();
+	if ( null === $staff ) { $staff = $visit->staff; }
 	$ok = $wpdb->query( $wpdb->prepare(
-		"INSERT IGNORE INTO $tr (visit_id, visit_date, chart_no, patient_name, doctor, staff, q_service, q_explain, q_recommend, comment, ip_hash, created_at)
-		 VALUES (%d, %s, %s, %s, %s, %s, %d, %d, %d, %s, %s, %s)",
-		(int) $visit->id, $visit->visit_date, $visit->chart_no, $visit->patient_name, $visit->doctor, $visit->staff,
+		"INSERT IGNORE INTO $tr (visit_id, visit_date, chart_no, patient_name, doctor, staff, staff_orig, staff_changed, q_service, q_explain, q_recommend, comment, ip_hash, created_at)
+		 VALUES (%d, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %s, %s, %s)",
+		(int) $visit->id, $visit->visit_date, $visit->chart_no, $visit->patient_name, $visit->doctor, $staff, $visit->staff, (int) $changed,
 		(int) $q1, (int) $q2, (int) $q3, $comment, md_survey_ip_hash(), current_time( 'mysql' )
 	) );
 	if ( ! $ok ) { return false; } /* 0 = 이미 있음 (UNIQUE visit) */
@@ -533,12 +559,13 @@ function md_survey_stats( $from, $to ) {
 	$tr = md_survey_table_response();
 	return $wpdb->get_results( $wpdb->prepare(
 		"SELECT staff,
-			COUNT(*) AS n,
-			AVG(q_service) AS avg_service, AVG(q_explain) AS avg_explain, AVG(q_recommend) AS avg_recommend,
+			SUM(q_service > 0) AS n,
+			AVG(NULLIF(q_service,0)) AS avg_service, AVG(NULLIF(q_explain,0)) AS avg_explain, AVG(q_recommend) AS avg_recommend,
 			SUM(q_service = 5) AS top_service, SUM(q_explain = 5) AS top_explain,
-			SUM(q_service <= 2 OR q_explain <= 2) AS low_n,
-			SUM(comment IS NOT NULL AND comment <> '') AS comment_n
-		 FROM $tr WHERE visit_date BETWEEN %s AND %s GROUP BY staff ORDER BY n DESC, avg_service DESC", $from, $to ) );
+			SUM(q_service BETWEEN 1 AND 2 OR q_explain BETWEEN 1 AND 2) AS low_n,
+			SUM(comment IS NOT NULL AND comment <> '') AS comment_n,
+			SUM(staff_changed = 1) AS changed_n
+		 FROM $tr WHERE visit_date BETWEEN %s AND %s AND staff <> '' GROUP BY staff ORDER BY n DESC, avg_service DESC", $from, $to ) );
 }
 
 /* ============================================================
@@ -673,13 +700,22 @@ function md_survey_public_render() {
 				$q2 = isset( $_POST['q_explain'] ) ? (int) $_POST['q_explain'] : 0;
 				$q3 = isset( $_POST['q_recommend'] ) ? (int) $_POST['q_recommend'] : -1;
 				$cm = isset( $_POST['comment'] ) ? mb_substr( trim( sanitize_textarea_field( wp_unslash( $_POST['comment'] ) ) ), 0, 1000 ) : '';
+				/* v4.21.3 · 환자가 담당 선생님을 바로잡은 경우 — 명단의 직원 이름 중에서만 받는다 */
+				$pick = isset( $_POST['staff_pick'] ) ? sanitize_text_field( wp_unslash( $_POST['staff_pick'] ) ) : '';
+				$who  = $v->staff; $changed = 0;
+				if ( '__unknown' === $pick ) { $who = ''; $changed = 2; }
+				elseif ( '' !== $pick && $pick !== $v->staff ) {
+					foreach ( md_survey_staff_choices( $v->staff ) as $o ) { if ( $o['name'] === $pick ) { $who = $pick; $changed = 1; break; } }
+				}
+				$need_staff = 2 !== $changed;
 				if ( $v->responded_at || md_survey_response_by_visit( $v->id ) ) {
 					$step = 'already';
-				} elseif ( $q1 < 1 || $q1 > 5 || $q2 < 1 || $q2 > 5 || $q3 < 0 || $q3 > 10 ) {
+				} elseif ( $q3 < 0 || $q3 > 10 || ( $need_staff && ( $q1 < 1 || $q1 > 5 || $q2 < 1 || $q2 > 5 ) ) ) {
 					$step = 'form';
-					$err  = '세 문항 모두 골라 주세요.';
+					$err  = $need_staff ? '1~3번을 모두 골라 주세요.' : '3번을 골라 주세요.';
 				} else {
-					$step = md_survey_response_insert( $v, $q1, $q2, $q3, $cm ) ? 'done' : 'already';
+					if ( ! $need_staff ) { $q1 = 0; $q2 = 0; } /* 누가 도왔는지 모르면 선생님 문항은 0(무응답)으로 */
+					$step = md_survey_response_insert( $v, $q1, $q2, $q3, $cm, $who, $changed ) ? 'done' : 'already';
 				}
 			}
 		}
@@ -719,16 +755,29 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-who b{font-weight:800}
 .sv-who b.staff{font-size:1.15rem;color:var(--primary-dk)}
 .sv-date{margin:12px 0 0 !important;font-size:.88rem;font-weight:700;color:var(--mute) !important}
-.sv-people{display:flex;flex-wrap:wrap;gap:12px;margin:10px 0 4px;padding:14px;border-radius:12px;background:var(--soft)}
-.sv-person{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px;width:104px;text-align:center}
-.sv-person__ph{display:flex;align-items:center;justify-content:center;width:88px;height:88px;border-radius:50%;overflow:hidden;background:var(--card);border:2px solid var(--line)}
-.sv-person__ph img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
-.sv-person__ph em{font-style:normal;font-size:1.8rem;font-weight:800;color:var(--mute)}
-.sv-person figcaption small{display:block;font-size:.72rem;font-weight:700;color:var(--mute)}
-.sv-person figcaption b{display:block;font-size:1rem;font-weight:800}
-.sv-person.is-staff .sv-person__ph{width:104px;height:104px;border:3px solid var(--primary)}
-.sv-person.is-staff figcaption b{color:var(--primary-dk);font-size:1.12rem}
-.sv-person.is-staff figcaption small{color:var(--primary-dk)}
+/* v4.21.3 · 상반신이 보이는 세로 사진 카드 */
+.sv-people{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:10px 0 6px}
+.sv-person{margin:0;display:flex;flex-direction:column;gap:8px;text-align:center}
+.sv-person__ph{position:relative;display:block;aspect-ratio:3/4;border-radius:16px;overflow:hidden;background:var(--soft)}
+.sv-person__ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%}
+.sv-person__ph em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:2.6rem;font-weight:800;color:var(--mute)}
+.sv-person__ph img~em{display:none}
+.sv-person__ph.is-noimg em{display:flex}
+.sv-person figcaption b{display:block;font-size:1.05rem;font-weight:800}
+.sv-person figcaption small{display:block;margin-top:2px;font-size:.8rem;color:var(--mute)}
+.sv-fix{margin:6px 0 2px;padding:10px 14px;border-radius:12px;border:1px dashed var(--line);font-size:.92rem}
+.sv-fix summary{cursor:pointer;color:var(--sub);font-weight:700}
+.sv-fix p{margin:8px 0 10px;font-size:.85rem}
+.sv-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.sv-pick label{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;text-align:center}
+.sv-pick input{position:absolute;opacity:0;width:1px;height:1px}
+.sv-pick label:has(input:checked){border-color:var(--primary);box-shadow:0 0 0 2px var(--primary) inset}
+.sv-pick__ph{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;overflow:hidden;background:var(--soft)}
+.sv-pick__ph img{width:100%;height:100%;object-fit:cover;object-position:50% 15%}
+.sv-pick__ph em{font-style:normal;font-weight:800;color:var(--mute)}
+.sv-pick b{font-size:.88rem}
+.sv-pick small{font-size:.7rem;color:var(--mute)}
+.sv-hint{margin:6px 0 0 !important;font-size:.8rem;color:var(--mute) !important}
 .sv-field{display:block;margin:14px 0}
 .sv-field>span{display:block;margin-bottom:6px;font-size:.86rem;font-weight:700;color:var(--sub)}
 .sv-field input[type=tel]{width:100%;font:inherit;font-size:1.25rem;letter-spacing:.12em;min-height:54px;padding:10px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text)}
@@ -803,61 +852,78 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 	$tok   = md_survey_sign( $visit->id, time() + 2 * HOUR_IN_SECONDS );
 	$staff = $visit->staff;
 	?>
+	<?php /* v4.21.3 · 평가받는 느낌을 줄이고(원장 지시) · 사진은 상반신이 보이게 크게 · 담당 선생님이 다르면 환자가 바로잡는다 */
+	$docs   = '' !== $visit->doctor ? array_values( array_filter( array_map( 'trim', explode( '·', $visit->doctor ) ) ) ) : array();
+	$others = md_survey_staff_choices( $staff );
+	$sel    = isset( $_POST['staff_pick'] ) ? sanitize_text_field( wp_unslash( $_POST['staff_pick'] ) ) : '';
+	?>
 	<form method="post" class="sv-card" action="<?php echo esc_url( md_survey_public_url() ); ?>">
 		<input type="hidden" name="md_sv" value="submit">
 		<input type="hidden" name="tok" value="<?php echo esc_attr( $tok ); ?>">
-		<h1><?php echo esc_html( $name ); ?>님, <?php echo esc_html( $date_label ); ?> 진료는 어떠셨나요?</h1>
-		<p>치료 결과가 아닌, 담당 스탭의 안내와 응대에 대해 여쭙습니다. 30초면 됩니다.</p>
-		<?php /* v4.21.2 · 이름만으로는 기억하기 어려우니 사진과 함께 (원장 지시) */
-		$docs = '' !== $visit->doctor ? array_filter( array_map( 'trim', explode( '·', $visit->doctor ) ) ) : array(); ?>
-		<p class="sv-date"><?php echo esc_html( date_i18n( 'Y년 n월 j일', strtotime( $visit->visit_date ) ) ); ?> 진료</p>
+		<h1><?php echo esc_html( $name ); ?>님, 오늘 진료 잘 받으셨나요?</h1>
+		<p>오늘 <?php echo esc_html( $name ); ?>님을 도와드린 분들이에요. 남겨 주신 말씀은 더 나은 진료를 위해 소중히 쓰겠습니다. 30초면 됩니다.</p>
+		<p class="sv-date"><?php echo esc_html( date_i18n( 'Y년 n월 j일', strtotime( $visit->visit_date ) ) ); ?></p>
+
 		<div class="sv-people">
 			<?php foreach ( $docs as $dn ) : $ph = md_survey_person_photo( $dn, 'doctor' ); ?>
 				<figure class="sv-person">
-					<span class="sv-person__ph"><?php if ( $ph ) : ?><img src="<?php echo esc_url( $ph ); ?>" alt="<?php echo esc_attr( $dn ); ?> 원장" loading="lazy"><?php else : ?><em><?php echo esc_html( mb_substr( $dn, 0, 1 ) ); ?></em><?php endif; ?></span>
-					<figcaption><small><?php echo count( $docs ) > 1 ? '진료 원장' : '담당 원장'; ?></small><b><?php echo esc_html( $dn ); ?></b></figcaption>
+					<span class="sv-person__ph"><?php if ( $ph ) : ?><img src="<?php echo esc_url( $ph ); ?>" alt="<?php echo esc_attr( $dn ); ?> 원장" onerror="this.parentNode.className+=' is-noimg';this.remove()"><?php endif; ?><em><?php echo esc_html( mb_substr( $dn, 0, 1 ) ); ?></em></span>
+					<figcaption><b><?php echo esc_html( $dn ); ?> 원장</b></figcaption>
 				</figure>
 			<?php endforeach; ?>
 			<?php $ph = md_survey_person_photo( $staff, 'staff' ); ?>
 			<figure class="sv-person is-staff">
-				<span class="sv-person__ph"><?php if ( $ph ) : ?><img src="<?php echo esc_url( $ph ); ?>" alt="<?php echo esc_attr( $staff ); ?>" loading="lazy"><?php else : ?><em><?php echo esc_html( mb_substr( $staff, 0, 1 ) ); ?></em><?php endif; ?></span>
-				<figcaption><small>담당 스탭 · 평가 대상</small><b><?php echo esc_html( $staff ); ?></b></figcaption>
+				<span class="sv-person__ph"><?php if ( $ph ) : ?><img src="<?php echo esc_url( $ph ); ?>" alt="<?php echo esc_attr( $staff ); ?> 선생님" onerror="this.parentNode.className+=' is-noimg';this.remove()"><?php endif; ?><em><?php echo esc_html( mb_substr( $staff, 0, 1 ) ); ?></em></span>
+				<figcaption><b><?php echo esc_html( $staff ); ?> 선생님</b><small>오늘 곁에서 도와드렸어요</small></figcaption>
 			</figure>
 		</div>
 
-		<div class="sv-q">
-			<h2>1. <em><?php echo esc_html( $staff ); ?></em> 스탭의 응대는 어떠셨나요?</h2>
-			<p>친절함 · 배려 · 불편한 점을 살펴 주었는지</p>
-			<div class="sv-scale sv-scale--5" role="radiogroup" aria-label="응대 만족도">
-				<?php for ( $i = 1; $i <= 5; $i++ ) : ?><label><input type="radio" name="q_service" value="<?php echo $i; ?>" required><span><?php echo $i; ?></span></label><?php endfor; ?>
+		<?php if ( $others ) : ?>
+		<details class="sv-fix"<?php echo '' !== $sel ? ' open' : ''; ?>>
+			<summary>도와주신 선생님이 사진과 다른가요?</summary>
+			<p>기억나는 분을 골라 주세요. 잘 모르시면 「잘 모르겠어요」를 고르시면 됩니다.</p>
+			<div class="sv-pick">
+				<label><input type="radio" name="staff_pick" value="" <?php checked( '', $sel ); ?>><span class="sv-pick__ph"><?php $p0 = md_survey_person_photo( $staff, 'staff' ); if ( $p0 ) : ?><img src="<?php echo esc_url( $p0 ); ?>" alt=""><?php else : ?><em><?php echo esc_html( mb_substr( $staff, 0, 1 ) ); ?></em><?php endif; ?></span><b><?php echo esc_html( $staff ); ?></b><small>사진 속 분이 맞아요</small></label>
+				<?php foreach ( $others as $o ) : ?>
+					<label><input type="radio" name="staff_pick" value="<?php echo esc_attr( $o['name'] ); ?>" <?php checked( $o['name'], $sel ); ?>><span class="sv-pick__ph"><?php if ( $o['photo'] ) : ?><img src="<?php echo esc_url( $o['photo'] ); ?>" alt="" loading="lazy"><?php else : ?><em><?php echo esc_html( mb_substr( $o['name'], 0, 1 ) ); ?></em><?php endif; ?></span><b><?php echo esc_html( $o['name'] ); ?></b></label>
+				<?php endforeach; ?>
+				<label><input type="radio" name="staff_pick" value="__unknown" <?php checked( '__unknown', $sel ); ?>><span class="sv-pick__ph"><em>?</em></span><b>잘 모르겠어요</b></label>
 			</div>
-			<div class="sv-ends"><span>매우 불만족</span><span>매우 만족</span></div>
-		</div>
+		</details>
+		<?php endif; ?>
 
 		<div class="sv-q">
-			<h2>2. <em><?php echo esc_html( $staff ); ?></em> 스탭의 설명은 이해하기 쉬웠나요?</h2>
-			<p>진료 안내 · 주의사항 · 다음 진료 설명</p>
-			<div class="sv-scale sv-scale--5" role="radiogroup" aria-label="설명 만족도">
-				<?php for ( $i = 1; $i <= 5; $i++ ) : ?><label><input type="radio" name="q_explain" value="<?php echo $i; ?>" required><span><?php echo $i; ?></span></label><?php endfor; ?>
+			<h2>1. 도와드린 선생님이 친절하고 세심하게 대해 드렸나요?</h2>
+			<div class="sv-scale sv-scale--5" role="radiogroup" aria-label="친절">
+				<?php for ( $i = 1; $i <= 5; $i++ ) : ?><label><input type="radio" name="q_service" value="<?php echo $i; ?>" <?php checked( $i, isset( $_POST['q_service'] ) ? (int) $_POST['q_service'] : 0 ); ?>><span><?php echo $i; ?></span></label><?php endfor; ?>
 			</div>
-			<div class="sv-ends"><span>매우 불만족</span><span>매우 만족</span></div>
+			<div class="sv-ends"><span>아쉬웠어요</span><span>아주 좋았어요</span></div>
 		</div>
 
 		<div class="sv-q">
-			<h2>3. 문치과병원을 가족이나 지인에게 추천하시겠습니까?</h2>
-			<div class="sv-scale sv-scale--11" role="radiogroup" aria-label="추천 의향">
-				<?php for ( $i = 0; $i <= 10; $i++ ) : ?><label><input type="radio" name="q_recommend" value="<?php echo $i; ?>" required><span><?php echo $i; ?></span></label><?php endfor; ?>
+			<h2>2. 진료 안내와 주의사항을 알기 쉽게 들으셨나요?</h2>
+			<div class="sv-scale sv-scale--5" role="radiogroup" aria-label="설명">
+				<?php for ( $i = 1; $i <= 5; $i++ ) : ?><label><input type="radio" name="q_explain" value="<?php echo $i; ?>" <?php checked( $i, isset( $_POST['q_explain'] ) ? (int) $_POST['q_explain'] : 0 ); ?>><span><?php echo $i; ?></span></label><?php endfor; ?>
 			</div>
-			<div class="sv-ends"><span>전혀 아니다</span><span>꼭 추천한다</span></div>
+			<div class="sv-ends"><span>어려웠어요</span><span>아주 쉬웠어요</span></div>
 		</div>
 
 		<div class="sv-q">
-			<h2>4. 칭찬하거나 개선할 점이 있다면 적어 주세요 <small style="font-weight:500;color:var(--mute)">(선택)</small></h2>
-			<textarea name="comment" maxlength="1000" placeholder="예) 설명이 자세해서 안심이 됐어요 · 대기 시간이 길었어요"></textarea>
+			<h2>3. 가족이나 지인에게 문치과병원을 권하고 싶으신가요?</h2>
+			<div class="sv-scale sv-scale--11" role="radiogroup" aria-label="추천">
+				<?php for ( $i = 0; $i <= 10; $i++ ) : ?><label><input type="radio" name="q_recommend" value="<?php echo $i; ?>" required <?php checked( $i, isset( $_POST['q_recommend'] ) ? (int) $_POST['q_recommend'] : -1 ); ?>><span><?php echo $i; ?></span></label><?php endfor; ?>
+			</div>
+			<div class="sv-ends"><span>아니요</span><span>꼭 권하고 싶어요</span></div>
 		</div>
 
-		<button type="submit" class="sv-btn">제출하기</button>
-		<p class="sv-foot">이 진료에 대한 응답은 한 번만 저장됩니다.</p>
+		<div class="sv-q">
+			<h2>4. 고마웠던 점이나 바라는 점을 들려주세요 <small style="font-weight:500;color:var(--mute)">(선택)</small></h2>
+			<textarea name="comment" maxlength="1000" placeholder="예) 아프지 않게 살펴 주셔서 고마웠어요 · 대기 시간이 조금 길었어요"><?php echo isset( $_POST['comment'] ) ? esc_textarea( wp_unslash( $_POST['comment'] ) ) : ''; ?></textarea>
+			<p class="sv-hint">고마운 마음은 해당 선생님께 꼭 전해 드릴게요.</p>
+		</div>
+
+		<button type="submit" class="sv-btn">보내기</button>
+		<p class="sv-foot">이 진료에 대한 응답은 한 번만 보낼 수 있어요.</p>
 	</form>
 
 <?php else : ?>
@@ -1355,14 +1421,14 @@ function md_survey_render_responses() {
 			<table class="mds-table mdsv-table">
 				<thead><tr><th>진료일</th><th>환자</th><th>담당 원장</th><th>담당 스탭</th><th class="num">응대</th><th class="num">설명</th><th class="num">추천</th><th>의견</th><th>작성</th></tr></thead>
 				<tbody>
-				<?php foreach ( $rows as $r ) : $low = ( $r->q_service <= 2 || $r->q_explain <= 2 ); ?>
+				<?php foreach ( $rows as $r ) : $low = ( ( $r->q_service >= 1 && $r->q_service <= 2 ) || ( $r->q_explain >= 1 && $r->q_explain <= 2 ) ); ?>
 					<tr class="<?php echo $low ? 'is-lowrow' : ''; ?>">
 						<td><?php echo esc_html( date_i18n( 'm.d', strtotime( $r->visit_date ) ) ); ?></td>
 						<td><b><?php echo esc_html( $r->patient_name ); ?></b><span class="mds-item__meta"><?php echo esc_html( $r->chart_no ); ?></span></td>
 						<td><?php echo esc_html( $r->doctor ); ?></td>
-						<td><b><?php echo esc_html( $r->staff ); ?></b></td>
-						<td class="num <?php echo $r->q_service <= 2 ? 'is-low' : ''; ?>"><?php echo (int) $r->q_service; ?></td>
-						<td class="num <?php echo $r->q_explain <= 2 ? 'is-low' : ''; ?>"><?php echo (int) $r->q_explain; ?></td>
+						<td><b><?php echo esc_html( '' !== $r->staff ? $r->staff : '(모름)' ); ?></b><?php if ( ! empty( $r->staff_changed ) && '' !== (string) $r->staff_orig ) : ?><span class="mds-item__meta">명단: <?php echo esc_html( $r->staff_orig ); ?> → 환자가 바로잡음</span><?php endif; ?></td>
+						<td class="num <?php echo ( $r->q_service >= 1 && $r->q_service <= 2 ) ? 'is-low' : ''; ?>"><?php echo $r->q_service ? (int) $r->q_service : '–'; ?></td>
+						<td class="num <?php echo ( $r->q_explain >= 1 && $r->q_explain <= 2 ) ? 'is-low' : ''; ?>"><?php echo $r->q_explain ? (int) $r->q_explain : '–'; ?></td>
 						<td class="num <?php echo $r->q_recommend <= 6 ? 'is-low' : ''; ?>"><?php echo (int) $r->q_recommend; ?></td>
 						<td class="mdsv-comment"><?php echo nl2br( esc_html( (string) $r->comment ) ); ?></td>
 						<td class="mds-last"><?php echo esc_html( date_i18n( 'm.d H:i', strtotime( $r->created_at ) ) ); ?></td>
@@ -1404,9 +1470,9 @@ function md_survey_render_stats() {
 	<?php else : ?>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>담당 스탭</th><th class="num">응답 수</th><th class="num">응대 평균</th><th class="num">응대 5점 비율</th><th class="num">설명 평균</th><th class="num">설명 5점 비율</th><th class="num">추천 평균</th><th class="num">1~2점</th><th class="num">의견</th></tr></thead>
+				<thead><tr><th>담당 스탭</th><th class="num">응답 수</th><th class="num">응대 평균</th><th class="num">응대 5점 비율</th><th class="num">설명 평균</th><th class="num">설명 5점 비율</th><th class="num">추천 평균</th><th class="num">1~2점</th><th class="num">의견</th><th class="num">환자가 바로잡음</th></tr></thead>
 				<tbody>
-				<?php foreach ( $rows as $r ) : $n = (int) $r->n; ?>
+				<?php foreach ( $rows as $r ) : $n = max( 1, (int) $r->n ); ?>
 					<tr>
 						<td><b><?php echo esc_html( $r->staff ); ?></b><?php if ( $n < 30 ) : ?><span class="mds-flag">표본 <?php echo $n; ?></span><?php endif; ?></td>
 						<td class="num"><?php echo $n; ?></td>
@@ -1417,6 +1483,7 @@ function md_survey_render_stats() {
 						<td class="num"><?php echo number_format( (float) $r->avg_recommend, 1 ); ?></td>
 						<td class="num <?php echo (int) $r->low_n ? 'is-low' : ''; ?>"><?php echo (int) $r->low_n; ?></td>
 						<td class="num"><?php echo (int) $r->comment_n; ?></td>
+						<td class="num"><?php echo (int) $r->changed_n; ?></td>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>
