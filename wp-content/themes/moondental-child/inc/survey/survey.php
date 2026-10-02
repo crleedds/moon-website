@@ -918,7 +918,7 @@ function md_survey_handle_post() {
 
 		case 'import':
 			$r = md_survey_import_text( isset( $_POST['rows'] ) ? wp_unslash( $_POST['rows'] ) : '', $date );
-			$back = add_query_arg( array( 'msg' => 'imported', 'a' => $r['added'], 'u' => $r['updated'], 's' => $r['skipped'] ), $back );
+			$back = add_query_arg( array( 'msg' => 'imported', 'a' => $r['added'], 'u' => $r['updated'], 'sk' => $r['skipped'] ), $back );
 			if ( $r['errors'] ) { $back = add_query_arg( 'err', implode( ' / ', array_slice( $r['errors'], 0, 5 ) ), $back ); }
 			break;
 
@@ -952,7 +952,7 @@ function md_survey_handle_post() {
 				} elseif ( count( $fd ) > 1 ) {
 					$back = add_query_arg( 'fd', implode( ',', $fd ), $back );
 				}
-				$back = add_query_arg( array( 'msg' => 'imported', 'a' => $r['added'], 'u' => $r['updated'], 's' => $r['skipped'] ), $back );
+				$back = add_query_arg( array( 'msg' => 'imported', 'a' => $r['added'], 'u' => $r['updated'], 'sk' => $r['skipped'] ), $back );
 				if ( $r['errors'] ) { $back = add_query_arg( 'err', implode( ' / ', array_slice( $r['errors'], 0, 5 ) ), $back ); }
 			}
 			break;
@@ -1069,8 +1069,7 @@ function md_survey_notice() {
 		'added'    => '명단에 넣었습니다.',
 		'updated'  => '같은 날 같은 차트번호가 있어 그 줄을 고쳤습니다.',
 		'saved'    => '설정을 저장했습니다.',
-		'imported' => sprintf( '파일을 올렸습니다 — 명단 %d명, 담당직원이 없어 건너뜀 %d명.', ( isset( $_GET['a'] ) ? (int) $_GET['a'] : 0 ) + ( isset( $_GET['u'] ) ? (int) $_GET['u'] : 0 ), isset( $_GET['s'] ) ? (int) $_GET['s'] : 0 ),
-		'imported' => sprintf( '올렸습니다 — 명단 %d명, 담당직원이 없어 건너뜀 %d명.', ( isset( $_GET['a'] ) ? (int) $_GET['a'] : 0 ) + ( isset( $_GET['u'] ) ? (int) $_GET['u'] : 0 ), isset( $_GET['s'] ) ? (int) $_GET['s'] : 0 ),
+		'imported' => sprintf( '파일을 올렸습니다 — 명단 %d명, 담당직원이 없어 건너뜀 %d명.', ( isset( $_GET['a'] ) ? (int) $_GET['a'] : 0 ) + ( isset( $_GET['u'] ) ? (int) $_GET['u'] : 0 ), isset( $_GET['sk'] ) ? (int) $_GET['sk'] : 0 ),
 	);
 	if ( isset( $map[ $m ] ) ) {
 		$text = $map[ $m ];
