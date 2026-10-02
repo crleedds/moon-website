@@ -1302,14 +1302,14 @@ function md_survey_current_tab() {
 }
 
 function md_survey_notice() {
-	if ( isset( $_GET['err'] ) ) { echo '<div class="mds-notice mds-notice--warn">' . esc_html( wp_unslash( $_GET['err'] ) ) . '</div>'; }
+	/* 오류(err)는 직원 허브 머리글(md_sup_render_page)이 이미 보여 준다 — 두 번 나오지 않게 여기선 생략 (v4.21.26) */
 	if ( ! isset( $_GET['msg'] ) ) { return; }
 	$m = sanitize_key( wp_unslash( $_GET['msg'] ) );
 	$map = array(
 		'added'    => '명단에 넣었습니다.',
 		'updated'  => '같은 날 같은 차트번호가 있어 그 줄을 고쳤습니다.',
 		'saved'    => '설정을 저장했습니다.',
-		'imported' => sprintf( '파일을 올렸습니다 — 명단 %d명, 담당직원이 없어 건너뜀 %d명.', ( isset( $_GET['a'] ) ? (int) $_GET['a'] : 0 ) + ( isset( $_GET['u'] ) ? (int) $_GET['u'] : 0 ), isset( $_GET['sk'] ) ? (int) $_GET['sk'] : 0 ),
+		'imported' => sprintf( '파일을 올렸습니다 — 총 %d명 (담당직원 입력 %d명 · 미입력 %d명).', ( isset( $_GET['a'] ) ? (int) $_GET['a'] : 0 ) + ( isset( $_GET['u'] ) ? (int) $_GET['u'] : 0 ), max( 0, ( isset( $_GET['a'] ) ? (int) $_GET['a'] : 0 ) + ( isset( $_GET['u'] ) ? (int) $_GET['u'] : 0 ) - ( isset( $_GET['sk'] ) ? (int) $_GET['sk'] : 0 ) ), isset( $_GET['sk'] ) ? (int) $_GET['sk'] : 0 ),
 	);
 	if ( isset( $map[ $m ] ) ) {
 		$text = $map[ $m ];
