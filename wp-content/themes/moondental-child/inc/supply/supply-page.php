@@ -100,11 +100,18 @@ function md_sup_apps() {
 			'icon'  => '💳',
 			'desc'  => '보험 · 비급여 진료비 표',
 		),
-		// v4.10 · 환자 만족도 조사 (진료 후 알림톡 링크 → 그날 담당 원장·스탭 표시 → 스탭 평가)
+		// v4.10 · 접수수납목록 (만족도 조사 명단) — 진료 후 알림톡 링크 → 그날 담당 원장·스탭 표시 → 스탭 평가
 		'survey' => array(
 			'label' => '접수수납목록', /* v4.19.4 · 원장 지시 — 「환자 만족도 조사」 대신 */
 			'icon'  => '📋',
-			'desc'  => '덴트웹 접수수납목록 엑셀 올리기 · 만족도 응답과 스탭별 집계는 관리자',
+			'desc'  => '덴트웹 접수수납목록 엑셀 올리기 (하루 한 번)',
+		),
+		// v4.19.7 · 만족도 응답·집계·설정은 관리자 전용 타일 (데스크 화면에서 탭 제거 — 원장 지시)
+		'survey_result' => array(
+			'label'  => '환자 만족도 결과',
+			'icon'   => '⭐',
+			'desc'   => '응답 · 스탭별 집계 · 설정',
+			'manage' => true,
 		),
 	);
 }
@@ -1021,7 +1028,9 @@ function md_sup_render_page() {
 	} elseif ( 'fees' === $app && function_exists( 'md_fees_render' ) ) {
 		md_fees_render(); // v4.13 · 진료비
 	} elseif ( 'survey' === $app && function_exists( 'md_survey_render' ) ) {
-		md_survey_render(); // v4.10 · 환자 만족도 조사
+		md_survey_render(); // v4.10 · 접수수납목록 (만족도 조사 명단)
+	} elseif ( 'survey_result' === $app && function_exists( 'md_survey_render_result' ) ) {
+		md_survey_render_result(); // v4.19.7 · 만족도 응답·집계·설정 (관리자)
 	} elseif ( 'stock' !== $app ) {
 		md_sup_render_hub();
 	} else {

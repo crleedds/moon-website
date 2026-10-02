@@ -881,8 +881,15 @@ add_action( 'rest_api_init', function () {
 function md_survey_can_view() { return function_exists( 'md_sup_can_use' ) && md_sup_can_use(); }
 function md_survey_can_manage() { return function_exists( 'md_sup_can_manage' ) && md_sup_can_manage(); }
 
+/**
+ * 직원 허브 안 주소. v4.19.7 부터 도구가 둘로 나뉜다 (원장 지시 — 데스크 화면에서 탭 제거)
+ *   survey         접수수납목록 (파일 올리기) — 직원 누구나
+ *   survey_result  만족도 응답 · 스탭별 집계 · 설정 — 관리자
+ */
 function md_survey_admin_url( $args = array() ) {
-	return md_sup_url( array_merge( array( 'app' => 'survey' ), $args ) );
+	$sv  = isset( $args['sv'] ) ? $args['sv'] : '';
+	$app = in_array( $sv, array( 'responses', 'stats', 'settings' ), true ) ? 'survey_result' : 'survey';
+	return md_sup_url( array_merge( array( 'app' => $app ), $args ) );
 }
 
 function md_survey_handle_post() {
@@ -1040,7 +1047,7 @@ function md_survey_range( $from, $to ) {
 
 function md_survey_enqueue() {
 	if ( ! function_exists( 'md_sup_is_page' ) || ! md_sup_is_page() ) { return; }
-	if ( ! function_exists( 'md_sup_current_app' ) || 'survey' !== md_sup_current_app() ) { return; }
+	if ( ! function_exists( 'md_sup_current_app' ) || ! in_array( md_sup_current_app(), array( 'survey', 'survey_result' ), true ) ) { return; }
 	$dir = get_stylesheet_directory();
 	$uri = get_stylesheet_directory_uri();
 	if ( file_exists( $dir . '/assets/css/survey.css' ) ) {
@@ -1049,20 +1056,19 @@ function md_survey_enqueue() {
 }
 add_action( 'wp_enqueue_scripts', 'md_survey_enqueue', 31 );
 
+/** 결과 도구(관리자)의 탭 — 접수수납목록 화면에는 탭이 없다 (v4.19.7) */
 function md_survey_tabs() {
-	$tabs = array( 'roster' => array( 'label' => '접수수납목록', 'icon' => '📋', 'manage' => false ) );
-	if ( md_survey_can_manage() ) {
-		$tabs['responses'] = array( 'label' => '응답',   'icon' => '💬', 'manage' => true );
-		$tabs['stats']     = array( 'label' => '스탭별 집계', 'icon' => '📊', 'manage' => true );
-		$tabs['settings']  = array( 'label' => '설정',   'icon' => '⚙️', 'manage' => true );
-	}
-	return $tabs;
+	return array(
+		'responses' => array( 'label' => '응답',        'icon' => '💬' ),
+		'stats'     => array( 'label' => '스탭별 집계', 'icon' => '📊' ),
+		'settings'  => array( 'label' => '설정',        'icon' => '⚙️' ),
+	);
 }
 
 function md_survey_current_tab() {
-	$t = isset( $_GET['sv'] ) ? sanitize_key( wp_unslash( $_GET['sv'] ) ) : 'roster';
+	$t = isset( $_GET['sv'] ) ? sanitize_key( wp_unslash( $_GET['sv'] ) ) : 'responses';
 	$tabs = md_survey_tabs();
-	return isset( $tabs[ $t ] ) ? $t : 'roster';
+	return isset( $tabs[ $t ] ) ? $t : 'responses';
 }
 
 function md_survey_notice() {
@@ -1087,10 +1093,18 @@ function md_survey_notice() {
 	}
 }
 
+/** 접수수납목록 도구 — 파일 올리기 화면 하나뿐 (v4.19.7 · 탭 없음) */
 function md_survey_render() {
+	md_survey_notice();
+	md_survey_render_roster();
+}
+
+/** 만족도 결과 도구 — 관리자. 응답 · 스탭별 집계 · 설정 */
+function md_survey_render_result() {
+	if ( ! md_survey_can_manage() ) { echo '<div class="mds-card"><div class="mds-empty">관리자만 볼 수 있습니다.</div></div>'; return; }
 	$tab = md_survey_current_tab();
 	?>
-	<nav class="mds-tabs" aria-label="접수수납목록 메뉴">
+	<nav class="mds-tabs" aria-label="만족도 결과 메뉴">
 		<?php foreach ( md_survey_tabs() as $key => $t ) : ?>
 			<a class="mds-tab<?php echo $tab === $key ? ' is-on' : ''; ?>" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => $key ) ) ); ?>"<?php echo $tab === $key ? ' aria-current="page"' : ''; ?>>
 				<span aria-hidden="true"><?php echo esc_html( $t['icon'] ); ?></span><?php echo esc_html( $t['label'] ); ?>
@@ -1100,10 +1114,9 @@ function md_survey_render() {
 	<?php
 	md_survey_notice();
 	switch ( $tab ) {
-		case 'responses': md_survey_render_responses(); break;
-		case 'stats':     md_survey_render_stats();     break;
-		case 'settings':  md_survey_render_settings();  break;
-		default:          md_survey_render_roster();    break;
+		case 'stats':    md_survey_render_stats();     break;
+		case 'settings': md_survey_render_settings();  break;
+		default:         md_survey_render_responses(); break;
 	}
 }
 
