@@ -500,10 +500,10 @@ function md_survey_import_rows( $rows, $date ) {
 		}
 		$d = array( 'date' => $date );
 		foreach ( $map as $field => $i ) { $d[ $field ] = isset( $cols[ $i ] ) ? $cols[ $i ] : ''; }
-		/* v4.19 · 진료의사 열이 있고 값이 있으면 그걸 담당 원장으로 — 여러 명이면 「문은수 · 정석형」 */
-		if ( isset( $d['doctors'] ) && '' !== trim( (string) $d['doctors'] ) ) {
-			$names = array_filter( array_map( 'trim', preg_split( '/[,\/·;]+/u', (string) $d['doctors'] ) ) );
-			if ( $names ) { $d['doctor'] = implode( ' · ', array_unique( $names ) ); }
+		/* v4.21.5 · 담당 원장은 엑셀의 「담당의사」 한 명 (원장 지시). 비어 있을 때만 「진료의사」의 첫 사람 */
+		if ( '' === trim( (string) ( isset( $d['doctor'] ) ? $d['doctor'] : '' ) ) && isset( $d['doctors'] ) && '' !== trim( (string) $d['doctors'] ) ) {
+			$names = array_values( array_filter( array_map( 'trim', preg_split( '/[,\/·;]+/u', (string) $d['doctors'] ) ) ) );
+			if ( $names ) { $d['doctor'] = $names[0]; }
 		}
 		unset( $d['doctors'] );
 		/* 접수시각 열이 있으면 그 날짜로 (2026-10-01 11:40:32 · 20261001114032 · 엑셀 일련번호 모두 받음) */
@@ -881,7 +881,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 	$staff = $visit->staff;
 	?>
 	<?php /* v4.21.4 · 원장·선생님·병원 각 1문항(1~5) + 주관식. 사진은 아직 쓰지 않는다. 문항은 평가보다 「환자의 경험」을 묻는 말투로 (원장 지시) */
-	$docs   = '' !== $visit->doctor ? array_values( array_filter( array_map( 'trim', explode( '·', $visit->doctor ) ) ) ) : array();
+	$docs   = '' !== $visit->doctor ? array_slice( array_values( array_filter( array_map( 'trim', explode( '·', $visit->doctor ) ) ) ), 0, 1 ) : array(); /* v4.21.5 · 담당의사는 한 명 */
 	$others = md_survey_staff_choices( $staff );
 	$sel    = isset( $_POST['staff_pick'] ) ? sanitize_text_field( wp_unslash( $_POST['staff_pick'] ) ) : '';
 	$doc_titles = array_map( 'md_survey_doctor_title', $docs );
@@ -901,13 +901,13 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 
 		<div class="sv-who">
 			<span>진료일</span><b><?php echo esc_html( date_i18n( 'Y년 n월 j일', strtotime( $visit->visit_date ) ) ); ?></b>
-			<?php if ( $doc_titles ) : ?><span>진료</span><b><?php echo esc_html( implode( ' · ', $doc_titles ) ); ?></b><?php endif; ?>
-			<span>함께한 분</span><b><?php echo esc_html( $staff ); ?> 선생님</b>
+			<?php if ( $doc_titles ) : ?><span>담당의사</span><b><?php echo esc_html( $doc_titles[0] ); ?></b><?php endif; ?>
+			<span>담당직원</span><b><?php echo esc_html( $staff ); ?> 선생님</b>
 		</div>
 
 		<?php if ( $others ) : ?>
 		<details class="sv-fix"<?php echo '' !== $sel ? ' open' : ''; ?>>
-			<summary>함께한 선생님이 다른 분이셨나요?</summary>
+			<summary>담당직원이 다른 분이셨나요?</summary>
 			<p>기억나는 분을 골라 주세요. 잘 모르시면 「잘 모르겠어요」를 고르시면 됩니다.</p>
 			<div class="sv-pick">
 				<label><input type="radio" name="staff_pick" value="" <?php checked( '', $sel ); ?>><b><?php echo esc_html( $staff ); ?></b><small>맞아요</small></label>
@@ -921,13 +921,13 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 
 		<?php if ( $doc_titles ) : ?>
 		<div class="sv-q">
-			<h2>1. 오늘 <?php echo esc_html( count( $doc_titles ) > 1 ? '원장님들' : $doc_titles[0] ); ?>께 진료받으시는 동안 마음이 편안하셨나요?</h2>
+			<h2>1. 오늘 <?php echo esc_html( $doc_titles[0] ); ?>께 진료받으시는 동안 마음이 편안하셨나요?</h2>
 			<?php $scale( 'q_doctor', '원장님', '조금 불편했어요', '아주 편안했어요' ); ?>
 		</div>
 		<?php endif; ?>
 
 		<div class="sv-q">
-			<h2><?php echo $doc_titles ? '2' : '1'; ?>. 곁에서 도와드린 선생님 덕분에 진료가 수월하셨나요?</h2>
+			<h2><?php echo $doc_titles ? '2' : '1'; ?>. 곁에서 도와드린 담당직원분 덕분에 진료가 수월하셨나요?</h2>
 			<?php $scale( 'q_staff', '선생님', '조금 아쉬웠어요', '아주 든든했어요', false ); ?>
 		</div>
 
