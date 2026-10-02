@@ -30,7 +30,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_SURVEY_SCHEMA', 6 ); /* v4.21.3 · 응답에 staff_orig · staff_changed (환자가 담당 선생님을 바로잡음) — 5: 파일 base64 */
+define( 'MD_SURVEY_SCHEMA', 7 ); /* v4.21.4 · q_doctor 추가 — 원장·선생님·병원 각 1~5 (6: staff_orig·staff_changed) */
 
 /* ============================================================
  * 테이블 · 설치
@@ -85,6 +85,7 @@ function md_survey_maybe_install() {
 		staff VARCHAR(40) NOT NULL DEFAULT '',
 		staff_orig VARCHAR(40) NOT NULL DEFAULT '',
 		staff_changed TINYINT UNSIGNED NOT NULL DEFAULT 0,
+		q_doctor TINYINT UNSIGNED NOT NULL DEFAULT 0,
 		q_service TINYINT UNSIGNED NOT NULL,
 		q_explain TINYINT UNSIGNED NOT NULL,
 		q_recommend TINYINT UNSIGNED NOT NULL,
@@ -258,6 +259,13 @@ function md_survey_person_photo( $name, $kind = 'staff' ) {
 		}
 	}
 	return '';
+}
+
+/** 원장 호칭 — 문은수는 「병원장님」, 나머지는 「원장님」 (v4.21.4 · 원장 지시) */
+function md_survey_doctor_title( $name ) {
+	$n = trim( preg_replace( '/\s*(대표\s*)?(병원장|원장)(님)?\s*$/u', '', (string) $name ) );
+	if ( '' === $n ) { return ''; }
+	return $n . ( '문은수' === $n ? ' 병원장님' : ' 원장님' );
 }
 
 /** 「다른 선생님이었어요」 고르기 목록 — 직원 정보의 재직 직원(의료진 제외) 중 명단의 담당 스탭이 아닌 사람 */
@@ -528,15 +536,15 @@ function md_survey_response_by_visit( $visit_id ) {
  * @param string $staff   실제로 평가받는 직원 (환자가 바로잡았으면 그 이름, 모르면 '')
  * @param int    $changed 0 명단 그대로 · 1 환자가 다른 직원으로 바꿈 · 2 모르겠다
  */
-function md_survey_response_insert( $visit, $q1, $q2, $q3, $comment, $staff = null, $changed = 0 ) {
+function md_survey_response_insert( $visit, $q1, $q2, $q3, $comment, $staff = null, $changed = 0, $qd = 0 ) {
 	global $wpdb;
 	$tr = md_survey_table_response();
 	if ( null === $staff ) { $staff = $visit->staff; }
 	$ok = $wpdb->query( $wpdb->prepare(
-		"INSERT IGNORE INTO $tr (visit_id, visit_date, chart_no, patient_name, doctor, staff, staff_orig, staff_changed, q_service, q_explain, q_recommend, comment, ip_hash, created_at)
-		 VALUES (%d, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %s, %s, %s)",
+		"INSERT IGNORE INTO $tr (visit_id, visit_date, chart_no, patient_name, doctor, staff, staff_orig, staff_changed, q_doctor, q_service, q_explain, q_recommend, comment, ip_hash, created_at)
+		 VALUES (%d, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %s, %s, %s)",
 		(int) $visit->id, $visit->visit_date, $visit->chart_no, $visit->patient_name, $visit->doctor, $staff, $visit->staff, (int) $changed,
-		(int) $q1, (int) $q2, (int) $q3, $comment, md_survey_ip_hash(), current_time( 'mysql' )
+		(int) $qd, (int) $q1, (int) $q2, (int) $q3, $comment, md_survey_ip_hash(), current_time( 'mysql' )
 	) );
 	if ( ! $ok ) { return false; } /* 0 = 이미 있음 (UNIQUE visit) */
 	$wpdb->update( md_survey_table_visit(), array( 'responded_at' => current_time( 'mysql' ) ), array( 'id' => (int) $visit->id ) );
@@ -560,12 +568,29 @@ function md_survey_stats( $from, $to ) {
 	return $wpdb->get_results( $wpdb->prepare(
 		"SELECT staff,
 			SUM(q_service > 0) AS n,
-			AVG(NULLIF(q_service,0)) AS avg_service, AVG(NULLIF(q_explain,0)) AS avg_explain, AVG(q_recommend) AS avg_recommend,
-			SUM(q_service = 5) AS top_service, SUM(q_explain = 5) AS top_explain,
-			SUM(q_service BETWEEN 1 AND 2 OR q_explain BETWEEN 1 AND 2) AS low_n,
+			AVG(NULLIF(q_service,0)) AS avg_service, AVG(NULLIF(q_recommend,0)) AS avg_recommend,
+			SUM(q_service = 5) AS top_service,
+			SUM(q_service BETWEEN 1 AND 2) AS low_n,
 			SUM(comment IS NOT NULL AND comment <> '') AS comment_n,
 			SUM(staff_changed = 1) AS changed_n
-		 FROM $tr WHERE visit_date BETWEEN %s AND %s AND staff <> '' GROUP BY staff ORDER BY n DESC, avg_service DESC", $from, $to ) );
+		 FROM $tr WHERE visit_date BETWEEN %s AND %s AND staff <> '' AND q_service > 0 GROUP BY staff ORDER BY n DESC, avg_service DESC", $from, $to ) );
+}
+
+/** v4.21.4 · 원장별 — 그날 진료한 원장이 여럿이면 각자에게 같은 점수로 센다 */
+function md_survey_stats_doctor( $from, $to ) {
+	global $wpdb;
+	$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT doctor, q_doctor FROM ' . md_survey_table_response() . ' WHERE visit_date BETWEEN %s AND %s AND q_doctor > 0', $from, $to ) );
+	$by = array();
+	foreach ( (array) $rows as $r ) {
+		foreach ( array_filter( array_map( 'trim', explode( '·', (string) $r->doctor ) ) ) as $d ) {
+			if ( ! isset( $by[ $d ] ) ) { $by[ $d ] = array( 'n' => 0, 'sum' => 0, 'top' => 0, 'low' => 0 ); }
+			$by[ $d ]['n']++; $by[ $d ]['sum'] += (int) $r->q_doctor;
+			if ( 5 === (int) $r->q_doctor ) { $by[ $d ]['top']++; }
+			if ( (int) $r->q_doctor <= 2 ) { $by[ $d ]['low']++; }
+		}
+	}
+	uasort( $by, function ( $a, $b ) { return $b['n'] - $a['n']; } );
+	return $by;
 }
 
 /* ============================================================
@@ -696,9 +721,12 @@ function md_survey_public_render() {
 				$err = '설문 화면이 만료되었습니다. 처음부터 다시 진행해 주세요.';
 			} else {
 				$visit = $v;
-				$q1 = isset( $_POST['q_service'] ) ? (int) $_POST['q_service'] : 0;
-				$q2 = isset( $_POST['q_explain'] ) ? (int) $_POST['q_explain'] : 0;
-				$q3 = isset( $_POST['q_recommend'] ) ? (int) $_POST['q_recommend'] : -1;
+				/* v4.21.4 · 원장(q_doctor) · 선생님(q_staff → q_service) · 병원(q_hospital → q_recommend), 모두 1~5 */
+				$qd = isset( $_POST['q_doctor'] ) ? (int) $_POST['q_doctor'] : 0;
+				$q1 = isset( $_POST['q_staff'] ) ? (int) $_POST['q_staff'] : 0;
+				$q2 = 0;
+				$q3 = isset( $_POST['q_hospital'] ) ? (int) $_POST['q_hospital'] : 0;
+				$has_doc = '' !== trim( (string) $v->doctor );
 				$cm = isset( $_POST['comment'] ) ? mb_substr( trim( sanitize_textarea_field( wp_unslash( $_POST['comment'] ) ) ), 0, 1000 ) : '';
 				/* v4.21.3 · 환자가 담당 선생님을 바로잡은 경우 — 명단의 직원 이름 중에서만 받는다 */
 				$pick = isset( $_POST['staff_pick'] ) ? sanitize_text_field( wp_unslash( $_POST['staff_pick'] ) ) : '';
@@ -710,12 +738,12 @@ function md_survey_public_render() {
 				$need_staff = 2 !== $changed;
 				if ( $v->responded_at || md_survey_response_by_visit( $v->id ) ) {
 					$step = 'already';
-				} elseif ( $q3 < 0 || $q3 > 10 || ( $need_staff && ( $q1 < 1 || $q1 > 5 || $q2 < 1 || $q2 > 5 ) ) ) {
+				} elseif ( $q3 < 1 || $q3 > 5 || ( $has_doc && ( $qd < 1 || $qd > 5 ) ) || ( $need_staff && ( $q1 < 1 || $q1 > 5 ) ) ) {
 					$step = 'form';
-					$err  = $need_staff ? '1~3번을 모두 골라 주세요.' : '3번을 골라 주세요.';
+					$err  = '점수 문항을 모두 골라 주세요.';
 				} else {
-					if ( ! $need_staff ) { $q1 = 0; $q2 = 0; } /* 누가 도왔는지 모르면 선생님 문항은 0(무응답)으로 */
-					$step = md_survey_response_insert( $v, $q1, $q2, $q3, $cm, $who, $changed ) ? 'done' : 'already';
+					if ( ! $need_staff ) { $q1 = 0; } /* 누가 도왔는지 모르면 선생님 문항은 0(무응답)으로 */
+					$step = md_survey_response_insert( $v, $q1, $q2, $q3, $cm, $who, $changed, $has_doc ? $qd : 0 ) ? 'done' : 'already';
 				}
 			}
 		}
@@ -852,74 +880,66 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 	$tok   = md_survey_sign( $visit->id, time() + 2 * HOUR_IN_SECONDS );
 	$staff = $visit->staff;
 	?>
-	<?php /* v4.21.3 · 평가받는 느낌을 줄이고(원장 지시) · 사진은 상반신이 보이게 크게 · 담당 선생님이 다르면 환자가 바로잡는다 */
+	<?php /* v4.21.4 · 원장·선생님·병원 각 1문항(1~5) + 주관식. 사진은 아직 쓰지 않는다. 문항은 평가보다 「환자의 경험」을 묻는 말투로 (원장 지시) */
 	$docs   = '' !== $visit->doctor ? array_values( array_filter( array_map( 'trim', explode( '·', $visit->doctor ) ) ) ) : array();
 	$others = md_survey_staff_choices( $staff );
 	$sel    = isset( $_POST['staff_pick'] ) ? sanitize_text_field( wp_unslash( $_POST['staff_pick'] ) ) : '';
+	$doc_titles = array_map( 'md_survey_doctor_title', $docs );
+	$pv = function ( $k ) { return isset( $_POST[ $k ] ) ? (int) $_POST[ $k ] : 0; };
+	$scale = function ( $field, $label, $lo, $hi, $req = true ) use ( $pv ) { ?>
+		<div class="sv-scale sv-scale--5" role="radiogroup" aria-label="<?php echo esc_attr( $label ); ?>">
+			<?php for ( $i = 1; $i <= 5; $i++ ) : ?><label><input type="radio" name="<?php echo esc_attr( $field ); ?>" value="<?php echo $i; ?>"<?php echo $req ? ' required' : ''; ?> <?php checked( $i, $pv( $field ) ); ?>><span><?php echo $i; ?></span></label><?php endfor; ?>
+		</div>
+		<div class="sv-ends"><span><?php echo esc_html( $lo ); ?></span><span><?php echo esc_html( $hi ); ?></span></div>
+	<?php };
 	?>
 	<form method="post" class="sv-card" action="<?php echo esc_url( md_survey_public_url() ); ?>">
 		<input type="hidden" name="md_sv" value="submit">
 		<input type="hidden" name="tok" value="<?php echo esc_attr( $tok ); ?>">
 		<h1><?php echo esc_html( $name ); ?>님, 오늘 진료 잘 받으셨나요?</h1>
-		<p>오늘 <?php echo esc_html( $name ); ?>님을 도와드린 분들이에요. 남겨 주신 말씀은 더 나은 진료를 위해 소중히 쓰겠습니다. 30초면 됩니다.</p>
-		<p class="sv-date"><?php echo esc_html( date_i18n( 'Y년 n월 j일', strtotime( $visit->visit_date ) ) ); ?></p>
+		<p>오늘 하루가 어떠셨는지 편하게 들려주세요. 30초면 됩니다.</p>
 
-		<div class="sv-people">
-			<?php foreach ( $docs as $dn ) : $ph = md_survey_person_photo( $dn, 'doctor' ); ?>
-				<figure class="sv-person">
-					<span class="sv-person__ph"><?php if ( $ph ) : ?><img src="<?php echo esc_url( $ph ); ?>" alt="<?php echo esc_attr( $dn ); ?> 원장" onerror="this.parentNode.className+=' is-noimg';this.remove()"><?php endif; ?><em><?php echo esc_html( mb_substr( $dn, 0, 1 ) ); ?></em></span>
-					<figcaption><b><?php echo esc_html( $dn ); ?> 원장</b></figcaption>
-				</figure>
-			<?php endforeach; ?>
-			<?php $ph = md_survey_person_photo( $staff, 'staff' ); ?>
-			<figure class="sv-person is-staff">
-				<span class="sv-person__ph"><?php if ( $ph ) : ?><img src="<?php echo esc_url( $ph ); ?>" alt="<?php echo esc_attr( $staff ); ?> 선생님" onerror="this.parentNode.className+=' is-noimg';this.remove()"><?php endif; ?><em><?php echo esc_html( mb_substr( $staff, 0, 1 ) ); ?></em></span>
-				<figcaption><b><?php echo esc_html( $staff ); ?> 선생님</b><small>오늘 곁에서 도와드렸어요</small></figcaption>
-			</figure>
+		<div class="sv-who">
+			<span>진료일</span><b><?php echo esc_html( date_i18n( 'Y년 n월 j일', strtotime( $visit->visit_date ) ) ); ?></b>
+			<?php if ( $doc_titles ) : ?><span>진료</span><b><?php echo esc_html( implode( ' · ', $doc_titles ) ); ?></b><?php endif; ?>
+			<span>함께한 분</span><b><?php echo esc_html( $staff ); ?> 선생님</b>
 		</div>
 
 		<?php if ( $others ) : ?>
 		<details class="sv-fix"<?php echo '' !== $sel ? ' open' : ''; ?>>
-			<summary>도와주신 선생님이 사진과 다른가요?</summary>
+			<summary>함께한 선생님이 다른 분이셨나요?</summary>
 			<p>기억나는 분을 골라 주세요. 잘 모르시면 「잘 모르겠어요」를 고르시면 됩니다.</p>
 			<div class="sv-pick">
-				<label><input type="radio" name="staff_pick" value="" <?php checked( '', $sel ); ?>><span class="sv-pick__ph"><?php $p0 = md_survey_person_photo( $staff, 'staff' ); if ( $p0 ) : ?><img src="<?php echo esc_url( $p0 ); ?>" alt=""><?php else : ?><em><?php echo esc_html( mb_substr( $staff, 0, 1 ) ); ?></em><?php endif; ?></span><b><?php echo esc_html( $staff ); ?></b><small>사진 속 분이 맞아요</small></label>
+				<label><input type="radio" name="staff_pick" value="" <?php checked( '', $sel ); ?>><b><?php echo esc_html( $staff ); ?></b><small>맞아요</small></label>
 				<?php foreach ( $others as $o ) : ?>
-					<label><input type="radio" name="staff_pick" value="<?php echo esc_attr( $o['name'] ); ?>" <?php checked( $o['name'], $sel ); ?>><span class="sv-pick__ph"><?php if ( $o['photo'] ) : ?><img src="<?php echo esc_url( $o['photo'] ); ?>" alt="" loading="lazy"><?php else : ?><em><?php echo esc_html( mb_substr( $o['name'], 0, 1 ) ); ?></em><?php endif; ?></span><b><?php echo esc_html( $o['name'] ); ?></b></label>
+					<label><input type="radio" name="staff_pick" value="<?php echo esc_attr( $o['name'] ); ?>" <?php checked( $o['name'], $sel ); ?>><b><?php echo esc_html( $o['name'] ); ?></b></label>
 				<?php endforeach; ?>
-				<label><input type="radio" name="staff_pick" value="__unknown" <?php checked( '__unknown', $sel ); ?>><span class="sv-pick__ph"><em>?</em></span><b>잘 모르겠어요</b></label>
+				<label><input type="radio" name="staff_pick" value="__unknown" <?php checked( '__unknown', $sel ); ?>><b>잘 모르겠어요</b></label>
 			</div>
 		</details>
 		<?php endif; ?>
 
+		<?php if ( $doc_titles ) : ?>
 		<div class="sv-q">
-			<h2>1. 도와드린 선생님이 친절하고 세심하게 대해 드렸나요?</h2>
-			<div class="sv-scale sv-scale--5" role="radiogroup" aria-label="친절">
-				<?php for ( $i = 1; $i <= 5; $i++ ) : ?><label><input type="radio" name="q_service" value="<?php echo $i; ?>" <?php checked( $i, isset( $_POST['q_service'] ) ? (int) $_POST['q_service'] : 0 ); ?>><span><?php echo $i; ?></span></label><?php endfor; ?>
-			</div>
-			<div class="sv-ends"><span>아쉬웠어요</span><span>아주 좋았어요</span></div>
+			<h2>1. 오늘 <?php echo esc_html( count( $doc_titles ) > 1 ? '원장님들' : $doc_titles[0] ); ?>께 진료받으시는 동안 마음이 편안하셨나요?</h2>
+			<?php $scale( 'q_doctor', '원장님', '조금 불편했어요', '아주 편안했어요' ); ?>
+		</div>
+		<?php endif; ?>
+
+		<div class="sv-q">
+			<h2><?php echo $doc_titles ? '2' : '1'; ?>. 곁에서 도와드린 선생님 덕분에 진료가 수월하셨나요?</h2>
+			<?php $scale( 'q_staff', '선생님', '조금 아쉬웠어요', '아주 든든했어요', false ); ?>
 		</div>
 
 		<div class="sv-q">
-			<h2>2. 진료 안내와 주의사항을 알기 쉽게 들으셨나요?</h2>
-			<div class="sv-scale sv-scale--5" role="radiogroup" aria-label="설명">
-				<?php for ( $i = 1; $i <= 5; $i++ ) : ?><label><input type="radio" name="q_explain" value="<?php echo $i; ?>" <?php checked( $i, isset( $_POST['q_explain'] ) ? (int) $_POST['q_explain'] : 0 ); ?>><span><?php echo $i; ?></span></label><?php endfor; ?>
-			</div>
-			<div class="sv-ends"><span>어려웠어요</span><span>아주 쉬웠어요</span></div>
+			<h2><?php echo $doc_titles ? '3' : '2'; ?>. 접수부터 귀가까지, 문치과병원에서의 오늘 하루는 어떠셨나요?</h2>
+			<?php $scale( 'q_hospital', '병원', '아쉬웠어요', '아주 좋았어요' ); ?>
 		</div>
 
 		<div class="sv-q">
-			<h2>3. 가족이나 지인에게 문치과병원을 권하고 싶으신가요?</h2>
-			<div class="sv-scale sv-scale--11" role="radiogroup" aria-label="추천">
-				<?php for ( $i = 0; $i <= 10; $i++ ) : ?><label><input type="radio" name="q_recommend" value="<?php echo $i; ?>" required <?php checked( $i, isset( $_POST['q_recommend'] ) ? (int) $_POST['q_recommend'] : -1 ); ?>><span><?php echo $i; ?></span></label><?php endfor; ?>
-			</div>
-			<div class="sv-ends"><span>아니요</span><span>꼭 권하고 싶어요</span></div>
-		</div>
-
-		<div class="sv-q">
-			<h2>4. 고마웠던 점이나 바라는 점을 들려주세요 <small style="font-weight:500;color:var(--mute)">(선택)</small></h2>
+			<h2><?php echo $doc_titles ? '4' : '3'; ?>. 고마웠던 점이나 바라는 점을 들려주세요 <small style="font-weight:500;color:var(--mute)">(선택)</small></h2>
 			<textarea name="comment" maxlength="1000" placeholder="예) 아프지 않게 살펴 주셔서 고마웠어요 · 대기 시간이 조금 길었어요"><?php echo isset( $_POST['comment'] ) ? esc_textarea( wp_unslash( $_POST['comment'] ) ) : ''; ?></textarea>
-			<p class="sv-hint">고마운 마음은 해당 선생님께 꼭 전해 드릴게요.</p>
+			<p class="sv-hint">고마운 마음은 해당 분께 꼭 전해 드릴게요.</p>
 		</div>
 
 		<button type="submit" class="sv-btn">보내기</button>
@@ -1151,9 +1171,9 @@ function md_survey_export_csv( $from, $to, $staff ) {
 	header( 'Content-Disposition: attachment; filename="만족도조사_' . $from . '_' . $to . '.csv"' );
 	echo "\xEF\xBB\xBF"; /* 엑셀이 한글을 제대로 읽도록 BOM */
 	$out = fopen( 'php://output', 'w' );
-	fputcsv( $out, array( '진료일', '차트번호', '이름', '담당원장', '담당스탭', '응대', '설명', '추천', '의견', '작성시각' ) );
+	fputcsv( $out, array( '진료일', '차트번호', '이름', '원장', '선생님', '명단상 선생님', '원장 점수', '선생님 점수', '병원 점수', '의견', '작성시각' ) );
 	foreach ( $rows as $r ) {
-		fputcsv( $out, array( $r->visit_date, $r->chart_no, $r->patient_name, $r->doctor, $r->staff, $r->q_service, $r->q_explain, $r->q_recommend, (string) $r->comment, $r->created_at ) );
+		fputcsv( $out, array( $r->visit_date, $r->chart_no, $r->patient_name, $r->doctor, $r->staff, isset( $r->staff_orig ) ? $r->staff_orig : '', isset( $r->q_doctor ) ? $r->q_doctor : '', $r->q_service, $r->q_recommend, (string) $r->comment, $r->created_at ) );
 	}
 	fclose( $out );
 }
@@ -1419,17 +1439,18 @@ function md_survey_render_responses() {
 	<?php else : ?>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>진료일</th><th>환자</th><th>담당 원장</th><th>담당 스탭</th><th class="num">응대</th><th class="num">설명</th><th class="num">추천</th><th>의견</th><th>작성</th></tr></thead>
+				<thead><tr><th>진료일</th><th>환자</th><th>원장</th><th>선생님</th><th class="num">원장</th><th class="num">선생님</th><th class="num">병원</th><th>의견</th><th>작성</th></tr></thead>
 				<tbody>
-				<?php foreach ( $rows as $r ) : $low = ( ( $r->q_service >= 1 && $r->q_service <= 2 ) || ( $r->q_explain >= 1 && $r->q_explain <= 2 ) ); ?>
+				<?php $lowf = function ( $v ) { return ( (int) $v >= 1 && (int) $v <= 2 ) ? 'is-low' : ''; };
+				foreach ( $rows as $r ) : $qd = isset( $r->q_doctor ) ? (int) $r->q_doctor : 0; $low = $lowf( $qd ) || $lowf( $r->q_service ) || $lowf( $r->q_recommend ); ?>
 					<tr class="<?php echo $low ? 'is-lowrow' : ''; ?>">
 						<td><?php echo esc_html( date_i18n( 'm.d', strtotime( $r->visit_date ) ) ); ?></td>
 						<td><b><?php echo esc_html( $r->patient_name ); ?></b><span class="mds-item__meta"><?php echo esc_html( $r->chart_no ); ?></span></td>
 						<td><?php echo esc_html( $r->doctor ); ?></td>
 						<td><b><?php echo esc_html( '' !== $r->staff ? $r->staff : '(모름)' ); ?></b><?php if ( ! empty( $r->staff_changed ) && '' !== (string) $r->staff_orig ) : ?><span class="mds-item__meta">명단: <?php echo esc_html( $r->staff_orig ); ?> → 환자가 바로잡음</span><?php endif; ?></td>
-						<td class="num <?php echo ( $r->q_service >= 1 && $r->q_service <= 2 ) ? 'is-low' : ''; ?>"><?php echo $r->q_service ? (int) $r->q_service : '–'; ?></td>
-						<td class="num <?php echo ( $r->q_explain >= 1 && $r->q_explain <= 2 ) ? 'is-low' : ''; ?>"><?php echo $r->q_explain ? (int) $r->q_explain : '–'; ?></td>
-						<td class="num <?php echo $r->q_recommend <= 6 ? 'is-low' : ''; ?>"><?php echo (int) $r->q_recommend; ?></td>
+						<td class="num <?php echo $lowf( $qd ); ?>"><?php echo $qd ? $qd : '–'; ?></td>
+						<td class="num <?php echo $lowf( $r->q_service ); ?>"><?php echo $r->q_service ? (int) $r->q_service : '–'; ?></td>
+						<td class="num <?php echo $lowf( $r->q_recommend ); ?>"><?php echo (int) $r->q_recommend; ?></td>
 						<td class="mdsv-comment"><?php echo nl2br( esc_html( (string) $r->comment ) ); ?></td>
 						<td class="mds-last"><?php echo esc_html( date_i18n( 'm.d H:i', strtotime( $r->created_at ) ) ); ?></td>
 					</tr>
@@ -1437,7 +1458,7 @@ function md_survey_render_responses() {
 				</tbody>
 			</table>
 		</div>
-		<p class="mds-hint">응대·설명 1~2점, 추천 6점 이하는 붉게 표시됩니다. 낮은 점수는 당일 실장이 전화로 확인하는 것을 권합니다.</p>
+		<p class="mds-hint">모든 문항은 1~5점입니다. 1~2점은 붉게 표시됩니다. 낮은 점수는 당일 실장이 전화로 확인하는 것을 권합니다.</p>
 	<?php endif; ?>
 	<?php
 }
@@ -1470,7 +1491,7 @@ function md_survey_render_stats() {
 	<?php else : ?>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>담당 스탭</th><th class="num">응답 수</th><th class="num">응대 평균</th><th class="num">응대 5점 비율</th><th class="num">설명 평균</th><th class="num">설명 5점 비율</th><th class="num">추천 평균</th><th class="num">1~2점</th><th class="num">의견</th><th class="num">환자가 바로잡음</th></tr></thead>
+				<thead><tr><th>선생님</th><th class="num">응답 수</th><th class="num">평균</th><th class="num">5점 비율</th><th class="num">1~2점</th><th class="num">병원 평균</th><th class="num">의견</th><th class="num">환자가 바로잡음</th></tr></thead>
 				<tbody>
 				<?php foreach ( $rows as $r ) : $n = max( 1, (int) $r->n ); ?>
 					<tr>
@@ -1478,10 +1499,8 @@ function md_survey_render_stats() {
 						<td class="num"><?php echo $n; ?></td>
 						<td class="num"><?php echo number_format( (float) $r->avg_service, 2 ); ?></td>
 						<td class="num"><b><?php echo round( 100 * (int) $r->top_service / $n ); ?>%</b></td>
-						<td class="num"><?php echo number_format( (float) $r->avg_explain, 2 ); ?></td>
-						<td class="num"><b><?php echo round( 100 * (int) $r->top_explain / $n ); ?>%</b></td>
-						<td class="num"><?php echo number_format( (float) $r->avg_recommend, 1 ); ?></td>
 						<td class="num <?php echo (int) $r->low_n ? 'is-low' : ''; ?>"><?php echo (int) $r->low_n; ?></td>
+						<td class="num"><?php echo number_format( (float) $r->avg_recommend, 2 ); ?></td>
 						<td class="num"><?php echo (int) $r->comment_n; ?></td>
 						<td class="num"><?php echo (int) $r->changed_n; ?></td>
 					</tr>
@@ -1489,6 +1508,19 @@ function md_survey_render_stats() {
 				</tbody>
 			</table>
 		</div>
+		<?php $docs = md_survey_stats_doctor( $from, $to ); if ( $docs ) : ?>
+		<h2 class="mdsv-h" style="margin-top:22px">원장님별</h2>
+		<div class="mds-tablewrap">
+			<table class="mds-table mdsv-table">
+				<thead><tr><th>원장</th><th class="num">응답 수</th><th class="num">평균</th><th class="num">5점 비율</th><th class="num">1~2점</th></tr></thead>
+				<tbody>
+				<?php foreach ( $docs as $dn => $d ) : $n = max( 1, $d['n'] ); ?>
+					<tr><td><b><?php echo esc_html( md_survey_doctor_title( $dn ) ); ?></b></td><td class="num"><?php echo (int) $d['n']; ?></td><td class="num"><?php echo number_format( $d['sum'] / $n, 2 ); ?></td><td class="num"><b><?php echo round( 100 * $d['top'] / $n ); ?>%</b></td><td class="num <?php echo $d['low'] ? 'is-low' : ''; ?>"><?php echo (int) $d['low']; ?></td></tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+		<?php endif; ?>
 		<p class="mds-hint">기간 전체 <?php echo (int) $total; ?>건. 평균보다 <b>5점 비율</b>로 비교하세요 — 대부분 4~5점을 주므로 평균은 차이가 잘 나지 않습니다. 응답 30건 미만(표본 표시)은 우연에 좌우되니 비교에 쓰지 마세요. 발치·신경치료처럼 힘든 진료는 점수가 낮게 나오는 경향이 있습니다.</p>
 	<?php endif; ?>
 	<?php
