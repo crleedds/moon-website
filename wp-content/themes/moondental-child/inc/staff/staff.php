@@ -107,6 +107,9 @@ function md_staff_sync_site() {
 	set_theme_mod( 'md_content_staff_list', implode( "\n", $lines ) );
 	if ( function_exists( 'wp_cache_flush' ) ) { wp_cache_flush(); }
 	if ( function_exists( 'wp_cache_clear_cache' ) ) { wp_cache_clear_cache(); } /* WP Super Cache */
+	/* v4.21.1 · 테마 자체 페이지 캐시(md_pcache_ 트랜지언트, 6시간)도 비운다 — 이걸 빠뜨려 의료진 페이지에 옛 명단이 남았다 */
+	global $wpdb;
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_md\_pcache\_%' OR option_name LIKE '\_transient\_timeout\_md\_pcache\_%'" );
 }
 
 /* ============================================================
