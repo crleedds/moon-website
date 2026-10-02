@@ -268,7 +268,7 @@ function md_survey_person_photo( $name, $kind = 'staff' ) {
 function md_survey_doctor_title( $name ) {
 	$n = trim( preg_replace( '/\s*(대표\s*)?(병원장|원장)(님)?\s*$/u', '', (string) $name ) );
 	if ( '' === $n ) { return ''; }
-	return $n . ( '문은수' === $n ? ' 병원장님' : ' 원장님' );
+	return $n . ' 원장님'; /* v4.21.32 · 문은수도 「원장」 (원장 지시 — 병원장 호칭 철회) */
 }
 
 /** 「다른 선생님이었어요」 고르기 목록 — 직원 정보의 재직 직원(의료진 제외) 중 명단의 담당 스탭이 아닌 사람 */
