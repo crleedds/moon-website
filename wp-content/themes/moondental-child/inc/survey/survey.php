@@ -289,6 +289,13 @@ function md_survey_norm_name( $v ) {
 	return preg_replace( '/\s+/u', '', trim( sanitize_text_field( (string) $v ) ) );
 }
 
+/** 이름 비교 키 — 공백 제거 + 한글 이름 끝의 덴트웹 접미사(B, 2 …) 제거 (v4.21.27) */
+function md_survey_name_key( $v ) {
+	$n = md_survey_norm_name( $v );
+	$s = preg_replace( '/[A-Za-z0-9]+$/u', '', $n );
+	return ( '' !== $s && preg_match( '/\p{Hangul}/u', $s ) ) ? $s : $n;
+}
+
 function md_survey_ip_hash() {
 	$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
 	return substr( hash_hmac( 'md5', $ip, md_survey_secret() ), 0, 32 );
@@ -761,15 +768,20 @@ function md_survey_public_render() {
 				} else {
 					global $wpdb;
 					$tv   = md_survey_table_visit();
-					$rows = $wpdb->get_results( $wpdb->prepare(
-						"SELECT * FROM $tv WHERE phone_hash = %s AND REPLACE(patient_name, ' ', '') = %s AND visit_date BETWEEN %s AND %s ORDER BY visit_date DESC, id DESC",
-						md_survey_phone_hash( $phone4 ), $pname, $since, $today ) );
+					/* v4.21.27 · 덴트웹은 동명이인에게 「김기관B」처럼 접미사를 붙인다. 알림톡의 #환자명# 에는
+					 * 접미사가 빠질 수 있어, 전화 해시로 먼저 찾고 이름은 접미사를 뗀 채로 비교한다 */
+					$cand = $wpdb->get_results( $wpdb->prepare(
+						"SELECT * FROM $tv WHERE phone_hash = %s AND visit_date BETWEEN %s AND %s ORDER BY visit_date DESC, id DESC",
+						md_survey_phone_hash( $phone4 ), $since, $today ) );
+					$want = md_survey_name_key( $pname );
+					$rows = array();
+					foreach ( (array) $cand as $c ) { if ( md_survey_name_key( $c->patient_name ) === $want ) { $rows[] = $c; } }
 					if ( empty( $rows ) ) {
 						$n = md_survey_note_fail();
 						$step = $n >= 5 ? 'locked' : 'identify';
 						if ( 'identify' === $step ) {
-							$err = '최근 ' . $win . '일 안의 진료 기록에서 일치하는 분을 찾지 못했습니다. 이름과 숫자를 다시 확인해 주세요. 진료 직후라면 잠시 후 다시 시도해 주세요.';
-							$pname = ''; /* 링크의 이름이 틀렸을 수도 있으니 이름 칸을 열어 준다 */
+							$err = '최근 ' . $win . '일 안의 진료 기록에서 일치하는 분을 찾지 못했습니다. 휴대전화 번호를 다시 확인해 주세요. 진료 직후라면 잠시 후 다시 시도해 주세요.';
+							if ( ! $from_link ) { $pname = ''; } /* 링크로 이름이 왔으면 이름 칸을 열지 않는다 (v4.21.27) */
 						}
 					} else {
 						delete_transient( md_survey_fail_key() );
