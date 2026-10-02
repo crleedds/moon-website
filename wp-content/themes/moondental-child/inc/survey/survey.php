@@ -868,6 +868,12 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-field{display:block;margin:14px 0}
 .sv-field>span{display:block;margin-bottom:6px;font-size:.86rem;font-weight:700;color:var(--sub)}
 .sv-field input[type=tel]{width:100%;font:inherit;font-size:1.25rem;letter-spacing:.12em;min-height:54px;padding:10px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text)}
+.sv-phone{display:flex;align-items:center;gap:8px;font-size:1.35rem;font-weight:800;letter-spacing:.06em;color:var(--sub)}
+.sv-phone__fix.is-hidden{color:var(--mute);letter-spacing:.1em}
+.sv-phone__dash{color:var(--mute)}
+.sv-phone input[type=tel]{flex:0 0 7.2em;width:7.2em;min-width:0;text-align:center;font-weight:800;font-size:1.35rem;letter-spacing:.2em;padding:10px 8px;border:2px solid var(--primary)}
+.sv-phone input::placeholder{color:var(--line);letter-spacing:.2em}
+.sv-field>small{display:block;margin-top:6px;font-size:.8rem;color:var(--mute)}
 .sv-field input:focus{outline:2px solid var(--primary);outline-offset:0;border-color:var(--primary)}
 .sv-field small{display:block;margin-top:5px;font-size:.8rem;color:var(--mute)}
 .sv-agree{display:flex;gap:10px;align-items:flex-start;margin:16px 0 6px;font-size:.9rem;color:var(--sub)}
@@ -1029,11 +1035,16 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 			<small>병원에 등록된 이름</small>
 		</label>
 		<?php endif; ?>
-		<label class="sv-field">
-			<span>휴대전화 가운데 4자리</span>
-			<input type="tel" name="phone4" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="1234" autocomplete="off" <?php echo '' !== $pname ? 'autofocus' : ''; ?>>
-			<small>010-<b>1234</b>-5678 이라면 <b>1234</b></small>
-		</label>
+		<?php /* v4.21.9 · 전화번호 모양 그대로 — 010 - [○○○○] - ●●●● (원장 제안) */ ?>
+		<div class="sv-field">
+			<span id="sv-ph-l">휴대전화 가운데 4자리</span>
+			<div class="sv-phone" aria-hidden="false">
+				<span class="sv-phone__fix">010</span><span class="sv-phone__dash">-</span>
+				<input type="tel" name="phone4" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="○○○○" autocomplete="off" aria-labelledby="sv-ph-l" <?php echo '' !== $pname ? 'autofocus' : ''; ?>>
+				<span class="sv-phone__dash">-</span><span class="sv-phone__fix is-hidden">●●●●</span>
+			</div>
+			<small>○ 자리에 휴대전화 번호 가운데 4자리를 넣어 주세요</small>
+		</div>
 		<?php /* v4.21.8 · 체크칸 없이 버튼으로 동의 — 입력 최소화. 링크로 이름이 왔으면 4자리를 다 치는 순간 넘어간다 */ ?>
 		<button type="submit" class="sv-btn">동의하고 설문 시작</button>
 		<details class="sv-consent-d">
