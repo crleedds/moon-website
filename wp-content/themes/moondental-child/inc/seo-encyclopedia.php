@@ -67,6 +67,8 @@ function moondental_enc_term_desc( $post, $len = 150 ) {
  * ---------------------------------------------------------------- */
 function moondental_enc_title( $title ) {
 	if ( ! moondental_enc_is_term() ) return $title;
+	$b = function_exists( 'moondental_enc_boost' ) ? moondental_enc_boost() : null; /* v4.20 · 보강 항목은 질문형 제목 */
+	if ( $b && ! empty( $b['title'] ) ) return $b['title'];
 	$t = get_the_title();
 	return $t . ' | 치과 백과사전 · 천안·아산 문치과병원';
 }
@@ -82,6 +84,8 @@ function moondental_enc_metadesc( $desc ) {
 	if ( ! moondental_enc_is_term() ) return $desc;
 	$post = get_post();
 	if ( ! $post ) return $desc;
+	$b = function_exists( 'moondental_enc_boost' ) ? moondental_enc_boost( $post ) : null; /* v4.20 */
+	if ( $b && ! empty( $b['desc'] ) ) return $b['desc'];
 	$cat  = moondental_enc_term_cat( $post->ID );
 	$map  = moondental_enc_center_map();
 	$tail = isset( $map[ $cat ] ) ? ' 천안·아산 문치과병원 ' . $map[ $cat ]['name'] . ' 안내.' : ' 천안·아산 문치과병원 치과 백과사전.';
@@ -118,6 +122,8 @@ function moondental_enc_jsonld() {
 	$url   = get_permalink( $post );
 	$title = get_the_title( $post );
 	$desc  = moondental_enc_term_desc( $post, 300 );
+	$boost = function_exists( 'moondental_enc_boost' ) ? moondental_enc_boost( $post ) : null;
+	if ( $boost && ! empty( $boost['desc'] ) ) { $desc = $boost['desc']; }
 	$cat   = moondental_enc_term_cat( $post->ID );
 	$map   = moondental_enc_center_map();
 	$cats  = get_the_terms( $post->ID, 'md_term_category' );
@@ -188,6 +194,7 @@ function moondental_enc_jsonld() {
 	// (d) FAQ — 템플릿이 본문 h3 에서 만든 것과 같은 질문·답변
 	if ( function_exists( 'moondental_md_term_generated_faq' ) ) {
 		$faqs = moondental_md_term_generated_faq( $title, $post->post_content );
+		if ( function_exists( 'moondental_enc_boost_faqs' ) ) { $faqs = moondental_enc_boost_faqs( $post, $faqs ); } /* v4.20 · 보강 FAQ 먼저 */
 		if ( $faqs ) {
 			$items = array();
 			foreach ( array_slice( $faqs, 0, 8 ) as $f ) {

@@ -17084,3 +17084,12 @@ a.md-center-color--preservation:hover { color: #4A7530 !important; }
 .md-copybtn--icon { width: auto; height: auto; padding: 6px; border: 0; background: transparent; box-shadow: none; border-radius: 8px; color: var(--color-text-sub); }
 .md-copybtn--icon svg { width: 16px; height: 16px; }
 .md-copybtn--icon:hover { color: var(--color-primary-dark); background: transparent; transform: none; }
+
+/* v4.20 · 백과사전 · 한눈에 보기 카드 */
+.md-term-glance { margin: 0 0 28px; padding: 20px 22px; border-radius: var(--radius-lg); background: var(--color-surface); border: 1px solid var(--color-border); }
+.md-term-glance__title { margin: 0 0 12px; font-size: 1rem; font-weight: 800; color: var(--color-primary-dark); letter-spacing: .02em; }
+.md-term-glance__list { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.md-term-glance__row { display: grid; grid-template-columns: 7.5em 1fr; gap: 12px; align-items: start; }
+.md-term-glance__row dt { margin: 0; font-weight: 800; font-size: .92rem; color: var(--color-text); }
+.md-term-glance__row dd { margin: 0; font-size: .95rem; line-height: 1.7; color: var(--color-text-sub); word-break: keep-all; }
+@media (max-width: 560px) { .md-term-glance { padding: 16px; } .md-term-glance__row { grid-template-columns: 1fr; gap: 4px; } }

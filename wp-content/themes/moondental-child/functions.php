@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '4.19.8' );
+define( 'MOONDENTAL_VERSION', '4.20' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -1297,6 +1297,17 @@ add_action( 'after_setup_theme', function() {
 	update_option( 'moondental_staff_v3316', 'done' );
 }, 48 );
 
+/* 일회성 마이그레이션 v4.20 · 홈 검색 제목 — 「천안 치과」가 앞에 오게 (원장 지시 · 사이트에 보이는 제목은 그대로) */
+add_action( 'init', function() {
+	if ( get_option( 'moondental_home_seo_title_v420' ) === 'done' ) return;
+	$cur = (string) get_theme_mod( 'md_content_seo_home_title', '' );
+	$old = array( '', '한아의료재단 문치과병원 | 천안 아산에서 30여년을 한결같이', '한아의료재단 문치과병원 천안·아산 | 30여년을 한결같이' );
+	if ( in_array( trim( $cur ), $old, true ) ) {
+		set_theme_mod( 'md_content_seo_home_title', '천안 치과 문치과병원 · 임플란트 · 교정 · 사랑니 | 한아의료재단' );
+	}
+	update_option( 'moondental_home_seo_title_v420', 'done' );
+}, 30 );
+
 /* 일회성 마이그레이션 v4.16 · 원장 지시 · 「직원 전용」 → 「직원 라운지」, 오시는 길 제목 */
 add_action( 'init', function() {
 	if ( get_option( 'moondental_lounge_v416' ) === 'done' ) return;
@@ -2101,6 +2112,7 @@ require_once MOONDENTAL_DIR . '/inc/care/care.php';           // v4.0 · Moon De
 if ( file_exists( MOONDENTAL_DIR . '/inc/support/support.php' ) ) { require_once MOONDENTAL_DIR . '/inc/support/support.php'; } // v4.3 · 지원 요청 (직원 전용)
 if ( file_exists( MOONDENTAL_DIR . '/inc/equipment/equipment.php' ) ) { require_once MOONDENTAL_DIR . '/inc/equipment/equipment.php'; } // v4.8 · 기구/장비 대장 (직원 전용)
 if ( file_exists( MOONDENTAL_DIR . '/inc/fees/fees.php' ) ) { require_once MOONDENTAL_DIR . '/inc/fees/fees.php'; } // v4.13 · 진료비
+if ( file_exists( MOONDENTAL_DIR . '/inc/encyclopedia-boost.php' ) ) { require_once MOONDENTAL_DIR . '/inc/encyclopedia-boost.php'; } // v4.20 · 백과사전 보강
 if ( file_exists( MOONDENTAL_DIR . '/inc/staff/staff.php' ) ) { require_once MOONDENTAL_DIR . '/inc/staff/staff.php'; } // v4.18 · 직원 정보
 if ( file_exists( MOONDENTAL_DIR . '/inc/calendar/calendar.php' ) ) { require_once MOONDENTAL_DIR . '/inc/calendar/calendar.php'; } // v4.17 · 달력
 if ( file_exists( MOONDENTAL_DIR . '/inc/survey/survey.php' ) ) { require_once MOONDENTAL_DIR . '/inc/survey/survey.php'; } // v4.10 · 환자 만족도 조사 (/만족도/ + 직원 전용 관리)

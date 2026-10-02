@@ -104,6 +104,15 @@ while ( have_posts() ) : the_post();
 	$related_service = moondental_md_term_related_service( $first_cat_slug );
 	// v3.44.91 · 용어별 FAQ 자동 생성 (본문 h3 파싱)
 	$common_faqs = moondental_md_term_generated_faq( get_the_title(), get_the_content() );
+	// v4.20 · 노출 많은 항목 보강 (한눈에 보기 · 질문형 FAQ · 관련 진료 지정)
+	$boost = function_exists( 'moondental_enc_boost' ) ? moondental_enc_boost() : null;
+	if ( $boost ) {
+		$common_faqs = moondental_enc_boost_faqs( get_post(), $common_faqs );
+		if ( ! empty( $boost['center'] ) && function_exists( 'moondental_enc_center_map' ) ) {
+			$cm = moondental_enc_center_map();
+			if ( isset( $cm[ $boost['center'] ] ) ) { $related_service = $cm[ $boost['center'] ]; }
+		}
+	}
 
 	// 관련 용어 (같은 카테고리 · 6개)
 	$related = array();
@@ -163,6 +172,18 @@ while ( have_posts() ) : the_post();
 
 <section class="md-section">
 	<div class="md-container md-container--narrow">
+
+		<?php if ( $boost && ! empty( $boost['glance'] ) ) : ?>
+		<!-- 0. 한눈에 보기 (v4.20) -->
+		<section class="md-term-glance" aria-label="한눈에 보기">
+			<h2 class="md-term-glance__title">한눈에 보기</h2>
+			<dl class="md-term-glance__list">
+				<?php foreach ( $boost['glance'] as $k => $v ) : ?>
+					<div class="md-term-glance__row"><dt><?php echo esc_html( $k ); ?></dt><dd><?php echo esc_html( $v ); ?></dd></div>
+				<?php endforeach; ?>
+			</dl>
+		</section>
+		<?php endif; ?>
 
 		<!-- 1. 본문 -->
 		<article class="md-page-content md-term-content">

@@ -302,10 +302,19 @@ if ( isset( $md_guide_for_service[ $slug ] ) && function_exists( 'md_guide_load'
 }
 ?>
 
+<?php if ( '사랑니-발치' === $slug ) { get_template_part( 'template-parts/section', 'wisdom-choose' ); } /* v4.20 · 천안에서 사랑니 치과 고를 때 보는 기준 */ ?>
+
 <?php
 /* 해당 service slug의 자동 FAQ 출력 */
 if ( function_exists( 'moondental_get_faqs_by_service' ) ) {
 	$faqs_map = moondental_get_faqs_by_service();
+	if ( '사랑니-발치' === $slug ) { /* v4.20 · 「천안 사랑니 전문 치과」 검색에 답하는 질문을 앞에 */
+		$faqs_map[ $slug ] = array_merge( array(
+			array( 'q' => '천안에서 사랑니 전문 치과를 찾는다면 무엇을 봐야 하나요?', 'a' => '매복 사랑니는 CT로 신경 위치를 보고 뽑는지, 구강외과 진료가 있는지, 실밥 제거와 드라이 소켓 치료까지 같은 곳에서 하는지, 비용을 미리 알려 주는지 네 가지입니다. 문치과병원은 구강외과가 있고 CT 진단 후 발치하며, 천안고속버스터미널 옆이라 아산 · 세종 · 평택에서도 옵니다.' ),
+			array( 'q' => '누워 있는 매복 사랑니도 당일에 뽑을 수 있나요?', 'a' => 'CT 촬영과 진단이 끝나면 대부분 당일 발치가 가능합니다. 다만 염증이 심하거나 전신질환 약(항응고제 등)을 드시는 경우는 준비 뒤 날짜를 잡습니다. 멀리서 오시면 예약 때 말씀해 주시면 상담과 발치를 하루에 묶어 드립니다.' ),
+			array( 'q' => '사랑니 발치 비용은 얼마인가요?', 'a' => '사랑니 발치는 건강보험이 적용되어 매복 정도에 따라 본인부담이 달라집니다. CT 촬영은 보험 적용 여부에 따라 금액이 다르므로 상담 때 총액을 알려 드립니다.' ),
+		), (array) $faqs_map[ $slug ] );
+	}
 	if ( isset( $faqs_map[ $slug ] ) && ! empty( $faqs_map[ $slug ] ) ) :
 ?>
 <section class="md-section md-section--sm" aria-label="자주 묻는 질문">
