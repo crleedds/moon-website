@@ -916,6 +916,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-q textarea:focus{outline:2px solid var(--primary);outline-offset:0;border-color:var(--primary)}
 .sv-done{text-align:center;padding:36px 20px}
 .sv-chat{color:var(--primary-dk);font-weight:700;word-break:break-all}
+.sv-time{display:inline-block;margin:2px 0 10px !important;padding:4px 12px;border-radius:999px;background:var(--soft);font-size:.86rem;font-weight:700;color:var(--primary-dk) !important}
 .sv-done p{word-break:keep-all;text-wrap:balance;line-height:1.75}
 .sv-done__sign{margin-top:18px !important;padding-top:16px;border-top:1px solid var(--line);font-weight:700;color:var(--text) !important}
 .sv-done .mark{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:rgba(107,143,114,.15);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:2rem}
@@ -1026,9 +1027,11 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<?php if ( '' !== $pname ) : ?>
 		<input type="hidden" name="pn" value="<?php echo esc_attr( $pname ); ?>">
 		<h1><?php echo esc_html( $pname ); ?>님, 본인 확인</h1>
+		<p class="sv-time">⏱ 약 30초면 끝나요</p>
 		<p>진료받으신 분만 참여할 수 있습니다. 휴대전화 가운데 4자리만 확인합니다.</p>
 		<?php else : ?>
 		<h1>진료받으신 본인 확인</h1>
+		<p class="sv-time">⏱ 약 30초면 끝나요</p>
 		<p>진료받으신 분만 참여할 수 있습니다. 이름과 휴대전화 가운데 4자리를 확인합니다.</p>
 		<label class="sv-field">
 			<span>이름</span>
