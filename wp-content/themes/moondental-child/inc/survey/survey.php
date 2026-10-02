@@ -404,7 +404,7 @@ function md_survey_visit_upsert( $d, $source = 'manual' ) {
 	if ( '' === $chart )  { return new WP_Error( 'md_survey', '차트번호가 없습니다.' ); }
 	if ( '' === $name )   { return new WP_Error( 'md_survey', '이름이 없습니다.' ); }
 	if ( '' === $phone4 ) { return new WP_Error( 'md_survey', '휴대폰 번호(가운데 4자리)를 읽지 못했습니다 (' . $name . ').' ); }
-	if ( '' === $staff )  { return new WP_Error( 'md_survey', '담당 스탭이 없습니다.' ); }
+	/* v4.21.13 · 담당직원이 비어도 명단에 넣는다 — 그 환자는 담당직원 문항 없이 설문 (원장 질문에 따라 변경) */
 
 	$t   = md_survey_table_visit();
 	$row = $wpdb->get_row( $wpdb->prepare( "SELECT id, responded_at FROM $t WHERE visit_date = %s AND chart_no = %s", $date, $chart ) );
@@ -577,7 +577,7 @@ function md_survey_import_rows( $rows, $date ) {
 			elseif ( is_numeric( $dv ) && (float) $dv > 30000 && function_exists( 'md_xlsx_serial_to_date' ) ) { $d['date'] = md_xlsx_serial_to_date( $dv ); }
 			else { $d['date'] = $date; }
 		}
-		if ( ! isset( $d['staff'] ) || '' === trim( (string) $d['staff'] ) ) { $skip++; continue; }
+		if ( ! isset( $d['staff'] ) || '' === trim( (string) $d['staff'] ) ) { $skip++; $d['staff'] = ''; } /* 미입력도 넣고, 세기만 한다 */
 		$dates[ $d['date'] ] = true;
 		$r = md_survey_visit_upsert( $d, 'import' );
 		if ( is_wp_error( $r ) ) { $errs[] = $n . '줄: ' . $r->get_error_message(); }
@@ -986,7 +986,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<div class="sv-who">
 			<span>진료일</span><b><?php echo esc_html( date_i18n( 'Y년 n월 j일 (D)', strtotime( $visit->visit_date ) ) ); ?></b>
 			<?php if ( $doc_titles ) : ?><span>담당의사</span><b><?php echo esc_html( $doc_titles[0] ); ?></b><?php endif; ?>
-			<span>담당직원</span><b><?php echo esc_html( $staff ); ?> 선생님</b>
+			<?php if ( '' !== trim( (string) $staff ) ) : ?><span>담당직원</span><b><?php echo esc_html( $staff ); ?> 선생님</b><?php endif; ?>
 		</div>
 
 		<?php if ( $doc_titles ) : $qn++; ?>
@@ -996,11 +996,12 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		</div>
 		<?php endif; ?>
 
-		<?php $qn++; ?>
+		<?php if ( '' !== trim( (string) $staff ) ) : $qn++; ?>
 		<div class="sv-q">
 			<h2><?php echo $qn; ?>. 곁에서 도와드린 담당직원분 덕분에 진료가 수월하셨나요? <small class="sv-opt">선택</small></h2>
 			<?php $scale( 'q_staff', '담당직원', '조금 아쉬웠어요', '아주 든든했어요', false, true ); ?>
 		</div>
+		<?php endif; ?>
 
 		<?php $qn++; ?>
 		<div class="sv-q">
@@ -1374,8 +1375,8 @@ function md_survey_day_counts( $from, $to ) {
 	$tv  = md_survey_table_visit();
 	$out = array();
 	$rows = $wpdb->get_results( $wpdb->prepare(
-		"SELECT visit_date, COUNT(*) AS n, SUM(responded_at IS NOT NULL) AS a, MAX(created_at) AS last_at FROM $tv WHERE visit_date BETWEEN %s AND %s GROUP BY visit_date", $from, $to ) );
-	foreach ( (array) $rows as $r ) { $r->skipped = 0; $r->total = (int) $r->n; $out[ $r->visit_date ] = $r; }
+		"SELECT visit_date, SUM(staff <> '') AS n, SUM(staff = '') AS miss, SUM(responded_at IS NOT NULL) AS a, MAX(created_at) AS last_at FROM $tv WHERE visit_date BETWEEN %s AND %s GROUP BY visit_date", $from, $to ) );
+	foreach ( (array) $rows as $r ) { $r->skipped = (int) $r->miss; $r->total = (int) $r->n + (int) $r->miss; $out[ $r->visit_date ] = $r; }
 	/* v4.19.4 · 올린 파일의 「담당직원 없음」 수를 더해 총 접수 환자 수를 만든다 */
 	$files = $wpdb->get_results( $wpdb->prepare(
 		'SELECT visit_date, skipped, uploaded_at FROM ' . md_survey_table_file() . ' WHERE visit_date BETWEEN %s AND %s', $from, $to ) );
@@ -1383,8 +1384,8 @@ function md_survey_day_counts( $from, $to ) {
 		if ( ! isset( $out[ $f->visit_date ] ) ) {
 			$out[ $f->visit_date ] = (object) array( 'visit_date' => $f->visit_date, 'n' => 0, 'a' => 0, 'last_at' => $f->uploaded_at, 'skipped' => 0, 'total' => 0 );
 		}
-		$out[ $f->visit_date ]->skipped = (int) $f->skipped;
-		$out[ $f->visit_date ]->total   = (int) $out[ $f->visit_date ]->n + (int) $f->skipped;
+		if ( 0 === (int) $out[ $f->visit_date ]->skipped ) { $out[ $f->visit_date ]->skipped = (int) $f->skipped; } /* v4.21.13 · 옛 날짜는 파일의 건너뜀 수 */
+		$out[ $f->visit_date ]->total   = (int) $out[ $f->visit_date ]->n + (int) $out[ $f->visit_date ]->skipped;
 		if ( $f->uploaded_at > $out[ $f->visit_date ]->last_at ) { $out[ $f->visit_date ]->last_at = $f->uploaded_at; }
 	}
 	return $out;
