@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '4.20.1' );
+define( 'MOONDENTAL_VERSION', '4.20.2' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -1307,6 +1307,15 @@ add_action( 'init', function() {
 	}
 	update_option( 'moondental_home_seo_title_v420', 'done' );
 }, 30 );
+
+/* 일회성 마이그레이션 v4.20.2 · 원장 지시 · 홈 검색 제목을 원래대로 되돌림 */
+add_action( 'init', function() {
+	if ( get_option( 'moondental_home_seo_title_v4201' ) === 'done' ) return;
+	if ( '천안 치과 문치과병원 · 임플란트 · 교정 · 사랑니 | 한아의료재단' === trim( (string) get_theme_mod( 'md_content_seo_home_title', '' ) ) ) {
+		set_theme_mod( 'md_content_seo_home_title', '한아의료재단 문치과병원 천안·아산 | 30여년을 한결같이' );
+	}
+	update_option( 'moondental_home_seo_title_v4201', 'done' );
+}, 31 );
 
 /* 일회성 마이그레이션 v4.16 · 원장 지시 · 「직원 전용」 → 「직원 라운지」, 오시는 길 제목 */
 add_action( 'init', function() {
