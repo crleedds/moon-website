@@ -367,3 +367,50 @@ function md_sup_login_redirect( $redirect_to, $requested, $user ) {
 	return $redirect_to;
 }
 add_filter( 'login_redirect', 'md_sup_login_redirect', 10, 3 );
+
+/* ============================================================
+ * v4.20.2 · 라운지 로그인과 워드프레스 관리 로그인을 나눈다 (원장 지시)
+ *
+ *  관리자 계정(moondentalmanager)으로 직원 라운지에 로그인하면 워드프레스 관리 화면까지
+ *  열려 버린다. 그래서 라운지 폼으로 로그인한 세션에는 표시(쿠키 md_lounge)를 남기고,
+ *  그 세션으로 wp-admin 에 들어가려 하면 비밀번호를 한 번 더 받는다 (reauth).
+ *  wp-login.php 에서 직접 로그인하면 표시가 지워져 관리 화면이 열린다.
+ *  라운지 세션에서는 상단 관리자 바도 감춘다.
+ * ============================================================ */
+
+/** 라운지 로그인 폼에만 숨은 표시를 넣는다 */
+function md_sup_lounge_login_field( $html, $args = array() ) {
+	if ( function_exists( 'md_sup_is_page' ) && md_sup_is_page() ) { $html .= '<input type="hidden" name="md_lounge" value="1">'; }
+	return $html;
+}
+add_filter( 'login_form_bottom', 'md_sup_lounge_login_field', 10, 2 );
+
+/** 로그인 성공 시 — 라운지에서 왔으면 표시 쿠키, 아니면(wp-login.php 직접) 표시 삭제 */
+function md_sup_lounge_mark( $user_login, $user ) {
+	$secure = is_ssl();
+	if ( ! empty( $_POST['md_lounge'] ) ) {
+		setcookie( 'md_lounge', '1', time() + 14 * DAY_IN_SECONDS, '/', '', $secure, true );
+		$_COOKIE['md_lounge'] = '1';
+	} else {
+		setcookie( 'md_lounge', '', time() - HOUR_IN_SECONDS, '/', '', $secure, true );
+		unset( $_COOKIE['md_lounge'] );
+	}
+}
+add_action( 'wp_login', 'md_sup_lounge_mark', 10, 2 );
+
+/** 라운지 세션으로 관리 화면에 오면 비밀번호를 다시 받는다 (admin-ajax · 크론은 제외) */
+function md_sup_lounge_admin_guard() {
+	if ( wp_doing_ajax() || ! is_admin() ) { return; }
+	if ( defined( 'DOING_CRON' ) && DOING_CRON ) { return; }
+	if ( empty( $_COOKIE['md_lounge'] ) || ! is_user_logged_in() ) { return; }
+	$to = isset( $_SERVER['REQUEST_URI'] ) ? home_url( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : admin_url();
+	wp_safe_redirect( wp_login_url( $to, true ) ); /* reauth=1 → 인증 쿠키를 지우고 다시 묻는다 */
+	exit;
+}
+add_action( 'admin_init', 'md_sup_lounge_admin_guard', 0 );
+
+/** 라운지 세션에서는 관리자 바를 감춘다 */
+function md_sup_lounge_hide_admin_bar( $show ) {
+	return ! empty( $_COOKIE['md_lounge'] ) ? false : $show;
+}
+add_filter( 'show_admin_bar', 'md_sup_lounge_hide_admin_bar', 20 );
