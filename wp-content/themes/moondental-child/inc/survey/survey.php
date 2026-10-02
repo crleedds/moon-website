@@ -622,12 +622,13 @@ function md_survey_response_insert( $visit, $q1, $q2, $q3, $comment, $staff = nu
 	return true;
 }
 
-function md_survey_responses( $from, $to, $staff = '' ) {
+function md_survey_responses( $from, $to, $staff = '', $doctor = '' ) {
 	global $wpdb;
 	$tr  = md_survey_table_response();
 	$sql = "SELECT * FROM $tr WHERE visit_date BETWEEN %s AND %s";
 	$args = array( $from, $to );
 	if ( '' !== $staff ) { $sql .= ' AND staff = %s'; $args[] = $staff; }
+	if ( '' !== $doctor ) { $sql .= ' AND ( doctor = %s OR doctor LIKE %s )'; $args[] = $doctor; $args[] = '%' . $wpdb->esc_like( $doctor ) . '%'; } /* v4.21.30 · 담당의사로 보기 */
 	$sql .= ' ORDER BY created_at DESC, id DESC LIMIT 2000';
 	return $wpdb->get_results( $wpdb->prepare( $sql, $args ) );
 }
@@ -645,6 +646,18 @@ function md_survey_stats( $from, $to ) {
 			SUM(comment IS NOT NULL AND comment <> '') AS comment_n,
 			SUM(staff_changed = 1) AS changed_n
 		 FROM $tr WHERE visit_date BETWEEN %s AND %s AND staff <> '' AND q_service > 0 AND flags = '' GROUP BY staff ORDER BY n DESC, avg_service DESC", $from, $to ) );
+}
+
+/** 응답에 나온 담당의사 이름 목록 (보기 필터용) */
+function md_survey_doctor_names() {
+	global $wpdb;
+	$out = array();
+	foreach ( (array) $wpdb->get_col( 'SELECT DISTINCT doctor FROM ' . md_survey_table_response() . " WHERE doctor <> ''" ) as $d ) {
+		foreach ( array_filter( array_map( 'trim', explode( '·', (string) $d ) ) ) as $n ) { $out[ $n ] = true; }
+	}
+	$out = array_keys( $out );
+	sort( $out );
+	return $out;
 }
 
 /** v4.21.4 · 원장별 — 그날 진료한 원장이 여럿이면 각자에게 같은 점수로 센다 */
@@ -1249,7 +1262,8 @@ function md_survey_handle_post() {
 			md_survey_export_csv(
 				isset( $_POST['from'] ) ? sanitize_text_field( wp_unslash( $_POST['from'] ) ) : '',
 				isset( $_POST['to'] ) ? sanitize_text_field( wp_unslash( $_POST['to'] ) ) : '',
-				isset( $_POST['staff'] ) ? sanitize_text_field( wp_unslash( $_POST['staff'] ) ) : ''
+				isset( $_POST['staff'] ) ? sanitize_text_field( wp_unslash( $_POST['staff'] ) ) : '',
+				isset( $_POST['doctor'] ) ? sanitize_text_field( wp_unslash( $_POST['doctor'] ) ) : ''
 			);
 			exit;
 	}
@@ -1259,9 +1273,9 @@ function md_survey_handle_post() {
 }
 add_action( 'template_redirect', 'md_survey_handle_post', 1 );
 
-function md_survey_export_csv( $from, $to, $staff ) {
+function md_survey_export_csv( $from, $to, $staff, $doctor = '' ) {
 	list( $from, $to ) = md_survey_range( $from, $to );
-	$rows = md_survey_responses( $from, $to, $staff );
+	$rows = md_survey_responses( $from, $to, $staff, $doctor );
 	nocache_headers();
 	header( 'Content-Type: text/csv; charset=utf-8' );
 	header( 'Content-Disposition: attachment; filename="만족도조사_' . $from . '_' . $to . '.csv"' );
@@ -1513,7 +1527,8 @@ function md_survey_render_responses() {
 	if ( ! md_survey_can_manage() ) { echo '<div class="mds-card"><div class="mds-empty">관리자만 볼 수 있습니다.</div></div>'; return; }
 	list( $from, $to ) = md_survey_range( isset( $_GET['from'] ) ? wp_unslash( $_GET['from'] ) : '', isset( $_GET['to'] ) ? wp_unslash( $_GET['to'] ) : '' );
 	$staff = isset( $_GET['staff'] ) ? sanitize_text_field( wp_unslash( $_GET['staff'] ) ) : '';
-	$rows  = md_survey_responses( $from, $to, $staff );
+	$doctor = isset( $_GET['doctor'] ) ? sanitize_text_field( wp_unslash( $_GET['doctor'] ) ) : '';
+	$rows  = md_survey_responses( $from, $to, $staff, $doctor );
 	global $wpdb;
 	$staffs = $wpdb->get_col( 'SELECT DISTINCT staff FROM ' . md_survey_table_response() . ' ORDER BY staff' );
 	?>
@@ -1521,15 +1536,19 @@ function md_survey_render_responses() {
 		<form method="get" class="mdsv-range" action="<?php echo esc_url( md_survey_admin_url() ); ?>">
 			<?php md_sup_app_field(); ?><input type="hidden" name="sv" value="responses">
 			<input type="date" name="from" value="<?php echo esc_attr( $from ); ?>"> ~ <input type="date" name="to" value="<?php echo esc_attr( $to ); ?>">
-			<select name="staff"><option value="">모든 스탭</option><?php foreach ( $staffs as $s ) : ?><option value="<?php echo esc_attr( $s ); ?>" <?php selected( $s, $staff ); ?>><?php echo esc_html( $s ); ?></option><?php endforeach; ?></select>
+			<select name="doctor"><option value="">모든 담당의사</option><?php foreach ( md_survey_doctor_names() as $s ) : ?><option value="<?php echo esc_attr( $s ); ?>" <?php selected( $s, $doctor ); ?>><?php echo esc_html( $s ); ?></option><?php endforeach; ?></select>
+			<select name="staff"><option value="">모든 담당직원</option><?php foreach ( $staffs as $s ) : if ( '' === (string) $s ) { continue; } ?><option value="<?php echo esc_attr( $s ); ?>" <?php selected( $s, $staff ); ?>><?php echo esc_html( $s ); ?></option><?php endforeach; ?></select>
 			<button type="submit" class="mds-btn mds-btn--ghost">보기</button>
 		</form>
 		<form method="post" class="mds-inline">
 			<input type="hidden" name="md_survey_action" value="export"><input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_export' ) ); ?>">
-			<input type="hidden" name="from" value="<?php echo esc_attr( $from ); ?>"><input type="hidden" name="to" value="<?php echo esc_attr( $to ); ?>"><input type="hidden" name="staff" value="<?php echo esc_attr( $staff ); ?>">
+			<input type="hidden" name="from" value="<?php echo esc_attr( $from ); ?>"><input type="hidden" name="to" value="<?php echo esc_attr( $to ); ?>"><input type="hidden" name="staff" value="<?php echo esc_attr( $staff ); ?>"><input type="hidden" name="doctor" value="<?php echo esc_attr( $doctor ); ?>">
 			<button type="submit" class="mds-btn mds-btn--ghost">CSV 내려받기</button>
 		</form>
 	</div>
+	<?php if ( '' !== $staff || '' !== $doctor ) : /* v4.21.30 · 집계에서 이름을 눌러 들어온 경우 */ ?>
+		<p class="mdsv-filterbar"><b><?php echo esc_html( trim( $doctor . ( $doctor && $staff ? ' · ' : '' ) . $staff ) ); ?></b> 응답 <?php echo count( $rows ); ?>건 · <a href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'responses', 'from' => $from, 'to' => $to ) ) ); ?>">전체 보기</a> · <a href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'stats', 'from' => $from, 'to' => $to ) ) ); ?>">집계로 돌아가기</a></p>
+	<?php endif; ?>
 	<?php if ( empty( $rows ) ) : ?>
 		<div class="mds-card"><div class="mds-empty">이 기간에 응답이 없습니다.</div></div>
 	<?php else : ?>
@@ -1587,28 +1606,13 @@ function md_survey_render_stats() {
 	<?php else : ?>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<?php /* v4.21.29 · 「환자가 바로잡음」 열 제거(그 기능을 뺐다) · 담당 환자 수와 응답률 추가 · 이름을 누르면 그 사람 응답만 */
-				global $wpdb;
-				$tv = md_survey_table_visit();
-				$vis_staff = array(); $vis_doc = array();
-				foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT staff, COUNT(*) AS c FROM $tv WHERE visit_date BETWEEN %s AND %s AND staff <> '' GROUP BY staff", $from, $to ) ) as $x ) { $vis_staff[ $x->staff ] = (int) $x->c; }
-				foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT doctor, COUNT(*) AS c FROM $tv WHERE visit_date BETWEEN %s AND %s AND doctor <> '' GROUP BY doctor", $from, $to ) ) as $x ) {
-					foreach ( array_filter( array_map( 'trim', explode( '·', $x->doctor ) ) ) as $dn ) { $vis_doc[ $dn ] = ( isset( $vis_doc[ $dn ] ) ? $vis_doc[ $dn ] : 0 ) + (int) $x->c; }
-				}
-				$rate = function ( $n, $base ) { return $base > 0 ? round( 100 * $n / $base ) . '%' : '–'; };
-				?>
-				<thead><tr><th>담당직원</th><th class="num">담당 환자</th><th class="num">응답</th><th class="num">응답률</th><th class="num">평균</th><th class="num">5점 비율</th><th class="num">1~2점</th><th class="num">의견</th></tr></thead>
+				<?php /* v4.21.30 · 이 화면은 평균만 (원장 지시). 이름을 누르면 그 사람 응답 목록 */ ?>
+				<thead><tr><th>담당직원</th><th class="num">평균</th></tr></thead>
 				<tbody>
-				<?php foreach ( $rows as $r ) : $n = max( 1, (int) $r->n ); $base = isset( $vis_staff[ $r->staff ] ) ? $vis_staff[ $r->staff ] : 0; ?>
+				<?php foreach ( $rows as $r ) : ?>
 					<tr>
-						<td><a class="mdsv-name" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'responses', 'from' => $from, 'to' => $to, 'staff' => $r->staff ) ) ); ?>"><b><?php echo esc_html( $r->staff ); ?></b></a><?php if ( (int) $r->n < 30 ) : ?><span class="mds-flag">응답 적음</span><?php endif; ?></td>
-						<td class="num"><?php echo $base ? (int) $base : '–'; ?></td>
-						<td class="num"><?php echo (int) $r->n; ?></td>
-						<td class="num"><?php echo esc_html( $rate( (int) $r->n, $base ) ); ?></td>
-						<td class="num"><?php echo number_format( (float) $r->avg_service, 2 ); ?></td>
-						<td class="num"><b><?php echo round( 100 * (int) $r->top_service / $n ); ?>%</b></td>
-						<td class="num <?php echo (int) $r->low_n ? 'is-low' : ''; ?>"><?php echo (int) $r->low_n; ?></td>
-						<td class="num"><?php echo (int) $r->comment_n; ?></td>
+						<td><a class="mdsv-name" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'responses', 'from' => $from, 'to' => $to, 'staff' => $r->staff ) ) ); ?>"><b><?php echo esc_html( $r->staff ); ?></b></a></td>
+						<td class="num"><b><?php echo number_format( (float) $r->avg_service, 2 ); ?></b></td>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>
@@ -1618,16 +1622,16 @@ function md_survey_render_stats() {
 		<h2 class="mdsv-h" style="margin-top:22px">담당의사별</h2>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>담당의사</th><th class="num">담당 환자</th><th class="num">응답</th><th class="num">응답률</th><th class="num">평균</th><th class="num">5점 비율</th><th class="num">1~2점</th></tr></thead>
+				<thead><tr><th>담당의사</th><th class="num">평균</th></tr></thead>
 				<tbody>
-				<?php foreach ( $docs as $dn => $d ) : $n = max( 1, $d['n'] ); $base = isset( $vis_doc[ $dn ] ) ? $vis_doc[ $dn ] : 0; ?>
-					<tr><td><b><?php echo esc_html( $dn ); ?></b><?php if ( $d['n'] < 30 ) : ?><span class="mds-flag">응답 적음</span><?php endif; ?></td><td class="num"><?php echo $base ? (int) $base : '–'; ?></td><td class="num"><?php echo (int) $d['n']; ?></td><td class="num"><?php echo esc_html( $rate( (int) $d['n'], $base ) ); ?></td><td class="num"><?php echo number_format( $d['sum'] / $n, 2 ); ?></td><td class="num"><b><?php echo round( 100 * $d['top'] / $n ); ?>%</b></td><td class="num <?php echo $d['low'] ? 'is-low' : ''; ?>"><?php echo (int) $d['low']; ?></td></tr>
+				<?php foreach ( $docs as $dn => $d ) : $n = max( 1, $d['n'] ); ?>
+					<tr><td><a class="mdsv-name" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'responses', 'from' => $from, 'to' => $to, 'doctor' => $dn ) ) ); ?>"><b><?php echo esc_html( $dn ); ?></b></a></td><td class="num"><b><?php echo number_format( $d['sum'] / $n, 2 ); ?></b></td></tr>
 				<?php endforeach; ?>
 				</tbody>
 			</table>
 		</div>
 		<?php endif; ?>
-		<p class="mds-hint">기간 전체 응답 <?php echo (int) $total; ?>건 · 이름을 누르면 그 사람의 응답만 봅니다.<br>비교는 평균보다 <b>5점 비율</b>로 — 대부분 4~5점을 주어 평균은 차이가 잘 나지 않습니다. 「응답 적음」(30건 미만)은 우연에 좌우되니 비교에 쓰지 마세요. 응답률은 명단(담당 환자) 대비 응답 비율입니다.</p>
+		<p class="mds-hint">이름을 누르면 그 사람의 응답을 모두 볼 수 있습니다. 평균은 1~5점입니다.</p>
 	<?php endif; ?>
 	<?php
 }
