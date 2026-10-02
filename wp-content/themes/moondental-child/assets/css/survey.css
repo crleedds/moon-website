@@ -99,3 +99,7 @@
 /* v4.19.1 · 파일 카드 버튼 묶음 */
 .mdsv-file__btns { display: flex; gap: 8px; }
 .mdsv-file b small { font-weight: 500; color: var(--color-text-mute, #A89685); margin-left: 4px; }
+
+/* v4.19.5 · 올리는 담당자 이름 칸 */
+.mdsv-upload__who { flex: 0 1 160px; font: inherit; font-size: .98rem; min-height: 46px; padding: 8px 12px; border: 1px solid var(--color-border, #EDDFD0); border-radius: 10px; background: var(--color-white, #fff); color: var(--color-text, #3D2F26); }
+.mdsv-upload__who:focus { outline: 2px solid var(--color-primary, #D88062); outline-offset: 0; border-color: var(--color-primary, #D88062); }

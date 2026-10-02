@@ -325,7 +325,8 @@ function md_survey_file_get_full( $id ) {
 }
 
 /** 그날 파일을 바꿔 넣는다 (있으면 덮어씀) */
-function md_survey_file_store( $date, $name, $content, $r ) {
+function md_survey_file_store( $date, $name, $content, $r, $uploader = '' ) {
+	$uploader = mb_substr( trim( sanitize_text_field( (string) $uploader ) ), 0, 60 ); /* v4.19.5 · 올린 담당자 이름 (폼 입력) */
 	global $wpdb;
 	$t = md_survey_table_file();
 	$wpdb->delete( $t, array( 'visit_date' => $date ) );
@@ -334,7 +335,7 @@ function md_survey_file_store( $date, $name, $content, $r ) {
 		'file_name'   => mb_substr( sanitize_file_name( (string) $name ), 0, 190 ),
 		'file_size'   => strlen( (string) $content ),
 		'content'     => base64_encode( (string) $content ), /* v4.19.2 · 이진 데이터를 wpdb 가 손대지 않게 base64 로 */
-		'uploaded_by' => mb_substr( wp_get_current_user()->display_name, 0, 60 ),
+		'uploaded_by' => '' !== $uploader ? $uploader : mb_substr( wp_get_current_user()->display_name, 0, 60 ),
 		'uploaded_at' => current_time( 'mysql' ),
 		'added'       => (int) $r['added'],
 		'updated'     => (int) $r['updated'],
@@ -946,7 +947,10 @@ function md_survey_handle_post() {
 				@unlink( $f['tmp_name'] );
 				/* 파일 안의 접수일이 고른 날짜와 다르면 그 날짜 화면으로 보내고 알린다. 파일도 그 날짜에 보관한다 */
 				$fd = ! empty( $r['dates'] ) ? $r['dates'] : array();
-				if ( ! md_survey_file_store( 1 === count( $fd ) ? $fd[0] : $date, $f['name'], $content, $r ) ) { global $wpdb; $r['errors'][] = '파일 보관 실패: ' . ( $wpdb->last_error ? $wpdb->last_error : '원인 미상' ); }
+				$uploader = isset( $_POST['uploader'] ) ? sanitize_text_field( wp_unslash( $_POST['uploader'] ) ) : '';
+				if ( ! md_survey_file_store( 1 === count( $fd ) ? $fd[0] : $date, $f['name'], $content, $r, $uploader ) ) { global $wpdb; $r['errors'][] = '파일 보관 실패: ' . ( $wpdb->last_error ? $wpdb->last_error : '원인 미상' ); }
+				/* 다음에 올릴 때 이름을 다시 안 적어도 되게 기억 (30일) */
+				if ( '' !== $uploader ) { setcookie( 'md_survey_uploader', $uploader, time() + 30 * DAY_IN_SECONDS, '/', '', is_ssl(), true ); }
 				if ( 1 === count( $fd ) && $fd[0] !== $date ) {
 					$back = md_survey_admin_url( array( 'sv' => 'roster', 'd' => $fd[0], 'fd' => $fd[0] ) );
 				} elseif ( count( $fd ) > 1 ) {
@@ -1173,7 +1177,7 @@ function md_survey_render_roster() {
 				$d   = gmdate( 'Y-m-d', $ts );
 				$w   = (int) gmdate( 'w', $ts );
 				$c   = isset( $counts[ $d ] ) ? $counts[ $d ] : null;
-				if ( $c )                 { $cls = 'is-ok';     $label = (int) $c->total . '명'; $title = sprintf( '담당직원 있음 %d명 · 없음 %d명 · 총 %d명 · 응답 %d명 · 올림 %s', (int) $c->n, (int) $c->skipped, (int) $c->total, (int) $c->a, date_i18n( 'n/j H:i', strtotime( $c->last_at ) ) ); }
+				if ( $c )                 { $cls = 'is-ok';     $label = '총 ' . (int) $c->total . '명'; $title = sprintf( '입력 %d명 · 미입력 %d명 · 총 %d명 · 응답 %d명', (int) $c->n, (int) $c->skipped, (int) $c->total, (int) $c->a ); }
 
 				elseif ( $d > $today )    { $cls = 'is-future'; $label = '예정'; $title = '아직 오지 않은 날'; }
 				elseif ( $d === $today )  { $cls = 'is-today';  $label = '아직'; $title = '오늘 — 아직 올리지 않음'; }
@@ -1210,6 +1214,7 @@ function md_survey_render_roster() {
 			<p class="mds-hint mdsv-diag">서버: 파일 업로드 <?php echo ini_get( 'file_uploads' ) ? '켜짐' : '꺼짐'; ?> · 최대 <?php echo esc_html( ini_get( 'upload_max_filesize' ) ); ?> · ZipArchive <?php echo class_exists( 'ZipArchive' ) ? '있음' : '없음'; ?> · PclZip <?php echo $pcl ? '있음' : '없음'; ?> · SimpleXML <?php echo function_exists( 'simplexml_load_string' ) ? '있음' : '없음'; ?> · PHP <?php echo esc_html( PHP_VERSION ); ?></p>
 		<?php endif; ?>
 		<div class="mdsv-upload__row">
+			<input type="text" name="uploader" class="mdsv-upload__who" maxlength="60" required placeholder="담당자 이름" value="<?php echo esc_attr( md_survey_remembered( 'uploader' ) ); ?>" aria-label="올리는 담당자 이름">
 			<input type="file" name="xlsx" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
 			<button type="submit" class="mds-btn mds-btn--fill"><?php echo $file ? '새 파일로 바꾸기' : '올리기'; ?></button>
 		</div>
