@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '4.21.39' );
+define( 'MOONDENTAL_VERSION', '4.22.0' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2155,6 +2155,8 @@ foreach ( array(
 	if ( file_exists( $_md_sup_p ) ) { require_once $_md_sup_p; }
 }
 unset( $_md_sup_f, $_md_sup_p );
+/* v4.22 · 재고관리 v5 — AppSheet 판을 대신하는 라운지 재고관리 (inc/inventory) */
+if ( file_exists( MOONDENTAL_DIR . '/inc/inventory/inventory.php' ) ) { require_once MOONDENTAL_DIR . '/inc/inventory/inventory.php'; }
 
 
 /* ============================================================

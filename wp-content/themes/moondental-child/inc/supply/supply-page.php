@@ -57,10 +57,9 @@ function md_sup_current_tab() {
 function md_sup_apps() {
 	return array(
 		'stock' => array(
-			'label' => '재료실 요청',
+			'label' => '재고관리', /* v4.22 · AppSheet 대신 라운지 안의 재고관리 (inc/inventory) — 원장 지시 */
 			'icon'  => '📦',
-			'url'   => 'https://www.appsheet.com/start/27720143-2dc0-4c72-bb78-888903789d2f', /* v4.10.1 · 재고관리 AppSheet 앱으로 (원장 지시) */
-			'desc'  => '재료 신청 · 우리 팀 사용량과 비용 · 입출고 관리',
+			'desc'  => '재료 요청 · 출고 · 입고 · 주문 · 선납 · 통계',
 		),
 		// v4.17 · 달력 (생일 · 입사 기념일 · 병원 행사)
 		'calendar' => array(
@@ -321,6 +320,7 @@ add_filter( 'body_class', 'md_sup_body_class' );
  */
 function md_sup_title_badge( $parts ) {
 	if ( ! md_sup_is_page() || ! md_sup_can_manage() ) { return $parts; }
+	if ( function_exists( 'md_inv_title_badge' ) ) { return $parts; } /* v4.22 · 재고관리 v5 가 대기 건수를 붙인다 (옛 재료실 표는 더 쓰지 않음) */
 	$n = md_sup_pending_count();
 	if ( $n > 0 && isset( $parts['title'] ) ) {
 		$parts['title'] = '(' . $n . ') ' . $parts['title'];
@@ -922,7 +922,7 @@ function md_sup_render_denied() {
 function md_sup_render_header( $app, $tab ) {
 	$user    = wp_get_current_user();
 	$apps    = md_sup_apps();
-	$pending = md_sup_can_manage() ? md_sup_pending_count() : 0;
+	$pending = 0; /* v4.22 · 옛 재료실 탭은 더 그리지 않는다 */
 	?>
 	<div class="mds-head">
 		<div class="mds-head__top">
@@ -942,7 +942,7 @@ function md_sup_render_header( $app, $tab ) {
 			</div>
 		</div>
 
-		<?php if ( 'stock' === $app ) : ?>
+		<?php if ( false && 'stock' === $app ) : /* v4.22 · 재고관리 v5 는 자기 메뉴를 그린다 */ ?>
 			<nav class="mds-tabs" aria-label="재료실 메뉴">
 				<?php foreach ( md_sup_tabs() as $key => $t ) :
 					if ( $t['manage'] && ! md_sup_can_manage() ) { continue; } ?>
@@ -975,6 +975,9 @@ function md_sup_render_hub() {
 						<?php echo esc_html( $a['label'] ); ?>
 						<?php if ( 'calendar' === $key && function_exists( 'md_cal_today_count' ) && md_cal_today_count() ) : ?>
 							<span class="mds-app__badge">오늘 <?php echo (int) md_cal_today_count(); ?>건</span>
+						<?php endif; ?>
+						<?php if ( 'stock' === $key && function_exists( 'md_inv_counts' ) && md_sup_can_manage() && (int) get_option( 'md_inv_schema', 0 ) > 0 && md_inv_counts()['pending'] ) : ?>
+							<span class="mds-app__badge">출고 대기 <?php echo (int) md_inv_counts()['pending']; ?>건</span>
 						<?php endif; ?>
 						<?php if ( 'support' === $key && function_exists( 'md_support_open_count' ) && md_sup_can_manage() && md_support_open_count() ) : ?>
 							<span class="mds-app__badge"><?php echo (int) md_support_open_count(); ?>건 접수</span>
@@ -1031,6 +1034,8 @@ function md_sup_render_page() {
 		md_survey_render(); // v4.10 · 접수수납목록 (만족도 조사 명단)
 	} elseif ( 'survey_result' === $app && function_exists( 'md_survey_render_result' ) ) {
 		md_survey_render_result(); // v4.19.7 · 만족도 응답·집계·설정 (관리자)
+	} elseif ( 'stock' === $app && function_exists( 'md_inv_render' ) ) {
+		md_inv_render(); // v4.22 · 재고관리 v5
 	} elseif ( 'stock' !== $app ) {
 		md_sup_render_hub();
 	} else {

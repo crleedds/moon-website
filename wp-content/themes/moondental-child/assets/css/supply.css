@@ -1184,3 +1184,6 @@ body.mds-page-body button { font-family: inherit; }
    빈 칸이 눈에 덜 걸리게 흐리게 둔다 */
 .mds-teampick.is-empty ~ .mds-tablewrap .mds-avg,
 .mds-teampick.is-empty ~ .mds-tablewrap .mds-last { opacity: .45; }
+
+/* v4.22 · 라운지에는 환자용 고정 헤더가 없다 — 테마가 그 자리로 비워 둔 body 위 여백(휴대폰 72px)을 없앤다 */
+body.mds-page-body { padding-top: 0 !important; }
