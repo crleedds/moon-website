@@ -159,9 +159,15 @@ function md_inv_seed_dir() {
 	return $dirs ? $dirs[0] : '';
 }
 
+/** 라운지 화면을 연 사람(직원·관리자 누구든)이 있으면 그때 채운다 */
 function md_inv_auto_seed() {
+	if ( ! function_exists( 'md_sup_is_page' ) || ! md_sup_is_page() || ! is_user_logged_in() || ! md_inv_can_use() ) { return; }
+	md_inv_seed_now();
+}
+
+/** 예약 작업에서도 부른다 — 아무도 라운지를 열지 않아도 몇 분 안에 채워지게 */
+function md_inv_seed_now() {
 	if ( get_option( 'md_inv_seeded' ) || get_option( 'md_inv_imported' ) ) { return; }
-	if ( ! function_exists( 'md_sup_is_page' ) || ! md_sup_is_page() || ! is_user_logged_in() || ! md_inv_is_admin() ) { return; }
 	if ( (int) get_option( 'md_inv_schema', 0 ) < 1 ) { return; }
 	global $wpdb;
 	if ( (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . md_inv_t( 'item' ) ) > 0 ) { update_option( 'md_inv_seeded', 'skip-has-items', false ); return; }

@@ -151,7 +151,9 @@ function md_inv_cron_schedule() {
 add_action( 'init', 'md_inv_cron_schedule' );
 
 function md_inv_hourly() {
+	if ( (int) get_option( 'md_inv_schema', 0 ) < 1 ) { md_inv_migrate(); }
 	if ( (int) get_option( 'md_inv_schema', 0 ) < 1 ) { return; }
+	if ( function_exists( 'md_inv_seed_now' ) ) { md_inv_seed_now(); }
 	$today = current_time( 'Y-m-d' );
 	/* 매일 자동 백업 */
 	if ( md_inv_set( 'backup_on' ) && get_option( 'md_inv_last_backup' ) !== $today ) {
