@@ -349,14 +349,14 @@ function md_inv_settings_mail() {
 				<label class="iv-f"><span>시각</span><select class="iv-input" name="s_report_hour"><?php for ( $h = 0; $h <= 23; $h++ ) : ?><option value="<?php echo (int) $h; ?>"<?php selected( (int) md_inv_set( 'report_hour' ), $h ); ?>><?php echo (int) $h; ?>시 무렵</option><?php endfor; ?></select></label>
 			</div>
 			<?php md_inv_s_check( 'report_backup', '백업 파일도 함께 첨부', '메일함에 그날의 전체 백업이 쌓입니다. 서버에 문제가 생겨도 메일에서 되살릴 수 있습니다.' ); ?>
-			<p class="iv-help">보내는 시각은 그 시각 이후 첫 방문 때입니다(홈페이지 예약 작업 방식). 같은 주기에 두 번 보내지 않습니다.</p>
+			<p class="iv-help">보내는 시각은 그 시각 이후 첫 방문 때입니다(홈페이지 예약 작업 방식). 같은 주기에 두 번 보내지 않습니다. <b>지난 보고서 뒤로 바뀐 것(요청 · 출고 · 입고 · 주문 · 품목 · 설정 등)이 하나도 없으면 보내지 않습니다.</b> 「시험 메일 보내기」는 항상 보냅니다.</p>
 			<div class="iv-dlg__foot"><button class="iv-btn iv-btn--primary">저장</button></div>
 		</section>
 	</form>
 	<section class="iv-panel">
 		<h3 class="iv-h3">지금 보내 보기</h3>
 		<?php if ( is_array( $last ) ) : ?>
-			<p class="iv-help">마지막 발송: <?php echo esc_html( $last['at'] . ' · ' . ( $last['ok'] ? '성공' : '실패' ) . ' · ' . $last['to'] ); ?></p>
+			<p class="iv-help">마지막 발송: <?php echo esc_html( $last['at'] . ' · ' . ( 'skip' === $last['why'] ? '바뀐 것이 없어 보내지 않음' : ( $last['ok'] ? '성공' : '실패' ) ) . ' · ' . $last['to'] ); ?></p>
 		<?php endif; ?>
 		<form method="post" class="iv-inline-form iv-grow">
 			<?php md_inv_hidden( 'report_now' ); ?><input type="hidden" name="test" value="1">
@@ -378,7 +378,7 @@ function md_inv_settings_backup() {
 		<p class="iv-help">재고관리의 모든 표(품목 · 입출고 · 요청 · 주문 · 선납 · 팀 · 업체 · 분류 · 작업 기록)와 설정을 한 파일로 묶습니다. 매일 한 번 자동으로 뜨고, 보고서 메일에도 첨부됩니다.</p>
 		<form method="post" class="iv-settings">
 			<?php md_inv_hidden( 'settings' ); ?>
-			<?php md_inv_s_check( 'backup_on', '매일 자동 백업' ); ?>
+			<?php md_inv_s_check( 'backup_on', '매일 자동 백업', '마지막 백업 뒤로 바뀐 것이 없으면 그날은 건너뜁니다.' ); ?>
 			<div class="iv-grid3"><?php md_inv_s_num( 'backup_keep', '자동 백업 보관 개수', '개', 3, 365 ); ?></div>
 			<button class="iv-btn iv-btn--ghost">저장</button>
 		</form>

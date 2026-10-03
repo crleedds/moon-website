@@ -150,6 +150,28 @@ function md_inv_cron_schedule() {
 }
 add_action( 'init', 'md_inv_cron_schedule' );
 
+/**
+ * 그 시각 이후 실제로 바뀐 것이 있나 — 모든 쓰기는 작업 기록(md_inv_log)을 남기므로 그것으로 본다.
+ * 보고서 발송 · 백업 · 내려받기처럼 데이터를 바꾸지 않는 기록은 세지 않는다.
+ */
+function md_inv_changed_since( $since ) {
+	global $wpdb;
+	if ( '' === (string) $since ) { return true; }
+	$skip = array( '보고서 메일', '백업', '백업 내려받기', '백업 삭제', '엑셀 내려받기' );
+	$in   = implode( ',', array_fill( 0, count( $skip ), '%s' ) );
+	$n = (int) $wpdb->get_var( $wpdb->prepare(
+		'SELECT COUNT(*) FROM ' . md_inv_t( 'log' ) . " WHERE created_at > %s AND action NOT IN ($in)",
+		array_merge( array( $since ), $skip )
+	) );
+	return $n > 0;
+}
+
+/** 마지막으로 백업을 뜬 시각 (종류 상관없이) */
+function md_inv_last_backup_at() {
+	global $wpdb;
+	return (string) $wpdb->get_var( 'SELECT MAX(created_at) FROM ' . md_inv_t( 'backup' ) );
+}
+
 function md_inv_hourly() {
 	if ( (int) get_option( 'md_inv_schema', 0 ) < 1 ) { md_inv_migrate(); }
 	if ( (int) get_option( 'md_inv_schema', 0 ) < 1 ) { return; }
@@ -158,7 +180,8 @@ function md_inv_hourly() {
 	/* 매일 자동 백업 */
 	if ( md_inv_set( 'backup_on' ) && get_option( 'md_inv_last_backup' ) !== $today ) {
 		update_option( 'md_inv_last_backup', $today, false );
-		md_inv_backup_make( 'auto', '매일 자동 백업' );
+		/* 마지막 백업 뒤로 바뀐 것이 없으면 같은 내용을 또 뜨지 않는다 */
+		if ( md_inv_changed_since( md_inv_last_backup_at() ) ) { md_inv_backup_make( 'auto', '매일 자동 백업' ); }
 	}
 	/* 정기 보고서 */
 	if ( md_inv_report_due() ) {
@@ -213,9 +236,17 @@ function md_inv_report_send( $why = 'manual', $to = '' ) {
 	$s  = md_inv_settings();
 	$to = '' !== $to ? md_inv_clean_emails( $to ) : $s['report_to'];
 	if ( '' === $to ) { return new WP_Error( 'to', '받는 주소가 없습니다. 설정에서 메일 주소를 적어 주세요.' ); }
-	if ( 'auto' === $why ) { update_option( 'md_inv_last_report_key', md_inv_report_period_key( current_time( 'timestamp' ) ), false ); }
-
 	list( $from, $till ) = md_inv_report_range();
+	if ( 'auto' === $why ) {
+		update_option( 'md_inv_last_report_key', md_inv_report_period_key( current_time( 'timestamp' ) ), false );
+		/* 지난 보고서(없으면 이번 기간 시작) 뒤로 바뀐 것이 하나도 없으면 보내지 않는다 */
+		$sent  = get_option( 'md_inv_last_report_sent' );
+		$since = $sent ? $sent : $from . ' 00:00:00';
+		if ( ! md_inv_changed_since( $since ) ) {
+			update_option( 'md_inv_last_report', array( 'at' => current_time( 'mysql' ), 'ok' => 1, 'to' => $to, 'why' => 'skip' ), false );
+			return true;
+		}
+	}
 	$dir = trailingslashit( get_temp_dir() ) . 'md-inv-' . wp_generate_password( 12, false );
 	wp_mkdir_p( $dir );
 	$files = array();
@@ -255,6 +286,7 @@ function md_inv_report_send( $why = 'manual', $to = '' ) {
 	@rmdir( $dir );
 
 	update_option( 'md_inv_last_report', array( 'at' => current_time( 'mysql' ), 'ok' => $ok ? 1 : 0, 'to' => $to, 'why' => $why ), false );
+	if ( $ok && 'test' !== $why ) { update_option( 'md_inv_last_report_sent', current_time( 'mysql' ), false ); }
 	md_inv_log( '보고서 메일', ( $ok ? '보냄' : '실패' ) . ' · ' . $to . ' · ' . $why );
 	return $ok ? true : new WP_Error( 'mail', '메일을 보내지 못했습니다. 서버 메일 설정을 확인해 주세요.' );
 }
