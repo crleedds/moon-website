@@ -546,7 +546,7 @@ function md_survey_import_xlsx( $path, $date ) {
 
 /** 공통 — 행 배열(첫 줄이 제목이면 제목으로 열을 찾음) → 명단 */
 function md_survey_import_rows( $rows, $date ) {
-	$ok = 0; $upd = 0; $skip = 0; $errs = array(); $dates = array();
+	$ok = 0; $upd = 0; $skip = 0; $errs = array(); $dates = array(); $charts = array();
 	$map = null;
 	$aliases = array(
 		'date'     => array( '접수시각', '접수일', '진료일', '날짜', 'date' ),
@@ -594,11 +594,12 @@ function md_survey_import_rows( $rows, $date ) {
 		if ( ! isset( $d['staff'] ) || '' === trim( (string) $d['staff'] ) ) { $skip++; $d['staff'] = ''; } /* 미입력도 넣고, 세기만 한다 */
 		$dates[ $d['date'] ] = true;
 		$r = md_survey_visit_upsert( $d, 'import' );
+		if ( ! is_wp_error( $r ) ) { $charts[ $d['date'] ][] = (string) trim( $d['chart_no'] ); } /* v4.21.39 · 다시 올릴 때 빠진 환자 정리용 */
 		if ( is_wp_error( $r ) ) { $errs[] = $n . '줄: ' . $r->get_error_message(); }
 		elseif ( $r['updated'] ) { $upd++; }
 		else { $ok++; }
 	}
-	return array( 'added' => $ok, 'updated' => $upd, 'skipped' => $skip, 'errors' => $errs, 'dates' => array_keys( $dates ) );
+	return array( 'added' => $ok, 'updated' => $upd, 'skipped' => $skip, 'errors' => $errs, 'dates' => array_keys( $dates ), 'charts' => $charts );
 }
 
 /* ============================================================
@@ -1258,8 +1259,8 @@ function md_survey_handle_post() {
 			} elseif ( ! preg_match( '/\.xlsx$/i', (string) $f['name'] ) ) {
 				$back = add_query_arg( 'err', '.xlsx 파일만 올릴 수 있습니다. 덴트웹 「엑셀저장」으로 만든 파일을 그대로 올려 주세요.', $back );
 			} else {
-				/* v4.19.1 · 새 파일을 올리면 그날 명단은 새 파일 기준으로 바뀐다 — 이전 명단은 지우고 다시 넣는다 (응답은 남음) */
-				md_survey_visits_delete_day( $date );
+				/* v4.21.39 · 다시 올려도 이미 응답한 환자의 기록은 지우지 않는다 — 같은 날 같은 차트번호는 고치고(응답 여부 유지), 새 파일에 없는 환자 중 응답 안 한 사람만 뺀다 */
+				/* (예전에는 그날 명단을 통째로 지우고 다시 넣어, 이미 응답한 환자가 또 응답할 수 있었다) */
 				$content = (string) file_get_contents( $f['tmp_name'] );
 				try {
 					$r = md_survey_import_xlsx( $f['tmp_name'], $date );
@@ -1271,6 +1272,8 @@ function md_survey_handle_post() {
 				/* 파일 안의 접수일이 고른 날짜와 다르면 그 날짜 화면으로 보내고 알린다. 파일도 그 날짜에 보관한다 */
 				$fd = ! empty( $r['dates'] ) ? $r['dates'] : array();
 				$uploader = isset( $_POST['uploader'] ) ? sanitize_text_field( wp_unslash( $_POST['uploader'] ) ) : '';
+				/* 새 파일에 없는 환자 중 아직 응답하지 않은 사람만 명단에서 뺀다 */
+				if ( ! empty( $r['charts'] ) ) { global $wpdb; foreach ( $r['charts'] as $cd => $list ) { $list = array_values( array_unique( array_filter( $list, 'strlen' ) ) ); if ( ! $list ) { continue; } $ph = implode( ',', array_fill( 0, count( $list ), '%s' ) ); $wpdb->query( $wpdb->prepare( 'DELETE FROM ' . md_survey_table_visit() . " WHERE visit_date = %s AND responded_at IS NULL AND chart_no NOT IN ($ph)", array_merge( array( $cd ), $list ) ) ); } }
 				if ( ! md_survey_file_store( 1 === count( $fd ) ? $fd[0] : $date, $f['name'], $content, $r, $uploader ) ) { global $wpdb; $r['errors'][] = '파일 보관 실패: ' . ( $wpdb->last_error ? $wpdb->last_error : '원인 미상' ); }
 				/* 다음에 올릴 때 이름을 다시 안 적어도 되게 기억 (30일) */
 				if ( '' !== $uploader ) { setcookie( 'md_survey_uploader', $uploader, time() + 30 * DAY_IN_SECONDS, '/', '', is_ssl(), true ); }
