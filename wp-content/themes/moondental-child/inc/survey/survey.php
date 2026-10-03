@@ -20,7 +20,7 @@
  *    명단의 휴대폰 가운데 4자리는 비밀키로 HMAC 해시해 저장한다 (원문은 남기지 않는다). 생년월일은 받지 않는다 (v4.10.8).
  *    환자가 입력한 값도 저장하지 않는다 — 해시해서 비교만 한다.
  *    본인 확인이 5번 틀리면 그 접속은 30분 동안 막는다.
- *    명단은 90일이 지나면 지운다. 응답은 남긴다 (차트번호 · 이름 · 담당자 · 점수 · 의견).
+ *    명단 · 응답 · 올린 엑셀 원본은 모두 진료일로부터 2년이 지나면 지운다 (v4.21.38).
  *
  *  화면은 서버에서 그린다. 자바스크립트가 없어도 전부 동작한다.
  *  폼은 POST → 처리 → 리다이렉트(PRG). 새로고침해도 두 번 올라가지 않는다.
@@ -131,16 +131,14 @@ function md_survey_maybe_install() {
 }
 add_action( 'init', 'md_survey_maybe_install', 20 );
 
-/** 명단은 본인 확인에만 쓰므로 90일이 지나면 지운다 (응답은 남긴다) */
+/** 진료일로부터 2년이 지난 명단 · 엑셀 원본 · 응답을 지운다 (매일 한 번) */
 function md_survey_cleanup() {
 	global $wpdb;
-	$d90 = gmdate( 'Y-m-d', time() - 90 * DAY_IN_SECONDS );
-	/* 명단(본인 확인용) — 진료일 90일 뒤 */
-	$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . md_survey_table_visit() . ' WHERE visit_date < %s', $d90 ) );
-	/* v4.21.37 · 올린 엑셀 원본 — 명단과 같이 90일 뒤 (그전엔 지우지 않고 계속 쌓였다) */
-	$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . md_survey_table_file() . ' WHERE visit_date < %s', $d90 ) );
-	/* v4.21.37 · 응답 — 안내문의 보유 기간(응답일로부터 2년)에 맞춰 */
-	$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . md_survey_table_response() . ' WHERE created_at < %s', gmdate( 'Y-m-d H:i:s', time() - 2 * YEAR_IN_SECONDS ) ) );
+	/* v4.21.38 · 명단 · 응답 · 엑셀 원본 모두 진료일로부터 2년 뒤 삭제 (원장 지시) */
+	$cut = gmdate( 'Y-m-d', strtotime( current_time( 'Y-m-d' ) . ' -2 years' ) );
+	$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . md_survey_table_visit() . ' WHERE visit_date < %s', $cut ) );
+	$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . md_survey_table_file() . ' WHERE visit_date < %s', $cut ) );
+	$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . md_survey_table_response() . ' WHERE visit_date < %s', $cut ) );
 }
 add_action( 'md_survey_cleanup', 'md_survey_cleanup' );
 add_action( 'init', function () {
@@ -1136,7 +1134,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 			<div class="sv-consent">
 				<b>수집 항목</b> 이름 · 휴대전화 가운데 4자리(본인 확인에만 사용, 저장하지 않음), 설문 응답<br>
 				<b>이용 목적</b> 진료 만족도 조사와 서비스 개선<br>
-				<b>보유 기간</b> 응답일로부터 2년<br>
+				<b>보유 기간</b> 진료일로부터 2년<br>
 				동의하지 않으시면 이 화면을 닫으시면 됩니다. 응답은 병원 관리자만 열람합니다.
 			</div>
 		</details>
