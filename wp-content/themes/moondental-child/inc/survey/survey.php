@@ -134,7 +134,13 @@ add_action( 'init', 'md_survey_maybe_install', 20 );
 /** 명단은 본인 확인에만 쓰므로 90일이 지나면 지운다 (응답은 남긴다) */
 function md_survey_cleanup() {
 	global $wpdb;
-	$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . md_survey_table_visit() . ' WHERE visit_date < %s', gmdate( 'Y-m-d', time() - 90 * DAY_IN_SECONDS ) ) );
+	$d90 = gmdate( 'Y-m-d', time() - 90 * DAY_IN_SECONDS );
+	/* 명단(본인 확인용) — 진료일 90일 뒤 */
+	$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . md_survey_table_visit() . ' WHERE visit_date < %s', $d90 ) );
+	/* v4.21.37 · 올린 엑셀 원본 — 명단과 같이 90일 뒤 (그전엔 지우지 않고 계속 쌓였다) */
+	$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . md_survey_table_file() . ' WHERE visit_date < %s', $d90 ) );
+	/* v4.21.37 · 응답 — 안내문의 보유 기간(응답일로부터 2년)에 맞춰 */
+	$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . md_survey_table_response() . ' WHERE created_at < %s', gmdate( 'Y-m-d H:i:s', time() - 2 * YEAR_IN_SECONDS ) ) );
 }
 add_action( 'md_survey_cleanup', 'md_survey_cleanup' );
 add_action( 'init', function () {
