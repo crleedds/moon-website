@@ -114,3 +114,29 @@
 	.mdst-row .mdst-f--note, .mdst-row .mdst-f--email, .mdst-row .mdst-save { grid-column: 1 / -1; }
 	.mdst-row .mdst-f input, .mdst-row .mdst-f select { min-width: 0; width: 100%; box-sizing: border-box; }
 }
+
+/* ---- v5.9 · 로그인 기록 · 퇴사 ---- */
+.mda-last { color: var(--color-text-sub, #7A6B5F); margin-left: 4px; }
+.mda-logpanel, .mda-retired { scroll-margin-top: 80px; }
+.mda-lock { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 10px 12px; margin: 8px 0; border-radius: 10px; background: rgba(198,107,94,.08); border: 1px solid var(--color-danger, #C66B5E); font-size: .9rem; }
+.mda-logdet summary { cursor: pointer; font-weight: 700; color: var(--color-text-sub, #7A6B5F); padding: 6px 0; }
+.mda-logwrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.mda-log { width: 100%; border-collapse: collapse; font-size: .84rem; }
+.mda-log th, .mda-log td { padding: 7px 8px; border-bottom: 1px solid var(--color-border, #E8DDD3); text-align: left; white-space: nowrap; }
+.mda-log th { color: var(--color-text-sub, #7A6B5F); font-weight: 700; }
+.mda-log tr.is-fail td { color: var(--color-danger, #C66B5E); }
+.mda-log tr.is-unlock td { color: var(--color-accent-dark, #6B8F72); }
+@media (max-width: 600px) {
+	.mda-log thead { display: none; }
+	.mda-log, .mda-log tbody, .mda-log tr, .mda-log td { display: block; width: 100%; box-sizing: border-box; }
+	.mda-log tr { padding: 8px 0; border-bottom: 1px solid var(--color-border, #E8DDD3); }
+	.mda-log td { border: 0; padding: 1px 0; white-space: normal; }
+	.mda-log td::before { content: attr(data-l) ' · '; color: var(--color-text-sub, #7A6B5F); font-size: .78rem; }
+}
+.mda-retire summary { color: var(--color-danger, #C66B5E); }
+.mda-f--inline { flex-direction: row; align-items: center; gap: 8px; margin: 0; }
+.mda-f--inline input { width: auto; min-height: 40px; }
+.mda-retired > details > summary { cursor: pointer; list-style: revert; }
+.mda-ret { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px dashed var(--color-border, #E8DDD3); }
+.mda-ret__who small { color: var(--color-text-sub, #7A6B5F); }
+.mdsp-me { background: var(--color-surface, #FBF2E8) !important; font-weight: 700; }

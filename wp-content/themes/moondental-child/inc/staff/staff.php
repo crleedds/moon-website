@@ -325,8 +325,11 @@ function md_staff_render() {
 		</section>
 
 		<?php
-		$by = array();
-		foreach ( $rows as $r ) { $by[ $r->dept ?: '기타' ][] = $r; }
+		$by = array(); $gone = array();
+		foreach ( $rows as $r ) {
+			if ( ! (int) $r->active && function_exists( 'md_acc_render_retired' ) ) { $gone[] = $r; continue; } /* v5.9 · 퇴사자는 맨 아래 따로 (inc/accounts) */
+			$by[ $r->dept ?: '기타' ][] = $r;
+		}
 		$order = array_values( array_unique( array_merge( $depts, array_keys( $by ) ) ) );
 		foreach ( $order as $d ) : if ( empty( $by[ $d ] ) ) continue; ?>
 			<section class="mds-card mdst-dept">
@@ -338,6 +341,7 @@ function md_staff_render() {
 				</div>
 			</section>
 		<?php endforeach; ?>
+		<?php if ( $gone ) { md_acc_render_retired( $gone ); } ?>
 	</div>
 	<?php
 }

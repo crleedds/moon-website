@@ -410,6 +410,7 @@ function md_inv_act_backup_now() {
 }
 
 function md_inv_act_backup_restore() {
+	if ( ! md_inv_is_owner() ) { md_inv_go( 'err', '백업 되돌리기는 원장 계정만 할 수 있습니다.' ); }
 	if ( 'RESTORE' !== strtoupper( trim( (string) md_inv_p( 'confirm' ) ) ) && '되돌리기' !== trim( (string) md_inv_p( 'confirm' ) ) ) {
 		md_inv_go( 'err', '확인 칸에 「되돌리기」를 적어야 실행됩니다.' );
 	}
@@ -434,6 +435,7 @@ function md_inv_act_backup_delete() {
 }
 
 function md_inv_act_import() {
+	if ( ! md_inv_is_owner() ) { md_inv_go( 'err', '가져오기(전부 지우고 다시)는 원장 계정만 할 수 있습니다.' ); }
 	$files = array();
 	foreach ( array( 'team', 'vendor', 'item', 'io' ) as $k ) {
 		if ( ! empty( $_FILES[ $k ]['tmp_name'] ) && is_uploaded_file( $_FILES[ $k ]['tmp_name'] ) ) {

@@ -331,6 +331,7 @@ function md_support_handle_post() {
 		case 'new':
 			$team = isset( $_POST['team'] ) ? sanitize_text_field( wp_unslash( $_POST['team'] ) ) : '';
 			$who  = isset( $_POST['requester'] ) ? sanitize_text_field( wp_unslash( $_POST['requester'] ) ) : '';
+			if ( function_exists( 'md_acc_my_name' ) && '' !== md_acc_my_name() ) { $who = md_acc_my_name(); } /* v5.9 · 개인 계정은 작성자를 계정 이름으로 못박는다 */
 			$stat = isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : '접수';
 			$res  = md_support_create(
 				$who, $team, isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '', $stat,
@@ -442,6 +443,8 @@ function md_support_render_new( $err = '' ) {
 	$teams = md_support_teams();
 	$team  = md_support_remembered( 'team' );
 	$name  = ''; /* v4.10.4 · 작성자는 항상 빈칸 (공용 계정 이름·지난 이름을 채우지 않는다 · 원장 지시) */
+	$mine  = function_exists( 'md_acc_my_name' ) ? md_acc_my_name() : ''; /* v5.9 · 개인 계정이면 그 이름 (원장 지시) */
+	$mail  = $mine && function_exists( 'md_acc_my_email' ) ? md_acc_my_email() : '';
 	?>
 	<form method="post" class="mds-card mdsp-new" id="new">
 		<input type="hidden" name="md_support_action" value="new">
@@ -456,12 +459,16 @@ function md_support_render_new( $err = '' ) {
 			</label>
 			<label class="mdsp-field">
 				<span>작성자 <em class="mdsp-req">*</em></span>
+				<?php if ( $mine ) : ?>
+					<input type="text" name="requester" value="<?php echo esc_attr( $mine ); ?>" readonly aria-readonly="true" class="mdsp-me" title="내 계정 이름으로 올립니다">
+				<?php else : ?>
 				<input type="text" name="requester" required maxlength="60" value="<?php echo esc_attr( $name ); ?>" placeholder="작성자 이름">
+				<?php endif; ?>
 			</label>
 		</div>
 		<label class="mdsp-field">
 			<span>알림 받을 이메일 <small>(선택사항 · 적으면 답변이 달리거나 상태가 바뀔 때 메일로 알려 드립니다. 메일이 안 보이면 스팸메일함을 확인해 주세요.)</small></span>
-			<input type="email" name="email" maxlength="120" placeholder="예) name@naver.com" autocomplete="email">
+			<input type="email" name="email" maxlength="120" placeholder="예) name@naver.com" autocomplete="email" value="<?php echo esc_attr( $mail ); ?>">
 		</label>
 		<label class="mdsp-field">
 			<span>요청·건의사항 <em class="mdsp-req">*</em></span>

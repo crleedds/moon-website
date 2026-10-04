@@ -21,6 +21,7 @@ function md_inv_settings_tabs() {
 		'log'      => '작업 기록',
 	);
 	if ( ! md_inv_can_accounts() ) { unset( $t['accounts'] ); }
+	if ( ! md_inv_is_owner() ) { unset( $t['import'] ); } /* 전부 지우고 다시 — 원장만 */
 	return $t;
 }
 
@@ -392,7 +393,7 @@ function md_inv_settings_backup() {
 					<td data-l="크기" class="r"><?php echo esc_html( size_format( (int) $b->size, 1 ) ); ?></td>
 					<td class="iv-td-act">
 						<a class="iv-btn iv-btn--ghost iv-btn--xs" href="<?php echo esc_url( md_inv_dl_url( 'backup', array( 'id' => $b->id ) ) ); ?>">내려받기</a>
-						<button type="button" class="iv-btn iv-btn--ghost iv-btn--xs" data-dlg="dlg-restore" data-set="<?php echo esc_attr( wp_json_encode( array( 'id' => (int) $b->id, 'what' => md_inv_date( $b->created_at, 'Y.n.j H:i' ) . ' 백업으로 되돌립니다.' ) ) ); ?>">되돌리기</button>
+						<?php if ( md_inv_is_owner() ) : ?><button type="button" class="iv-btn iv-btn--ghost iv-btn--xs" data-dlg="dlg-restore" data-set="<?php echo esc_attr( wp_json_encode( array( 'id' => (int) $b->id, 'what' => md_inv_date( $b->created_at, 'Y.n.j H:i' ) . ' 백업으로 되돌립니다.' ) ) ); ?>">되돌리기</button><?php endif; ?>
 						<form method="post" class="iv-inline-form" data-confirm="이 백업을 지울까요?"><?php md_inv_hidden( 'backup_delete' ); ?><input type="hidden" name="id" value="<?php echo (int) $b->id; ?>"><button class="iv-btn iv-btn--ghost iv-btn--xs">삭제</button></form>
 					</td>
 				</tr>
@@ -400,6 +401,9 @@ function md_inv_settings_backup() {
 		</tbody></table></div>
 		<?php endif; ?>
 	</section>
+	<?php if ( ! md_inv_is_owner() ) : ?>
+	<p class="iv-help">백업으로 되돌리기는 원장 계정만 할 수 있습니다. 백업 만들기 · 내려받기는 그대로 됩니다.</p>
+	<?php else : ?>
 	<section class="iv-panel">
 		<h3 class="iv-h3">파일에서 되돌리기</h3>
 		<p class="iv-help">내려받았거나 메일로 받은 백업 파일(.json.gz)을 올려 그 시점으로 되돌립니다. 지금 상태는 자동으로 먼저 백업됩니다.</p>
@@ -410,6 +414,7 @@ function md_inv_settings_backup() {
 			<button class="iv-btn iv-btn--danger">파일로 되돌리기</button>
 		</form>
 	</section>
+	<?php endif; ?>
 	<dialog class="iv-dlg" id="dlg-restore"><form method="post">
 		<?php md_inv_hidden( 'backup_restore' ); ?><input type="hidden" name="id" value="">
 		<div class="iv-dlg__head"><b>백업으로 되돌리기</b><button type="button" class="iv-x" data-close aria-label="닫기"><?php echo md_inv_icon( 'x' ); // phpcs:ignore ?></button></div>

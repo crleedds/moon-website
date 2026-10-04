@@ -18,6 +18,8 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
+require_once __DIR__ . '/accounts-log.php'; /* v5.9 · 로그인 기록 · 잠금 */
+
 /* ============================================================
  * 기본
  * ============================================================ */
@@ -215,7 +217,7 @@ add_filter( 'authenticate', 'md_acc_authenticate', 99 );
 function md_acc_login_failed( $username, $error = null ) {
 	if ( empty( $_POST['md_lounge'] ) ) { return; }
 	$code = ( $error instanceof WP_Error ) ? $error->get_error_code() : 'bad';
-	$code = in_array( $code, array( 'md_acc_pending', 'md_acc_off' ), true ) ? $code : 'bad';
+	$code = in_array( $code, array( 'md_acc_pending', 'md_acc_off', 'md_acc_locked' ), true ) ? $code : 'bad';
 	wp_safe_redirect( md_acc_lounge_url( array( 'md_le' => $code ) ) );
 	exit;
 }
@@ -226,6 +228,7 @@ function md_acc_login_top( $html ) {
 	$m = array(
 		'md_acc_pending' => '가입 신청을 확인하고 있습니다. 승인되면 이메일로 알려 드립니다.',
 		'md_acc_off'     => '사용이 중지된 계정입니다. 경영지원실에 문의해 주세요.',
+		'md_acc_locked'  => '비밀번호를 여러 번 틀려 ' . MD_ACC_LOCK_MIN . '분 동안 잠겼습니다. 잠시 뒤에 다시 하거나, 급하면 경영지원실에 잠금 풀기를 부탁해 주세요.',
 		'bad'            => '아이디(또는 이메일)나 비밀번호가 맞지 않습니다.',
 	);
 	$k = sanitize_key( wp_unslash( $_GET['md_le'] ) );
@@ -497,18 +500,14 @@ function md_acc_handle() {
 			break;
 
 		case 'off':
-			update_user_meta( $uid, 'md_acc_perms_off', md_acc_user_perms( $u ) );
-			foreach ( array_keys( md_acc_perms() ) as $cap ) { $u->remove_cap( $cap ); }
-			$u->set_role( 'md_lounge_off' );
-			WP_Session_Tokens::get_instance( $uid )->destroy_all();
+			md_acc_turn_off( $u );
 			md_acc_log( '계정 사용 중지', $u->display_name . ' (' . $u->user_login . ')' );
 			md_acc_flash( 'ok', $u->display_name . ' 님 계정을 사용 중지했습니다. 로그인돼 있던 기기에서도 바로 나가집니다.' );
 			$back .= md_acc_anchor( $uid );
 			break;
 
 		case 'on':
-			md_acc_apply_perms( $u, (array) get_user_meta( $uid, 'md_acc_perms_off', true ) );
-			delete_user_meta( $uid, 'md_acc_perms_off' );
+			md_acc_turn_on( $u );
 			md_acc_log( '계정 다시 사용', $u->display_name );
 			md_acc_flash( 'ok', $u->display_name . ' 님 계정을 다시 쓸 수 있게 했습니다.' );
 			$back .= md_acc_anchor( $uid );
@@ -560,6 +559,57 @@ function md_acc_handle() {
 			$back .= '#s' . $sid;
 			break;
 
+		case 'unlock':
+			$lk = isset( $_POST['lk_login'] ) ? sanitize_text_field( wp_unslash( $_POST['lk_login'] ) ) : '';
+			$li = isset( $_POST['lk_ip'] ) ? sanitize_text_field( wp_unslash( $_POST['lk_ip'] ) ) : '';
+			md_acc_unlock( $lk, $li );
+			md_acc_flash( 'ok', $lk . ' 잠금을 풀었습니다.' );
+			$back .= '#mda-log';
+			break;
+
+		case 'retire':
+		case 'rehire':
+		case 'purge':
+			$row = md_acc_staff_row( $sid );
+			if ( ! $row ) { md_acc_flash( 'err', '직원을 다시 골라 주세요.' ); break; }
+			$map = md_acc_staff_user_map();
+			$acc = isset( $map[ $sid ] ) ? $map[ $sid ] : null;
+			if ( $acc && (int) $acc->ID === get_current_user_id() ) { md_acc_flash( 'err', '내 퇴사 · 삭제는 다른 관리자가 해야 합니다.' ); break; }
+			if ( $acc && user_can( $acc, 'md_supply_manage' ) && ! md_acc_can_grant_admin() ) { md_acc_flash( 'err', '라운지 관리자 계정이 있는 직원은 원장님만 퇴사 · 삭제할 수 있습니다.' ); break; }
+			global $wpdb;
+			$left = (array) get_option( 'md_staff_left', array() );
+			if ( 'retire' === $act ) {
+				$d = md_acc_norm_date( isset( $_POST['left_on'] ) ? wp_unslash( $_POST['left_on'] ) : '' );
+				$left[ $sid ] = $d ? $d : current_time( 'Y-m-d' );
+				update_option( 'md_staff_left', $left, false );
+				$wpdb->update( md_staff_table(), array( 'active' => 0, 'updated_at' => current_time( 'mysql' ) ), array( 'id' => $sid ) );
+				if ( $acc && 'active' === md_acc_status( $acc ) ) { md_acc_turn_off( $acc ); }
+				if ( function_exists( 'md_staff_sync_site' ) ) { md_staff_sync_site(); }
+				md_acc_log( '퇴사 처리', $row->name . ' · ' . $left[ $sid ] . ( $acc ? ' · 계정 중지' : '' ) );
+				md_acc_flash( 'ok', $row->name . ' 님을 퇴사 처리했습니다 — 홈페이지 명단 · 달력 · 만족도 조사 담당자 목록에서 빠지고' . ( $acc ? ', 계정은 사용 중지(로그인돼 있던 기기도 나가짐)' : '' ) . '했습니다. 아래 「퇴사한 직원」에서 복직 · 완전 삭제할 수 있습니다.' );
+				$back .= '#mda-retired';
+			} elseif ( 'rehire' === $act ) {
+				unset( $left[ $sid ] );
+				update_option( 'md_staff_left', $left, false );
+				$wpdb->update( md_staff_table(), array( 'active' => 1, 'updated_at' => current_time( 'mysql' ) ), array( 'id' => $sid ) );
+				if ( $acc && 'off' === md_acc_status( $acc ) ) { md_acc_turn_on( $acc ); }
+				if ( function_exists( 'md_staff_sync_site' ) ) { md_staff_sync_site(); }
+				md_acc_log( '복직', $row->name );
+				md_acc_flash( 'ok', $row->name . ' 님을 다시 명단에 넣었습니다' . ( $acc ? ' (계정도 예전 권한으로 다시 사용)' : '' ) . '.' );
+				$back .= '#s' . $sid;
+			} else {
+				if ( (int) $row->active ) { md_acc_flash( 'err', '퇴사 처리한 직원만 완전히 지울 수 있습니다.' ); break; }
+				if ( $acc ) { require_once ABSPATH . 'wp-admin/includes/user.php'; wp_delete_user( $acc->ID ); }
+				if ( function_exists( 'md_staff_delete' ) ) { md_staff_delete( $sid ); }
+				unset( $left[ $sid ] );
+				update_option( 'md_staff_left', $left, false );
+				if ( function_exists( 'md_staff_sync_site' ) ) { md_staff_sync_site(); }
+				md_acc_log( '퇴사자 개인정보 삭제', $row->name );
+				md_acc_flash( 'ok', $row->name . ' 님의 명단 · 연락처 · 사진' . ( $acc ? ' · 계정' : '' ) . '을 모두 지웠습니다. (재료실 · 요청 기록의 이름은 남습니다)' );
+				$back .= '#mda-retired';
+			}
+			break;
+
 		case 'notify':
 			$to = isset( $_POST['to'] ) ? sanitize_text_field( wp_unslash( $_POST['to'] ) ) : '';
 			$ok = array();
@@ -577,6 +627,34 @@ add_action( 'template_redirect', 'md_acc_handle', 0 );
 function md_acc_anchor( $uid ) {
 	$sid = (int) get_user_meta( $uid, 'md_staff_id', true );
 	return $sid && md_acc_staff_row( $sid ) ? '#s' . $sid : '#mda-loose';
+}
+
+/** 개인 계정이면 그 사람 이름, 공용 · 관리자 계정이면 '' — 다른 라운지 기능의 「작성자」 자동 입력용 */
+function md_acc_my_name() {
+	$u = wp_get_current_user();
+	if ( ! md_acc_is_personal_user( $u ) || 'active' !== md_acc_status( $u ) ) { return ''; }
+	return '' !== trim( $u->display_name ) ? $u->display_name : $u->user_login;
+}
+
+function md_acc_my_email() {
+	return '' !== md_acc_my_name() ? (string) wp_get_current_user()->user_email : '';
+}
+
+/** 계정 끄기 / 켜기 — 권한은 따로 보관했다가 그대로 돌려준다 */
+function md_acc_turn_off( $u ) {
+	update_user_meta( $u->ID, 'md_acc_perms_off', md_acc_user_perms( $u ) );
+	foreach ( array_keys( md_acc_perms() ) as $cap ) { $u->remove_cap( $cap ); }
+	$u->set_role( 'md_lounge_off' );
+	WP_Session_Tokens::get_instance( $u->ID )->destroy_all();
+}
+function md_acc_turn_on( $u ) {
+	md_acc_apply_perms( $u, (array) get_user_meta( $u->ID, 'md_acc_perms_off', true ) );
+	delete_user_meta( $u->ID, 'md_acc_perms_off' );
+}
+
+function md_acc_left_on( $sid ) {
+	$l = (array) get_option( 'md_staff_left', array() );
+	return isset( $l[ (int) $sid ] ) ? (string) $l[ (int) $sid ] : '';
 }
 
 function md_acc_me_name() {
@@ -690,6 +768,13 @@ function md_acc_render_me() {
 				<label class="mda-f"><span>이메일</span><input type="email" name="email" required maxlength="120" value="<?php echo esc_attr( $u->user_email ); ?>"></label>
 				<button type="submit" class="mds-btn mds-btn--fill">저장</button>
 			</form>
+			<?php endif; ?>
+			<?php if ( ! $first ) : ?>
+			<section class="mds-card mda-card">
+				<h3 class="mda-h3">최근 로그인</h3>
+				<p class="mds-hint">내가 모르는 기기 · 시간이 있으면 비밀번호를 바꾸고 경영지원실에 알려 주세요.</p>
+				<?php md_acc_render_log_table( md_acc_log_rows( array( 'user_id' => $u->ID, 'limit' => 8 ) ), false ); ?>
+			</section>
 			<?php endif; ?>
 			<form method="post" class="mds-card mda-card mda-form" id="mda-pass">
 				<h3 class="mda-h3"><?php echo $first ? '새 비밀번호 정하기' : '비밀번호 바꾸기'; ?></h3>
@@ -817,6 +902,29 @@ function md_acc_render_staff_panel() {
 			<?php endforeach; ?>
 		</section>
 	<?php endif;
+	md_acc_render_log_panel();
+}
+
+/** 직원 정보 맨 아래 — 퇴사한 직원 (복직 · 완전 삭제) */
+function md_acc_render_retired( $rows ) {
+	if ( ! md_acc_can_manage() || ! $rows ) { return; }
+	$map = md_acc_staff_user_map();
+	?>
+	<section class="mds-card mda-retired" id="mda-retired">
+		<details><summary class="mdst-title">퇴사한 직원 <small><?php echo count( $rows ); ?>명 — 홈페이지 · 달력 · 만족도 목록에 나오지 않음</small></summary>
+			<p class="mds-hint">회원가입 때 「퇴사하면 개인정보를 지운다」고 안내했습니다. 정리가 끝나면 「완전 삭제」로 연락처 · 생일 · 사진 · 계정을 지워 주세요.</p>
+			<?php foreach ( $rows as $r ) : $acc = isset( $map[ $r->id ] ) ? $map[ $r->id ] : null; $lo = md_acc_left_on( $r->id ); ?>
+				<div class="mda-ret" id="s<?php echo (int) $r->id; ?>" data-sid="<?php echo (int) $r->id; ?>">
+					<div class="mda-ret__who"><b><?php echo esc_html( $r->name ); ?></b> <span><?php echo esc_html( trim( $r->dept . ' ' . $r->position ) ); ?></span> <small><?php echo $lo ? esc_html( $lo ) . ' 퇴사' : '퇴사'; ?><?php echo $acc ? ' · 계정 ' . esc_html( $acc->user_login ) . ' (' . esc_html( md_acc_perm_label( $acc ) ) . ')' : ''; ?></small></div>
+					<div class="mda-btnrow">
+						<form method="post"><?php md_acc_hidden( 'rehire' ); ?><input type="hidden" name="sid" value="<?php echo (int) $r->id; ?>"><button type="submit" class="mds-btn">복직</button></form>
+						<form method="post" data-mda-confirm="<?php echo esc_attr( $r->name . ' 님의 명단 · 연락처 · 생일 · 사진' . ( $acc ? ' · 계정' : '' ) . '을 완전히 지울까요? 되돌릴 수 없습니다.' ); ?>"><?php md_acc_hidden( 'purge' ); ?><input type="hidden" name="sid" value="<?php echo (int) $r->id; ?>"><button type="submit" class="mds-btn mda-btn-danger">완전 삭제</button></form>
+					</div>
+				</div>
+			<?php endforeach; ?>
+		</details>
+	</section>
+	<?php
 }
 
 /** 직원 한 사람 줄 아래 — 계정 칸 */
@@ -829,7 +937,8 @@ function md_acc_render_row( $r ) {
 	echo '<div class="mda-acc" data-sid="' . (int) $r->id . '">';
 	if ( $u ) {
 		echo '<div class="mda-acc__line"><span class="mda-acc__ic" aria-hidden="true">👤</span><code>' . esc_html( $u->user_login ) . '</code> <span class="mda-chip mda-chip--' . esc_attr( md_acc_status( $u ) ) . '">' . esc_html( md_acc_perm_label( $u ) ) . '</span>'
-			. ( (int) $u->ID === get_current_user_id() ? ' <span class="mda-chip">나</span>' : '' ) . '</div>';
+			. ( (int) $u->ID === get_current_user_id() ? ' <span class="mda-chip">나</span>' : '' )
+			. ' <small class="mda-last">마지막 로그인 ' . esc_html( md_acc_when( md_acc_last_login( $u->ID ) ) ) . '</small></div>';
 		md_acc_render_manage( $u );
 	} else { ?>
 		<div class="mda-acc__line mda-acc__line--none"><span class="mda-acc__ic" aria-hidden="true">👤</span>계정 없음 <small>— 본인이 회원가입을 신청하거나, 여기서 바로 만들어 줄 수 있습니다</small></div>
@@ -840,6 +949,17 @@ function md_acc_render_row( $r ) {
 				<div class="mda-perms"><span class="mda-perms__base">✓ 직원</span><?php md_acc_perm_checks(); ?></div>
 				<button type="submit" class="mds-btn mds-btn--fill">만들기 (임시 비밀번호 발급)</button>
 			</form>
+		</details>
+	<?php }
+	if ( (int) $r->active && ! ( $u && (int) $u->ID === get_current_user_id() ) ) {
+		$cmsg = $r->name . ' 님을 퇴사 처리할까요? 홈페이지 명단 · 달력 · 만족도 담당자 목록에서 빠지고' . ( $u ? ', 계정은 사용 중지됩니다.' : '니다.' ); ?>
+		<details class="mda-manage mda-retire"><summary>퇴사 처리</summary>
+			<form method="post" class="mda-inline" data-mda-confirm="<?php echo esc_attr( $cmsg ); ?>">
+				<?php md_acc_hidden( 'retire' ); ?><input type="hidden" name="sid" value="<?php echo (int) $r->id; ?>">
+				<label class="mda-f mda-f--inline"><span>퇴사일</span><input type="date" name="left_on" value="<?php echo esc_attr( current_time( 'Y-m-d' ) ); ?>"></label>
+				<button type="submit" class="mds-btn mda-btn-danger">퇴사 처리</button>
+			</form>
+			<p class="mda-note">홈페이지 의료진 페이지 명단 · 라운지 달력(생일 · 입사 기념일) · 만족도 조사 담당자 목록에서 한 번에 빠지고<?php echo $u ? ', 계정은 사용 중지되어 로그인돼 있던 기기에서도 바로 나가집니다' : ''; ?>. 복직하면 그대로 돌아옵니다.</p>
 		</details>
 	<?php }
 	echo '</div>';

@@ -26,6 +26,21 @@
       if (lo !== t.value) t.value = lo;
     }
   });
+  /* 되돌리기 어려운 처리는 한 번 묻는다 (문구는 data-mda-confirm) */
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (f && f.dataset && f.dataset.mdaConfirm && !window.confirm(f.dataset.mdaConfirm)) e.preventDefault();
+  }, true);
+  function openHash() {
+    var id = (location.hash || '').slice(1);
+    var el = id && document.getElementById(id);
+    if (!el) return;
+    var d = el.tagName === 'SECTION' ? el.querySelector('details') : el.closest('details');
+    for (; d; d = d.parentElement && d.parentElement.closest('details')) d.open = true;
+    el.scrollIntoView({ block: 'start' });
+  }
+  openHash();
+  window.addEventListener('hashchange', openHash);
   /* 오류가 있으면 첫 오류 칸으로 */
   var firstErr = document.querySelector('.mda-err');
   if (firstErr) {

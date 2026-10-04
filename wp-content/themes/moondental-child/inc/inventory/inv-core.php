@@ -133,6 +133,11 @@ function md_inv_is_admin() {
 	return function_exists( 'md_sup_can_manage' ) ? md_sup_can_manage() : current_user_can( 'manage_options' );
 }
 
+/** 원장 계정인가 — 가져오기(전부 지우고 다시) · 백업 되돌리기는 원장만 (2026-10-04 원장 확정 권한표) */
+function md_inv_is_owner() {
+	return function_exists( 'md_sup_is_owner' ) ? md_sup_is_owner() : current_user_can( 'manage_options' );
+}
+
 /** 지금 처리하는 사람 이름 — 관리자는 이 기기에 기억한 이름, 없으면 설정의 기본 이름 */
 function md_inv_me() {
 	/* 개인 계정(공용 두 계정이 아닌 것)은 계정 이름이 곧 기록에 남는 이름이다 */
