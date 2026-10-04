@@ -1,0 +1,35 @@
+/* v5.8 · 직원 라운지 계정 — 전화번호 자동 하이픈 · 아이디 소문자 */
+(function () {
+  'use strict';
+  function fmt(v) {
+    var d = String(v || '').replace(/\D/g, '').slice(0, 11);
+    if (d.indexOf('02') === 0) {
+      if (d.length > 9) return d.slice(0, 2) + '-' + d.slice(2, 6) + '-' + d.slice(6, 10);
+      if (d.length > 5) return d.slice(0, 2) + '-' + d.slice(2, 5) + '-' + d.slice(5);
+      if (d.length > 2) return d.slice(0, 2) + '-' + d.slice(2);
+      return d;
+    }
+    if (d.length > 10) return d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7);
+    if (d.length > 6) return d.slice(0, 3) + '-' + d.slice(3, 6) + '-' + d.slice(6);
+    if (d.length > 3) return d.slice(0, 3) + '-' + d.slice(3);
+    return d;
+  }
+  document.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t.matches && t.matches('[data-mda-phone]')) {
+      var end = t.selectionEnd === t.value.length;
+      t.value = fmt(t.value);
+      if (end) t.setSelectionRange(t.value.length, t.value.length);
+    }
+    if (t.name === 'login' && t.closest && t.closest('.mda-form')) {
+      var lo = t.value.toLowerCase().replace(/\s/g, '');
+      if (lo !== t.value) t.value = lo;
+    }
+  });
+  /* 오류가 있으면 첫 오류 칸으로 */
+  var firstErr = document.querySelector('.mda-err');
+  if (firstErr) {
+    var f = firstErr.parentNode.querySelector('input, select');
+    if (f) { f.scrollIntoView({ block: 'center' }); try { f.focus({ preventScroll: true }); } catch (x) { f.focus(); } }
+  }
+})();

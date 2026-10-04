@@ -57,6 +57,9 @@ function md_inv_view_req() {
 			'admin' => $admin ? 1 : 0,
 		),
 		'vendorNames' => array_values( array_map( function ( $v ) { return $v['n']; }, $vend ) ),
+		/* v5.8 · 개인 계정 — 이름은 계정 이름으로 고정, 팀은 지난번에 고른 팀 */
+		'me' => md_inv_is_personal() ? md_inv_me() : '',
+		'myTeam' => md_inv_is_personal() ? (int) get_user_meta( get_current_user_id(), 'md_inv_team', true ) : 0,
 	);
 	?>
 	<div id="iv-req" class="iv-req">
@@ -118,7 +121,11 @@ function md_inv_view_req() {
 					</select>
 				</label>
 				<label class="iv-f"><span>신청자 이름<?php echo $S['req_need_name'] ? ' <em>*</em>' : ''; ?></span>
+					<?php if ( md_inv_is_personal() ) : ?>
+						<input class="iv-input iv-input--me" name="requester" id="iv-cart-name" value="<?php echo esc_attr( md_inv_me() ); ?>" readonly aria-readonly="true" title="내 계정 이름으로 신청합니다">
+					<?php else : ?>
 					<input class="iv-input" name="requester" id="iv-cart-name" maxlength="40" autocomplete="name" placeholder="이름"<?php echo $S['req_need_name'] ? ' required' : ''; ?>>
+					<?php endif; ?>
 				</label>
 			</div>
 			<label class="iv-f"><span>메모 (선택)</span><input class="iv-input" name="note" maxlength="300" placeholder="예: 내일 오전 수술용"></label>
@@ -155,7 +162,7 @@ function md_inv_view_req() {
 		<div class="iv-dlg__head"><b id="iv-scan-h">바코드 스캔</b><button type="button" class="iv-x" data-close aria-label="닫기"><?php echo md_inv_icon( 'x' ); // phpcs:ignore ?></button></div>
 		<div class="iv-scan"><video id="iv-scan-video" playsinline muted></video><div class="iv-scan__frame"></div></div>
 		<p class="iv-help" id="iv-scan-msg">바코드를 네모 안에 맞춰 주세요. 카메라 권한을 물으면 「허용」을 눌러 주세요.</p>
-		<label class="iv-f"><span>직접 입력</span><input class="iv-input" id="iv-scan-manual" inputmode="numeric" placeholder="바코드 숫자"></label>
+		<div class="iv-scan-manual"><label class="iv-f"><span>직접 입력</span><input class="iv-input" id="iv-scan-manual" inputmode="numeric" enterkeyhint="done" placeholder="바코드 숫자"></label><button type="button" class="iv-btn iv-btn--primary" id="iv-scan-ok">확인</button></div>
 	</dialog>
 
 	<?php md_inv_install_help(); ?>

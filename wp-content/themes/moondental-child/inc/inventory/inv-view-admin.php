@@ -273,7 +273,7 @@ function md_inv_view_todo() {
 				$r0 = $g[0];
 				?>
 				<div class="iv-group">
-					<div class="iv-group__head"><b><?php echo esc_html( md_inv_team_name( $r0->team_id ) ); ?></b> · <?php echo esc_html( $r0->requester ); ?> <span class="iv-muted"><?php echo esc_html( md_inv_ago( $r0->created_at ) ); ?></span></div>
+					<div class="iv-group__head"><b><?php echo esc_html( md_inv_team_name( $r0->team_id ) ); ?></b> · <?php echo esc_html( $r0->requester ); ?><?php echo md_inv_req_by_account( $r0 ) ? ' <span class="iv-tag iv-tag--acc" title="본인 계정으로 로그인해 보낸 신청">본인 계정</span>' : ''; ?> <span class="iv-muted"><?php echo esc_html( md_inv_ago( $r0->created_at ) ); ?></span></div>
 					<?php foreach ( $g as $r ) :
 						$short = $r->item_id && $r->stock < $r->qty;
 						?>

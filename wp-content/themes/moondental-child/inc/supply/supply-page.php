@@ -72,7 +72,7 @@ function md_sup_apps() {
 		'staff' => array(
 			'label'  => '직원 정보',
 			'icon'   => '👥',
-			'desc'   => '이름 · 부서 · 생일 · 입사일 — 달력에 자동 표시',
+			'desc'   => '이름 · 부서 · 생일 · 입사일 · 계정 승인 · 권한', /* v5.8 · 계정 관리를 여기로 합침 */
 			'manage' => true,
 		),
 		// v6.2 · 미니차트 (AppSheet 「Mini Chart」를 옮김 · inc/minichart)
@@ -117,6 +117,13 @@ function md_sup_apps() {
 			'icon'   => '⭐',
 			'desc'   => '응답 · 스탭별 집계 · 설정',
 			'manage' => true,
+		),
+		// v5.8 · 내 정보 (inc/accounts) — 머리의 아이디를 누르면 들어온다
+		'me' => array(
+			'label'  => '내 정보',
+			'icon'   => '👤',
+			'desc'   => '연락처 · 비밀번호',
+			'hidden' => true,
 		),
 	);
 }
@@ -881,6 +888,7 @@ function md_sup_notice( $code, $n = 0 ) {
 
 /** 로그인 안 된 경우 */
 function md_sup_render_login() {
+	if ( isset( $_GET['md_join'] ) && function_exists( 'md_acc_render_join' ) ) { md_acc_render_join(); return; } /* v5.8 · 회원가입 신청 */
 	?>
 	<div class="mds-gate">
 		<div class="mds-gate__box">
@@ -944,7 +952,7 @@ function md_sup_render_header( $app, $tab ) {
 				<h1><?php echo esc_html( $app ? $apps[ $app ]['label'] : '직원 라운지' ); ?></h1>
 			</div>
 			<div class="mds-head__me">
-				<span class="mds-head__name"><?php echo esc_html( $user->user_login ); /* v4.21.1 · 표시 이름 대신 로그인 아이디 (관리자 계정의 표시 이름이 옛 아이디 moondentalhospital 로 남아 있었음) */ ?></span>
+				<a class="mds-head__name" href="<?php echo esc_url( md_sup_url( array( 'app' => 'me' ) ) ); ?>" title="내 정보"><?php echo esc_html( $user->user_login ); /* v4.21.1 · 표시 이름 대신 로그인 아이디 · v5.8 · 누르면 내 정보 */ ?></a>
 				<a class="mds-head__out" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">로그아웃</a>
 			</div>
 		</div>
@@ -983,7 +991,10 @@ function md_sup_render_hub() {
 						<?php if ( 'calendar' === $key && function_exists( 'md_cal_today_count' ) && md_cal_today_count() ) : ?>
 							<span class="mds-app__badge">오늘 <?php echo (int) md_cal_today_count(); ?>건</span>
 						<?php endif; ?>
-						<?php if ( 'stock' === $key && function_exists( 'md_inv_counts' ) && md_sup_can_manage() && (int) get_option( 'md_inv_schema', 0 ) > 0 && md_inv_counts()['pending'] ) : ?>
+						<?php if ( 'staff' === $key && function_exists( 'md_acc_pending_count' ) && md_acc_pending_count() ) : ?>
+							<span class="mds-app__badge">가입 신청 <?php echo (int) md_acc_pending_count(); ?>건</span>
+						<?php endif; ?>
+						<?php if ( 'stock' === $key && function_exists( 'md_inv_counts' ) && function_exists( 'md_inv_is_admin' ) && md_inv_is_admin() && (int) get_option( 'md_inv_schema', 0 ) > 0 && md_inv_counts()['pending'] ) : ?>
 							<span class="mds-app__badge">출고 대기 <?php echo (int) md_inv_counts()['pending']; ?>건</span>
 						<?php endif; ?>
 						<?php if ( 'support' === $key && function_exists( 'md_support_open_count' ) && md_sup_can_manage() && md_support_open_count() ) : ?>
@@ -1041,6 +1052,8 @@ function md_sup_render_page() {
 		md_survey_render(); // v4.10 · 접수수납목록 (만족도 조사 명단)
 	} elseif ( 'survey_result' === $app && function_exists( 'md_survey_render_result' ) ) {
 		md_survey_render_result(); // v4.19.7 · 만족도 응답·집계·설정 (관리자)
+	} elseif ( 'me' === $app && function_exists( 'md_acc_render_me' ) ) {
+		md_acc_render_me(); // v5.8 · 내 정보
 	} elseif ( 'minichart' === $app && function_exists( 'md_mc_render' ) ) {
 		md_mc_render(); // v6.2 · 미니차트
 	} elseif ( 'stock' === $app && function_exists( 'md_inv_render' ) ) {

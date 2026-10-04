@@ -1,0 +1,116 @@
+/* v5.8 · 직원 라운지 계정 — 회원가입 신청 · 내 정보 · 직원 정보의 계정 칸 (inc/accounts) */
+
+/* ---- 로그인 화면 아래 링크 · 오류 ---- */
+.mda-login-err { margin: 0 0 14px; padding: 10px 12px; border-radius: 10px; background: rgba(198,107,94,.10); border: 1px solid var(--color-danger, #C66B5E); color: var(--color-danger, #C66B5E); font-size: .88rem; line-height: 1.5; }
+.mda-login-links { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-border, #E8DDD3); }
+.mda-join-btn { display: block; text-align: center; padding: 12px; border-radius: 12px; border: 1.5px solid var(--color-primary, #D88062); color: var(--color-primary-dark, #B86347); text-decoration: none; font-size: .95rem; }
+.mda-join-btn:hover { background: var(--color-surface, #FBF2E8); }
+.mda-lost { text-align: center; font-size: .84rem; color: var(--color-text-sub, #7A6B5F); }
+
+/* ---- 회원가입 신청 ---- */
+.mds-gate__box.mda-join { max-width: 520px; width: 100%; }
+.mda-form { display: flex; flex-direction: column; gap: 14px; }
+.mda-set { border: 1px solid var(--color-border, #E8DDD3); border-radius: 14px; padding: 14px 14px 4px; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.mda-set legend { padding: 0 6px; font-weight: 800; font-size: .9rem; color: var(--color-text, #3D2F26); }
+.mds-gate__box .mda-f, .mda-f { display: flex; flex-direction: column; gap: 6px; margin: 0 0 8px; font-size: .84rem; font-weight: 700; color: var(--color-text-sub, #7A6B5F); }
+.mda-f small { font-weight: 400; opacity: .85; }
+.mda-f b, .mda-agree b { color: var(--color-danger, #C66B5E); }
+.mda-f input, .mda-f select,
+.mds-gate__box .mda-f input[type="text"], .mds-gate__box .mda-f input[type="password"] {
+	width: 100%; box-sizing: border-box; min-height: 46px; padding: 10px 12px; font-size: 16px; /* 16px 미만이면 아이폰이 확대한다 */
+	border: 1px solid var(--color-border, #E8DDD3); border-radius: 10px; background: #fff; color: var(--color-text, #3D2F26); font-weight: 400; margin: 0;
+}
+.mda-f input:focus, .mda-f select:focus { outline: 2px solid var(--color-primary, #D88062); outline-offset: 1px; }
+.mda-err { display: block; font-style: normal; font-weight: 600; font-size: .8rem; color: var(--color-danger, #C66B5E); }
+.mda-hp { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; overflow: hidden; }
+.mda-privacy { font-size: .82rem; color: var(--color-text-sub, #7A6B5F); background: var(--color-surface, #FBF2E8); border-radius: 10px; padding: 10px 12px; }
+.mda-privacy summary { cursor: pointer; font-weight: 700; }
+.mda-privacy p { margin: 8px 0 0; line-height: 1.7; }
+.mda-agree { display: flex; gap: 8px; align-items: flex-start; font-size: .9rem; line-height: 1.5; }
+.mda-agree input { width: 20px; height: 20px; flex: none; margin-top: 1px; }
+.mda-wide { display: block; width: 100%; min-height: 50px; font-size: 1rem; text-align: center; box-sizing: border-box; }
+.mda-back { text-align: center; font-size: .86rem; color: var(--color-text-sub, #7A6B5F); }
+.mda-join--done .mds-btn { margin-top: 8px; }
+
+/* ---- 내 정보 ---- */
+.mda-me { display: flex; flex-direction: column; gap: 14px; max-width: 640px; }
+.mda-card { padding: 18px; }
+.mda-h { margin: 0 0 10px; font-size: 1.15rem; }
+.mda-h3 { margin: 0 0 4px; font-size: 1rem; }
+.mda-dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: .92rem; }
+.mda-dl dt { color: var(--color-text-sub, #7A6B5F); }
+.mda-dl dd { margin: 0; word-break: break-all; }
+.mda-me .mda-form .mds-btn { align-self: flex-start; min-height: 44px; }
+.mds-head__name { color: inherit; text-decoration: none; border-bottom: 1px dashed currentColor; }
+
+/* ---- 한 번만 보여 주는 임시 비밀번호 ---- */
+.mda-flash { margin-bottom: 14px; }
+.mda-temp { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: center; margin: 10px 0 6px; padding: 12px; border-radius: 10px; background: #fff; color: var(--color-text, #3D2F26); }
+.mda-temp code { font-size: 1.15rem; font-weight: 800; letter-spacing: .04em; user-select: all; }
+.mda-flash small { display: block; opacity: .85; }
+
+/* ---- 직원 정보 › 가입 신청 ---- */
+.mda-pending { scroll-margin-top: 80px; }
+.mda-badge { display: inline-block; min-width: 22px; padding: 1px 8px; border-radius: 999px; background: var(--color-danger, #C66B5E); color: #fff; font-size: .8rem; text-align: center; vertical-align: middle; }
+.mda-app { border: 1.5px solid var(--color-primary, #D88062); border-radius: 14px; padding: 14px; margin-top: 12px; background: #fff; }
+.mda-app__who { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; margin-bottom: 10px; font-size: 1.02rem; }
+.mda-app__when { font-size: .8rem; color: var(--color-text-sub, #7A6B5F); }
+.mda-dl--app { grid-template-columns: repeat(2, auto 1fr); font-size: .88rem; margin-bottom: 12px; }
+.mda-approve { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+.mda-approve .mda-perms, .mda-approve .mda-actions { grid-column: 1 / -1; }
+.mda-perms { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 12px; padding: 10px 12px; border-radius: 10px; background: var(--color-surface, #FBF2E8); }
+.mda-perms__base { font-size: .86rem; color: var(--color-accent-dark, #6B8F72); font-weight: 700; }
+.mda-perm { display: flex; gap: 8px; align-items: flex-start; font-size: .9rem; line-height: 1.45; cursor: pointer; }
+.mda-perm input { width: 20px; height: 20px; flex: none; margin-top: 1px; }
+.mda-perm small { display: block; color: var(--color-text-sub, #7A6B5F); }
+.mda-perm.is-lock { opacity: .55; cursor: not-allowed; }
+.mda-actions .mds-btn { min-width: 120px; min-height: 44px; }
+.mda-reject { margin-top: 8px; font-size: .88rem; }
+.mda-reject summary, .mda-notify summary, .mda-manage summary { cursor: pointer; color: var(--color-text-sub, #7A6B5F); font-weight: 700; padding: 6px 0; }
+.mda-reject form { margin-top: 8px; }
+.mda-btn-danger { background: transparent; border: 1px solid var(--color-danger, #C66B5E) !important; color: var(--color-danger, #C66B5E) !important; }
+.mda-notify { margin-top: 12px; font-size: .86rem; }
+.mda-inline { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+.mda-inline input, .mda-inline select { flex: 1 1 200px; min-height: 42px; padding: 8px 10px; font-size: 16px; border: 1px solid var(--color-border, #E8DDD3); border-radius: 10px; box-sizing: border-box; }
+
+/* ---- 직원 줄 아래 계정 칸 ---- */
+.mda-acc { margin: 6px 0 4px; padding: 8px 12px; border-radius: 10px; background: var(--color-surface, #FBF2E8); font-size: .88rem; }
+.mda-acc__line { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.mda-acc__line--none { color: var(--color-text-sub, #7A6B5F); }
+.mda-acc__line--none small { opacity: .85; }
+.mda-chip { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .78rem; font-weight: 700; background: #fff; border: 1px solid var(--color-border, #E8DDD3); }
+.mda-chip--active { color: var(--color-accent-dark, #6B8F72); border-color: var(--color-accent, #8FAE92); }
+.mda-chip--off { color: var(--color-danger, #C66B5E); border-color: var(--color-danger, #C66B5E); }
+.mda-chip--pending { color: var(--color-primary-dark, #B86347); border-color: var(--color-primary, #D88062); }
+.mda-manage { margin-top: 4px; }
+.mda-form--compact { gap: 6px; margin: 6px 0; }
+.mda-form--compact .mds-btn { align-self: flex-start; min-height: 40px; }
+.mda-btnrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+.mda-btnrow form { margin: 0; }
+.mda-btnrow .mds-btn { min-height: 38px; font-size: .84rem; }
+.mda-note { margin: 4px 0 0; font-size: .8rem; color: var(--color-text-sub, #7A6B5F); }
+.mda-acc--loose { background: #fff; border: 1px dashed var(--color-border, #E8DDD3); margin-top: 10px; }
+
+/* ---- 재료실 · 신청자 이름 고정 · 본인 계정 표시 ---- */
+.iv-input--me { background: var(--color-surface, #FBF2E8) !important; font-weight: 700; }
+.iv-tag--acc { background: rgba(143,174,146,.15); color: var(--color-accent-dark, #6B8F72); }
+
+@media (max-width: 600px) {
+	.mda-approve { grid-template-columns: 1fr; }
+	.mda-dl--app { grid-template-columns: auto 1fr; }
+	.mda-set { padding: 12px 12px 2px; }
+	.mda-actions .mds-btn { width: 100%; }
+}
+
+/* 직원 줄(.mdst-item 은 가로 한 줄)에서 계정 칸은 늘 아래 새 줄로 — 옆에 끼면 사진 칸 · 양식과 겹쳐 눌리지 않는다 */
+.mdst-item { flex-wrap: wrap; }
+.mdst-item > .mda-acc { flex: 1 0 100%; order: 10; box-sizing: border-box; }
+
+/* 직원 정보 줄 — 휴대폰에서 칸이 찌그러지던 것 (calendar.css 의 10칸 규칙이 휴대폰 2칸 규칙보다 뒤에 있어 덮었다) · 사진 업로드 흐름은 그대로 */
+.mdst-f--photo { position: relative; } /* 숨은 파일 칸이 화면 밖으로 나가 가로 스크롤을 만들던 것 */
+@media (max-width: 700px) {
+	.mdst-row, .mdst-row--new { grid-template-columns: 1fr 1fr !important; }
+	.mdst-row .mdst-f--photo { grid-column: 1 / -1; }
+	.mdst-row .mdst-f--note, .mdst-row .mdst-f--email, .mdst-row .mdst-save { grid-column: 1 / -1; }
+	.mdst-row .mdst-f input, .mdst-row .mdst-f select { min-width: 0; width: 100%; box-sizing: border-box; }
+}

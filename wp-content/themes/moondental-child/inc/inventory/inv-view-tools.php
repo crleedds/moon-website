@@ -22,7 +22,7 @@ function md_inv_scan_dialog() {
 		<div class="iv-dlg__head"><b id="iv-scan-h">바코드 스캔</b><button type="button" class="iv-x" data-close aria-label="닫기"><?php echo md_inv_icon( 'x' ); // phpcs:ignore ?></button></div>
 		<div class="iv-scan"><video id="iv-scan-video" playsinline muted></video><div class="iv-scan__frame"></div></div>
 		<p class="iv-help" id="iv-scan-msg">바코드를 네모 안에 맞춰 주세요. 카메라 권한을 물으면 「허용」을 눌러 주세요.</p>
-		<label class="iv-f"><span>직접 입력 (스캐너로 찍어도 됩니다)</span><input class="iv-input" id="iv-scan-manual" inputmode="numeric" placeholder="바코드 숫자 입력 후 엔터"></label>
+		<div class="iv-scan-manual"><label class="iv-f"><span>직접 입력 (스캐너로 찍어도 됩니다)</span><input class="iv-input" id="iv-scan-manual" inputmode="numeric" enterkeyhint="done" placeholder="바코드 숫자"></label><button type="button" class="iv-btn iv-btn--primary" id="iv-scan-ok">확인</button></div>
 	</dialog>
 	<?php
 }

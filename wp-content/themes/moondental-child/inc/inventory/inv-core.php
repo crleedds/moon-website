@@ -121,6 +121,7 @@ function md_inv_clean_emails( $raw ) {
  * 권한 — 라운지 공통 권한을 그대로 쓴다
  *   직원 = md_sup_can_use (공용 계정 moondentalhospital)
  *   관리자 = md_sup_can_manage (moondentalmanager · 재고 담당자 역할)
+ *          + 「재료실 관리」 권한(md_inv_manage)을 받은 개인 계정 (v5.8 · 직원 정보에서 승인할 때 준다)
  * ============================================================ */
 
 function md_inv_can_use() {
@@ -128,6 +129,7 @@ function md_inv_can_use() {
 }
 
 function md_inv_is_admin() {
+	if ( is_user_logged_in() && current_user_can( 'md_inv_manage' ) && md_inv_can_use() ) { return true; }
 	return function_exists( 'md_sup_can_manage' ) ? md_sup_can_manage() : current_user_can( 'manage_options' );
 }
 
@@ -892,6 +894,18 @@ function md_inv_req_create( $team_id, $requester, $lines, $note = '', $urgent = 
 	md_inv_log( '요청', md_inv_team_name( $team_id ) . ' · ' . $requester . ' · ' . count( $ids ) . '건' );
 	if ( function_exists( 'md_inv_notify_new' ) ) { md_inv_notify_new( $ids ); }
 	return $ids;
+}
+
+/** 개인 계정으로 로그인해서 보낸 신청인가 (공용 계정 · 관리자가 대신 넣은 것은 아님) */
+function md_inv_req_by_account( $r ) {
+	static $personal = array();
+	$uid = isset( $r->user_id ) ? (int) $r->user_id : 0;
+	if ( ! $uid ) { return false; }
+	if ( ! isset( $personal[ $uid ] ) ) {
+		$u = get_userdata( $uid );
+		$personal[ $uid ] = $u && function_exists( 'md_acc_is_personal_user' ) && md_acc_is_personal_user( $u ) && ( '' === trim( $u->display_name ) || $u->display_name === $r->requester );
+	}
+	return $personal[ $uid ];
 }
 
 function md_inv_req( $id ) {

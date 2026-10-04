@@ -273,15 +273,18 @@ function md_inv_cat_row( $c, $use, $child_level ) {
 /* ---- 계정 -------------------------------------------------- */
 
 function md_inv_settings_accounts() {
-	$me = get_current_user_id();
+	/* v5.8 · 개인 계정 만들기 · 권한은 라운지 「직원 정보」로 옮겼다 (회원가입 신청 → 승인) */
+	$staff_url = function_exists( 'md_sup_url' ) ? md_sup_url( array( 'app' => 'staff' ) ) : home_url( '/직원/?app=staff' );
+	$shared    = array();
+	foreach ( md_inv_accounts() as $a ) {
+		if ( 'administrator' !== $a->role && in_array( $a->login, array( defined( 'MD_SUP_STAFF_LOGIN' ) ? MD_SUP_STAFF_LOGIN : 'moondentalhospital' ), true ) ) { $shared[] = $a; }
+	}
 	?>
-	<div class="iv-toolbar iv-toolbar--actions">
-		<button type="button" class="iv-btn iv-btn--primary" data-dlg="dlg-acc"><?php echo md_inv_icon( 'plus', 18 ); // phpcs:ignore ?>계정 만들기</button>
-	</div>
-	<div class="iv-sent">💡 관리자마다 <b>개인 계정</b>(권한 「관리자」)을 만들어 쓰면, 출고 · 입고 · 주문 기록에 그 사람 이름이 자동으로 남습니다. 공용 관리자 계정(moondentalmanager)은 계정 관리 · 백업처럼 원장님만 하는 일에 쓰세요. 개인 계정은 워드프레스 관리 화면에 들어갈 수 없고 라운지만 씁니다.</div>
+	<div class="iv-sent">👥 계정은 이제 <b>직원 라운지 › 직원 정보</b>에서 관리합니다. 직원이 로그인 화면의 「회원가입 신청」으로 신청하면, 직원 정보 맨 위에서 명단과 연결하고 권한(직원 · <b>재료실 관리</b> · 라운지 관리자)을 골라 승인합니다. 개인 계정으로 신청하면 신청자 이름이 자동으로 들어갑니다.</div>
+	<p><a class="iv-btn iv-btn--primary" href="<?php echo esc_url( $staff_url ); ?>">직원 정보 · 계정 관리로 가기 →</a></p>
 	<div class="iv-panel">
 		<h3 class="iv-h3">권한 차이</h3>
-		<div class="iv-table-wrap"><table class="iv-table iv-table--perm"><thead><tr><th></th><th>직원</th><th>관리자</th></tr></thead><tbody>
+		<div class="iv-table-wrap"><table class="iv-table iv-table--perm"><thead><tr><th></th><th>직원</th><th>재료실 관리</th></tr></thead><tbody>
 			<tr><td>품목 요청 · 내 요청 취소</td><td>○</td><td>○</td></tr>
 			<tr><td>요청 내역 보기</td><td><?php echo md_inv_set( 'staff_see_all_teams' ) ? '○ (모든 팀)' : '○ (고른 팀)'; ?></td><td>○</td></tr>
 			<tr><td>통계</td><td><?php echo md_inv_set( 'staff_stats' ) ? '○' : '—'; ?></td><td>○</td></tr>
@@ -289,37 +292,21 @@ function md_inv_settings_accounts() {
 			<tr><td>출고 · 반려 · 입고 · 실사 · 주문 · 선납</td><td>—</td><td>○</td></tr>
 			<tr><td>품목 · 팀 · 업체 · 분류 · 설정 · 백업</td><td>—</td><td>○</td></tr>
 		</tbody></table></div>
-		<p class="iv-help">직원 화면에서 보이는 범위는 「운영 설정」에서 바꿉니다.</p>
+		<p class="iv-help">「라운지 관리자」는 재료실 관리에 더해 직원 정보 · 계정 승인 등 라운지 전체를 관리합니다. 직원 화면에서 보이는 범위는 「운영 설정」에서 바꿉니다.</p>
 	</div>
-	<div class="iv-table-wrap"><table class="iv-table"><thead><tr><th>아이디</th><th>이름</th><th>권한</th><th></th></tr></thead><tbody>
-	<?php foreach ( md_inv_accounts() as $a ) : $edit = 'administrator' !== $a->role; ?>
-		<tr>
-			<td data-l="아이디"><code><?php echo esc_html( $a->login ); ?></code><?php echo (int) $a->id === $me ? ' <span class="iv-tag">지금 로그인</span>' : ''; ?></td>
-			<td data-l="이름"><?php echo esc_html( $a->name ); ?></td>
-			<td data-l="권한"><?php echo esc_html( md_inv_role_label( $a->role ) ); ?></td>
-			<td class="iv-td-act">
-				<?php if ( $edit ) : ?>
-					<button type="button" class="iv-btn iv-btn--ghost iv-btn--xs" data-dlg="dlg-accpass" data-set="<?php echo esc_attr( wp_json_encode( array( 'id' => (int) $a->id, 'what' => $a->login ) ) ); ?>">비밀번호</button>
-					<?php if ( (int) $a->id !== $me ) : ?>
-						<form method="post" class="iv-inline-form"><?php md_inv_hidden( 'acc_role' ); ?><input type="hidden" name="id" value="<?php echo (int) $a->id; ?>"><input type="hidden" name="role" value="<?php echo 'md_stock_staff' === $a->role ? 'md_stock_manager' : 'md_stock_staff'; ?>"><button class="iv-btn iv-btn--ghost iv-btn--xs" data-confirm-btn="<?php echo esc_attr( $a->login . ' 권한을 ' . ( 'md_stock_staff' === $a->role ? '관리자' : '직원' ) . '(으)로 바꿀까요?' ); ?>"><?php echo 'md_stock_staff' === $a->role ? '관리자로' : '직원으로'; ?></button></form>
-						<form method="post" class="iv-inline-form" data-confirm="<?php echo esc_attr( $a->login . ' 계정을 지울까요?' ); ?>"><?php md_inv_hidden( 'acc_delete' ); ?><input type="hidden" name="id" value="<?php echo (int) $a->id; ?>"><button class="iv-btn iv-btn--ghost iv-btn--xs">삭제</button></form>
-					<?php endif; ?>
-				<?php else : ?><span class="iv-muted">워드프레스 관리 화면에서 관리</span><?php endif; ?>
-			</td>
-		</tr>
-	<?php endforeach; ?>
-	</tbody></table></div>
-	<dialog class="iv-dlg" id="dlg-acc"><form method="post" autocomplete="off">
-		<?php md_inv_hidden( 'acc_create' ); ?>
-		<div class="iv-dlg__head"><b>계정 만들기</b><button type="button" class="iv-x" data-close aria-label="닫기"><?php echo md_inv_icon( 'x' ); // phpcs:ignore ?></button></div>
-		<div class="iv-grid2">
-			<label class="iv-f"><span>아이디 (영문 · 숫자) <em>*</em></span><input class="iv-input" name="login" pattern="[A-Za-z0-9._\-]{3,40}" required autocomplete="off"></label>
-			<label class="iv-f"><span>이름 (기록에 남음) <em>*</em></span><input class="iv-input" name="name" maxlength="40" required placeholder="예: 김민지"></label>
-			<label class="iv-f"><span>비밀번호 (8자 이상) <em>*</em></span><input class="iv-input" name="pass" type="text" minlength="8" required autocomplete="new-password"></label>
-			<label class="iv-f"><span>권한</span><select class="iv-input" name="role"><option value="md_stock_manager">관리자 (출고 · 입고 · 주문 · 설정)</option><option value="md_stock_staff">직원 (신청 · 내역 · 통계)</option></select></label>
-		</div>
-		<p class="iv-help">비밀번호는 저장소·기록 어디에도 남지 않습니다. 만든 뒤 따로 적어 두세요.</p>
-		<?php md_inv_dlg_close( '만들기' ); ?>
+	<?php if ( $shared && md_inv_can_accounts() ) : ?>
+	<div class="iv-panel">
+		<h3 class="iv-h3">병원 공용 계정</h3>
+		<div class="iv-table-wrap"><table class="iv-table"><thead><tr><th>아이디</th><th>이름</th><th></th></tr></thead><tbody>
+		<?php foreach ( $shared as $a ) : ?>
+			<tr>
+				<td data-l="아이디"><code><?php echo esc_html( $a->login ); ?></code></td>
+				<td data-l="이름"><?php echo esc_html( $a->name ); ?></td>
+				<td class="iv-td-act"><button type="button" class="iv-btn iv-btn--ghost iv-btn--xs" data-dlg="dlg-accpass" data-set="<?php echo esc_attr( wp_json_encode( array( 'id' => (int) $a->id, 'what' => $a->login ) ) ); ?>">비밀번호</button></td>
+			</tr>
+		<?php endforeach; ?>
+		</tbody></table></div>
+	</div>
 	<dialog class="iv-dlg" id="dlg-accpass"><form method="post" autocomplete="off">
 		<?php md_inv_hidden( 'acc_pass' ); ?><input type="hidden" name="id" value="">
 		<div class="iv-dlg__head"><b>비밀번호 바꾸기</b><button type="button" class="iv-x" data-close aria-label="닫기"><?php echo md_inv_icon( 'x' ); // phpcs:ignore ?></button></div>
@@ -327,6 +314,7 @@ function md_inv_settings_accounts() {
 		<label class="iv-f"><span>새 비밀번호 (8자 이상)</span><input class="iv-input" name="pass" type="text" minlength="8" required autocomplete="new-password"></label>
 		<p class="iv-help">공용 계정 비밀번호를 바꾸면 그 계정으로 로그인한 모든 기기가 다시 로그인해야 합니다.</p>
 		<?php md_inv_dlg_close( '바꾸기' ); ?>
+	<?php endif; ?>
 	<?php
 }
 

@@ -247,8 +247,9 @@
   /* ---------------------------------------------------------
    * 바코드 스캔 (카메라) — BarcodeDetector, 없으면 ZXing 을 불러 쓴다
    * ------------------------------------------------------- */
-  var scanner = { stream: null, timer: null, zx: null, cb: null };
+  var scanner = { stream: null, timer: null, zx: null, cb: null, run: 0 };
   function stopScan() {
+    scanner.run++; /* 늦게 도착한 카메라는 받자마자 끈다 */
     if (scanner.timer) { clearInterval(scanner.timer); scanner.timer = null; }
     if (scanner.zx) { try { scanner.zx.stop(); } catch (e) {} scanner.zx = null; }
     if (scanner.stream) { scanner.stream.getTracks().forEach(function (t) { t.stop(); }); scanner.stream = null; }
@@ -263,32 +264,83 @@
       document.head.appendChild(s);
     });
   }
+  /* 카메라가 안 열린 이유를 사람이 알아들을 말로 */
+  function camBlockedByPage() {
+    try {
+      var pp = document.permissionsPolicy || document.featurePolicy;
+      return !!(pp && pp.allowsFeature && !pp.allowsFeature('camera'));
+    } catch (e) { return false; }
+  }
+  function camError(err) {
+    var n = err && err.name ? err.name : '';
+    if (!window.isSecureContext) return '보안 연결(https)에서만 카메라를 쓸 수 있습니다. 아래에 숫자를 직접 입력해 주세요.';
+    if (camBlockedByPage()) return '홈페이지 보안 설정이 카메라를 막고 있습니다 (관리자에게 알려 주세요). 아래에 숫자를 직접 입력해 주세요.';
+    if (n === 'NotAllowedError' || n === 'SecurityError') return '카메라 권한이 꺼져 있습니다. 주소창 왼쪽 🔒(또는 ⓘ) › 권한 › 카메라를 「허용」으로 바꾼 뒤 다시 눌러 주세요. 아래에 숫자를 직접 입력해도 됩니다.';
+    if (n === 'NotFoundError' || n === 'OverconstrainedError') return '이 기기에서 카메라를 찾지 못했습니다. 아래에 숫자를 직접 입력해 주세요.';
+    if (n === 'NotReadableError' || n === 'AbortError') return '다른 앱이 카메라를 쓰고 있습니다. 카메라 앱 · 화상 통화를 닫고 다시 눌러 주세요.';
+    return '카메라를 열지 못했습니다. 아래에 숫자를 직접 입력해 주세요.';
+  }
+  function getCam() {
+    /* 뒤 카메라를 먼저, 안 되면 아무 카메라나 */
+    var want = { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false };
+    return navigator.mediaDevices.getUserMedia(want).catch(function (e) {
+      if (e && (e.name === 'OverconstrainedError' || e.name === 'NotFoundError')) return navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      throw e;
+    });
+  }
+  function nativeDetector() {
+    /* 안드로이드 크롬에도 BarcodeDetector 만 있고 읽을 수 있는 형식이 없는 기기가 있다 → 그땐 ZXing */
+    if (!('BarcodeDetector' in window) || !window.BarcodeDetector.getSupportedFormats) return Promise.resolve(null);
+    return window.BarcodeDetector.getSupportedFormats().then(function (f) {
+      var want = ['ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e', 'itf', 'qr_code', 'data_matrix', 'codabar'].filter(function (x) { return f.indexOf(x) >= 0; });
+      return want.length ? new window.BarcodeDetector({ formats: want }) : null;
+    }).catch(function () { return null; });
+  }
   function startScan(cb) {
     var dlg = openDlg('iv-scan-dlg');
     if (!dlg) { var v = window.prompt('바코드 숫자를 입력하세요'); if (v) cb(v.trim()); return; }
+    stopScan();
+    var run = scanner.run;
     scanner.cb = cb;
     var video = $('#iv-scan-video'), msg = $('#iv-scan-msg'), manual = $('#iv-scan-manual');
     manual.value = '';
+    dlg.classList.remove('is-live');
     var done = function (code) { if (!code) return; stopScan(); closeDlg(dlg); if (navigator.vibrate) navigator.vibrate(60); cb(String(code).trim()); };
     manual.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); done(manual.value); } };
+    var okb = $('#iv-scan-ok'); if (okb) okb.onclick = function () { if (manual.value.trim()) done(manual.value); else manual.focus(); };
     if (!dlg.dataset.bound) { dlg.dataset.bound = '1'; dlg.addEventListener('close', stopScan); }
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { msg.textContent = '이 브라우저는 카메라를 쓸 수 없습니다. 아래에 숫자를 직접 입력해 주세요.'; return; }
-    msg.textContent = '바코드를 네모 안에 맞춰 주세요.';
-    if ('BarcodeDetector' in window) {
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(function (st) {
-        scanner.stream = st; video.srcObject = st; video.play();
-        var det = new window.BarcodeDetector();
-        scanner.timer = setInterval(function () {
-          if (video.readyState < 2) return;
-          det.detect(video).then(function (r) { if (r && r.length) done(r[0].rawValue); }).catch(function () {});
-        }, 250);
-      }).catch(function () { msg.textContent = '카메라를 열지 못했습니다. 권한을 허용하거나 숫자를 직접 입력해 주세요.'; });
-    } else {
+    var fail = function (e) { if (run !== scanner.run) return; msg.textContent = camError(e); msg.classList.add('is-err'); dlg.dataset.camErr = (e && e.name) || 'x'; try { manual.focus(); } catch (x) {} };
+    msg.classList.remove('is-err'); delete dlg.dataset.camErr;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { fail({ name: window.isSecureContext ? 'NotFoundError' : 'SecurityError' }); return; }
+    if (camBlockedByPage()) { fail({ name: 'SecurityError' }); return; }
+    msg.textContent = '카메라를 여는 중…';
+    var live = function () { if (run !== scanner.run) return; dlg.classList.add('is-live'); msg.textContent = '바코드를 네모 안에 맞춰 주세요. 잘 안 읽히면 조금 떨어뜨려 보세요.'; };
+    nativeDetector().then(function (det) {
+      if (run !== scanner.run) return;
+      if (det) {
+        getCam().then(function (st) {
+          if (run !== scanner.run) { st.getTracks().forEach(function (t) { t.stop(); }); return; }
+          scanner.stream = st; video.srcObject = st;
+          var pl = video.play(); if (pl && pl.catch) pl.catch(function () {});
+          live();
+          var busy = false;
+          scanner.timer = setInterval(function () {
+            if (busy || video.readyState < 2) return;
+            busy = true;
+            det.detect(video).then(function (r) { busy = false; if (r && r.length) done(r[0].rawValue); }).catch(function () { busy = false; });
+          }, 200);
+        }).catch(fail);
+        return;
+      }
+      msg.textContent = '스캐너를 불러오는 중…';
       loadZXing().then(function (ZX) {
+        if (run !== scanner.run) return;
         var reader = new ZX.BrowserMultiFormatReader();
-        reader.decodeFromVideoDevice(undefined, video, function (r) { if (r) done(r.getText()); }).then(function (ctrl) { scanner.zx = ctrl; }).catch(function () { msg.textContent = '카메라를 열지 못했습니다. 숫자를 직접 입력해 주세요.'; });
-      }).catch(function () { msg.textContent = '스캐너를 불러오지 못했습니다. 숫자를 직접 입력해 주세요.'; });
-    }
+        reader.decodeFromConstraints({ video: { facingMode: { ideal: 'environment' } }, audio: false }, video, function (r) { if (r) done(r.getText()); })
+          .then(function (ctrl) { if (run !== scanner.run) { ctrl.stop(); return; } scanner.zx = ctrl; live(); })
+          .catch(fail);
+      }).catch(function () { if (run === scanner.run) { msg.textContent = '스캐너를 불러오지 못했습니다 (인터넷 연결 확인). 아래에 숫자를 직접 입력해 주세요.'; msg.classList.add('is-err'); } });
+    });
   }
   /* 품목 양식의 바코드 칸 옆 스캔 버튼 */
   document.addEventListener('click', function (e) {
@@ -320,7 +372,7 @@
     if (!cart || !Array.isArray(cart.lines)) cart = { lines: [], tok: '' };
     cart.lines = cart.lines.filter(function (l) { return l.custom || byId[l.id]; });
     var who = O.remember ? store.get(WHO, {}) : {};
-    var state = { q: '', chip: '', team: teamName[who.team] ? Number(who.team) : 0, shown: PAGE };
+    var state = { q: '', chip: '', team: teamName[who.team] ? Number(who.team) : (teamName[D.myTeam] ? Number(D.myTeam) : 0), shown: PAGE };
     var favs = D.favs || {};
     function favList() { return state.team && favs[state.team] ? favs[state.team] : []; }
     function isFav(id) { return favList().indexOf(id) >= 0; }
@@ -598,7 +650,7 @@
       if (!e.target.closest('[data-dlg="iv-cart"]')) return;
       var ct = $('#iv-cart-team'), cn = $('#iv-cart-name');
       if (state.team) ct.value = String(state.team);
-      if (!cn.value && who.name) cn.value = who.name;
+      if (D.me) cn.value = D.me; else if (!cn.value && who.name) cn.value = who.name;
       err.hidden = true;
       renderCart();
     });
@@ -618,7 +670,7 @@
       if (!cart.tok) { cart.tok = (Date.now().toString(36) + Math.random().toString(36).slice(2, 10)).replace(/[^a-z0-9]/gi, ''); store.set(KEY, cart); }
       $('#iv-cart-tok').value = cart.tok;
       $('#iv-cart-json').value = JSON.stringify(cart.lines.map(function (l) { return l.custom ? { custom: l.custom, qty: l.qty, note: l.note || '' } : { id: l.id, qty: l.qty, note: l.note || '' }; }));
-      if (O.remember) { who.team = Number(tm.value); who.name = nm.value.trim(); store.set(WHO, who); }
+      if (O.remember) { who.team = Number(tm.value); if (!D.me) who.name = nm.value.trim(); store.set(WHO, who); }
     });
 
     var cf = $('#iv-custom-form');

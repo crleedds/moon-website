@@ -614,3 +614,10 @@ textarea.iv-input { min-height: 44px; resize: vertical; line-height: 1.5; }
 .iv-input--loc { width: 150px; }
 .iv-table--pick .iv-pick__sign { min-width: 110px; }
 @media print { .iv-table--pick .iv-pick__sign { width: 120px; } }
+
+/* v5.8 · 바코드 스캔 — 카메라가 안 열리면 검은 상자를 접고 이유와 직접 입력을 바로 보인다 */
+#iv-scan-msg.is-err { color: var(--iv-danger, #C66B5E); font-weight: 600; line-height: 1.6; }
+.iv-dlg[data-cam-err] .iv-scan { display: none; }
+.iv-scan-manual { display: flex; gap: 8px; align-items: flex-end; margin: 0 20px 20px; }
+.iv-scan-manual .iv-f { flex: 1; margin: 0; }
+.iv-scan-manual .iv-btn { min-height: 46px; }

@@ -103,8 +103,11 @@ function md_inv_act_req_send() {
 			);
 		}
 	}
-	$res = md_inv_req_create( (int) md_inv_p( 'team_id' ), (string) md_inv_p( 'requester' ), $lines, (string) md_inv_p( 'note' ), md_inv_p( 'urgent' ) ? 1 : 0 );
+	/* v5.8 · 개인 계정은 신청자 이름을 계정 이름으로 못박는다 — 누가 신청했는지 확실하게 */
+	$who = md_inv_is_personal() ? md_inv_me() : (string) md_inv_p( 'requester' );
+	$res = md_inv_req_create( (int) md_inv_p( 'team_id' ), $who, $lines, (string) md_inv_p( 'note' ), md_inv_p( 'urgent' ) ? 1 : 0 );
 	if ( is_wp_error( $res ) ) { md_inv_go( 'err', $res->get_error_message(), md_inv_url( array( 'iv' => 'req' ) ) ); }
+	if ( md_inv_is_personal() ) { update_user_meta( get_current_user_id(), 'md_inv_team', (int) md_inv_p( 'team_id' ) ); }
 	if ( '' !== $tok ) { set_transient( 'md_inv_tok_' . $tok, 1, DAY_IN_SECONDS ); }
 	$first = md_inv_req( $res[0] );
 	md_inv_go( 'ok', '신청 ' . count( $res ) . '건을 보냈습니다. 처리되면 이 화면에서 확인할 수 있습니다.', add_query_arg( array( 'sent' => $tok, 'nb' => $first ? $first->batch : '', 'it' => (int) md_inv_p( 'team_id' ) ), $hist ) );
