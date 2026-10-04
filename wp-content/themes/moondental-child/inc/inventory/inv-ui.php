@@ -257,7 +257,7 @@ function md_inv_render() {
 	}
 	$parent = array( 'item' => 'stock', 'count' => 'stock', 'qcount' => 'stock', 'barcode' => 'stock', 'fix' => 'stock', 'pick' => 'todo', 'po' => 'orders', 'receive' => 'todo', 'settle' => 'orders' );
 	$on = isset( $parent[ $view ] ) ? $parent[ $view ] : $view;
-	echo '<nav class="iv-nav" aria-label="품목신청 메뉴">';
+	echo '<nav class="iv-nav" aria-label="재료실 메뉴">';
 	foreach ( $items as $k => $v ) {
 		echo '<a class="iv-nav__a' . ( $on === $k ? ' is-on' : '' ) . '" href="' . esc_url( md_inv_url( array( 'iv' => $k ) ) ) . '"' . ( $on === $k ? ' aria-current="page"' : '' ) . '>'
 			. md_inv_icon( $v['icon'], 18 ) . '<span>' . esc_html( $v['label'] ) . '</span>'
@@ -269,7 +269,7 @@ function md_inv_render() {
 	/* 휴대폰 아래 메뉴: 앞 4개 + 더보기 */
 	$primary = $admin ? array( 'req', 'todo', 'stock', 'stats' ) : array_slice( array_keys( $items ), 0, 4 );
 	$rest    = array_diff( array_keys( $items ), $primary );
-	echo '<nav class="iv-tabbar" aria-label="품목신청 메뉴 (휴대폰)">';
+	echo '<nav class="iv-tabbar" aria-label="재료실 메뉴 (휴대폰)">';
 	foreach ( $primary as $k ) {
 		if ( ! isset( $items[ $k ] ) ) { continue; }
 		$v = $items[ $k ];

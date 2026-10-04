@@ -57,7 +57,7 @@ function md_sup_current_tab() {
 function md_sup_apps() {
 	return array(
 		'stock' => array(
-			'label' => '품목신청', /* v4.23 · 이름 「재고관리」 → 「품목신청」 (원장 지시). 화면은 inc/inventory */
+			'label' => '재료실', /* v5.6 · 이름 「품목신청」 → 「재료실」 (원장 지시, 그 전엔 「재고관리」). 화면은 inc/inventory */
 			'icon'  => '📦',
 			'desc'  => '재료 · 소모품 신청 · 출고 · 입고 · 주문 · 선납 · 통계',
 		),

@@ -377,7 +377,7 @@ function md_inv_settings_backup() {
 	?>
 	<section class="iv-panel">
 		<h3 class="iv-h3">백업</h3>
-		<p class="iv-help">품목신청의 모든 표(품목 · 입출고 · 요청 · 주문 · 선납 · 팀 · 업체 · 분류 · 작업 기록)와 설정을 한 파일로 묶습니다. 매일 한 번 자동으로 뜨고, 보고서 메일에도 첨부됩니다.</p>
+		<p class="iv-help">재료실의 모든 표(품목 · 입출고 · 요청 · 주문 · 선납 · 팀 · 업체 · 분류 · 작업 기록)와 설정을 한 파일로 묶습니다. 매일 한 번 자동으로 뜨고, 보고서 메일에도 첨부됩니다.</p>
 		<form method="post" class="iv-settings">
 			<?php md_inv_hidden( 'settings' ); ?>
 			<?php md_inv_s_check( 'backup_on', '매일 자동 백업', '마지막 백업 뒤로 바뀐 것이 없으면 그날은 건너뜁니다.' ); ?>
@@ -413,7 +413,7 @@ function md_inv_settings_backup() {
 	<section class="iv-panel">
 		<h3 class="iv-h3">파일에서 되돌리기</h3>
 		<p class="iv-help">내려받았거나 메일로 받은 백업 파일(.json.gz)을 올려 그 시점으로 되돌립니다. 지금 상태는 자동으로 먼저 백업됩니다.</p>
-		<form method="post" enctype="multipart/form-data" class="iv-settings" data-confirm="정말 되돌릴까요? 지금 품목신청 데이터가 백업 시점으로 바뀝니다.">
+		<form method="post" enctype="multipart/form-data" class="iv-settings" data-confirm="정말 되돌릴까요? 지금 재료실 데이터가 백업 시점으로 바뀝니다.">
 			<?php md_inv_hidden( 'backup_restore' ); ?>
 			<label class="iv-f"><span>백업 파일</span><input class="iv-input" type="file" name="file" accept=".gz,.json,application/gzip,application/json" required></label>
 			<label class="iv-f"><span>확인: 「되돌리기」라고 적어 주세요</span><input class="iv-input" name="confirm" required autocomplete="off"></label>

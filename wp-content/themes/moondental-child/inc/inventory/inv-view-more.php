@@ -224,8 +224,8 @@ function md_inv_manifest() {
 	nocache_headers();
 	header( 'Content-Type: application/manifest+json; charset=UTF-8' );
 	echo wp_json_encode( array(
-		'name'             => '문치과병원 품목신청',
-		'short_name'       => '품목신청',
+		'name'             => '문치과병원 재료실',
+		'short_name'       => '재료실',
 		'start_url'        => home_url( '/직원/?app=stock' ),
 		'scope'            => home_url( '/' ),
 		'display'          => 'standalone',
@@ -248,7 +248,7 @@ function md_inv_head_app() {
 	echo '<link rel="manifest" href="' . esc_url( add_query_arg( 'md_inv_manifest', '1', home_url( '/' ) ) ) . '">' . "\n";
 	echo '<link rel="apple-touch-icon" href="' . esc_url( $icon ) . '">' . "\n";
 	echo '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">' . "\n";
-	echo '<meta name="apple-mobile-web-app-title" content="품목신청">' . "\n";
+	echo '<meta name="apple-mobile-web-app-title" content="재료실">' . "\n";
 }
 add_action( 'wp_head', 'md_inv_head_app', 2 );
 
@@ -256,7 +256,7 @@ add_action( 'wp_head', 'md_inv_head_app', 2 );
 function md_inv_install_help() {
 	?>
 	<div class="iv-install" id="iv-install" hidden>
-		<b>📱 휴대폰 홈 화면에 「품목신청」 아이콘 만들기</b>
+		<b>📱 휴대폰 홈 화면에 「재료실」 아이콘 만들기</b>
 		<button type="button" class="iv-btn iv-btn--primary iv-btn--sm" id="iv-install-btn" hidden>홈 화면에 추가</button>
 		<span class="iv-install__ios" hidden>아이폰: 아래 <b>공유 버튼 ⬆︎</b> → <b>「홈 화면에 추가」</b></span>
 		<span class="iv-install__and" hidden>안드로이드: 오른쪽 위 <b>⋮</b> → <b>「홈 화면에 추가」</b></span>

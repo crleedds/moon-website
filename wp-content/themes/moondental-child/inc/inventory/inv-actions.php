@@ -461,12 +461,12 @@ function md_inv_handle_download() {
 	if ( 'xlsx' === $what ) {
 		md_inv_log( '엑셀 내려받기', $from . '~' . $to );
 		if ( md_inv_is_admin() ) {
-			md_inv_send_xlsx( md_inv_report_xlsx( $from, $to ), '문치과병원 품목신청 보고서 ' . current_time( 'Y-m-d' ) . '.xlsx' );
+			md_inv_send_xlsx( md_inv_report_xlsx( $from, $to ), '문치과병원 재료실 보고서 ' . current_time( 'Y-m-d' ) . '.xlsx' );
 		}
 		/* 직원: 볼 수 있는 표만 묶는다 */
 		$keys = array_values( array_intersect( array( 'requests', 'usage', 'monthly' ), $staff_ok ) );
 		if ( ! $keys ) { wp_die( '내려받을 수 있는 표가 없습니다.', '', array( 'response' => 403 ) ); }
-		md_inv_send_xlsx( md_inv_report_xlsx( $from, $to, $keys ), '문치과병원 품목신청 ' . current_time( 'Y-m-d' ) . '.xlsx' );
+		md_inv_send_xlsx( md_inv_report_xlsx( $from, $to, $keys ), '문치과병원 재료실 ' . current_time( 'Y-m-d' ) . '.xlsx' );
 	}
 	if ( 'backup' === $what ) {
 		$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;

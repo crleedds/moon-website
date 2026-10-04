@@ -298,7 +298,7 @@ function md_inv_xlsx( $sheets ) {
 		. '</Relationships>';
 	$files['docProps/core.xml'] = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
 		. '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
-		. '<dc:title>문치과병원 품목신청</dc:title><dc:creator>문치과병원 직원 라운지</dc:creator>'
+		. '<dc:title>문치과병원 재료실</dc:title><dc:creator>문치과병원 직원 라운지</dc:creator>'
 		. '<dcterms:created xsi:type="dcterms:W3CDTF">' . gmdate( 'Y-m-d\TH:i:s\Z' ) . '</dcterms:created></cp:coreProperties>';
 	$files['xl/workbook.xml'] = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
 		. '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
