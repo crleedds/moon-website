@@ -1103,3 +1103,4 @@ body.md-v5 .md-header__cta-btn:hover { background: #3A2A1E !important; border-co
 .v5-impl [id] { scroll-margin-top: 90px; }
 @media (max-width: 1000px) { .v5-impl__flow--5 { grid-template-columns: 1fr 1fr; } .v5-impl__flow--5 li:nth-child(odd) { padding-left: 0; border-left: 0; } .v5-impl__flow--5 li:nth-child(n+3) { border-top: 1px solid var(--v5-line); } }
 @media (max-width: 700px) { .v5-impl__dots--2 { grid-template-columns: 1fr; } .v5-impl__flow--5 { grid-template-columns: 1fr; } .v5-impl__flow--5 li { padding-left: 0 !important; border-left: 0 !important; } .v5-ortho-track { padding: 22px 20px; } }
+@media (min-width: 1001px) { .v5-impl ol.v5-impl__flow.v5-impl__flow--5 { grid-template-columns: repeat(5, 1fr); } }
