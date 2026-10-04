@@ -774,3 +774,37 @@ body.md-v5 .md-cta-banner a [class*="logo"], body.md-v5 .md-cta-banner a [class*
   .v5-impl__flow li, .v5-impl__flow li + li, .v5-impl__brands li, .v5-impl__brands li + li { padding-left: 0; border-left: 0; }
   .v5-impl__flow li + li, .v5-impl__brands li + li { border-top: 1px solid var(--v5-line); }
 }
+
+/* v5.7 · 원장 지시 · 떠 있는 버튼 — 푸터 SNS 처럼 가는 선 아이콘 · 같은 모양 원 */
+body.md-v5 .md-fab-stack { gap: 10px !important; }
+body.md-v5 .md-fab,
+body.md-v5 .md-fab--naver,
+body.md-v5 .md-fab--kakao,
+body.md-v5 .md-totop {
+  width: 46px !important; height: 46px !important; padding: 0 !important;
+  display: inline-grid !important; place-items: center;
+  border-radius: 50% !important;
+  background: var(--v5-paper) !important;
+  border: 1px solid var(--v5-line) !important;
+  color: var(--v5-sub) !important;
+  box-shadow: 0 6px 18px rgba(30, 26, 23, .08) !important;
+  transition: color .2s, border-color .2s, transform .2s !important;
+}
+body.md-v5 .md-fab:hover, body.md-v5 .md-totop:hover {
+  color: var(--v5-bronze) !important; border-color: var(--v5-bronze) !important; transform: translateY(-2px) !important;
+}
+body.md-v5 .md-fab__icon { display: grid !important; place-items: center; width: auto !important; height: auto !important; background: none !important; color: inherit !important; font-size: 0 !important; }
+body.md-v5 .md-ico { width: 20px; height: 20px; display: block; }
+body.md-v5 .md-totop .md-ico { width: 18px; height: 18px; }
+body.md-v5 .md-fab__label {
+  font-size: 12.5px !important; font-weight: 400 !important; letter-spacing: .02em;
+  background: #1E1A17 !important; color: #F6F3EE !important;
+  border-radius: 2px !important; padding: 6px 11px !important; box-shadow: none !important;
+}
+/* 언어 버튼 · 휴대폰 아래 막대 */
+body.md-v5 .md-lang-fab__globe { display: inline-grid; place-items: center; color: var(--v5-sub); }
+body.md-v5 .md-lang-fab__globe .md-ico { width: 17px; height: 17px; }
+body.md-v5 .md-mobile-cta__icon { display: grid; place-items: center; font-size: 0 !important; }
+body.md-v5 .md-mobile-cta__icon .md-ico { width: 20px; height: 20px; }
+body.md-v5 .md-mobile-cta__item { color: var(--v5-ink) !important; }
+body.md-v5 .md-mobile-cta__item--naver { background: var(--v5-bronze) !important; color: #fff !important; }
