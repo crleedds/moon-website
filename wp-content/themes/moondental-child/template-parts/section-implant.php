@@ -151,6 +151,8 @@ $md_impl_img = get_stylesheet_directory_uri() . '/assets/images/services/';
 </section>
 
 <!-- ④ 프리미엄 임플란트 시스템 ──────────────────────────────── -->
+<?php get_template_part( 'template-parts/section', 'guide-implant' ); /* v5.4 · 가이드 임플란트 */ ?>
+
 <section class="md-section md-section--surface" aria-label="사용하는 임플란트 시스템">
 	<div class="md-container md-container--narrow">
 		<header class="md-section-head">

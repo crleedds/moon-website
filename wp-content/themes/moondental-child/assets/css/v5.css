@@ -673,3 +673,33 @@ body.md-v5 .md-cta-banner a [class*="logo"], body.md-v5 .md-cta-banner a [class*
   .v5-hero { align-items: center; }
   .v5-hero__photo { align-self: center; }
 }
+
+/* v5.4 · 임플란트센터 · 가이드 임플란트 */
+.v5-guide { margin: 0; }
+.v5-guide h3 { font-family: var(--v5-serif) !important; font-weight: 400 !important; color: var(--v5-ink); }
+.v5-guide__steps { list-style: none; margin: 0 0 48px; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--v5-ink); }
+.v5-guide__steps li { padding: 26px 24px 8px 0; margin: 0; }
+.v5-guide__steps li + li { padding-left: 24px; border-left: 1px solid var(--v5-line); }
+.v5-guide__no { font-family: var(--v5-display); font-size: 22px; color: var(--v5-bronze); font-variant-numeric: lining-nums; font-feature-settings: "lnum" 1; }
+.v5-guide__steps h3 { font-size: 20px !important; margin: 10px 0 8px; }
+.v5-guide__steps p, .v5-guide__sys p, .v5-guide__flapless p { margin: 0; color: var(--v5-sub); font-size: 15px; line-height: 1.85; }
+.v5-guide__sys { padding: 26px 0; border-top: 1px solid var(--v5-line); max-width: 52em; }
+.v5-guide__sys h3 { font-size: 21px !important; margin: 0 0 8px; }
+.v5-guide__sub { font-size: 21px !important; margin: 40px 0 6px; }
+.v5-guide__cases { margin-bottom: 44px; }
+.v5-guide__flapless { display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: start; background: var(--v5-bg); border: 1px solid var(--v5-line); padding: 36px 36px 30px; }
+.v5-guide__flapless h3 { font-size: 24px !important; margin: 10px 0 12px; }
+.v5-guide__flapless ul { list-style: none; margin: 0; padding: 0; }
+.v5-guide__flapless li { padding: 14px 0; border-bottom: 1px solid var(--v5-line); margin: 0; }
+.v5-guide__flapless li:first-child { padding-top: 0; }
+.v5-guide__flapless li b { display: block; font-family: var(--v5-serif); font-weight: 500; font-size: 18px; color: var(--v5-ink); margin-bottom: 2px; }
+.v5-guide__flapless li span { color: var(--v5-sub); font-size: 14.5px; }
+.v5-guide__note { margin: 14px 0 40px; font-size: 13.5px; color: var(--v5-mute); }
+.v5-guide__quote { margin: 44px 0; padding: 0 0 0 20px; border-left: 2px solid var(--v5-bronze); font-family: var(--v5-serif); font-weight: 300; font-size: clamp(22px, 2.6vw, 30px); color: var(--v5-ink); }
+.v5-guide__faq { margin-top: 8px; }
+@media (max-width: 900px) {
+  .v5-guide__steps { grid-template-columns: 1fr; }
+  .v5-guide__steps li, .v5-guide__steps li + li { padding: 22px 0 6px; border-left: 0; }
+  .v5-guide__steps li + li { border-top: 1px solid var(--v5-line); }
+  .v5-guide__flapless { grid-template-columns: 1fr; gap: 24px; padding: 26px 20px; }
+}
