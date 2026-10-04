@@ -139,7 +139,24 @@ foreach ( $all_doctors as $m ) {
 				 * 13줄을 초록 체크로 죽 늘어놓던 것을 두 갈래로 묶는다.
 				 * 한쪽이 비면(문은수 이사장님처럼 전부 직책인 경우) 빈 소제목을
 				 * 만들지 않고 한 덩어리로 두 단에 흘린다. */
-				if ( ! empty( $credentials ) ) :
+				/* v5.6 · 「## 제목」 줄로 묶음을 직접 정한 경우 그 순서 · 제목 그대로 */
+				$md_groups = array();
+				foreach ( (array) $credentials as $_l ) {
+					if ( 0 === strpos( (string) $_l, '## ' ) ) { $md_groups[] = array( 'title' => trim( substr( $_l, 3 ) ), 'items' => array() ); continue; }
+					if ( $md_groups ) $md_groups[ count( $md_groups ) - 1 ]['items'][] = $_l;
+				}
+				if ( $md_groups ) : ?>
+					<div class="md-creds md-creds--groups">
+						<?php foreach ( $md_groups as $_g ) : if ( ! $_g['items'] ) continue; ?>
+							<div class="md-creds__group">
+								<h3 class="md-creds__title"><?php echo esc_html( $_g['title'] ); ?></h3>
+								<ul class="md-creds__list">
+									<?php foreach ( $_g['items'] as $c ) : ?><li><?php echo esc_html( $c ); ?></li><?php endforeach; ?>
+								</ul>
+							</div>
+						<?php endforeach; ?>
+					</div>
+				<?php elseif ( ! empty( $credentials ) ) :
 					$creds     = moondental_split_bio( $credentials );
 					$has_both  = ( ! empty( $creds['career'] ) && ! empty( $creds['cert'] ) );
 					?>

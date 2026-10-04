@@ -662,6 +662,7 @@ function moondental_jsonld_doctor() {
 	}
 
 	if ( ! empty( $found['bio'] ) && is_array( $found['bio'] ) ) {
+		$found['bio'] = array_values( array_filter( $found['bio'], function ( $l ) { return 0 !== strpos( (string) $l, '## ' ); } ) ); /* v5.6 */
 		$schema['description'] = implode( ' · ', array_slice( $found['bio'], 0, 5 ) );
 		// 학력·자격을 hasCredential로도 표현
 		$creds = array();
