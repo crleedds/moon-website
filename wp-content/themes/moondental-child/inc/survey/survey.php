@@ -8,7 +8,7 @@
  *
  *    1. 데스크가 그날 접수 명단(차트번호 · 이름 · 휴대폰 · 담당 원장 · 담당 스탭)을
  *       직원 허브에 올린다 (덴트웹 기간별 접수환자 목록 엑셀 붙여넣기, 한 명씩 입력, 또는 REST 로 자동 전송).
- *    2. 환자가 링크를 열면 링크에 실린 이름(?n=#환자명#)과 환자가 넣은 휴대폰 가운데 4자리를 명단과 대조한다.
+ *    2. 환자가 링크를 열면 링크에 실린 이름(?n=#환자명#)과 환자가 넣은 휴대폰 마지막 4자리를 명단과 대조한다.
  *       이름이 링크에 없으면 환자가 이름을 적는다. 맞으면 그날 담당 원장 · 담당 스탭 이름이 보이고 설문이 열린다.
  *    3. 제출하면 그 진료(명단 한 줄)는 응답 완료로 잠긴다 — 같은 진료에 두 번 쓸 수 없다.
  *
@@ -17,7 +17,7 @@
  *    관리자           응답 열람 · 스탭별 집계 · CSV · 설정 (원장·스탭 목록 · 응답 허용 일수 · 연동 키)
  *
  *  개인정보
- *    명단의 휴대폰 가운데 4자리는 비밀키로 HMAC 해시해 저장한다 (원문은 남기지 않는다). 생년월일은 받지 않는다 (v4.10.8).
+ *    명단의 휴대폰 마지막 4자리는 비밀키로 HMAC 해시해 저장한다 (원문은 남기지 않는다). 생년월일은 받지 않는다 (v4.10.8).
  *    환자가 입력한 값도 저장하지 않는다 — 해시해서 비교만 한다.
  *    본인 확인이 5번 틀리면 그 접속은 30분 동안 막는다.
  *    명단 · 응답 · 올린 엑셀 원본은 모두 진료일로부터 2년이 지나면 지운다 (v4.21.38).
@@ -193,18 +193,19 @@ function md_survey_review_url() {
  * ============================================================ */
 
 /**
- * 휴대폰 → 가운데 4자리 (010-XXXX-0000 의 XXXX). (v4.14.3)
- *  덴트웹이 전자서명 없이 저장한 엑셀은 뒷자리를 「010-1234-56**」처럼 가리므로 뒷 4자리는 쓸 수 없다.
- *  가운데 4자리는 그대로 남아 있어 이것을 본인 확인 값으로 쓴다.
- *  입력이 딱 4자리면 그 값을 가운데 4자리로 본다 (데스크가 손으로 넣을 때).
+ * (v4.14.3 ~ v6.3.1 에는 가운데 4자리를 썼다 — 서명 없이 저장한 엑셀은 뒷자리가 가려졌기 때문.)
+ *  덴트웹 DB 연동(dwpublic)은 번호 전체를 주므로 v6.3.2 부터 마지막 4자리로 바꿨다.
+ *  엑셀로 올릴 때는 덴트웹 엑셀저장에서 인증서로 서명해야 번호 전체가 나온다.
+ *  입력이 딱 4자리면 그대로, 전체 번호면 끝 4자리. 뒷자리에 * 가 있으면 쓸 수 없어 빈 값.
  *  11자리(가려진 자리는 * 로 세어서)면 4~7번째, 그 밖에는 ''.
  */
 function md_survey_norm_phone4( $v ) {
-	$s = preg_replace( '/[^0-9*]+/', '', (string) $v );
-	if ( preg_match( '/^\d{4}$/', $s ) ) { return $s; }
-	if ( 11 === strlen( $s ) && preg_match( '/^\d{7}/', $s ) ) { return substr( $s, 3, 4 ); }
-	if ( 10 === strlen( $s ) && preg_match( '/^\d{6}/', $s ) ) { return substr( $s, 3, 3 ) . '0'; } /* 옛 10자리 번호 — 거의 없음 */
-	return '';
+	/* v6.3.2 · 본인 확인 숫자를 휴대폰 「마지막 4자리」로 (원장 지시 — 덴트웹 DB 연동은 번호를 가리지 않고 준다).
+	 * 입력이 딱 4자리면 그대로, 전체 번호면 끝 4자리. 뒷자리가 * 로 가려진 번호(서명 없이 저장한 엑셀)는 쓸 수 없어 '' */
+	$raw = (string) $v;
+	if ( false !== strpos( $raw, '*' ) ) { return ''; }
+	$s = preg_replace( '/\D+/', '', $raw );
+	return strlen( $s ) >= 4 ? substr( $s, -4 ) : '';
 }
 
 /**
@@ -233,7 +234,7 @@ function md_survey_ident_hash( $phone4, $birth6 ) {
 	return hash_hmac( 'sha256', $phone4 . '|' . $birth6, md_survey_secret() );
 }
 
-/** 휴대폰 가운데 4자리만의 해시 — 링크에 이름이 실려 온 환자는 이것과 이름으로 확인한다 (v4.10.1) */
+/** 휴대폰 마지막 4자리의 해시 (v6.3.2 전에는 가운데 4자리) — 링크에 이름이 실려 온 환자는 이것과 이름으로 확인한다 (v4.10.1) */
 function md_survey_phone_hash( $phone4 ) {
 	return hash_hmac( 'sha256', 'p|' . $phone4, md_survey_secret() );
 }
@@ -417,7 +418,7 @@ function md_survey_visit_upsert( $d, $source = 'manual' ) {
 
 	if ( '' === $chart )  { return new WP_Error( 'md_survey', '차트번호가 없습니다.' ); }
 	if ( '' === $name )   { return new WP_Error( 'md_survey', '이름이 없습니다.' ); }
-	if ( '' === $phone4 ) { return new WP_Error( 'md_survey', '휴대폰 번호(가운데 4자리)를 읽지 못했습니다 (' . $name . ').' ); }
+	if ( '' === $phone4 ) { return new WP_Error( 'md_survey', '휴대폰 번호(마지막 4자리)를 읽지 못했습니다 — 뒷자리가 가려진 번호일 수 있습니다 (' . $name . ').' ); }
 	/* v4.21.13 · 담당직원이 비어도 명단에 넣는다 — 그 환자는 담당직원 문항 없이 설문 (원장 질문에 따라 변경) */
 
 	$t   = md_survey_table_visit();
@@ -784,7 +785,7 @@ function md_survey_public_render() {
 
 	$method = isset( $_SERVER['REQUEST_METHOD'] ) ? $_SERVER['REQUEST_METHOD'] : 'GET';
 
-	/* v4.10.1 · 알림톡 링크에 이름이 실려 오면(?n=#환자명#) 휴대폰 가운데 4자리만 묻는다.
+	/* v4.10.1 · 알림톡 링크에 이름이 실려 오면(?n=#환자명#) 휴대폰 마지막 4자리만 묻는다.
 	 * 이름은 GET 으로 받아 폼에 숨겨 두고, POST 때 그대로 돌려받는다. */
 	$pname = '';
 	if ( isset( $_GET['n'] ) )  { $pname = md_survey_norm_name( wp_unslash( $_GET['n'] ) ); }
@@ -822,7 +823,7 @@ function md_survey_public_render() {
 			if ( md_survey_is_locked() ) {
 				$step = 'locked';
 			} else {
-				/* v4.10.8 · 본인 확인은 이름 + 휴대폰 가운데 4자리. 이름은 링크(?n=)에서 오거나, 없으면 환자가 적는다. */
+				/* v4.10.8 · 본인 확인은 이름 + 휴대폰 마지막 4자리. 이름은 링크(?n=)에서 오거나, 없으면 환자가 적는다. */
 				$phone4 = md_survey_norm_phone4( isset( $_POST['phone4'] ) ? wp_unslash( $_POST['phone4'] ) : '' );
 				$typed  = isset( $_POST['name'] ) ? mb_substr( md_survey_norm_name( wp_unslash( $_POST['name'] ) ), 0, 40 ) : '';
 				$from_link = '' !== $pname;
@@ -831,7 +832,7 @@ function md_survey_public_render() {
 				if ( ! $agree ) {
 					$err = '개인정보 수집·이용에 동의해 주세요.';
 				} elseif ( '' === $pname || '' === $phone4 ) {
-					$err = '이름과 휴대전화 가운데 4자리를 확인해 주세요.';
+					$err = '이름과 휴대전화 마지막 4자리를 확인해 주세요.';
 				} else {
 					global $wpdb;
 					$tv   = md_survey_table_visit();
@@ -1111,7 +1112,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<?php else : ?>
 		<h1>진료받으신 본인 확인</h1>
 		<p class="sv-time">⏱ 약 30초면 끝나요</p>
-		<p>진료받으신 분만 참여할 수 있습니다. 이름과 휴대전화 가운데 4자리를 확인합니다.</p>
+		<p>진료받으신 분만 참여할 수 있습니다. 이름과 휴대전화 마지막 4자리를 확인합니다.</p>
 		<label class="sv-field">
 			<span>이름</span>
 			<input type="text" name="name" maxlength="40" required placeholder="이름을 적어 주세요" id="sv-name" autocomplete="off" autofocus>
@@ -1120,20 +1121,19 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<?php endif; ?>
 		<?php /* v4.21.9 · 전화번호 모양 그대로 — 010 - [○○○○] - ●●●● (원장 제안) */ ?>
 		<div class="sv-field">
-			<span id="sv-ph-l">휴대전화 가운데 4자리</span>
+			<span id="sv-ph-l">휴대전화 마지막 4자리</span>
 			<div class="sv-phone" aria-hidden="false">
-				<span class="sv-phone__fix">010</span><span class="sv-phone__dash">-</span>
+				<span class="sv-phone__fix">010</span><span class="sv-phone__dash">-</span><span class="sv-phone__fix is-hidden">●●●●</span><span class="sv-phone__dash">-</span>
 				<span class="sv-phone__br" aria-hidden="true">[</span><input type="tel" name="phone4" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="○○○○" autocomplete="off" aria-labelledby="sv-ph-l" <?php echo '' !== $pname ? 'autofocus' : ''; ?>><span class="sv-phone__br" aria-hidden="true">]</span>
-				<span class="sv-phone__dash">-</span><span class="sv-phone__fix is-hidden">●●●●</span>
 			</div>
-			<small>○ 자리에 휴대전화 번호 가운데 4자리를 넣어 주세요</small>
+			<small>○ 자리에 휴대전화 번호 마지막 4자리를 넣어 주세요</small>
 		</div>
 		<?php /* v4.21.8 · 체크칸 없이 버튼으로 동의 — 입력 최소화. 링크로 이름이 왔으면 4자리를 다 치는 순간 넘어간다 */ ?>
 		<button type="submit" class="sv-btn">동의하고 설문 시작</button>
 		<details class="sv-consent-d">
 			<summary>개인정보 수집·이용 안내</summary>
 			<div class="sv-consent">
-				<b>수집 항목</b> 이름 · 휴대전화 가운데 4자리(본인 확인에만 사용, 저장하지 않음), 설문 응답<br>
+				<b>수집 항목</b> 이름 · 휴대전화 마지막 4자리(본인 확인에만 사용, 저장하지 않음), 설문 응답<br>
 				<b>이용 목적</b> 진료 만족도 조사와 서비스 개선<br>
 				<b>보유 기간</b> 진료일로부터 2년<br>
 				동의하지 않으시면 이 화면을 닫으시면 됩니다. 응답은 병원 관리자만 열람합니다.
@@ -1556,7 +1556,7 @@ function md_survey_render_roster() {
 		<input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_upload' ) ); ?>">
 		<input type="hidden" name="date" value="<?php echo esc_attr( $date ); ?>">
 		<h2 class="mdsv-h"><?php echo esc_html( date_i18n( 'n월 j일 (D)', strtotime( $date ) ) ); ?> <small><?php echo $file ? '파일 올림' : '아직 올리지 않음'; ?></small></h2>
-		<p class="mds-hint">덴트웹 접수목록 → <b>기간별 목록</b> → 오늘 → <b>엑셀저장</b>(사유: 만족도 조사 명단, 인증서는 취소) 한 파일을 골라 올리기. 다시 올리면 새 파일로 바뀝니다.</p>
+		<p class="mds-hint">덴트웹 접수목록 → <b>기간별 목록</b> → 오늘 → <b>엑셀저장</b>(사유: 만족도 조사 명단 · <b>인증서로 서명</b> — 서명하지 않으면 전화번호 뒷자리가 가려져 환자가 본인 확인을 못 합니다) 한 파일을 골라 올리기. 다시 올리면 새 파일로 바뀝니다.</p>
 		<?php if ( md_survey_can_manage() ) : /* v4.18.7 · 관리자에게만 서버 상태 — 안 될 때 원인 찾기용 */
 			$pcl = file_exists( ABSPATH . 'wp-admin/includes/class-pclzip.php' ); ?>
 			<p class="mds-hint mdsv-diag">서버: 파일 업로드 <?php echo ini_get( 'file_uploads' ) ? '켜짐' : '꺼짐'; ?> · 최대 <?php echo esc_html( ini_get( 'upload_max_filesize' ) ); ?> · ZipArchive <?php echo class_exists( 'ZipArchive' ) ? '있음' : '없음'; ?> · PclZip <?php echo $pcl ? '있음' : '없음'; ?> · SimpleXML <?php echo function_exists( 'simplexml_load_string' ) ? '있음' : '없음'; ?> · PHP <?php echo esc_html( PHP_VERSION ); ?></p>
