@@ -812,3 +812,53 @@ body.md-v5 .md-fab-stack .md-fab .md-fab__icon,
 body.md-v5 .md-fab-stack .md-fab--naver .md-fab__icon,
 body.md-v5 .md-fab-stack .md-fab--kakao .md-fab__icon { color: inherit !important; background: none !important; opacity: 1 !important; filter: none !important; }
 body.md-v5 .md-fab-stack .md-fab .md-ico { stroke: currentColor !important; fill: none !important; }
+
+/* ==========================================================================
+   v5.8 · 원장 지시 · 줄 · 간격 다듬기
+   ========================================================================== */
+/* 섹션 머리 · 왼쪽 작은 라벨을 제목 첫 줄 높이에 맞춤 */
+@media (min-width: 821px) { .v5-head > .v5-label { padding-top: 16px; } }
+
+/* 숫자 띠 · 위 선이 내용 폭보다 튀어나오지 않게 (선은 안쪽 칸에만) */
+.v5-stats { border-top: 0 !important; border-bottom: 0 !important; padding-inline: 24px; }
+.v5-stats > .v5-stat { border-top: 1px solid var(--v5-hair); border-bottom: 1px solid var(--v5-hair); }
+@media (max-width: 700px) {
+  .v5-stats > .v5-stat:nth-child(n+3) { border-top: 0; }
+  .v5-stat { padding: 24px 10px; }
+  .v5-stat dt { font-size: 12.5px; line-height: 1.5; }
+}
+/* 지정 · 협력 · 휴대폰에서 두 줄로 고르게 */
+@media (max-width: 700px) { .v5-creds ul { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; padding-block: 20px; } .v5-creds li { align-items: flex-start; } .v5-creds li::before { margin-top: 7px; } }
+
+/* 30여년의 발자취 · 옆으로 넘겨 보는 줄임을 알 수 있게 오른쪽 흐림 */
+.v5-hist-railwrap, .v5-rail { position: relative; }
+.v5-blk.v5-paper .v5-rail { -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); mask-image: linear-gradient(to right, #000 88%, transparent); padding-right: 60px; }
+
+/* 전문센터 행 · 휴대폰 들여쓰기 정리 */
+@media (max-width: 820px) { .v5-crow { padding: 24px 0; } .v5-crow:hover { padding-inline: 0; } .v5-crow__no { font-size: 18px; } }
+
+/* 푸터 · 위 내용과 같은 폭 · 같은 여백 */
+body.md-v5 .md-footer .md-container { max-width: var(--v5-max) !important; padding-inline: 24px !important; box-sizing: border-box; }
+body.md-v5 .md-footer__grid { max-width: none !important; gap: 40px 48px !important; }
+body.md-v5 .md-footer__social { flex-wrap: nowrap !important; gap: 8px !important; }
+body.md-v5 .md-fsoc { width: 36px !important; height: 36px !important; }
+body.md-v5 .md-footer__park-item > div > span::before { content: none !important; }
+body.md-v5 .md-footer__park-item { display: grid !important; grid-template-columns: 28px 1fr; gap: 0 8px; align-items: baseline; padding: 0 0 12px !important; }
+body.md-v5 .md-footer__park-list { display: grid; gap: 8px; margin: 0 !important; padding: 0 !important; }
+body.md-v5 .md-footer__park-item strong { font-size: 14.5px !important; }
+body.md-v5 .md-footer__park-transit { margin-top: 14px !important; display: grid; gap: 6px; }
+body.md-v5 .md-footer__park-transit a, body.md-v5 .md-station-link { border-bottom: 1px solid var(--v5-line) !important; text-decoration: none !important; font-weight: 500; }
+body.md-v5 .md-station-hl { background: none !important; color: inherit !important; padding: 0 !important; }
+@media (max-width: 900px) {
+  body.md-v5 .md-footer__grid { grid-template-columns: 1fr 1fr !important; gap: 40px 32px !important; }
+  body.md-v5 .md-footer__brand { grid-column: 1 / -1; }
+}
+@media (max-width: 720px) {
+  body.md-v5 .md-footer { padding-top: 48px !important; }
+  body.md-v5 .md-footer__grid { grid-template-columns: 1fr !important; gap: 36px !important; }
+  body.md-v5 .md-footer__brand, body.md-v5 .md-footer__phone, body.md-v5 .md-footer__email, body.md-v5 .md-footer__addr { text-align: left !important; }
+  body.md-v5 .md-footer__social { justify-content: flex-start !important; }
+  body.md-v5 .md-footer__brand-link { display: inline-block; }
+  body.md-v5 .md-footer__legal-line, body.md-v5 .md-footer__policy-line { text-align: left !important; }
+}
+body.md-v5 .md-footer__park-list li, body.md-v5 .md-footer__park-item, body.md-v5 .md-footer__park-num, body.md-v5 .md-footer__park-note, body.md-v5 .md-footer__park-transit { margin-left: 0 !important; padding-left: 0 !important; }
