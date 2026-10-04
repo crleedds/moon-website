@@ -47,13 +47,15 @@ $stats = array(
 $certs = array();
 foreach ( $lines( $mc( 'mission_certs', "⭐|1990년대부터 임플란트를 식립해온 병원\n🏥|국가지정 구강검진 병원\n🌐|외국인환자 유치 의료기관\n🪖|미군 및 가족 치료기관\n🦷|천안시 치아사랑사업 협력병원\n🔗|삼성서울병원 협력병원\n➕|대한적십자사 협력병원" ) ) as $l ) {
 	$p = array_map( 'trim', explode( '|', $l, 2 ) );
-	$certs[] = isset( $p[1] ) ? $p[1] : $p[0];
+	$c_label = isset( $p[1] ) ? $p[1] : $p[0];
+	if ( false !== strpos( $c_label, '1990년대' ) ) continue; /* v5.3.5 · 원장 지시 · 이 문구는 임플란트센터 소개로 옮김 */
+	$certs[] = $c_label;
 }
 
 /* 4개 전문센터 */
 $centers = array(
 	array( 'no' => '01', 'title' => $mc( 'clinic_intro_implant_title', '임플란트센터' ), 'en' => 'IMPLANT · 10F', 'url' => home_url( '/임플란트-센터/' ),
-		'desc' => '정밀한 임플란트 시술과 정기 검진을 통한 사후관리까지.',
+		'desc' => '정밀한 임플란트 시술과 정기 검진을 통한 사후관리까지.', 'lead' => '1990년대부터 임플란트를 식립해온 병원',
 		'tags' => array( '네비게이션 임플란트', '비절개 임플란트', '상악동 거상술', '전악 임플란트', '임플란트 재수술' ) ),
 	array( 'no' => '02', 'title' => $mc( 'clinic_intro_ortho_title', '교정센터' ), 'en' => 'ORTHODONTICS · 11F', 'url' => home_url( '/투명교정-센터/' ),
 		'desc' => 'AI 기반 투명교정 진단으로 환자별 교정 계획을 제안합니다.',
@@ -183,7 +185,7 @@ $addr = $info['address'] ?? '충청남도 천안시 동남구 만남로 52, 문�
 				<a class="v5-crow" href="<?php echo esc_url( $c['url'] ); ?>">
 					<span class="v5-crow__no"><?php echo esc_html( $c['no'] ); ?></span>
 					<h3><?php echo esc_html( $c['title'] ); ?><small><?php echo esc_html( $c['en'] ); ?></small></h3>
-					<span class="v5-crow__desc"><p><?php echo esc_html( $c['desc'] ); ?></p><span class="v5-crow__tags"><?php foreach ( $c['tags'] as $t ) : ?><span><?php echo esc_html( $t ); ?></span><?php endforeach; ?></span></span>
+					<span class="v5-crow__desc"><?php if ( ! empty( $c['lead'] ) ) : ?><strong class="v5-crow__lead"><?php echo esc_html( $c['lead'] ); ?></strong><?php endif; ?><p><?php echo esc_html( $c['desc'] ); ?></p><span class="v5-crow__tags"><?php foreach ( $c['tags'] as $t ) : ?><span><?php echo esc_html( $t ); ?></span><?php endforeach; ?></span></span>
 					<span class="v5-crow__ar" aria-hidden="true">→</span>
 				</a>
 			<?php endforeach; ?>

@@ -642,3 +642,26 @@ body.md-v5 .md-cta-banner a:hover { filter: brightness(1.08); }
 
 body.md-v5 .md-cta-banner a svg, body.md-v5 .md-cta-banner a svg * { color: currentColor !important; fill: currentColor !important; }
 body.md-v5 .md-cta-banner a [class*="logo"], body.md-v5 .md-cta-banner a [class*="badge"] { background: transparent !important; color: currentColor !important; }
+
+/* v5.3.5 · 원장 지시 · 첫 화면 사진이 화면 오른쪽 끝까지 가지 않게 — 메뉴 · 아래 내용과 같은 폭 안으로 */
+@media (min-width: 901px) {
+  .v5-hero {
+    max-width: var(--v5-max);
+    margin: 0 auto;
+    padding: 48px 24px 56px;
+    box-sizing: border-box;
+    min-height: 0;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    border-bottom: 0;
+  }
+  .v5-hero__copy { padding: 24px 0; }
+  .v5-hero__photo { min-height: 0; aspect-ratio: 4 / 5; max-height: 640px; align-self: center; }
+}
+@media (min-width: 901px) and (max-width: 1100px) {
+  .v5-hero { gap: 36px; }
+  .v5-hero__photo { aspect-ratio: 3 / 4; }
+}
+.v5-stats { border-top: 1px solid var(--v5-hair); }
+/* 임플란트센터 · 「1990년대부터 임플란트를 식립해온 병원」 */
+.v5-crow__lead { display: block; font-family: var(--v5-serif); font-weight: 500; font-size: 15.5px; color: var(--v5-bronze); margin-bottom: 4px; }
