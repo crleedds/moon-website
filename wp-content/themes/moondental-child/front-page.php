@@ -13,7 +13,7 @@
 get_header();
 
 /* v5.0 · 새 디자인 홈 (한국어) — 외국어 홈은 아래 기존 구성을 새 색으로 */
-if ( function_exists( 'md_v5' ) && md_v5() && ( ! function_exists( 'moondental_current_language' ) || 'ko' === moondental_current_language() ) ) {
+if ( function_exists( 'md_v5' ) && md_v5() && ( ! function_exists( 'moondental_current_language' ) || 'ko' === moondental_current_language() || isset( $_GET['v5all'] ) || 'on' === get_option( 'md_design_v5_i18n', '' ) ) ) {
 	get_template_part( 'template-parts/home-v5' );
 	get_footer();
 	return;
