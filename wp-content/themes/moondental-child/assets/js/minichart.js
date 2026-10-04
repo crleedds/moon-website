@@ -1,4 +1,4 @@
-/* 직원 라운지 · 미니차트 (v6.2) — 없어도 화면은 모두 동작한다. 바로 찾기 · 더 보기 · 칸 늘리기 · 복사 */
+/* 직원 라운지 · 미니차트 (v6.2 · v6.5) — 없어도 화면은 모두 동작한다. 바로 찾기 · 더 보기 · 칸 늘리기 · 복사 · 담당의 확인 */
 (function () {
   'use strict';
   var PAGE = 60;
@@ -74,19 +74,6 @@
     });
   });
 
-  /* 태블릿 보기 글자 크기 (기기마다 기억) */
-  var tab = document.querySelector('.mc-tab');
-  if (tab) {
-    try { if (localStorage.getItem('md_mc_big') === '1') { tab.classList.add('is-big'); } } catch (er) {}
-    var sz = tab.querySelector('[data-size]');
-    if (sz) {
-      sz.addEventListener('click', function () {
-        var on = tab.classList.toggle('is-big');
-        try { localStorage.setItem('md_mc_big', on ? '1' : '0'); } catch (er) {}
-      });
-    }
-  }
-
   /* 저장 전에 나가려 하면 묻기 */
   var form = document.querySelector('.mc-form');
   if (form) {
@@ -96,48 +83,17 @@
     window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
   }
 
-  /* v6.3 · 최근 본 차트 (기기마다, 8개) */
-  var RKEY = 'md_mc_recent';
-  var readRecent = function () { try { return JSON.parse(localStorage.getItem(RKEY) || '[]') || []; } catch (er) { return []; } };
-  var here = document.querySelector('[data-mc-id][data-mc-label]');
-  if (here) {
-    var rid = here.getAttribute('data-mc-id'), lbl = here.getAttribute('data-mc-label');
-    var rec = readRecent().filter(function (x) { return x && x.id !== rid; });
-    rec.unshift({ id: rid, l: lbl });
-    try { localStorage.setItem(RKEY, JSON.stringify(rec.slice(0, 8))); } catch (er) {}
-  }
-  var box = document.getElementById('mc-recent');
-  if (box) {
-    var recs = readRecent();
-    if (recs.length) {
-      var base = location.href.split('#')[0].split('?')[0] + '?app=minichart&mv=p&mid=';
-      recs.forEach(function (x) {
-        var a = document.createElement('a'); a.href = base + encodeURIComponent(x.id); a.textContent = x.l; box.appendChild(a);
-      });
-      box.hidden = false;
-    }
-  }
-
-  /* v6.3 · 태블릿 보기 — 다른 기기에서 차트를 고치면 30초 안에 새로 불러온다 */
-  var live = document.querySelector('.mc-tab[data-mc-rev]');
-  if (live && window.fetch) {
-    var url = location.href.split('#')[0].split('?')[0] + '?md_mc_rev=' + live.getAttribute('data-mc-id');
-    var myRev = parseInt(live.getAttribute('data-mc-rev'), 10);
-    setInterval(function () {
-      if (document.hidden) { return; }
-      fetch(url, { credentials: 'same-origin', cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-        if (j && j.rev && j.rev !== myRev) {
-          try { sessionStorage.setItem('md_mc_live', '1'); } catch (er) {}
-          location.reload();
-        }
-      }).catch(function () {});
-    }, 30000);
-    try {
-      if (sessionStorage.getItem('md_mc_live')) {
-        sessionStorage.removeItem('md_mc_live');
-        var note = live.querySelector('.mc-tab__live');
-        if (note) { note.hidden = false; setTimeout(function () { note.hidden = true; }, 4000); }
+  /* v6.5 · 담당의는 한 칸 이상 (별표항목) */
+  var drBox = document.querySelector('[data-mc-dr]');
+  var drForm = drBox ? drBox.closest('form') : null;
+  if (drForm) {
+    drForm.addEventListener('submit', function (e) {
+      var any = Array.prototype.some.call(drBox.querySelectorAll('select, textarea'), function (el) { return el.value.trim() !== ''; });
+      if (!any) {
+        e.preventDefault(); e.stopImmediatePropagation();
+        alert('담당의를 한 칸 이상 골라 주세요.');
+        var sel = drBox.querySelector('select'); if (sel) { sel.focus(); }
       }
-    } catch (er) {}
+    }, true);
   }
 })();

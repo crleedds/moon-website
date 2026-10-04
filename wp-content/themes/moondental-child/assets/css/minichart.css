@@ -1,5 +1,5 @@
 /* =============================================================
-   직원 라운지 · 미니차트 (v6.2 · v6.4 휴대폰 정리)
+   직원 라운지 · 미니차트 (v6.2 · v6.4 휴대폰 정리 · v6.5 태블릿 보기 없앰 — 데스크탑 · 태블릿 · 휴대폰 모두 같은 화면)
    재료실(supply.css)의 토큰과 mds-btn · mds-card · mds-notice 를 쓴다.
    폼 · 칩은 여기서 따로 정의한다 (support.css 는 이 화면에 안 실린다).
    ============================================================= */
@@ -24,7 +24,8 @@
 .mc-chips::-webkit-scrollbar { display: none; }
 .mc-chip { flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 38px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--mc-line); background: var(--mc-bg); color: var(--mc-sub); font-size: .92rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .mc-chip.is-on { background: var(--mc-pri); border-color: var(--mc-pri); color: var(--color-text-on-primary, #fff); }
-.mc-chips--doc .mc-chip { min-height: 34px; padding: 3px 12px; font-size: .88rem; }
+.mc-chips--doc .mc-chip, .mc-chips--sort .mc-chip { min-height: 34px; padding: 3px 12px; font-size: .88rem; }
+.mc-chips__label { min-width: 2.6em; }
 .mc-chips__label { flex: 0 0 auto; font-size: .8rem; font-weight: 800; color: var(--mc-mute); margin-right: 2px; }
 .mc-chips__edit { flex: 0 0 auto; font-size: .82rem; color: var(--mc-mute); margin-left: 4px; white-space: nowrap; }
 .mc-group { display: flex; align-items: baseline; gap: 10px; margin: 18px 0 10px; font-size: 1.05rem; font-weight: 800; }
@@ -37,9 +38,6 @@
 .mc-search input[type="search"]:focus { outline: none; border-color: var(--mc-pri); }
 .mc-search__btn { min-height: 52px; padding: 0 16px; white-space: nowrap; }
 .mc-found { margin: 0 0 8px; color: var(--mc-sub); }
-.mc-recent { display: flex; gap: 6px; margin: 0 0 12px; overflow-x: auto; scrollbar-width: none; align-items: center; }
-.mc-recent::-webkit-scrollbar { display: none; }
-.mc-recent a { flex: 0 0 auto; padding: 6px 11px; border-radius: 8px; border: 1px dashed var(--mc-line); color: var(--mc-ink); font-size: .88rem; text-decoration: none; background: var(--mc-bg); white-space: nowrap; }
 
 /* 환자 목록 */
 .mc-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--mc-line); border-radius: 14px; overflow: hidden; background: var(--mc-bg); }
@@ -53,7 +51,6 @@
 .mc-row__pin { font-size: .85rem; }
 .mc-row__last { color: var(--mc-sub); font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .mc-row__upd { color: var(--mc-mute); font-size: .82rem; font-variant-numeric: tabular-nums; }
-.mc-miss { flex: 0 0 auto; font-size: .72rem; font-weight: 800; color: #8A6D0B; background: rgba(201,162,39,.16); border-radius: 999px; padding: 1px 7px; }
 .mc-warn { flex: 0 0 auto; font-size: .72rem; font-weight: 800; color: var(--mc-alert); background: var(--mc-alert-bg); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
 mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-weight: 800; border-radius: 3px; padding: 0 2px; }
 .mc-more-wrap { text-align: center; margin: 14px 0; }
@@ -74,7 +71,6 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
 .mc-inline { display: inline; margin: 0; }
 .mc-chart__meta { margin: 10px 0 0; font-size: .84rem; color: var(--mc-mute); }
 .mc-chart__meta a { color: inherit; }
-.mc-missnote { margin-bottom: 12px; }
 .mc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
 .mc-block { background: var(--mc-bg); border: 1px solid var(--mc-line); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; min-width: 0; }
 .mc-grid .mc-block { margin-bottom: 0; }
@@ -160,22 +156,24 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
 .mc-modes input { margin-top: 4px; width: 18px; height: 18px; flex: 0 0 auto; }
 .mc-file { max-width: 100%; }
 
-/* 태블릿 보기 */
-body.mc-tablet-mode .mds-head, body.mc-tablet-mode .mds-foot { display: none; }
-.mc-tab { --mc-fs: 1.25rem; }
-.mc-tab.is-big { --mc-fs: 1.5rem; }
-.mc-tab__head { display: flex; align-items: center; gap: 16px; padding: 10px 0 16px; border-bottom: 2px solid var(--mc-ink); margin-bottom: 16px; }
-.mc-tab__close { min-height: 48px; display: inline-flex; align-items: center; padding: 0 16px; border-radius: 12px; background: var(--mc-alt); color: var(--mc-ink); font-weight: 800; text-decoration: none; }
-.mc-tab__no { color: var(--mc-sub); font-size: 1.1rem; font-variant-numeric: tabular-nums; }
-.mc-tab__name { margin: 0; font-size: 2.2rem; font-weight: 800; line-height: 1.15; }
-.mc-tab__size { margin-left: auto; min-height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--mc-line); background: var(--mc-bg); font: inherit; font-size: 1rem; cursor: pointer; }
-.mc-tab__size b { font-size: 1.35rem; }
-.mc-tab__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.mc-tab__grid .mc-block { margin: 0; }
-.mc-tab .mc-block__b { font-size: var(--mc-fs); line-height: 1.6; }
-.mc-tab .mc-block__h { font-size: 1rem; }
-.mc-tab .mc-block--hist { grid-row: span 2; }
-.mc-tab__live { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); background: var(--mc-ink); color: #fff; padding: 10px 18px; border-radius: 999px; font-size: .95rem; }
+/* 휴지통 · 설정 (v6.5) */
+.mc-trash-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 6px 0 10px; }
+.mc-trash-head .mc-group { margin: 0; }
+.mc-trash-row__acts { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+.mc .mc-btn-danger { min-height: 44px; padding: 0 18px; border: 1px solid rgba(180,68,46,.5); color: var(--mc-alert); background: var(--mc-bg); font-weight: 800; }
+.mc .mc-btn-danger:hover { background: var(--mc-alert-bg); }
+.mc-chips__sep { flex: 0 0 auto; width: 1px; height: 22px; background: var(--mc-line); margin: 0 4px; }
+.mc-settings .mc-check { margin: -6px 0 10px; font-weight: 500; color: var(--mc-sub); }
+.mc-admin .mds-btn { min-height: 44px; padding: 0 18px; margin: 4px 6px 0 0; }
+
+/* ---------- 태블릿 (가로 761~1100) ---------- */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .mc-row { grid-template-columns: 4.8em minmax(7em, 11em) 1fr auto; gap: 4px 12px; padding: 13px 14px; }
+  .mc-chart__acts .mds-btn, .mc-chart__acts form .mds-btn { min-height: 48px; }
+  .mc-block__b { font-size: 1.05rem; }
+  .mc-form { max-width: none; }
+  .mc-add__btn, .mc-chip { min-height: 44px; }
+}
 
 /* ---------- 휴대폰 ---------- */
 @media (max-width: 760px) {
@@ -206,7 +204,7 @@ body.mc-tablet-mode .mds-head, body.mc-tablet-mode .mds-foot { display: none; }
   .mc-chart__name { font-size: 1.35rem; }
   .mc-chart__acts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
   .mc-chart__acts .mds-btn, .mc-chart__acts form, .mc-chart__acts form .mds-btn { width: 100%; min-height: 44px; padding: 0 6px; font-size: .9rem; }
-  .mc-grid, .mc-tab__grid { grid-template-columns: 1fr; gap: 10px; }
+  .mc-grid { grid-template-columns: 1fr; gap: 10px; }
   .mc-block { padding: 12px 14px; }
   .mc-add { grid-template-columns: 1fr auto; }
   .mc-add__text { grid-column: 1 / -1; }
@@ -221,8 +219,6 @@ body.mc-tablet-mode .mds-head, body.mc-tablet-mode .mds-foot { display: none; }
   .mc-note { padding: 16px 14px; }
   .mc-note-row { grid-template-columns: 1fr auto; }
   .mc-note-row span { grid-column: 1 / -1; grid-row: 2; }
-  .mc-tab__name { font-size: 1.7rem; }
-  .mc-tab .mc-block--hist { grid-row: auto; }
   .mc-admin { padding: 16px 14px; }
 }
 @media print {
