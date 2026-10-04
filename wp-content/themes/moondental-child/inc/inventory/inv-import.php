@@ -430,3 +430,25 @@ function md_inv_import_appsheet( $files, $opt = array() ) {
 	$summary['ledger'] = $lines;
 	return $summary;
 }
+
+/* ============================================================
+ * 1회 데이터 정리 (2026-10-04 원장 지시)
+ *   「전동칫솔」(메가젠임플란트) 분류를 건별결제품목 › 구강위생용품 → 선납차감품목 › 메가젠임플란트 로.
+ *   한 번만 돈다(옵션 md_inv_fix_20261004). 작업 기록에 「분류 이동」으로 남긴다.
+ * ============================================================ */
+function md_inv_fix_20261004() {
+	if ( get_option( 'md_inv_fix_20261004' ) || (int) get_option( 'md_inv_schema', 0 ) < 1 ) { return; }
+	global $wpdb;
+	$t   = md_inv_t();
+	$c1  = (int) $wpdb->get_var( "SELECT id FROM {$t['cat']} WHERE level = 1 AND legacy = 'C5' LIMIT 1" );
+	$c2  = (int) $wpdb->get_var( "SELECT id FROM {$t['cat']} WHERE level = 2 AND legacy = 'MB1' LIMIT 1" );
+	$vid = (int) $wpdb->get_var( "SELECT id FROM {$t['vendor']} WHERE name = '메가젠임플란트' LIMIT 1" );
+	if ( ! $c1 || ! $c2 || ! $vid ) { return; } /* 아직 데이터가 없으면 다음에 */
+	$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$t['item']} WHERE name = %s AND vendor_id = %d AND cat2 <> %d", '전동칫솔', $vid, $c2 ) );
+	foreach ( $ids as $id ) {
+		$wpdb->update( $t['item'], array( 'cat1' => $c1, 'cat2' => $c2, 'cat3' => 0, 'updated_at' => current_time( 'mysql' ) ), array( 'id' => (int) $id ) );
+		$wpdb->insert( $t['log'], array( 'user_id' => 0, 'person' => '시스템', 'action' => '분류 이동', 'detail' => '전동칫솔 → 선납차감품목 › 메가젠임플란트 (원장 지시)', 'created_at' => current_time( 'mysql' ) ) );
+	}
+	update_option( 'md_inv_fix_20261004', current_time( 'mysql' ) . ' · ' . count( $ids ) . '개', false );
+}
+add_action( 'init', 'md_inv_fix_20261004', 30 );
