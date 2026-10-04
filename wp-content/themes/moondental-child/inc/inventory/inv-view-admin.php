@@ -413,7 +413,7 @@ function md_inv_view_stock() {
 
 	<div class="iv-toolbar">
 		<span class="iv-muted"><?php echo count( $rows ); ?>개 품목<?php echo $admin ? ' · 재고 금액 ' . esc_html( md_inv_won( $value ) ) : ''; ?></span>
-		<?php if ( $admin ) : md_inv_dl_buttons( 'items' ); ?><a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_dl_url( 'xlsx' ) ); ?>"><?php echo md_inv_icon( 'down', 16 ); // phpcs:ignore ?>엑셀 (전체 보고서)</a><?php endif; ?>
+		<?php if ( $admin ) : md_inv_dl_buttons( 'items', array(), '재고 현황 엑셀' ); ?><a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_dl_url( 'xlsx' ) ); ?>"><?php echo md_inv_icon( 'down', 16 ); // phpcs:ignore ?>전체 보고서 엑셀</a><?php endif; ?>
 	</div>
 
 	<?php if ( ! $rows ) { md_inv_empty( '이 조건의 품목이 없습니다.' ); } else { ?>
@@ -640,7 +640,7 @@ function md_inv_view_prepaid() {
 	}
 	?>
 	<p class="iv-help">입금 − 입고 금액(무상 제외) + 반품 금액 = 잔액. 주문해 두고 아직 안 들어온 금액을 빼면 「쓸 수 있는 잔액」입니다.</p>
-	<div class="iv-toolbar"><?php md_inv_dl_buttons( 'prepaid', array(), '현황 CSV' ); md_inv_dl_buttons( 'deposits', array(), '입금 CSV' ); ?></div>
+	<div class="iv-toolbar"><?php md_inv_dl_buttons( 'prepaid', array(), '선납 현황 엑셀' ); md_inv_dl_buttons( 'deposits', array(), '입금 내역 엑셀' ); ?></div>
 	<div class="iv-ppgrid">
 		<?php foreach ( $sum as $p ) : ?>
 			<a class="iv-pp<?php echo $vid === (int) $p->vendor->id ? ' is-on' : ''; ?><?php echo $p->available < 0 ? ' is-neg' : ''; ?>" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'prepaid', 'ivd' => $p->vendor->id ) ) ); ?>">

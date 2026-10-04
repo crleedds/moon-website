@@ -239,13 +239,7 @@ function md_inv_report_send( $why = 'manual', $to = '' ) {
 	list( $from, $till ) = md_inv_report_range();
 	if ( 'auto' === $why ) {
 		update_option( 'md_inv_last_report_key', md_inv_report_period_key( current_time( 'timestamp' ) ), false );
-		/* 지난 보고서(없으면 이번 기간 시작) 뒤로 바뀐 것이 하나도 없으면 보내지 않는다 */
-		$sent  = get_option( 'md_inv_last_report_sent' );
-		$since = $sent ? $sent : $from . ' 00:00:00';
-		if ( ! md_inv_changed_since( $since ) ) {
-			update_option( 'md_inv_last_report', array( 'at' => current_time( 'mysql' ), 'ok' => 1, 'to' => $to, 'why' => 'skip' ), false );
-			return true;
-		}
+		/* v4.23 · 바뀐 것이 없는 주에도 보낸다 (원장 지시 — v4.22.2 의 건너뛰기 철회) */
 	}
 	$dir = trailingslashit( get_temp_dir() ) . 'md-inv-' . wp_generate_password( 12, false );
 	wp_mkdir_p( $dir );
@@ -266,8 +260,8 @@ function md_inv_report_send( $why = 'manual', $to = '' ) {
 	$usage = 0;
 	foreach ( md_inv_usage( 'team', $from, $till ) as $r ) { $usage += (int) $r->amount; }
 	$freq  = array( 'daily' => '일간', 'weekly' => '주간', 'monthly' => '월간' );
-	$subject = '[문치과병원 재고] ' . ( 'test' === $why ? '(시험) ' : '' ) . $freq[ $s['report_freq'] ] . ' 보고서 ' . current_time( 'Y-m-d' );
-	$body  = "문치과병원 재고관리 " . $freq[ $s['report_freq'] ] . " 보고서입니다.\n";
+	$subject = '[문치과병원 품목신청] ' . ( 'test' === $why ? '(시험) ' : '' ) . $freq[ $s['report_freq'] ] . ' 보고서 ' . current_time( 'Y-m-d' );
+	$body  = "문치과병원 품목신청 " . $freq[ $s['report_freq'] ] . " 보고서입니다.\n";
 	$body .= '기간: ' . $from . ' ~ ' . $till . "\n\n";
 	$body .= '· 출고 대기 요청: ' . $c['pending'] . "건\n";
 	$body .= '· 입고 기다리는 주문: ' . $c['ordered'] . "건\n";
@@ -277,9 +271,9 @@ function md_inv_report_send( $why = 'manual', $to = '' ) {
 	foreach ( md_inv_prepaid_summary() as $p ) {
 		$body .= '· 선납 ' . $p->vendor->name . ' 쓸 수 있는 잔액: ' . md_inv_won( $p->available ) . "\n";
 	}
-	$body .= "\n첨부: 엑셀 보고서" . ( $s['report_backup'] ? ' · 백업 파일(.json.gz — 직원 라운지 › 재고관리 › 설정 › 백업에서 올리면 이 시점으로 되돌릴 수 있음)' : '' ) . "\n";
-	$body .= '재고관리 열기: ' . home_url( '/직원/?app=stock' ) . "\n";
-	$body .= "\n이 메일은 자동으로 보냈습니다. 받는 주소·주기는 재고관리 › 설정 › 보고서 메일에서 바꿀 수 있습니다.\n";
+	$body .= "\n첨부: 엑셀 보고서" . ( $s['report_backup'] ? ' · 백업 파일(.json.gz — 직원 라운지 › 품목신청 › 설정 › 백업에서 올리면 이 시점으로 되돌릴 수 있음)' : '' ) . "\n";
+	$body .= '품목신청 열기: ' . home_url( '/직원/?app=stock' ) . "\n";
+	$body .= "\n이 메일은 자동으로 보냈습니다. 받는 주소·주기는 품목신청 › 설정 › 보고서 메일에서 바꿀 수 있습니다.\n";
 
 	$ok = wp_mail( array_map( 'trim', explode( ',', $to ) ), $subject, $body, array(), $files );
 	foreach ( $files as $f ) { @unlink( $f ); }
@@ -302,5 +296,5 @@ function md_inv_notify_new( $ids ) {
 	$body = md_inv_team_name( $r0->team_id ) . ' · ' . $r0->requester . "\n\n";
 	foreach ( $reqs as $r ) { $body .= '· ' . $r->name . ' ' . $r->qty . ( $r->unit ? ' ' . $r->unit : '' ) . ( $r->note ? ' — ' . $r->note : '' ) . "\n"; }
 	$body .= "\n처리하기: " . home_url( '/직원/?app=stock&iv=todo' ) . "\n";
-	wp_mail( array_map( 'trim', explode( ',', $to ) ), '[문치과병원 재고] 새 요청 ' . count( $reqs ) . '건 · ' . md_inv_team_name( $r0->team_id ), $body );
+	wp_mail( array_map( 'trim', explode( ',', $to ) ), '[문치과병원 품목신청] 새 신청 ' . count( $reqs ) . '건 · ' . md_inv_team_name( $r0->team_id ), $body );
 }

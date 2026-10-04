@@ -57,9 +57,9 @@ function md_sup_current_tab() {
 function md_sup_apps() {
 	return array(
 		'stock' => array(
-			'label' => '재고관리', /* v4.22 · AppSheet 대신 라운지 안의 재고관리 (inc/inventory) — 원장 지시 */
+			'label' => '품목신청', /* v4.23 · 이름 「재고관리」 → 「품목신청」 (원장 지시). 화면은 inc/inventory */
 			'icon'  => '📦',
-			'desc'  => '재료 요청 · 출고 · 입고 · 주문 · 선납 · 통계',
+			'desc'  => '재료 · 소모품 신청 · 출고 · 입고 · 주문 · 선납 · 통계',
 		),
 		// v4.17 · 달력 (생일 · 입사 기념일 · 병원 행사)
 		'calendar' => array(

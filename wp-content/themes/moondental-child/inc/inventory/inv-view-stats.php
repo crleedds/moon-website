@@ -142,8 +142,8 @@ function md_inv_view_stats() {
 		<?php endif; ?>
 	</div>
 	<div class="iv-toolbar">
-		<?php md_inv_dl_buttons( 'usage', array( 'df' => $from, 'dt' => $to ), '이 기간 CSV' ); ?>
-		<?php md_inv_dl_buttons( 'monthly', array(), '팀별 월별 CSV' ); ?>
+		<?php md_inv_dl_buttons( 'usage', array( 'df' => $from, 'dt' => $to ), '이 기간 엑셀' ); ?>
+		<?php md_inv_dl_buttons( 'monthly', array(), '팀별 월별 엑셀' ); ?>
 		<?php if ( $admin ) : ?><a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_dl_url( 'xlsx', array( 'df' => $from, 'dt' => $to ) ) ); ?>"><?php echo md_inv_icon( 'down', 16 ); // phpcs:ignore ?>엑셀 보고서 (이 기간)</a><?php endif; ?>
 	</div>
 	<?php

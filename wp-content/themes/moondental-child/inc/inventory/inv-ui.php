@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 /** 화면 목록 — admin: 관리자만 · staff_opt: 직원은 설정이 켜져 있을 때만 */
 function md_inv_views() {
 	return array(
-		'req'      => array( 'label' => '요청',   'icon' => 'cart',    'admin' => false ),
+		'req'      => array( 'label' => '신청',   'icon' => 'cart',    'admin' => false ),
 		'mine'     => array( 'label' => '내역',   'icon' => 'list',    'admin' => false ),
 		'todo'     => array( 'label' => '할 일',  'icon' => 'check',   'admin' => true ),
 		'stock'    => array( 'label' => '재고',   'icon' => 'box',     'admin' => true, 'staff_opt' => 'staff_stock_tab' ),
@@ -198,7 +198,7 @@ function md_inv_cat_selects( $c1 = 0, $c2 = 0, $c3 = 0 ) {
 }
 
 /** 내려받기 버튼 묶음 */
-function md_inv_dl_buttons( $key, $args = array(), $label = 'CSV' ) {
+function md_inv_dl_buttons( $key, $args = array(), $label = '엑셀' ) {
 	echo '<a class="iv-btn iv-btn--ghost iv-btn--sm" href="' . esc_url( md_inv_dl_url( $key, $args ) ) . '">' . md_inv_icon( 'down', 16 ) . esc_html( $label ) . '</a>';
 }
 
@@ -249,39 +249,43 @@ function md_inv_render() {
 		$items[ $k ] = array( 'label' => $v['label'], 'icon' => $v['icon'], 'badge' => $badge );
 	}
 	$on = in_array( $view, array( 'item', 'count' ), true ) ? 'stock' : $view;
-	echo '<nav class="iv-nav" aria-label="재고관리 메뉴">';
+	echo '<nav class="iv-nav" aria-label="품목신청 메뉴">';
 	foreach ( $items as $k => $v ) {
 		echo '<a class="iv-nav__a' . ( $on === $k ? ' is-on' : '' ) . '" href="' . esc_url( md_inv_url( array( 'iv' => $k ) ) ) . '"' . ( $on === $k ? ' aria-current="page"' : '' ) . '>'
 			. md_inv_icon( $v['icon'], 18 ) . '<span>' . esc_html( $v['label'] ) . '</span>'
 			. ( $v['badge'] ? '<b class="iv-nav__badge">' . (int) $v['badge'] . '</b>' : '' ) . '</a>';
 	}
+	echo '<a class="iv-nav__a iv-nav__xl" href="' . esc_url( md_inv_dl_url( 'xlsx' ) ) . '" title="' . esc_attr( $admin ? '전체 보고서 엑셀 (최근 30일 기록 · 지금 재고 · 선납 · 업체)' : '신청 내역 · 통계 엑셀' ) . '">' . md_inv_icon( 'down', 18 ) . '<span>엑셀</span></a>';
 	echo '</nav>';
 
 	/* 휴대폰 아래 메뉴: 앞 4개 + 더보기 */
 	$primary = $admin ? array( 'req', 'todo', 'stock', 'stats' ) : array_slice( array_keys( $items ), 0, 4 );
 	$rest    = array_diff( array_keys( $items ), $primary );
-	echo '<nav class="iv-tabbar" aria-label="재고관리 메뉴 (휴대폰)">';
+	echo '<nav class="iv-tabbar" aria-label="품목신청 메뉴 (휴대폰)">';
 	foreach ( $primary as $k ) {
 		if ( ! isset( $items[ $k ] ) ) { continue; }
 		$v = $items[ $k ];
 		echo '<a class="iv-tabbar__a' . ( $on === $k ? ' is-on' : '' ) . '" href="' . esc_url( md_inv_url( array( 'iv' => $k ) ) ) . '">' . md_inv_icon( $v['icon'], 22 ) . '<span>' . esc_html( $v['label'] ) . '</span>' . ( $v['badge'] ? '<b class="iv-nav__badge">' . (int) $v['badge'] . '</b>' : '' ) . '</a>';
 	}
-	if ( $rest ) {
+	if ( true ) {
 		$rest_on = in_array( $on, $rest, true );
 		$rb = 0; foreach ( $rest as $k ) { $rb += $items[ $k ]['badge']; }
 		echo '<button type="button" class="iv-tabbar__a' . ( $rest_on ? ' is-on' : '' ) . '" data-dlg="iv-more">' . md_inv_icon( 'more', 22 ) . '<span>' . ( $rest_on ? esc_html( $items[ $on ]['label'] ) : '더보기' ) . '</span>' . ( $rb ? '<b class="iv-nav__badge">' . (int) $rb . '</b>' : '' ) . '</button>';
 	}
 	echo '</nav>';
-	if ( $rest ) {
+	if ( true ) {
 		echo '<dialog class="iv-dlg iv-dlg--sheet" id="iv-more"><div class="iv-dlg__head"><b>메뉴</b><button type="button" class="iv-x" data-close>' . md_inv_icon( 'x' ) . '</button></div><div class="iv-more">';
 		foreach ( $rest as $k ) {
 			$v = $items[ $k ];
 			echo '<a class="iv-more__a' . ( $on === $k ? ' is-on' : '' ) . '" href="' . esc_url( md_inv_url( array( 'iv' => $k ) ) ) . '">' . md_inv_icon( $v['icon'], 22 ) . '<span>' . esc_html( $v['label'] ) . '</span>' . ( $v['badge'] ? '<b class="iv-nav__badge">' . (int) $v['badge'] . '</b>' : '' ) . '</a>';
 		}
+		echo '<a class="iv-more__a" href="' . esc_url( md_inv_dl_url( 'xlsx' ) ) . '">' . md_inv_icon( 'down', 22 ) . '<span>엑셀 받기</span></a>';
 		echo '</div></dialog>';
 	}
 
 	$f = md_inv_flash_take();
+	/* 신청을 막 보낸 내역 화면은 아래 초록 안내 하나로 충분하다 */
+	if ( $f && 'ok' === $f[0] && 'mine' === $view && '' !== md_inv_get( 'nb' ) ) { $f = null; }
 	if ( $f ) {
 		$cls = 'ok' === $f[0] ? 'ok' : ( 'warn' === $f[0] ? 'warn' : 'err' );
 		echo '<div class="iv-flash iv-flash--' . $cls . '" role="' . ( 'ok' === $cls ? 'status' : 'alert' ) . '">' . esc_html( $f[1] ) . '<button type="button" class="iv-x" data-dismiss aria-label="닫기">' . md_inv_icon( 'x', 16 ) . '</button></div>';

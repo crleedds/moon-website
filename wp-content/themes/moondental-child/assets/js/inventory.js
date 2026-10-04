@@ -1,4 +1,4 @@
-/* 재고관리 v5 — 직원 라운지
+/* 품목신청 (재고관리 v5) — 직원 라운지
  *
  * 요청 화면: 품목 목록 · 검색 · 장바구니(이 기기 localStorage) · 바코드 스캔
  * 공통: 대화상자(data-dlg / data-set), 확인창(data-confirm), 품목 고르기(datalist),
@@ -303,53 +303,99 @@
   });
 
   /* ---------------------------------------------------------
-   * 요청 화면
+   * 품목신청 화면
    * ------------------------------------------------------- */
   var root = $('#iv-req');
   var dataEl = $('#iv-req-data');
   if (root && dataEl) reqApp(JSON.parse(dataEl.textContent));
 
   function reqApp(D) {
-    var KEY = 'md_inv_cart_v1', WHO = 'md_inv_who_v1';
+    var KEY = 'md_inv_cart_v1', WHO = 'md_inv_who_v1', PAGE = 150;
     var O = D.opt;
-    var byId = {}, catName = {}, catSort = {}, vendors = D.vendors || {};
+    var byId = {}, catName = {}, catSort = {}, catParent = {}, vendors = D.vendors || {}, teamName = {};
     D.items.forEach(function (it) { byId[it.i] = it; });
-    var catParent = {};
     D.cats.forEach(function (c, i) { catName[c.id] = c.n; catSort[c.id] = i; catParent[c.id] = c.p; });
+    D.teams.forEach(function (t) { teamName[t.id] = t.n; });
     var cart = store.get(KEY, null);
     if (!cart || !Array.isArray(cart.lines)) cart = { lines: [], tok: '' };
-    /* 목록에서 사라진 품목은 장바구니에서 뺀다 */
     cart.lines = cart.lines.filter(function (l) { return l.custom || byId[l.id]; });
     var who = O.remember ? store.get(WHO, {}) : {};
-    var state = { q: '', c1: 0, team: Number(who.team || 0) };
+    var state = { q: '', chip: '', team: teamName[who.team] ? Number(who.team) : 0, shown: PAGE };
 
-    var list = $('#iv-list'), q = $('#iv-q'), team = $('#iv-team'), chips = $('#iv-c1');
-    if (state.team && team.querySelector('option[value="' + state.team + '"]')) team.value = String(state.team); else state.team = 0;
+    var list = $('#iv-list'), q = $('#iv-q'), chipsEl = $('#iv-chips');
 
-    function save() { store.set(KEY, cart); renderBar(); }
+    function save() { store.set(KEY, cart); renderBar(); steps(); }
     function lineOf(id) { for (var i = 0; i < cart.lines.length; i++) if (!cart.lines[i].custom && cart.lines[i].id === id) return cart.lines[i]; return null; }
     function qtyOf(id) { var l = lineOf(id); return l ? l.qty : 0; }
     function add(id, n) {
-      var it = byId[id]; if (!it) return;
+      if (!byId[id]) return;
       var l = lineOf(id);
       if (!l) { l = { id: id, qty: 0 }; cart.lines.push(l); }
       l.qty = Math.max(0, Math.min(O.max, l.qty + n));
       if (!l.qty) cart.lines.splice(cart.lines.indexOf(l), 1);
       cart.tok = '';
-      save(); updateRow(id);
+      save(); updateRow(id); renderChips();
     }
 
-    /* 결제 방식 칩 */
-    var c1s = D.cats.filter(function (c) { return c.l === 1; });
-    var chipHtml = '<button type="button" class="iv-chipbtn is-on" data-c1="0">전체</button>';
-    c1s.forEach(function (c) { if (D.items.some(function (it) { return it.c1 === c.id; })) chipHtml += '<button type="button" class="iv-chipbtn" data-c1="' + c.id + '">' + esc(c.n) + '</button>'; });
-    chips.innerHTML = chipHtml;
-    chips.hidden = c1s.length < 2;
-    chips.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-c1]'); if (!b) return;
-      state.c1 = Number(b.dataset.c1);
-      $$('[data-c1]', chips).forEach(function (x) { x.classList.toggle('is-on', x === b); });
-      render();
+    /* 1 · 팀 */
+    function setTeam(id, silent) {
+      state.team = teamName[id] ? Number(id) : 0;
+      $('#iv-team').value = state.team || '';
+      $('#iv-team-label').textContent = state.team ? teamName[state.team] : '팀을 골라 주세요';
+      $('#iv-teambtn').classList.toggle('is-empty', !state.team);
+      $$('#iv-teamgrid [data-team]').forEach(function (b) { b.classList.toggle('is-on', Number(b.dataset.team) === state.team); });
+      var ct = $('#iv-cart-team'); if (ct && state.team) ct.value = String(state.team);
+      if (O.remember) { who.team = state.team; store.set(WHO, who); }
+      if (!silent) { if (recentOf().length) state.chip = 'star'; state.shown = PAGE; renderChips(); render(); }
+      steps();
+    }
+    $('#iv-teamgrid').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-team]'); if (!b) return;
+      setTeam(Number(b.dataset.team));
+      $('#iv-teambtn').classList.remove('is-pulse');
+      closeDlg($('#iv-team-dlg'));
+      toast('「' + teamName[state.team] + '」 팀으로 신청합니다');
+    });
+
+    function steps() {
+      var s1 = !!state.team, s2 = cart.lines.length > 0;
+      $('#iv-step1').className = s1 ? 'is-done' : 'is-now';
+      $('#iv-step2').className = s2 ? 'is-done' : (s1 ? 'is-now' : '');
+      $('#iv-step3').className = s1 && s2 ? 'is-now' : '';
+    }
+
+    /* 2 · 품목군 칩 */
+    function recentOf() {
+      return state.team && D.recent[state.team] ? D.recent[state.team].map(function (id) { return byId[id]; }).filter(Boolean) : [];
+    }
+    var groups = {}, groupOrder = [];
+    D.items.forEach(function (it) { var g = it.c2 || 0; if (!groups[g]) { groups[g] = []; groupOrder.push(g); } groups[g].push(it); });
+    groupOrder.sort(function (a, b) { if (!a) return 1; if (!b) return -1; var pa = catSort[catParent[a]] || 0, pb = catSort[catParent[b]] || 0; return pa !== pb ? pa - pb : (catSort[a] || 0) - (catSort[b] || 0); });
+    function itemsOfChip(chip) {
+      if (chip === 'star') return recentOf();
+      if (chip === 'cart') return cart.lines.filter(function (l) { return !l.custom; }).map(function (l) { return byId[l.id]; });
+      if (chip === 'all' || chip === '') return D.items;
+      return groups[Number(chip.slice(1))] || [];
+    }
+    function chipBtn(key, label, n) {
+      var on = !state.q && (state.chip === key || (state.chip === '' && key === 'all'));
+      return '<button type="button" class="iv-chipbtn' + (on ? ' is-on' : '') + '" role="tab" aria-selected="' + on + '" data-chip="' + key + '">' + esc(label) + ' <small>' + n + '</small></button>';
+    }
+    function renderChips() {
+      var h = '';
+      var rc = recentOf().length, cc = cart.lines.filter(function (l) { return !l.custom; }).length;
+      if (rc) h += chipBtn('star', '⭐ 우리 팀 자주 신청', rc);
+      if (cc) h += chipBtn('cart', '🛒 담은 품목', cc);
+      h += chipBtn('all', '전체', D.items.length);
+      groupOrder.forEach(function (g) { h += chipBtn('g' + g, g ? (catName[g] || '기타') : '분류 없음', groups[g].length); });
+      chipsEl.innerHTML = h;
+    }
+    chipsEl.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-chip]'); if (!b) return;
+      state.chip = b.dataset.chip; state.q = ''; q.value = ''; state.shown = PAGE;
+      if (state.chip !== 'cart' && state.chip !== 'star') store.set('md_inv_chip_v1', state.chip);
+      renderChips(); render();
+      var on = chipsEl.querySelector('.is-on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'center' });
     });
 
     function stockHtml(it) {
@@ -358,19 +404,29 @@
       if (it.m && it.s < it.m) return '<span class="iv-badge iv-badge--low">재고 ' + num(it.s) + (it.o ? ' · 주문 중' : '') + '</span>';
       return '<span class="iv-badge iv-badge--ok">재고 ' + num(it.s) + '</span>';
     }
+    function hl(text) {
+      var out = esc(text);
+      if (!state.q) return out;
+      state.q.split(/\s+/).filter(Boolean).forEach(function (w) {
+        var pat = esc(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        out = out.replace(new RegExp('(' + pat + ')', 'ig'), '<mark>$1</mark>');
+      });
+      return out;
+    }
     function rowHtml(it) {
       var v = vendors[it.v] ? vendors[it.v].n : '';
       var pend = state.team && D.pending[state.team] && D.pending[state.team][it.i];
-      var sub = [v, it.u, (O.price && it.p ? num(it.p) + '원' : '')].filter(Boolean).join(' · ');
-      return '<div class="iv-row" data-id="' + it.i + '">' +
-        '<button type="button" class="iv-row__main" data-add="' + it.i + '"><span class="iv-row__name">' + esc(it.n) + '</span><span class="iv-row__sub">' + esc(sub) + '</span>' +
-        (pend ? '<span class="iv-row__dup">우리 팀이 이미 ' + pend + '개 요청해 둠</span>' : '') + '</button>' +
+      var showCat = (state.q || state.chip === 'all' || state.chip === 'star' || state.chip === 'cart') && it.c2;
+      var sub = [v, it.u, (O.price && it.p ? num(it.p) + '원' : ''), showCat ? catName[it.c2] : ''].filter(Boolean).join(' · ');
+      return '<div class="iv-row' + (qtyOf(it.i) ? ' is-in' : '') + '" data-id="' + it.i + '">' +
+        '<button type="button" class="iv-row__main" data-add="' + it.i + '"><span class="iv-row__name">' + hl(it.n) + '</span><span class="iv-row__sub">' + esc(sub) + '</span>' +
+        (pend ? '<span class="iv-row__dup">우리 팀이 이미 ' + pend + '개 신청해 둠</span>' : '') + '</button>' +
         '<span class="iv-row__stock">' + stockHtml(it) + '</span>' +
         '<span class="iv-row__ctl">' + ctlHtml(it.i) + '</span></div>';
     }
     function ctlHtml(id) {
       var n = qtyOf(id);
-      if (!n) return '<button type="button" class="iv-btn iv-btn--add" data-add="' + id + '" aria-label="담기">담기</button>';
+      if (!n) return '<button type="button" class="iv-btn iv-btn--add" data-add="' + id + '">＋ 담기</button>';
       return '<span class="iv-step"><button type="button" data-dec="' + id + '" aria-label="하나 빼기">−</button><input type="number" inputmode="numeric" min="0" max="' + O.max + '" value="' + n + '" data-qty="' + id + '" aria-label="수량"><button type="button" data-inc="' + id + '" aria-label="하나 더">+</button></span>';
     }
     function updateRow(id) {
@@ -381,164 +437,129 @@
         if (!focused) c.innerHTML = ctlHtml(id);
       });
     }
-
     function match(it, words) {
       var hay = (it.n + ' ' + (vendors[it.v] ? vendors[it.v].n : '') + ' ' + (it.b || '') + ' ' + (catName[it.c2] || '') + ' ' + (catName[it.c3] || '')).toLowerCase();
       for (var i = 0; i < words.length; i++) if (hay.indexOf(words[i]) < 0) return false;
       return true;
     }
 
-    var openGroups = store.get('md_inv_open_v1', {});
     function render() {
-      var items = D.items.filter(function (it) { return !state.c1 || it.c1 === state.c1; });
-      var html = '';
+      var arr, head = '';
       if (state.q) {
         var words = state.q.toLowerCase().split(/\s+/).filter(Boolean);
-        var hit = items.filter(function (it) { return match(it, words); });
-        html += '<p class="iv-list__count">「' + esc(state.q) + '」 ' + hit.length + '개</p>';
-        hit.slice(0, 200).forEach(function (it) { html += rowHtml(it); });
-        if (!hit.length) html += '<div class="iv-empty">찾는 품목이 없습니다.' + (O.custom ? ' 아래 「목록에 없는 품목 요청」으로 보내 주세요.' : '') + '</div>';
-        list.innerHTML = html;
-        $$('.iv-row', list).forEach(function (r) { r.classList.toggle('is-in', qtyOf(Number(r.dataset.id)) > 0); });
-        return;
+        arr = D.items.filter(function (it) { return match(it, words); });
+        head = '<p class="iv-list__count">「' + esc(state.q) + '」 찾은 품목 <b>' + arr.length + '</b>개</p>';
+        if (!arr.length) {
+          list.innerHTML = head + '<div class="iv-nohit"><b>목록에서 찾지 못했어요.</b><span>이름을 줄여 다시 찾아보거나, 목록에 없는 품목으로 신청하세요.</span>' +
+            (O.custom ? '<button type="button" class="iv-btn iv-btn--primary" data-custom-from-q>「' + esc(state.q) + '」 목록에 없는 품목으로 신청</button>' : '') + '</div>';
+          return;
+        }
+      } else {
+        arr = itemsOfChip(state.chip || 'all');
+        if (!state.team && (state.chip === '' || state.chip === 'all')) head = '<div class="iv-hint">먼저 <button type="button" class="iv-link" data-dlg="iv-team-dlg">우리 팀</button>을 고르면 우리 팀이 자주 신청한 품목이 첫 칸에 모입니다.</div>';
+        if (state.chip === 'star') head = '<p class="iv-list__count">최근 ' + (D.recentDays || 60) + '일 동안 우리 팀이 신청한 품목</p>';
       }
-      /* 담은 품목 · 우리 팀 최근 품목 · 품목군별 */
-      var inCart = cart.lines.filter(function (l) { return !l.custom && byId[l.id] && (!state.c1 || byId[l.id].c1 === state.c1); }).map(function (l) { return byId[l.id]; });
-      var recent = state.team && D.recent[state.team] ? D.recent[state.team].map(function (id) { return byId[id]; }).filter(function (it) { return it && (!state.c1 || it.c1 === state.c1); }) : [];
-      var groups = {}, order = [];
-      items.forEach(function (it) {
-        var g = it.c2 || 0;
-        if (!groups[g]) { groups[g] = []; order.push(g); }
-        groups[g].push(it);
-      });
-      /* 결제 방식 순서 → 그 안의 품목군 순서 */
-      order.sort(function (a, b) { if (!a) return 1; if (!b) return -1; var pa = catSort[catParent[a]] || 0, pb = catSort[catParent[b]] || 0; return pa !== pb ? pa - pb : (catSort[a] || 0) - (catSort[b] || 0); });
-      function group(key, title, arr, open, cls) {
-        if (!arr.length) return '';
-        var isOpen = open || openGroups[key];
-        var h = '<details class="iv-grp ' + (cls || '') + '" data-g="' + key + '"' + (isOpen ? ' open' : '') + '><summary><span>' + title + '</span><b>' + arr.length + '</b></summary><div class="iv-grp__body">';
-        if (isOpen) arr.forEach(function (it) { h += rowHtml(it); });
-        return h + '</div></details>';
-      }
-      if (!state.team) html += '<div class="iv-hint">' + '위에서 <b>우리 팀</b>을 고르면 우리 팀이 자주 요청한 품목이 맨 위에 모입니다.</div>';
-      html += group('cart', '🛒 담은 품목', inCart, true, 'iv-grp--cart');
-      html += group('recent', '⭐ 우리 팀이 최근 요청한 품목', recent, true, 'iv-grp--star');
-      order.forEach(function (g) { html += group('c' + g, esc(g ? (catName[g] || '기타') : '분류 없음'), groups[g], false); });
-      if (!items.length) html += '<div class="iv-empty">품목이 없습니다.</div>';
-      list.innerHTML = html;
-      $$('.iv-row', list).forEach(function (r) { r.classList.toggle('is-in', qtyOf(Number(r.dataset.id)) > 0); });
+      var h = head;
+      arr.slice(0, state.shown).forEach(function (it) { h += rowHtml(it); });
+      if (arr.length > state.shown) h += '<button type="button" class="iv-btn iv-btn--ghost iv-more-btn" data-more>' + (arr.length - state.shown) + '개 더 보기</button>';
+      if (!arr.length) h += '<div class="iv-empty">품목이 없습니다.</div>';
+      list.innerHTML = h;
     }
-    /* 그룹을 열 때 그 안을 그린다 (처음부터 600줄을 다 그리지 않는다) */
-    list.addEventListener('toggle', function (e) {
-      var d = e.target;
-      if (!d.matches || !d.matches('details.iv-grp')) return;
-      var k = d.dataset.g;
-      if (k !== 'cart' && k !== 'recent') { openGroups[k] = d.open ? 1 : 0; store.set('md_inv_open_v1', openGroups); }
-      var body = d.querySelector('.iv-grp__body');
-      if (d.open && !body.children.length) {
-        var g = Number(k.slice(1));
-        var h = '';
-        D.items.forEach(function (it) { if ((it.c2 || 0) === g && (!state.c1 || it.c1 === state.c1)) h += rowHtml(it); });
-        body.innerHTML = h;
-        $$('.iv-row', body).forEach(function (r) { r.classList.toggle('is-in', qtyOf(Number(r.dataset.id)) > 0); });
-      }
-    }, true);
 
+    var nudged = false;
+    function nudgeTeam() { if (nudged) return; nudged = true; toast('담았습니다. 신청 전에 우리 팀을 골라 주세요'); $('#iv-teambtn').classList.add('is-pulse'); }
     list.addEventListener('click', function (e) {
-      var a = e.target.closest('[data-add]'); if (a) { add(Number(a.dataset.add), 1); return; }
+      var a = e.target.closest('[data-add]'); if (a) { add(Number(a.dataset.add), 1); if (!state.team) nudgeTeam(); return; }
       var i = e.target.closest('[data-inc]'); if (i) { add(Number(i.dataset.inc), 1); return; }
       var d = e.target.closest('[data-dec]'); if (d) { add(Number(d.dataset.dec), -1); return; }
+      if (e.target.closest('[data-more]')) { state.shown += PAGE; render(); return; }
+      if (e.target.closest('[data-custom-from-q]')) {
+        var dlg = openDlg('iv-custom', {});
+        if (dlg) dlg.querySelector('[name=name]').value = state.q;
+      }
     });
     list.addEventListener('change', function (e) {
       var t = e.target; if (!t.matches('[data-qty]')) return;
       var id = Number(t.dataset.qty), l = lineOf(id);
       var v = Math.max(0, Math.min(O.max, parseInt(t.value, 10) || 0));
       if (l) { l.qty = v; if (!v) cart.lines.splice(cart.lines.indexOf(l), 1); cart.tok = ''; save(); }
-      updateRow(id);
+      updateRow(id); renderChips();
     });
 
     var tmr = null;
-    q.addEventListener('input', function () { clearTimeout(tmr); tmr = setTimeout(function () { state.q = q.value.trim(); render(); }, 120); });
+    q.addEventListener('input', function () { clearTimeout(tmr); tmr = setTimeout(function () { state.q = q.value.trim(); state.shown = PAGE; renderChips(); render(); }, 120); });
     q.addEventListener('keydown', function (e) {
       if (e.key !== 'Enter') return;
       e.preventDefault();
       var v = q.value.trim(); if (!v) return;
-      /* 바코드 스캐너(키보드처럼 입력 + 엔터)로 찍으면 바로 담는다 */
       var hit = D.items.filter(function (it) { return it.b && it.b === v; });
-      if (hit.length === 1) { add(hit[0].i, 1); q.value = ''; state.q = ''; render(); toast('「' + hit[0].n + '」 담았습니다'); }
-    });
-    team.addEventListener('change', function () {
-      state.team = Number(team.value) || 0;
-      if (O.remember) { who.team = state.team; store.set(WHO, who); }
-      render();
+      if (hit.length === 1) { add(hit[0].i, 1); q.value = ''; state.q = ''; renderChips(); render(); toast('「' + hit[0].n + '」 담았습니다'); }
+      else q.blur();
     });
     $('#iv-scan').addEventListener('click', function () {
       startScan(function (code) {
         var hit = D.items.filter(function (it) { return it.b && it.b === code; });
         if (hit.length) { add(hit[0].i, 1); toast('「' + hit[0].n + '」 담았습니다'); }
-        else { q.value = code; state.q = code; render(); toast('등록되지 않은 바코드입니다: ' + code); }
+        else { q.value = code; state.q = code; renderChips(); render(); toast('등록되지 않은 바코드입니다: ' + code); }
       });
     });
 
-    /* 장바구니 바 */
+    /* 3 · 장바구니 */
     var bar = $('#iv-cartbar');
     function renderBar() {
       var n = cart.lines.length, total = 0;
       cart.lines.forEach(function (l) { total += l.qty; });
       bar.hidden = n === 0;
       $('#iv-cart-n').textContent = n;
-      $('#iv-cart-txt').textContent = n ? n + '개 품목 · ' + total + '개' : '담은 품목';
+      $('#iv-cart-txt').textContent = n ? n + '개 품목 · 모두 ' + total + '개' : '담은 품목';
       document.body.classList.toggle('iv-has-cart', n > 0);
-      var tab = $('.iv-tabbar__a.is-on'); if (tab) tab.dataset.n = n || '';
     }
-
-    /* 장바구니 대화상자 */
     var dlg = $('#iv-cart'), lines = $('#iv-cart-lines'), form = $('#iv-cart-form'), err = $('#iv-cart-err');
     function renderCart() {
-      if (!cart.lines.length) { lines.innerHTML = '<div class="iv-empty">담은 품목이 없습니다.</div>'; return; }
+      if (!cart.lines.length) { lines.innerHTML = '<div class="iv-empty">담은 품목이 없습니다.</div>'; $('#iv-cart-send').textContent = '신청하기'; return; }
       var tm = Number($('#iv-cart-team').value) || 0;
       var h = '';
       cart.lines.forEach(function (l, idx) {
         var it = l.custom ? null : byId[l.id];
         var name = it ? it.n : l.custom.name;
         var warn = [];
-        if (it && O.stock && it.s !== null && l.qty > it.s) warn.push(it.s <= 0 ? '지금 재고가 없어요 — 주문 후 출고됩니다' : '재고(' + it.s + ')보다 많아요 — 있는 만큼 먼저 나갈 수 있어요');
-        if (it && tm && D.pending[tm] && D.pending[tm][it.i]) warn.push('우리 팀이 이미 ' + D.pending[tm][it.i] + '개 요청해 둔 품목이에요');
+        if (it && O.stock && it.s !== null && l.qty > it.s) warn.push(it.s <= 0 ? '지금 재고가 없어요 — 주문 후 나갑니다' : '재고(' + it.s + ')보다 많아요 — 있는 만큼 먼저 나갈 수 있어요');
+        if (it && tm && D.pending[tm] && D.pending[tm][it.i]) warn.push('우리 팀이 이미 ' + D.pending[tm][it.i] + '개 신청해 둔 품목이에요');
         var sub = it ? [vendors[it.v] ? vendors[it.v].n : '', it.u].filter(Boolean).join(' · ') : ['목록에 없는 품목', l.custom.vendor, l.custom.unit].filter(Boolean).join(' · ');
         h += '<div class="iv-cline" data-idx="' + idx + '"><div class="iv-cline__main"><b>' + esc(name) + '</b><small>' + esc(sub) + '</small>' +
           warn.map(function (w) { return '<span class="iv-cline__warn">' + esc(w) + '</span>'; }).join('') +
           '<input class="iv-input iv-input--sm" maxlength="200" placeholder="이 품목 메모 (선택)" value="' + esc(l.note || '') + '" data-lnote="' + idx + '"></div>' +
           '<span class="iv-step"><button type="button" data-ldec="' + idx + '" aria-label="하나 빼기">−</button><input type="number" inputmode="numeric" min="1" max="' + O.max + '" value="' + l.qty + '" data-lqty="' + idx + '" aria-label="수량"><button type="button" data-linc="' + idx + '" aria-label="하나 더">+</button></span>' +
-          '<button type="button" class="iv-x" data-ldel="' + idx + '" aria-label="빼기">' + '×' + '</button></div>';
+          '<button type="button" class="iv-x" data-ldel="' + idx + '" aria-label="빼기">×</button></div>';
       });
       lines.innerHTML = h;
-      $('#iv-cart-send').textContent = '요청 보내기 (' + cart.lines.length + '건)';
+      $('#iv-cart-send').textContent = cart.lines.length + '건 신청하기';
     }
     function lineChanged(idx) { var l = cart.lines[idx]; cart.tok = ''; save(); if (l && !l.custom) updateRow(l.id); }
     lines.addEventListener('click', function (e) {
       var t = e.target, idx;
       if ((idx = t.dataset.linc) !== undefined) { cart.lines[idx].qty = Math.min(O.max, cart.lines[idx].qty + 1); lineChanged(idx); renderCart(); }
       else if ((idx = t.dataset.ldec) !== undefined) { cart.lines[idx].qty = Math.max(1, cart.lines[idx].qty - 1); lineChanged(idx); renderCart(); }
-      else if ((idx = t.dataset.ldel) !== undefined) { var l = cart.lines.splice(Number(idx), 1)[0]; cart.tok = ''; save(); if (l && !l.custom) updateRow(l.id); renderCart(); render(); }
+      else if ((idx = t.dataset.ldel) !== undefined) { var l = cart.lines.splice(Number(idx), 1)[0]; cart.tok = ''; save(); if (l && !l.custom) updateRow(l.id); renderCart(); renderChips(); }
     });
     lines.addEventListener('change', function (e) {
       var t = e.target;
       if (t.dataset.lqty !== undefined) { cart.lines[t.dataset.lqty].qty = Math.max(1, Math.min(O.max, parseInt(t.value, 10) || 1)); lineChanged(t.dataset.lqty); renderCart(); }
       if (t.dataset.lnote !== undefined) { cart.lines[t.dataset.lnote].note = t.value.slice(0, 200); save(); }
     });
-    $('#iv-cart-team').addEventListener('change', renderCart);
-    dlg.addEventListener('close', function () { render(); });
+    $('#iv-cart-team').addEventListener('change', function () { renderCart(); var v = Number(this.value); if (v && v !== state.team) setTeam(v, true); });
+    dlg.addEventListener('close', function () { renderChips(); render(); });
     document.addEventListener('click', function (e) {
       if (!e.target.closest('[data-dlg="iv-cart"]')) return;
       var ct = $('#iv-cart-team'), cn = $('#iv-cart-name');
-      if (!ct.value && state.team) ct.value = String(state.team);
+      if (state.team) ct.value = String(state.team);
       if (!cn.value && who.name) cn.value = who.name;
       err.hidden = true;
       renderCart();
     });
     $('#iv-cart-clear').addEventListener('click', function () {
       if (!cart.lines.length || !window.confirm('담은 품목을 모두 비울까요?')) return;
-      cart.lines = []; cart.tok = ''; save(); renderCart(); render();
+      cart.lines = []; cart.tok = ''; save(); renderCart(); renderChips(); render();
     });
     form.addEventListener('submit', function (e) {
       err.hidden = true;
@@ -546,16 +567,15 @@
       var problem = '';
       if (!cart.lines.length) problem = '담은 품목이 없습니다.';
       else if (!tm.value) problem = '팀을 골라 주세요.';
-      else if (O.needName && !nm.value.trim()) problem = '요청자 이름을 적어 주세요.';
+      else if (O.needName && !nm.value.trim()) problem = '신청자 이름을 적어 주세요.';
       else if (!O.over && cart.lines.some(function (l) { var it = byId[l.id]; return it && it.s !== null && l.qty > it.s; })) problem = '재고보다 많이 담은 품목이 있습니다. 수량을 줄여 주세요.';
-      if (problem) { e.preventDefault(); e.stopImmediatePropagation(); err.textContent = problem; err.hidden = false; return; }
+      if (problem) { e.preventDefault(); e.stopImmediatePropagation(); err.textContent = problem; err.hidden = false; (tm.value ? nm : tm).focus(); return; }
       if (!cart.tok) { cart.tok = (Date.now().toString(36) + Math.random().toString(36).slice(2, 10)).replace(/[^a-z0-9]/gi, ''); store.set(KEY, cart); }
       $('#iv-cart-tok').value = cart.tok;
       $('#iv-cart-json').value = JSON.stringify(cart.lines.map(function (l) { return l.custom ? { custom: l.custom, qty: l.qty, note: l.note || '' } : { id: l.id, qty: l.qty, note: l.note || '' }; }));
       if (O.remember) { who.team = Number(tm.value); who.name = nm.value.trim(); store.set(WHO, who); }
     });
 
-    /* 목록에 없는 품목 */
     var cf = $('#iv-custom-form');
     if (cf) cf.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -563,11 +583,34 @@
       if (!g('name')) return;
       cart.lines.push({ custom: { name: g('name'), vendor: g('vendor'), unit: g('unit'), price: g('price'), link: g('link') }, qty: Math.max(1, Math.min(O.max, parseInt(g('qty'), 10) || 1)), note: g('note') });
       cart.tok = ''; save(); cf.reset(); closeDlg(cf.closest('dialog'));
-      toast('장바구니에 담았습니다'); render();
+      toast('담았습니다. 아래 「신청하기」를 눌러 보내세요');
     });
 
-    render(); renderBar();
+    /* 내역 화면의 「다시 담기」로 넘어온 품목 */
+    var re = store.get('md_inv_readd_v1', null);
+    if (re && Array.isArray(re)) {
+      re.forEach(function (r) { if (byId[r.id]) { var l = lineOf(r.id); if (l) l.qty = Math.min(O.max, l.qty + r.qty); else cart.lines.push({ id: r.id, qty: Math.min(O.max, Math.max(1, r.qty)) }); } });
+      store.del('md_inv_readd_v1'); cart.tok = ''; store.set(KEY, cart);
+      if (re.length) toast('다시 담았습니다. 수량을 확인하고 신청하세요');
+    }
+
+    setTeam(state.team, true);
+    state.chip = recentOf().length ? 'star' : (store.get('md_inv_chip_v1', 'all') || 'all');
+    if (state.chip.charAt(0) === 'g' && !groups[Number(state.chip.slice(1))]) state.chip = 'all';
+    renderChips(); render(); renderBar(); steps();
+    /* 팀을 한 번도 고르지 않은 기기면 먼저 묻는다 */
+    if (!state.team && D.teams.length) setTimeout(function () { openDlg('iv-team-dlg'); }, 250);
   }
+
+  /* 내역: 「다시 담기」 — 품목신청 화면으로 넘어가 장바구니에 넣는다 */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-readd]');
+    if (!b) return;
+    var cur = store.get('md_inv_readd_v1', []) || [];
+    try { cur.push(JSON.parse(b.dataset.readd)); } catch (x) { return; }
+    store.set('md_inv_readd_v1', cur);
+    window.location.href = b.dataset.href;
+  });
 
   /* 잠깐 뜨는 알림 */
   var toastEl = null, toastT = null;

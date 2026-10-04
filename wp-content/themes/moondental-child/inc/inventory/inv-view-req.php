@@ -47,7 +47,7 @@ function md_inv_view_req() {
 
 	$cfg = array(
 		'items' => $items, 'cats' => $cats, 'vendors' => $vend, 'teams' => $teams,
-		'recent' => md_inv_recent_by_team( (int) $S['recent_days'] ), 'pending' => $pend,
+		'recent' => md_inv_recent_by_team( (int) $S['recent_days'] ), 'pending' => $pend, 'recentDays' => (int) $S['recent_days'],
 		'L' => array( 'c1' => $S['label_cat1'], 'c2' => $S['label_cat2'], 'c3' => $S['label_cat3'] ),
 		'opt' => array(
 			'needName' => (int) $S['req_need_name'], 'custom' => (int) $S['req_allow_custom'], 'over' => (int) $S['req_allow_over'],
@@ -58,26 +58,30 @@ function md_inv_view_req() {
 	);
 	?>
 	<div id="iv-req" class="iv-req">
+		<ol class="iv-steps" aria-label="신청 순서">
+			<li id="iv-step1"><b>1</b> 팀 고르기</li>
+			<li id="iv-step2"><b>2</b> 품목 담기</li>
+			<li id="iv-step3"><b>3</b> 신청하기</li>
+		</ol>
 		<div class="iv-req__bar">
-			<label class="iv-teampick">
-				<span>우리 팀</span>
-				<select class="iv-input" id="iv-team" aria-label="우리 팀">
-					<option value="">팀 고르기</option>
-					<?php foreach ( $teams as $tm ) : ?><option value="<?php echo (int) $tm['id']; ?>"><?php echo esc_html( $tm['n'] ); ?></option><?php endforeach; ?>
-				</select>
-			</label>
+			<button type="button" class="iv-teambtn" id="iv-teambtn" data-dlg="iv-team-dlg" aria-haspopup="dialog">
+				<span class="iv-teambtn__k">우리 팀</span>
+				<b class="iv-teambtn__v" id="iv-team-label">팀을 골라 주세요</b>
+				<?php echo md_inv_icon( 'dn', 18 ); // phpcs:ignore ?>
+			</button>
+			<input type="hidden" id="iv-team" value="">
 			<div class="iv-search">
 				<?php echo md_inv_icon( 'search', 18 ); // phpcs:ignore ?>
-				<input type="search" id="iv-q" class="iv-input" placeholder="품목 이름 · 업체 · 바코드로 찾기" autocomplete="off" enterkeyhint="search">
+				<input type="search" id="iv-q" class="iv-input" placeholder="품목 이름 · 업체 · 바코드로 찾기" autocomplete="off" enterkeyhint="search" aria-label="품목 찾기">
 				<button type="button" class="iv-btn iv-btn--icon" id="iv-scan" aria-label="바코드 스캔" title="바코드 스캔"><?php echo md_inv_icon( 'scan', 20 ); // phpcs:ignore ?></button>
 			</div>
 		</div>
-		<div class="iv-chips" id="iv-c1" role="tablist" aria-label="<?php echo esc_attr( $S['label_cat1'] ); ?>"></div>
+		<div class="iv-chips" id="iv-chips" role="tablist" aria-label="<?php echo esc_attr( $S['label_cat2'] ); ?>"></div>
 		<div id="iv-list" class="iv-list" aria-live="polite"><p class="iv-loading">품목을 불러오는 중…</p></div>
 		<?php if ( $S['req_allow_custom'] ) : ?>
 			<div class="iv-custom-cta">
 				<p>찾는 품목이 목록에 없나요?</p>
-				<button type="button" class="iv-btn iv-btn--ghost" data-dlg="iv-custom"><?php echo md_inv_icon( 'plus', 18 ); // phpcs:ignore ?>목록에 없는 품목 요청</button>
+				<button type="button" class="iv-btn iv-btn--ghost" data-dlg="iv-custom"><?php echo md_inv_icon( 'plus', 18 ); // phpcs:ignore ?>목록에 없는 품목 신청</button>
 			</div>
 		<?php endif; ?>
 
@@ -85,17 +89,24 @@ function md_inv_view_req() {
 			<button type="button" class="iv-cartbar__btn" data-dlg="iv-cart">
 				<span class="iv-cartbar__ico"><?php echo md_inv_icon( 'cart', 22 ); // phpcs:ignore ?><b id="iv-cart-n">0</b></span>
 				<span class="iv-cartbar__txt" id="iv-cart-txt">담은 품목</span>
-				<span class="iv-cartbar__go">요청하기 →</span>
+				<span class="iv-cartbar__go">신청하기 →</span>
 			</button>
 		</div>
 	</div>
+
+	<dialog class="iv-dlg iv-dlg--sheet" id="iv-team-dlg" aria-labelledby="iv-team-h">
+		<div class="iv-dlg__head"><b id="iv-team-h">어느 팀에서 신청하나요?</b><button type="button" class="iv-x" data-close aria-label="닫기"><?php echo md_inv_icon( 'x' ); // phpcs:ignore ?></button></div>
+		<div class="iv-teamgrid" id="iv-teamgrid">
+			<?php foreach ( $teams as $tm ) : ?><button type="button" class="iv-teamgrid__b" data-team="<?php echo (int) $tm['id']; ?>"><?php echo esc_html( $tm['n'] ); ?></button><?php endforeach; ?>
+		</div>
+	</dialog>
 
 	<dialog class="iv-dlg iv-dlg--sheet iv-dlg--wide" id="iv-cart" aria-labelledby="iv-cart-h">
 		<form method="post" id="iv-cart-form" novalidate>
 			<?php md_inv_hidden( 'req_send', md_inv_url( array( 'iv' => 'req' ) ) ); ?>
 			<input type="hidden" name="cart" id="iv-cart-json" value="">
 			<input type="hidden" name="tok" id="iv-cart-tok" value="">
-			<div class="iv-dlg__head"><b id="iv-cart-h">장바구니</b><button type="button" class="iv-x" data-close aria-label="닫기"><?php echo md_inv_icon( 'x' ); // phpcs:ignore ?></button></div>
+			<div class="iv-dlg__head"><b id="iv-cart-h">담은 품목 확인하고 신청하기</b><button type="button" class="iv-x" data-close aria-label="닫기"><?php echo md_inv_icon( 'x' ); // phpcs:ignore ?></button></div>
 			<div id="iv-cart-lines" class="iv-cart-lines"></div>
 			<div class="iv-grid2">
 				<label class="iv-f"><span>팀 <em>*</em></span>
@@ -104,7 +115,7 @@ function md_inv_view_req() {
 						<?php foreach ( $teams as $tm ) : ?><option value="<?php echo (int) $tm['id']; ?>"><?php echo esc_html( $tm['n'] ); ?></option><?php endforeach; ?>
 					</select>
 				</label>
-				<label class="iv-f"><span>요청자 이름<?php echo $S['req_need_name'] ? ' <em>*</em>' : ''; ?></span>
+				<label class="iv-f"><span>신청자 이름<?php echo $S['req_need_name'] ? ' <em>*</em>' : ''; ?></span>
 					<input class="iv-input" name="requester" id="iv-cart-name" maxlength="40" autocomplete="name" placeholder="이름"<?php echo $S['req_need_name'] ? ' required' : ''; ?>>
 				</label>
 			</div>
@@ -113,7 +124,7 @@ function md_inv_view_req() {
 			<p class="iv-err" id="iv-cart-err" role="alert" hidden></p>
 			<div class="iv-dlg__foot">
 				<button type="button" class="iv-btn iv-btn--ghost" id="iv-cart-clear">모두 비우기</button>
-				<button type="submit" class="iv-btn iv-btn--primary iv-btn--lg" id="iv-cart-send">요청 보내기</button>
+				<button type="submit" class="iv-btn iv-btn--primary iv-btn--lg" id="iv-cart-send">신청하기</button>
 			</div>
 		</form>
 	</dialog>
@@ -121,7 +132,7 @@ function md_inv_view_req() {
 	<?php if ( $S['req_allow_custom'] ) : ?>
 	<dialog class="iv-dlg" id="iv-custom" aria-labelledby="iv-custom-h">
 		<form id="iv-custom-form">
-			<div class="iv-dlg__head"><b id="iv-custom-h">목록에 없는 품목 요청</b><button type="button" class="iv-x" data-close aria-label="닫기"><?php echo md_inv_icon( 'x' ); // phpcs:ignore ?></button></div>
+			<div class="iv-dlg__head"><b id="iv-custom-h">목록에 없는 품목 신청</b><button type="button" class="iv-x" data-close aria-label="닫기"><?php echo md_inv_icon( 'x' ); // phpcs:ignore ?></button></div>
 			<p class="iv-help">적어 주신 내용을 보고 관리자가 구매하거나 품목으로 등록합니다.</p>
 			<label class="iv-f"><span>품목 이름 <em>*</em></span><input class="iv-input" name="name" maxlength="200" required placeholder="예: 3M 필텍 Z350 A2"></label>
 			<div class="iv-grid2">
@@ -166,6 +177,7 @@ function md_inv_view_mine() {
 	if ( in_array( $st, array( 'pending', 'done', 'rejected', 'cancelled' ), true ) ) { $args['status'] = $st; }
 	$rows  = $team < 0 ? array() : md_inv_reqs( $args );
 	$sent  = md_inv_get( 'sent' );
+	$nb    = preg_replace( '/[^a-z0-9]/', '', md_inv_get( 'nb' ) );
 	?>
 	<?php if ( '' !== $sent ) : ?><span hidden id="iv-sent-ok" data-tok="<?php echo esc_attr( $sent ); ?>"></span><?php endif; ?>
 	<form class="iv-filter" method="get" data-autosubmit>
@@ -183,23 +195,27 @@ function md_inv_view_mine() {
 		<button class="iv-btn iv-btn--ghost">보기</button>
 	</form>
 
+	<?php if ( '' !== $sent ) : $nsent = 0; foreach ( $rows as $r0 ) { if ( '' !== $nb && $r0->batch === $nb ) { $nsent++; } } ?>
+		<div class="iv-sent" role="status"><b>✓ 신청<?php echo $nsent ? ' ' . (int) $nsent . '건' : ''; ?>을 보냈습니다.</b> 아래에서 처리 상태(대기 → 출고 완료)를 볼 수 있습니다. <a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'req' ) ) ); ?>">더 신청하기</a></div>
+	<?php endif; ?>
+
 	<?php if ( $team < 0 ) : ?>
-		<?php md_inv_empty( '위에서 우리 팀을 고르면 요청 내역이 보입니다.' ); ?>
+		<?php md_inv_empty( '위에서 우리 팀을 고르면 신청 내역이 보입니다.' ); ?>
 		<?php return; ?>
 	<?php endif; ?>
 
 	<div class="iv-toolbar">
 		<span class="iv-muted"><?php echo count( $rows ); ?>건<?php echo count( $rows ) >= 300 ? ' (최근 300건)' : ''; ?></span>
-		<?php md_inv_dl_buttons( 'requests', array( 'df' => date( 'Y-m-d', current_time( 'timestamp' ) - $days * DAY_IN_SECONDS ), 'dt' => current_time( 'Y-m-d' ) ) ); ?>
+		<?php if ( $admin || $S['staff_see_all_teams'] ) : md_inv_dl_buttons( 'requests', array( 'df' => date( 'Y-m-d', current_time( 'timestamp' ) - $days * DAY_IN_SECONDS ), 'dt' => current_time( 'Y-m-d' ) ) ); endif; ?>
 	</div>
 
-	<?php if ( ! $rows ) { md_inv_empty( '이 조건의 요청이 없습니다.' ); return; } ?>
+	<?php if ( ! $rows ) { md_inv_empty( '이 조건의 신청이 없습니다.' ); return; } ?>
 	<div class="iv-cards">
 		<?php $day = ''; foreach ( $rows as $r ) :
 			$d = substr( $r->created_at, 0, 10 );
 			if ( $d !== $day ) { $day = $d; echo '<h3 class="iv-day">' . esc_html( date( 'n월 j일', strtotime( $d ) ) . ' (' . array( '일', '월', '화', '수', '목', '금', '토' )[ (int) date( 'w', strtotime( $d ) ) ] . ')' ) . '</h3>'; }
 			?>
-			<article class="iv-card iv-card--req is-<?php echo esc_attr( $r->status ); ?>">
+			<article class="iv-card iv-card--req is-<?php echo esc_attr( $r->status ); ?><?php echo ( '' !== $nb && $r->batch === $nb ) ? ' is-new' : ''; ?>">
 				<div class="iv-card__main">
 					<div class="iv-card__title"><?php echo esc_html( $r->name ); ?><?php if ( ! $r->item_id ) : ?> <span class="iv-tag">목록에 없음</span><?php endif; ?><?php if ( $r->urgent ) : ?> <span class="iv-tag iv-tag--hot">급함</span><?php endif; ?></div>
 					<div class="iv-card__sub"><?php echo esc_html( md_inv_team_name( $r->team_id ) . ' · ' . $r->requester . ' · ' . md_inv_date( $r->created_at, 'H:i' ) ); ?></div>
@@ -212,8 +228,11 @@ function md_inv_view_mine() {
 				<div class="iv-card__side">
 					<div class="iv-qty"><?php echo (int) $r->qty; ?><small><?php echo esc_html( $r->unit ); ?></small></div>
 					<?php echo md_inv_req_badge( $r ); // phpcs:ignore ?>
+					<?php if ( 'pending' !== $r->status && $r->item_id && (int) $r->item_active ) : ?>
+						<button type="button" class="iv-btn iv-btn--ghost iv-btn--sm" data-readd="<?php echo esc_attr( wp_json_encode( array( 'id' => (int) $r->item_id, 'qty' => (int) $r->qty ) ) ); ?>" data-href="<?php echo esc_url( md_inv_url( array( 'iv' => 'req' ) ) ); ?>">다시 담기</button>
+					<?php endif; ?>
 					<?php if ( 'pending' === $r->status && ( $admin || $S['staff_cancel'] ) ) : ?>
-						<form method="post" data-confirm="이 요청을 취소할까요?">
+						<form method="post" data-confirm="이 신청을 취소할까요?">
 							<?php md_inv_hidden( 'req_cancel' ); ?><input type="hidden" name="id" value="<?php echo (int) $r->id; ?>">
 							<button class="iv-btn iv-btn--ghost iv-btn--sm">취소</button>
 						</form>

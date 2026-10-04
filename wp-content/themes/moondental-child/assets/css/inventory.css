@@ -471,3 +471,49 @@ textarea.iv-input { min-height: 44px; resize: vertical; line-height: 1.5; }
   .iv-nav, .iv-tabbar, .iv-toolbar--actions, .iv-filter, .iv-actions, .iv-td-act, .iv-cartbar, .iv-me, .mds-head, .mds-foot { display: none !important; }
   .iv-table-wrap { border: 0; }
 }
+
+/* =============================================================
+   v4.23 · 품목신청 — 더 쉽게
+   ============================================================= */
+.iv-nav__xl { margin-left: auto; }
+.iv-steps { display: flex; gap: 6px; margin: 0 0 10px; padding: 0; list-style: none; counter-reset: none; }
+.iv-steps li { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 6px; border-radius: 999px; background: var(--iv-card); border: 1px solid var(--iv-line); color: var(--iv-mute); font-size: .84rem; font-weight: 700; }
+.iv-steps li b { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--iv-line); color: var(--iv-sub); font-size: .76rem; }
+.iv-steps li.is-now { border-color: var(--iv-pri); color: var(--iv-text); }
+.iv-steps li.is-now b { background: var(--iv-pri); color: var(--iv-on-pri); }
+.iv-steps li.is-done { color: var(--iv-ok); }
+.iv-steps li.is-done b { background: var(--iv-ok); color: #fff; font-size: 0; }
+.iv-steps li.is-done b::after { content: '✓'; font-size: .8rem; }
+
+.iv-teambtn { display: inline-flex; align-items: center; gap: 10px; flex: 0 1 300px; min-height: 48px; padding: 6px 14px; border: 1px solid var(--iv-line); border-radius: 12px; background: var(--iv-card); color: var(--iv-text); cursor: pointer; text-align: left; }
+.iv-teambtn:hover { border-color: var(--iv-pri); }
+.iv-teambtn__k { font-size: .78rem; font-weight: 800; color: var(--iv-mute); white-space: nowrap; }
+.iv-teambtn__v { flex: 1; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.iv-teambtn.is-empty { border-color: var(--iv-pri); background: color-mix(in srgb, var(--iv-pri) 8%, var(--iv-card)); }
+.iv-teambtn.is-empty .iv-teambtn__v { color: var(--iv-pri-d); }
+.iv-teambtn.is-pulse { animation: iv-pulse 1.2s ease-in-out 3; }
+@keyframes iv-pulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--iv-pri) 30%, transparent); } }
+.iv-teamgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; padding: 12px 20px 22px !important; }
+.iv-teamgrid__b { min-height: 56px; padding: 10px; border: 1px solid var(--iv-line); border-radius: 14px; background: var(--iv-bg); color: var(--iv-text); font: inherit; font-weight: 800; font-size: .98rem; cursor: pointer; }
+.iv-teamgrid__b:hover { border-color: var(--iv-pri); }
+.iv-teamgrid__b.is-on { background: var(--iv-pri); border-color: var(--iv-pri); color: var(--iv-on-pri); }
+
+.iv-chips { flex-wrap: wrap; overflow: visible; }
+.iv-chipbtn small { margin-left: 2px; font-size: .74rem; font-weight: 700; opacity: .65; }
+.iv-row__name mark { background: color-mix(in srgb, var(--iv-warn) 30%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
+.iv-more-btn { width: 100%; margin-top: 4px; }
+.iv-nohit { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 26px 16px; border: 1px dashed var(--iv-line); border-radius: var(--iv-r); background: var(--iv-card); text-align: center; color: var(--iv-sub); }
+.iv-nohit b { color: var(--iv-text); font-size: 1.02rem; }
+.iv-sent { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 12px; padding: 14px 16px; border-radius: var(--iv-r); background: var(--iv-ok-bg); color: var(--iv-ok); font-size: .92rem; }
+.iv-sent .iv-btn { margin-left: auto; }
+.iv-card.is-new { border-color: var(--iv-ok); box-shadow: inset 4px 0 0 var(--iv-ok), var(--iv-shadow); }
+
+@media (max-width: 760px) {
+  .iv-steps { gap: 4px; }
+  .iv-steps li { padding: 4px 9px 4px 4px; font-size: .76rem; }
+  .iv-steps li b { width: 20px; height: 20px; }
+  .iv-teambtn { flex: 1 1 auto; width: 100%; }
+  .iv-chips { flex-wrap: nowrap; overflow-x: auto; margin: 0 -14px 10px; padding: 0 14px 4px; }
+  .iv-teamgrid { grid-template-columns: repeat(2, 1fr); }
+  .iv-sent .iv-btn { margin-left: 0; }
+}

@@ -88,7 +88,7 @@ function md_inv_act_req_send() {
 	$hist = md_inv_url( array( 'iv' => 'mine' ) );
 	if ( '' !== $tok && get_transient( 'md_inv_tok_' . $tok ) ) {
 		/* 같은 장바구니를 두 번 보냈다 — 두 번째는 넣지 않는다 */
-		md_inv_go( 'ok', '요청은 이미 들어가 있습니다.', add_query_arg( 'sent', $tok, $hist ) );
+		md_inv_go( 'ok', '신청은 이미 들어가 있습니다.', add_query_arg( 'sent', $tok, $hist ) );
 	}
 	$raw   = json_decode( (string) md_inv_p( 'cart' ), true );
 	$lines = array();
@@ -106,11 +106,12 @@ function md_inv_act_req_send() {
 	$res = md_inv_req_create( (int) md_inv_p( 'team_id' ), (string) md_inv_p( 'requester' ), $lines, (string) md_inv_p( 'note' ), md_inv_p( 'urgent' ) ? 1 : 0 );
 	if ( is_wp_error( $res ) ) { md_inv_go( 'err', $res->get_error_message(), md_inv_url( array( 'iv' => 'req' ) ) ); }
 	if ( '' !== $tok ) { set_transient( 'md_inv_tok_' . $tok, 1, DAY_IN_SECONDS ); }
-	md_inv_go( 'ok', '요청 ' . count( $res ) . '건을 보냈습니다. 처리되면 이 화면에서 확인할 수 있습니다.', add_query_arg( array( 'sent' => $tok, 'it' => (int) md_inv_p( 'team_id' ) ), $hist ) );
+	$first = md_inv_req( $res[0] );
+	md_inv_go( 'ok', '신청 ' . count( $res ) . '건을 보냈습니다. 처리되면 이 화면에서 확인할 수 있습니다.', add_query_arg( array( 'sent' => $tok, 'nb' => $first ? $first->batch : '', 'it' => (int) md_inv_p( 'team_id' ) ), $hist ) );
 }
 
 function md_inv_act_req_cancel() {
-	md_inv_done( md_inv_req_cancel( (int) md_inv_p( 'id' ) ), '요청을 취소했습니다.' );
+	md_inv_done( md_inv_req_cancel( (int) md_inv_p( 'id' ) ), '신청을 취소했습니다.' );
 }
 
 /* ============================================================
@@ -439,7 +440,7 @@ function md_inv_act_import() {
 }
 
 /* ============================================================
- * 내려받기 (GET) — CSV · 엑셀 · 백업 파일
+ * 내려받기 (GET) — 엑셀 · 백업 파일
  * ============================================================ */
 
 function md_inv_handle_download() {
@@ -455,11 +456,17 @@ function md_inv_handle_download() {
 	$staff_ok = array();
 	if ( md_inv_set( 'staff_stats' ) ) { $staff_ok[] = 'usage'; $staff_ok[] = 'monthly'; }
 	if ( md_inv_set( 'staff_see_all_teams' ) ) { $staff_ok[] = 'requests'; }
-	if ( ! md_inv_is_admin() && ! in_array( $what, $staff_ok, true ) ) { wp_die( '관리자만 내려받을 수 있습니다.', '', array( 'response' => 403 ) ); }
+	if ( ! md_inv_is_admin() && ! in_array( $what, array_merge( $staff_ok, array( 'xlsx' ) ), true ) ) { wp_die( '관리자만 내려받을 수 있습니다.', '', array( 'response' => 403 ) ); }
 
 	if ( 'xlsx' === $what ) {
 		md_inv_log( '엑셀 내려받기', $from . '~' . $to );
-		md_inv_send_xlsx( md_inv_report_xlsx( $from, $to ), '문치과병원 재고 ' . current_time( 'Y-m-d' ) . '.xlsx' );
+		if ( md_inv_is_admin() ) {
+			md_inv_send_xlsx( md_inv_report_xlsx( $from, $to ), '문치과병원 품목신청 보고서 ' . current_time( 'Y-m-d' ) . '.xlsx' );
+		}
+		/* 직원: 볼 수 있는 표만 묶는다 */
+		$keys = array_values( array_intersect( array( 'requests', 'usage', 'monthly' ), $staff_ok ) );
+		if ( ! $keys ) { wp_die( '내려받을 수 있는 표가 없습니다.', '', array( 'response' => 403 ) ); }
+		md_inv_send_xlsx( md_inv_report_xlsx( $from, $to, $keys ), '문치과병원 품목신청 ' . current_time( 'Y-m-d' ) . '.xlsx' );
 	}
 	if ( 'backup' === $what ) {
 		$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
@@ -474,7 +481,9 @@ function md_inv_handle_download() {
 		exit;
 	}
 	if ( isset( md_inv_dataset_names()[ $what ] ) ) {
-		md_inv_send_csv( $what, array( 'from' => $from, 'to' => $to ) );
+		/* 표 하나 = 시트 하나짜리 엑셀 (CSV 는 v4.23 에서 없앰 — 원장 지시: 엑셀 하나로) */
+		$ds = md_inv_dataset( $what, array( 'from' => $from, 'to' => $to ) );
+		md_inv_send_xlsx( md_inv_xlsx( array( $ds ) ), '문치과병원 ' . $ds['title'] . ' ' . current_time( 'Y-m-d' ) . '.xlsx' );
 	}
 	wp_die( '알 수 없는 내려받기입니다.' );
 }

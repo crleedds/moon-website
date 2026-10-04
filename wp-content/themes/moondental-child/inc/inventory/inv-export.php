@@ -1,11 +1,12 @@
 <?php
 /**
- * 재고관리 v5 — 내보내기 (CSV · 엑셀)
+ * 품목신청 (재고관리 v5) — 내보내기 (엑셀)
  *
  * 엑셀(.xlsx)은 라이브러리 없이 직접 만든다 — 서버에 ZipArchive 가 없어도 되게
  * zip 도 손으로 짠다 (저장 방식 deflate). 표마다 첫 줄 고정 · 필터 · 숫자 서식.
  *
- * 표 정의는 md_inv_dataset() 한 곳에 있고, CSV · 엑셀 · 메일이 모두 이것을 쓴다.
+ * 표 정의는 md_inv_dataset() 한 곳에 있고, 화면 내려받기 · 메일이 모두 이것을 쓴다.
+ * CSV 는 v4.23 에서 없앴다 — 엑셀 하나가 시트 · 서식 · 필터까지 다 해서 (원장 지시).
  *
  * @package moondental-child
  */
@@ -190,31 +191,6 @@ function md_inv_dataset( $key, $a = array() ) {
 }
 
 /* ============================================================
- * CSV
- * ============================================================ */
-
-function md_inv_send_csv( $key, $a = array() ) {
-	$ds   = md_inv_dataset( $key, $a );
-	$name = 'moondental-' . $key . '-' . current_time( 'Ymd-Hi' ) . '.csv';
-	nocache_headers();
-	header( 'Content-Type: text/csv; charset=UTF-8' );
-	header( "Content-Disposition: attachment; filename=\"$name\"; filename*=UTF-8''" . rawurlencode( '문치과병원 ' . $ds['title'] . ' ' . current_time( 'Y-m-d' ) . '.csv' ) );
-	echo "\xEF\xBB\xBF"; // 엑셀이 한글을 깨뜨리지 않게
-	$fh = fopen( 'php://output', 'w' );
-	fputcsv( $fh, $ds['head'] );
-	foreach ( $ds['rows'] as $r ) { fputcsv( $fh, array_map( 'md_inv_csv_cell', $r ) ); }
-	fclose( $fh );
-	exit;
-}
-
-/** 엑셀이 = + - @ 로 시작하는 칸을 수식으로 읽지 않게 (CSV 수식 주입 방지) */
-function md_inv_csv_cell( $v ) {
-	if ( is_string( $v ) && '' !== $v && in_array( $v[0], array( '=', '+', '@' ), true ) ) { return "'" . $v; }
-	if ( is_string( $v ) && '' !== $v && '-' === $v[0] && ! is_numeric( $v ) ) { return "'" . $v; }
-	return $v;
-}
-
-/* ============================================================
  * 엑셀 (.xlsx)
  * ============================================================ */
 
@@ -299,7 +275,7 @@ function md_inv_xlsx( $sheets ) {
 		. '</Relationships>';
 	$files['docProps/core.xml'] = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
 		. '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
-		. '<dc:title>문치과병원 재고관리</dc:title><dc:creator>문치과병원 직원 라운지</dc:creator>'
+		. '<dc:title>문치과병원 품목신청</dc:title><dc:creator>문치과병원 직원 라운지</dc:creator>'
 		. '<dcterms:created xsi:type="dcterms:W3CDTF">' . gmdate( 'Y-m-d\TH:i:s\Z' ) . '</dcterms:created></cp:coreProperties>';
 	$files['xl/workbook.xml'] = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
 		. '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'

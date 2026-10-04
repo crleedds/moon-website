@@ -349,7 +349,7 @@ function md_inv_settings_mail() {
 				<label class="iv-f"><span>시각</span><select class="iv-input" name="s_report_hour"><?php for ( $h = 0; $h <= 23; $h++ ) : ?><option value="<?php echo (int) $h; ?>"<?php selected( (int) md_inv_set( 'report_hour' ), $h ); ?>><?php echo (int) $h; ?>시 무렵</option><?php endfor; ?></select></label>
 			</div>
 			<?php md_inv_s_check( 'report_backup', '백업 파일도 함께 첨부', '메일함에 그날의 전체 백업이 쌓입니다. 서버에 문제가 생겨도 메일에서 되살릴 수 있습니다.' ); ?>
-			<p class="iv-help">보내는 시각은 그 시각 이후 첫 방문 때입니다(홈페이지 예약 작업 방식). 같은 주기에 두 번 보내지 않습니다. <b>지난 보고서 뒤로 바뀐 것(요청 · 출고 · 입고 · 주문 · 품목 · 설정 등)이 하나도 없으면 보내지 않습니다.</b> 「시험 메일 보내기」는 항상 보냅니다.</p>
+			<p class="iv-help">보내는 시각은 그 시각 이후 첫 방문 때입니다(홈페이지 예약 작업 방식). 같은 주기에 두 번 보내지 않습니다. 바뀐 것이 없는 주에도 보냅니다.</p>
 			<div class="iv-dlg__foot"><button class="iv-btn iv-btn--primary">저장</button></div>
 		</section>
 	</form>
@@ -375,7 +375,7 @@ function md_inv_settings_backup() {
 	?>
 	<section class="iv-panel">
 		<h3 class="iv-h3">백업</h3>
-		<p class="iv-help">재고관리의 모든 표(품목 · 입출고 · 요청 · 주문 · 선납 · 팀 · 업체 · 분류 · 작업 기록)와 설정을 한 파일로 묶습니다. 매일 한 번 자동으로 뜨고, 보고서 메일에도 첨부됩니다.</p>
+		<p class="iv-help">품목신청의 모든 표(품목 · 입출고 · 요청 · 주문 · 선납 · 팀 · 업체 · 분류 · 작업 기록)와 설정을 한 파일로 묶습니다. 매일 한 번 자동으로 뜨고, 보고서 메일에도 첨부됩니다.</p>
 		<form method="post" class="iv-settings">
 			<?php md_inv_hidden( 'settings' ); ?>
 			<?php md_inv_s_check( 'backup_on', '매일 자동 백업', '마지막 백업 뒤로 바뀐 것이 없으면 그날은 건너뜁니다.' ); ?>
@@ -411,7 +411,7 @@ function md_inv_settings_backup() {
 	<section class="iv-panel">
 		<h3 class="iv-h3">파일에서 되돌리기</h3>
 		<p class="iv-help">내려받았거나 메일로 받은 백업 파일(.json.gz)을 올려 그 시점으로 되돌립니다. 지금 상태는 자동으로 먼저 백업됩니다.</p>
-		<form method="post" enctype="multipart/form-data" class="iv-settings" data-confirm="정말 되돌릴까요? 지금 재고관리 데이터가 백업 시점으로 바뀝니다.">
+		<form method="post" enctype="multipart/form-data" class="iv-settings" data-confirm="정말 되돌릴까요? 지금 품목신청 데이터가 백업 시점으로 바뀝니다.">
 			<?php md_inv_hidden( 'backup_restore' ); ?>
 			<label class="iv-f"><span>백업 파일</span><input class="iv-input" type="file" name="file" accept=".gz,.json,application/gzip,application/json" required></label>
 			<label class="iv-f"><span>확인: 「되돌리기」라고 적어 주세요</span><input class="iv-input" name="confirm" required autocomplete="off"></label>
@@ -445,7 +445,7 @@ function md_inv_settings_export() {
 		<p class="iv-help">기간은 입출고 · 요청 · 주문 · 사용금액 시트에 적용됩니다. 재고 현황 · 업체 · 선납은 지금 기준입니다.</p>
 	</section>
 	<section class="iv-panel">
-		<h3 class="iv-h3">CSV 하나씩</h3>
+		<h3 class="iv-h3">표 하나씩 (엑셀)</h3>
 		<div class="iv-pills">
 			<?php foreach ( md_inv_dataset_names() as $k => $lb ) : ?>
 				<a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_dl_url( $k, array( 'df' => $df, 'dt' => $dt ) ) ); ?>"><?php echo md_inv_icon( 'down', 16 ); // phpcs:ignore ?><?php echo esc_html( $lb ); ?></a>
@@ -463,7 +463,7 @@ function md_inv_settings_import() {
 	$imp = get_option( 'md_inv_imported' );
 	?>
 	<section class="iv-panel">
-		<h3 class="iv-h3">AppSheet 재고관리에서 가져오기</h3>
+		<h3 class="iv-h3">AppSheet 에서 가져오기</h3>
 		<p class="iv-help">구글 드라이브 「문치과병원 재고관리 v2 (AppSheet)」 폴더의 시트를 각각 <b>파일 › 다운로드 › Microsoft Excel (.xlsx)</b>로 받아 올려 주세요.
 			팀 · 분류 · 업체 · 선납 입금 · 품목을 옮기고, 품목마다 AppSheet 와 같은 식으로 계산한 <b>지금 재고</b>를 「기초」로 넣습니다.</p>
 		<?php if ( $has ) : ?><p class="iv-flash iv-flash--warn">지금 품목 <?php echo (int) $has; ?>개가 있습니다. 가져오기를 실행하면 재고관리 데이터를 모두 지우고 새로 넣습니다(바로 전에 자동 백업).<?php echo $imp ? ' 마지막 가져오기: ' . esc_html( $imp ) : ''; ?></p><?php endif; ?>
