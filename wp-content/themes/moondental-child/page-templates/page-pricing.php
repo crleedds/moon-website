@@ -426,32 +426,7 @@ for ( $i = 1; $i <= 4; $i++ ) {
 	</div>
 </section>
 
-<!-- ============ 결제 안내 (2-col tile with descriptions) ============ -->
-<section class="md-section">
-	<div class="md-container">
-		<header class="md-section-head">
-			<span class="md-section-head__eyebrow"><?php echo esc_html( md_content( 'price_pay_eyebrow', 'Payment' ) ); ?></span>
-			<h2 class="md-section-head__title"><?php echo esc_html( md_content( 'price_pay_title', '결제 안내' ) ); ?></h2>
-		</header>
-
-		<div class="md-priceX-pay">
-			<?php foreach ( $payment_methods as $pm ) : ?>
-				<div class="md-priceX-pay__item">
-					<span class="md-priceX-pay__icon" aria-hidden="true"><?php echo $pm['icon']; ?></span>
-					<div>
-						<strong><?php echo esc_html( $pm['title'] ); ?></strong>
-						<span><?php echo esc_html( $pm['desc'] ); ?></span>
-					</div>
-				</div>
-			<?php endforeach; ?>
-		</div>
-
-		<aside class="md-priceX-pay__notice">
-			<span class="md-priceX-pay__notice-tag"><?php echo esc_html( md_content( 'price_pay_notice_tag', '실손보험 안내' ) ); ?></span>
-			<p><?php echo wp_kses_post( wpautop( md_content( 'price_pay_notice_text', '치과 진료는 대부분 실손보험 대상이 아닙니다. 사고로 인한 외상 치료·턱관절 일부는 보장 가능할 수 있으니 가입 보험사에 사전 확인해주세요. 문치과병원은 진단서·소견서 발급으로 보험 청구를 도와드립니다.' ) ) ); ?></p>
-		</aside>
-	</div>
-</section>
+<?php /* v5.3.4 · 원장 지시 · 결제 안내(카드 · 무이자 할부 · 간편결제 · 현금 · 실손보험 안내) 칸 제거. 문구는 Customizer price_pay_* 에 그대로 남아 있음 */ ?>
 
 <?php /* v3.37.8 · 비용안내 중간 CTA (md-priceX-cta) 제거 · 하단 통일 CTA와 중복 */ ?>
 <?php /* 위치 섹션은 푸터 위 section-location과 중복되어 제거됨 — v3.12.3 */ ?>
