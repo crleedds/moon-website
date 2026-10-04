@@ -70,11 +70,19 @@ function md_v5_build_base_css() {
 	$src = MOONDENTAL_DIR . '/style.css';
 	$dst = md_v5_base_css_path();
 	if ( ! file_exists( $src ) ) return false;
-	if ( file_exists( $dst ) && filemtime( $dst ) >= filemtime( $src ) && filesize( $dst ) > 1000 ) return true;
+	if ( file_exists( $dst ) && filemtime( $dst ) >= filemtime( $src ) && filemtime( $dst ) >= filemtime( __FILE__ ) && filesize( $dst ) > 1000 ) return true;
 	$css = file_get_contents( $src );
 	if ( ! $css ) return false;
 	$map = md_v5_css_map();
 	$css = str_replace( array_keys( $map ), array_values( $map ), $css );
+	// v5.2 · 둥근 모서리(6~40px · 999px 알약) → 거의 각지게 (원형 50% 는 그대로)
+	$css = preg_replace_callback( '/border-radius:\s*([0-9.]+)px/', function ( $m ) {
+		$v = (float) $m[1];
+		if ( $v >= 6 && $v <= 40 ) return 'border-radius: 3px';
+		if ( $v >= 400 ) return 'border-radius: 2px';
+		return $m[0];
+	}, $css );
+	$css = str_replace( '--radius-pill: 999px', '--radius-pill: 2px', $css );
 	// 상대 경로(이미지 · 글꼴)는 assets/css 기준으로 맞춘다
 	$css = preg_replace( '#url\(\s*([\'"]?)(?!data:|https?:|/|\.\./)([^\'")]+)\1\s*\)#', 'url($1../../$2$1)', $css );
 	$css = "/* 자동 생성 · style.css → v5 색 · 직접 고치지 마세요 (inc/design-v5.php) */\n" . $css;
@@ -148,3 +156,26 @@ add_action( 'init', function () {
 	update_option( 'md_design_v5_i18n', 'on' );
 	update_option( 'md_design_v5_i18n_init', 'done' );
 }, 8 );
+
+/* v5.2 · 화면 글자 속 이모지 아이콘 빼기 (✓ ★ 는 남김) — 직원 라운지 · 만족도 조사는 그대로 */
+function md_v5_strip_emoji( $html ) {
+	$re = '/(?:[\x{1F000}-\x{1FAFF}\x{2600}-\x{2604}\x{2607}-\x{2712}\x{2715}-\x{27BF}\x{2B00}-\x{2BFF}\x{FE0F}\x{200D}\x{20E3}])+\s?/u';
+	$parts = preg_split( '#(<script\b.*?</script>|<style\b.*?</style>|<textarea\b.*?</textarea>|<[^>]+>)#is', $html, -1, PREG_SPLIT_DELIM_CAPTURE );
+	if ( ! is_array( $parts ) ) return $html;
+	foreach ( $parts as $i => $p ) {
+		if ( $p === '' || $p[0] === '<' ) continue;
+		$n = preg_replace( $re, '', $p );
+		if ( is_string( $n ) ) $parts[ $i ] = $n;
+	}
+	return implode( '', $parts );
+}
+add_action( 'template_redirect', function () {
+	if ( is_admin() || ! md_v5() || is_feed() ) return;
+	if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax() ) return;
+	if ( function_exists( 'md_sup_is_page' ) && md_sup_is_page() ) return;
+	if ( function_exists( 'md_survey_is_public_path' ) && md_survey_is_public_path() ) return;
+	ob_start( function ( $html ) {
+		if ( ! is_string( $html ) || stripos( $html, '<html' ) === false ) return $html;
+		return md_v5_strip_emoji( $html );
+	} );
+}, 1 );

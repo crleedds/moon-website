@@ -552,3 +552,67 @@ html:not([lang^="ko"]):not([lang^="en"]) body.md-v5 .md-header__nav .md-nav > li
 /* 외국어 홈 · 첫 화면 제목이 길어 조금 작게 */
 html:not([lang^="ko"]) .v5-hero__title { font-size: clamp(28px, 2.9vw, 40px) !important; line-height: 1.3 !important; }
 html:not([lang^="ko"]) .v5-head h2 { font-size: clamp(26px, 2.8vw, 36px) !important; }
+
+/* ==========================================================================
+   v5.2 · 안쪽 페이지 정리 — 이모지 뺀 빈 아이콘 칸 숨김 · 카드 그림자 없이 · 머리 영역 단정하게
+   ========================================================================== */
+body.md-v5 [class*="__icon"]:empty,
+body.md-v5 [class*="-icon"]:empty,
+body.md-v5 [class*="__emoji"]:empty,
+body.md-v5 [class*="__badge"]:empty,
+body.md-v5 [class*="__ico"]:empty { display: none !important; }
+
+/* 카드 · 그림자 · 떠오르는 효과 없이 가는 선으로 */
+body.md-v5 .md-main [class*="card"],
+body.md-v5 .md-main [class*="__item"],
+body.md-v5 .md-main [class*="__box"],
+body.md-v5 .md-main [class*="__panel"] {
+  box-shadow: none !important;
+}
+body.md-v5 .md-main [class*="card"]:hover { transform: none !important; }
+body.md-v5 .md-main [class*="card"]:hover { border-color: var(--v5-bronze) !important; }
+
+/* 페이지 머리(히어로) · 장식 그라디언트 없이 */
+body.md-v5 .md-page-hero,
+body.md-v5 .md-docs-hero,
+body.md-v5 .md-svc-hero,
+body.md-v5 [class*="-hero"]:not(.v5-hero):not([class*="__"]) {
+  background-image: none !important;
+  background-color: var(--v5-bg) !important;
+  border-bottom: 1px solid var(--v5-hair);
+}
+body.md-v5 .md-page-hero::before, body.md-v5 .md-page-hero::after,
+body.md-v5 .md-docs-hero::before, body.md-v5 .md-docs-hero::after { display: none !important; }
+body.md-v5 .md-page-hero__title, body.md-v5 .md-docs-hero__title { font-weight: 300 !important; letter-spacing: -0.02em; }
+body.md-v5 .md-page-hero__title em, body.md-v5 .md-docs-hero__title em { font-style: normal; color: var(--v5-bronze); }
+
+/* 칩 · 알약 라벨 · 가는 선 */
+body.md-v5 [class*="__chip"],
+body.md-v5 [class*="__pill"],
+body.md-v5 [class*="__tag"]:not(.v5-crow__tags) {
+  background: transparent !important;
+  border: 1px solid var(--v5-line) !important;
+  color: var(--v5-sub) !important;
+  box-shadow: none !important;
+  font-weight: 400 !important;
+}
+body.md-v5 .md-page-hero__eyebrow,
+body.md-v5 [class*="__eyebrow"] {
+  font-family: var(--v5-label);
+  letter-spacing: .18em;
+  font-weight: 400;
+  color: var(--v5-mute);
+  background: none !important;
+  border: 0 !important;
+}
+
+/* 본문 · 읽기 좋게 */
+body.md-v5 .md-page-content { color: var(--v5-ink); line-height: 1.85; }
+body.md-v5 .md-page-content h2, body.md-v5 .md-page-content h3 { font-family: var(--v5-serif); font-weight: 400; color: var(--v5-ink); }
+body.md-v5 .md-page-content a { color: var(--v5-bronze); }
+
+/* FAQ (안쪽 페이지) */
+body.md-v5 .md-faq__item, body.md-v5 .md-home-faq__item {
+  background: none !important; border: 0 !important; border-bottom: 1px solid var(--v5-line) !important; border-radius: 0 !important;
+}
+body.md-v5 .md-faq__item summary, body.md-v5 .md-home-faq__item summary { font-family: var(--v5-serif); font-weight: 400; }
