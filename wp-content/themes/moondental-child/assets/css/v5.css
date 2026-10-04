@@ -637,6 +637,8 @@ body.md-v5 .md-cta-banner a {
   color: #F6F3EE !important;
   min-height: 52px;
 }
-body.md-v5 .md-cta-banner a:first-of-type,
 body.md-v5 .md-cta-banner a[href*="booking.naver"] { background: #C9A27F !important; border-color: #C9A27F !important; color: #1E1A17 !important; }
 body.md-v5 .md-cta-banner a:hover { filter: brightness(1.08); }
+
+body.md-v5 .md-cta-banner a svg, body.md-v5 .md-cta-banner a svg * { color: currentColor !important; fill: currentColor !important; }
+body.md-v5 .md-cta-banner a [class*="logo"], body.md-v5 .md-cta-banner a [class*="badge"] { background: transparent !important; color: currentColor !important; }
