@@ -1073,3 +1073,17 @@ body.md-v5 .md-header__cta-btn, body.md-v5 .md-header__cta-btn--cycle {
   background: #1C110A !important; border-color: #1C110A !important; color: #F1E7DA !important;
 }
 body.md-v5 .md-header__cta-btn:hover { background: #3A2A1E !important; border-color: #3A2A1E !important; filter: none !important; }
+
+/* v6.6 · 다크 모드 — 밝게 고정한 곳들을 어둡게 (머리 · 옅은 띠 · 짙은 띠 구분) */
+@media (prefers-color-scheme: dark) {
+  body.md-v5 .md-site-header, body.md-v5 .md-header { background: color-mix(in srgb, #150D08 94%, transparent) !important; }
+  body.md-v5 .md-site-header { border-bottom-color: #3A2A1E !important; }
+  body.md-v5 .md-header__nav .md-nav > li > a,
+  body.md-v5 .md-header__nav .md-nav > li[class*="md-nav-center"] > a { color: #E6D9C8 !important; }
+  body.md-v5 .md-header__nav .md-nav > li > a:hover { color: #D1A77E !important; }
+  body.md-v5 .md-header__cta-btn, body.md-v5 .md-header__cta-btn--cycle { background: #D1A77E !important; border-color: #D1A77E !important; color: #150D08 !important; }
+  body.md-v5 .md-header__cta-btn:hover { background: #E0BC97 !important; border-color: #E0BC97 !important; }
+  .v5-paper:not(.v5-deep) { background: #22170F !important; border-color: #22170F !important; }
+  .v5-deep, body.md-v5 .md-footer, .v5-closing, body.md-v5 .md-cta-banner { background: #0C0704 !important; }
+  .v5-deep .v5-doc__ph { background: #F1E7DA; }
+}
