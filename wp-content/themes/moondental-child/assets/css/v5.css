@@ -1061,3 +1061,15 @@ body.md-v5 .md-cta-banner { background: #1C110A !important; }
 body.md-v5 .md-site-header, body.md-v5 .md-header { background: color-mix(in srgb, #F3EDE6 94%, transparent) !important; }
 /* 옅은 띠(소식 · 페이지 사이 구역) */
 .v5-paper:not(.v5-deep) { background: #E9DFD3 !important; border-color: #E9DFD3 !important; }
+
+/* v6.1 · 원장 지시 · 머리(메뉴 줄) — 아이보리 바탕 · 진한 글자 · 짙은 에스프레소 버튼 */
+body.md-v5 .md-site-header, body.md-v5 .md-header { background: color-mix(in srgb, #F9F5F0 96%, transparent) !important; }
+body.md-v5 .md-site-header { border-bottom: 1px solid #DCCFC2 !important; }
+body.md-v5 .md-header__nav .md-nav > li > a,
+body.md-v5 .md-header__nav .md-nav > li[class*="md-nav-center"] > a { color: #22150D !important; }
+body.md-v5 .md-header__nav .md-nav > li > a:hover { color: #7A4F35 !important; }
+body.md-v5 .md-header__cta-btn, body.md-v5 .md-header__cta-btn--cycle {
+  --cta-bg: #1C110A; --cta-fg: #F1E7DA;
+  background: #1C110A !important; border-color: #1C110A !important; color: #F1E7DA !important;
+}
+body.md-v5 .md-header__cta-btn:hover { background: #3A2A1E !important; border-color: #3A2A1E !important; filter: none !important; }
