@@ -75,6 +75,12 @@ function md_sup_apps() {
 			'desc'   => '이름 · 부서 · 생일 · 입사일 — 달력에 자동 표시',
 			'manage' => true,
 		),
+		// v6.2 · 미니차트 (AppSheet 「Mini Chart」를 옮김 · inc/minichart)
+		'minichart' => array(
+			'label' => '미니차트',
+			'icon'  => '🗂️',
+			'desc'  => '환자 병력 · 치료이력 · 계획 · 참고사항 · 팀 노트',
+		),
 		// v4.0 · 환자 설명용 자료
 		'care'  => array(
 			'label' => 'Moon Dental Care',
@@ -1035,6 +1041,8 @@ function md_sup_render_page() {
 		md_survey_render(); // v4.10 · 접수수납목록 (만족도 조사 명단)
 	} elseif ( 'survey_result' === $app && function_exists( 'md_survey_render_result' ) ) {
 		md_survey_render_result(); // v4.19.7 · 만족도 응답·집계·설정 (관리자)
+	} elseif ( 'minichart' === $app && function_exists( 'md_mc_render' ) ) {
+		md_mc_render(); // v6.2 · 미니차트
 	} elseif ( 'stock' === $app && function_exists( 'md_inv_render' ) ) {
 		md_inv_render(); // v4.22 · 재고관리 v5
 	} else {
