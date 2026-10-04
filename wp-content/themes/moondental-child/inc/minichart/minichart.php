@@ -214,6 +214,117 @@ function md_mc_last_line( $s ) {
 }
 
 /* ============================================================
+ * v6.3 · 병력 주의 단어 — 진료 전에 놓치면 안 되는 것만 붉게
+ *   (항혈전·항응고 → 출혈, 골흡수억제제 → 턱뼈 괴사, 알러지, 임신, 투석, 스텐트·판막, 항암·방사선)
+ * ============================================================ */
+
+function md_mc_alert_words() {
+	return (array) apply_filters( 'md_mc_alert_words', array(
+		'항혈전', '항응고', '아스피린', '와파린', '쿠마딘', '플라빅스', '클로피도그렐', '엘리퀴스', '자렐토', '프라닥사', '릭시아나', '헤파린',
+		'골흡수억제', '비스포스포네이트', 'BP제제', '포사맥스', '프롤리아', '본비바', '악토넬', '졸레드론', '데노수맙', '골다공증 주사', '골다공증주사',
+		'알러지', '알레르기', '페니실린',
+		'임신', '수유',
+		'투석', '스텐트', '인공판막', '판막',
+		'항암', '방사선',
+	) );
+}
+
+/** 병력 글에서 주의 단어를 찾는다 — 「아스피린x」 「아스피린 X」 처럼 「안 먹음」 표시는 뺀다 */
+function md_mc_alerts( $mhx ) {
+	$mhx = (string) $mhx;
+	if ( '' === trim( $mhx ) ) { return array(); }
+	$hit = array();
+	foreach ( md_mc_alert_words() as $w ) {
+		if ( ! preg_match_all( '/' . preg_quote( $w, '/' ) . '(.{0,4})/u', $mhx, $m, PREG_SET_ORDER ) ) { continue; }
+		foreach ( $m as $one ) {
+			if ( preg_match( '/^[\s:：\-(]*([xX×✕]|없|무|안|[Nn][Oo]?(?![A-Za-z]))/u', $one[1] ) ) { continue; }
+			$hit[ $w ] = true;
+			break;
+		}
+	}
+	return array_keys( $hit );
+}
+
+/** 읽기 화면용 — 주의 단어를 붉게 */
+function md_mc_mark_alerts( $html, $words ) {
+	foreach ( $words as $w ) {
+		$html = preg_replace( '/' . preg_quote( esc_html( $w ), '/' ) . '/u', '<mark class="mc-alert">$0</mark>', $html );
+	}
+	return $html;
+}
+
+/* ============================================================
+ * v6.3 · 접수수납목록(만족도 명단 wp_md_survey_visit)과 잇기
+ *   데스크가 매일 올리는 덴트웹 엑셀 — 날짜 · 차트번호 · 이름 · 담당의 · 담당직원
+ * ============================================================ */
+
+function md_mc_visit_table() {
+	global $wpdb;
+	if ( (int) get_option( 'md_survey_schema', 0 ) < 1 ) { return ''; }
+	return $wpdb->prefix . 'md_survey_visit';
+}
+
+/** 차트번호 비교용 — 앞자리 0 은 떼고 숫자만 */
+function md_mc_norm_chart( $c ) {
+	$c = preg_replace( '/\D/', '', (string) $c );
+	$c = ltrim( $c, '0' );
+	return '' === $c ? '0' : $c;
+}
+
+/** 한 환자의 내원 기록 (최근 순) */
+function md_mc_visits( $chart, $limit = 12 ) {
+	global $wpdb;
+	$t = md_mc_visit_table();
+	if ( ! $t || '' === trim( (string) $chart ) ) { return array(); }
+	$n = md_mc_norm_chart( $chart );
+	return (array) $wpdb->get_results( $wpdb->prepare(
+		"SELECT visit_date, doctor, staff FROM $t WHERE chart_no IN (%s, %s, %s) ORDER BY visit_date DESC LIMIT %d",
+		$chart, $n, str_pad( $n, 6, '0', STR_PAD_LEFT ), (int) $limit
+	) );
+}
+
+/** 날짜별 내원 인원 (최근 n 일) */
+function md_mc_visit_days( $days = 14 ) {
+	global $wpdb;
+	$t = md_mc_visit_table();
+	if ( ! $t ) { return array(); }
+	$from = date( 'Y-m-d', current_time( 'timestamp' ) - ( $days - 1 ) * DAY_IN_SECONDS );
+	$out  = array();
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT visit_date d, COUNT(*) n FROM $t WHERE visit_date >= %s GROUP BY visit_date", $from ) ) as $r ) {
+		$out[ $r->d ] = (int) $r->n;
+	}
+	return $out;
+}
+
+/** 미니차트 환자 전체를 차트번호(정규화) → 줄 로 */
+function md_mc_chart_index() {
+	global $wpdb;
+	$idx = array();
+	foreach ( (array) $wpdb->get_results( 'SELECT id, chart_no, pname, addr, mhx, referral, dr FROM ' . md_mc_t() . " WHERE kind = 'patient' AND deleted_at IS NULL" ) as $r ) {
+		$idx[ md_mc_norm_chart( $r->chart_no ) ] = $r;
+	}
+	return $idx;
+}
+
+/** 담당의 칸에 자주 나오는 원장 이름 (필터 칩) — 직원 정보의 의료진 이름이 있으면 그것만 */
+function md_mc_doctor_names() {
+	$names = get_transient( 'md_mc_doctors' );
+	if ( is_array( $names ) ) { return $names; }
+	global $wpdb;
+	$cnt = array();
+	foreach ( (array) $wpdb->get_col( 'SELECT dr FROM ' . md_mc_t() . " WHERE kind = 'patient' AND deleted_at IS NULL AND dr <> ''" ) as $dr ) {
+		if ( ! preg_match_all( '/[가-힣]{3}/u', (string) $dr, $m ) ) { continue; }
+		foreach ( array_unique( $m[0] ) as $nm ) { $cnt[ $nm ] = ( $cnt[ $nm ] ?? 0 ) + 1; }
+	}
+	foreach ( array( '임플란트', '턱관절', '보존과', '보철과' ) as $not ) { unset( $cnt[ $not ] ); }
+	arsort( $cnt );
+	$names = array_keys( array_filter( $cnt, function ( $n ) { return $n >= 5; } ) );
+	$names = array_slice( $names, 0, 10 );
+	set_transient( 'md_mc_doctors', $names, 6 * HOUR_IN_SECONDS );
+	return $names;
+}
+
+/* ============================================================
  * 쓰기
  * ============================================================ */
 
@@ -357,12 +468,13 @@ function md_mc_revert( $log_id ) {
  * ============================================================ */
 
 /** 목록 — 환자. $q 가 있으면 차트번호 · 이름(초성) · 내용까지 */
-function md_mc_patients( $q = '', $filter = '' ) {
+function md_mc_patients( $q = '', $filter = '', $doc = '' ) {
 	global $wpdb;
 	$t     = md_mc_t();
 	$where = array( "kind = 'patient'", 'deleted_at IS NULL' );
 	$args  = array();
 	if ( 'pin' === $filter ) { $where[] = 'pin = 1'; }
+	if ( '' !== $doc ) { $where[] = 'dr LIKE %s'; $args[] = '%' . $wpdb->esc_like( $doc ) . '%'; }
 	if ( '' !== $q ) {
 		if ( md_mc_is_cho( $q ) ) {
 			$where[] = 'cho LIKE %s';
@@ -682,6 +794,7 @@ function md_mc_render() {
 		case 'tablet': md_mc_render_tablet( $mid ); break;
 		case 'edit':   md_mc_render_edit( $mid, isset( $_GET['mk'] ) && 'note' === $_GET['mk'] ? 'note' : 'patient' ); break;
 		case 'notes':  md_mc_render_notes(); break;
+		case 'visits': md_mc_render_visits(); break;
 		case 'note':   md_mc_render_note( $mid ); break;
 		case 'log':    md_mc_render_log( $mid ); break;
 		case 'trash':  md_mc_render_trash(); break;
@@ -695,9 +808,11 @@ function md_mc_render_nav( $mv ) {
 	$c    = md_mc_counts();
 	$tabs = array(
 		''      => array( '환자', $c['patient'] ),
+		'visits' => array( '내원 환자', null ),
 		'notes' => array( '팀 노트', $c['note'] ),
 		'trash' => array( '휴지통', $c['trash'] ),
 	);
+	if ( ! md_mc_visit_table() ) { unset( $tabs['visits'] ); }
 	if ( md_mc_can_manage() ) { $tabs['admin'] = array( '가져오기 · 엑셀', null ); }
 	$on = in_array( $mv, array( 'p', 'edit', 'log', 'tablet' ), true ) ? '' : ( 'note' === $mv ? 'notes' : $mv );
 	if ( 'edit' === $mv && isset( $_GET['mk'] ) && 'note' === $_GET['mk'] ) { $on = 'notes'; }
@@ -727,7 +842,8 @@ function md_mc_render_list() {
 	$q      = isset( $_GET['mq'] ) ? trim( sanitize_text_field( wp_unslash( $_GET['mq'] ) ) ) : '';
 	$filter = isset( $_GET['mf'] ) ? sanitize_key( wp_unslash( $_GET['mf'] ) ) : '';
 	if ( ! in_array( $filter, array( '', 'pin', 'recent', 'todo' ), true ) ) { $filter = ''; }
-	$rows   = md_mc_patients( $q, $filter );
+	$doc    = isset( $_GET['md'] ) ? trim( sanitize_text_field( wp_unslash( $_GET['md'] ) ) ) : '';
+	$rows   = md_mc_patients( $q, $filter, $doc );
 	if ( 'todo' === $filter ) { $rows = array_values( array_filter( $rows, function ( $r ) { return (bool) md_mc_missing( $r ); } ) ); }
 	$c      = md_mc_counts();
 
@@ -744,6 +860,7 @@ function md_mc_render_list() {
 	<form method="get" class="mc-search" action="<?php echo esc_url( md_mc_url() ); ?>" role="search">
 		<?php md_sup_app_field(); ?>
 		<?php if ( $filter ) : ?><input type="hidden" name="mf" value="<?php echo esc_attr( $filter ); ?>"><?php endif; ?>
+		<?php if ( $doc ) : ?><input type="hidden" name="md" value="<?php echo esc_attr( $doc ); ?>"><?php endif; ?>
 		<input type="search" name="mq" id="mc-q" value="<?php echo esc_attr( $q ); ?>" placeholder="차트번호 · 이름 · 초성(ㄱㅁㅅ)" autocomplete="off" aria-label="환자 찾기" <?php echo '' === $q ? 'autofocus' : ''; ?>>
 		<button type="submit" class="mds-btn mc-search__btn" title="병력 · 치료이력 · 참고사항까지 찾기">내용까지 찾기</button>
 	</form>
@@ -751,12 +868,21 @@ function md_mc_render_list() {
 		<?php
 		$chips = array( '' => '전체 ' . $c['patient'], 'pin' => '📌 팔로우업 ' . $c['pin'], 'recent' => '최근 수정', 'todo' => '별표항목 미입력' );
 		foreach ( $chips as $k => $label ) {
-			echo '<a class="mdsp-chip' . ( $filter === $k ? ' is-on' : '' ) . '" href="' . esc_url( md_mc_url( array( 'mf' => $k, 'mq' => $q ) ) ) . '">' . esc_html( $label ) . '</a>';
+			echo '<a class="mdsp-chip' . ( $filter === $k ? ' is-on' : '' ) . '" href="' . esc_url( md_mc_url( array( 'mf' => $k, 'mq' => $q, 'md' => $doc ) ) ) . '">' . esc_html( $label ) . '</a>';
 		}
 		?>
 	</nav>
+	<?php $docs = md_mc_doctor_names(); if ( $docs ) : ?>
+		<nav class="mc-chips mc-chips--doc" aria-label="담당의">
+			<span class="mc-chips__label">담당의</span>
+			<?php foreach ( $docs as $dn ) : ?>
+				<a class="mdsp-chip<?php echo $doc === $dn ? ' is-on' : ''; ?>" href="<?php echo esc_url( md_mc_url( array( 'mf' => $filter, 'mq' => $q, 'md' => $doc === $dn ? '' : $dn ) ) ); ?>"><?php echo esc_html( $dn ); ?></a>
+			<?php endforeach; ?>
+		</nav>
+	<?php endif; ?>
+	<div class="mc-recent" id="mc-recent" hidden><span class="mc-chips__label">최근 본 차트</span></div>
 	<?php if ( '' !== $q ) : ?>
-		<p class="mc-found">「<?php echo esc_html( $q ); ?>」 <?php echo count( $rows ); ?>명 · <a href="<?php echo esc_url( md_mc_url( array( 'mf' => $filter ) ) ); ?>">지우기</a></p>
+		<p class="mc-found">「<?php echo esc_html( $q ); ?>」 <?php echo count( $rows ); ?>명 · <a href="<?php echo esc_url( md_mc_url( array( 'mf' => $filter, 'md' => $doc ) ) ); ?>">지우기</a></p>
 	<?php endif; ?>
 	<?php if ( ! $rows ) : ?>
 		<div class="mds-card"><div class="mds-empty"><?php echo '' !== $q ? '찾는 환자가 없습니다.' : '해당하는 환자가 없습니다.'; ?></div></div>
@@ -767,13 +893,14 @@ function md_mc_render_list() {
 		<ul class="mc-list" id="mc-list">
 			<?php foreach ( $rows as $r ) :
 				$miss = md_mc_missing( $r );
+				$alrt = md_mc_alerts( $r->mhx );
 				$last = md_mc_last_line( $r->tx_hist );
 				$key  = $r->chart_no . ' ' . preg_replace( '/\s+/u', '', $r->pname ) . ' ' . $r->cho;
 				?>
 				<li data-k="<?php echo esc_attr( mb_strtolower( $key ) ); ?>">
 					<a class="mc-row" href="<?php echo esc_url( md_mc_url( array( 'mv' => 'p', 'mid' => $r->id ) ) ); ?>">
 						<span class="mc-row__no"><?php echo esc_html( $r->chart_no ); ?></span>
-						<span class="mc-row__name"><?php echo $r->pin ? '<span class="mc-row__pin" title="팔로우업">📌</span>' : ''; ?><?php echo esc_html( $r->pname ); ?><?php if ( $miss ) : ?><span class="mc-miss" title="미입력: <?php echo esc_attr( implode( ', ', $miss ) ); ?>">★<?php echo count( $miss ); ?></span><?php endif; ?></span>
+						<span class="mc-row__name"><?php echo $r->pin ? '<span class="mc-row__pin" title="팔로우업">📌</span>' : ''; ?><?php echo esc_html( $r->pname ); ?><?php if ( $alrt ) : ?><span class="mc-warn" title="병력 주의: <?php echo esc_attr( implode( ', ', $alrt ) ); ?>">⚠ <?php echo esc_html( $alrt[0] ); ?></span><?php endif; ?><?php if ( $miss ) : ?><span class="mc-miss" title="미입력: <?php echo esc_attr( implode( ', ', $miss ) ); ?>">★<?php echo count( $miss ); ?></span><?php endif; ?></span>
 						<span class="mc-row__last"><?php echo esc_html( $last ); ?></span>
 						<span class="mc-row__upd"><?php echo esc_html( md_mc_short_date( $r->updated_at ) ); ?></span>
 					</a>
@@ -810,10 +937,11 @@ function md_mc_render_patient( $id ) {
 	if ( ! $r || 'patient' !== $r->kind ) { md_mc_render_gone( $id ); return; }
 	$f    = md_mc_fields();
 	$miss = md_mc_missing( $r );
+	$alrt = md_mc_alerts( $r->mhx );
 	if ( isset( $_GET['saved'] ) )    { echo '<div class="mds-notice mds-notice--ok">저장했습니다.</div>'; }
 	if ( isset( $_GET['reverted'] ) ) { echo '<div class="mds-notice mds-notice--ok">이전 내용으로 되돌렸습니다.</div>'; }
 	?>
-	<article class="mc-chart">
+	<article class="mc-chart" data-mc-id="<?php echo (int) $r->id; ?>" data-mc-label="<?php echo esc_attr( $r->chart_no . ' ' . $r->pname ); ?>">
 		<header class="mds-card mc-chart__head">
 			<div class="mc-chart__id">
 				<button type="button" class="mc-copy" data-copy="<?php echo esc_attr( $r->chart_no ); ?>" title="차트번호 복사"><?php echo esc_html( $r->chart_no ); ?></button>
@@ -838,7 +966,7 @@ function md_mc_render_patient( $id ) {
 		<div class="mc-grid">
 			<?php
 			$mhx_real = ! md_mc_blank( $r->mhx ) && ! in_array( strtolower( trim( (string) $r->mhx ) ), array( 'x', '없음', 'n/a' ), true );
-			md_mc_block( $f['mhx'][0], md_mc_text( $r->mhx ), $mhx_real ? 'mc-block--alert' : '' );
+			md_mc_block( $f['mhx'][0] . ( $alrt ? ' — 주의: ' . implode( ', ', $alrt ) : '' ), md_mc_mark_alerts( md_mc_text( $r->mhx ), $alrt ), $mhx_real ? 'mc-block--alert' : '' );
 			md_mc_block( $f['dr'][0], md_mc_text( $r->dr ) );
 			md_mc_block( $f['referral'][0], md_mc_text( $r->referral ) );
 			md_mc_block( $f['addr'][0], md_mc_text( $r->addr ) );
@@ -856,6 +984,8 @@ function md_mc_render_patient( $id ) {
 			<?php md_mc_addform( $r, 'memo', $f['memo'][0] ); ?>
 			<div class="mc-block__b"><?php echo md_mc_text( $r->memo ); // phpcs:ignore ?></div>
 		</section>
+
+		<?php md_mc_render_visit_block( $r ); ?>
 
 		<div class="mc-chart__foot">
 			<a href="<?php echo esc_url( md_mc_url() ); ?>">← 환자 목록</a>
@@ -875,7 +1005,7 @@ function md_mc_render_tablet( $id ) {
 	$f = md_mc_fields();
 	$mhx_real = ! md_mc_blank( $r->mhx ) && ! in_array( strtolower( trim( (string) $r->mhx ) ), array( 'x', '없음', 'n/a' ), true );
 	?>
-	<article class="mc-tab">
+	<article class="mc-tab" data-mc-id="<?php echo (int) $r->id; ?>" data-mc-rev="<?php echo (int) $r->rev; ?>" data-mc-label="<?php echo esc_attr( $r->chart_no . ' ' . $r->pname ); ?>">
 		<header class="mc-tab__head">
 			<a class="mc-tab__close" href="<?php echo esc_url( md_mc_url( array( 'mv' => 'p', 'mid' => $r->id ) ) ); ?>">✕ 닫기</a>
 			<div>
@@ -885,16 +1015,119 @@ function md_mc_render_tablet( $id ) {
 			<button type="button" class="mc-tab__size" data-size title="글자 크기">가<b>가</b></button>
 		</header>
 		<div class="mc-tab__grid">
-			<?php md_mc_block( $f['mhx'][0], md_mc_text( $r->mhx ), $mhx_real ? 'mc-block--alert' : '' ); ?>
+			<?php $alrt = md_mc_alerts( $r->mhx ); md_mc_block( $f['mhx'][0] . ( $alrt ? ' — 주의: ' . implode( ', ', $alrt ) : '' ), md_mc_mark_alerts( md_mc_text( $r->mhx ), $alrt ), $mhx_real ? 'mc-block--alert' : '' ); ?>
 			<?php md_mc_block( $f['tx_plan'][0], md_mc_text( $r->tx_plan ), 'mc-block--plan' ); ?>
 			<?php md_mc_block( $f['tx_hist'][0], md_mc_text( $r->tx_hist ), 'mc-block--hist' ); ?>
 			<?php md_mc_block( $f['memo'][0], md_mc_text( $r->memo ) ); ?>
 			<?php md_mc_block( $f['referral'][0], md_mc_text( $r->referral ) ); ?>
 			<?php md_mc_block( $f['dr'][0], md_mc_text( $r->dr ) ); ?>
 		</div>
+		<p class="mc-tab__live" hidden>다른 기기에서 차트가 바뀌어 새로 불러왔습니다.</p>
 	</article>
 	<?php
 }
+
+/** v6.3 · 차트 아래 — 접수수납목록에 남은 내원 기록 */
+function md_mc_render_visit_block( $r ) {
+	if ( ! md_mc_visit_table() ) { return; }
+	$vs = md_mc_visits( $r->chart_no );
+	echo '<section class="mc-block mc-block--visits"><h3 class="mc-block__h">내원 기록 <small>접수수납목록에서</small></h3><div class="mc-block__b">';
+	if ( ! $vs ) {
+		echo '<span class="mc-none">접수수납목록에 올라온 내원이 아직 없습니다.</span>';
+	} else {
+		echo '<ul class="mc-visits">';
+		foreach ( $vs as $v ) {
+			$ts = strtotime( $v->visit_date );
+			echo '<li><b>' . esc_html( date( 'y.m.d', $ts ) ) . '</b> <span class="mc-dow">' . esc_html( array( '일', '월', '화', '수', '목', '금', '토' )[ (int) date( 'w', $ts ) ] ) . '</span>'
+				. ( '' !== (string) $v->doctor ? ' · ' . esc_html( $v->doctor ) : '' )
+				. ( '' !== (string) $v->staff ? ' · <span class="mc-visits__staff">' . esc_html( $v->staff ) . '</span>' : '' ) . '</li>';
+		}
+		echo '</ul>';
+	}
+	echo '</div></section>';
+}
+
+/**
+ * v6.3 · 내원 환자 — 데스크가 올린 접수수납목록의 그날 환자와 미니차트를 맞대어 본다.
+ *  미니차트가 없는 환자는 차트번호 · 이름 · 담당의를 채운 채 바로 만든다
+ *  (팀 피드: 「미니차트에 없는 환자 전날 추가」).
+ */
+function md_mc_render_visits() {
+	global $wpdb;
+	$t = md_mc_visit_table();
+	if ( ! $t ) { echo '<div class="mds-card"><div class="mds-empty">접수수납목록이 아직 없습니다.</div></div>'; return; }
+	$days  = md_mc_visit_days( 14 );
+	$today = current_time( 'Y-m-d' );
+	$day   = isset( $_GET['mvd'] ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $_GET['mvd'] ) ? $_GET['mvd'] : '';
+	if ( '' === $day ) { $day = isset( $days[ $today ] ) || ! $days ? $today : max( array_keys( $days ) ); }
+	$only  = ! empty( $_GET['mvx'] );
+	$rows  = $wpdb->get_results( $wpdb->prepare( "SELECT chart_no, patient_name, doctor, staff FROM $t WHERE visit_date = %s ORDER BY id", $day ) );
+	$idx   = md_mc_chart_index();
+	$have  = 0;
+	foreach ( $rows as $v ) { if ( isset( $idx[ md_mc_norm_chart( $v->chart_no ) ] ) ) { $have++; } }
+	$dow = array( '일', '월', '화', '수', '목', '금', '토' );
+	?>
+	<nav class="mc-days" aria-label="날짜">
+		<?php for ( $i = 13; $i >= 0; $i-- ) :
+			$d  = date( 'Y-m-d', current_time( 'timestamp' ) - $i * DAY_IN_SECONDS );
+			$ts = strtotime( $d );
+			$n  = $days[ $d ] ?? 0; ?>
+			<a class="mc-day<?php echo $d === $day ? ' is-on' : ''; ?><?php echo $n ? '' : ' is-empty'; ?>" href="<?php echo esc_url( md_mc_url( array( 'mv' => 'visits', 'mvd' => $d, 'mvx' => $only ? 1 : '' ) ) ); ?>">
+				<span><?php echo esc_html( date( 'n/j', $ts ) . ' ' . $dow[ (int) date( 'w', $ts ) ] ); ?></span><b><?php echo $n ? (int) $n . '명' : '–'; ?></b>
+			</a>
+		<?php endfor; ?>
+	</nav>
+	<div class="mc-visit-sum">
+		<b><?php echo esc_html( date( 'n월 j일', strtotime( $day ) ) . ' (' . $dow[ (int) date( 'w', strtotime( $day ) ) ] . ')' ); ?></b>
+		<?php if ( $rows ) : ?>
+			내원 <?php echo count( $rows ); ?>명 · 미니차트 있음 <?php echo (int) $have; ?> · <span class="mc-visit-sum__no">없음 <?php echo count( $rows ) - $have; ?></span>
+			<a class="mdsp-chip<?php echo $only ? ' is-on' : ''; ?>" href="<?php echo esc_url( md_mc_url( array( 'mv' => 'visits', 'mvd' => $day, 'mvx' => $only ? '' : 1 ) ) ); ?>">미니차트 없는 환자만</a>
+		<?php endif; ?>
+	</div>
+	<?php if ( ! $rows ) : ?>
+		<div class="mds-card"><div class="mds-empty">이날 올라온 접수수납목록이 없습니다. 데스크가 「접수수납목록」 타일에서 덴트웹 엑셀을 올리면 여기에 보입니다.</div></div>
+		<?php return; ?>
+	<?php endif; ?>
+	<ul class="mc-list mc-list--visits">
+		<?php foreach ( $rows as $v ) :
+			$m = $idx[ md_mc_norm_chart( $v->chart_no ) ] ?? null;
+			if ( $only && $m ) { continue; }
+			?>
+			<li>
+				<?php if ( $m ) :
+					$miss = md_mc_missing( $m );
+					$alrt = md_mc_alerts( $m->mhx ); ?>
+					<a class="mc-row" href="<?php echo esc_url( md_mc_url( array( 'mv' => 'p', 'mid' => $m->id ) ) ); ?>">
+						<span class="mc-row__no"><?php echo esc_html( $v->chart_no ); ?></span>
+						<span class="mc-row__name"><?php echo esc_html( $m->pname ); ?><?php if ( $alrt ) : ?><span class="mc-warn" title="병력 주의: <?php echo esc_attr( implode( ', ', $alrt ) ); ?>">⚠ <?php echo esc_html( $alrt[0] ); ?></span><?php endif; ?><?php if ( $miss ) : ?><span class="mc-miss" title="미입력: <?php echo esc_attr( implode( ', ', $miss ) ); ?>">★<?php echo count( $miss ); ?></span><?php endif; ?></span>
+						<span class="mc-row__last"><?php echo esc_html( trim( $v->doctor . ( $v->staff ? ' · ' . $v->staff : '' ), ' ·' ) ); ?></span>
+						<span class="mc-row__upd mc-ok">미니차트 ✓</span>
+					</a>
+				<?php else : ?>
+					<a class="mc-row mc-row--none" href="<?php echo esc_url( md_mc_url( array( 'mv' => 'edit', 'chart' => $v->chart_no, 'pn' => $v->patient_name, 'pdr' => $v->doctor ) ) ); ?>">
+						<span class="mc-row__no"><?php echo esc_html( $v->chart_no ); ?></span>
+						<span class="mc-row__name"><?php echo esc_html( $v->patient_name ); ?></span>
+						<span class="mc-row__last"><?php echo esc_html( trim( $v->doctor . ( $v->staff ? ' · ' . $v->staff : '' ), ' ·' ) ); ?></span>
+						<span class="mc-row__upd mc-make">＋ 미니차트 만들기</span>
+					</a>
+				<?php endif; ?>
+			</li>
+		<?php endforeach; ?>
+	</ul>
+	<p class="mds-hint">명단은 데스크가 올리는 「접수수납목록」(덴트웹 엑셀)입니다. 미니차트가 필요 없는 환자(소독 · S/O · CA · 2차 수술)는 만들지 않아도 됩니다.</p>
+	<?php
+}
+
+/** v6.3 · 태블릿 보기 자동 새로고침 — 차트의 rev 만 돌려준다 */
+function md_mc_handle_rev() {
+	if ( empty( $_GET['md_mc_rev'] ) ) { return; }
+	if ( ! md_mc_can_use() ) { status_header( 403 ); exit; }
+	global $wpdb;
+	$rev = $wpdb->get_var( $wpdb->prepare( 'SELECT rev FROM ' . md_mc_t() . ' WHERE id = %d AND deleted_at IS NULL', (int) $_GET['md_mc_rev'] ) );
+	nocache_headers();
+	wp_send_json( array( 'rev' => null === $rev ? 0 : (int) $rev ) );
+}
+add_action( 'template_redirect', 'md_mc_handle_rev', 2 );
 
 function md_mc_render_gone( $id ) {
 	$r = $id ? md_mc_get( $id, true ) : null;
@@ -914,6 +1147,8 @@ function md_mc_render_edit( $id, $kind ) {
 	if ( $r ) { $kind = $r->kind; }
 	$vals = $r ? (array) $r : array();
 	if ( ! $r && isset( $_GET['chart'] ) ) { $vals['chart_no'] = sanitize_text_field( wp_unslash( $_GET['chart'] ) ); }
+	if ( ! $r && isset( $_GET['pn'] ) )    { $vals['pname'] = sanitize_text_field( wp_unslash( $_GET['pn'] ) ); } /* v6.3 · 내원 환자에서 만들기 */
+	if ( ! $r && isset( $_GET['pdr'] ) && '' !== trim( (string) $_GET['pdr'] ) ) { $vals['dr'] = sanitize_text_field( wp_unslash( $_GET['pdr'] ) ); }
 	$draft = isset( $_GET['draft'] ) ? get_transient( 'md_mc_draft_' . get_current_user_id() . '_' . $id ) : false;
 	if ( is_array( $draft ) ) { $vals = array_merge( $vals, $draft ); }
 	$conflict = isset( $_GET['conflict'] ) && $r;

@@ -163,3 +163,32 @@ body.mc-tablet-mode .mds-head, body.mc-tablet-mode .mds-foot { display: none; }
 @media print {
   .mc-nav, .mc-search, .mc-chips, .mc-add, .mc-chart__acts, .mc-chart__foot { display: none !important; }
 }
+
+/* v6.3 · 병력 주의 · 담당의 칩 · 최근 본 차트 · 내원 환자 */
+.mc-warn { font-size: .72rem; font-weight: 800; color: var(--mc-alert); background: var(--mc-alert-bg); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-weight: 800; border-radius: 3px; padding: 0 2px; }
+.mc-chips__label { align-self: center; font-size: .8rem; font-weight: 800; color: var(--mc-mute); margin-right: 2px; }
+.mc-chips--doc .mdsp-chip { min-height: 34px; padding: 4px 12px; font-size: .86rem; }
+.mc-recent { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.mc-recent a { padding: 5px 11px; border-radius: 8px; border: 1px dashed var(--mc-line); color: var(--color-text, #3D2F26); font-size: .88rem; text-decoration: none; background: var(--color-white, #fff); }
+.mc-recent a:hover { border-style: solid; }
+.mc-visits { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 24px; }
+.mc-visits li { break-inside: avoid; padding: 2px 0; }
+.mc-visits b { font-variant-numeric: tabular-nums; }
+.mc-dow, .mc-visits__staff { color: var(--mc-sub); }
+.mc-block__h small { font-weight: 500; color: var(--mc-mute); }
+.mc-days { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin: 0 0 12px; }
+.mc-day { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; min-width: 64px; padding: 7px 8px; border-radius: 12px; border: 1px solid var(--mc-line); background: var(--color-white, #fff); color: var(--color-text, #3D2F26); text-decoration: none; font-size: .82rem; }
+.mc-day b { font-size: .95rem; }
+.mc-day.is-empty { color: var(--mc-mute); }
+.mc-day.is-on { background: var(--color-text, #3D2F26); border-color: var(--color-text, #3D2F26); color: #fff; }
+.mc-visit-sum { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 12px; }
+.mc-visit-sum__no { color: var(--mc-alert); font-weight: 700; }
+.mc-ok { color: var(--color-accent-dark, #6B8F72); font-weight: 700; }
+.mc-make { color: var(--color-primary-dark, #B86347); font-weight: 800; }
+.mc-row--none { background: rgba(216,128,98,.05); }
+.mc-tab__live { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); background: var(--color-text, #3D2F26); color: #fff; padding: 10px 18px; border-radius: 999px; font-size: .95rem; }
+@media (max-width: 760px) {
+  .mc-visits { columns: 1; }
+  .mc-row__upd.mc-make, .mc-row__upd.mc-ok { font-size: .78rem; }
+}
