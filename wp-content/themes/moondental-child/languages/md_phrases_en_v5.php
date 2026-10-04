@@ -197,4 +197,5 @@ return array(
 	'카카오톡이나 전화(041-563-2875)로 편하게 문의하세요. 진단 뒤 치료 계획과 비용을 먼저 설명드립니다.' => 'Contact us anytime by KakaoTalk or phone (+82-41-563-2875). After diagnosis we explain the treatment plan and cost first.',
 	'미군 및 가족 진료' => 'US Forces & families',
 	'미군 및 가족 치료기관으로, 외국인 환자 진료 경험이 많습니다.' => 'As a designated clinic for US Forces members and their families, we have extensive experience treating international patients.',
+	'천안 · 아산에서 30여년' => 'For more than 30 years in Cheonan · Asan', /* v6.8 */
 );

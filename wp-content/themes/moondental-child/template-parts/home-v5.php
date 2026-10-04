@@ -154,9 +154,9 @@ $addr = $info['address'] ?? '충청남도 천안시 동남구 만남로 52, 문�
 		<span class="v5-label">Since 1995 · Cheonan · Asan</span>
 		<p class="v5-hero__en">Thirty years, one place, one team.</p>
 		<?php if ( ! function_exists( 'moondental_current_language' ) || 'ko' === moondental_current_language() ) : ?>
-		<h1 class="v5-hero__title">천안 · 아산에서 30여년,<br><b>한 건물에서 함께 보는</b> 치과병원</h1>
+		<h1 class="v5-hero__title">천안 · 아산에서 30여년</h1>
 		<?php else : /* 외국어 · 둘째 줄을 한 문구로 (문구 번역 사전이 통째로 바꾸게) */ ?>
-		<h1 class="v5-hero__title">천안 · 아산에서 30여년,<br><b>한 건물에서 함께 보는 치과병원</b></h1>
+		<h1 class="v5-hero__title">천안 · 아산에서 30여년</h1>
 		<?php endif; ?>
 		<p class="v5-hero__lead">한아의료재단 문치과병원은 임플란트 · 교정 · 심미치료 · 자연치아보존 네 개의 센터와 진료과 원장들이 대학병원식 협진으로 한 환자를 같이 보는 병원급 치과병원입니다.</p>
 		<p class="v5-hero__mission"><?php echo esc_html( $mc( 'mission_band_text', '한아의료재단 문치과병원의 사명은 품격 있는 진료와 서비스로 환자의 신뢰를 받으며, 나눔과 봉사를 통해 사회에 공헌하는 가장 인정받는 병원이 되는 것입니다.' ) ); ?></p>
