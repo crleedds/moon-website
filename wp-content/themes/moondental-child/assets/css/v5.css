@@ -703,3 +703,23 @@ body.md-v5 .md-cta-banner a [class*="logo"], body.md-v5 .md-cta-banner a [class*
   .v5-guide__steps li + li { border-top: 1px solid var(--v5-line); }
   .v5-guide__flapless { grid-template-columns: 1fr; gap: 24px; padding: 26px 20px; }
 }
+
+/* v5.4.1 · 가이드 임플란트 · 원내 증례 사진 */
+.v5-guide__caselead { margin: 0 0 22px; color: var(--v5-sub); font-size: 15px; }
+.v5-gcases { display: grid; gap: 34px; margin-bottom: 44px; }
+.v5-gcases--flapless { margin: 26px 0 0; }
+.v5-gcase { border-top: 1px solid var(--v5-line); padding-top: 22px; }
+.v5-gcase--plain { border-top: 0; padding-top: 18px; }
+.v5-gcase h4 { font-family: var(--v5-serif); font-weight: 500; font-size: 19px; color: var(--v5-ink); margin: 0 0 6px; }
+.v5-gcase > p { margin: 0 0 16px; color: var(--v5-sub); font-size: 14.5px; line-height: 1.8; max-width: 52em; }
+.v5-gcase__figs { display: grid; gap: 14px; grid-template-columns: repeat(2, 1fr); }
+.v5-gcase__figs--3 { grid-template-columns: 1fr 1fr 0.62fr; align-items: start; }
+.v5-gcase__fig { margin: 0; }
+.v5-gcase__fig a { display: block; background: #111; border: 1px solid var(--v5-line); overflow: hidden; }
+.v5-gcase__fig img { display: block; width: 100%; height: auto; transition: transform .3s; }
+.v5-gcase__fig a:hover img { transform: scale(1.02); }
+.v5-gcase__fig figcaption { margin-top: 7px; font-size: 13px; color: var(--v5-mute); line-height: 1.5; }
+.v5-gcase--plain .v5-gcase__fig a { background: #fff; }
+@media (max-width: 700px) {
+  .v5-gcase__figs, .v5-gcase__figs--3 { grid-template-columns: 1fr; }
+}

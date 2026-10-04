@@ -99,6 +99,29 @@ function md_inv_dataset( $key, $a = array() ) {
 			}
 			break;
 
+		case 'po':
+			$v = md_inv_vendor( isset( $a['vendor'] ) ? (int) $a['vendor'] : 0 );
+			$out['title'] = '발주서 ' . ( $v ? $v->name : '' );
+			$out['head']  = array( '품목', '수량', '단위', '단가', '금액', '주문일', '메모' );
+			$out['num']   = array( 1 => 'n', 3 => 'won', 4 => 'won' );
+			$out['width'] = array( 40, 8, 7, 11, 13, 11, 24 );
+			$sum = 0;
+			$vid_want = isset( $a['vendor'] ) ? (int) $a['vendor'] : 0;
+			foreach ( md_inv_ords( array( 'status' => 'ordered', 'limit' => 0 ) ) as $o ) {
+				if ( (int) $o->vendor_id !== $vid_want ) { continue; }
+				$left = (int) $o->qty - (int) $o->recv_qty;
+				$amt  = (int) round( (int) $o->amount * $left / max( 1, (int) $o->qty ) );
+				$sum += $amt;
+				$out['rows'][] = array( $o->item_name, $left, $o->unit, (int) $o->price, $amt, substr( $o->created_at, 0, 10 ), $o->note );
+			}
+			$out['rows'][] = array( '합계', '', '', '', $sum, '', '' );
+			if ( $v ) {
+				$out['rows'][] = array( '', '', '', '', '', '', '' );
+				$out['rows'][] = array( '받는 곳: ' . $v->name . ' ' . trim( $v->contact . ' ' . $v->phone ), '', '', '', '', '', '' );
+				$out['rows'][] = array( '보내는 곳: 문치과병원 · ' . current_time( 'Y-m-d' ), '', '', '', '', '', '' );
+			}
+			break;
+
 		case 'usage':
 			$out['title'] = '사용금액 ' . $a['from'] . '~' . $a['to'];
 			$out['head']  = array( '팀', '출고 건수', '수량', '사용금액' );

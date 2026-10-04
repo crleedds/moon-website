@@ -517,3 +517,78 @@ textarea.iv-input { min-height: 44px; resize: vertical; line-height: 1.5; }
   .iv-teamgrid { grid-template-columns: repeat(2, 1fr); }
   .iv-sent .iv-btn { margin-left: 0; }
 }
+
+/* =============================================================
+   v5.5 · 도구 — 휴대폰 실사 · 바코드 등록 · 정리할 품목 · 출고 준비 · 발주서
+   ============================================================= */
+.iv-tools { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0 0 14px; }
+.iv-tool { display: flex; flex-direction: column; gap: 3px; padding: 12px 14px; border: 1px solid var(--iv-line); border-radius: var(--iv-r); background: var(--iv-card); text-decoration: none; }
+.iv-tool:hover { border-color: var(--iv-pri); }
+.iv-tool .iv-ico { color: var(--iv-pri-d); }
+.iv-tool b { font-size: .95rem; }
+.iv-tool small { font-size: .78rem; color: var(--iv-mute); }
+.iv-tool.is-hot small { color: var(--iv-warn); font-weight: 700; }
+.iv-vrow td { background: color-mix(in srgb, var(--iv-line) 35%, var(--iv-card)); padding-top: 8px; padding-bottom: 8px; }
+.iv-panel--hi { border-color: var(--iv-pri); margin-top: 12px; }
+.iv-input--bc { width: 170px; }
+.iv-input--unit { width: 84px; }
+.iv-card--bc .iv-actions { flex-wrap: nowrap; }
+.iv-table--fix tr.is-changed td { background: var(--iv-warn-bg); }
+.iv-table--fix select.iv-input--sm { min-width: 120px; }
+.iv-card--slim { padding: 10px 14px; align-items: center; }
+.iv-card--slim .iv-card__side { flex-direction: row; align-items: baseline; gap: 8px; }
+
+.iv-qc-find { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 14px; }
+.iv-qc-pick { display: flex; gap: 8px; flex: 1 1 320px; }
+.iv-qc-card { display: flex; flex-direction: column; gap: 4px; max-width: 520px; padding: 18px 20px; margin: 0 0 16px; border: 2px solid var(--iv-pri); border-radius: 18px; background: var(--iv-card); box-shadow: var(--iv-shadow); }
+.iv-qc-card__name { font-size: 1.25rem; font-weight: 800; line-height: 1.35; }
+.iv-qc-card__sub { color: var(--iv-mute); font-size: .86rem; }
+.iv-qc-card__book { margin: 8px 0 6px; font-size: 1rem; color: var(--iv-sub); }
+.iv-qc-card__book b { font-size: 1.6rem; color: var(--iv-text); }
+.iv-qc-card__num { font-size: 1.6rem !important; min-height: 60px; text-align: center; font-weight: 800; }
+.iv-qc-card__save { width: 100%; margin-top: 4px; }
+
+.iv-pick { margin: 0 0 16px; }
+.iv-table--pick .iv-pick__chk { width: 34px; text-align: center; }
+.iv-box { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--iv-sub); border-radius: 4px; }
+.iv-table--pick tr.is-short td:nth-child(4) { color: var(--iv-bad); font-weight: 800; }
+.iv-print-head { display: none; }
+
+.iv-po { margin: 0 0 16px; padding: 16px 18px; border: 1px solid var(--iv-line); border-radius: var(--iv-r); background: var(--iv-card); }
+.iv-po__head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; }
+.iv-po__head .iv-h3 { margin: 0 0 4px; }
+.iv-po__contact { margin: 0; font-size: .86rem; color: var(--iv-sub); }
+.iv-po__need { margin: 12px 0; padding: 12px 14px; border-radius: 12px; background: var(--iv-warn-bg); }
+.iv-po__label { margin: 0 0 6px; font-weight: 800; font-size: .9rem; color: var(--iv-warn); }
+.iv-po__line { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: .92rem; }
+.iv-po__line span { flex: 1; min-width: 0; }
+.iv-po__line small { color: var(--iv-mute); margin-left: 4px; }
+.iv-po__line input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--iv-pri); }
+.iv-table--po { margin-top: 10px; }
+.iv-table--po tfoot td { border-top: 2px solid var(--iv-line); }
+
+@media (max-width: 760px) {
+  .iv-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .iv-card--bc .iv-actions { flex-wrap: wrap; padding-left: 0; }
+  .iv-input--bc { flex: 1; width: auto; }
+  .iv-qc-pick { flex-direction: column; }
+  .iv-qc-find .iv-btn--lg { width: 100%; }
+  .iv-table--fix td { align-items: center; }
+  .iv-table--fix .iv-input--sm { max-width: 60%; }
+}
+
+@media print {
+  .iv-no-print, .iv-tools, .iv-stickyfoot, .iv-flash, .iv-crumb, .iv-subnav, .iv-po__need, details { display: none !important; }
+  .iv-print-head { display: block; font-weight: 800; margin: 0 0 8px; }
+  body.iv-print-one .iv-po:not(.is-print) { display: none !important; }
+  .iv-po, .iv-pick { border: 0; padding: 0; break-inside: avoid; }
+  .iv-table, .iv-table-wrap { display: table !important; width: 100%; border-collapse: collapse; }
+  .iv-table thead { display: table-header-group !important; }
+  .iv-table tbody { display: table-row-group !important; }
+  .iv-table tfoot { display: table-footer-group !important; }
+  .iv-table tr { display: table-row !important; border: 0 !important; margin: 0 !important; padding: 0 !important; }
+  .iv-table td, .iv-table th { display: table-cell !important; border: 1px solid #999 !important; padding: 4px 6px !important; text-align: left; color: #000 !important; background: #fff !important; }
+  .iv-table td::before { content: none !important; }
+  .iv-table .r { text-align: right !important; }
+  body.mds-page-body .mds-page { padding: 0 !important; }
+}

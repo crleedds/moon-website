@@ -480,6 +480,12 @@ function md_inv_handle_download() {
 		echo $bin; // phpcs:ignore
 		exit;
 	}
+	if ( 'po' === $what ) {
+		$vid = isset( $_GET['ivd'] ) ? (int) $_GET['ivd'] : 0;
+		$ds  = md_inv_dataset( 'po', array( 'vendor' => $vid ) );
+		md_inv_log( '엑셀 내려받기', $ds['title'] );
+		md_inv_send_xlsx( md_inv_xlsx( array( $ds ) ), '문치과병원 ' . $ds['title'] . ' ' . current_time( 'Y-m-d' ) . '.xlsx' );
+	}
 	if ( isset( md_inv_dataset_names()[ $what ] ) ) {
 		/* 표 하나 = 시트 하나짜리 엑셀 (CSV 는 v4.23 에서 없앰 — 원장 지시: 엑셀 하나로) */
 		$ds = md_inv_dataset( $what, array( 'from' => $from, 'to' => $to ) );

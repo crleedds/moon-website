@@ -25,6 +25,11 @@ function md_inv_views() {
 		/* 메뉴에 없는 화면 */
 		'item'     => array( 'label' => '품목',   'icon' => 'box',     'admin' => true, 'hidden' => true ),
 		'count'    => array( 'label' => '실사',   'icon' => 'box',     'admin' => true, 'hidden' => true ),
+		'qcount'   => array( 'label' => '휴대폰 실사', 'icon' => 'box', 'admin' => true, 'hidden' => true ),
+		'barcode'  => array( 'label' => '바코드 등록', 'icon' => 'scan', 'admin' => true, 'hidden' => true ),
+		'fix'      => array( 'label' => '정리할 품목', 'icon' => 'edit', 'admin' => true, 'hidden' => true ),
+		'pick'     => array( 'label' => '출고 준비 목록', 'icon' => 'list', 'admin' => true, 'hidden' => true ),
+		'po'       => array( 'label' => '업체별 발주서', 'icon' => 'truck', 'admin' => true, 'hidden' => true ),
 	);
 }
 
@@ -248,7 +253,8 @@ function md_inv_render() {
 		if ( 'orders' === $k ) { $badge = $c['ordered']; }
 		$items[ $k ] = array( 'label' => $v['label'], 'icon' => $v['icon'], 'badge' => $badge );
 	}
-	$on = in_array( $view, array( 'item', 'count' ), true ) ? 'stock' : $view;
+	$parent = array( 'item' => 'stock', 'count' => 'stock', 'qcount' => 'stock', 'barcode' => 'stock', 'fix' => 'stock', 'pick' => 'todo', 'po' => 'orders' );
+	$on = isset( $parent[ $view ] ) ? $parent[ $view ] : $view;
 	echo '<nav class="iv-nav" aria-label="품목신청 메뉴">';
 	foreach ( $items as $k => $v ) {
 		echo '<a class="iv-nav__a' . ( $on === $k ? ' is-on' : '' ) . '" href="' . esc_url( md_inv_url( array( 'iv' => $k ) ) ) . '"' . ( $on === $k ? ' aria-current="page"' : '' ) . '>'
@@ -298,6 +304,11 @@ function md_inv_render() {
 		case 'stock':    md_inv_view_stock(); break;
 		case 'item':     md_inv_view_item(); break;
 		case 'count':    md_inv_view_count(); break;
+		case 'qcount':   md_inv_view_qcount(); break;
+		case 'barcode':  md_inv_view_barcode(); break;
+		case 'fix':      md_inv_view_fix(); break;
+		case 'pick':     md_inv_view_pick(); break;
+		case 'po':       md_inv_view_po(); break;
 		case 'orders':   md_inv_view_orders(); break;
 		case 'prepaid':  md_inv_view_prepaid(); break;
 		case 'ledger':   md_inv_view_ledger(); break;

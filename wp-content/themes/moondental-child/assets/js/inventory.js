@@ -620,6 +620,67 @@
     clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove('is-on'); }, 2200);
   }
 
+  /* ---------------------------------------------------------
+   * v5.5 · 도구 화면
+   * ------------------------------------------------------- */
+  /* 인쇄 — data-print="구역 id" 면 그 구역만 */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-print]');
+    if (!b) return;
+    e.preventDefault();
+    var id = b.dataset.print;
+    if (id) {
+      var el = document.getElementById(id);
+      if (el) { document.body.classList.add('iv-print-one'); el.classList.add('is-print'); }
+    }
+    window.print();
+    setTimeout(function () {
+      document.body.classList.remove('iv-print-one');
+      $$('.is-print').forEach(function (x) { x.classList.remove('is-print'); });
+    }, 500);
+  });
+
+  /* 찍으면 그 바코드로 화면 이동 (바코드 등록 · 휴대폰 실사) */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-scan-go]');
+    if (!b) return;
+    e.preventDefault();
+    var base = b.dataset.scanGo;
+    startScan(function (code) {
+      if (!code) return;
+      var u = new URL(base, window.location.href);
+      u.searchParams.set('bc', code);
+      u.searchParams.delete('id');
+      window.location.href = u.toString();
+    });
+  });
+
+  /* 정리할 품목 — 고친 줄 표시 · 개수 */
+  var fixForm = $('#iv-fix-form');
+  if (fixForm) {
+    var mark = function () {
+      var n = 0;
+      $$('tr[data-fixrow]', fixForm).forEach(function (tr) {
+        var ch = $$('[data-orig]', tr).some(function (i) { return String(i.value) !== String(i.dataset.orig); });
+        tr.classList.toggle('is-changed', ch);
+        if (ch) n++;
+      });
+      var el = $('#iv-fix-n'); if (el) el.textContent = n ? '고친 줄 ' + n + '개' : '';
+    };
+    fixForm.addEventListener('input', mark);
+    fixForm.addEventListener('change', mark);
+    /* 안 고친 줄은 보내지 않는다 (가볍게 · 실수로 덮어쓰지 않게) */
+    fixForm.addEventListener('submit', function () {
+      $$('tr[data-fixrow]', fixForm).forEach(function (tr) {
+        if (!tr.classList.contains('is-changed')) $$('[data-orig]', tr).forEach(function (i) { i.disabled = true; });
+      });
+    });
+  }
+
+  /* 휴대폰 실사: 숫자 칸에 바로 커서 */
+  var qn = $('.iv-qc-card__num');
+  if (qn) setTimeout(function () { try { qn.focus(); } catch (x) {} }, 100);
+
   /* 결과 문구는 몇 초 뒤 옅어진다 (성공일 때만) */
   var fl = $('.iv-flash--ok');
   if (fl) setTimeout(function () { fl.classList.add('is-fade'); }, 6000);

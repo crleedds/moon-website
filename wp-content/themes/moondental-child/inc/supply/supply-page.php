@@ -667,7 +667,8 @@ function md_sup_handle_post() {
 	wp_safe_redirect( $redirect );
 	exit;
 }
-add_action( 'template_redirect', 'md_sup_handle_post', 1 );
+/* v5.5 · 옛 재료실 폼 처리는 끊었다 — 품목신청(inc/inventory)이 대신한다 */
+// add_action( 'template_redirect', 'md_sup_handle_post', 1 );
 
 /**
  * 즐겨찾기 토글 · 삭제 · CSV 내보내기 — 화면을 그리기 전에 처리한다.
@@ -769,7 +770,7 @@ function md_sup_handle_get() {
 		if ( 'po' === $what && md_sup_can_manage() ) { md_sup_export_po( isset( $_GET['po'] ) ? (int) $_GET['po'] : 0 ); }
 	}
 }
-add_action( 'template_redirect', 'md_sup_handle_get', 2 );
+// add_action( 'template_redirect', 'md_sup_handle_get', 2 ); /* v5.5 · 옛 재료실 즐겨찾기·삭제·CSV — 사용 안 함 */
 
 /** CSV 한 줄 — 엑셀이 한글을 깨뜨리지 않게 BOM 을 앞에 붙인다 */
 function md_sup_csv_start( $filename ) {
@@ -1036,19 +1037,8 @@ function md_sup_render_page() {
 		md_survey_render_result(); // v4.19.7 · 만족도 응답·집계·설정 (관리자)
 	} elseif ( 'stock' === $app && function_exists( 'md_inv_render' ) ) {
 		md_inv_render(); // v4.22 · 재고관리 v5
-	} elseif ( 'stock' !== $app ) {
-		md_sup_render_hub();
 	} else {
-		switch ( $tab ) {
-			case 'stats':     md_sup_render_stats();     break;
-			case 'manage':    md_sup_render_manage();    break;
-			case 'order':     md_sup_render_order();     break;
-			case 'inbound':   md_sup_render_inbound();   break;
-			case 'inventory': md_sup_render_inventory(); break;
-			case 'history':   md_sup_render_history();   break;
-			case 'items':     md_sup_render_items();     break;
-			default:          md_sup_render_request();   break;
-		}
+		md_sup_render_hub(); // v5.5 · 옛 재료실 탭 화면은 없앴다 (품목신청이 대신)
 	}
 
 	/* 사이트 푸터를 감췄으니 필요한 안내만 여기서 */

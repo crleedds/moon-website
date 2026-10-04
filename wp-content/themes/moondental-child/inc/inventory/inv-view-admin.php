@@ -250,7 +250,7 @@ function md_inv_view_todo() {
 	</div>
 
 	<section id="iv-sec-req" class="iv-sec">
-		<h2 class="iv-h2">출고 대기 <span class="iv-n"><?php echo count( $reqs ); ?></span></h2>
+		<h2 class="iv-h2">출고 대기 <span class="iv-n"><?php echo count( $reqs ); ?></span><?php if ( $reqs ) : ?> <a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'pick' ) ) ); ?>">출고 준비 목록 · 인쇄</a><?php endif; ?></h2>
 		<?php if ( ! $reqs ) : md_inv_empty( '기다리는 요청이 없습니다.' ); else : ?>
 			<form method="post" id="iv-bulk-release" data-confirm="선택한 요청을 요청 수량대로 모두 출고할까요?">
 				<?php md_inv_hidden( 'req_release_many' ); ?>
@@ -303,7 +303,7 @@ function md_inv_view_todo() {
 	</section>
 
 	<section id="iv-sec-need" class="iv-sec">
-		<h2 class="iv-h2">주문 필요 <span class="iv-n"><?php echo count( $need ); ?></span></h2>
+		<h2 class="iv-h2">주문 필요 <span class="iv-n"><?php echo count( $need ); ?></span> <a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'po' ) ) ); ?>">업체별로 주문 · 발주서</a></h2>
 		<p class="iv-help">재고가 안전재고보다 적고 주문해 둔 것이 없는 품목<?php echo (int) md_inv_set( 'order_need_recent' ) ? ' 중 최근 ' . (int) md_inv_set( 'order_need_recent' ) . '주 안에 출고된 것' : ''; ?>입니다. <a class="iv-link" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'stock', 'ist' => 'low' ) ) ); ?>">부족한 품목 전체 보기</a></p>
 		<?php if ( ! $need ) : md_inv_empty( '지금 주문할 품목이 없습니다.' ); else : ?>
 			<form method="post" data-confirm="선택한 품목을 적힌 수량대로 주문 목록에 넣을까요?">
@@ -312,7 +312,11 @@ function md_inv_view_todo() {
 				<div class="iv-table-wrap"><table class="iv-table">
 					<thead><tr><th></th><th>품목</th><th>업체</th><th class="r">재고</th><th class="r">안전재고</th><th class="r">주문 수량</th><th class="r">예상 금액</th></tr></thead>
 					<tbody>
+					<?php usort( $need, function ( $a, $b ) { return strcmp( md_inv_vendor_name( $a->vendor_id ), md_inv_vendor_name( $b->vendor_id ) ) ?: strcmp( $a->name, $b->name ); } ); $lastv = -1; ?>
 					<?php foreach ( $need as $it ) : $q = max( 1, $it->min_stock - max( 0, $it->stock ) ); ?>
+						<?php if ( (int) $it->vendor_id !== $lastv ) : $lastv = (int) $it->vendor_id; $vv = md_inv_vendor( $lastv ); ?>
+							<tr class="iv-vrow"><td colspan="7"><b><?php echo esc_html( $vv ? $vv->name : '업체 없음' ); ?></b> <small class="iv-muted"><?php echo esc_html( $vv ? trim( $vv->phone . ' ' . preg_replace( '/\s+/', ' ', (string) $vv->shop_info ) ) : '' ); ?></small></td></tr>
+						<?php endif; ?>
 						<tr>
 							<td data-l=""><input type="checkbox" name="ids[]" value="<?php echo (int) $it->id; ?>" aria-label="선택"></td>
 							<td data-l="품목"><a href="<?php echo esc_url( md_inv_url( array( 'iv' => 'item', 'id' => $it->id ) ) ); ?>"><?php echo esc_html( $it->name ); ?></a></td>
@@ -397,6 +401,13 @@ function md_inv_view_stock() {
 		<a class="iv-btn iv-btn--ghost" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'count', 'ic2' => $c2 ?: '', 'ivd' => $vd ?: '' ) ) ); ?>">실사 모드 (여러 품목)</a>
 		<button type="button" class="iv-btn iv-btn--ghost" data-dlg="dlg-order">주문</button>
 	</div>
+	<?php $fx = md_inv_fix_counts( md_inv_items() ); ?>
+	<div class="iv-tools">
+		<a class="iv-tool" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'qcount' ) ) ); ?>"><?php echo md_inv_icon( 'scan', 22 ); // phpcs:ignore ?><b>휴대폰 실사</b><small>찍고 센 수량만</small></a>
+		<a class="iv-tool" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'barcode' ) ) ); ?>"><?php echo md_inv_icon( 'scan', 22 ); // phpcs:ignore ?><b>바코드 등록</b><small>없는 품목 <?php echo (int) $fx['nobar']; ?>개</small></a>
+		<a class="iv-tool<?php echo ( $fx['noprice'] + $fx['nounit'] + $fx['neg'] ) ? ' is-hot' : ''; ?>" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'fix' ) ) ); ?>"><?php echo md_inv_icon( 'edit', 22 ); // phpcs:ignore ?><b>정리할 품목</b><small>단가 없음 <?php echo (int) $fx['noprice']; ?> · 단위 없음 <?php echo (int) $fx['nounit']; ?> · 음수 <?php echo (int) $fx['neg']; ?></small></a>
+		<a class="iv-tool" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'po' ) ) ); ?>"><?php echo md_inv_icon( 'truck', 22 ); // phpcs:ignore ?><b>업체별 발주서</b><small>주문 · 엑셀 · 인쇄</small></a>
+	</div>
 	<?php endif; ?>
 
 	<form class="iv-filter" method="get" data-autosubmit>
@@ -416,7 +427,12 @@ function md_inv_view_stock() {
 		<?php if ( $admin ) : md_inv_dl_buttons( 'items', array(), '재고 현황 엑셀' ); ?><a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_dl_url( 'xlsx' ) ); ?>"><?php echo md_inv_icon( 'down', 16 ); // phpcs:ignore ?>전체 보고서 엑셀</a><?php endif; ?>
 	</div>
 
-	<?php if ( ! $rows ) { md_inv_empty( '이 조건의 품목이 없습니다.' ); } else { ?>
+	<?php
+	$pg_n  = max( 1, (int) md_inv_get( 'pg', 1 ) );
+	$per_n = 100;
+	$total_rows = count( $rows );
+	$rows  = array_slice( $rows, ( $pg_n - 1 ) * $per_n, $per_n );
+	if ( ! $rows ) { md_inv_empty( '이 조건의 품목이 없습니다.' ); } else { ?>
 	<div class="iv-table-wrap"><table class="iv-table iv-table--stock">
 		<thead><tr><th>품목</th><th>업체</th><th><?php echo esc_html( $S['label_cat2'] ); ?></th><th class="r">단가</th><th class="r">재고</th><th class="r">안전</th><th class="r">대기</th><th class="r">주문 중</th><?php echo $admin ? '<th></th>' : ''; ?></tr></thead>
 		<tbody>
@@ -440,7 +456,7 @@ function md_inv_view_stock() {
 		<?php endforeach; ?>
 		</tbody>
 	</table></div>
-	<?php }
+	<?php md_inv_pager( $total_rows, $per_n, $pg_n ); }
 	if ( $admin ) { md_inv_admin_dialogs( array( 'item', 'in', 'out', 'adjust', 'order' ) ); }
 }
 
@@ -610,6 +626,7 @@ function md_inv_view_orders() {
 	?>
 	<div class="iv-toolbar iv-toolbar--actions">
 		<button type="button" class="iv-btn iv-btn--primary" data-dlg="dlg-order"><?php echo md_inv_icon( 'plus', 18 ); // phpcs:ignore ?>주문 넣기</button>
+		<a class="iv-btn iv-btn--ghost" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'po' ) ) ); ?>"><?php echo md_inv_icon( 'truck', 18 ); // phpcs:ignore ?>업체별 발주서</a>
 		<?php md_inv_dl_buttons( 'orders', array( 'df' => date( 'Y-m-d', current_time( 'timestamp' ) - 365 * DAY_IN_SECONDS ) ) ); ?>
 	</div>
 	<form class="iv-filter" method="get" data-autosubmit>
