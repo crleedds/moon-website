@@ -1748,6 +1748,11 @@ function md_survey_render_settings() {
 		<p class="mds-hint">비우면 메일을 보내지 않습니다. 낮은 점수(1~2점)나 연락 요청이 있으면 제목 앞에 [낮은 점수] · [연락 원함]이 붙습니다.</p>
 		<p><button type="submit" form="md-sv-testmail" class="mds-btn mds-btn--ghost mds-btn--sm">시험 메일 보내기</button></p>
 
+		<?php /* v6.3.1 · 덴트웹 DB 자동 연동 프로그램(config.json 의 ApiKey)에 넣을 키 — 관리자만 보는 화면 */ ?>
+		<h2 class="mdsv-h" style="margin-top:20px">덴트웹 자동 연동 키</h2>
+		<p class="mdsv-url"><code><?php echo esc_html( (string) get_option( 'md_survey_api_key' ) ); ?></code></p>
+		<p class="mds-hint">「덴트웹 자동연동」 프로그램의 config.json 에서 ApiKey 자리에 넣습니다. 다른 곳에 알려지지 않게 주의하세요.</p>
+
 		<h2 class="mdsv-h" style="margin-top:20px">응답 받는 기간</h2>
 		<div class="mds-formrow">
 			<label class="mds-field"><span>진료일부터 며칠까지 응답을 받을까요</span><input type="number" name="window_days" min="1" max="30" value="<?php echo (int) $s['window_days']; ?>"></label>
