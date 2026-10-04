@@ -587,9 +587,9 @@ body.md-v5 .md-page-hero__title, body.md-v5 .md-docs-hero__title { font-weight: 
 body.md-v5 .md-page-hero__title em, body.md-v5 .md-docs-hero__title em { font-style: normal; color: var(--v5-bronze); }
 
 /* 칩 · 알약 라벨 · 가는 선 */
-body.md-v5 [class*="__chip"],
-body.md-v5 [class*="__pill"],
-body.md-v5 [class*="__tag"]:not(.v5-crow__tags) {
+body.md-v5 [class*="__chip"]:not([class*="v5-"]),
+body.md-v5 [class*="__pill"]:not([class*="v5-"]),
+body.md-v5 [class*="__tag"]:not([class*="v5-"]):not([class*="__tags"]) {
   background: transparent !important;
   border: 1px solid var(--v5-line) !important;
   color: var(--v5-sub) !important;
@@ -1013,3 +1013,20 @@ body.md-v5 .md-priceX-ins__col { border-radius: 0 !important; box-shadow: none !
 body.md-v5 .md-priceX-ins__col--no { border-top-color: var(--v5-line) !important; }
 body.md-v5 .md-priceX-ins__badge { background: none !important; border: 1px solid var(--v5-line) !important; border-radius: 0 !important; color: var(--v5-sub) !important; }
 body.md-v5 [class*="md-priceX"] [class*="__step"], body.md-v5 [class*="md-priceX"] [class*="__card"], body.md-v5 [class*="md-priceX"] [class*="__item"] { border-radius: 0 !important; box-shadow: none !important; }
+
+/* v5.9.2 · 임플란트센터 「왜 문치과병원인가」 3칸 — 4칸 격자에 3개라 오른쪽이 비던 것 */
+.v5-why.v5-impl__pillars { grid-template-columns: repeat(3, 1fr); border: 0; border-top: 1px solid var(--v5-ink); }
+@media (max-width: 900px) { .v5-why.v5-impl__pillars { grid-template-columns: 1fr; } .v5-why.v5-impl__pillars > div, .v5-why.v5-impl__pillars > div + div { padding-left: 0; border-left: 0; margin-top: 0; } .v5-why.v5-impl__pillars > div + div { border-top: 1px solid var(--v5-line); } }
+
+/* v5.9.2 · 점검 보완 — 태그 묶음 · 강조 문단 · 종합안내서 카드 */
+body.md-v5 [class*="__tags"] { border: 0 !important; background: none !important; padding: 0 !important; }
+body.md-v5 .md-single__tags a, body.md-v5 .md-single__tags span { border: 1px solid var(--v5-line) !important; background: none !important; border-radius: 0 !important; }
+body.md-v5 .md-highlight { padding: 22px 24px !important; border-left: 2px solid var(--v5-bronze) !important; }
+body.md-v5 .md-guide-cta { display: grid !important; grid-template-columns: 1fr auto !important; gap: 24px !important; align-items: center; background: var(--v5-paper) !important; background-image: none !important; border: 1px solid var(--v5-line) !important; border-left: 2px solid var(--v5-bronze) !important; padding: 28px 32px !important; overflow: hidden; }
+body.md-v5 .md-guide-cta::before, body.md-v5 .md-guide-cta::after { display: none !important; }
+body.md-v5 .md-guide-cta__icon { display: none !important; }
+body.md-v5 .md-guide-cta__code { display: none !important; }
+body.md-v5 .md-guide-cta__title { font-family: var(--v5-serif) !important; font-weight: 500 !important; color: var(--v5-ink) !important; }
+body.md-v5 .md-guide-cta__read { color: var(--v5-bronze) !important; white-space: nowrap; }
+@media (max-width: 700px) { body.md-v5 .md-guide-cta { grid-template-columns: 1fr !important; padding: 22px 20px !important; } }
+body.md-v5 .md-apply-card [class*="__email"], body.md-v5 .md-apply-card [class*="mail"] { background-image: none !important; border-radius: 0 !important; }
