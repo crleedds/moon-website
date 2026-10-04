@@ -665,3 +665,11 @@ body.md-v5 .md-cta-banner a [class*="logo"], body.md-v5 .md-cta-banner a [class*
 .v5-stats { border-top: 1px solid var(--v5-hair); }
 /* 임플란트센터 · 「1990년대부터 임플란트를 식립해온 병원」 */
 .v5-crow__lead { display: block; font-family: var(--v5-serif); font-weight: 500; font-size: 15.5px; color: var(--v5-bronze); margin-bottom: 4px; }
+
+/* v5.3.6 · 원장 지시 · 첫 화면 사진이 잘리지 않게 — 사진 원래 비율 그대로 */
+.v5-hero__photo { aspect-ratio: auto !important; max-height: none !important; min-height: 0 !important; background: none; }
+.v5-hero__photo img { position: static; display: block; width: 100%; height: auto; object-fit: initial; }
+@media (min-width: 901px) {
+  .v5-hero { align-items: center; }
+  .v5-hero__photo { align-self: center; }
+}

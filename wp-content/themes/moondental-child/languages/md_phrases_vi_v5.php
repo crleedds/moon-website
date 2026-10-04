@@ -47,4 +47,5 @@ return array(
 	'네이버 지도' => 'Bản đồ Naver',
 	'카카오맵' => 'KakaoMap',
 	'심미 · 보철 진료 자세히' => 'Chi tiết điều trị thẩm mỹ & phục hình',
+	'대표원장' => 'Bác sĩ trưởng', /* v5.3.6 */
 );

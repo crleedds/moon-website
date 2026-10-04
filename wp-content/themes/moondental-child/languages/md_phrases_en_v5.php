@@ -47,4 +47,5 @@ return array(
 	'네이버 지도' => 'Naver Map',
 	'카카오맵' => 'KakaoMap',
 	'심미 · 보철 진료 자세히' => 'Aesthetic & Prosthetic Care in Detail',
+	'대표원장' => 'Director', /* v5.3.6 */
 );

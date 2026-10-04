@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '5.3.5' );
+define( 'MOONDENTAL_VERSION', '5.3.6' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -3228,14 +3228,14 @@ function moondental_team_zoom_defaults() {
 	 */
 	return array(
 		sanitize_title( '문은수' ) => array( 'name' => '문은수', 'role' => '대표 병원장',          'default' => 1.00, 'ty' =>  0 ),
-		sanitize_title( '이승주' ) => array( 'name' => '이승주', 'role' => '원장',                  'default' => 1.00, 'ty' =>  5 ),
-		sanitize_title( '이수연' ) => array( 'name' => '이수연', 'role' => '원장',                  'default' => 1.00, 'ty' =>  3 ),
-		sanitize_title( '권혜진' ) => array( 'name' => '권혜진', 'role' => '원장',                  'default' => 1.00, 'ty' =>  4 ),
-		sanitize_title( '문지현' ) => array( 'name' => '문지현', 'role' => '원장',                  'default' => 1.00, 'ty' =>  2 ),
-		sanitize_title( '이창률' ) => array( 'name' => '이창률', 'role' => '원장',                  'default' => 1.00, 'ty' =>  5 ),
-		sanitize_title( '이영일' ) => array( 'name' => '이영일', 'role' => '원장',                  'default' => 1.00, 'ty' =>  2 ),
-		sanitize_title( '김세일' ) => array( 'name' => '김세일', 'role' => '원장',                  'default' => 1.00, 'ty' => -2 ),
-		sanitize_title( '정석형' ) => array( 'name' => '정석형', 'role' => '원장',                  'default' => 1.00, 'ty' =>  2 ),
+		sanitize_title( '이승주' ) => array( 'name' => '이승주', 'role' => '대표원장',                  'default' => 1.00, 'ty' =>  5 ),
+		sanitize_title( '이수연' ) => array( 'name' => '이수연', 'role' => '대표원장',                  'default' => 1.00, 'ty' =>  3 ),
+		sanitize_title( '권혜진' ) => array( 'name' => '권혜진', 'role' => '대표원장',                  'default' => 1.00, 'ty' =>  4 ),
+		sanitize_title( '문지현' ) => array( 'name' => '문지현', 'role' => '대표원장',                  'default' => 1.00, 'ty' =>  2 ),
+		sanitize_title( '이창률' ) => array( 'name' => '이창률', 'role' => '대표원장',                  'default' => 1.00, 'ty' =>  5 ),
+		sanitize_title( '이영일' ) => array( 'name' => '이영일', 'role' => '대표원장',                  'default' => 1.00, 'ty' =>  2 ),
+		sanitize_title( '김세일' ) => array( 'name' => '김세일', 'role' => '대표원장',                  'default' => 1.00, 'ty' => -2 ),
+		sanitize_title( '정석형' ) => array( 'name' => '정석형', 'role' => '대표원장',                  'default' => 1.00, 'ty' =>  2 ),
 	);
 }
 
@@ -5201,7 +5201,7 @@ function moondental_get_team() {
 
 		array(
 			'name'       => '이승주',
-			'role'       => '원장',
+			'role'       => '대표원장',
 			'photo'      => 'doctor-07.png',
 			'photo_zoom' => 1.00,
 			'photo_ty'   => 5,
@@ -5215,7 +5215,7 @@ function moondental_get_team() {
 		),
 		array(
 			'name'       => '이수연',
-			'role'       => '원장',
+			'role'       => '대표원장',
 			'photo'      => 'doctor-08.png',
 			'photo_zoom' => 1.00,
 			'photo_ty'   => 3,
@@ -5232,7 +5232,7 @@ function moondental_get_team() {
 		),
 		array(
 			'name'       => '권혜진',
-			'role'       => '원장',
+			'role'       => '대표원장',
 			'photo'      => 'doctor-02.png',
 			'photo_zoom' => 1.00,
 			'photo_ty'   => 4,
@@ -5249,7 +5249,7 @@ function moondental_get_team() {
 
 		array(
 			'name'       => '문지현',
-			'role'       => '원장',
+			'role'       => '대표원장',
 			'photo'      => 'doctor-05.png',
 			'photo_zoom' => 1.00,
 			'photo_ty'   => 2,
@@ -5273,7 +5273,7 @@ function moondental_get_team() {
 		),
 		array(
 			'name'       => '이창률',
-			'role'       => '원장',
+			'role'       => '대표원장',
 			'photo'      => 'doctor-01.png',
 			'photo_zoom' => 1.00,
 			'photo_ty'   => 5,
@@ -5300,7 +5300,7 @@ function moondental_get_team() {
 
 		array(
 			'name'       => '이영일',
-			'role'       => '원장',
+			'role'       => '대표원장',
 			'photo'      => 'doctor-09.png',
 			'photo_zoom' => 1.00,
 			'photo_ty'   => 2,
@@ -5315,7 +5315,7 @@ function moondental_get_team() {
 		),
 		array(
 			'name'       => '김세일',
-			'role'       => '원장',
+			'role'       => '대표원장',
 			'photo'      => 'doctor-03.png',
 			'photo_zoom' => 1.00,
 			'photo_ty'   => -2,
@@ -5329,7 +5329,7 @@ function moondental_get_team() {
 		),
 		array(
 			'name'       => '정석형',
-			'role'       => '원장',
+			'role'       => '대표원장',
 			'photo'      => 'doctor-06.png',
 			'photo_zoom' => 1.00,
 			'photo_ty'   => 2,
@@ -5401,6 +5401,10 @@ function moondental_get_team_with_customizer() {
 				$doctors[ $di ]['role'] = $role_override;
 			}
 		}
+	}
+	/* v5.3.6 · 원장 지시 · 대표 병원장 외 원장님은 모두 「대표원장」 */
+	foreach ( $doctors as $_i => $_d ) {
+		if ( isset( $_d['role'] ) && in_array( trim( (string) $_d['role'] ), array( '원장', '원장님' ), true ) ) $doctors[ $_i ]['role'] = '대표원장';
 	}
 	return $doctors;
 }
