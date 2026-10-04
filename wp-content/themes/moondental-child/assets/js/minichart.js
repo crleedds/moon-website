@@ -1,4 +1,4 @@
-/* 직원 라운지 · 미니차트 (v6.2 · v6.5) — 없어도 화면은 모두 동작한다. 바로 찾기 · 더 보기 · 칸 늘리기 · 복사 · 담당의 확인 */
+/* 직원 라운지 · 미니차트 (v6.2 · v6.8) — 없어도 화면은 모두 동작한다. 바로 찾기 · 더 보기 · 칸 늘리기 · 복사 · 담당의 확인 */
 (function () {
   'use strict';
   var PAGE = 60;
@@ -83,17 +83,41 @@
     window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
   }
 
-  /* v6.5 · 담당의는 한 칸 이상 (별표항목) */
+  /* v6.8 · 담당의 — 「＋ 담당의 추가」로 과 · 담당의 줄, ✕ 로 빼기. 저장 전 한 분 이상 확인 */
   var drBox = document.querySelector('[data-mc-dr]');
-  var drForm = drBox ? drBox.closest('form') : null;
-  if (drForm) {
-    drForm.addEventListener('submit', function (e) {
-      var any = Array.prototype.some.call(drBox.querySelectorAll('select, textarea'), function (el) { return el.value.trim() !== ''; });
-      if (!any) {
-        e.preventDefault(); e.stopImmediatePropagation();
-        alert('담당의를 한 칸 이상 골라 주세요.');
-        var sel = drBox.querySelector('select'); if (sel) { sel.focus(); }
-      }
-    }, true);
+  if (drBox) {
+    var drList = drBox.querySelector('[data-mc-dr-list]');
+    var drTpl = drBox.querySelector('template[data-mc-dr-tpl]');
+    var addBtn = drBox.querySelector('[data-mc-dr-add]');
+    if (addBtn && drList && drTpl) {
+      addBtn.addEventListener('click', function () {
+        drList.appendChild(drTpl.content.cloneNode(true));
+        var sels = drList.querySelectorAll('.mc-dr__pair:last-child select');
+        if (sels[0]) { sels[0].focus(); }
+      });
+      drList.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-mc-dr-rm]');
+        if (b) { b.closest('.mc-dr__pair').remove(); }
+      });
+    }
+    var drForm = drBox.closest('form');
+    if (drForm) {
+      drForm.addEventListener('submit', function (e) {
+        var any = Array.prototype.some.call(drBox.querySelectorAll('select[name="dr_main"], select[name="dr_doc[]"], textarea[name="dr_extra"]'), function (el) { return el.value.trim() !== ''; });
+        if (!any) {
+          e.preventDefault(); e.stopImmediatePropagation();
+          alert('담당의를 한 분 이상 골라 주세요.');
+          var sel = drBox.querySelector('select[name="dr_main"]'); if (sel) { sel.focus(); }
+        }
+      }, true);
+    }
   }
+
+  /* v6.8 · 「해당없음」 체크하면 그 칸은 잠근다 */
+  document.querySelectorAll('[data-na-for]').forEach(function (c) {
+    var t = document.getElementById(c.getAttribute('data-na-for'));
+    if (!t) { return; }
+    var sync = function () { t.disabled = c.checked; if (!c.checked) { t.focus(); } };
+    c.addEventListener('change', sync);
+  });
 })();

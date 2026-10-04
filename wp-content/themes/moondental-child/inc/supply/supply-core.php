@@ -24,6 +24,17 @@ function md_sup_can_manage() {
 	return is_user_logged_in() && ( current_user_can( 'md_supply_manage' ) || current_user_can( 'manage_options' ) );
 }
 
+/**
+ * v6.8 · 원장 계정인가 — moondentalmanager(워드프레스 관리자). 라운지의 모든 것을 보고 고친다.
+ *  권한 세 단계 (원장 지시 2026-10-04): 원장 계정 > 라운지 관리자(md_supply_manage) > 직원(md_supply_use)
+ *  원장 계정만: 미니차트 Import/Export · 휴지통 비우기, 재료실 가져오기 · 백업 복원, 라운지 관리자 지정
+ */
+function md_sup_is_owner() {
+	if ( ! is_user_logged_in() ) { return false; }
+	if ( current_user_can( 'manage_options' ) ) { return true; }
+	return wp_get_current_user()->user_login === ( defined( 'MD_SUP_MANAGER_LOGIN' ) ? MD_SUP_MANAGER_LOGIN : 'moondentalmanager' );
+}
+
 /** 로그인한 사용자의 소속 팀 id (사용자 메타에 저장) */
 function md_sup_my_team_id() {
 	$id = (int) get_user_meta( get_current_user_id(), 'md_sup_team_id', true );

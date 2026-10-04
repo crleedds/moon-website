@@ -166,6 +166,24 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
 .mc-settings .mc-check { margin: -6px 0 10px; font-weight: 500; color: var(--mc-sub); }
 .mc-admin .mds-btn { min-height: 44px; padding: 0 18px; margin: 4px 6px 0 0; }
 
+/* 해당없음 · 담당의 (v6.8) */
+.mc-field__top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.mc-field__top .mc-field__l { flex: 1 1 auto; }
+.mc-na-chk { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; margin-bottom: 4px; border: 1px solid var(--mc-line); border-radius: 999px; font-size: .88rem; font-weight: 700; color: var(--mc-sub); background: var(--mc-bg); cursor: pointer; }
+.mc-na-chk input { width: 18px; height: 18px; margin: 0; }
+.mc-na-chk:has(input:checked) { background: var(--mc-ink); border-color: var(--mc-ink); color: #fff; }
+.mc-field textarea:disabled { background: var(--mc-alt); color: var(--mc-mute); min-height: 40px; }
+.mc-na { color: var(--mc-sub); font-weight: 600; }
+.mc-dr__list { display: grid; gap: 8px; margin: 0 0 8px; }
+.mc-dr__list:empty { display: none; }
+.mc-dr__pair { display: grid; grid-template-columns: minmax(6em, 1fr) 2fr 44px; gap: 8px; align-items: center; }
+.mc-dr__rm { min-height: 44px; border: 1px solid var(--mc-line); border-radius: 10px; background: var(--mc-bg); color: var(--mc-mute); font-size: 1rem; cursor: pointer; }
+.mc-dr__rm:hover { color: var(--mc-alert); border-color: rgba(180,68,46,.5); }
+.mc .mc-dr__add { min-height: 44px; padding: 0 16px; margin: 0 0 8px; border-style: dashed; }
+.mc-dr__add small { font-weight: 500; color: var(--mc-mute); margin-left: 4px; }
+.mc-dr textarea { margin-top: 4px; }
+.mc-dr__main small, .mc-dr__pairv small { display: inline-block; min-width: 3.4em; font-size: .78rem; font-weight: 700; color: var(--mc-mute); }
+
 /* ---------- 태블릿 (가로 761~1100) ---------- */
 @media (min-width: 761px) and (max-width: 1100px) {
   .mc-row { grid-template-columns: 4.8em minmax(7em, 11em) 1fr auto; gap: 4px 12px; padding: 13px 14px; }
@@ -215,6 +233,8 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
   .mc-form__foot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; margin: 0; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); border-radius: 0; box-shadow: 0 -4px 14px rgba(0,0,0,.08); }
   .mc-form__save { flex: 1 1 auto; }
   .mc-dr__row { grid-template-columns: 5.5em 1fr; }
+  .mc-dr__pair { grid-template-columns: 1fr 1.4fr 44px; gap: 6px; }
+  .mc .mc-dr__add { width: 100%; }
 
   .mc-note { padding: 16px 14px; }
   .mc-note-row { grid-template-columns: 1fr auto; }
