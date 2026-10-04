@@ -1008,3 +1008,8 @@ body.md-v5 .md-track__more { display: inline-block; margin-top: 6px; color: var(
 /* 원장 인터뷰 · 기타 남은 둥근 카드 */
 body.md-v5 .md-main [class*="interview"], body.md-v5 .md-main [class*="-qa__item"], body.md-v5 .md-main [class*="__card"] { border-radius: 0 !important; box-shadow: none !important; }
 body.md-v5 .md-main [class*="interview"] [class*="__q"], body.md-v5 .md-main [class*="interview"] hr { border-style: solid !important; }
+/* 비용 안내 · 건강보험 비교 · 표 */
+body.md-v5 .md-priceX-ins__col { border-radius: 0 !important; box-shadow: none !important; background: var(--v5-paper) !important; border: 1px solid var(--v5-line) !important; border-top: 2px solid var(--v5-bronze) !important; }
+body.md-v5 .md-priceX-ins__col--no { border-top-color: var(--v5-line) !important; }
+body.md-v5 .md-priceX-ins__badge { background: none !important; border: 1px solid var(--v5-line) !important; border-radius: 0 !important; color: var(--v5-sub) !important; }
+body.md-v5 [class*="md-priceX"] [class*="__step"], body.md-v5 [class*="md-priceX"] [class*="__card"], body.md-v5 [class*="md-priceX"] [class*="__item"] { border-radius: 0 !important; box-shadow: none !important; }
