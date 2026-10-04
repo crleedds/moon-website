@@ -14,6 +14,12 @@ add_action( 'init', function () {
 	if ( is_admin() || empty( $_SERVER['REQUEST_URI'] ) ) return;
 	$uri  = (string) $_SERVER['REQUEST_URI'];
 	$path = rawurldecode( (string) parse_url( $uri, PHP_URL_PATH ) );
+	/* v5.1 · 예전 /심미치료/ 페이지도 심미치료센터로 합침 */
+	if ( preg_match( '#^/((?:en|ja|zh|vi|ru|mn)/)?심미치료/?$#u', $path, $mm ) ) {
+		$q = parse_url( $uri, PHP_URL_QUERY );
+		wp_redirect( home_url( '/' . ( $mm[1] ?? '' ) . rawurlencode( '심미치료센터' ) . '/' ) . ( $q ? '?' . $q : '' ), 301 );
+		exit;
+	}
 	if ( strpos( $path, '스마일디자인센터' ) === false ) return;
 	if ( ! preg_match( '#^/((?:en|ja|zh|vi|ru|mn)/)?스마일디자인센터(/.*)?$#u', $path, $m ) ) return;
 	$rest = ( isset( $m[2] ) && $m[2] !== '' ) ? $m[2] : '/';
@@ -95,3 +101,10 @@ add_action( 'init', function () {
 	}
 	update_option( 'md_rename_esthetic_v424', 'done' );
 }, 6 );
+
+/* v5.1 · 합친 /심미치료/ 페이지는 사이트맵에서 뺀다 (주소는 심미치료센터로 301) */
+add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', function ( $ids ) {
+	$p = get_page_by_path( '심미치료' );
+	if ( $p ) $ids[] = (int) $p->ID;
+	return $ids;
+} );

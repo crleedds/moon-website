@@ -223,6 +223,8 @@ $nav_items = $parse_nav( md_content( 'smile_nav_items', '' ) );
 </section>
 
 <?php /* v3.44.212 · 심미치료센터 종합안내서 (라미네이트) */ ?>
+<?php get_template_part( 'template-parts/section', 'esthetic-more' ); /* v5.1 · 예전 /심미치료/ 내용 */ ?>
+
 <?php get_template_part( 'template-parts/section', 'guide-cta', array( 'slug' => 'laminate' ) ); ?>
 
 <?php get_template_part( 'template-parts/section', 'cta' ); ?>

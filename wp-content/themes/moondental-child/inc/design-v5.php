@@ -110,7 +110,7 @@ add_filter( 'body_class', function ( $c ) {
 function md_v5_doctor_photo( $filename ) {
 	$base = basename( (string) $filename );
 	if ( $base && file_exists( MOONDENTAL_DIR . '/assets/images/doctors/v5/' . $base ) ) {
-		return MOONDENTAL_URI . '/assets/images/doctors/v5/' . $base;
+		return MOONDENTAL_URI . '/assets/images/doctors/v5/' . $base . '?v=' . filemtime( MOONDENTAL_DIR . '/assets/images/doctors/v5/' . $base );
 	}
 	return function_exists( 'moondental_doctor_photo_url' ) ? moondental_doctor_photo_url( $filename ) : '';
 }

@@ -281,7 +281,7 @@ function moondental_get_strengths() {
 </ol>',
 			'related' => array(
 				array( 'label' => '임플란트 센터', 'url' => $home . '임플란트-센터/' ),
-				array( 'label' => '심미치료',     'url' => $home . '심미치료/' ),
+				array( 'label' => '심미치료',     'url' => $home . '심미치료센터/' ),
 			),
 		),
 

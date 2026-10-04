@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '5.0.0' );
+define( 'MOONDENTAL_VERSION', '5.1.0' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -5059,7 +5059,7 @@ function moondental_get_services() {
 			'desc'  => '천안·아산 매복 사랑니까지 — CBCT 3D 정밀 진단으로 구강악안면외과 전문 의료진이 안전하게 발치합니다.',
 		),
 		array(
-			'slug'  => '심미치료',
+			'slug'  => '심미치료센터', /* v5.1 · /심미치료/ 는 심미치료센터로 합침 */
 			'title' => '천안·아산 라미네이트·미백',
 			'icon'  => 'icon:aesthetic',
 			'desc'  => '천안·아산 라미네이트·치아미백·올세라믹 — 최소 삭제 보존적 접근으로 자연스러운 미소를 디자인합니다.',

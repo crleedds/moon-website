@@ -88,6 +88,10 @@ $photo_style = sprintf(
 	esc_attr( number_format( $photo_ty,   1 ) ),
 	esc_attr( number_format( $photo_zoom, 2 ) )
 );
+if ( function_exists( 'md_v5' ) && md_v5() && false !== strpos( md_v5_doctor_photo( $doctor['photo'] ?? '' ), '/doctors/v5/' ) ) { /* v5.0 · 얼굴 크기 맞춘 사진 */
+	$photo_url   = md_v5_doctor_photo( $doctor['photo'] ?? '' );
+	$photo_style = 'object-position: center top;';
+}
 
 /* 다른 의료진 — 본인을 제외한 전체 */
 $all_doctors = function_exists( 'moondental_get_team_with_customizer' )
@@ -247,6 +251,7 @@ foreach ( $all_doctors as $m ) {
 					esc_attr( number_format( $other_ty,   1 ) ),
 					esc_attr( number_format( $other_zoom, 2 ) )
 				);
+				if ( function_exists( 'md_v5' ) && md_v5() && false !== strpos( md_v5_doctor_photo( $other['photo'] ?? '' ), '/doctors/v5/' ) ) { $other_photo = md_v5_doctor_photo( $other['photo'] ?? '' ); $other_style = 'object-position: center top;'; }
 			?>
 				<a class="md-docsingle-other" href="<?php echo esc_url( $other_url ); ?>">
 					<div class="md-docsingle-other__photo">
