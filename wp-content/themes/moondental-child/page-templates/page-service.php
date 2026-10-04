@@ -50,6 +50,8 @@ foreach ( $services as $svc ) {
 <?php
 /* v3.44.30 · 강제 히어로 이미지 + 임팩트 스탯 (페이지 콘텐츠와 무관하게 항상 노출) */
 $_visual = function_exists( 'moondental_service_visual' ) ? moondental_service_visual( $slug ) : null;
+$md_impl_v5 = ( '임플란트-센터' === $slug && function_exists( 'md_v5' ) && md_v5() ); /* v5.5 · 임플란트센터 기승전결 정리 */
+if ( $md_impl_v5 ) $_visual = null;
 if ( $_visual ) :
 ?>
 <section class="md-svc-hero" aria-label="<?php echo esc_attr( $_visual['headline'] ); ?>">
@@ -113,7 +115,8 @@ $md_impl_own = ( $slug === '임플란트-센터' );
 <?php
 /* 임플란트-센터 본문 · template-parts/section-implant.php 참고 */
 if ( $md_impl_own ) {
-	get_template_part( 'template-parts/section', 'implant' );
+	if ( ! empty( $md_impl_v5 ) ) get_template_part( 'template-parts/implant-v5' );
+	else get_template_part( 'template-parts/section', 'implant' );
 }
 ?>
 
@@ -259,6 +262,7 @@ if ( function_exists( 'moondental_service_pain_points' ) && ! $md_impl_own ) {
 /* === 이런 분께 추천합니다 === */
 if ( function_exists( 'moondental_service_ideal_candidates' ) ) {
 	$cand_map = moondental_service_ideal_candidates();
+	if ( ! empty( $md_impl_v5 ) ) $cand_map = array();
 	if ( isset( $cand_map[ $slug ] ) && ! empty( $cand_map[ $slug ] ) ) :
 ?>
 <section class="md-section md-section--surface md-section--sm" aria-label="추천 대상">
@@ -314,6 +318,12 @@ if ( function_exists( 'moondental_get_faqs_by_service' ) ) {
 			array( 'q' => '누워 있는 매복 사랑니도 당일에 뽑을 수 있나요?', 'a' => 'CT 촬영과 진단이 끝나면 대부분 당일 발치가 가능합니다. 다만 염증이 심하거나 전신질환 약(항응고제 등)을 드시는 경우는 준비 뒤 날짜를 잡습니다. 멀리서 오시면 예약 때 말씀해 주시면 상담과 발치를 하루에 묶어 드립니다.' ),
 			array( 'q' => '사랑니 발치 비용은 얼마인가요?', 'a' => '사랑니 발치는 건강보험이 적용되어 매복 정도에 따라 본인부담이 달라집니다. CT 촬영은 보험 적용 여부에 따라 금액이 다르므로 상담 때 총액을 알려 드립니다.' ),
 		), (array) $faqs_map[ $slug ] );
+	}
+	if ( ! empty( $md_impl_v5 ) ) { /* v5.5 · 가이드 임플란트 질문을 앞에 */
+		$faqs_map[ $slug ] = array_merge( array(
+			array( 'q' => '가이드 임플란트는 무엇인가요?', 'a' => 'CT와 구강 스캔으로 임플란트 위치 · 각도 · 깊이를 컴퓨터에서 미리 계획하고, 그 계획대로 드릴이 들어가도록 만든 틀(가이드)을 끼워 심는 방법입니다. 네비게이션 임플란트라고도 부릅니다.' ),
+			array( 'q' => '모든 환자가 무절개로 할 수 있나요?', 'a' => '뼈의 양과 잇몸 상태가 충분하면 무절개로 진행할 수 있습니다. 뼈이식이 많이 필요하거나 잇몸이 부족하면 절개가 필요할 수 있어, CT 진단 뒤 결정합니다.' ),
+		), (array) ( $faqs_map[ $slug ] ?? array() ) );
 	}
 	if ( isset( $faqs_map[ $slug ] ) && ! empty( $faqs_map[ $slug ] ) ) :
 ?>

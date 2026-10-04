@@ -12,6 +12,13 @@ $fig = function ( $f, $cap ) use ( $gimg ) {
 };
 $case = function ( $title, $desc, $figs, $cls = '' ) use ( $fig ) {
 	$h = '<article class="v5-gcase ' . esc_attr( $cls ) . '"><h4>' . esc_html( $title ) . '</h4>' . ( $desc ? '<p>' . esc_html( $desc ) . '</p>' : '' ) . '<div class="v5-gcase__figs v5-gcase__figs--' . count( $figs ) . '">';
+	$main = array_slice( $figs, 0, 2 ); $more = array_slice( $figs, 2 );
+	if ( $more && false === strpos( $cls, 'v5-gcase--plain' ) && count( $figs ) === 4 ) {
+		foreach ( $main as $f ) $h .= $fig( $f[0], $f[1] );
+		$h .= '</div><details class="v5-gcase__more"><summary>계획 · 수술 후 CT 보기</summary><div class="v5-gcase__figs v5-gcase__figs--2">';
+		foreach ( $more as $f ) $h .= $fig( $f[0], $f[1] );
+		return $h . '</div></details></article>';
+	}
 	foreach ( $figs as $f ) $h .= $fig( $f[0], $f[1] );
 	return $h . '</div></article>';
 };
@@ -20,7 +27,7 @@ $story_url = home_url( '/%ec%b9%98%ec%95%84%ec%9d%b4%ec%95%bc%ea%b8%b0%ea%b0%80%
 <section class="v5-blk v5-paper v5-guide" id="guide-implant" aria-label="가이드 임플란트">
 	<div class="v5-wrap">
 		<div class="v5-head">
-			<span class="v5-label">Guided Surgery</span>
+			<span class="v5-label"><?php echo ! empty( $args['chapter'] ) ? esc_html( $args['chapter'] ) . ' · Planning' : 'Guided Surgery'; ?></span>
 			<div>
 				<h2>가이드 임플란트 — 설계는 경험으로, 재현은 가이드로</h2>
 				<p>CT와 구강 스캔으로 임플란트를 심을 위치 · 각도 · 깊이를 미리 정하고, 그 계획을 원내 3D 프린터로 만든 가이드에 담아 수술 때 그대로 옮깁니다. 위치를 정하는 판단은 30여년 임상 경험이, 그 판단을 정확히 재현하는 일은 가이드가 맡습니다.</p>
@@ -39,12 +46,7 @@ $story_url = home_url( '/%ec%b9%98%ec%95%84%ec%9d%b4%ec%95%bc%ea%b8%b0%ea%b0%80%
 			<?php echo $case( '', '', array( array( 'bone-r2gate', 'MEGAGEN R2GATE — 단면 전체를 색으로 보여 주는 골질 화면' ), array( 'bone-oneguide', 'OSSTEM OneGuide — 픽스처 표면의 골질을 네 방향으로' ) ), 'v5-gcase--plain' ); ?>
 		</div>
 
-		<h3 class="v5-guide__sub">이런 경우에 씁니다</h3>
-		<dl class="v5-fac v5-guide__cases">
-			<div><dt>윗어금니 · 상악동 거상과 함께</dt><dd>상악동까지의 거리를 미리 재 두고, 상악동을 올리면서 계획한 위치에 심습니다.</dd></div>
-			<div><dt>이를 뺀 자리</dt><dd>발치한 자리는 드릴이 미끄러지기 쉬워 가이드가 특히 도움이 됩니다. 옆 치아 자리까지 고려해 각도를 정합니다.</dd></div>
-			<div><dt>여러 개를 한 번에</dt><dd>여러 자리를 한 번의 계획으로 잡고 같은 가이드로 심어, 개수가 늘어도 계획대로 들어갑니다.</dd></div>
-		</dl>
+
 
 		<h3 class="v5-guide__sub">원내 증례 — 계획과 실제</h3>
 		<p class="v5-guide__caselead">문치과병원에서 가이드로 식립한 실제 증례입니다. 왼쪽은 수술 전, 오른쪽은 수술 후입니다. 사진을 누르면 크게 볼 수 있습니다.</p>
@@ -70,7 +72,7 @@ $story_url = home_url( '/%ec%b9%98%ec%95%84%ec%9d%b4%ec%95%bc%ea%b8%b0%ea%b0%80%
 		</div>
 		<div class="v5-gcases v5-gcases--flapless">
 			<?php
-			echo $case( '무절개 증례 ① — 위 · 아래 여러 개', '위 · 아래 여러 부위를 한 번의 계획으로 잡고, 잇몸을 절개하지 않고 같은 날 식립했습니다. 수술 직후에도 절개선과 봉합이 없습니다.', array( array( 'flapless1-pre', '수술 전' ), array( 'flapless1-post', '수술 후 — 절개 없이 식립' ), array( 'flapless1-oral', '수술 직후 입안 — 작은 구멍만 남음' ) ) );
+			echo $case( '무절개 증례 ① — 위 · 아래 여러 개', '위 · 아래 여러 부위를 한 번의 계획으로 잡고, 잇몸을 절개하지 않고 같은 날 식립했습니다. 수술 직후에도 절개선과 봉합이 없습니다.', array( array( 'flapless1-pre', '수술 전' ), array( 'flapless1-post', '수술 후 — 절개 없이 식립' ) ) );
 			echo $case( '무절개 증례 ② — 같은 방식으로', '계획한 위치가 그대로 재현되므로 절개가 필요 없습니다. 개수가 늘어도 같은 방식으로 진행합니다.', array( array( 'flapless2-pre', '수술 전' ), array( 'flapless2-post', '수술 후 — 절개 없이 식립' ), array( 'flapless2-oral', '수술 직후 입안 — 절개 없이 치유 지대주 연결' ) ) );
 			?>
 		</div>
@@ -84,11 +86,6 @@ $story_url = home_url( '/%ec%b9%98%ec%95%84%ec%9d%b4%ec%95%bc%ea%b8%b0%ea%b0%80%
 
 		<blockquote class="v5-guide__quote">설계는 경험이 하고, 재현은 가이드가 합니다.</blockquote>
 
-		<div class="v5-faq v5-guide__faq">
-			<details open><summary>가이드 임플란트는 무엇인가요?</summary><div class="v5-faq__a"><p>CT와 구강 스캔으로 임플란트 위치 · 각도 · 깊이를 컴퓨터에서 미리 계획하고, 그 계획대로 드릴이 들어가도록 만든 틀(가이드)을 끼워 심는 방법입니다. 네비게이션 임플란트라고도 부릅니다.</p></div></details>
-			<details><summary>모든 환자가 무절개로 할 수 있나요?</summary><div class="v5-faq__a"><p>뼈의 양과 잇몸 상태가 충분하면 무절개로 진행할 수 있습니다. 뼈이식이 많이 필요하거나 잇몸이 부족하면 절개가 필요할 수 있어, CT 진단 뒤 결정합니다.</p></div></details>
-			<details><summary>가이드는 어디서 만드나요?</summary><div class="v5-faq__a"><p>문치과병원 안에서 직접 설계하고 3D 프린터로 출력합니다. 메가젠 R2GATE와 오스템 OneGuide 두 시스템을 증례에 맞게 골라 씁니다.</p></div></details>
-		</div>
 		<a class="v5-more" href="<?php echo esc_url( $story_url ); ?>">치아이야기 · 가이드 임플란트, 중요한 건 「설계」 →</a>
 	</div>
 </section>
