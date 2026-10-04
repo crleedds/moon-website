@@ -33,6 +33,7 @@ function md_inv_view_req() {
 			'm'  => $see_stock ? $it->min_stock : null,
 			'p'  => $see_price ? $it->price : null,
 			'b'  => $it->barcode,
+			'l'  => (string) $it->location,
 			'o'  => $it->onord > 0 ? 1 : 0,
 		);
 	}
@@ -47,6 +48,7 @@ function md_inv_view_req() {
 
 	$cfg = array(
 		'items' => $items, 'cats' => $cats, 'vendors' => $vend, 'teams' => $teams,
+		'favs' => md_inv_fav_map(), 'favNonce' => wp_create_nonce( 'md_inv_post' ),
 		'recent' => md_inv_recent_by_team( (int) $S['recent_days'] ), 'pending' => $pend, 'recentDays' => (int) $S['recent_days'],
 		'L' => array( 'c1' => $S['label_cat1'], 'c2' => $S['label_cat2'], 'c3' => $S['label_cat3'] ),
 		'opt' => array(
@@ -222,7 +224,7 @@ function md_inv_view_mine() {
 					<div class="iv-card__sub"><?php echo esc_html( md_inv_team_name( $r->team_id ) . ' · ' . $r->requester . ' · ' . md_inv_date( $r->created_at, 'H:i' ) ); ?></div>
 					<?php if ( '' !== $r->note ) : ?><div class="iv-card__note">“<?php echo esc_html( $r->note ); ?>”</div><?php endif; ?>
 					<?php if ( 'rejected' === $r->status && '' !== $r->admin_note ) : ?><div class="iv-card__why">반려 사유: <?php echo esc_html( $r->admin_note ); ?></div><?php endif; ?>
-					<?php if ( 'done' === $r->status ) : ?><div class="iv-card__sub">✓ <?php echo esc_html( md_inv_ago( $r->done_at ) . ' · ' . $r->done_by ); ?><?php echo '' !== $r->admin_note ? ' · ' . esc_html( $r->admin_note ) : ''; ?></div><?php endif; ?>
+					<?php if ( 'done' === $r->status ) : ?><div class="iv-card__sub">✓ <?php echo esc_html( md_inv_ago( $r->done_at ) . ' · ' . $r->done_by . ( '' !== (string) $r->receiver ? ' → 받은 사람 ' . $r->receiver : '' ) ); ?><?php echo '' !== $r->admin_note ? ' · ' . esc_html( $r->admin_note ) : ''; ?></div><?php endif; ?>
 					<?php if ( 'pending' === $r->status && (int) $r->ord_id ) : ?><div class="iv-card__sub iv-accent">주문해 두었습니다 — 들어오면 출고됩니다</div><?php endif; ?>
 					<?php if ( 'pending' === $r->status && '' !== $r->admin_note ) : ?><div class="iv-card__sub"><?php echo esc_html( $r->admin_note ); ?></div><?php endif; ?>
 				</div>

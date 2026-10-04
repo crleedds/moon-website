@@ -80,6 +80,8 @@ function md_inv_settings_ops() {
 			<?php
 			md_inv_s_check( 'out_allow_negative', '재고보다 많이 출고 허용', '꺼 두기를 권합니다. 켜면 재고가 음수가 될 수 있어 실사로 맞춰야 합니다.' );
 			md_inv_s_check( 'adjust_need_note', '실사 조정에 사유 필수' );
+			md_inv_s_check( 'out_need_receiver', '출고할 때 받은 사람 확인', '출고 버튼을 누르면 받은 사람 칸이 뜹니다(신청자 이름이 미리 채워져 있어 맞으면 그대로 출고). 끄면 버튼 한 번에 바로 출고합니다.' );
+			md_inv_s_check( 'price_follow_in', '입고 단가가 다르면 품목 단가도 바꾸기', '켜 두면 새 단가가 다음 주문 · 통계에 쓰입니다. 어느 쪽이든 단가 변동은 기록됩니다.' );
 			echo '<div class="iv-grid3">';
 			md_inv_s_num( 'order_need_recent', '「주문 필요」는 최근 몇 주 안에 출고된 품목만', '주 (0 = 전체)', 0, 104 );
 			md_inv_s_num( 'min_cover_weeks', '안전재고 제안: 몇 주 쓸 만큼', '주', 1, 26 );

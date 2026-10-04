@@ -39,6 +39,14 @@ jobs:
           sudo apt-get install -y lftp
 
       # v3.44.199 · 업로드 전에 구문 검사. 여기서 걸리면 서버에는 올라가지 않는다.
+      # 원장 지시 (2026-10-04) · 문법 검사를 운영 서버와 같은 PHP 8.4 로 — 러너 기본 PHP(8.3)로는 8.4 에서만 나는 오류를 못 잡는다
+      - name: Set up PHP 8.4 (서버와 같은 버전)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: none
+
       - name: PHP syntax check
         run: |
           php -v > /dev/null 2>&1 || { sudo apt-get update -qq && sudo apt-get install -y -qq php-cli; }

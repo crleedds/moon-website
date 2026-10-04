@@ -32,6 +32,7 @@ function md_inv_admin_dialogs( $which ) {
 	if ( isset( $which['release'] ) ) {
 		md_inv_dlg_open( 'dlg-release', '출고', 'req_release' );
 		echo '<label class="iv-f"><span>내줄 수량</span><input class="iv-input" type="number" inputmode="numeric" name="qty" min="1" required></label>';
+		echo '<label class="iv-f"><span>받은 사람' . ( md_inv_set( 'out_need_receiver' ) ? ' <em>*</em>' : '' ) . '</span><input class="iv-input" name="receiver" maxlength="40" placeholder="실제로 받아 간 사람"' . ( md_inv_set( 'out_need_receiver' ) ? ' required' : '' ) . '></label>';
 		echo '<p class="iv-help" data-t="hint"></p>';
 		echo '<label class="iv-f"><span>메모 (요청한 팀에 보임)</span><input class="iv-input" name="note" maxlength="300"></label>';
 		md_inv_dlg_close( '출고' );
@@ -115,7 +116,8 @@ function md_inv_admin_dialogs( $which ) {
 		echo '<label class="iv-f"><span>품목 <em>*</em></span>'; md_inv_item_picker( 'item_id', true ); echo '</label>';
 		echo '<div class="iv-grid2"><label class="iv-f"><span>수량 <em>*</em></span><input class="iv-input" type="number" inputmode="numeric" name="qty" min="1" required></label>';
 		echo '<label class="iv-f"><span>팀 <em>*</em></span>'; md_inv_team_select( 'team_id', 0, true ); echo '</label></div>';
-		echo '<label class="iv-f"><span>메모</span><input class="iv-input" name="note" maxlength="300" placeholder="예: 받은 사람 이름"></label>';
+		echo '<label class="iv-f"><span>받은 사람' . ( md_inv_set( 'out_need_receiver' ) ? ' <em>*</em>' : '' ) . '</span><input class="iv-input" name="receiver" maxlength="40"' . ( md_inv_set( 'out_need_receiver' ) ? ' required' : '' ) . '></label>';
+		echo '<label class="iv-f"><span>메모</span><input class="iv-input" name="note" maxlength="300"></label>';
 		md_inv_dlg_close( '출고' );
 	}
 	if ( isset( $which['adjust'] ) ) {
@@ -165,6 +167,9 @@ function md_inv_item_form_fields( $it, $with_open = false ) {
 	echo '</div>';
 	md_inv_cat_selects( $it ? $it->cat1 : 0, $it ? $it->cat2 : 0, $it ? $it->cat3 : 0 );
 	echo '<div class="iv-grid2">';
+	echo '<label class="iv-f"><span>보관 위치</span><input class="iv-input" name="location" maxlength="100" list="iv-loc-dl" value="' . esc_attr( $it ? (string) $it->location : '' ) . '" placeholder="예: 9층 재료실 2번 선반"></label>';
+	static $locs = false;
+	if ( ! $locs ) { $locs = true; echo '<datalist id="iv-loc-dl">'; foreach ( md_inv_locations() as $lc ) { echo '<option value="' . esc_attr( $lc ) . '"></option>'; } echo '</datalist>'; }
 	echo '<label class="iv-f"><span>바코드</span><span class="iv-inline"><input class="iv-input" name="barcode" maxlength="100" value="' . esc_attr( $it ? $it->barcode : '' ) . '"><button type="button" class="iv-btn iv-btn--icon" data-scanto="barcode" aria-label="바코드 스캔">' . md_inv_icon( 'scan', 18 ) . '</button></span></label>';
 	if ( $with_open ) {
 		echo '<label class="iv-f" data-newonly><span>처음 수량 (새 품목일 때만)</span><input class="iv-input" name="open_qty" type="number" inputmode="numeric" min="0"></label>';
@@ -201,12 +206,16 @@ function md_inv_req_actions( $r ) {
 		echo '<button type="button" class="iv-btn iv-btn--ghost iv-btn--sm" data-dlg="dlg-reqdone" data-set="' . esc_attr( wp_json_encode( $base ) ) . '">처리 완료</button>';
 	} else {
 		$stock = (int) $r->stock;
-		if ( $stock >= $r->qty || md_inv_set( 'out_allow_negative' ) ) {
+		$need_rcv = (bool) md_inv_set( 'out_need_receiver' );
+		if ( $need_rcv && ( $stock > 0 || md_inv_set( 'out_allow_negative' ) ) ) {
+			$q1 = ( $stock >= $r->qty || md_inv_set( 'out_allow_negative' ) ) ? $r->qty : $stock;
+			echo '<button type="button" class="iv-btn iv-btn--primary iv-btn--sm" data-dlg="dlg-release" data-set="' . esc_attr( wp_json_encode( array_merge( $base, array( 'qty' => $q1, 'qty@max' => $r->qty, 'receiver' => $r->requester, 'hint' => $q1 < $r->qty ? '재고가 ' . $stock . '개라 있는 만큼 먼저 내주고, 남은 ' . ( $r->qty - $q1 ) . '개는 대기로 남깁니다.' : '' ) ) ) ) . '">' . ( $q1 < $r->qty ? '있는 만큼 ' . (int) $q1 . '개 출고' : (int) $r->qty . '개 출고' ) . '</button>';
+		} elseif ( $stock >= $r->qty || md_inv_set( 'out_allow_negative' ) ) {
 			echo '<form method="post" class="iv-inline-form">';
 			md_inv_hidden( 'req_release' );
 			echo '<input type="hidden" name="id" value="' . (int) $r->id . '"><input type="hidden" name="qty" value="' . (int) $r->qty . '">';
 			echo '<button class="iv-btn iv-btn--primary iv-btn--sm">' . (int) $r->qty . '개 출고</button></form>';
-		} elseif ( $stock > 0 ) {
+		} elseif ( $stock > 0 && ! $need_rcv ) {
 			echo '<form method="post" class="iv-inline-form" data-confirm="' . esc_attr( '재고 ' . $stock . '개만 먼저 내주고, 남은 ' . ( $r->qty - $stock ) . '개는 대기로 남깁니다.' ) . '">';
 			md_inv_hidden( 'req_release' );
 			echo '<input type="hidden" name="id" value="' . (int) $r->id . '"><input type="hidden" name="qty" value="' . $stock . '">';
@@ -218,7 +227,7 @@ function md_inv_req_actions( $r ) {
 			echo '<button type="button" class="iv-btn iv-btn--' . ( $stock > 0 ? 'ghost' : 'primary' ) . ' iv-btn--sm" data-dlg="dlg-reqorder" data-set="' . esc_attr( wp_json_encode( $set ) ) . '">주문</button>';
 		}
 		if ( $stock > 0 || md_inv_set( 'out_allow_negative' ) ) :
-		$set = array_merge( $base, array( 'qty' => min( $r->qty, max( 1, $stock ) ), 'qty@max' => $r->qty, 'hint' => '요청 ' . $r->qty . '개 · 지금 재고 ' . $stock . '개. 요청보다 적게 내주면 남은 수량은 대기로 남습니다.' ) );
+		$set = array_merge( $base, array( 'qty' => min( $r->qty, max( 1, $stock ) ), 'qty@max' => $r->qty, 'receiver' => $r->requester, 'hint' => '요청 ' . $r->qty . '개 · 지금 재고 ' . $stock . '개. 요청보다 적게 내주면 남은 수량은 대기로 남습니다.' ) );
 		echo '<button type="button" class="iv-btn iv-btn--ghost iv-btn--sm" data-dlg="dlg-release" data-set="' . esc_attr( wp_json_encode( $set ) ) . '">수량 정해 출고</button>';
 		endif;
 	}
@@ -440,7 +449,7 @@ function md_inv_view_stock() {
 		<tbody>
 		<?php foreach ( $rows as $it ) : ?>
 			<tr class="is-<?php echo esc_attr( md_inv_stock_state( $it ) ); ?>">
-				<td data-l="품목" class="iv-td-name"><?php if ( $admin ) : ?><a href="<?php echo esc_url( md_inv_url( array( 'iv' => 'item', 'id' => $it->id ) ) ); ?>"><?php echo esc_html( $it->name ); ?></a><?php else : echo esc_html( $it->name ); endif; ?><small><?php echo esc_html( $it->unit ); ?><?php echo $it->barcode ? ' · ▮▮' : ''; ?></small></td>
+				<td data-l="품목" class="iv-td-name"><?php if ( $admin ) : ?><a href="<?php echo esc_url( md_inv_url( array( 'iv' => 'item', 'id' => $it->id ) ) ); ?>"><?php echo esc_html( $it->name ); ?></a><?php else : echo esc_html( $it->name ); endif; ?><small><?php echo esc_html( $it->unit ); ?><?php echo $it->barcode ? ' · ▮▮' : ''; ?><?php echo '' !== (string) $it->location ? ' · 📍' . esc_html( $it->location ) : ''; ?></small></td>
 				<td data-l="업체"><?php echo esc_html( md_inv_vendor_name( $it->vendor_id ) ); ?></td>
 				<td data-l="<?php echo esc_attr( $S['label_cat2'] ); ?>"><?php echo esc_html( md_inv_item_catpath( $it ) ); ?></td>
 				<td data-l="단가" class="r"><?php echo $admin || $S['staff_see_price'] ? esc_html( md_inv_num( $it->price ) ) : '—'; ?></td>
@@ -488,7 +497,7 @@ function md_inv_view_item() {
 	<div class="iv-item-head">
 		<div>
 			<h2 class="iv-item-title"><?php echo esc_html( $it->name ); ?><?php if ( ! $it->active ) : ?> <span class="iv-tag">숨김</span><?php endif; ?></h2>
-			<p class="iv-muted"><?php echo esc_html( implode( ' · ', array_filter( array( $it->code, $v ? $v->name . ( $v->prepaid ? ' (선납)' : '' ) : '', md_inv_item_catpath( $it, true ), $it->unit, $it->barcode ? '바코드 ' . $it->barcode : '' ) ) ) ); ?></p>
+			<p class="iv-muted"><?php echo esc_html( implode( ' · ', array_filter( array( $it->code, $v ? $v->name . ( $v->prepaid ? ' (선납)' : '' ) : '', md_inv_item_catpath( $it, true ), $it->unit, $it->barcode ? '바코드 ' . $it->barcode : '', '' !== (string) $it->location ? '📍 ' . $it->location : '' ) ) ) ); ?></p>
 		</div>
 		<div class="iv-kpis">
 			<div class="iv-kpi"><span>재고</span><b><?php echo md_inv_stock_badge( $it ); // phpcs:ignore ?></b></div>
@@ -507,7 +516,7 @@ function md_inv_view_item() {
 		<button type="button" class="iv-btn iv-btn--ghost" data-dlg="dlg-order" data-set="<?php echo esc_attr( wp_json_encode( array( 'item_id' => $id, 'item_id_pick' => $pick, 'qty' => max( 1, $it->min_stock - max( 0, $it->stock ) ), 'price' => $it->price ) ) ); ?>">주문</button>
 		<button type="button" class="iv-btn iv-btn--ghost" data-dlg="dlg-item" data-set="<?php echo esc_attr( wp_json_encode( array(
 			'title' => '품목 고치기', 'id' => $id, 'name' => $it->name, 'vendor_id' => (int) $it->vendor_id, 'unit' => $it->unit, 'price' => $it->price,
-			'min_stock' => $it->min_stock, 'barcode' => $it->barcode, 'note' => (string) $it->note, 'cat1' => (int) $it->cat1, 'cat2' => (int) $it->cat2, 'cat3' => (int) $it->cat3,
+			'min_stock' => $it->min_stock, 'barcode' => $it->barcode, 'note' => (string) $it->note, 'cat1' => (int) $it->cat1, 'cat2' => (int) $it->cat2, 'cat3' => (int) $it->cat3, 'location' => (string) $it->location,
 		) ) ); ?>"><?php echo md_inv_icon( 'edit', 16 ); // phpcs:ignore ?>고치기</button>
 		<form method="post" class="iv-inline-form" data-confirm="<?php echo esc_attr( $it->active ? '이 품목을 숨길까요? 요청 화면과 재고 목록에서 빠지고, 기록은 그대로 남습니다.' : '이 품목을 다시 보이게 할까요?' ); ?>">
 			<?php md_inv_hidden( 'item_active' ); ?><input type="hidden" name="id" value="<?php echo (int) $id; ?>"><input type="hidden" name="on" value="<?php echo $it->active ? 0 : 1; ?>">
@@ -524,6 +533,15 @@ function md_inv_view_item() {
 	<?php if ( $by_team ) : ?>
 		<h3 class="iv-h3">최근 3개월 팀별 출고</h3>
 		<div class="iv-pills"><?php foreach ( $by_team as $b ) : ?><span class="iv-pill"><?php echo esc_html( md_inv_team_name( $b->team_id ) ); ?> <b><?php echo (int) $b->q; ?></b></span><?php endforeach; ?></div>
+	<?php endif; ?>
+
+	<?php $ph = md_inv_price_history( $id, 20 ); if ( $ph ) : ?>
+		<h3 class="iv-h3">단가 변동</h3>
+		<div class="iv-table-wrap"><table class="iv-table"><thead><tr><th>일시</th><th class="r">전</th><th class="r">후</th><th class="r">변동</th><th>어디서</th><th>누가</th></tr></thead><tbody>
+		<?php foreach ( $ph as $p ) : $pct = $p->old_price ? round( ( $p->new_price - $p->old_price ) / $p->old_price * 100, 1 ) : null; ?>
+			<tr><td data-l="일시"><?php echo esc_html( md_inv_date( $p->created_at, 'y.n.j' ) ); ?></td><td data-l="전" class="r"><?php echo esc_html( md_inv_num( $p->old_price ) ); ?></td><td data-l="후" class="r"><b><?php echo esc_html( md_inv_num( $p->new_price ) ); ?></b></td><td data-l="변동" class="r <?php echo $p->new_price > $p->old_price ? 'iv-danger' : 'iv-accent'; ?>"><?php echo null === $pct ? '—' : esc_html( ( $pct > 0 ? '+' : '' ) . $pct . '%' ); ?></td><td data-l="어디서"><?php echo esc_html( $p->source . ( $p->applied ? '' : ' (품목 단가는 그대로)' ) ); ?></td><td data-l="누가"><?php echo esc_html( $p->person ); ?></td></tr>
+		<?php endforeach; ?>
+		</tbody></table></div>
 	<?php endif; ?>
 
 	<h3 class="iv-h3">입출고 기록 <span class="iv-n"><?php echo (int) $ledn; ?></span></h3>
@@ -560,7 +578,7 @@ function md_inv_ledger_table( $rows, $with_item = true ) {
 		echo '<td data-l="수량" class="r"><b>' . ( $l->qty > 0 ? '+' : '' ) . (int) $l->qty . '</b>' . ( null !== $l->counted ? ' <small>(센 수량 ' . (int) $l->counted . ')</small>' : '' ) . '</td>';
 		echo '<td data-l="금액" class="r">' . esc_html( md_inv_num( $amt ) ) . '</td>';
 		echo '<td data-l="팀 · 업체">' . esc_html( trim( md_inv_team_name( $l->team_id ) . ( $l->team_id && $l->vendor_id ? ' · ' : '' ) . ( in_array( $l->type, array( 'in', 'return' ), true ) ? md_inv_vendor_name( $l->vendor_id ) : '' ) ) ) . '</td>';
-		echo '<td data-l="처리 · 메모">' . esc_html( trim( $l->person . ' ' . $l->note ) ) . ( $l->voided ? '<br><small class="iv-danger">취소됨 · ' . esc_html( $l->void_note ) . '</small>' : '' ) . '</td>';
+		echo '<td data-l="처리 · 메모">' . esc_html( trim( $l->person . ' ' . $l->note ) ) . ( '' !== (string) $l->receiver ? '<br><small>받은 사람 ' . esc_html( $l->receiver ) . '</small>' : '' ) . ( $l->voided ? '<br><small class="iv-danger">취소됨 · ' . esc_html( $l->void_note ) . '</small>' : '' ) . '</td>';
 		echo '<td class="iv-td-act">';
 		if ( ! $l->voided ) {
 			$what = md_inv_type_label( $l->type ) . ' · ' . $l->item_name . ' ' . ( $l->qty > 0 ? '+' : '' ) . $l->qty . ' · ' . md_inv_date( $l->created_at, 'n/j H:i' );

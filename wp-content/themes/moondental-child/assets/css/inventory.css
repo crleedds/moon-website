@@ -605,3 +605,12 @@ textarea.iv-input { min-height: 44px; resize: vertical; line-height: 1.5; }
 .iv-ordpick legend { padding: 0 6px; font-weight: 800; font-size: .86rem; color: var(--iv-sub); }
 .iv-dup .iv-h3 small { font-weight: 600; }
 @media (max-width: 760px) { .iv-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* v5.7 · 즐겨찾기 별 · 보관 위치 · 받은 사람 */
+.iv-row__ctl { gap: 6px; align-items: center; }
+.iv-star { width: 38px; height: 38px; flex: none; border: 0; border-radius: 50%; background: transparent; color: var(--iv-mute); font-size: 1.3rem; line-height: 1; cursor: pointer; }
+.iv-star:hover { background: var(--iv-bg); color: var(--iv-warn); }
+.iv-star.is-on { color: #E0A21B; }
+.iv-input--loc { width: 150px; }
+.iv-table--pick .iv-pick__sign { min-width: 110px; }
+@media print { .iv-table--pick .iv-pick__sign { width: 120px; } }

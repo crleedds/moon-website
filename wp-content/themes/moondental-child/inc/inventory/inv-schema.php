@@ -17,7 +17,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_INV_SCHEMA', 1 );
+define( 'MD_INV_SCHEMA', 2 );
 
 /** 테이블 이름 */
 function md_inv_t( $key = '' ) {
@@ -34,6 +34,8 @@ function md_inv_t( $key = '' ) {
 		'deposit' => $p . 'deposit',  // 선납 입금 장부
 		'backup'  => $p . 'backup',   // 백업 보관함
 		'log'     => $p . 'log',      // 작업 기록 (누가 언제 무엇을)
+		'fav'     => $p . 'fav',      // 팀 즐겨찾기 (v5.7)
+		'price'   => $p . 'price',    // 단가 변동 기록 (v5.7)
 	);
 	return '' === $key ? $t : $t[ $key ];
 }
@@ -54,6 +56,7 @@ function md_inv_migrate() {
 			update_option( 'md_inv_last_report_key', null === $k ? 'install' : $k, false );
 		}
 	}
+	if ( $cur < 2 ) { md_inv_schema_2(); }
 
 	update_option( 'md_inv_schema', MD_INV_SCHEMA );
 	delete_transient( 'md_inv_migrating' );
@@ -264,6 +267,48 @@ function md_inv_schema_1() {
 	) $c;" );
 
 	md_inv_seed_defaults();
+}
+
+/**
+ * 2단계 (v5.7) · 보관 위치 · 받은 사람 · 팀 즐겨찾기 · 단가 변동 기록
+ */
+function md_inv_schema_2() {
+	global $wpdb;
+	$t = md_inv_t();
+	$c = $wpdb->get_charset_collate();
+	dbDelta( "CREATE TABLE {$t['fav']} (
+		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		team_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		item_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		created_at DATETIME NULL DEFAULT NULL,
+		PRIMARY KEY  (id),
+		UNIQUE KEY team_item (team_id, item_id)
+	) $c;" );
+	dbDelta( "CREATE TABLE {$t['price']} (
+		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		item_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		vendor_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		old_price BIGINT NOT NULL DEFAULT 0,
+		new_price BIGINT NOT NULL DEFAULT 0,
+		source VARCHAR(12) NOT NULL DEFAULT '',
+		applied TINYINT(1) NOT NULL DEFAULT 1,
+		person VARCHAR(100) NOT NULL DEFAULT '',
+		created_at DATETIME NULL DEFAULT NULL,
+		PRIMARY KEY  (id),
+		KEY item_id (item_id),
+		KEY created_at (created_at)
+	) $c;" );
+	md_inv_add_col( $t['item'], 'location', "VARCHAR(100) NOT NULL DEFAULT ''" );
+	md_inv_add_col( $t['ledger'], 'receiver', "VARCHAR(100) NOT NULL DEFAULT ''" );
+	md_inv_add_col( $t['req'], 'receiver', "VARCHAR(100) NOT NULL DEFAULT ''" );
+}
+
+/** 열이 없을 때만 더한다 */
+function md_inv_add_col( $table, $col, $def ) {
+	global $wpdb;
+	$cols = $wpdb->get_col( "SHOW COLUMNS FROM $table" );
+	if ( is_array( $cols ) && in_array( $col, $cols, true ) ) { return; }
+	$wpdb->query( "ALTER TABLE $table ADD COLUMN $col $def" );
 }
 
 /**

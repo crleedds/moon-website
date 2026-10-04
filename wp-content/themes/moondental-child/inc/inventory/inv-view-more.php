@@ -87,7 +87,7 @@ function md_inv_view_receive() {
 			<?php md_inv_hidden( 'recv_scan', $here ); ?>
 			<input type="hidden" name="item_id" value="<?php echo (int) $it->id; ?>">
 			<div class="iv-qc-card__name"><?php echo esc_html( $it->name ); ?></div>
-			<div class="iv-qc-card__sub"><?php echo esc_html( trim( ( $v ? $v->name . ( $v->prepaid ? ' (선납)' : '' ) : '' ) . ' · ' . $it->unit, ' ·' ) ); ?> · 지금 재고 <?php echo (int) $it->stock; ?></div>
+			<div class="iv-qc-card__sub"><?php echo esc_html( trim( ( $v ? $v->name . ( $v->prepaid ? ' (선납)' : '' ) : '' ) . ' · ' . $it->unit, ' ·' ) ); ?> · 지금 재고 <?php echo (int) $it->stock; ?><?php echo '' !== (string) $it->location ? ' · 📍' . esc_html( $it->location ) : ''; ?></div>
 			<?php if ( $mine ) : ?>
 				<fieldset class="iv-ordpick"><legend>어느 주문이 들어왔나요?</legend>
 					<?php foreach ( $mine as $i => $o ) : $left = (int) $o->qty - (int) $o->recv_qty; ?>

@@ -89,9 +89,10 @@ function md_inv_act_items_bulk() {
 			'barcode' => $it->barcode, 'note' => (string) $it->note,
 		);
 		$changed = false;
-		foreach ( array( 'unit', 'price', 'min_stock', 'vendor_id', 'cat2' ) as $k ) {
+		$d['location'] = (string) $it->location;
+		foreach ( array( 'unit', 'price', 'min_stock', 'vendor_id', 'cat2', 'location' ) as $k ) {
 			if ( ! array_key_exists( $k, $row ) ) { continue; }
-			$v = in_array( $k, array( 'unit' ), true ) ? md_inv_txt( $row[ $k ], 30 ) : md_inv_int( $row[ $k ] );
+			$v = 'unit' === $k ? md_inv_txt( $row[ $k ], 30 ) : ( 'location' === $k ? md_inv_txt( $row[ $k ], 100 ) : md_inv_int( $row[ $k ] ) );
 			if ( (string) $v !== (string) $d[ $k ] ) {
 				$d[ $k ] = $v;
 				$changed = true;
@@ -121,7 +122,9 @@ function md_inv_view_fix() {
 	foreach ( $all as $it ) { if ( isset( $sug[ (int) $it->id ] ) && $sug[ (int) $it->id ]->suggest !== (int) $it->min_stock ) { $nsug++; } }
 	$cnt['minsug'] = $nsug;
 	$cnt['dup']    = count( $dups );
-	$kinds = array( 'noprice' => '단가 없음', 'nounit' => '단위 없음', 'nocat' => $S['label_cat2'] . ' 없음', 'neg' => '재고 음수', 'minsug' => '안전재고 제안', 'dup' => '중복 품목' );
+	$cnt['noloc'] = 0;
+	foreach ( $all as $it ) { if ( '' === (string) $it->location ) { $cnt['noloc']++; } }
+	$kinds = array( 'noprice' => '단가 없음', 'nounit' => '단위 없음', 'nocat' => $S['label_cat2'] . ' 없음', 'noloc' => '위치 없음', 'neg' => '재고 음수', 'minsug' => '안전재고 제안', 'dup' => '중복 품목' );
 	if ( ! isset( $kinds[ $k ] ) ) { $k = 'noprice'; }
 	$q    = md_inv_get( 'iq' );
 	$rows = array();
@@ -130,6 +133,7 @@ function md_inv_view_fix() {
 		if ( 'nounit' === $k && '' !== trim( (string) $it->unit ) ) { continue; }
 		if ( 'nocat' === $k && (int) $it->cat2 ) { continue; }
 		if ( 'neg' === $k && $it->stock >= 0 ) { continue; }
+		if ( 'noloc' === $k && '' !== (string) $it->location ) { continue; }
 		if ( '' !== $q && false === mb_stripos( $it->name . ' ' . md_inv_vendor_name( $it->vendor_id ), $q ) ) { continue; }
 		$rows[] = $it;
 	}
@@ -156,12 +160,13 @@ function md_inv_view_fix() {
 	<form method="post" data-dirtywarn id="iv-fix-form">
 		<?php md_inv_hidden( 'items_bulk' ); ?>
 		<div class="iv-table-wrap"><table class="iv-table iv-table--fix">
-			<thead><tr><th>품목</th><th>업체</th><th>단위</th><th class="r">단가 (원)</th><th class="r">안전재고</th><th><?php echo esc_html( $S['label_cat2'] ); ?></th><th class="r">재고</th></tr></thead>
+			<thead><tr><th>품목</th><th>업체</th><th>보관 위치</th><th>단위</th><th class="r">단가 (원)</th><th class="r">안전재고</th><th><?php echo esc_html( $S['label_cat2'] ); ?></th><th class="r">재고</th></tr></thead>
 			<tbody>
 			<?php foreach ( $show as $it ) : $id = (int) $it->id; ?>
 				<tr data-fixrow>
 					<td data-l="품목" class="iv-td-name"><a href="<?php echo esc_url( md_inv_url( array( 'iv' => 'item', 'id' => $id ) ) ); ?>"><?php echo esc_html( $it->name ); ?></a></td>
 					<td data-l="업체"><select class="iv-input iv-input--sm" name="f[<?php echo $id; ?>][vendor_id]" data-orig="<?php echo (int) $it->vendor_id; ?>"><option value="0">—</option><?php foreach ( md_inv_vendors() as $v ) : ?><option value="<?php echo (int) $v->id; ?>"<?php selected( (int) $it->vendor_id, (int) $v->id ); ?>><?php echo esc_html( $v->name ); ?></option><?php endforeach; ?></select></td>
+					<td data-l="보관 위치"><input class="iv-input iv-input--sm iv-input--loc" name="f[<?php echo $id; ?>][location]" value="<?php echo esc_attr( (string) $it->location ); ?>" data-orig="<?php echo esc_attr( (string) $it->location ); ?>" list="iv-loc-dl2" maxlength="100"></td>
 					<td data-l="단위"><input class="iv-input iv-input--sm iv-input--unit" name="f[<?php echo $id; ?>][unit]" value="<?php echo esc_attr( $it->unit ); ?>" data-orig="<?php echo esc_attr( $it->unit ); ?>" list="iv-unit-dl2" maxlength="20"></td>
 					<td data-l="단가" class="r"><input class="iv-input iv-input--sm iv-input--num" name="f[<?php echo $id; ?>][price]" value="<?php echo (int) $it->price; ?>" data-orig="<?php echo (int) $it->price; ?>" inputmode="numeric"></td>
 					<td data-l="안전재고" class="r"><input class="iv-input iv-input--sm iv-input--num" type="number" min="0" name="f[<?php echo $id; ?>][min_stock]" value="<?php echo (int) $it->min_stock; ?>" data-orig="<?php echo (int) $it->min_stock; ?>" inputmode="numeric"></td>
@@ -171,6 +176,7 @@ function md_inv_view_fix() {
 			<?php endforeach; ?>
 			</tbody>
 		</table></div>
+		<datalist id="iv-loc-dl2"><?php foreach ( md_inv_locations() as $lc ) : ?><option value="<?php echo esc_attr( $lc ); ?>"></option><?php endforeach; ?></datalist>
 		<datalist id="iv-unit-dl2"><?php foreach ( array( 'ea', 'box', '갑', '팩', '봉', '병', '개', '각', '롤', '세트', '통', '대' ) as $u ) : ?><option value="<?php echo esc_attr( $u ); ?>"></option><?php endforeach; ?></datalist>
 		<div class="iv-stickyfoot"><span class="iv-muted" id="iv-fix-n"></span><button class="iv-btn iv-btn--primary iv-btn--lg">고친 것 저장</button></div>
 	</form>
@@ -279,7 +285,7 @@ function md_inv_view_qcount() {
 			<?php md_inv_hidden( 'stock_adjust', $here ); ?>
 			<input type="hidden" name="item_id" value="<?php echo (int) $it->id; ?>">
 			<div class="iv-qc-card__name"><?php echo esc_html( $it->name ); ?></div>
-			<div class="iv-qc-card__sub"><?php echo esc_html( trim( md_inv_vendor_name( $it->vendor_id ) . ' · ' . $it->unit . ' · ' . md_inv_item_catpath( $it ), ' ·' ) ); ?></div>
+			<div class="iv-qc-card__sub"><?php echo esc_html( trim( md_inv_vendor_name( $it->vendor_id ) . ' · ' . $it->unit . ' · ' . md_inv_item_catpath( $it ), ' ·' ) ); ?><?php echo '' !== (string) $it->location ? ' · 📍' . esc_html( $it->location ) : ''; ?></div>
 			<div class="iv-qc-card__book">장부 재고 <b><?php echo (int) $it->stock; ?></b> <?php echo esc_html( $it->unit ); ?></div>
 			<label class="iv-f"><span>실제로 센 수량</span><input class="iv-input iv-qc-card__num" type="number" inputmode="numeric" min="0" name="counted" required autofocus value=""></label>
 			<label class="iv-f"><span>사유</span><input class="iv-input" name="note" value="<?php echo esc_attr( $note_default ); ?>" maxlength="200" required></label>
@@ -304,8 +310,13 @@ function md_inv_view_qcount() {
 
 function md_inv_view_pick() {
 	$reqs = md_inv_reqs( array( 'status' => 'pending', 'limit' => 1000, 'order' => 'old' ) );
+	$loc  = array();
+	foreach ( md_inv_items( array( 'active' => -1 ) ) as $it ) { $loc[ (int) $it->id ] = (string) $it->location; }
 	$by   = array();
-	foreach ( $reqs as $r ) { $by[ (int) $r->team_id ][] = $r; }
+	foreach ( $reqs as $r ) { $r->loc = isset( $loc[ (int) $r->item_id ] ) ? $loc[ (int) $r->item_id ] : ''; $by[ (int) $r->team_id ][] = $r; }
+	/* 팀 안에서는 보관 위치 순 — 창고를 한 바퀴 돌며 꺼내게 (위치 없는 것은 뒤로) */
+	foreach ( $by as &$g ) { usort( $g, function ( $a, $b ) { if ( '' === $a->loc xor '' === $b->loc ) { return '' === $a->loc ? 1 : -1; } return strcmp( $a->loc, $b->loc ) ?: strcmp( $a->name, $b->name ); } ); }
+	unset( $g );
 	?>
 	<p class="iv-crumb iv-no-print"><a href="<?php echo esc_url( md_inv_url( array( 'iv' => 'todo' ) ) ); ?>">← 할 일</a></p>
 	<div class="iv-toolbar iv-no-print">
@@ -318,15 +329,17 @@ function md_inv_view_pick() {
 		<section class="iv-pick">
 			<h3 class="iv-h3"><?php echo esc_html( md_inv_team_name( $tid ) ); ?> <small><?php echo count( $rows ); ?>건</small></h3>
 			<table class="iv-table iv-table--pick">
-				<thead><tr><th class="iv-pick__chk">✓</th><th>품목</th><th class="r">수량</th><th class="r">재고</th><th>신청자</th><th>메모</th></tr></thead>
+				<thead><tr><th class="iv-pick__chk">✓</th><th>위치</th><th>품목</th><th class="r">수량</th><th class="r">재고</th><th>신청자</th><th>메모</th><th>받은 사람</th></tr></thead>
 				<tbody><?php foreach ( $rows as $r ) : ?>
 					<tr class="<?php echo $r->item_id && $r->stock < $r->qty ? 'is-short' : ''; ?>">
 						<td class="iv-pick__chk"><span class="iv-box"></span></td>
+						<td data-l="위치"><?php echo esc_html( $r->loc ); ?></td>
 						<td data-l="품목"><b><?php echo esc_html( $r->name ); ?></b><?php echo $r->item_id ? '' : ' <small>(목록에 없음)</small>'; ?><?php echo $r->urgent ? ' <span class="iv-tag iv-tag--hot">급함</span>' : ''; ?></td>
 						<td data-l="수량" class="r"><b><?php echo (int) $r->qty; ?></b> <?php echo esc_html( $r->unit ); ?></td>
 						<td data-l="재고" class="r"><?php echo $r->item_id ? (int) $r->stock : '—'; ?></td>
 						<td data-l="신청자"><?php echo esc_html( $r->requester ); ?></td>
 						<td data-l="메모"><?php echo esc_html( $r->note ); ?></td>
+						<td data-l="받은 사람" class="iv-pick__sign"></td>
 					</tr>
 				<?php endforeach; ?></tbody>
 			</table>

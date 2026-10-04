@@ -130,7 +130,17 @@ function md_inv_view_stats() {
 			</tbody></table></div>
 			<?php endif; ?>
 		</section>
-		<?php if ( $admin ) : ?>
+		<?php if ( $admin ) : $ph = md_inv_price_history( 0, 30, 180 ); ?>
+		<section class="iv-panel iv-panel--wide">
+			<h3 class="iv-h3">단가 변동 <small>최근 6개월 · 30건</small></h3>
+			<?php if ( ! $ph ) : md_inv_empty( '단가가 바뀐 품목이 없습니다.' ); else : ?>
+			<div class="iv-table-wrap"><table class="iv-table"><thead><tr><th>일시</th><th>품목</th><th>업체</th><th class="r">전</th><th class="r">후</th><th class="r">변동</th><th>어디서</th></tr></thead><tbody>
+			<?php foreach ( $ph as $p ) : $pct = $p->old_price ? round( ( $p->new_price - $p->old_price ) / $p->old_price * 100, 1 ) : null; ?>
+				<tr><td data-l="일시"><?php echo esc_html( md_inv_date( $p->created_at, 'n/j' ) ); ?></td><td data-l="품목"><a href="<?php echo esc_url( md_inv_url( array( 'iv' => 'item', 'id' => $p->item_id ) ) ); ?>"><?php echo esc_html( $p->item_name ); ?></a></td><td data-l="업체"><?php echo esc_html( md_inv_vendor_name( $p->vendor_id ) ); ?></td><td data-l="전" class="r"><?php echo esc_html( md_inv_num( $p->old_price ) ); ?></td><td data-l="후" class="r"><b><?php echo esc_html( md_inv_num( $p->new_price ) ); ?></b></td><td data-l="변동" class="r <?php echo $p->new_price > $p->old_price ? 'iv-danger' : 'iv-accent'; ?>"><?php echo null === $pct ? '—' : esc_html( ( $pct > 0 ? '+' : '' ) . $pct . '%' ); ?></td><td data-l="어디서"><?php echo esc_html( $p->source ); ?></td></tr>
+			<?php endforeach; ?>
+			</tbody></table></div>
+			<?php endif; ?>
+		</section>
 		<section class="iv-panel iv-panel--wide">
 			<h3 class="iv-h3">업체별 구매(입고) 금액 <small><?php echo esc_html( $pname ); ?> · 무상 제외 · 반품 차감</small></h3>
 			<?php

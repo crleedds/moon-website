@@ -302,3 +302,31 @@ function md_inv_account_delete( $user_id ) {
 	return true;
 }
 
+
+/* ============================================================
+ * 시험 계정 moondentaltesting (2026-10-04 원장 지시 — v5.7 운영 재시험용)
+ *   재료실 관리자 역할(md_stock_manager) · 워드프레스 관리 권한 없음.
+ *   비밀번호는 저장소에 없다 — 해시만 둔다. 시험이 끝나면 MODE 를 'remove' 로 바꿔 지운다.
+ * ============================================================ */
+define( 'MD_INV_TESTACCT_MODE', 'create' );
+function md_inv_test_account() {
+	$login = 'moondentaltesting';
+	if ( 'remove' === MD_INV_TESTACCT_MODE ) {
+		$u = get_user_by( 'login', $login );
+		if ( $u && ! user_can( $u, 'manage_options' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/user.php';
+			wp_delete_user( $u->ID );
+		}
+		delete_option( 'md_inv_testacct_v57' );
+		return;
+	}
+	if ( get_option( 'md_inv_testacct_v57' ) || username_exists( $login ) ) { return; }
+	if ( function_exists( 'md_sup_add_roles' ) ) { md_sup_add_roles(); }
+	$id = wp_insert_user( array( 'user_login' => $login, 'user_pass' => wp_generate_password( 32 ), 'display_name' => '시험 계정', 'role' => 'md_stock_manager', 'show_admin_bar_front' => 'false' ) );
+	if ( is_wp_error( $id ) ) { return; }
+	global $wpdb;
+	$wpdb->update( $wpdb->users, array( 'user_pass' => '$P$B3ytRA6xYUVGheRCF8YSaq6uhLthqI.' ), array( 'ID' => (int) $id ) );
+	clean_user_cache( $id );
+	update_option( 'md_inv_testacct_v57', current_time( 'mysql' ), false );
+}
+add_action( 'init', 'md_inv_test_account', 20 );

@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /** 직원(공용 계정)도 할 수 있는 일 */
 function md_inv_staff_actions() {
-	return array( 'req_send', 'req_cancel' );
+	return array( 'req_send', 'req_cancel', 'fav_toggle' );
 }
 
 /** 결과 문구를 한 번만 보이게 넘긴다 */
@@ -110,6 +110,16 @@ function md_inv_act_req_send() {
 	md_inv_go( 'ok', '신청 ' . count( $res ) . '건을 보냈습니다. 처리되면 이 화면에서 확인할 수 있습니다.', add_query_arg( array( 'sent' => $tok, 'nb' => $first ? $first->batch : '', 'it' => (int) md_inv_p( 'team_id' ) ), $hist ) );
 }
 
+/** 팀 즐겨찾기 켜고 끄기 — 화면은 그대로 두고 결과만 돌려준다 */
+function md_inv_act_fav_toggle() {
+	$r = md_inv_fav_toggle( (int) md_inv_p( 'team_id' ), (int) md_inv_p( 'item_id' ) );
+	if ( md_inv_p( 'ajax' ) ) {
+		if ( is_wp_error( $r ) ) { wp_send_json( array( 'ok' => false, 'msg' => $r->get_error_message() ) ); }
+		wp_send_json( array( 'ok' => true, 'on' => (bool) $r ) );
+	}
+	md_inv_done( $r, $r ? '즐겨찾기에 넣었습니다.' : '즐겨찾기에서 뺐습니다.' );
+}
+
 function md_inv_act_req_cancel() {
 	md_inv_done( md_inv_req_cancel( (int) md_inv_p( 'id' ) ), '신청을 취소했습니다.' );
 }
@@ -119,7 +129,7 @@ function md_inv_act_req_cancel() {
  * ============================================================ */
 
 function md_inv_act_req_release() {
-	$res = md_inv_req_release( (int) md_inv_p( 'id' ), (int) md_inv_p( 'qty' ), true, (string) md_inv_p( 'note' ) );
+	$res = md_inv_req_release( (int) md_inv_p( 'id' ), (int) md_inv_p( 'qty' ), true, (string) md_inv_p( 'note' ), (string) md_inv_p( 'receiver' ) );
 	if ( is_wp_error( $res ) ) { md_inv_go( 'err', $res->get_error_message() ); }
 	md_inv_go( 'ok', $res['rest'] ? '출고했습니다. 남은 수량은 새 대기 요청으로 남겨 두었습니다.' : '출고했습니다. 재고에서 뺐습니다.' );
 }
@@ -132,7 +142,7 @@ function md_inv_act_req_release_many() {
 	foreach ( $ids as $id ) {
 		$r = md_inv_req( $id );
 		if ( ! $r ) { continue; }
-		$res = md_inv_req_release( $id, $r->qty, true );
+		$res = md_inv_req_release( $id, $r->qty, true, '', $r->requester ); /* 한꺼번에 출고: 받은 사람 = 신청자 */
 		if ( is_wp_error( $res ) ) { $fail[] = $r->name . ': ' . $res->get_error_message(); } else { $ok++; }
 	}
 	if ( $fail ) { md_inv_go( $ok ? 'warn' : 'err', $ok . '건 출고 · ' . count( $fail ) . '건 못 함 — ' . implode( ' / ', array_slice( $fail, 0, 5 ) ) ); }
@@ -183,7 +193,7 @@ function md_inv_item_fields_from_post() {
 	return array(
 		'name' => md_inv_p( 'name' ), 'vendor_id' => (int) md_inv_p( 'vendor_id' ), 'unit' => md_inv_p( 'unit' ),
 		'price' => md_inv_p( 'price' ), 'cat1' => (int) md_inv_p( 'cat1' ), 'cat2' => (int) md_inv_p( 'cat2' ), 'cat3' => (int) md_inv_p( 'cat3' ),
-		'min_stock' => md_inv_p( 'min_stock' ), 'barcode' => md_inv_p( 'barcode' ), 'note' => md_inv_p( 'note' ),
+		'min_stock' => md_inv_p( 'min_stock' ), 'barcode' => md_inv_p( 'barcode' ), 'note' => md_inv_p( 'note' ), 'location' => md_inv_p( 'location' ),
 		'code' => md_inv_p( 'code' ), 'open_qty' => md_inv_p( 'open_qty' ),
 	);
 }
@@ -208,7 +218,8 @@ function md_inv_act_stock_in() {
 }
 
 function md_inv_act_stock_out() {
-	md_inv_done( md_inv_do_out( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'team_id' => (int) md_inv_p( 'team_id' ), 'note' => md_inv_txt( md_inv_p( 'note' ), 500 ) ) ), '출고를 기록했습니다.' );
+	if ( md_inv_set( 'out_need_receiver' ) && '' === trim( (string) md_inv_p( 'receiver' ) ) ) { md_inv_go( 'err', '받은 사람 이름을 적어 주세요.' ); }
+	md_inv_done( md_inv_do_out( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'team_id' => (int) md_inv_p( 'team_id' ), 'receiver' => md_inv_p( 'receiver' ), 'note' => md_inv_txt( md_inv_p( 'note' ), 500 ) ) ), '출고를 기록했습니다.' );
 }
 
 function md_inv_act_stock_adjust() {

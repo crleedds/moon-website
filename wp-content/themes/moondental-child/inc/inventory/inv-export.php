@@ -31,6 +31,7 @@ function md_inv_dataset_names() {
 		'vendors'  => '업체',
 		'teams'    => '팀',
 		'cats'     => '분류',
+		'prices'   => '단가 변동',
 	);
 }
 
@@ -48,36 +49,36 @@ function md_inv_dataset( $key, $a = array() ) {
 	switch ( $key ) {
 		case 'items':
 		case 'low':
-			$out['head']  = array( '코드', '품목명', '업체', $L['label_cat1'], $L['label_cat2'], $L['label_cat3'], '단위', '단가', '현재고', '안전재고', '상태', '대기 요청', '주문 중', '재고 금액', '바코드', '비고', '숨김' );
+			$out['head']  = array( '코드', '품목명', '업체', $L['label_cat1'], $L['label_cat2'], $L['label_cat3'], '단위', '단가', '현재고', '안전재고', '상태', '대기 요청', '주문 중', '재고 금액', '바코드', '비고', '숨김', '보관 위치' );
 			$out['num']   = array( 7 => 'won', 8 => 'n', 9 => 'n', 11 => 'n', 12 => 'n', 13 => 'won' );
-			$out['width'] = array( 9, 40, 16, 12, 14, 12, 7, 11, 8, 8, 7, 8, 8, 12, 14, 30, 6 );
+			$out['width'] = array( 9, 40, 16, 12, 14, 12, 7, 11, 8, 8, 7, 8, 8, 12, 14, 30, 6, 18 );
 			$items = 'low' === $key ? md_inv_need_order( true ) : md_inv_items( array( 'active' => -1 ) );
 			$st = array( 'out' => '품절', 'low' => '부족', 'ok' => '' );
 			foreach ( $items as $it ) {
 				$out['rows'][] = array( $it->code, $it->name, md_inv_vendor_name( $it->vendor_id ), md_inv_cat_name( $it->cat1 ), md_inv_cat_name( $it->cat2 ), md_inv_cat_name( $it->cat3 ),
 					$it->unit, $it->price, $it->stock, $it->min_stock, $st[ md_inv_stock_state( $it ) ], $it->pend, $it->onord, max( 0, $it->stock ) * $it->price,
-					$it->barcode, (string) $it->note, $it->active ? '' : '숨김' );
+					$it->barcode, (string) $it->note, $it->active ? '' : '숨김', (string) $it->location );
 			}
 			break;
 
 		case 'ledger':
-			$out['head']  = array( '일시', '구분', '코드', '품목', '수량', '단위', '단가', '금액', '팀', '업체', '무상', '처리자', '비고', '요청 번호', '주문 번호', '실사 수량', '취소됨' );
+			$out['head']  = array( '일시', '구분', '코드', '품목', '수량', '단위', '단가', '금액', '팀', '업체', '무상', '처리자', '비고', '요청 번호', '주문 번호', '실사 수량', '취소됨', '받은 사람' );
 			$out['num']   = array( 4 => 'n', 6 => 'won', 7 => 'won', 15 => 'n' );
 			$out['width'] = array( 16, 6, 9, 36, 7, 6, 10, 12, 14, 14, 5, 10, 30, 8, 8, 8, 14 );
 			foreach ( md_inv_ledger( array( 'from' => $a['from'], 'to' => $a['to'], 'limit' => 0 ) ) as $l ) {
 				$out['rows'][] = array( substr( $l->created_at, 0, 16 ), md_inv_type_label( $l->type ), $l->item_code, $l->item_name, (int) $l->qty, $l->unit, (int) $l->price, (int) $l->qty * (int) $l->price,
 					md_inv_team_name( $l->team_id ), md_inv_vendor_name( $l->vendor_id ), $l->free ? '무상' : '', $l->person, $l->note,
-					$l->req_id ? $l->req_id : '', $l->ord_id ? $l->ord_id : '', null === $l->counted ? '' : (int) $l->counted, $l->voided ? '취소 · ' . $l->void_note : '' );
+					$l->req_id ? $l->req_id : '', $l->ord_id ? $l->ord_id : '', null === $l->counted ? '' : (int) $l->counted, $l->voided ? '취소 · ' . $l->void_note : '', (string) $l->receiver );
 			}
 			break;
 
 		case 'requests':
-			$out['head']  = array( '번호', '요청 일시', '팀', '요청자', '품목', '목록에 없음', '업체(직접)', '요청 수량', '출고 수량', '단위', '상태', '처리 일시', '처리자', '요청 메모', '처리 메모', '긴급' );
+			$out['head']  = array( '번호', '요청 일시', '팀', '요청자', '품목', '목록에 없음', '업체(직접)', '요청 수량', '출고 수량', '단위', '상태', '처리 일시', '처리자', '요청 메모', '처리 메모', '긴급', '받은 사람' );
 			$out['num']   = array( 7 => 'n', 8 => 'n' );
 			$out['width'] = array( 7, 16, 14, 10, 36, 8, 14, 8, 8, 6, 9, 16, 10, 24, 24, 5 );
 			foreach ( md_inv_reqs( array( 'from' => $a['from'], 'to' => $a['to'], 'limit' => 0 ) ) as $r ) {
 				$out['rows'][] = array( (int) $r->id, substr( $r->created_at, 0, 16 ), md_inv_team_name( $r->team_id ), $r->requester, $r->name, $r->item_id ? '' : '목록에 없음', $r->custom_vendor,
-					$r->qty, $r->qty_out, $r->unit, md_inv_req_status_label( $r->status ), $r->done_at ? substr( $r->done_at, 0, 16 ) : '', $r->done_by, $r->note, $r->admin_note, $r->urgent ? '긴급' : '' );
+					$r->qty, $r->qty_out, $r->unit, md_inv_req_status_label( $r->status ), $r->done_at ? substr( $r->done_at, 0, 16 ) : '', $r->done_by, $r->note, $r->admin_note, $r->urgent ? '긴급' : '', (string) $r->receiver );
 			}
 			break;
 
@@ -96,6 +97,15 @@ function md_inv_dataset( $key, $a = array() ) {
 				if ( isset( $have[ (int) $o->id ] ) ) { continue; }
 				$out['rows'][] = array( (int) $o->id, substr( $o->created_at, 0, 10 ), $o->item_name, md_inv_vendor_name( $o->vendor_id ), (int) $o->qty, (int) $o->recv_qty, (int) $o->price, (int) $o->amount,
 					md_inv_ord_status_label( $o->status ), '', $o->req_id ? $o->req_id : '', $o->note, $o->cancel_note, $o->person );
+			}
+			break;
+
+		case 'prices':
+			$out['head']  = array( '일시', '품목', '업체', '전 단가', '새 단가', '변동(%)', '어디서', '품목 단가 반영', '누가' );
+			$out['num']   = array( 3 => 'won', 4 => 'won' );
+			$out['width'] = array( 16, 36, 16, 11, 11, 9, 8, 10, 10 );
+			foreach ( md_inv_price_history( 0, 5000 ) as $p ) {
+				$out['rows'][] = array( substr( $p->created_at, 0, 16 ), $p->item_name, md_inv_vendor_name( $p->vendor_id ), (int) $p->old_price, (int) $p->new_price, $p->old_price ? round( ( $p->new_price - $p->old_price ) / $p->old_price * 100, 1 ) : '', $p->source, $p->applied ? 'O' : '', $p->person );
 			}
 			break;
 

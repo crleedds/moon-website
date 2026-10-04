@@ -283,7 +283,7 @@ function md_inv_import_appsheet( $files, $opt = array() ) {
 	$t = md_inv_t();
 	md_inv_lock();
 	md_inv_begin();
-	foreach ( array( 'cat', 'team', 'vendor', 'item', 'ledger', 'req', 'ord', 'deposit' ) as $k ) { $wpdb->query( "DELETE FROM {$t[$k]}" ); }
+	foreach ( array( 'cat', 'team', 'vendor', 'item', 'ledger', 'req', 'ord', 'deposit', 'fav', 'price' ) as $k ) { $wpdb->query( "DELETE FROM {$t[$k]}" ); }
 
 	/* 분류 */
 	$map1 = array(); $map2 = array(); $map3 = array();

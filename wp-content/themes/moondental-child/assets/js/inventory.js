@@ -321,6 +321,9 @@
     cart.lines = cart.lines.filter(function (l) { return l.custom || byId[l.id]; });
     var who = O.remember ? store.get(WHO, {}) : {};
     var state = { q: '', chip: '', team: teamName[who.team] ? Number(who.team) : 0, shown: PAGE };
+    var favs = D.favs || {};
+    function favList() { return state.team && favs[state.team] ? favs[state.team] : []; }
+    function isFav(id) { return favList().indexOf(id) >= 0; }
 
     var list = $('#iv-list'), q = $('#iv-q'), chipsEl = $('#iv-chips');
 
@@ -346,7 +349,7 @@
       $$('#iv-teamgrid [data-team]').forEach(function (b) { b.classList.toggle('is-on', Number(b.dataset.team) === state.team); });
       var ct = $('#iv-cart-team'); if (ct && state.team) ct.value = String(state.team);
       if (O.remember) { who.team = state.team; store.set(WHO, who); }
-      if (!silent) { if (recentOf().length) state.chip = 'star'; state.shown = PAGE; renderChips(); render(); }
+      if (!silent) { state.chip = favList().length ? 'fav' : (recentOf().length ? 'star' : 'all'); state.shown = PAGE; renderChips(); render(); }
       steps();
     }
     $('#iv-teamgrid').addEventListener('click', function (e) {
@@ -372,6 +375,7 @@
     D.items.forEach(function (it) { var g = it.c2 || 0; if (!groups[g]) { groups[g] = []; groupOrder.push(g); } groups[g].push(it); });
     groupOrder.sort(function (a, b) { if (!a) return 1; if (!b) return -1; var pa = catSort[catParent[a]] || 0, pb = catSort[catParent[b]] || 0; return pa !== pb ? pa - pb : (catSort[a] || 0) - (catSort[b] || 0); });
     function itemsOfChip(chip) {
+      if (chip === 'fav') return favList().map(function (id) { return byId[id]; }).filter(Boolean);
       if (chip === 'star') return recentOf();
       if (chip === 'cart') return cart.lines.filter(function (l) { return !l.custom; }).map(function (l) { return byId[l.id]; });
       if (chip === 'all' || chip === '') return D.items;
@@ -384,7 +388,9 @@
     function renderChips() {
       var h = '';
       var rc = recentOf().length, cc = cart.lines.filter(function (l) { return !l.custom; }).length;
-      if (rc) h += chipBtn('star', '⭐ 우리 팀 자주 신청', rc);
+      var fc = favList().filter(function (id) { return byId[id]; }).length;
+      if (state.team) h += chipBtn('fav', '★ 우리 팀 즐겨찾기', fc);
+      if (rc) h += chipBtn('star', '🕘 우리 팀 최근 신청', rc);
       if (cc) h += chipBtn('cart', '🛒 담은 품목', cc);
       h += chipBtn('all', '전체', D.items.length);
       groupOrder.forEach(function (g) { h += chipBtn('g' + g, g ? (catName[g] || '기타') : '분류 없음', groups[g].length); });
@@ -416,13 +422,17 @@
     function rowHtml(it) {
       var v = vendors[it.v] ? vendors[it.v].n : '';
       var pend = state.team && D.pending[state.team] && D.pending[state.team][it.i];
-      var showCat = (state.q || state.chip === 'all' || state.chip === 'star' || state.chip === 'cart') && it.c2;
-      var sub = [v, it.u, (O.price && it.p ? num(it.p) + '원' : ''), showCat ? catName[it.c2] : ''].filter(Boolean).join(' · ');
+      var showCat = (state.q || state.chip === 'all' || state.chip === 'star' || state.chip === 'cart' || state.chip === 'fav') && it.c2;
+      var sub = [v, it.u, (O.price && it.p ? num(it.p) + '원' : ''), showCat ? catName[it.c2] : '', it.l ? '📍' + it.l : ''].filter(Boolean).join(' · ');
       return '<div class="iv-row' + (qtyOf(it.i) ? ' is-in' : '') + '" data-id="' + it.i + '">' +
         '<button type="button" class="iv-row__main" data-add="' + it.i + '"><span class="iv-row__name">' + hl(it.n) + '</span><span class="iv-row__sub">' + esc(sub) + '</span>' +
         (pend ? '<span class="iv-row__dup">우리 팀이 이미 ' + pend + '개 신청해 둠</span>' : '') + '</button>' +
         '<span class="iv-row__stock">' + stockHtml(it) + '</span>' +
-        '<span class="iv-row__ctl">' + ctlHtml(it.i) + '</span></div>';
+        '<span class="iv-row__ctl">' + favBtn(it.i) + ctlHtml(it.i) + '</span></div>';
+    }
+    function favBtn(id) {
+      var on = isFav(id);
+      return '<button type="button" class="iv-star' + (on ? ' is-on' : '') + '" data-fav="' + id + '" aria-pressed="' + on + '" aria-label="' + (on ? '즐겨찾기에서 빼기' : '우리 팀 즐겨찾기에 넣기') + '" title="' + (on ? '즐겨찾기에서 빼기' : '우리 팀 즐겨찾기') + '">' + (on ? '★' : '☆') + '</button>';
     }
     function ctlHtml(id) {
       var n = qtyOf(id);
@@ -434,7 +444,7 @@
         r.classList.toggle('is-in', qtyOf(id) > 0);
         var c = r.querySelector('.iv-row__ctl');
         var focused = document.activeElement && c.contains(document.activeElement) && document.activeElement.tagName === 'INPUT';
-        if (!focused) c.innerHTML = ctlHtml(id);
+        if (!focused) c.innerHTML = favBtn(id) + ctlHtml(id);
       });
     }
     /* 초성: 「ㅇㅋㅅ」 → 「알콜솜」 */
@@ -482,7 +492,28 @@
 
     var nudged = false;
     function nudgeTeam() { if (nudged) return; nudged = true; toast('담았습니다. 신청 전에 우리 팀을 골라 주세요'); $('#iv-teambtn').classList.add('is-pulse'); }
+    var favBusy = false;
     list.addEventListener('click', function (e) {
+      var fb = e.target.closest('[data-fav]');
+      if (fb) {
+        if (!state.team) { openDlg('iv-team-dlg'); toast('즐겨찾기는 팀마다 따로 있어요. 먼저 우리 팀을 골라 주세요'); return; }
+        if (favBusy) return; favBusy = true;
+        var id = Number(fb.dataset.fav), fd = new FormData();
+        fd.append('md_inv', 'fav_toggle'); fd.append('_mdinv', D.favNonce); fd.append('ajax', '1');
+        fd.append('team_id', state.team); fd.append('item_id', id); fd.append('back', location.href);
+        fetch(location.href, { method: 'POST', body: fd, credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (j) {
+          favBusy = false;
+          if (!j || !j.ok) { toast((j && j.msg) || '즐겨찾기를 바꾸지 못했습니다'); return; }
+          var l = favs[state.team] = favs[state.team] || [];
+          var k = l.indexOf(id);
+          if (j.on && k < 0) l.push(id);
+          if (!j.on && k >= 0) l.splice(k, 1);
+          toast(j.on ? '★ 우리 팀 즐겨찾기에 넣었습니다' : '즐겨찾기에서 뺐습니다');
+          renderChips();
+          if (state.chip === 'fav' && !j.on) render(); else updateRow(id);
+        }).catch(function () { favBusy = false; toast('연결이 끊겼습니다. 다시 눌러 주세요'); });
+        return;
+      }
       var a = e.target.closest('[data-add]'); if (a) { add(Number(a.dataset.add), 1); if (!state.team) nudgeTeam(); return; }
       var i = e.target.closest('[data-inc]'); if (i) { add(Number(i.dataset.inc), 1); return; }
       var d = e.target.closest('[data-dec]'); if (d) { add(Number(d.dataset.dec), -1); return; }
@@ -609,7 +640,7 @@
     }
 
     setTeam(state.team, true);
-    state.chip = recentOf().length ? 'star' : (store.get('md_inv_chip_v1', 'all') || 'all');
+    state.chip = favList().length ? 'fav' : (recentOf().length ? 'star' : (store.get('md_inv_chip_v1', 'all') || 'all'));
     if (state.chip.charAt(0) === 'g' && !groups[Number(state.chip.slice(1))]) state.chip = 'all';
     renderChips(); render(); renderBar(); steps();
     /* 팀을 한 번도 고르지 않은 기기면 먼저 묻는다 */

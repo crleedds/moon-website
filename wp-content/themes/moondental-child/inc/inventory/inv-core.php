@@ -39,6 +39,8 @@ function md_inv_setting_defaults() {
 		'stats_months'        => 12,
 		'stats_include_prepaid' => 0, // 사용금액 통계에 선납 업체 품목 포함
 		'min_cover_weeks'     => 4,   // 안전재고 제안: 몇 주 쓸 만큼
+		'out_need_receiver'   => 1,   // 출고할 때 받은 사람 확인 (신청자 이름이 미리 채워짐)
+		'price_follow_in'     => 1,   // 입고 단가가 다르면 품목 단가도 따라 바꿈
 		'notify_new'          => 0,   // 새 요청 메일
 		'notify_to'           => '',
 		'report_on'           => 1,   // 정기 엑셀 보고서 메일
@@ -531,6 +533,7 @@ function md_inv_item_save( $id, $d ) {
 		'cat3'      => (int) ( isset( $d['cat3'] ) ? $d['cat3'] : 0 ),
 		'min_stock' => max( 0, md_inv_int( isset( $d['min_stock'] ) ? $d['min_stock'] : 0 ) ),
 		'barcode'   => md_inv_txt( isset( $d['barcode'] ) ? $d['barcode'] : '', 100 ),
+		'location'  => md_inv_txt( isset( $d['location'] ) ? $d['location'] : '', 100 ),
 		'note'      => md_inv_mtxt( isset( $d['note'] ) ? $d['note'] : '', 2000 ),
 		'updated_at'=> current_time( 'mysql' ),
 	);
@@ -556,8 +559,11 @@ function md_inv_item_save( $id, $d ) {
 	}
 
 	if ( $id > 0 ) {
-		if ( ! md_inv_item( $id ) ) { return new WP_Error( 'gone', '품목을 찾을 수 없습니다.' ); }
+		$old = md_inv_item( $id );
+		if ( ! $old ) { return new WP_Error( 'gone', '품목을 찾을 수 없습니다.' ); }
+		if ( ! array_key_exists( 'location', $d ) ) { unset( $row['location'] ); } /* 위치 칸이 없는 양식에서 저장하면 위치를 지우지 않는다 */
 		$wpdb->update( $t, $row, array( 'id' => $id ) );
+		if ( (int) $old->price !== (int) $row['price'] ) { md_inv_price_log( $id, (int) $old->price, (int) $row['price'], '수정', true ); }
 		md_inv_log( '품목 수정', $row['name'] );
 		return $id;
 	}
@@ -657,6 +663,7 @@ function md_inv_ledger_add( $type, $item_id, $qty, $o = array() ) {
 		'free'       => ! empty( $o['free'] ) ? 1 : 0,
 		'person'     => mb_substr( isset( $o['person'] ) ? (string) $o['person'] : md_inv_me(), 0, 100 ),
 		'note'       => mb_substr( isset( $o['note'] ) ? (string) $o['note'] : '', 0, 500 ),
+		'receiver'   => mb_substr( isset( $o['receiver'] ) ? md_inv_txt( $o['receiver'], 100 ) : '', 0, 100 ),
 		'user_id'    => get_current_user_id(),
 		'created_at' => isset( $o['created_at'] ) ? $o['created_at'] : current_time( 'mysql' ),
 	) );
@@ -765,6 +772,7 @@ function md_inv_returnable( $in_id ) {
 function md_inv_do_in( $item_id, $qty, $o = array() ) {
 	md_inv_lock();
 	$r = md_inv_ledger_add( 'in', $item_id, $qty, $o );
+	if ( ! is_wp_error( $r ) && isset( $o['price'] ) && '' !== trim( (string) $o['price'] ) ) { md_inv_price_from_in( $item_id, md_inv_int( $o['price'] ) ); }
 	md_inv_unlock();
 	if ( ! is_wp_error( $r ) ) { $it = md_inv_item( $item_id ); md_inv_log( '입고', $it->name . ' +' . (int) $qty ); }
 	return $r;
@@ -781,7 +789,7 @@ function md_inv_do_out( $item_id, $qty, $o = array() ) {
 	}
 	$r = md_inv_ledger_add( 'out', $item_id, $qty, $o );
 	md_inv_unlock();
-	if ( ! is_wp_error( $r ) ) { $it = md_inv_item( $item_id ); md_inv_log( '출고', $it->name . ' −' . (int) $qty . ' · ' . md_inv_team_name( $o['team_id'] ) ); }
+	if ( ! is_wp_error( $r ) ) { $it = md_inv_item( $item_id ); md_inv_log( '출고', $it->name . ' −' . (int) $qty . ' · ' . md_inv_team_name( $o['team_id'] ) . ( ! empty( $o['receiver'] ) ? ' · 받음 ' . $o['receiver'] : '' ) ); }
 	return $r;
 }
 
@@ -958,7 +966,7 @@ function md_inv_reqs( $a = array(), $count_only = false ) {
  * @param int  $qty_out 실제로 내주는 수량
  * @param bool $split   요청보다 적게 내줄 때 남은 수량을 대기로 남길지
  */
-function md_inv_req_release( $id, $qty_out, $split = true, $note = '' ) {
+function md_inv_req_release( $id, $qty_out, $split = true, $note = '', $receiver = '' ) {
 	global $wpdb;
 	$t   = md_inv_t();
 	$req = md_inv_req( $id );
@@ -968,6 +976,8 @@ function md_inv_req_release( $id, $qty_out, $split = true, $note = '' ) {
 	$qty_out = (int) $qty_out;
 	if ( $qty_out < 1 ) { return new WP_Error( 'qty', '출고 수량은 1 이상이어야 합니다. 내줄 수 없으면 「반려」를 눌러 주세요.' ); }
 	if ( $qty_out > $req->qty ) { return new WP_Error( 'qty', '요청 수량(' . $req->qty . ')보다 많이 출고할 수 없습니다. 수량을 늘리려면 요청 수량을 먼저 고쳐 주세요.' ); }
+	$receiver = md_inv_txt( $receiver, 100 );
+	if ( md_inv_set( 'out_need_receiver' ) && '' === $receiver ) { return new WP_Error( 'receiver', '받은 사람 이름을 적어 주세요.' ); }
 
 	if ( ! md_inv_lock() ) { return new WP_Error( 'busy', '다른 출고를 처리하는 중입니다. 잠시 뒤 다시 눌러 주세요.' ); }
 	$stock = md_inv_stock( $req->item_id );
@@ -979,13 +989,13 @@ function md_inv_req_release( $id, $qty_out, $split = true, $note = '' ) {
 	md_inv_begin();
 	$me = md_inv_me();
 	$claimed = $wpdb->query( $wpdb->prepare(
-		"UPDATE {$t['req']} SET status = 'done', qty_out = %d, done_at = %s, done_by = %s, admin_note = %s WHERE id = %d AND status = 'pending'",
-		$qty_out, current_time( 'mysql' ), $me, mb_substr( trim( $note ), 0, 500 ), (int) $id
+		"UPDATE {$t['req']} SET status = 'done', qty_out = %d, done_at = %s, done_by = %s, admin_note = %s, receiver = %s WHERE id = %d AND status = 'pending'",
+		$qty_out, current_time( 'mysql' ), $me, mb_substr( trim( $note ), 0, 500 ), $receiver, (int) $id
 	) );
 	if ( ! $claimed ) { md_inv_rollback(); md_inv_unlock(); return new WP_Error( 'race', '방금 다른 곳에서 이 요청을 처리했습니다. 새로고침해 확인해 주세요.' ); }
 
 	$lid = md_inv_ledger_add( 'out', $req->item_id, $qty_out, array(
-		'team_id' => $req->team_id, 'req_id' => $req->id, 'person' => $me,
+		'team_id' => $req->team_id, 'req_id' => $req->id, 'person' => $me, 'receiver' => $receiver,
 		'note'    => '요청 출고 · ' . $req->requester,
 	) );
 	if ( is_wp_error( $lid ) ) { md_inv_rollback(); md_inv_unlock(); return $lid; }
@@ -1003,7 +1013,7 @@ function md_inv_req_release( $id, $qty_out, $split = true, $note = '' ) {
 	}
 	md_inv_commit();
 	md_inv_unlock();
-	md_inv_log( '출고', $req->name . ' ' . $qty_out . ( $qty_out < $req->qty ? '/' . $req->qty : '' ) . ' · ' . md_inv_team_name( $req->team_id ) . ' · ' . $req->requester );
+	md_inv_log( '출고', $req->name . ' ' . $qty_out . ( $qty_out < $req->qty ? '/' . $req->qty : '' ) . ' · ' . md_inv_team_name( $req->team_id ) . ' · ' . $req->requester . ( '' !== $receiver ? ' · 받음 ' . $receiver : '' ) );
 	return array( 'ledger' => $lid, 'rest' => $rest_id );
 }
 
@@ -1205,6 +1215,7 @@ function md_inv_ord_receive( $id, $qty, $d = array() ) {
 	if ( is_wp_error( $lid ) ) { md_inv_rollback(); md_inv_unlock(); return $lid; }
 	md_inv_commit();
 	md_inv_unlock();
+	if ( ! $free ) { md_inv_price_from_in( $ord->item_id, $price ); }
 	md_inv_log( '입고', $ord->item_name . ' +' . $qty . ' (주문 #' . $ord->id . ( $free ? ', 무상' : '' ) . ')' );
 	return $lid;
 }
@@ -1446,4 +1457,75 @@ function md_inv_stock_value( $items = null ) {
 	$s = 0;
 	foreach ( $items as $it ) { if ( $it->stock > 0 ) { $s += $it->stock * $it->price; } }
 	return $s;
+}
+
+
+/* ============================================================
+ * v5.7 · 단가 변동 기록
+ * ============================================================ */
+
+/** 단가가 바뀐 것을 남긴다. $applied = 품목 단가에도 반영했는가 */
+function md_inv_price_log( $item_id, $old, $new, $source, $applied ) {
+	global $wpdb;
+	if ( (int) $old === (int) $new ) { return; }
+	$it = md_inv_item( $item_id );
+	$wpdb->insert( md_inv_t( 'price' ), array(
+		'item_id' => (int) $item_id, 'vendor_id' => $it ? (int) $it->vendor_id : 0,
+		'old_price' => (int) $old, 'new_price' => (int) $new, 'source' => $source, 'applied' => $applied ? 1 : 0,
+		'person' => mb_substr( md_inv_me(), 0, 100 ), 'created_at' => current_time( 'mysql' ),
+	) );
+}
+
+/** 입고 단가가 품목 단가와 다르면 기록하고(설정에 따라) 품목 단가를 따라 바꾼다. 단가 0 입고는 무시 */
+function md_inv_price_from_in( $item_id, $price ) {
+	global $wpdb;
+	$price = (int) $price;
+	$it    = md_inv_item( $item_id );
+	if ( ! $it || $price <= 0 || $price === (int) $it->price ) { return; }
+	$follow = (bool) md_inv_set( 'price_follow_in' );
+	if ( $follow ) { $wpdb->update( md_inv_t( 'item' ), array( 'price' => $price, 'updated_at' => current_time( 'mysql' ) ), array( 'id' => (int) $item_id ) ); }
+	md_inv_price_log( $item_id, (int) $it->price, $price, '입고', $follow );
+}
+
+function md_inv_price_history( $item_id = 0, $limit = 100, $days = 0 ) {
+	global $wpdb;
+	$w = array( '1=1' );
+	if ( $item_id ) { $w[] = $wpdb->prepare( 'p.item_id = %d', (int) $item_id ); }
+	if ( $days ) { $w[] = $wpdb->prepare( 'p.created_at >= %s', date( 'Y-m-d H:i:s', current_time( 'timestamp' ) - (int) $days * DAY_IN_SECONDS ) ); }
+	return $wpdb->get_results( 'SELECT p.*, COALESCE(i.name, \'\') AS item_name, COALESCE(i.unit, \'\') AS unit FROM ' . md_inv_t( 'price' ) . ' p LEFT JOIN ' . md_inv_t( 'item' ) . ' i ON i.id = p.item_id WHERE ' . implode( ' AND ', $w ) . ' ORDER BY p.created_at DESC, p.id DESC LIMIT ' . (int) $limit );
+}
+
+/* ============================================================
+ * v5.7 · 팀 즐겨찾기
+ * ============================================================ */
+
+/** [ team_id => [ item_id, … ] ] */
+function md_inv_fav_map() {
+	global $wpdb;
+	$m = array();
+	foreach ( (array) $wpdb->get_results( 'SELECT team_id, item_id FROM ' . md_inv_t( 'fav' ) . ' ORDER BY id' ) as $r ) { $m[ (int) $r->team_id ][] = (int) $r->item_id; }
+	return $m;
+}
+
+/** 켜고 끄기 → 켜졌으면 true */
+function md_inv_fav_toggle( $team_id, $item_id ) {
+	global $wpdb;
+	$t = md_inv_t( 'fav' );
+	$team_id = (int) $team_id; $item_id = (int) $item_id;
+	$ok_team = false;
+	foreach ( md_inv_teams() as $tm ) { if ( (int) $tm->id === $team_id ) { $ok_team = true; } }
+	if ( ! $ok_team ) { return new WP_Error( 'team', '팀을 먼저 골라 주세요.' ); }
+	$it = md_inv_item( $item_id );
+	if ( ! $it ) { return new WP_Error( 'item', '품목을 찾을 수 없습니다.' ); }
+	$has = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $t WHERE team_id = %d AND item_id = %d", $team_id, $item_id ) );
+	if ( $has ) { $wpdb->delete( $t, array( 'id' => (int) $has ) ); return false; }
+	$wpdb->insert( $t, array( 'team_id' => $team_id, 'item_id' => $item_id, 'created_at' => current_time( 'mysql' ) ) );
+	return true;
+}
+
+/** 쓰고 있는 보관 위치 이름들 (고르는 칸) */
+function md_inv_locations() {
+	global $wpdb;
+	$v = $wpdb->get_col( 'SELECT DISTINCT location FROM ' . md_inv_t( 'item' ) . " WHERE location <> '' ORDER BY location" );
+	return is_array( $v ) ? $v : array();
 }
