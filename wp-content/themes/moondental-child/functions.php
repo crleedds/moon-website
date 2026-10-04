@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '5.9.2' );
+define( 'MOONDENTAL_VERSION', '6.0.0' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2158,6 +2158,8 @@ foreach ( array(
 unset( $_md_sup_f, $_md_sup_p );
 /* v4.22 · 재고관리 v5 — AppSheet 판을 대신하는 라운지 재고관리 (inc/inventory) */
 if ( file_exists( MOONDENTAL_DIR . '/inc/inventory/inventory.php' ) ) { require_once MOONDENTAL_DIR . '/inc/inventory/inventory.php'; }
+/* v5.10 · 미니차트 — AppSheet 「Mini Chart」를 옮긴 라운지 도구 (inc/minichart) */
+if ( file_exists( MOONDENTAL_DIR . '/inc/minichart/minichart.php' ) ) { require_once MOONDENTAL_DIR . '/inc/minichart/minichart.php'; }
 
 
 /* ============================================================

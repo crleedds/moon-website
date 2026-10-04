@@ -7,37 +7,37 @@
    ========================================================================== */
 
 body.md-v5 {
-  --v5-bg: #F6F3EE;
-  --v5-paper: #FBF9F6;
-  --v5-ink: #1E1A17;
-  --v5-sub: #5F5650;
-  --v5-mute: #8F857D;
-  --v5-line: #DDD5CC;
-  --v5-hair: #E8E1D8;
-  --v5-bronze: #8C6B4F;
-  --v5-bronze-ink: #FBF9F6;
+  --v5-bg: #F3EDE6;
+  --v5-paper: #F9F5F0;
+  --v5-ink: #22150D;
+  --v5-sub: #5C4A3E;
+  --v5-mute: #98877A;
+  --v5-line: #DCCFC2;
+  --v5-hair: #E8DED3;
+  --v5-bronze: #7A4F35;
+  --v5-bronze-ink: #F9F5F0;
   --v5-serif: "Noto Serif KR", "Nanum Myeongjo", Georgia, serif;
   --v5-display: "Cormorant Garamond", "Noto Serif KR", Georgia, serif;
   --v5-label: "Jost", "Pretendard Variable", Pretendard, system-ui, sans-serif;
   --v5-max: 1240px;
 
   /* 기존 토큰을 v5 로 */
-  --color-primary: #8C6B4F;
-  --color-primary-light: #B39478;
-  --color-primary-dark: #6F543D;
-  --color-bg: #F6F3EE;
-  --color-surface: #FBF9F6;
-  --color-surface-alt: #EFE9E1;
+  --color-primary: #7A4F35;
+  --color-primary-light: #A57B5C;
+  --color-primary-dark: #5E3B26;
+  --color-bg: #F3EDE6;
+  --color-surface: #F9F5F0;
+  --color-surface-alt: #E9DFD3;
   --color-white: #FFFFFF;
-  --color-border: #DDD5CC;
-  --color-text: #1E1A17;
-  --color-text-sub: #5F5650;
-  --color-text-mute: #8F857D;
-  --shadow-soft: 0 2px 10px rgba(30, 26, 23, .05);
-  --shadow-hover: 0 10px 26px rgba(30, 26, 23, .10);
-  --shadow-card: 0 1px 4px rgba(30, 26, 23, .04);
+  --color-border: #DCCFC2;
+  --color-text: #22150D;
+  --color-text-sub: #5C4A3E;
+  --color-text-mute: #98877A;
+  --shadow-soft: 0 2px 10px rgba(34, 21, 13, .05);
+  --shadow-hover: 0 10px 26px rgba(34, 21, 13, .10);
+  --shadow-card: 0 1px 4px rgba(34, 21, 13, .04);
   --card-shadow: none;
-  --card-shadow-hover: 0 10px 26px rgba(30, 26, 23, .08);
+  --card-shadow-hover: 0 10px 26px rgba(34, 21, 13, .08);
 
   background: var(--v5-bg);
   color: var(--v5-ink);
@@ -47,26 +47,26 @@ body.md-v5 {
 }
 @media (prefers-color-scheme: dark) {
   body.md-v5 {
-    --v5-bg: #141210;
-    --v5-paper: #1B1815;
-    --v5-ink: #EEE7DF;
-    --v5-sub: #C0B5AB;
-    --v5-mute: #8C8178;
-    --v5-line: #383029;
-    --v5-hair: #2A241F;
-    --v5-bronze: #C9A27F;
-    --v5-bronze-ink: #141210;
-    --color-primary: #C9A27F;
+    --v5-bg: #150D08;
+    --v5-paper: #1E140D;
+    --v5-ink: #F1E7DA;
+    --v5-sub: #C2AE9A;
+    --v5-mute: #8F7C6A;
+    --v5-line: #3A2A1E;
+    --v5-hair: #2A1D14;
+    --v5-bronze: #D1A77E;
+    --v5-bronze-ink: #150D08;
+    --color-primary: #D1A77E;
     --color-primary-light: #D9B998;
     --color-primary-dark: #A9845F;
-    --color-bg: #141210;
-    --color-surface: #1B1815;
+    --color-bg: #150D08;
+    --color-surface: #1E140D;
     --color-surface-alt: #221E1A;
     --color-white: #1F1B17;
-    --color-border: #383029;
-    --color-text: #EEE7DF;
-    --color-text-sub: #C0B5AB;
-    --color-text-mute: #8C8178;
+    --color-border: #3A2A1E;
+    --color-text: #F1E7DA;
+    --color-text-sub: #C2AE9A;
+    --color-text-mute: #8F7C6A;
   }
 }
 
@@ -146,7 +146,7 @@ body.md-v5 .md-header__nav .md-nav > li.current-menu-ancestor > a { color: var(-
     background: var(--v5-paper);
     border: 1px solid var(--v5-hair);
     border-radius: 0;
-    box-shadow: 0 18px 40px rgba(30, 26, 23, .08);
+    box-shadow: 0 18px 40px rgba(34, 21, 13, .08);
     padding: 12px 0;
   }
   body.md-v5 .md-header__nav .sub-menu a {
@@ -265,17 +265,17 @@ body.md-v5 .md-fab {
   background: var(--v5-paper) !important;
   color: var(--v5-ink) !important;
   border: 1px solid var(--v5-line) !important;
-  box-shadow: 0 8px 22px rgba(30, 26, 23, .12) !important;
+  box-shadow: 0 8px 22px rgba(34, 21, 13, .12) !important;
 }
 body.md-v5 .md-fab--naver { background: var(--v5-bronze) !important; border-color: var(--v5-bronze) !important; color: #fff !important; }
 body.md-v5 .md-fab--naver .md-fab__icon { background: transparent !important; color: #fff !important; }
 body.md-v5 .md-fab--kakao { background: #FEE500 !important; border-color: #FEE500 !important; color: #3A1D1D !important; }
-body.md-v5 .md-fab__label { background: #1E1A17 !important; color: #F6F3EE !important; border-radius: 0 !important; }
+body.md-v5 .md-fab__label { background: #22150D !important; color: #F3EDE6 !important; border-radius: 0 !important; }
 body.md-v5 .md-lang-fab__toggle {
   background: var(--v5-paper) !important;
   color: var(--v5-ink) !important;
   border: 1px solid var(--v5-line) !important;
-  box-shadow: 0 8px 22px rgba(30, 26, 23, .12) !important;
+  box-shadow: 0 8px 22px rgba(34, 21, 13, .12) !important;
   font-weight: 400 !important;
 }
 body.md-v5 .md-lang-fab__menu { background: var(--v5-paper) !important; border: 1px solid var(--v5-line) !important; border-radius: 0 !important; }
@@ -442,15 +442,15 @@ body.md-v5 .md-main:has(.v5-hero) { padding: 0; }
 .v5-faq__a p { margin: 0 0 8px; }
 
 /* 예약 띠 */
-.v5-closing { background: #1E1A17; color: #F6F3EE; }
+.v5-closing { background: #22150D; color: #F3EDE6; }
 .v5-closing .v5-wrap { padding-block: clamp(64px, 8vw, 104px); display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: end; }
-.v5-closing .v5-label { color: #B5A796; }
-.v5-closing h2 { font-family: var(--v5-serif) !important; font-weight: 300 !important; font-size: clamp(26px, 3.2vw, 38px) !important; line-height: 1.45; margin: 14px 0 0; color: #F6F3EE !important; }
-.v5-closing p { color: #C9BFB4; margin: 16px 0 0; }
+.v5-closing .v5-label { color: #B9A591; }
+.v5-closing h2 { font-family: var(--v5-serif) !important; font-weight: 300 !important; font-size: clamp(26px, 3.2vw, 38px) !important; line-height: 1.45; margin: 14px 0 0; color: #F3EDE6 !important; }
+.v5-closing p { color: #B9A591; margin: 16px 0 0; }
 .v5-closing .v5-acts { justify-content: flex-end; }
-.v5-closing .v5-btn { border-color: #F6F3EE; color: #F6F3EE; }
-.v5-closing .v5-btn:hover { background: #F6F3EE; color: #1E1A17; }
-.v5-closing .v5-btn--fill { background: #C9A27F; border-color: #C9A27F; color: #1E1A17; }
+.v5-closing .v5-btn { border-color: #F3EDE6; color: #F3EDE6; }
+.v5-closing .v5-btn:hover { background: #F3EDE6; color: #22150D; }
+.v5-closing .v5-btn--fill { background: #D1A77E; border-color: #D1A77E; color: #22150D; }
 @media (max-width: 820px) { .v5-closing .v5-wrap { grid-template-columns: 1fr; } .v5-closing .v5-acts { justify-content: flex-start; } }
 
 /* 오시는 길 (홈) */
@@ -619,25 +619,25 @@ body.md-v5 .md-faq__item summary, body.md-v5 .md-home-faq__item summary { font-f
 
 /* v5.3 · 안쪽 페이지 「궁금한 점이 있으신가요?」 → 홈 예약 띠와 같은 톤 */
 body.md-v5 .md-cta-banner {
-  background: #1E1A17 !important;
+  background: #22150D !important;
   background-image: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  color: #F6F3EE !important;
+  color: #F3EDE6 !important;
 }
 body.md-v5 .md-cta-banner::before, body.md-v5 .md-cta-banner::after { display: none !important; }
-body.md-v5 .md-cta-banner__eyebrow { color: #B5A796 !important; font-family: var(--v5-label); letter-spacing: .22em; }
-body.md-v5 .md-cta-banner__title { font-family: var(--v5-serif) !important; font-weight: 300 !important; color: #F6F3EE !important; }
-body.md-v5 .md-cta-banner__lead, body.md-v5 .md-cta-banner__hint { color: #C9BFB4 !important; }
+body.md-v5 .md-cta-banner__eyebrow { color: #B9A591 !important; font-family: var(--v5-label); letter-spacing: .22em; }
+body.md-v5 .md-cta-banner__title { font-family: var(--v5-serif) !important; font-weight: 300 !important; color: #F3EDE6 !important; }
+body.md-v5 .md-cta-banner__lead, body.md-v5 .md-cta-banner__hint { color: #B9A591 !important; }
 body.md-v5 .md-cta-banner a {
   border-radius: 0 !important;
   box-shadow: none !important;
   background: transparent !important;
-  border: 1px solid #F6F3EE !important;
-  color: #F6F3EE !important;
+  border: 1px solid #F3EDE6 !important;
+  color: #F3EDE6 !important;
   min-height: 52px;
 }
-body.md-v5 .md-cta-banner a[href*="booking.naver"] { background: #C9A27F !important; border-color: #C9A27F !important; color: #1E1A17 !important; }
+body.md-v5 .md-cta-banner a[href*="booking.naver"] { background: #D1A77E !important; border-color: #D1A77E !important; color: #22150D !important; }
 body.md-v5 .md-cta-banner a:hover { filter: brightness(1.08); }
 
 body.md-v5 .md-cta-banner a svg, body.md-v5 .md-cta-banner a svg * { color: currentColor !important; fill: currentColor !important; }
@@ -787,7 +787,7 @@ body.md-v5 .md-totop {
   background: var(--v5-paper) !important;
   border: 1px solid var(--v5-line) !important;
   color: var(--v5-sub) !important;
-  box-shadow: 0 6px 18px rgba(30, 26, 23, .08) !important;
+  box-shadow: 0 6px 18px rgba(34, 21, 13, .08) !important;
   transition: color .2s, border-color .2s, transform .2s !important;
 }
 body.md-v5 .md-fab:hover, body.md-v5 .md-totop:hover {
@@ -798,7 +798,7 @@ body.md-v5 .md-ico { width: 20px; height: 20px; display: block; }
 body.md-v5 .md-totop .md-ico { width: 18px; height: 18px; }
 body.md-v5 .md-fab__label {
   font-size: 12.5px !important; font-weight: 400 !important; letter-spacing: .02em;
-  background: #1E1A17 !important; color: #F6F3EE !important;
+  background: #22150D !important; color: #F3EDE6 !important;
   border-radius: 2px !important; padding: 6px 11px !important; box-shadow: none !important;
 }
 /* 언어 버튼 · 휴대폰 아래 막대 */
@@ -966,8 +966,8 @@ body.md-v5 .md-rcta__btn { border-radius: 2px !important; box-shadow: none !impo
 body.md-v5 .md-rcta__btn.md-rcta__naver { background: var(--v5-bronze) !important; border-color: var(--v5-bronze) !important; color: #fff !important; }
 body.md-v5 .md-rcta__btn:hover { filter: brightness(.95); transform: none !important; }
 body.md-v5 .md-rcta__icon { display: none !important; }
-body.md-v5 .md-cta-banner .md-rcta__btn { border-color: #F6F3EE !important; color: #F6F3EE !important; }
-body.md-v5 .md-cta-banner .md-rcta__btn.md-rcta__naver { background: #C9A27F !important; border-color: #C9A27F !important; color: #1E1A17 !important; }
+body.md-v5 .md-cta-banner .md-rcta__btn { border-color: #F3EDE6 !important; color: #F3EDE6 !important; }
+body.md-v5 .md-cta-banner .md-rcta__btn.md-rcta__naver { background: #D1A77E !important; border-color: #D1A77E !important; color: #22150D !important; }
 /* 지도 버튼 3개 (지역 · 예전 오시는 길) */
 body.md-v5 .md-mapbtn { border-radius: 0 !important; box-shadow: none !important; background: var(--v5-paper) !important; border: 1px solid var(--v5-line) !important; }
 body.md-v5 .md-mapbtn:hover { border-color: var(--v5-ink) !important; transform: none !important; }
@@ -1030,3 +1030,34 @@ body.md-v5 .md-guide-cta__title { font-family: var(--v5-serif) !important; font-
 body.md-v5 .md-guide-cta__read { color: var(--v5-bronze) !important; white-space: nowrap; }
 @media (max-width: 700px) { body.md-v5 .md-guide-cta { grid-template-columns: 1fr !important; padding: 22px 20px !important; } }
 body.md-v5 .md-apply-card [class*="__email"], body.md-v5 .md-apply-card [class*="mail"] { background-image: none !important; border-radius: 0 !important; }
+
+/* ==========================================================================
+   v6.0 · 원장 지시 · 색 시안 5 「크림 + 에스프레소」
+   바탕은 크림, 인상을 주는 구역만 짙은 에스프레소로 번갈아
+   ========================================================================== */
+.v5-deep, body.md-v5 .md-footer {
+  --v5-bg: #1C110A; --v5-paper: #1C110A; --v5-ink: #F1E7DA; --v5-sub: #C2AE9A; --v5-mute: #937F6D;
+  --v5-line: rgba(241, 231, 218, .16); --v5-hair: rgba(241, 231, 218, .09); --v5-bronze: #D1A77E; --v5-bronze-ink: #1C110A;
+  background: #1C110A !important; color: var(--v5-ink);
+}
+.v5-deep { border-color: #1C110A !important; }
+.v5-deep h2, .v5-deep h3, .v5-deep figcaption, .v5-deep .v5-doc b { color: var(--v5-ink) !important; }
+.v5-deep .v5-more { color: var(--v5-ink); border-color: var(--v5-ink); }
+/* 홈 · 짙은 띠 */
+.v5-creds.v5-deep li { color: var(--v5-sub); }
+.v5-creds.v5-deep li::before { background: var(--v5-bronze); }
+.v5-deep .v5-doc__ph { background: #F9F5F0; }
+.v5-deep .v5-rail__ph { background: #2A1D14; }
+/* 예약 띠 */
+.v5-closing { background: #1C110A !important; }
+.v5-closing .v5-btn--fill { background: #D1A77E !important; border-color: #D1A77E !important; color: #1C110A !important; }
+/* 푸터 · 짙게 · 흰 로고 */
+body.md-v5 .md-footer .md-v5-logo-light { display: none !important; }
+body.md-v5 .md-footer .md-v5-logo-dark { display: block !important; }
+body.md-v5 .md-footer .md-footer__legal-line { border-top-color: rgba(241, 231, 218, .16) !important; }
+/* 진료 페이지 상담 띠 · 같은 에스프레소 */
+body.md-v5 .md-cta-banner { background: #1C110A !important; }
+/* 머리(헤더) 바탕 · 크림 */
+body.md-v5 .md-site-header, body.md-v5 .md-header { background: color-mix(in srgb, #F3EDE6 94%, transparent) !important; }
+/* 옅은 띠(소식 · 페이지 사이 구역) */
+.v5-paper:not(.v5-deep) { background: #E9DFD3 !important; border-color: #E9DFD3 !important; }

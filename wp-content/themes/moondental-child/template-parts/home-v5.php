@@ -167,7 +167,7 @@ $addr = $info['address'] ?? '충청남도 천안시 동남구 만남로 52, 문�
 </dl>
 
 <?php if ( $certs ) : ?>
-<div class="v5-creds" aria-label="지정 · 협력">
+<div class="v5-creds v5-deep" aria-label="지정 · 협력">
 	<ul class="v5-wrap">
 		<?php foreach ( $certs as $c ) : ?><li><?php echo esc_html( $c ); ?></li><?php endforeach; ?>
 	</ul>
@@ -194,7 +194,7 @@ $addr = $info['address'] ?? '충청남도 천안시 동남구 만남로 52, 문�
 </section>
 
 <?php if ( $history ) : ?>
-<section class="v5-blk v5-paper" aria-label="30여년의 발자취">
+<section class="v5-blk v5-paper v5-deep" aria-label="30여년의 발자취">
 	<div class="v5-wrap">
 		<div class="v5-head">
 			<span class="v5-label">History</span>
@@ -246,7 +246,7 @@ $addr = $info['address'] ?? '충청남도 천안시 동남구 만남로 52, 문�
 </section>
 
 <?php if ( $doctors ) : ?>
-<section class="v5-blk v5-blk--tight" aria-label="의료진">
+<section class="v5-blk v5-deep" aria-label="의료진">
 	<div class="v5-wrap">
 		<div class="v5-head">
 			<span class="v5-label">Doctors</span>
