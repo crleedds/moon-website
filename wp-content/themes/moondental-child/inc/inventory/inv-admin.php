@@ -308,7 +308,7 @@ function md_inv_account_delete( $user_id ) {
  *   재료실 관리자 역할(md_stock_manager) · 워드프레스 관리 권한 없음.
  *   비밀번호는 저장소에 없다 — 해시만 둔다. 시험이 끝나면 MODE 를 'remove' 로 바꿔 지운다.
  * ============================================================ */
-define( 'MD_INV_TESTACCT_MODE', 'create' );
+define( 'MD_INV_TESTACCT_MODE', 'remove' ); // 2026-10-04 운영 재시험 보류 — 계정 삭제
 function md_inv_test_account() {
 	$login = 'moondentaltesting';
 	if ( 'remove' === MD_INV_TESTACCT_MODE ) {
