@@ -616,3 +616,27 @@ body.md-v5 .md-faq__item, body.md-v5 .md-home-faq__item {
   background: none !important; border: 0 !important; border-bottom: 1px solid var(--v5-line) !important; border-radius: 0 !important;
 }
 body.md-v5 .md-faq__item summary, body.md-v5 .md-home-faq__item summary { font-family: var(--v5-serif); font-weight: 400; }
+
+/* v5.3 · 안쪽 페이지 「궁금한 점이 있으신가요?」 → 홈 예약 띠와 같은 톤 */
+body.md-v5 .md-cta-banner {
+  background: #1E1A17 !important;
+  background-image: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: #F6F3EE !important;
+}
+body.md-v5 .md-cta-banner::before, body.md-v5 .md-cta-banner::after { display: none !important; }
+body.md-v5 .md-cta-banner__eyebrow { color: #B5A796 !important; font-family: var(--v5-label); letter-spacing: .22em; }
+body.md-v5 .md-cta-banner__title { font-family: var(--v5-serif) !important; font-weight: 300 !important; color: #F6F3EE !important; }
+body.md-v5 .md-cta-banner__lead, body.md-v5 .md-cta-banner__hint { color: #C9BFB4 !important; }
+body.md-v5 .md-cta-banner a {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  border: 1px solid #F6F3EE !important;
+  color: #F6F3EE !important;
+  min-height: 52px;
+}
+body.md-v5 .md-cta-banner a:first-of-type,
+body.md-v5 .md-cta-banner a[href*="booking.naver"] { background: #C9A27F !important; border-color: #C9A27F !important; color: #1E1A17 !important; }
+body.md-v5 .md-cta-banner a:hover { filter: brightness(1.08); }

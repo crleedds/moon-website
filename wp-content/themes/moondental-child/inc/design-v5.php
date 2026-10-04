@@ -116,7 +116,9 @@ add_filter( 'body_class', function ( $c ) {
 
 /* 홈 화면 · 의료진 사진 — 얼굴 크기를 맞춘 사진이 있으면 그것을 쓴다 */
 function md_v5_doctor_photo( $filename ) {
-	$base = basename( (string) $filename );
+	/* 사진 칸 값이 「doctor-04」 · 「doctor-04.png」 · 전체 주소 등 여러 모양이라 이름만 뽑아 .jpg 로 찾는다 */
+	$stem = pathinfo( (string) parse_url( (string) $filename, PHP_URL_PATH ), PATHINFO_FILENAME );
+	$base = $stem ? $stem . '.jpg' : '';
 	if ( $base && file_exists( MOONDENTAL_DIR . '/assets/images/doctors/v5/' . $base ) ) {
 		return MOONDENTAL_URI . '/assets/images/doctors/v5/' . $base . '?v=' . filemtime( MOONDENTAL_DIR . '/assets/images/doctors/v5/' . $base );
 	}
