@@ -83,6 +83,10 @@ function md_v5_build_base_css() {
 		return $m[0];
 	}, $css );
 	$css = str_replace( '--radius-pill: 999px', '--radius-pill: 2px', $css );
+	// v6.6 · 속도 · 주석 · 빈 줄 · 줄 앞 공백 빼기
+	$css = preg_replace( '#/\*.*?\*/#s', '', $css );
+	$css = preg_replace( "/^[ \t]+/m", '', $css );
+	$css = preg_replace( "/\n{2,}/", "\n", $css );
 	// 상대 경로(이미지 · 글꼴)는 assets/css 기준으로 맞춘다
 	$css = preg_replace( '#url\(\s*([\'"]?)(?!data:|https?:|/|\.\./)([^\'")]+)\1\s*\)#', 'url($1../../$2$1)', $css );
 	$css = "/* 자동 생성 · style.css → v5 색 · 직접 고치지 마세요 (inc/design-v5.php) */\n" . $css;

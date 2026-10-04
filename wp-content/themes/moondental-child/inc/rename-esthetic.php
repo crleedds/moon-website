@@ -108,3 +108,17 @@ add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', function ( $ids ) {
 	if ( $p ) $ids[] = (int) $p->ID;
 	return $ids;
 } );
+
+/* v6.6 · 내용 없는 /장치교정/ → /브라켓-치아교정/ (301) · 사이트맵에서 빼기 */
+add_action( 'init', function () {
+	if ( is_admin() || empty( $_SERVER['REQUEST_URI'] ) ) return;
+	$path = rawurldecode( (string) parse_url( (string) $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
+	if ( ! preg_match( '#^/((?:en|ja|zh|vi|ru|mn)/)?장치교정/?$#u', $path, $m ) ) return;
+	wp_redirect( home_url( '/' . ( $m[1] ?? '' ) . rawurlencode( '브라켓-치아교정' ) . '/' ), 301 );
+	exit;
+}, 0 );
+add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', function ( $ids ) {
+	$p = get_page_by_path( '장치교정' );
+	if ( $p ) $ids[] = (int) $p->ID;
+	return $ids;
+} );

@@ -186,4 +186,15 @@ return array(
 	'서울대학교 치의학대학원 박사 과정' => 'Ph.D. Candidate, Seoul National University School of Dentistry',
 	'충남 아너소사이어티 클럽 초대회장' => 'Founding President, Chungnam Honor Society Club',
 	'한국 사랑의집짓기 해비타트 충남·세종지회 이사' => 'Board Member, Habitat for Humanity Korea, Chungnam·Sejong Chapter',
+	/* v6.6 · 외국인 환자 안내 */
+	'외국인 환자 안내' => 'Information for International Patients',
+	'보건복지부 등록 외국인환자 유치 의료기관입니다. 처음 오시는 분도 편하게 진료받으실 수 있도록 안내해 드립니다.' => 'We are a medical institution registered with the Ministry of Health and Welfare to serve international patients. We will guide you so that you can be treated comfortably, even on your first visit.',
+	'외국어 통역' => 'Interpreting',
+	'영어 · 러시아어 · 몽골어 · 베트남어 · 중국어 통역을 도와드립니다. 예약하실 때 필요한 언어를 알려 주세요.' => 'We help with English, Russian, Mongolian, Vietnamese and Chinese interpreting. Please tell us the language you need when booking.',
+	'찾아오시는 길' => 'Getting here',
+	'천안고속 · 시외버스터미널 맞은편 문타워 9~13층입니다. 천안아산역(KTX)에서 버스로 약 25분입니다.' => 'Moon Tower, floors 9–13, across from Cheonan Express · Intercity Bus Terminal. About 25 minutes by bus from Cheonan-Asan Station (KTX).',
+	'예약과 상담' => 'Booking & consultation',
+	'카카오톡이나 전화(041-563-2875)로 편하게 문의하세요. 진단 뒤 치료 계획과 비용을 먼저 설명드립니다.' => 'Contact us anytime by KakaoTalk or phone (+82-41-563-2875). After diagnosis we explain the treatment plan and cost first.',
+	'미군 및 가족 진료' => 'US Forces & families',
+	'미군 및 가족 치료기관으로, 외국인 환자 진료 경험이 많습니다.' => 'As a designated clinic for US Forces members and their families, we have extensive experience treating international patients.',
 );

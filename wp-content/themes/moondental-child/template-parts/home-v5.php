@@ -28,6 +28,17 @@ $location_url = home_url( '/오시는-길/' );
 
 /* 첫 화면 사진 (사용자 정의하기 · 홈 배경) */
 $hero_bg = get_theme_mod( 'moondental_home_hero_bg', '' );
+/* v6.6 · 속도 · 화면 크기에 맞는 사진(srcset) — 원본 650KB 대신 화면에 맞는 판 */
+$hero_srcset = '';
+$hero_mid    = null;
+if ( $hero_bg ) {
+	$hero_id = attachment_url_to_postid( $hero_bg );
+	if ( ! $hero_id ) $hero_id = attachment_url_to_postid( preg_replace( '/-scaled(\.[a-z]+)$/i', '$1', $hero_bg ) );
+	if ( $hero_id ) {
+		$hero_srcset = (string) wp_get_attachment_image_srcset( $hero_id, 'full' );
+		$hero_mid    = wp_get_attachment_image_src( $hero_id, 'large' );
+	}
+}
 if ( $hero_bg ) {
 	$hero_bg = preg_replace_callback( '#[^\x00-\x7F]+#u', function ( $m ) { return rawurlencode( $m[0] ); }, $hero_bg );
 } else {
@@ -155,7 +166,7 @@ $addr = $info['address'] ?? '충청남도 천안시 동남구 만남로 52, 문�
 		</div>
 	</div>
 	<div class="v5-hero__photo">
-		<img src="<?php echo esc_url( $hero_bg ); ?>" alt="<?php echo esc_attr( $mc( 'hero_bg_alt', '천안 문치과병원 문타워 야경 — 한아의료재단 문치과병원' ) ); ?>" fetchpriority="high" decoding="async">
+		<img src="<?php echo esc_url( ! empty( $hero_mid[0] ) ? $hero_mid[0] : $hero_bg ); ?>"<?php if ( $hero_srcset ) : ?> srcset="<?php echo esc_attr( $hero_srcset ); ?>" sizes="(max-width: 900px) 100vw, 600px"<?php endif; ?> width="884" height="1024" alt="<?php echo esc_attr( $mc( 'hero_bg_alt', '천안 문치과병원 문타워 야경 — 한아의료재단 문치과병원' ) ); ?>" fetchpriority="high" decoding="async">
 		<span class="v5-hero__cap" aria-hidden="true">MOON TOWER · CHEONAN</span>
 	</div>
 </section>
@@ -312,6 +323,23 @@ $addr = $info['address'] ?? '충청남도 천안시 동남구 만남로 52, 문�
 			<?php endwhile; wp_reset_postdata(); ?>
 		</div>
 		<?php endif; ?>
+	</div>
+</section>
+<?php endif; ?>
+
+<?php if ( ! $md_v5_ko ) : /* v6.6 · 외국어 홈 · 소식 칸 대신 외국인 환자 안내 */ ?>
+<section class="v5-blk v5-paper" id="international" aria-label="외국인 환자 안내">
+	<div class="v5-wrap">
+		<div class="v5-head">
+			<span class="v5-label">International Patients</span>
+			<div><h2>외국인 환자 안내</h2><p>보건복지부 등록 외국인환자 유치 의료기관입니다. 처음 오시는 분도 편하게 진료받으실 수 있도록 안내해 드립니다.</p></div>
+		</div>
+		<div class="v5-why">
+			<div><span class="v5-why__no">01</span><h3>외국어 통역</h3><p>영어 · 러시아어 · 몽골어 · 베트남어 · 중국어 통역을 도와드립니다. 예약하실 때 필요한 언어를 알려 주세요.</p></div>
+			<div><span class="v5-why__no">02</span><h3>찾아오시는 길</h3><p>천안고속 · 시외버스터미널 맞은편 문타워 9~13층입니다. 천안아산역(KTX)에서 버스로 약 25분입니다.</p></div>
+			<div><span class="v5-why__no">03</span><h3>예약과 상담</h3><p>카카오톡이나 전화(041-563-2875)로 편하게 문의하세요. 진단 뒤 치료 계획과 비용을 먼저 설명드립니다.</p></div>
+			<div><span class="v5-why__no">04</span><h3>미군 및 가족 진료</h3><p>미군 및 가족 치료기관으로, 외국인 환자 진료 경험이 많습니다.</p></div>
+		</div>
 	</div>
 </section>
 <?php endif; ?>

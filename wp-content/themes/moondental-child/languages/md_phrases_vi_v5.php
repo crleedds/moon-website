@@ -186,4 +186,15 @@ return array(
 	'서울대학교 치의학대학원 박사 과정' => 'Nghiên cứu sinh tiến sĩ, Trường Nha khoa Đại học Quốc gia Seoul',
 	'충남 아너소사이어티 클럽 초대회장' => 'Chủ tịch sáng lập Câu lạc bộ Honor Society Chungnam',
 	'한국 사랑의집짓기 해비타트 충남·세종지회 이사' => 'Thành viên HĐQT Habitat Hàn Quốc, chi hội Chungnam·Sejong',
+	/* v6.6 · 외국인 환자 안내 */
+	'외국인 환자 안내' => 'Hướng dẫn cho bệnh nhân nước ngoài',
+	'보건복지부 등록 외국인환자 유치 의료기관입니다. 처음 오시는 분도 편하게 진료받으실 수 있도록 안내해 드립니다.' => 'Chúng tôi là cơ sở y tế được Bộ Y tế và Phúc lợi đăng ký tiếp nhận bệnh nhân nước ngoài. Chúng tôi sẽ hướng dẫn để bạn yên tâm điều trị, kể cả lần đầu đến khám.',
+	'외국어 통역' => 'Phiên dịch',
+	'영어 · 러시아어 · 몽골어 · 베트남어 · 중국어 통역을 도와드립니다. 예약하실 때 필요한 언어를 알려 주세요.' => 'Hỗ trợ phiên dịch tiếng Anh, Nga, Mông Cổ, Việt và Trung. Vui lòng cho biết ngôn ngữ bạn cần khi đặt lịch.',
+	'찾아오시는 길' => 'Đường đến',
+	'천안고속 · 시외버스터미널 맞은편 문타워 9~13층입니다. 천안아산역(KTX)에서 버스로 약 25분입니다.' => 'Tòa Moon Tower tầng 9–13, đối diện Bến xe Cao tốc · Liên tỉnh Cheonan. Khoảng 25 phút đi xe buýt từ ga Cheonan-Asan (KTX).',
+	'예약과 상담' => 'Đặt lịch & tư vấn',
+	'카카오톡이나 전화(041-563-2875)로 편하게 문의하세요. 진단 뒤 치료 계획과 비용을 먼저 설명드립니다.' => 'Liên hệ qua KakaoTalk hoặc điện thoại (041-563-2875). Sau khi chẩn đoán, chúng tôi giải thích kế hoạch điều trị và chi phí trước.',
+	'미군 및 가족 진료' => 'Khám cho quân đội Mỹ & gia đình',
+	'미군 및 가족 치료기관으로, 외국인 환자 진료 경험이 많습니다.' => 'Là cơ sở điều trị chỉ định cho quân nhân Mỹ và gia đình, chúng tôi có nhiều kinh nghiệm điều trị bệnh nhân nước ngoài.',
 );
