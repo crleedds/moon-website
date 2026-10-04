@@ -120,6 +120,7 @@ $nav_items = $parse_nav( md_content( 'smile_nav_items', '' ) );
 </nav>
 <?php endif; ?>
 
+<?php if ( function_exists( 'md_v5_ko' ) && md_v5_ko() ) : get_template_part( 'template-parts/esth-v5' ); else : /* v6.7 */ ?>
 <!-- ============ 01 라미네이트 ============ -->
 <section class="md-section md-section--surface" id="laminate">
 	<div class="md-container md-container--narrow">
@@ -224,6 +225,7 @@ $nav_items = $parse_nav( md_content( 'smile_nav_items', '' ) );
 
 <?php /* v3.44.212 · 심미치료센터 종합안내서 (라미네이트) */ ?>
 <?php get_template_part( 'template-parts/section', 'esthetic-more' ); /* v5.1 · 예전 /심미치료/ 내용 */ ?>
+<?php endif; /* v6.7 */ ?>
 
 <?php get_template_part( 'template-parts/section', 'guide-cta', array( 'slug' => 'laminate' ) ); ?>
 

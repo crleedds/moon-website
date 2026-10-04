@@ -226,3 +226,8 @@ add_action( 'template_redirect', function () {
 		return md_v5_veneer( $html );
 	} );
 }, 2 );
+
+/* v6.7 · 한국어 · 새 디자인일 때만 (기승전결 정리한 본문은 한국어 전용 — 외국어는 번역된 예전 본문) */
+function md_v5_ko() {
+	return md_v5() && ( ! function_exists( 'moondental_current_language' ) || 'ko' === moondental_current_language() );
+}

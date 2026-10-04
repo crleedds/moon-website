@@ -51,7 +51,8 @@ foreach ( $services as $svc ) {
 /* v3.44.30 · 강제 히어로 이미지 + 임팩트 스탯 (페이지 콘텐츠와 무관하게 항상 노출) */
 $_visual = function_exists( 'moondental_service_visual' ) ? moondental_service_visual( $slug ) : null;
 $md_impl_v5 = ( '임플란트-센터' === $slug && function_exists( 'md_v5' ) && md_v5() ); /* v5.5 · 임플란트센터 기승전결 정리 */
-if ( $md_impl_v5 ) $_visual = null;
+$md_ortho_v5 = ( '투명교정-센터' === $slug && function_exists( 'md_v5_ko' ) && md_v5_ko() ); /* v6.7 · 교정센터 기승전결 */
+if ( $md_impl_v5 || $md_ortho_v5 ) $_visual = null;
 if ( $_visual ) :
 ?>
 <section class="md-svc-hero" aria-label="<?php echo esc_attr( $_visual['headline'] ); ?>">
@@ -92,7 +93,7 @@ if ( $_visual ) :
 $md_impl_own = ( $slug === '임플란트-센터' );
 ?>
 
-<?php if ( ! $md_impl_own ) : ?>
+<?php if ( $md_ortho_v5 ) : get_template_part( 'template-parts/ortho-v5' ); elseif ( ! $md_impl_own ) : ?>
 <section class="md-section">
 	<div class="md-container md-container--narrow">
 		<article class="md-page-content">
@@ -220,7 +221,7 @@ if ( $slug === '사랑니-발치' ) : ?>
  * v3.47 · 임플란트-센터는 제외. 위 "다른 병원에서 어렵다고 하셨나요" 6케이스와
  *   뼈 부족·전신질환·흔들림 3개가 겹쳐 같은 말을 두 번 하게 된다.
  *   해당 페이지에서는 그쪽 한 블록으로 합쳤다. */
-if ( function_exists( 'moondental_service_pain_points' ) && ! $md_impl_own ) {
+if ( function_exists( 'moondental_service_pain_points' ) && ! $md_impl_own && empty( $md_ortho_v5 ) ) {
 	$pp_map = moondental_service_pain_points();
 	if ( isset( $pp_map[ $slug ] ) && ! empty( $pp_map[ $slug ] ) ) :
 ?>
@@ -262,7 +263,7 @@ if ( function_exists( 'moondental_service_pain_points' ) && ! $md_impl_own ) {
 /* === 이런 분께 추천합니다 === */
 if ( function_exists( 'moondental_service_ideal_candidates' ) ) {
 	$cand_map = moondental_service_ideal_candidates();
-	if ( ! empty( $md_impl_v5 ) ) $cand_map = array();
+	if ( ! empty( $md_impl_v5 ) || ! empty( $md_ortho_v5 ) ) $cand_map = array();
 	if ( isset( $cand_map[ $slug ] ) && ! empty( $cand_map[ $slug ] ) ) :
 ?>
 <section class="md-section md-section--surface md-section--sm" aria-label="추천 대상">

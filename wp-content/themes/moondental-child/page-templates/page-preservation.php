@@ -108,6 +108,7 @@ $spa_who_list       = md_parse_lines( md_content( 'preservation_spa_who_list', '
 </nav>
 <?php endif; ?>
 
+<?php if ( function_exists( 'md_v5_ko' ) && md_v5_ko() ) : get_template_part( 'template-parts/pres-v5' ); else : /* v6.7 */ ?>
 <!-- ============ 1. 충치치료 ============ -->
 <section class="md-section md-section--surface" id="cavity">
 	<div class="md-container md-container--narrow">
@@ -331,6 +332,8 @@ if ( $spa_eb || $spa_ttl || $spa_lead || $spa_cards || $spa_who_list ) :
 	</div>
 </section>
 <?php endif; ?>
+
+<?php endif; /* v6.7 */ ?>
 
 <?php /* v3.85 · NO. 04 자연치아보존 종합안내서 배너 (다른 센터 페이지와 같은 위치·형식) */ ?>
 <?php get_template_part( 'template-parts/section', 'guide-cta', array( 'slug' => 'preservation' ) ); ?>
