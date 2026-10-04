@@ -862,3 +862,149 @@ body.md-v5 .md-station-hl { background: none !important; color: inherit !importa
   body.md-v5 .md-footer__legal-line, body.md-v5 .md-footer__policy-line { text-align: left !important; }
 }
 body.md-v5 .md-footer__park-list li, body.md-v5 .md-footer__park-item, body.md-v5 .md-footer__park-num, body.md-v5 .md-footer__park-note, body.md-v5 .md-footer__park-transit { margin-left: 0 !important; padding-left: 0 !important; }
+
+/* ==========================================================================
+   v5.9 · 원장 지시 · 모든 페이지 점검 — 진료 페이지 공통 부품
+   ========================================================================== */
+/* 진료 페이지 머리 아래 사진 · 숫자 블록 — 사진 없으면 숨김(제목과 겹침), 있으면 단정하게 */
+body.md-v5 .md-svc-hero:not(:has(.md-svc-hero__figure)) { display: none; }
+body.md-v5 .md-svc-hero { background: var(--v5-bg) !important; border-bottom: 1px solid var(--v5-hair); padding: 48px 0 !important; }
+body.md-v5 .md-svc-hero .md-container { max-width: var(--v5-max); padding-inline: 24px; }
+body.md-v5 .md-svc-hero__figure { border-radius: 0 !important; box-shadow: none !important; }
+body.md-v5 .md-svc-hero__headline { font-family: var(--v5-serif) !important; font-weight: 300 !important; color: var(--v5-ink); }
+body.md-v5 .md-svc-hero__stats { gap: 0 !important; border-top: 1px solid var(--v5-ink); }
+body.md-v5 .md-svc-hero__stats li { background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; transform: none !important; padding: 18px 8px 4px !important; }
+body.md-v5 .md-svc-hero__stats li + li { border-left: 1px solid var(--v5-line) !important; }
+body.md-v5 .md-svc-hero__stat-value { font-family: var(--v5-display); font-weight: 500 !important; color: var(--v5-ink) !important; font-variant-numeric: lining-nums; font-feature-settings: "lnum" 1; }
+body.md-v5 .md-svc-hero__stat-label { color: var(--v5-mute) !important; }
+
+/* 페이지 머리 · 장식 아이콘 원 · 층 칩 */
+body.md-v5 .md-page-hero__icon { background: none !important; box-shadow: none !important; color: var(--v5-bronze) !important; }
+
+/* 「혹시 이런 고민」 카드 */
+body.md-v5 .md-pain__pair { border-radius: 0 !important; border: 1px solid var(--v5-line) !important; background: var(--v5-paper) !important; box-shadow: none !important; transform: none !important; }
+body.md-v5 .md-pain__pair::before { display: none !important; }
+body.md-v5 .md-pain__concern, body.md-v5 .md-pain__solution { background: none !important; }
+body.md-v5 .md-pain__concern { border-bottom: 1px solid var(--v5-hair) !important; }
+body.md-v5 .md-pain__concern::before, body.md-v5 .md-pain__concern::after, body.md-v5 .md-pain__solution::before { display: none !important; }
+body.md-v5 .md-pain__tag { background: none !important; border: 0 !important; padding: 0 !important; font-family: var(--v5-label); font-size: 11px !important; letter-spacing: .16em; color: var(--v5-mute) !important; }
+body.md-v5 .md-pain__concern p, body.md-v5 .md-pain__concern blockquote, body.md-v5 .md-pain__concern q { font-family: var(--v5-serif) !important; font-style: normal !important; color: var(--v5-ink) !important; }
+
+/* 「이런 분께 추천합니다」 */
+body.md-v5 .md-ideal { border-radius: 0 !important; background: var(--v5-paper) !important; border: 1px solid var(--v5-line) !important; }
+body.md-v5 .md-ideal::before, body.md-v5 .md-ideal::after { display: none !important; }
+body.md-v5 .md-ideal__chip { background: none !important; padding: 0 !important; font-family: var(--v5-label); font-weight: 400 !important; color: var(--v5-mute) !important; }
+body.md-v5 .md-ideal__title { font-family: var(--v5-serif) !important; font-weight: 400 !important; }
+body.md-v5 .md-ideal__list li { background: none !important; border-radius: 0 !important; border-bottom: 1px solid var(--v5-hair) !important; text-align: left; }
+body.md-v5 .md-ideal__check { background: none !important; color: var(--v5-bronze) !important; }
+
+/* 「다른 진료 영역 보기」 카드 */
+body.md-v5 .md-service-card { border-radius: 0 !important; background: var(--v5-paper) !important; border: 1px solid var(--v5-line) !important; box-shadow: none !important; }
+body.md-v5 .md-service-card::before, body.md-v5 .md-service-card::after { display: none !important; }
+body.md-v5 .md-service-card__icon { background: none !important; box-shadow: none !important; color: var(--v5-bronze) !important; }
+body.md-v5 .md-service-card__title { font-family: var(--v5-serif) !important; font-weight: 400 !important; }
+body.md-v5 .md-service-card:hover { border-color: var(--v5-bronze) !important; transform: none !important; }
+
+/* 종합안내서 카드 · 큰 번호 장식 약하게 */
+body.md-v5 .md-guide-cta { border-radius: 0 !important; box-shadow: none !important; }
+body.md-v5 .md-guide-cta__code { opacity: .06 !important; }
+body.md-v5 .md-guide-cta__tag { border-radius: 0 !important; }
+
+/* 상담 띠 버튼 · 아이콘 빼고 글자만 */
+body.md-v5 .md-cta-banner .md-rcta__icon { display: none !important; }
+body.md-v5 .md-cta-banner .md-rcta__btn { min-height: 52px !important; padding: 0 26px !important; flex-direction: row !important; }
+body.md-v5 .md-cta-banner .md-rcta__label { font-size: 14.5px !important; font-weight: 500 !important; }
+body.md-v5 .md-cta-banner { padding-block: clamp(48px, 6vw, 72px) !important; }
+
+/* v5.9 · 페이지별 카드 · 강조 상자 공통 정리 (자연치아보존 · 심미치료 · 사랑니 · 교정 트랙 · 지역 등) */
+body.md-v5 .md-preservation-card, body.md-v5 .md-track, body.md-v5 .md-wisdom-case, body.md-v5 .md-wisdom-stat,
+body.md-v5 .md-region-reason, body.md-v5 .md-spec, body.md-v5 .md-staff-dept, body.md-v5 .md-doccard, body.md-v5 .md-highlight {
+  border-radius: 0 !important; box-shadow: none !important; background: var(--v5-paper) !important;
+  border: 1px solid var(--v5-line) !important; transform: none !important;
+}
+body.md-v5 .md-preservation-card::before, body.md-v5 .md-preservation-card::after,
+body.md-v5 .md-track::before, body.md-v5 .md-track::after,
+body.md-v5 .md-wisdom-case::before, body.md-v5 .md-wisdom-case::after,
+body.md-v5 .md-region-reason::before, body.md-v5 .md-highlight::before, body.md-v5 .md-highlight::after,
+body.md-v5 .md-preservation-callout::before, body.md-v5 .md-preservation-callout::after,
+body.md-v5 .md-wisdom-callout::before, body.md-v5 .md-wisdom-callout::after { display: none !important; }
+body.md-v5 .md-preservation-card:hover, body.md-v5 .md-track:hover, body.md-v5 .md-wisdom-case:hover,
+body.md-v5 .md-region-reason:hover, body.md-v5 .md-doccard:hover { border-color: var(--v5-bronze) !important; transform: none !important; box-shadow: none !important; }
+body.md-v5 .md-preservation-card h4, body.md-v5 .md-preservation-card h3, body.md-v5 .md-track h3, body.md-v5 .md-wisdom-case h3, body.md-v5 .md-region-reason h3 { font-family: var(--v5-serif) !important; font-weight: 400 !important; color: var(--v5-ink) !important; }
+/* 단계 · 꼬리표 */
+body.md-v5 [class*="preservation-card__tag"], body.md-v5 [class*="preservation-card__badge"], body.md-v5 [class*="__step"]:not(ol):not(ul) {
+  background: none !important; border: 0 !important; padding: 0 !important; border-radius: 0 !important;
+  font-family: var(--v5-label); font-size: 11px !important; letter-spacing: .14em; color: var(--v5-bronze) !important; font-weight: 500 !important;
+}
+/* 강조 상자 (callout) — 왼쪽 브론즈 선 하나, 그라디언트 · 그림자 없이 */
+body.md-v5 .md-preservation-callout, body.md-v5 .md-wisdom-callout, body.md-v5 .md-policy-note {
+  border-radius: 0 !important; box-shadow: none !important; background: var(--v5-paper) !important; background-image: none !important;
+  border: 1px solid var(--v5-line) !important; border-left: 2px solid var(--v5-bronze) !important;
+}
+body.md-v5 .md-preservation-callout h3, body.md-v5 .md-preservation-callout h4, body.md-v5 .md-wisdom-callout h3 { font-family: var(--v5-serif) !important; font-weight: 500 !important; border-bottom: 0 !important; }
+body.md-v5 .md-preservation-callout li, body.md-v5 .md-preservation-callout [class*="__item"] { background: none !important; border: 0 !important; border-bottom: 1px solid var(--v5-hair) !important; border-radius: 0 !important; box-shadow: none !important; }
+/* 소제목 밑줄 · 체크 목록 */
+body.md-v5 .md-preservation-h3 { font-family: var(--v5-serif) !important; font-weight: 400 !important; border-bottom: 0 !important; padding-bottom: 0 !important; }
+body.md-v5 .md-preservation-h3::after { display: none !important; }
+body.md-v5 .md-preservation-list li::before { color: var(--v5-bronze) !important; }
+/* 섹션 바탕 · 덴탈SPA 초록 · 분리선 갈색 굵은 줄 */
+body.md-v5 .md-section--spa, body.md-v5 .md-section--pulpcap { background: var(--v5-paper) !important; background-image: none !important; border-top: 1px solid var(--v5-hair) !important; border-bottom: 1px solid var(--v5-hair) !important; }
+body.md-v5 .md-section--spa .md-preservation-card { border-top: 1px solid var(--v5-line) !important; }
+/* 위쪽 바로가기 칩 */
+body.md-v5 .md-preservation-nav { background: var(--v5-bg) !important; border-bottom: 1px solid var(--v5-hair); }
+body.md-v5 .md-preservation-nav a { border-radius: 0 !important; background: none !important; box-shadow: none !important; border: 0 !important; border-bottom: 1px solid transparent !important; color: var(--v5-sub) !important; font-weight: 400 !important; }
+body.md-v5 .md-preservation-nav a:hover { border-bottom-color: var(--v5-bronze) !important; color: var(--v5-ink) !important; }
+body.md-v5 .md-service-floor-badge { background: none !important; border: 1px solid var(--v5-line) !important; border-radius: 0 !important; color: var(--v5-sub) !important; }
+/* 진료 단계 숫자 칸 · 교정 트랙 강조 */
+body.md-v5 .md-track--featured { border-color: var(--v5-bronze) !important; }
+body.md-v5 .md-content-figure img, body.md-v5 .md-page-content img { border-radius: 0 !important; box-shadow: none !important; }
+body.md-v5 .md-content-figure { border-radius: 0 !important; box-shadow: none !important; border: 1px solid var(--v5-line); }
+
+/* v5.9 · 상담 예약 · 지역 · 백과사전 페이지 */
+/* 예약 버튼(전화 · 네이버 · 카카오) — 모든 페이지 같은 모양 (네이버만 브론즈) */
+body.md-v5 .md-rcta__btn { border-radius: 2px !important; box-shadow: none !important; background: transparent !important; border: 1px solid var(--v5-ink) !important; color: var(--v5-ink) !important; }
+body.md-v5 .md-rcta__btn.md-rcta__naver { background: var(--v5-bronze) !important; border-color: var(--v5-bronze) !important; color: #fff !important; }
+body.md-v5 .md-rcta__btn:hover { filter: brightness(.95); transform: none !important; }
+body.md-v5 .md-rcta__icon { display: none !important; }
+body.md-v5 .md-cta-banner .md-rcta__btn { border-color: #F6F3EE !important; color: #F6F3EE !important; }
+body.md-v5 .md-cta-banner .md-rcta__btn.md-rcta__naver { background: #C9A27F !important; border-color: #C9A27F !important; color: #1E1A17 !important; }
+/* 지도 버튼 3개 (지역 · 예전 오시는 길) */
+body.md-v5 .md-mapbtn { border-radius: 0 !important; box-shadow: none !important; background: var(--v5-paper) !important; border: 1px solid var(--v5-line) !important; }
+body.md-v5 .md-mapbtn:hover { border-color: var(--v5-ink) !important; transform: none !important; }
+body.md-v5 .md-mapbtn__logo { background: none !important; color: var(--v5-bronze) !important; border: 1px solid var(--v5-line); border-radius: 50% !important; }
+/* 진료시간 · 주차 · 경로 카드 */
+body.md-v5 .md-hours, body.md-v5 .md-park, body.md-v5 .md-region-route, body.md-v5 .md-region-callout, body.md-v5 .md-info-pair > * {
+  border-radius: 0 !important; box-shadow: none !important; background: var(--v5-paper) !important; background-image: none !important;
+}
+body.md-v5 .md-hours__badge, body.md-v5 .md-park__badge, body.md-v5 .md-region-route__icon { background: none !important; color: var(--v5-bronze) !important; border-radius: 0 !important; }
+body.md-v5 .md-hours__off.is-today, body.md-v5 .md-hours li.is-today { background: none !important; color: var(--v5-bronze) !important; }
+/* 백과사전 · 글 안 상담 상자 */
+body.md-v5 .md-term-inline-cta { border-radius: 0 !important; box-shadow: none !important; background: var(--v5-paper) !important; background-image: none !important; border: 1px solid var(--v5-line) !important; border-left: 2px solid var(--v5-bronze) !important; }
+body.md-v5 .md-term-inline-cta::before, body.md-v5 .md-term-inline-cta::after { display: none !important; }
+body.md-v5 .md-term-inline-cta__title { font-family: var(--v5-serif) !important; font-weight: 400 !important; color: var(--v5-ink) !important; }
+body.md-v5 .md-term-section-title__num { background: none !important; color: var(--v5-bronze) !important; border: 1px solid var(--v5-line); border-radius: 50% !important; }
+body.md-v5 .md-term-related-service, body.md-v5 .md-term-faq__item { border-radius: 0 !important; box-shadow: none !important; }
+body.md-v5 .md-term-hero__cat { border-radius: 0 !important; background: none !important; border: 1px solid var(--v5-line) !important; }
+/* 자가진단 봇 */
+body.md-v5 [class*="md-bot"] { border-radius: 0 !important; }
+body.md-v5 .md-bot__panel, body.md-v5 .md-bot { box-shadow: none !important; border: 1px solid var(--v5-line) !important; }
+
+/* v5.9 · 원장 상세 · 휴대폰에서 약력이 가운데 정렬 + 왼쪽 점으로 어긋나던 것 */
+@media (max-width: 820px) {
+  body.md-v5 .md-docsingle-card__body { text-align: left !important; }
+  body.md-v5 .md-creds, body.md-v5 .md-creds__group, body.md-v5 .md-creds__list { text-align: left !important; }
+  body.md-v5 .md-creds__list li { justify-content: flex-start !important; }
+}
+body.md-v5 .md-docsingle-card { border-radius: 0 !important; box-shadow: none !important; border: 1px solid var(--v5-line) !important; background: var(--v5-paper) !important; }
+body.md-v5 .md-docsingle-card__role { background: none !important; border: 1px solid var(--v5-line) !important; border-radius: 0 !important; }
+body.md-v5 .md-creds__title { font-family: var(--v5-label) !important; letter-spacing: .14em; color: var(--v5-mute) !important; font-weight: 500 !important; border-bottom: 1px solid var(--v5-line); padding-bottom: 6px; }
+/* 교정 트랙 카드 (본문 안 링크 카드) — 한 덩어리 상자로 */
+body.md-v5 .md-track-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0 8px; }
+body.md-v5 .md-track { display: block !important; padding: 22px 22px 18px !important; color: var(--v5-ink) !important; text-decoration: none !important; }
+body.md-v5 .md-track h4 { font-family: var(--v5-serif) !important; font-weight: 500 !important; font-size: 18px !important; margin: 6px 0 6px !important; }
+body.md-v5 .md-track__badge { font-family: var(--v5-label); font-size: 11px; letter-spacing: .14em; color: var(--v5-bronze); border: 0 !important; }
+body.md-v5 .md-track__more { display: inline-block; margin-top: 6px; color: var(--v5-bronze); border: 0 !important; font-size: 13.5px; }
+@media (max-width: 700px) { body.md-v5 .md-track-grid { grid-template-columns: 1fr; } }
+/* 원장 인터뷰 · 기타 남은 둥근 카드 */
+body.md-v5 .md-main [class*="interview"], body.md-v5 .md-main [class*="-qa__item"], body.md-v5 .md-main [class*="__card"] { border-radius: 0 !important; box-shadow: none !important; }
+body.md-v5 .md-main [class*="interview"] [class*="__q"], body.md-v5 .md-main [class*="interview"] hr { border-style: solid !important; }
