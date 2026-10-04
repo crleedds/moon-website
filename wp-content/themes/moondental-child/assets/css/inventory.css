@@ -592,3 +592,5 @@ textarea.iv-input { min-height: 44px; resize: vertical; line-height: 1.5; }
   .iv-table .r { text-align: right !important; }
   body.mds-page-body .mds-page { padding: 0 !important; }
 }
+.iv-qc-card__num { -moz-appearance: textfield; }
+.iv-qc-card__num::-webkit-inner-spin-button, .iv-qc-card__num::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }

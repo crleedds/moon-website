@@ -212,8 +212,10 @@ function md_inv_is_lounge_only( $user ) {
 add_filter( 'login_redirect', function ( $to, $req, $user ) {
 	return ( ! is_wp_error( $user ) && md_inv_is_lounge_only( $user ) ) ? home_url( '/직원/' ) : $to;
 }, 20, 3 );
-add_action( 'admin_init', function () {
-	if ( wp_doing_ajax() || ! is_user_logged_in() ) { return; }
+/* admin_init 보다 앞(init)에서 돌려보낸다 — 관리 화면이 메뉴를 만들며 내는 PHP 알림까지 막는다 */
+add_action( 'init', function () {
+	if ( ! is_admin() || wp_doing_ajax() || wp_doing_cron() || ! is_user_logged_in() ) { return; }
+	if ( isset( $_SERVER['SCRIPT_NAME'] ) && false !== strpos( (string) $_SERVER['SCRIPT_NAME'], 'admin-post.php' ) ) { return; }
 	if ( md_inv_is_lounge_only( wp_get_current_user() ) ) { wp_safe_redirect( home_url( '/직원/' ) ); exit; }
 }, 1 );
 add_filter( 'show_admin_bar', function ( $show ) {
