@@ -2442,7 +2442,7 @@ function moondental_smile_content_fields() {
 		'hero' => array(
 			'title'  => '심미치료 · 히어로',
 			'fields' => array(
-				'smile_hero_eyebrow' => array( 'default' => 'SMILE DESIGN CENTER · 천안·아산 심미치과', 'label' => '히어로 · eyebrow', 'type' => 'text' ),
+				'smile_hero_eyebrow' => array( 'default' => 'AESTHETIC DENTISTRY CENTER · 천안·아산 심미치과', 'label' => '히어로 · eyebrow', 'type' => 'text' ),
 				'smile_hero_title_a' => array( 'default' => '천안·아산 심미치료센터', 'label' => '히어로 · 제목 첫 줄', 'type' => 'text' ),
 				'smile_hero_title_b' => array( 'default' => '자연스러운 미소를 디자인합니다', 'label' => '히어로 · 제목 강조 (em)', 'type' => 'text' ),
 				'smile_hero_lead'    => array( 'default' => "최소 침습 라미네이트·심미 레진·전문가 치아미백·잇몸미백·거미스마일 —\n환자분의 얼굴·치아·잇몸 라인을 종합적으로 분석해 맞춤 스마일을 설계합니다.", 'label' => '히어로 · 리드 (줄바꿈 유지)', 'type' => 'textarea' ),

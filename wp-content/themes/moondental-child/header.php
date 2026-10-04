@@ -37,7 +37,9 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 			<div class="md-header__inner">
 
 				<a class="md-header__brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php echo esc_attr( moondental_get_info( 'name_short' ) ?: moondental_get_info( 'name_full' ) ); ?>">
-					<?php if ( has_custom_logo() ) : ?>
+					<?php if ( function_exists( 'md_v5' ) && md_v5() ) : /* v5.0 · 글자 로고 */ ?>
+						<span class="md-v5-brand"><small>HANA MEDICAL FOUNDATION</small><b>문치과병원</b></span>
+					<?php elseif ( has_custom_logo() ) : ?>
 						<?php the_custom_logo(); ?>
 					<?php else :
 						// 컬러 로고 (다크모드에서도 브랜드 코럴 그대로 보이도록 유지)
@@ -121,6 +123,10 @@ $hours_wd   = function_exists( 'moondental_get_today_hours_label' )
 					}
 					$cta_data_attr = $cta_variants ? wp_json_encode( array_values( $cta_variants ) ) : '';
 					$first = $cta_variants[0] ?? array( 'label' => $header_cta_label, 'bg' => '', 'fg' => '', 'shadow' => '' );
+					if ( function_exists( 'md_v5' ) && md_v5() ) { /* v5.0 · 바뀌지 않는 「상담예약」 버튼 */
+						$cta_data_attr = '';
+						$first = array( 'label' => ( function_exists( 'moondental_current_language' ) && 'ko' !== moondental_current_language() ) ? $header_cta_label : '상담예약', 'bg' => '', 'fg' => '', 'shadow' => '' );
+					}
 
 					$style_bits = array();
 					if ( ! empty( $first['bg'] ) )     $style_bits[] = '--cta-bg:' . esc_attr( $first['bg'] );

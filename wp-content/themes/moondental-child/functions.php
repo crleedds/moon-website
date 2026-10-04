@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '4.23.0' );
+define( 'MOONDENTAL_VERSION', '5.0.0' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2122,6 +2122,7 @@ if ( file_exists( MOONDENTAL_DIR . '/inc/support/support.php' ) ) { require_once
 if ( file_exists( MOONDENTAL_DIR . '/inc/equipment/equipment.php' ) ) { require_once MOONDENTAL_DIR . '/inc/equipment/equipment.php'; } // v4.8 · 기구/장비 대장 (직원 전용)
 if ( file_exists( MOONDENTAL_DIR . '/inc/fees/fees.php' ) ) { require_once MOONDENTAL_DIR . '/inc/fees/fees.php'; } // v4.13 · 진료비
 if ( file_exists( MOONDENTAL_DIR . '/inc/encyclopedia-boost.php' ) ) { require_once MOONDENTAL_DIR . '/inc/encyclopedia-boost.php'; } // v4.20 · 백과사전 보강
+if ( file_exists( MOONDENTAL_DIR . '/inc/design-v5.php' ) ) { require_once MOONDENTAL_DIR . '/inc/design-v5.php'; } // v5.0 · 새 디자인
 if ( file_exists( MOONDENTAL_DIR . '/inc/rename-esthetic.php' ) ) { require_once MOONDENTAL_DIR . '/inc/rename-esthetic.php'; } // v4.23 · 심미치료센터 이름·주소
 if ( file_exists( MOONDENTAL_DIR . '/inc/staff/staff.php' ) ) { require_once MOONDENTAL_DIR . '/inc/staff/staff.php'; } // v4.18 · 직원 정보
 if ( file_exists( MOONDENTAL_DIR . '/inc/calendar/calendar.php' ) ) { require_once MOONDENTAL_DIR . '/inc/calendar/calendar.php'; } // v4.17 · 달력

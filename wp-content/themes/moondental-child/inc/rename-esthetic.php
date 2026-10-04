@@ -79,3 +79,19 @@ add_action( 'init', function () {
 
 	update_option( 'md_rename_esthetic_v423', 'done' );
 }, 5 );
+
+/* v4.24 · 영문 라벨 「SMILE DESIGN CENTER」 도 바꾼다 (한 번) */
+add_action( 'init', function () {
+	if ( get_option( 'md_rename_esthetic_v424' ) === 'done' ) return;
+	$mods = get_theme_mods();
+	if ( is_array( $mods ) ) {
+		$changed = false;
+		foreach ( $mods as $k => $v ) {
+			if ( ! is_string( $v ) ) continue;
+			$nv = str_ireplace( array( 'SMILE DESIGN CENTER', 'Smile Design Center' ), 'AESTHETIC DENTISTRY CENTER', $v );
+			if ( $nv !== $v ) { $mods[ $k ] = $nv; $changed = true; }
+		}
+		if ( $changed ) update_option( 'theme_mods_' . get_option( 'stylesheet' ), $mods );
+	}
+	update_option( 'md_rename_esthetic_v424', 'done' );
+}, 6 );

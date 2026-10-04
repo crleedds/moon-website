@@ -133,6 +133,8 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 		<div class="md-docs-grid">
 			<?php foreach ( $ordered_doctors as $doc ) :
 				$photo_url   = moondental_doctor_photo_url( $doc['photo'] ?? '' );
+				$md_v5_ph    = ( function_exists( 'md_v5' ) && md_v5() && function_exists( 'md_v5_doctor_photo' ) && false !== strpos( md_v5_doctor_photo( $doc['photo'] ?? '' ), '/doctors/v5/' ) ); /* v5.0 · 얼굴 크기 맞춘 사진 */
+				if ( $md_v5_ph ) $photo_url = md_v5_doctor_photo( $doc['photo'] ?? '' );
 				$anchor      = 'doctor-' . sanitize_title( $doc['name'] );
 				$doctor_link = home_url( '/의료진/' . moondental_doctor_name_to_slug( $doc['name'] ) . '/' );
 				$bio         = $doc['bio'] ?? array();
@@ -146,6 +148,7 @@ foreach ( $staff_by_dept as $dept => $roles ) {
 					esc_attr( number_format( $photo_ty,   1 ) ),
 					esc_attr( number_format( $photo_zoom, 2 ) )
 				);
+				if ( $md_v5_ph ) $photo_style = 'object-position: center top;';
 			?>
 				<article class="md-doccard md-doccard--linked" id="<?php echo esc_attr( $anchor ); ?>"><a class="md-doccard__link-wrap" href="<?php echo esc_url( $doctor_link ); ?>" aria-label="<?php echo esc_attr( $doc['name'] . ' ' . $doc['role'] . ' 상세 페이지' ); ?>"></a>
 					<div class="md-doccard__photo">

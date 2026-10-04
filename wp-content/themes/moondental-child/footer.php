@@ -60,7 +60,12 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				if ( file_exists( $footer_logo_path ) ) :
 				?>
 					<a class="md-footer__brand-link" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php echo esc_attr( $info['name_full'] ); ?>">
+						<?php if ( function_exists( 'md_v5' ) && md_v5() ) : /* v5.0 · 밝은 푸터 → 컬러 로고 (다크 모드는 흰 로고) */ ?>
+						<img class="md-footer__brand-img md-v5-logo-light" src="<?php echo esc_url( MOONDENTAL_URI . '/assets/images/logo/logo-wide-noreg.png' ); ?>" alt="<?php echo esc_attr( $info['name_full'] ); ?>" loading="lazy" decoding="async" width="200" height="68">
+						<img class="md-footer__brand-img md-v5-logo-dark" src="<?php echo esc_url( MOONDENTAL_URI . '/assets/images/logo/logo-wide-white.png' ); ?>" alt="" loading="lazy" decoding="async" width="200" height="68">
+						<?php else : ?>
 						<img class="md-footer__brand-img" src="<?php echo esc_url( MOONDENTAL_URI . '/assets/images/logo/logo-wide-white.png' ); ?>" alt="<?php echo esc_attr( $info['name_full'] ); ?>" loading="lazy" decoding="async" width="200" height="60">
+						<?php endif; ?>
 					</a>
 				<?php else : ?>
 					<h3><?php echo esc_html( $info['name_full'] ); ?></h3>
@@ -127,6 +132,19 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 				if ( ! empty( $info['blog_url'] ) ) $socials[] = array( 'href'=>$info['blog_url'], 'label'=>'네이버 블로그', 'cls'=>'md-fsoc--blog', 'svg'=>'<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#03C75A"/><path d="M8 7.5h3.5c1.4 0 2.3.7 2.3 1.9 0 .8-.5 1.4-1.2 1.6.9.2 1.5.9 1.5 1.9 0 1.4-1 2.1-2.6 2.1H8V7.5zm1.7 3.1h1.5c.7 0 1.1-.3 1.1-.9 0-.5-.4-.8-1.1-.8H9.7v1.7zm0 3.1h1.7c.8 0 1.2-.3 1.2-.9s-.4-.9-1.2-.9H9.7v1.8z" fill="#fff"/></svg>' );
 				if ( ! empty( $info['facebook_url'] ) ) $socials[] = array( 'href'=>$info['facebook_url'], 'label'=>'페이스북', 'cls'=>'md-fsoc--fb', 'svg'=>'<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#1877F2"/><path d="M14.5 12.7h-1.7V18h-2.2v-5.3H9.4v-2h1.2V9.2c0-1.5 1-2.6 2.5-2.6h1.5v2.1h-1c-.5 0-.8.3-.8.8v1.3h1.8l-.1 2z" fill="#fff"/></svg>' );
 				if ( ! empty( $info['youtube_url'] ) ) $socials[] = array( 'href'=>$info['youtube_url'], 'label'=>'유튜브', 'cls'=>'md-fsoc--yt', 'svg'=>'<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#FF0000"/><path d="M16.8 8.4c-.1-.5-.5-.9-1-1C14.9 7.2 12 7.2 12 7.2s-2.9 0-3.8.2c-.5.1-.9.5-1 1C7 9.3 7 12 7 12s0 2.7.2 3.6c.1.5.5.9 1 1 .9.2 3.8.2 3.8.2s2.9 0 3.8-.2c.5-.1.9-.5 1-1 .2-.9.2-3.6.2-3.6s0-2.7-.2-3.6zM10.8 13.9V10.1l3.3 1.9-3.3 1.9z" fill="#fff"/></svg>' );
+				/* v5.0 · 가는 선 아이콘 + 네이버 플레이스 */
+				if ( function_exists( 'md_v5' ) && md_v5() ) {
+					$v5_ic = array(
+						'md-fsoc--insta' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".9" fill="currentColor" stroke="none"/></svg>',
+						'md-fsoc--blog'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 5.5h16v10.5H13l-3 3v-3H4z" stroke-linejoin="round"/><path d="M9.5 8.3v5.2M9.5 10.6c.4-.8 1.2-1.2 2-1.2 1.2 0 2 .9 2 2.1s-.8 2.1-2 2.1c-.8 0-1.6-.4-2-1.2" stroke-linecap="round"/></svg>',
+						'md-fsoc--fb'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M13.4 20.3V13h2.3l.3-2.6h-2.6V8.9c0-.8.3-1.3 1.4-1.3h1.3V5.3a17 17 0 0 0-1.9-.1c-1.9 0-3.2 1.2-3.2 3.3v1.9H8.9V13H11v7.3" stroke-linejoin="round"/></svg>',
+						'md-fsoc--yt'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="2.8" y="5.8" width="18.4" height="12.4" rx="3.6"/><path d="M10.2 9.4v5.2l4.6-2.6z" fill="currentColor" stroke="none"/></svg>',
+					);
+					foreach ( $socials as $_k => $_s ) {
+						if ( isset( $v5_ic[ $_s['cls'] ] ) ) $socials[ $_k ]['svg'] = $v5_ic[ $_s['cls'] ];
+					}
+					$socials[] = array( 'href' => 'https://map.naver.com/p/entry/place/12772165', 'label' => '네이버 플레이스', 'cls' => 'md-fsoc--place', 'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z" stroke-linejoin="round"/><path d="M9.8 12.6V7.6l4.4 5V7.6" stroke-linejoin="round"/></svg>' );
+				}
 				if ( $socials ) : ?>
 					<ul class="md-footer__social" aria-label="문치과 채널">
 						<?php foreach ( $socials as $s ) : ?>

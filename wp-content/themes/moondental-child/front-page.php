@@ -11,6 +11,13 @@
  */
 
 get_header();
+
+/* v5.0 · 새 디자인 홈 (한국어) — 외국어 홈은 아래 기존 구성을 새 색으로 */
+if ( function_exists( 'md_v5' ) && md_v5() && ( ! function_exists( 'moondental_current_language' ) || 'ko' === moondental_current_language() ) ) {
+	get_template_part( 'template-parts/home-v5' );
+	get_footer();
+	return;
+}
 ?>
 
 <?php /* v3.34.6 · 히어로+사명+지표 3개 섹션을 통합 · 한 화면 첫 임팩트 */ ?>
