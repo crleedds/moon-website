@@ -808,3 +808,7 @@ body.md-v5 .md-mobile-cta__icon { display: grid; place-items: center; font-size:
 body.md-v5 .md-mobile-cta__icon .md-ico { width: 20px; height: 20px; }
 body.md-v5 .md-mobile-cta__item { color: var(--v5-ink) !important; }
 body.md-v5 .md-mobile-cta__item--naver { background: var(--v5-bronze) !important; color: #fff !important; }
+body.md-v5 .md-fab-stack .md-fab .md-fab__icon,
+body.md-v5 .md-fab-stack .md-fab--naver .md-fab__icon,
+body.md-v5 .md-fab-stack .md-fab--kakao .md-fab__icon { color: inherit !important; background: none !important; opacity: 1 !important; filter: none !important; }
+body.md-v5 .md-fab-stack .md-fab .md-ico { stroke: currentColor !important; fill: none !important; }
