@@ -1,7 +1,7 @@
 <?php
 /**
  * English translations · extra set (v3.87)
- * 홈 · 자연치아보존센터 · 스마일디자인센터 · 비용안내 · 의료진 · 오시는 길에서 쓰이지만
+ * 홈 · 자연치아보존센터 · 심미치료센터 · 비용안내 · 의료진 · 오시는 길에서 쓰이지만
  * md_translations_en.php 에 없던 키. 기본 파일과 병합되며 같은 키는 이 파일이 우선.
  *
  * @package moondental-child
@@ -53,7 +53,7 @@ return array(
 	'clinic_intro_smile_lead'    => 'White-spot removal, tooth reshaping, gum whitening, minimally invasive laminates, resin closure of gaps, microdontia — a tailored plan for every aesthetic concern.',
 	'clinic_intro_smile_list'    => "White-spot removal\nTooth reshaping · Gum whitening\nMinimally invasive laminates\nResin closure of front-tooth gaps\nMicrodontia treatment\nMinimal-intervention principle — no unnecessary tooth reduction",
 	'clinic_intro_smile_more'    => 'Learn more →',
-	'clinic_intro_smile_title'   => 'Smile Design Center',
+	'clinic_intro_smile_title'   => 'Aesthetic Dentistry Center',
 	'clinic_intro_preserve_lead' => 'We preserve your natural teeth instead of extracting. From the smallest intervention upward — cavity, pulp and gum care, plus the Dental SPA that protects the result afterwards, all in one place.',
 	'clinic_intro_preserve_list' => "Cavity treatment — precise, minimal-reduction care from the earliest stage\nVital pulp therapy — preserve healthy pulp instead of removing the whole nerve\nRoot canal treatment — microscope & CBCT precision endodontics · re-treatment\nGum treatment — staged periodontal therapy and maintenance\nDental SPA — 60–90 min prevention program: scaling · air-flow · fluoride · brushing coaching",
 	'clinic_intro_preserve_more' => 'Learn more →',
@@ -235,8 +235,8 @@ return array(
 	'price_cta_meta_3_value' => 'Moon Tower 9·10·11·13F, 52 Mannam-ro, Dongnam-gu, Cheonan, Chungnam',
 	'price_loc_title'        => 'Moon Dental Hospital location',
 
-	/* === 스마일디자인센터 페이지 === */
-	'smile_hero_title_a'     => 'Cheonan-Asan Smile Design Center',
+	/* === 심미치료센터 페이지 === */
+	'smile_hero_title_a'     => 'Cheonan-Asan Aesthetic Dentistry Center',
 	'smile_hero_title_b'     => 'Designing a naturally beautiful smile',
 	'smile_nav_items'        => "💎 | Laminates | #laminate\n🎨 | Aesthetic resin | #aesthetic-resin\n✨ | Whitening | #whitening\n🌸 | Gum whitening | #gum-whitening\n😊 | Gummy smile | #gummy",
 	'smile_laminate_title'   => 'Minimally invasive laminates',
@@ -263,10 +263,10 @@ return array(
 	'smile_gummy_cards'      => "Cause 1 | Low gumline | Teeth are normal length but the gum covers too much. <strong>Laser gum contouring</strong> adjusts the gumline.\nCause 2 | Short teeth | Short natural teeth make the gum look prominent. <strong>Crown lengthening + laminates</strong> restore length and proportion.\nCause 3 | Overactive upper lip | The lip-lifting muscles pull too strongly. <strong>Botox</strong> moderates the movement — effect lasts 3–6 months.\nCause 4 | Overgrown upper jaw | A skeletal cause where the upper jaw itself has overgrown. <strong>Orthodontics + jaw surgery</strong> — our 11F orthodontic team with an external surgical team.",
 	'smile_gummy_callout_title' => '📐 How we diagnose a gummy smile',
 	'smile_gummy_callout_body'  => '① Facial analysis — smile line measured from photos and video / ② CBCT to check gum-to-tooth proportion / ③ Identify which of the 4 causes applies / ④ Propose a single or combined plan for you.',
-	'smile_cta_chip'         => '✨ Free smile design consultation',
+	'smile_cta_chip'         => '✨ Free aesthetic dentistry consultation',
 	'smile_cta_title'        => "Your smile, designed\nat Moon Dental Hospital, Cheonan-Asan",
 	'smile_cta_lead'         => 'See the result in a digital smile simulation before you begin.',
-	'why_2_desc'  => '9F Natural Tooth Preservation Center · Prosthodontics · Dental SPA — 10F Implant Center · Smile Design Center · Oral Surgery · TMJ — 11F Orthodontic Center · Pediatrics · Periodontics — 13F In-house Lab · Hanah Culture Center — coordinated care from specialists in every field, all in one place.',
-	'trust_2_sub' => 'Prosthodontics · Conservative · Dental SPA · Implants · Smile Design · Oral Surgery · Oral Medicine · TMJ · Orthodontics · Pediatrics · Periodontics',
-	'trust_3_sub' => '9F Natural Tooth Preservation · 10F Implants · Smile Design · 11F Orthodontics · Pediatrics · 13F Lab',
+	'why_2_desc'  => '9F Natural Tooth Preservation Center · Prosthodontics · Dental SPA — 10F Implant Center · Aesthetic Dentistry Center · Oral Surgery · TMJ — 11F Orthodontic Center · Pediatrics · Periodontics — 13F In-house Lab · Hanah Culture Center — coordinated care from specialists in every field, all in one place.',
+	'trust_2_sub' => 'Prosthodontics · Conservative · Dental SPA · Implants · Aesthetic Dentistry · Oral Surgery · Oral Medicine · TMJ · Orthodontics · Pediatrics · Periodontics',
+	'trust_3_sub' => '9F Natural Tooth Preservation · 10F Implants · Aesthetic Dentistry · 11F Orthodontics · Pediatrics · 13F Lab',
 );

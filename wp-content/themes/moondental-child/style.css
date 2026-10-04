@@ -8049,7 +8049,7 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
   color: var(--color-primary-dark, #D97742);
   border-bottom-color: var(--color-primary-dark, #D97742);
 }
-/* v3.44.156 · 하이라이트 3개 (임플란트·교정·스마일디자인) · 브랜드 컬러 */
+/* v3.44.156 · 하이라이트 3개 (임플란트·교정·심미치료) · 브랜드 컬러 */
 .md-floor-guide__center--highlight {
   color: var(--color-primary-dark, #D97742) !important;
 }
@@ -9050,7 +9050,7 @@ a.md-footer__hours-link:focus-visible .md-footer__hours-note {
 }
 
 /* =============================================================
-   40d. 자연치아살리기/스마일디자인/예방클리닉 — 멀티 섹션 페이지
+   40d. 자연치아살리기/심미치료/예방클리닉 — 멀티 섹션 페이지
    ============================================================= */
 /* 스무스 스크롤 (앵커 클릭 시) */
 html { scroll-behavior: smooth; }

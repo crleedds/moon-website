@@ -1184,8 +1184,8 @@ function moondental_floor_guide_data() {
 			'floor'   => '10F',
 			'centers' => array(
 				array( 'name' => '임플란트센터',      'slug' => '임플란트-센터', 'center' => 'implant' ),
-				// v3.85 · 스마일디자인센터 9F → 10F 이전 · 비서실 항목 제거
-				array( 'name' => '스마일디자인센터',   'slug' => '스마일디자인센터', 'center' => 'laminate' ),
+				// v3.85 · 심미치료센터 9F → 10F 이전 · 비서실 항목 제거
+				array( 'name' => '심미치료센터',   'slug' => '심미치료센터', 'center' => 'laminate' ),
 				array( 'name' => '슈어스마일 투명교정', 'slug' => '투명교정-센터' ),
 				array( 'name' => '구강외과' ),
 				array( 'name' => '구강내과' ),
@@ -1232,7 +1232,7 @@ function moondental_slug_floor( $slug ) {
 		// 진료 페이지 슬러그 · 층 별칭 매핑 (실제 진료 담당 진료과의 층)
 		$aliases = array(
 			'자연치아-살리기' => '9F',  // 보존과 · 9F
-			'심미치료'         => '10F', // 스마일디자인센터 · 10F (v3.85 · 스마일디자인센터 10F 이전)
+			'심미치료'         => '10F', // 심미치료센터 · 10F (v3.85 · 심미치료센터 10F 이전)
 			'사랑니-발치'      => '10F', // 구강외과 · 10F
 			// v3.44.203 · 슈어스마일 투명교정 진료는 10F 에서 진행 (사용자 확인).
 			//   교정센터(11F)와 층이 다르므로 별칭을 분리해 둔다.
@@ -1276,9 +1276,9 @@ function moondental_text_floor( $text ) {
 		'덴탈'         => '덴탈SPA',
 		'잇몸'         => '치주과',
 		'치주'         => '치주과',
-		'라미네이트'   => '스마일디자인센터',
-		'심미'         => '스마일디자인센터',
-		'미백'         => '스마일디자인센터',
+		'라미네이트'   => '심미치료센터',
+		'심미'         => '심미치료센터',
+		'미백'         => '심미치료센터',
 		'보철'         => '보철과',
 		'크라운'       => '보철과',
 		'틀니'         => '보철과',
@@ -1324,8 +1324,8 @@ function moondental_floor_guide_list_html( $link = true ) {
 		foreach ( $f['centers'] as $c ) {
 			$name = esc_html( $c['name'] );
 			if ( $link && ! empty( $c['slug'] ) ) {
-				$url = ( $c['slug'] === '스마일디자인센터' )
-					? home_url( '/스마일디자인센터/' )
+				$url = ( $c['slug'] === '심미치료센터' )
+					? home_url( '/심미치료센터/' )
 					: home_url( '/진료항목/' . $c['slug'] . '/' );
 				$parts[] = '<a href="' . esc_url( $url ) . '">' . $name . '</a>';
 			} else {
@@ -1368,8 +1368,8 @@ function moondental_render_floor_guide( $variant = 'card', $args = array() ) {
 			// v3.44.211 · 링크는 3개 센터만 ('center' 키 보유 항목)
 			if ( $args['link_pages'] && ! empty( $c['center'] ) && ! empty( $c['slug'] ) ) {
 				$url = home_url( '/진료항목/' . $c['slug'] . '/' );
-				if ( $c['slug'] === '스마일디자인센터' ) {
-					$url = home_url( '/스마일디자인센터/' );
+				if ( $c['slug'] === '심미치료센터' ) {
+					$url = home_url( '/심미치료센터/' );
 				}
 				$cls = 'md-floor-guide__center md-floor-guide__center--link' . $color_cls;
 				if ( $color_cls ) $cls .= ' md-floor-guide__center--highlight';
@@ -1960,7 +1960,7 @@ function moondental_clinic_comparison() {
 	$defaults = array(
 		1 => array( 'label' => '의료기관 종별',     'value' => '치과병원 (병원급)',                            'icon' => '🏥' ),
 		2 => array( 'label' => '의료진 협진',       'value' => '분야별 전문 의료진 협진',                       'icon' => '👨‍⚕️' ),
-		3 => array( 'label' => '전문 진료 영역',   'value' => '보철·보존·덴탈SPA·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주',                'icon' => '🦷' ),
+		3 => array( 'label' => '전문 진료 영역',   'value' => '보철·보존·덴탈SPA·임플란트·심미치료·구강외과·구강내과·턱관절·교정·소아·치주',                'icon' => '🦷' ),
 		4 => array( 'label' => '통합 진료센터',     'value' => '9·10·11·13F 4개 층 운영',                      'icon' => '🏢' ),
 		5 => array( 'label' => '디지털 진단 장비',  'value' => 'CBCT · 디지털 가이드 · 구강스캐너',            'icon' => '🔬' ),
 		6 => array( 'label' => '자체 보철 제작',    'value' => '한아 임플란트 보철연구소 · 원내 기공실 (13F)', 'icon' => '⚙️' ),

@@ -24,7 +24,7 @@ return array(
 	'cta_label'    => '문치과병원 임플란트 진료 페이지',
 	'related'      => array(
 		array( 'label' => '교정센터 투명교정 종합안내서',      'href' => '/guide/suresmile/', 'icon' => '😁' ),
-		array( 'label' => '스마일디자인센터 라미네이트 종합안내서', 'href' => '/guide/laminate/',  'icon' => '✨' ),
+		array( 'label' => '심미치료센터 라미네이트 종합안내서', 'href' => '/guide/laminate/',  'icon' => '✨' ),
 		array( 'label' => '자연치아보존센터 자연치아보존 종합안내서', 'href' => '/guide/preservation/', 'icon' => '🌿' ), // v3.85
 	),
 	'toc' => array(

@@ -133,7 +133,7 @@ return array(
 	/* === Header menu === */
 	'menu_impl'         => 'インプラントセンター',
 	'menu_ortho'        => '矯正センター',
-	'menu_smile'        => 'スマイルデザイン',
+	'menu_smile'        => '審美治療',
 	'menu_preserve'     => '天然歯保存センター',
 	'menu_vpt'          => '部分神経治療（歯髄保存）',
 	'menu_spa'          => 'デンタルSPA',

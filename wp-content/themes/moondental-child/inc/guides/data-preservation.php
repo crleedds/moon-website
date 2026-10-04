@@ -25,7 +25,7 @@ return array(
 	'related'      => array(
 		array( 'label' => '임플란트센터 종합안내서',          'href' => '/guide/implant/',   'icon' => '🦷' ),
 		array( 'label' => '교정센터 투명교정 종합안내서',      'href' => '/guide/suresmile/', 'icon' => '😁' ),
-		array( 'label' => '스마일디자인센터 라미네이트 종합안내서', 'href' => '/guide/laminate/',  'icon' => '✨' ),
+		array( 'label' => '심미치료센터 라미네이트 종합안내서', 'href' => '/guide/laminate/',  'icon' => '✨' ),
 	),
 	'toc' => array(
 		array( 'id' => 'why',       'label' => '왜 살리기가 아니라 보존인가' ),

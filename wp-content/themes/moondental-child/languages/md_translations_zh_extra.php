@@ -53,7 +53,7 @@ return array(
 	'clinic_intro_smile_lead'    => '白斑去除、牙齿塑形、牙龈美白、微创贴面、前牙缝隙树脂修复、过小牙治疗等——针对各种美学困扰提供个性化诊断与最佳方案。',
 	'clinic_intro_smile_list'    => "白斑去除\n牙齿塑形 · 牙龈美白\n微创贴面\n前牙缝隙树脂修复\n过小牙治疗\n微创原则——避免不必要的磨牙",
 	'clinic_intro_smile_more'    => '了解更多 →',
-	'clinic_intro_smile_title'   => '微笑设计中心',
+	'clinic_intro_smile_title'   => '美学治疗中心',
 	'clinic_intro_preserve_lead' => '不拔牙，最大限度保存天然牙。从最小干预开始——龋齿、牙髓、牙周治疗，以及守护治疗成果的牙科SPA，一站式完成。',
 	'clinic_intro_preserve_list' => "龋齿治疗——从早期开始，最小磨除、精准治疗\n部分牙髓治疗（活髓保存）——不完全去除牙神经，保留健康牙髓\n根管治疗——显微镜·CBCT精准根管治疗 · 再治疗\n牙周治疗——分阶段牙周治疗与维护\n牙科SPA——洁牙·喷砂·涂氟·刷牙指导的60~90分钟预防项目",
 	'clinic_intro_preserve_more' => '了解更多 →',
@@ -203,9 +203,9 @@ return array(
 	'news_stories_lead'       => "种植·矫正·天然牙保存·贴面·预防等\n汇集对患者有帮助的口腔健康资讯。",
 	'news_stories_title'      => '文牙科医院 牙齿故事',
 	'trust_1_sub'             => '全国患者慕名而来的30余年信赖',
-	'trust_2_sub'             => '修复·保存·牙科SPA·种植·微笑设计·口腔外科·口腔内科·颞下颌关节·矫正·儿童·牙周',
+	'trust_2_sub'             => '修复·保存·牙科SPA·种植·美学治疗·口腔外科·口腔内科·颞下颌关节·矫正·儿童·牙周',
 	'trust_2_unit'            => '个',
-	'trust_3_sub'             => '9F 天然牙保存 · 10F 种植·微笑设计 · 11F 矫正·儿童 · 13F 技工',
+	'trust_3_sub'             => '9F 天然牙保存 · 10F 种植·美学治疗 · 11F 矫正·儿童 · 13F 技工',
 	'trust_4_sub'             => '先倾听，只做必要的治疗',
 
 	/* === 자연치아보존센터 === */
@@ -320,15 +320,15 @@ return array(
 	'price_cta_meta_3_value' => '忠南 天安市东南区万南路52号 文塔9·10·11·13层',
 	'price_loc_title'        => '文牙科医院位置',
 
-	/* === 스마일디자인센터 === */
+	/* === 심미치료센터 === */
 	'smile_hero_eyebrow'     => 'SMILE DESIGN CENTER · 天安·牙山 美学牙科',
-	'smile_hero_title_a'     => '天安·牙山 微笑设计中心',
+	'smile_hero_title_a'     => '天安·牙山 美学治疗中心',
 	'smile_hero_title_b'     => '设计自然的微笑',
 	'smile_hero_lead'        => "微创贴面·美学树脂·专业牙齿美白·牙龈美白·露龈笑——\n综合分析您的面部·牙齿·牙龈线，设计专属微笑。",
 	'smile_nav_items'        => "💎 | 贴面 | #laminate\n🎨 | 美学树脂 | #aesthetic-resin\n✨ | 牙齿美白 | #whitening\n🌸 | 牙龈美白 | #gum-whitening\n😊 | 露龈笑 | #gummy",
 	'smile_laminate_title'   => '微创贴面',
 	'smile_laminate_lead'    => '在最大限度减少天然牙磨除的同时，自然改善前牙的颜色·形状·长度。',
-	'smile_laminate_cards'   => "🔬 最小磨除（No-prep/Minimal） | 较传统贴面大幅减少磨牙量。将薄陶瓷片（0.3~0.5mm）粘接于天然牙表面，自然遮盖变色·裂纹·小缝隙。\n🎨 数字化微笑设计 | 口内扫描仪精密取模，分析面部·牙龈·牙齿比例进行<strong>个性化模拟</strong>。开始前预览效果。\n⚙️ 院内技工室制作 | 13层韩亚种植修复研究所<strong>自主制作</strong>。试戴时可即时微调，颜色·形态精准。\n🦷 e.max·Empress陶瓷 | 采用美观与强度兼备的e.max·Empress等国际陶瓷。通透度与天然牙难以区分。",
+	'smile_laminate_cards'   => "🔬 最小磨除（No-prep/Minimal） | 较传统贴面大幅减少磨牙量。将薄陶瓷片（0.3~0.5mm）粘接于天然牙表面，自然遮盖变色·裂纹·小缝隙。\n🎨 数字化美学治疗 | 口内扫描仪精密取模，分析面部·牙龈·牙齿比例进行<strong>个性化模拟</strong>。开始前预览效果。\n⚙️ 院内技工室制作 | 13层韩亚种植修复研究所<strong>自主制作</strong>。试戴时可即时微调，颜色·形态精准。\n🦷 e.max·Empress陶瓷 | 采用美观与强度兼备的e.max·Empress等国际陶瓷。通透度与天然牙难以区分。",
 	'smile_laminate_reco_title' => '推荐做贴面的情况',
 	'smile_laminate_reco_list'  => "前牙变色，仅靠美白效果有限\n希望同时改善前牙长度·形状·牙龈线\n前牙之间有轻微缝隙（牙间隙）\n前牙因外伤轻微缺损或磨损\n婚礼·面试·重要活动前想在短期内改善笑容",
 	'smile_resin_title'      => '美学树脂——不损伤天然牙的形态改善',
@@ -350,9 +350,9 @@ return array(
 	'smile_gummy_cards'      => "原因1 | 牙龈线偏低 | 牙齿长度正常但牙龈覆盖过多。用<strong>牙龈成形术（激光）</strong>调整牙龈线。\n原因2 | 牙齿偏短 | 天然牙短，牙龈占比大。用<strong>冠延长术＋贴面</strong>恢复牙齿长度并调整比例。\n原因3 | 上唇肌肉过度活动 | 提唇肌过度用力使上唇抬得过高。用<strong>肉毒素</strong>调节肌肉活动——效果3~6个月。\n原因4 | 上颌骨过度发育 | 上颌本身过度发育的骨性原因。需<strong>矫正＋正颌手术协作</strong>。11层矫正科＋外部外科协作。",
 	'smile_gummy_callout_title' => '📐 露龈笑诊断流程',
 	'smile_gummy_callout_body'  => '① 面部分析——通过照片·视频测量笑线 / ② CBCT确认牙龈·牙齿比例 / ③ 诊断属于4种原因中的哪一种 / ④ 提出适合患者的单一·联合治疗方案。',
-	'smile_cta_chip'         => '✨ 微笑设计免费咨询',
+	'smile_cta_chip'         => '✨ 美学治疗免费咨询',
 	'smile_cta_title'        => "现在的微笑，\n在天安·牙山文牙科医院重新设计",
 	'smile_cta_lead'         => '通过数字微笑模拟，可先预览效果再开始。',
-	'why_2_desc'  => '9F 天然牙保存中心·修复·牙科SPA · 10F 种植中心·微笑设计中心·口腔外科·颞下颌关节 · 11F 矫正中心·儿童·牙周 · 13F 院内技工室·韩亚文化中心 — 在一处即可接受各领域专科医生的协作诊疗。',
+	'why_2_desc'  => '9F 天然牙保存中心·修复·牙科SPA · 10F 种植中心·美学治疗中心·口腔外科·颞下颌关节 · 11F 矫正中心·儿童·牙周 · 13F 院内技工室·韩亚文化中心 — 在一处即可接受各领域专科医生的协作诊疗。',
 	'svc_other_title'        => '查看其他诊疗领域',
 );

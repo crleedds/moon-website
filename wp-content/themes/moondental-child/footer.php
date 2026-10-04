@@ -222,11 +222,11 @@ $legal_show = $mc( 'footer_legal_show', 'yes' );
 								foreach ( $f['centers'] as $c ) {
 									$_name  = esc_html( $c['name'] );
 									$_color = ! empty( $c['center'] ) ? ' md-center-color--' . $c['center'] : '';
-									// v3.44.211 · 링크는 3개 센터(임플란트·교정·스마일디자인)만.
+									// v3.44.211 · 링크는 3개 센터(임플란트·교정·심미치료)만.
 									//   'center' 키가 있는 항목이 곧 그 3개다.
 									if ( ! empty( $c['center'] ) && ! empty( $c['slug'] ) ) {
-										$_url = ( $c['slug'] === '스마일디자인센터' )
-											? home_url( '/스마일디자인센터/' )
+										$_url = ( $c['slug'] === '심미치료센터' )
+											? home_url( '/심미치료센터/' )
 											: home_url( '/진료항목/' . $c['slug'] . '/' );
 										$_cls = 'md-footer__floor-center md-footer__floor-center--link' . $_color;
 										$_parts[] = '<a class="' . esc_attr( $_cls ) . '" href="' . esc_url( $_url ) . '">' . $_name . '</a>';

@@ -35,7 +35,7 @@ function md_guide_block_moon( $city, $min ) {
 	$dist = (int) $min > 0 ? ' ' . esc_html( $city ) . '에서 차로 ' . (int) $min . '분 안팎입니다.' : '';
 	return '<p>한아의료재단 문치과병원은 <strong>1995년 천안 만남로에서 개원</strong>한 <strong>병원급 치과병원</strong>입니다.' . $dist . '</p>
 	<ul>
-		<li><strong>진료과</strong> · 임플란트센터 · 교정센터 · 스마일디자인센터 · 자연치아보존센터 4개 전문센터와 구강외과 · 턱관절 · 소아치과 · 치주과 · 보철과 · 보존과가 한 건물에서 협진합니다.</li>
+		<li><strong>진료과</strong> · 임플란트센터 · 교정센터 · 심미치료센터 · 자연치아보존센터 4개 전문센터와 구강외과 · 턱관절 · 소아치과 · 치주과 · 보철과 · 보존과가 한 건물에서 협진합니다.</li>
 		<li><strong>장비</strong> · CBCT(3D CT) · 네비게이션 임플란트 · 구강 스캐너.</li>
 		<li><strong>기공실</strong> · 원내 기공실을 직접 운영합니다.</li>
 		<li><strong>통역</strong> · 영어 · 러시아어 · 몽골어 · 베트남어 · 중국어.</li>

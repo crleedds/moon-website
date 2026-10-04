@@ -88,7 +88,7 @@ function moondental_render_content_dashboard() {
 		'임플란트-센터'    => '임플란트 센터',
 		'투명교정-센터'    => '투명교정 센터',
 		'자연치아-살리기'   => '자연치아 살리기',
-		'스마일디자인센터'  => '스마일디자인 센터',
+		'심미치료센터'  => '심미치료 센터',
 		'예방클리닉'      => '예방 클리닉',
 		'턱관절-클리닉'    => '턱관절 클리닉',
 		'사랑니-발치'      => '사랑니 발치',
@@ -283,7 +283,7 @@ function moondental_render_content_dashboard() {
 			</div>
 
 			<div class="md-cm-card">
-				<h2>스마일디자인<span class="md-cm-badge md-cm-badge--customizer">Customizer</span></h2>
+				<h2>심미치료<span class="md-cm-badge md-cm-badge--customizer">Customizer</span></h2>
 				<p class="md-cm-desc">라미네이트·심미레진·미백·잇몸미백·거미스마일 5섹션.</p>
 				<a class="button button-primary" href="<?php echo esc_url( $panel_link( 'md_panel_smile_content' ) ); ?>">편집 →</a>
 			</div>

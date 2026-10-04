@@ -217,7 +217,7 @@ $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '�
 								$_nm = esc_html( $_c['name'] );
 								$_cc = ! empty( $_c['center'] ) ? ' md-center-color--' . $_c['center'] : '';
 								if ( ! empty( $_c['center'] ) && ! empty( $_c['slug'] ) ) {
-									$_u = ( $_c['slug'] === '스마일디자인센터' ) ? home_url( '/스마일디자인센터/' ) : home_url( '/' . $_c['slug'] . '/' );
+									$_u = ( $_c['slug'] === '심미치료센터' ) ? home_url( '/심미치료센터/' ) : home_url( '/' . $_c['slug'] . '/' );
 									$_fp[] = '<a class="md-floor-guide__center md-floor-guide__center--link md-floor-guide__center--highlight' . $_cc . '" href="' . esc_url( $_u ) . '">' . $_nm . '</a>';
 								} else {
 									$_fp[] = '<span class="md-floor-guide__center">' . $_nm . '</span>';

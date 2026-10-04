@@ -32,7 +32,7 @@ $title = function_exists( 'md_content' ) ? md_content( 'floor_guide_title', '층
 						// v3.44.211 · 링크는 3개 센터만 ('center' 키 보유 항목)
 						if ( ! empty( $c['center'] ) && ! empty( $c['slug'] ) ) {
 							$url = home_url( '/진료항목/' . $c['slug'] . '/' );
-							if ( $c['slug'] === '스마일디자인센터' ) $url = home_url( '/스마일디자인센터/' );
+							if ( $c['slug'] === '심미치료센터' ) $url = home_url( '/심미치료센터/' );
 							$cls = 'md-floor-rail__center md-floor-rail__center--link' . $color_cls;
 							if ( $color_cls ) $cls .= ' md-floor-rail__center--highlight';
 							$parts[] = '<a class="' . esc_attr( $cls ) . '" href="' . esc_url( $url ) . '">' . $name . '</a>';

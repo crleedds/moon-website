@@ -343,7 +343,7 @@ if ( function_exists( 'moondental_get_faqs_by_service' ) ) {
 		</header>
 		<div class="md-service-grid">
 			<?php
-			// 주 메뉴 구조 기반 5개 상위 카테고리 (임플란트/교정/스마일디자인/자연치아/진료과)
+			// 주 메뉴 구조 기반 5개 상위 카테고리 (임플란트/교정/심미치료/자연치아/진료과)
 			$service_areas   = function_exists( 'moondental_get_service_areas' ) ? moondental_get_service_areas() : array();
 			$current_area    = function_exists( 'moondental_service_slug_to_area' ) ? moondental_service_slug_to_area( $slug ) : $slug;
 			foreach ( $service_areas as $area ) :

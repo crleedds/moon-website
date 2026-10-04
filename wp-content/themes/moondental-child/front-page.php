@@ -30,7 +30,7 @@ get_header();
 		 * 다시 넣으면 된다 (바로 아래 guide-rail 호출과 같은 형태). */ ?>
 		<?php /* v3.85 · 홈 사이드바의 종합안내서 카드 4개 제거 (v3.44.182 에 추가했던 것).
 		 * 종합안내서는 각 센터 페이지의 배너(template-parts/section-guide-cta.php)에서
-		 * 센터 색에 맞춰 보여주는 것으로 통일 — 임플란트·교정·스마일디자인은 page-service.php /
+		 * 센터 색에 맞춰 보여주는 것으로 통일 — 임플란트·교정·심미치료은 page-service.php /
 		 * page-smile-design.php, 자연치아보존센터는 page-preservation.php.
 		 * template-parts/section-guide-rail.php 파일은 그대로 두었다 — 되살리려면 이 자리에
 		 *   get_template_part( 'template-parts/section', 'guide-rail', array( 'slug' => 'implant' ) );

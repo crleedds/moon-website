@@ -284,7 +284,7 @@ return array(
 	'prevention_hero_eyebrow' => 'PREVENTION · Cheonan-Asan Prevention Clinic',
 	'prevention_hero_lead'    => "Blocking cavities and gum disease before they start — the most economical and conservative treatment.\nMoon Dental Hospital Prevention Clinic: Dental SPA · Air Flow · Fluoride · Sealant.",
 
-	/* === Smile Design (스마일디자인) === */
+	/* === Aesthetic Dentistry (심미치료) === */
 	'smile_hero_eyebrow' => 'SMILE DESIGN · Aesthetic Center',
 	'smile_hero_lead'    => 'Laminate · Whitening · Aesthetic prosthetics — minimally invasive approach to your ideal smile.',
 
@@ -404,7 +404,7 @@ return array(
 	/* === Header primary menu (v3.44.22) === */
 	'menu_impl'         => 'Implant Center',
 	'menu_ortho'        => 'Orthodontics',
-	'menu_smile'        => 'Smile Design',
+	'menu_smile'        => 'Aesthetic Dentistry',
 	'menu_preserve'     => 'Natural Tooth Preservation Center',
 	'menu_vpt'          => 'Vital Pulp Therapy (Partial RCT)',
 	'menu_spa'          => 'Dental SPA',

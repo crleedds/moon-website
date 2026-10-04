@@ -230,7 +230,7 @@ return array(
 	/* 头部菜单 */
 	'menu_impl'         => '种植牙中心',
 	'menu_ortho'        => '矫正中心',
-	'menu_smile'        => '微笑设计',
+	'menu_smile'        => '美学治疗',
 	'menu_preserve'     => '天然牙保存中心',
 	'menu_vpt'          => '部分神经治疗（牙髓保存）',
 	'menu_spa'          => '牙科SPA',

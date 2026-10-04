@@ -1,9 +1,9 @@
 <?php
 /**
- * Template Name: 스마일디자인센터 (라미네이트·미백·심미)
+ * Template Name: 심미치료센터 (라미네이트·미백·심미)
  * Template Post Type: page
  *
- * /스마일디자인센터/ 페이지 — 라미네이트·심미레진·치아미백·잇몸미백·거미스마일 등
+ * /심미치료센터/ 페이지 — 라미네이트·심미레진·치아미백·잇몸미백·거미스마일 등
  * 심미치과 진료를 한 페이지에 종합.
  *
  *  앵커: #laminate / #aesthetic-resin / #whitening / #gum-whitening / #gummy
@@ -89,12 +89,12 @@ $nav_items = $parse_nav( md_content( 'smile_nav_items', '' ) );
 <section class="md-page-hero md-page-hero--smile">
 	<div class="md-container">
 		<nav class="md-page-hero__crumbs" aria-label="breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( get_the_title() ?: '스마일디자인센터' ); ?></span>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( md_content( 'breadcrumb_home', '홈' ) ); ?></a> ▸ <span><?php echo esc_html( get_the_title() ?: '심미치료센터' ); ?></span>
 		</nav>
 		<span class="md-page-hero__eyebrow"><?php echo esc_html( md_content( 'smile_hero_eyebrow', '' ) ); ?></span>
 		<?php
 		// v3.44.68 · 층 배지
-		$_smile_floor = function_exists( 'moondental_slug_floor' ) ? moondental_slug_floor( '스마일디자인센터' ) : '';
+		$_smile_floor = function_exists( 'moondental_slug_floor' ) ? moondental_slug_floor( '심미치료센터' ) : '';
 		if ( $_smile_floor ) :
 		?>
 			<span class="md-service-floor-badge" aria-label="위치"><span aria-hidden="true">📍</span> 문타워 <?php echo esc_html( $_smile_floor ); ?></span>
@@ -109,7 +109,7 @@ $nav_items = $parse_nav( md_content( 'smile_nav_items', '' ) );
 
 <!-- ============ 앵커 네비 ============ -->
 <?php if ( $nav_items ) : ?>
-<nav class="md-preservation-nav" aria-label="스마일디자인 섹션 이동">
+<nav class="md-preservation-nav" aria-label="심미치료 섹션 이동">
 	<div class="md-container">
 		<ul>
 			<?php foreach ( $nav_items as $n ) : ?>
@@ -222,7 +222,7 @@ $nav_items = $parse_nav( md_content( 'smile_nav_items', '' ) );
 	</div>
 </section>
 
-<?php /* v3.44.212 · 스마일디자인센터 종합안내서 (라미네이트) */ ?>
+<?php /* v3.44.212 · 심미치료센터 종합안내서 (라미네이트) */ ?>
 <?php get_template_part( 'template-parts/section', 'guide-cta', array( 'slug' => 'laminate' ) ); ?>
 
 <?php get_template_part( 'template-parts/section', 'cta' ); ?>

@@ -22,7 +22,7 @@ $services = moondental_get_services();
 		$svc_color_map = array(
 			'임플란트-센터'   => 'md-service-card--implant',   // 임플란트센터
 			'투명교정-센터'   => 'md-service-card--suresmile', // 교정센터
-			'스마일디자인센터' => 'md-service-card--laminate',  // 스마일디자인센터
+			'심미치료센터' => 'md-service-card--laminate',  // 심미치료센터
 			'자연치아-살리기'  => 'md-service-card--preservation', // v3.85 · 자연치아보존센터
 		);
 		?>

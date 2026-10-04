@@ -31,7 +31,7 @@ function moondental_enc_center_map() {
 	return array(
 		'implant'     => array( 'name' => '임플란트센터',     'url' => '/임플란트-센터/',     'icon' => '🦷', 'treat' => '임플란트·뼈이식·상악동 거상술·임플란트 틀니' ),
 		'ortho'       => array( 'name' => '교정센터',         'url' => '/투명교정-센터/',     'icon' => '✨', 'treat' => '슈어스마일 투명교정·브라켓 교정·성장기 교정' ),
-		'esthetic'    => array( 'name' => '스마일디자인센터', 'url' => '/스마일디자인센터/', 'icon' => '💎', 'treat' => '라미네이트·치아미백·심미보철·크라운' ),
+		'esthetic'    => array( 'name' => '심미치료센터', 'url' => '/심미치료센터/', 'icon' => '💎', 'treat' => '라미네이트·치아미백·심미보철·크라운' ),
 		'general'     => array( 'name' => '자연치아보존센터', 'url' => '/자연치아-살리기/',   'icon' => '🌿', 'treat' => '충치치료·부분신경치료·신경치료·잇몸치료·덴탈SPA' ),
 		'surgery'     => array( 'name' => '구강외과·턱관절 클리닉', 'url' => '/사랑니-발치/', 'icon' => '🩺', 'treat' => '사랑니 발치·턱관절 치료·구강 질환' ),
 		'pediatric'   => array( 'name' => '소아치과',         'url' => '/소아치과/',         'icon' => '👶', 'treat' => '어린이 충치·실란트·불소·유치 관리' ),

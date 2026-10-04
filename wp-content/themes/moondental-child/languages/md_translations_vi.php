@@ -230,7 +230,7 @@ return array(
 	/* Menu tiêu đề */
 	'menu_impl'         => 'Trung tâm Cấy ghép',
 	'menu_ortho'        => 'Trung tâm Niềng răng',
-	'menu_smile'        => 'Thiết kế Nụ cười',
+	'menu_smile'        => 'Nha khoa Thẩm mỹ',
 	'menu_preserve'     => 'Trung tâm Bảo tồn Răng thật',
 	'menu_vpt'          => 'Điều trị tủy một phần (Bảo tồn tủy)',
 	'menu_spa'          => 'Dental SPA',

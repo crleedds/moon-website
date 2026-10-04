@@ -1,7 +1,7 @@
 <?php
 /**
  * Section: 30여년 이상 한자리에서 + 4개 전문센터 카드 (v3.86)
- *  순서: 임플란트센터 · 교정센터 · 스마일디자인센터 · 자연치아보존센터 — 각 카드에 종합안내서 링크
+ *  순서: 임플란트센터 · 교정센터 · 심미치료센터 · 자연치아보존센터 — 각 카드에 종합안내서 링크
  *
  *  v3.27.7: 헤더·카드 제목·리드·야간진료·마무리 문구 모두 Customizer 편집 가능.
  *
@@ -53,12 +53,12 @@ $cards = array(
 		'guide'=> 'laminate',
 		'num'  => '03',
 		'icon' => $mc( 'clinic_intro_smile_icon', '💎' ),
-		'title'=> $mc( 'clinic_intro_smile_title', '스마일디자인센터' ),
+		'title'=> $mc( 'clinic_intro_smile_title', '심미치료센터' ),
 		'lead' => $mc( 'clinic_intro_smile_lead', '반점치(화이트스팟) 제거·치아 성형·잇몸 미백·최소침습 라미네이트·벌어진 앞니 레진 수복·왜소치 치료 등 다양한 심미적 고민에 맞춤 진단으로 개인별 최적 치료를 제안합니다.' ),
 		'list' => $md_intro_list( 'clinic_intro_smile_list',
 			"반점치(화이트스팟) 제거\n치아 성형 · 잇몸 미백\n최소침습 라미네이트\n벌어진 앞니 레진 수복\n왜소치 치료\n최소 침습 치료 원칙 — 불필요한 치아 삭제 최소화" ),
 		'more_label' => $mc( 'clinic_intro_smile_more', '자세히 보기 →' ),
-		'more_url'   => home_url( '/스마일디자인센터/' ),
+		'more_url'   => home_url( '/심미치료센터/' ),
 	),
 	array(
 		'key'  => 'preserve',

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '4.22.2' );
+define( 'MOONDENTAL_VERSION', '4.23.0' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -781,7 +781,7 @@ add_action( 'wp_loaded', function() {
 	$rename_map = array(
 		'임플란트센터'     => '임플란트 센터',
 		'교정센터'         => '교정 센터',
-		'스마일디자인센터' => '스마일디자인 센터',
+		'심미치료센터' => '심미치료 센터',
 		'자연치아살리기'   => '자연치아 살리기',
 		'비용안내'         => '비용 안내',
 		'병원안내'         => '병원 안내',
@@ -1215,7 +1215,7 @@ add_action( 'after_setup_theme', function() {
 }, 45 );
 
 /* 일회성 마이그레이션 v3.30.4 · 전문 진료 영역 확장 (6과 → 11개)
- * 사용자 요청 · 구강외과·구강내과·턱관절·스마일디자인·임플란트·예방·교정센터 포함.
+ * 사용자 요청 · 구강외과·구강내과·턱관절·심미치료·임플란트·예방·교정센터 포함.
  * Customizer에 옛 6과 값 저장돼있으면 새 11개로 갱신. */
 add_action( 'after_setup_theme', function() {
 	if ( get_option( 'moondental_specialties_v3304' ) === 'done' ) return;
@@ -1223,7 +1223,7 @@ add_action( 'after_setup_theme', function() {
 		'md_content_trust_2_value' => array( '6', '11' ),
 		'md_content_trust_2_unit'  => array( '과', '개' ),
 		'md_content_trust_2_label' => array( '전문 진료과', '전문 진료 영역' ),
-		'md_content_trust_2_sub'   => array( '보철·교정·보존·치주·소아·외과', '보철·보존·예방·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주' ),
+		'md_content_trust_2_sub'   => array( '보철·교정·보존·치주·소아·외과', '보철·보존·예방·임플란트·심미치료·구강외과·구강내과·턱관절·교정·소아·치주' ),
 	);
 	foreach ( $old_new as $key => $pair ) {
 		$saved = get_theme_mod( $key );
@@ -2122,6 +2122,7 @@ if ( file_exists( MOONDENTAL_DIR . '/inc/support/support.php' ) ) { require_once
 if ( file_exists( MOONDENTAL_DIR . '/inc/equipment/equipment.php' ) ) { require_once MOONDENTAL_DIR . '/inc/equipment/equipment.php'; } // v4.8 · 기구/장비 대장 (직원 전용)
 if ( file_exists( MOONDENTAL_DIR . '/inc/fees/fees.php' ) ) { require_once MOONDENTAL_DIR . '/inc/fees/fees.php'; } // v4.13 · 진료비
 if ( file_exists( MOONDENTAL_DIR . '/inc/encyclopedia-boost.php' ) ) { require_once MOONDENTAL_DIR . '/inc/encyclopedia-boost.php'; } // v4.20 · 백과사전 보강
+if ( file_exists( MOONDENTAL_DIR . '/inc/rename-esthetic.php' ) ) { require_once MOONDENTAL_DIR . '/inc/rename-esthetic.php'; } // v4.23 · 심미치료센터 이름·주소
 if ( file_exists( MOONDENTAL_DIR . '/inc/staff/staff.php' ) ) { require_once MOONDENTAL_DIR . '/inc/staff/staff.php'; } // v4.18 · 직원 정보
 if ( file_exists( MOONDENTAL_DIR . '/inc/calendar/calendar.php' ) ) { require_once MOONDENTAL_DIR . '/inc/calendar/calendar.php'; } // v4.17 · 달력
 if ( file_exists( MOONDENTAL_DIR . '/inc/survey/survey.php' ) ) { require_once MOONDENTAL_DIR . '/inc/survey/survey.php'; } // v4.10 · 환자 만족도 조사 (/만족도/ + 직원 전용 관리)
@@ -2587,7 +2588,7 @@ function moondental_cta_context() {
 			'상담예약'       => 'reservation',
 			'예약'           => 'reservation',
 			'예방클리닉'     => 'prevention',
-			'스마일디자인센터' => 'smile',
+			'심미치료센터' => 'smile',
 			'심미치료'       => 'smile',
 			'임상-케이스'    => 'about',
 			'임상케이스'     => 'about',
@@ -3308,7 +3309,7 @@ function moondental_default_pages() {
 		array( 'slug' => '사랑니-발치',       'title' => '사랑니 발치',   'template' => 'page-templates/page-service.php',      'order' => 9,  'parent' => '' ),
 		array( 'slug' => '심미치료',         'title' => '심미치료',      'template' => 'page-templates/page-service.php',      'order' => 10, 'parent' => '' ),
 		array( 'slug' => '예방클리닉',       'title' => '예방클리닉',     'template' => 'page-templates/page-prevention.php',   'order' => 11, 'parent' => '' ),
-		array( 'slug' => '스마일디자인센터', 'title' => '스마일디자인센터', 'template' => 'page-templates/page-smile-design.php', 'order' => 12, 'parent' => '' ),
+		array( 'slug' => '심미치료센터', 'title' => '심미치료센터', 'template' => 'page-templates/page-smile-design.php', 'order' => 12, 'parent' => '' ),
 		array( 'slug' => '슈어스마일-투명교정', 'title' => '슈어스마일 투명교정', 'template' => 'page-templates/page-service.php', 'order' => 13, 'parent' => '' ),
 		array( 'slug' => '브라켓-치아교정',   'title' => '브라켓 치아교정', 'template' => 'page-templates/page-service.php',     'order' => 14, 'parent' => '' ),
 		array( 'slug' => '상시채용',         'title' => '상시채용',       'template' => 'page-templates/page-recruit.php',      'order' => 15, 'parent' => '' ),
@@ -3718,7 +3719,7 @@ function moondental_admin_tools_page() {
 
 		<div class="card" style="max-width:720px; padding:24px; margin-bottom:16px;">
 			<h2>주 메뉴 자동 설정 (헤더 메뉴)</h2>
-			<p>스크린샷 기준 8개 메뉴 구조를 자동 설정합니다. (임플란트센터·교정센터·스마일디자인센터·자연치아살리기·진료과·의료진·비용안내·병원안내)
+			<p>스크린샷 기준 8개 메뉴 구조를 자동 설정합니다. (임플란트센터·교정센터·심미치료센터·자연치아살리기·진료과·의료진·비용안내·병원안내)
 			   하위 메뉴 포함. <strong>이미 메뉴가 있다면 비우고 새로 채웁니다.</strong></p>
 			<p style="font-size:13px; color:#666;">⚠️ 실행 전: 위의 "기본 페이지 만들기"를 먼저 실행해야 하위 페이지가 모두 생성됩니다.</p>
 			<form method="post">
@@ -3989,7 +3990,7 @@ function moondental_template_router( $template ) {
 		'기술력-시설'     => 'page-templates/page-facility.php',
 		'기술력시설'      => 'page-templates/page-facility.php',
 		'facility'       => 'page-templates/page-facility.php',
-		'스마일디자인센터' => 'page-templates/page-smile-design.php',
+		'심미치료센터' => 'page-templates/page-smile-design.php',
 		'smile-design'    => 'page-templates/page-smile-design.php',
 		'예방클리닉'      => 'page-templates/page-prevention.php',
 		'예방-클리닉'     => 'page-templates/page-prevention.php',
@@ -4326,7 +4327,7 @@ function moondental_setup_primary_menu( $force = false ) {
 	$structure = array(
 		array( 'title'=>'임플란트 센터',     'url'=>$home.'임플란트-센터/' ),
 		array( 'title'=>'교정 센터',         'url'=>$home.'투명교정-센터/' ),
-		array( 'title'=>'스마일디자인 센터', 'url'=>$home.'스마일디자인센터/' ),
+		array( 'title'=>'심미치료 센터', 'url'=>$home.'심미치료센터/' ),
 		array( 'title'=>'자연치아 살리기',   'url'=>$home.'자연치아-살리기/', 'children'=>array(
 			array( 'title'=>'충치치료',   'url'=>$home.'자연치아-살리기/#cavity' ),
 			array( 'title'=>'치수복조술', 'url'=>$home.'자연치아-살리기/#pulpcap' ),
@@ -4411,7 +4412,7 @@ add_action( 'admin_init', 'moondental_auto_setup_menu_once' );
 
 /**
  * 누락된 페이지 자동 생성 — admin 수동 작업 없이 메뉴 항목들이 모두 정상 동작하도록.
- *  스마일디자인센터·예방클리닉·상시채용 등이 기본 페이지 자동 생성 버튼을 누르지 않아도 만들어짐.
+ *  심미치료센터·예방클리닉·상시채용 등이 기본 페이지 자동 생성 버튼을 누르지 않아도 만들어짐.
  *  옵션 키로 1회만 실행.
  */
 function moondental_auto_create_pages_once() {
@@ -4613,7 +4614,7 @@ function moondental_primary_menu_data() {
 			array( 'label' => '슈어스마일 투명교정', 'url' => $home . '슈어스마일-투명교정/' ),
 			array( 'label' => '브라켓 치아교정',     'url' => $home . '브라켓-치아교정/' ),
 		) ),
-		array( 'label' => '스마일디자인센터', 'url' => $home . '스마일디자인센터/',  'children' => array() ),
+		array( 'label' => '심미치료센터', 'url' => $home . '심미치료센터/',  'children' => array() ),
 		// v3.85 · 자연치아살리기 → 자연치아보존센터 (4번째 전문센터) · 부분신경치료·덴탈SPA 하위 추가
 		array( 'label' => '자연치아보존센터', 'url' => $home . '자연치아-살리기/',   'children' => array(
 			array( 'label' => '충치치료',                'url' => $home . '자연치아-살리기/#cavity' ),
@@ -4792,7 +4793,7 @@ function moondental_service_visual( $slug ) {
 			'stats' => array(
 				array( 'value' => '30+', 'unit' => '년', 'label' => '임플란트 임상 경험' ),
 				array( 'value' => '±0.5', 'unit' => 'mm', 'label' => '가이드 수술 정확도' ),
-				array( 'value' => '10F',  'unit' => '',   'label' => '임플란트센터' ), // v3.85 · 스마일디자인센터와 같은 층
+				array( 'value' => '10F',  'unit' => '',   'label' => '임플란트센터' ), // v3.85 · 심미치료센터와 같은 층
 			),
 			'headline' => '천안·아산 임플란트, 30여년 임상으로 지키는 안정감',
 			'sub'      => 'CBCT 3D 정밀 진단 · 네비게이션 가이드 수술 · 발치부터 평생 관리까지 한 곳에서',
@@ -4853,7 +4854,7 @@ function moondental_menu_label_key( $label ) {
 	static $map = array(
 		'임플란트센터'         => 'menu_impl',
 		'교정센터'             => 'menu_ortho',
-		'스마일디자인센터'     => 'menu_smile',
+		'심미치료센터'     => 'menu_smile',
 		'자연치아살리기'       => 'menu_preserve',
 		'자연치아 살리기'      => 'menu_preserve',
 		'자연치아보존센터'     => 'menu_preserve', // v3.85
@@ -4910,7 +4911,7 @@ function moondental_render_primary_menu() {
 		$_lbl_flat = str_replace( ' ', '', trim( (string) $item['label'] ) );
 		if ( $_lbl_flat === '임플란트센터' )      $classes[] = 'md-nav-center md-nav-center--implant';
 		elseif ( $_lbl_flat === '교정센터' )      $classes[] = 'md-nav-center md-nav-center--suresmile';
-		elseif ( $_lbl_flat === '스마일디자인센터' ) $classes[] = 'md-nav-center md-nav-center--laminate';
+		elseif ( $_lbl_flat === '심미치료센터' ) $classes[] = 'md-nav-center md-nav-center--laminate';
 		elseif ( $_lbl_flat === '자연치아보존센터' ) $classes[] = 'md-nav-center md-nav-center--preservation'; // v3.85
 		// v3.44.22 · 라벨 번역 (파일 → API → 원본)
 		$_key   = function_exists( 'moondental_menu_label_key' ) ? moondental_menu_label_key( $item['label'] ) : null;
@@ -4982,7 +4983,7 @@ add_filter( 'nav_menu_css_class', function ( $classes, $item ) {
 	$t = str_replace( ' ', '', trim( wp_strip_all_tags( $item->title ) ) );
 	if ( $t === '임플란트센터' )      { $classes[] = 'md-nav-center'; $classes[] = 'md-nav-center--implant'; }
 	elseif ( $t === '교정센터' )      { $classes[] = 'md-nav-center'; $classes[] = 'md-nav-center--suresmile'; }
-	elseif ( $t === '스마일디자인센터' ) { $classes[] = 'md-nav-center'; $classes[] = 'md-nav-center--laminate'; }
+	elseif ( $t === '심미치료센터' ) { $classes[] = 'md-nav-center'; $classes[] = 'md-nav-center--laminate'; }
 	elseif ( $t === '자연치아보존센터' ) { $classes[] = 'md-nav-center'; $classes[] = 'md-nav-center--preservation'; } // v3.85
 	return $classes;
 }, 10, 2 );
@@ -5111,11 +5112,11 @@ function moondental_get_service_areas() {
 			'url'   => $home . '투명교정-센터/',
 		),
 		array(
-			'slug'  => '스마일디자인센터',
-			'title' => '스마일디자인센터',
+			'slug'  => '심미치료센터',
+			'title' => '심미치료센터',
 			'icon'  => 'icon:aesthetic',
 			'desc'  => '라미네이트·치아미백·심미보철 — 최소 삭제 보존적 심미 치료.',
-			'url'   => $home . '스마일디자인센터/',
+			'url'   => $home . '심미치료센터/',
 		),
 		array(
 			'slug'  => '자연치아-살리기',
@@ -5142,8 +5143,8 @@ function moondental_service_slug_to_area( $slug ) {
 	$map = array(
 		'임플란트-센터'    => '임플란트-센터',
 		'투명교정-센터'    => '투명교정-센터',
-		'스마일디자인센터' => '스마일디자인센터',
-		'심미치료'         => '스마일디자인센터',
+		'심미치료센터' => '심미치료센터',
+		'심미치료'         => '심미치료센터',
 		'자연치아-살리기'  => '자연치아-살리기',
 		'턱관절-클리닉'    => '진료항목',
 		'사랑니-발치'      => '진료항목',
@@ -5609,7 +5610,7 @@ function moondental_fetch_naver_blog( $limit = 20, $no_cache = false ) {
  * 일회성 마이그레이션 v3.85 · 자연치아보존센터 신설
  *  - 자연치아 살리기 → 자연치아보존센터 (4번째 전문센터)
  *  - 예방클리닉 → 자연치아보존센터 › 덴탈SPA 로 통합
- *  - 층별 안내 (스마일디자인센터 10F · 비서실 제거 · 13F 블루문드림)
+ *  - 층별 안내 (심미치료센터 10F · 비서실 제거 · 13F 블루문드림)
  *  - 비용안내 헤드라인 "투명한 비용 설명"
  *  저장된 Customizer 값이 새 기본값을 덮어쓰지 않도록 관련 키를 비우고
  *  (옵션 moondental_migrate_v385_backup 에 보관 · 되돌리기용), 페이지 제목을 갱신한다.
@@ -5678,7 +5679,7 @@ add_action( 'template_redirect', function () {
 add_action( 'init', function () {
 	if ( get_option( 'moondental_migrate_v386' ) === 'done' ) return;
 	$keys = array( 'trust_2_sub', 'trust_3_sub', 'why_2_desc', 'facility_lead', 'services_lead' );
-	$old_phrases = array( '9F 보철·보존', '9F 스마일디자인', '보존·예방', '예방클리닉', '자연치아 살리기' );
+	$old_phrases = array( '9F 보철·보존', '9F 심미치료', '보존·예방', '예방클리닉', '자연치아 살리기' );
 	$backup = array();
 	foreach ( $keys as $k ) {
 		foreach ( array( 'md_content_' . $k, $k ) as $mod ) {

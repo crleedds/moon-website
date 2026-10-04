@@ -286,12 +286,12 @@ function moondental_home_content_fields() {
 				'trust_2_value' => array( 'default' => '11',    'label' => '②번 — 숫자',     'type' => 'text' ),
 				'trust_2_unit'  => array( 'default' => '개',    'label' => '②번 — 단위',     'type' => 'text' ),
 				'trust_2_label' => array( 'default' => '전문 진료 영역', 'label' => '②번 — 라벨', 'type' => 'text' ),
-				'trust_2_sub'   => array( 'default' => '보철·보존·덴탈SPA·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주', 'label' => '②번 — 부제', 'type' => 'text' ),
+				'trust_2_sub'   => array( 'default' => '보철·보존·덴탈SPA·임플란트·심미치료·구강외과·구강내과·턱관절·교정·소아·치주', 'label' => '②번 — 부제', 'type' => 'text' ),
 
 				'trust_3_value' => array( 'default' => '4',     'label' => '③번 — 숫자',     'type' => 'text' ),
 				'trust_3_unit'  => array( 'default' => '개층',   'label' => '③번 — 단위',     'type' => 'text' ),
 				'trust_3_label' => array( 'default' => '통합 진료센터', 'label' => '③번 — 라벨', 'type' => 'text' ),
-				'trust_3_sub'   => array( 'default' => '9F 자연치아보존 · 10F 임플란트·스마일디자인 · 11F 교정·소아 · 13F 기공', 'label' => '③번 — 부제', 'type' => 'text' ),
+				'trust_3_sub'   => array( 'default' => '9F 자연치아보존 · 10F 임플란트·심미치료 · 11F 교정·소아 · 13F 기공', 'label' => '③번 — 부제', 'type' => 'text' ),
 
 				'trust_4_value' => array( 'default' => '1:1',   'label' => '④번 — 숫자',     'type' => 'text' ),
 				'trust_4_unit'  => array( 'default' => '',       'label' => '④번 — 단위',     'type' => 'text' ),
@@ -314,7 +314,7 @@ function moondental_home_content_fields() {
 
 				'why_2_icon'  => array( 'default' => '🏢', 'label' => '②번 — 아이콘', 'type' => 'text' ),
 				'why_2_title' => array( 'default' => '통합 진료센터', 'label' => '②번 — 제목', 'type' => 'text' ),
-				'why_2_desc'  => array( 'default' => '9F 자연치아보존센터·보철·덴탈SPA · 10F 임플란트센터·스마일디자인센터·구강외과·턱관절 · 11F 교정센터·소아·치주 · 13F 원내기공실·한아문화센터 — 분야별 전문 의료진의 협진을 한 곳에서 받으실 수 있습니다.', 'label' => '②번 — 설명', 'type' => 'textarea' ),
+				'why_2_desc'  => array( 'default' => '9F 자연치아보존센터·보철·덴탈SPA · 10F 임플란트센터·심미치료센터·구강외과·턱관절 · 11F 교정센터·소아·치주 · 13F 원내기공실·한아문화센터 — 분야별 전문 의료진의 협진을 한 곳에서 받으실 수 있습니다.', 'label' => '②번 — 설명', 'type' => 'textarea' ),
 
 				'why_3_icon'  => array( 'default' => '❤️', 'label' => '③번 — 아이콘', 'type' => 'text' ),
 				'why_3_title' => array( 'default' => '전신질환 안심 진료', 'label' => '③번 — 제목', 'type' => 'text' ),
@@ -348,12 +348,12 @@ function moondental_home_content_fields() {
 				'clinic_intro_ortho_list'  => array( 'default' => "고난도 교정\n투명교정 (슈어스마일)\n소아 교정\n재교정\n앞니 부분 교정", 'label' => '② 교정센터 · 리스트', 'type' => 'textarea' ),
 				'clinic_intro_ortho_more'  => array( 'default' => '자세히 보기 →', 'label' => '② 교정센터 · 링크 라벨', 'type' => 'text' ),
 
-				/* 03 스마일디자인센터 */
-				'clinic_intro_smile_icon'  => array( 'default' => '💎', 'label' => '③ 스마일디자인 · 아이콘', 'type' => 'text' ),
-				'clinic_intro_smile_title' => array( 'default' => '스마일디자인센터', 'label' => '③ 스마일디자인 · 제목', 'type' => 'text' ),
-				'clinic_intro_smile_lead'  => array( 'default' => '반점치(화이트스팟) 제거·치아 성형·잇몸 미백·최소침습 라미네이트·벌어진 앞니 레진 수복·왜소치 치료 등 다양한 심미적 고민에 맞춤 진단으로 개인별 최적 치료를 제안합니다.', 'label' => '③ 스마일디자인 · 리드', 'type' => 'textarea' ),
-				'clinic_intro_smile_list'  => array( 'default' => "반점치(화이트스팟) 제거\n치아 성형 · 잇몸 미백\n최소침습 라미네이트\n벌어진 앞니 레진 수복\n왜소치 치료\n최소 침습 치료 원칙 — 불필요한 치아 삭제 최소화", 'label' => '③ 스마일디자인 · 리스트', 'type' => 'textarea' ),
-				'clinic_intro_smile_more'  => array( 'default' => '자세히 보기 →', 'label' => '③ 스마일디자인 · 링크 라벨', 'type' => 'text' ),
+				/* 03 심미치료센터 */
+				'clinic_intro_smile_icon'  => array( 'default' => '💎', 'label' => '③ 심미치료 · 아이콘', 'type' => 'text' ),
+				'clinic_intro_smile_title' => array( 'default' => '심미치료센터', 'label' => '③ 심미치료 · 제목', 'type' => 'text' ),
+				'clinic_intro_smile_lead'  => array( 'default' => '반점치(화이트스팟) 제거·치아 성형·잇몸 미백·최소침습 라미네이트·벌어진 앞니 레진 수복·왜소치 치료 등 다양한 심미적 고민에 맞춤 진단으로 개인별 최적 치료를 제안합니다.', 'label' => '③ 심미치료 · 리드', 'type' => 'textarea' ),
+				'clinic_intro_smile_list'  => array( 'default' => "반점치(화이트스팟) 제거\n치아 성형 · 잇몸 미백\n최소침습 라미네이트\n벌어진 앞니 레진 수복\n왜소치 치료\n최소 침습 치료 원칙 — 불필요한 치아 삭제 최소화", 'label' => '③ 심미치료 · 리스트', 'type' => 'textarea' ),
+				'clinic_intro_smile_more'  => array( 'default' => '자세히 보기 →', 'label' => '③ 심미치료 · 링크 라벨', 'type' => 'text' ),
 
 				/* 04 자연치아 살리기 */
 				'clinic_intro_preserve_icon'  => array( 'default' => '🌿', 'label' => '④ 자연치아 살리기 · 아이콘', 'type' => 'text' ),
@@ -1618,7 +1618,7 @@ function moondental_compare_content_fields() {
 	$defaults = array(
 		1 => array( 'label' => '의료기관 종별',     'value' => '치과병원 (병원급)',                            'icon' => '🏥' ),
 		2 => array( 'label' => '의료진 협진',       'value' => '분야별 전문 의료진 협진',                       'icon' => '👨‍⚕️' ),
-		3 => array( 'label' => '전문 진료 영역',   'value' => '보철·보존·덴탈SPA·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주',                'icon' => '🦷' ),
+		3 => array( 'label' => '전문 진료 영역',   'value' => '보철·보존·덴탈SPA·임플란트·심미치료·구강외과·구강내과·턱관절·교정·소아·치주',                'icon' => '🦷' ),
 		4 => array( 'label' => '통합 진료센터',     'value' => '9·10·11·13F 4개 층 운영',                      'icon' => '🏢' ),
 		5 => array( 'label' => '디지털 진단 장비',  'value' => 'CBCT · 디지털 가이드 · 구강스캐너',            'icon' => '🔬' ),
 		6 => array( 'label' => '자체 보철 제작',    'value' => '한아 임플란트 보철연구소 · 원내 기공실 (13F)', 'icon' => '⚙️' ),
@@ -2190,13 +2190,13 @@ function moondental_register_preservation_content_customizer( $wp_customize ) {
 add_action( 'customize_register', 'moondental_register_preservation_content_customizer', 42 );
 
 /**
- * 스마일디자인 페이지 콘텐츠 등록.
+ * 심미치료 페이지 콘텐츠 등록.
  */
 function moondental_register_smile_content_customizer( $wp_customize ) {
 	$panel_id = 'md_panel_smile_content';
 	$wp_customize->add_panel( $panel_id, array(
-		'title'       => '스마일디자인 · 콘텐츠',
-		'description' => '/스마일디자인센터/ 페이지의 히어로·5개 섹션(라미네이트·심미레진·미백·잇몸미백·거미스마일)·CTA를 편집합니다.',
+		'title'       => '심미치료 · 콘텐츠',
+		'description' => '/심미치료센터/ 페이지의 히어로·5개 섹션(라미네이트·심미레진·미백·잇몸미백·거미스마일)·CTA를 편집합니다.',
 		'priority'    => 43,
 	) );
 	moondental_register_panel_groups( $wp_customize, $panel_id, moondental_smile_content_fields(), 'md_section_smile_' );
@@ -2435,15 +2435,15 @@ function moondental_preservation_content_fields() {
 }
 
 /**
- * 스마일디자인센터 페이지 (라미네이트·심미레진·미백·잇몸미백·거미스마일) 콘텐츠.
+ * 심미치료센터 페이지 (라미네이트·심미레진·미백·잇몸미백·거미스마일) 콘텐츠.
  */
 function moondental_smile_content_fields() {
 	return array(
 		'hero' => array(
-			'title'  => '스마일디자인 · 히어로',
+			'title'  => '심미치료 · 히어로',
 			'fields' => array(
 				'smile_hero_eyebrow' => array( 'default' => 'SMILE DESIGN CENTER · 천안·아산 심미치과', 'label' => '히어로 · eyebrow', 'type' => 'text' ),
-				'smile_hero_title_a' => array( 'default' => '천안·아산 스마일디자인센터', 'label' => '히어로 · 제목 첫 줄', 'type' => 'text' ),
+				'smile_hero_title_a' => array( 'default' => '천안·아산 심미치료센터', 'label' => '히어로 · 제목 첫 줄', 'type' => 'text' ),
 				'smile_hero_title_b' => array( 'default' => '자연스러운 미소를 디자인합니다', 'label' => '히어로 · 제목 강조 (em)', 'type' => 'text' ),
 				'smile_hero_lead'    => array( 'default' => "최소 침습 라미네이트·심미 레진·전문가 치아미백·잇몸미백·거미스마일 —\n환자분의 얼굴·치아·잇몸 라인을 종합적으로 분석해 맞춤 스마일을 설계합니다.", 'label' => '히어로 · 리드 (줄바꿈 유지)', 'type' => 'textarea' ),
 				'smile_nav_items'    => array( 'default' => "💎 | 라미네이트 | #laminate\n🎨 | 심미레진 | #aesthetic-resin\n✨ | 치아미백 | #whitening\n🌸 | 잇몸미백 | #gum-whitening\n😊 | 거미스마일 | #gummy", 'label' => '앵커 네비 (한 줄에 1개, 형식: 아이콘 | 라벨 | 앵커)', 'type' => 'textarea' ),
@@ -2534,9 +2534,9 @@ function moondental_smile_content_fields() {
 			),
 		),
 		'cta' => array(
-			'title'  => '스마일디자인 · CTA',
+			'title'  => '심미치료 · CTA',
 			'fields' => array(
-				'smile_cta_chip'  => array( 'default' => '✨ 스마일디자인 무료 상담', 'label' => 'CTA 칩', 'type' => 'text' ),
+				'smile_cta_chip'  => array( 'default' => '✨ 심미치료 무료 상담', 'label' => 'CTA 칩', 'type' => 'text' ),
 				'smile_cta_title' => array( 'default' => "지금 내 미소,\n천안·아산 문치과병원에서 디자인해보세요", 'label' => 'CTA 제목 (줄바꿈 유지)', 'type' => 'textarea' ),
 				'smile_cta_lead'  => array( 'default' => '디지털 스마일 시뮬레이션으로 결과를 미리 확인하고 시작할 수 있습니다.', 'label' => 'CTA 리드', 'type' => 'textarea' ),
 			),
@@ -2746,7 +2746,7 @@ function moondental_recruit_page_content_fields() {
 				'recruit_why_eyebrow' => array( 'default' => '✨ WHY MOON DENTAL', 'label' => '섹션 eyebrow', 'type' => 'text' ),
 				'recruit_why_title'   => array( 'default' => '문치과병원에서 일하면 좋은 점', 'label' => '섹션 제목', 'type' => 'text' ),
 				'recruit_why_cards'   => array(
-					'default' => "🕰️ 20년 넘게 함께한 동료들 | 1995년 개원 후 20년 넘게 근무하고 계신 선생님들이 여러 분 계십니다. 신뢰가 쌓인 동료와 오래 함께 일할 수 있는 환경입니다.\n🦷 30여년 임상 노하우 | 다양한 케이스를 직접 경험하며 임상 실력을 키울 수 있습니다.\n🏥 통합 진료센터 (4개 층) | 9F 자연치아보존·보철·덴탈SPA · 10F 임플란트·스마일디자인·외과·턱관절 · 11F 교정·소아·치주·디지털 · 13F 기공·문화센터 — 모든 진료를 한 건물에서 경험.\n🔬 디지털 진료 시스템 | CBCT·디지털 가이드·구강 스캐너 등 최신 장비. 디지털 치과 실무 경험 축적.\n👨‍⚕️ 분야별 전문 의료진 협진 | 보철·보존·덴탈SPA·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 전문 의료진과 함께 — 다각도로 배울 수 있는 환경.\n📚 교육·세미나 지원 | 학회·세미나 참석 지원, 사내 임상 교육 — 성장하고 싶은 분께 적극 추천.",
+					'default' => "🕰️ 20년 넘게 함께한 동료들 | 1995년 개원 후 20년 넘게 근무하고 계신 선생님들이 여러 분 계십니다. 신뢰가 쌓인 동료와 오래 함께 일할 수 있는 환경입니다.\n🦷 30여년 임상 노하우 | 다양한 케이스를 직접 경험하며 임상 실력을 키울 수 있습니다.\n🏥 통합 진료센터 (4개 층) | 9F 자연치아보존·보철·덴탈SPA · 10F 임플란트·심미치료·외과·턱관절 · 11F 교정·소아·치주·디지털 · 13F 기공·문화센터 — 모든 진료를 한 건물에서 경험.\n🔬 디지털 진료 시스템 | CBCT·디지털 가이드·구강 스캐너 등 최신 장비. 디지털 치과 실무 경험 축적.\n👨‍⚕️ 분야별 전문 의료진 협진 | 보철·보존·덴탈SPA·임플란트·심미치료·구강외과·구강내과·턱관절·교정·소아·치주 전문 의료진과 함께 — 다각도로 배울 수 있는 환경.\n📚 교육·세미나 지원 | 학회·세미나 참석 지원, 사내 임상 교육 — 성장하고 싶은 분께 적극 추천.",
 					'label' => '강점 카드 (한 줄에 1개, 형식: 아이콘+제목 | 본문)',
 					'type'  => 'textarea',
 				),
@@ -2837,7 +2837,7 @@ function moondental_region_content_fields() {
 				'region_reasons_eyebrow' => array( 'default' => '✨ {region} 추천 치과 · 선택 이유', 'label' => 'eyebrow (토큰: {region})', 'type' => 'text' ),
 				'region_reasons_title'   => array( 'default' => '{region} 추천 치과 · 문치과병원을 선택하시는 이유', 'label' => '섹션 제목 (토큰: {region})', 'type' => 'text' ),
 				'region_reasons_cards'   => array(
-					'default' => "🦷 30여년 임상 경험 | {region}에서 천안까지 오시는 데는 이유가 있습니다. 1995년 개원부터 30여년 한자리 진료로 누적된 임상 경험.\n👨‍⚕️ 분야별 전문 의료진 협진 | 보철·보존·덴탈SPA·임플란트·스마일디자인·구강외과·구강내과·턱관절·교정·소아·치주 전 분야 의료진이 한 케이스를 함께 보는 협진 시스템. {region}에서 따로따로 다닐 필요 없습니다.\n🔬 CBCT 디지털 진단 | 3D CBCT·디지털 가이드 수술·구강 스캐너 — 정확한 진단과 안전한 수술. {region}에서 정밀 진단이 필요한 케이스에 추천.\n⚙️ 자체 보철 제작 | 13층 한아 임플란트 보철연구소 원내 직접 제작. 빠른 수정·정확한 의사소통·품질 일관성 — {region}에서 오신 분들도 한 번에 끝.\n❤️ 전신질환 안심 진료 | 혈압·당검사·심전도·산소포화도 상시 측정. 고혈압·당뇨·심장질환자도 {region}에서 오셔서 안심하고 진료받으실 수 있습니다.\n🌙 평일 야간진료 | 월·화·수·금 9:00~20:30 점심시간 없이 진료 · 목 9:00~18:30 · 토 9:00~14:00. {region}에서 퇴근 후 출발하셔도 충분한 진료 시간.",
+					'default' => "🦷 30여년 임상 경험 | {region}에서 천안까지 오시는 데는 이유가 있습니다. 1995년 개원부터 30여년 한자리 진료로 누적된 임상 경험.\n👨‍⚕️ 분야별 전문 의료진 협진 | 보철·보존·덴탈SPA·임플란트·심미치료·구강외과·구강내과·턱관절·교정·소아·치주 전 분야 의료진이 한 케이스를 함께 보는 협진 시스템. {region}에서 따로따로 다닐 필요 없습니다.\n🔬 CBCT 디지털 진단 | 3D CBCT·디지털 가이드 수술·구강 스캐너 — 정확한 진단과 안전한 수술. {region}에서 정밀 진단이 필요한 케이스에 추천.\n⚙️ 자체 보철 제작 | 13층 한아 임플란트 보철연구소 원내 직접 제작. 빠른 수정·정확한 의사소통·품질 일관성 — {region}에서 오신 분들도 한 번에 끝.\n❤️ 전신질환 안심 진료 | 혈압·당검사·심전도·산소포화도 상시 측정. 고혈압·당뇨·심장질환자도 {region}에서 오셔서 안심하고 진료받으실 수 있습니다.\n🌙 평일 야간진료 | 월·화·수·금 9:00~20:30 점심시간 없이 진료 · 목 9:00~18:30 · 토 9:00~14:00. {region}에서 퇴근 후 출발하셔도 충분한 진료 시간.",
 					'label' => '이유 카드 (한 줄에 1개, 형식: 아이콘+제목 | 본문) · 토큰: {region}',
 					'type'  => 'textarea',
 				),

@@ -5,11 +5,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 return array(
 	'slug' => 'esthetic',
 	'order' => 30,
-	'group' => '스마일디자인센터',
+	'group' => '심미치료센터',
 	'icon' => '✨',
 	'title' => '심미치료',
 	'tagline' => '라미네이트 · 치아미백 — 앞니 모양과 색을 자연스럽게',
-	'center' => '스마일디자인센터 · 10F',
+	'center' => '심미치료센터 · 10F',
 	'keywords' => '라미네이트 미백 심미보철 치아성형',
 	'updated' => '2026.09',
 	'summary' => array(
@@ -39,6 +39,6 @@ return array(
 	),
 	'links' => array(
 		array( 'label' => '라미네이트 종합안내서', 'url' => '/guide/laminate/' ),
-		array( 'label' => '스마일디자인센터 페이지', 'url' => '/스마일디자인센터/' ),
+		array( 'label' => '심미치료센터 페이지', 'url' => '/심미치료센터/' ),
 	),
 );
