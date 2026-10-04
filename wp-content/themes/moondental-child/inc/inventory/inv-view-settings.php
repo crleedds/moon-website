@@ -82,6 +82,7 @@ function md_inv_settings_ops() {
 			md_inv_s_check( 'adjust_need_note', '실사 조정에 사유 필수' );
 			echo '<div class="iv-grid3">';
 			md_inv_s_num( 'order_need_recent', '「주문 필요」는 최근 몇 주 안에 출고된 품목만', '주 (0 = 전체)', 0, 104 );
+			md_inv_s_num( 'min_cover_weeks', '안전재고 제안: 몇 주 쓸 만큼', '주', 1, 26 );
 			echo '</div>';
 			?>
 		</section>
@@ -275,6 +276,7 @@ function md_inv_settings_accounts() {
 	<div class="iv-toolbar iv-toolbar--actions">
 		<button type="button" class="iv-btn iv-btn--primary" data-dlg="dlg-acc"><?php echo md_inv_icon( 'plus', 18 ); // phpcs:ignore ?>계정 만들기</button>
 	</div>
+	<div class="iv-sent">💡 관리자마다 <b>개인 계정</b>(권한 「관리자」)을 만들어 쓰면, 출고 · 입고 · 주문 기록에 그 사람 이름이 자동으로 남습니다. 공용 관리자 계정(moondentalmanager)은 계정 관리 · 백업처럼 원장님만 하는 일에 쓰세요. 개인 계정은 워드프레스 관리 화면에 들어갈 수 없고 라운지만 씁니다.</div>
 	<div class="iv-panel">
 		<h3 class="iv-h3">권한 차이</h3>
 		<div class="iv-table-wrap"><table class="iv-table iv-table--perm"><thead><tr><th></th><th>직원</th><th>관리자</th></tr></thead><tbody>
@@ -310,9 +312,9 @@ function md_inv_settings_accounts() {
 		<div class="iv-dlg__head"><b>계정 만들기</b><button type="button" class="iv-x" data-close aria-label="닫기"><?php echo md_inv_icon( 'x' ); // phpcs:ignore ?></button></div>
 		<div class="iv-grid2">
 			<label class="iv-f"><span>아이디 (영문 · 숫자) <em>*</em></span><input class="iv-input" name="login" pattern="[A-Za-z0-9._\-]{3,40}" required autocomplete="off"></label>
-			<label class="iv-f"><span>이름</span><input class="iv-input" name="name" maxlength="40"></label>
+			<label class="iv-f"><span>이름 (기록에 남음) <em>*</em></span><input class="iv-input" name="name" maxlength="40" required placeholder="예: 김민지"></label>
 			<label class="iv-f"><span>비밀번호 (8자 이상) <em>*</em></span><input class="iv-input" name="pass" type="text" minlength="8" required autocomplete="new-password"></label>
-			<label class="iv-f"><span>권한</span><select class="iv-input" name="role"><option value="md_stock_staff">직원</option><option value="md_stock_manager">관리자</option></select></label>
+			<label class="iv-f"><span>권한</span><select class="iv-input" name="role"><option value="md_stock_manager">관리자 (출고 · 입고 · 주문 · 설정)</option><option value="md_stock_staff">직원 (신청 · 내역 · 통계)</option></select></label>
 		</div>
 		<p class="iv-help">비밀번호는 저장소·기록 어디에도 남지 않습니다. 만든 뒤 따로 적어 두세요.</p>
 		<?php md_inv_dlg_close( '만들기' ); ?>

@@ -437,9 +437,23 @@
         if (!focused) c.innerHTML = ctlHtml(id);
       });
     }
+    /* 초성: 「ㅇㅋㅅ」 → 「알콜솜」 */
+    var CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+    function cho(s) {
+      var o = '';
+      for (var i = 0; i < s.length; i++) { var c = s.charCodeAt(i); o += (c >= 0xAC00 && c <= 0xD7A3) ? CHO.charAt(Math.floor((c - 0xAC00) / 588)) : s.charAt(i).toLowerCase(); }
+      return o;
+    }
+    var choCache = {};
     function match(it, words) {
       var hay = (it.n + ' ' + (vendors[it.v] ? vendors[it.v].n : '') + ' ' + (it.b || '') + ' ' + (catName[it.c2] || '') + ' ' + (catName[it.c3] || '')).toLowerCase();
-      for (var i = 0; i < words.length; i++) if (hay.indexOf(words[i]) < 0) return false;
+      for (var i = 0; i < words.length; i++) {
+        var w = words[i];
+        if (/^[ㄱ-ㅎ]+$/.test(w)) {
+          var ch = choCache[it.i] || (choCache[it.i] = cho(it.n).replace(/\s+/g, ''));
+          if (ch.indexOf(w) < 0) return false;
+        } else if (hay.indexOf(w) < 0) return false;
+      }
       return true;
     }
 
@@ -680,6 +694,64 @@
   /* 휴대폰 실사: 숫자 칸에 바로 커서 */
   var qn = $('.iv-qc-card__num');
   if (qn) setTimeout(function () { try { qn.focus(); } catch (x) {} }, 100);
+
+  /* ---------------------------------------------------------
+   * v5.6 · 처리된 신청 표시 (메뉴 「내역」 옆 숫자 · 내역의 「새로 처리됨」)
+   * ------------------------------------------------------- */
+  (function () {
+    var el = $('#iv-done-feed'); if (!el) return;
+    var F; try { F = JSON.parse(el.textContent); } catch (x) { return; }
+    var who = store.get('md_inv_who_v1', {}) || {};
+    var team = Number(who.team || 0); if (!team) return;
+    var seen = store.get('md_inv_seen_v1', {}) || {};
+    if (!seen[team]) { seen[team] = F.now; store.set('md_inv_seen_v1', seen); return; }
+    var since = seen[team];
+    var fresh = F.list.filter(function (r) { return r.t === team && r.a > since; });
+    var onMine = !!$('.iv-view--mine');
+    if (onMine) {
+      $$('.iv-card--req[data-done]').forEach(function (c) {
+        if (Number(c.dataset.team) === team && c.dataset.done && c.dataset.done > since) {
+          c.classList.add('is-fresh');
+          var t = c.querySelector('.iv-card__title');
+          if (t && !t.querySelector('.iv-tag--fresh')) t.insertAdjacentHTML('beforeend', ' <span class="iv-tag iv-tag--fresh">새로 처리됨</span>');
+        }
+      });
+      seen[team] = F.now; store.set('md_inv_seen_v1', seen);
+      return;
+    }
+    if (!fresh.length) return;
+    $$('a.iv-nav__a[href*="iv=mine"], a.iv-tabbar__a[href*="iv=mine"]').forEach(function (a) {
+      if (a.querySelector('.iv-nav__badge')) return;
+      a.insertAdjacentHTML('beforeend', '<b class="iv-nav__badge iv-nav__badge--ok" title="처리된 신청">' + fresh.length + '</b>');
+    });
+  })();
+
+  /* ---------------------------------------------------------
+   * v5.6 · 홈 화면에 추가 안내 (신청 화면)
+   * ------------------------------------------------------- */
+  (function () {
+    var box = $('#iv-install'); if (!box) return;
+    var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (standalone || store.get('md_inv_install_x', 0)) return;
+    var ua = navigator.userAgent || '';
+    var ios = /iPhone|iPad|iPod/i.test(ua), mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+    var prompt = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault(); prompt = e;
+      box.hidden = false; $('#iv-install-btn').hidden = false; $('.iv-install__and', box).hidden = true;
+    });
+    if (mobile) { box.hidden = false; (ios ? $('.iv-install__ios', box) : $('.iv-install__and', box)).hidden = false; }
+    $('#iv-install-btn').addEventListener('click', function () { if (prompt) { prompt.prompt(); prompt = null; box.hidden = true; } });
+    $('#iv-install-x').addEventListener('click', function () { box.hidden = true; store.set('md_inv_install_x', 1); });
+  })();
+
+  /* 바코드 입고: 주문을 고르면 남은 수량으로 */
+  $$('.iv-ordpick input[type=radio]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      var q = r.form.querySelector('[name=qty]');
+      if (q && r.dataset.left) q.value = r.dataset.left;
+    });
+  });
 
   /* 결과 문구는 몇 초 뒤 옅어진다 (성공일 때만) */
   var fl = $('.iv-flash--ok');

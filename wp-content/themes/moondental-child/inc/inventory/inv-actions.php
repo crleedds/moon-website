@@ -480,6 +480,11 @@ function md_inv_handle_download() {
 		echo $bin; // phpcs:ignore
 		exit;
 	}
+	if ( 'settle' === $what ) {
+		$ym = isset( $_GET['im'] ) && preg_match( '/^\d{4}-\d{2}$/', $_GET['im'] ) ? $_GET['im'] : date( 'Y-m', strtotime( '-1 month', current_time( 'timestamp' ) ) );
+		md_inv_log( '엑셀 내려받기', $ym . ' 업체 정산' );
+		md_inv_send_xlsx( md_inv_settle_xlsx( $ym ), '문치과병원 업체 정산 ' . $ym . '.xlsx' );
+	}
 	if ( 'po' === $what ) {
 		$vid = isset( $_GET['ivd'] ) ? (int) $_GET['ivd'] : 0;
 		$ds  = md_inv_dataset( 'po', array( 'vendor' => $vid ) );

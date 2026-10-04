@@ -38,6 +38,7 @@ function md_inv_setting_defaults() {
 		'stats_weeks'         => 12,
 		'stats_months'        => 12,
 		'stats_include_prepaid' => 0, // 사용금액 통계에 선납 업체 품목 포함
+		'min_cover_weeks'     => 4,   // 안전재고 제안: 몇 주 쓸 만큼
 		'notify_new'          => 0,   // 새 요청 메일
 		'notify_to'           => '',
 		'report_on'           => 1,   // 정기 엑셀 보고서 메일
@@ -92,6 +93,7 @@ function md_inv_settings_save( $in ) {
 	$out['report_dom']    = max( 1, min( 28, (int) $out['report_dom'] ) );
 	$out['report_hour']   = max( 0, min( 23, (int) $out['report_hour'] ) );
 	$out['backup_keep']   = max( 3, min( 365, (int) $out['backup_keep'] ) );
+	$out['min_cover_weeks'] = max( 1, min( 26, (int) $out['min_cover_weeks'] ) );
 	if ( ! in_array( $out['report_freq'], array( 'daily', 'weekly', 'monthly' ), true ) ) { $out['report_freq'] = 'weekly'; }
 	foreach ( array( 'label_cat1', 'label_cat2', 'label_cat3' ) as $k ) {
 		if ( '' === trim( $out[ $k ] ) ) { $out[ $k ] = $def[ $k ]; }
@@ -129,11 +131,44 @@ function md_inv_is_admin() {
 
 /** 지금 처리하는 사람 이름 — 관리자는 이 기기에 기억한 이름, 없으면 설정의 기본 이름 */
 function md_inv_me() {
+	/* 개인 계정(공용 두 계정이 아닌 것)은 계정 이름이 곧 기록에 남는 이름이다 */
+	if ( md_inv_is_personal() ) {
+		$u = wp_get_current_user();
+		return mb_substr( '' !== trim( $u->display_name ) ? $u->display_name : $u->user_login, 0, 40 );
+	}
 	$c = isset( $_COOKIE['md_inv_me'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['md_inv_me'] ) ) : '';
 	$c = trim( mb_substr( $c, 0, 40 ) );
 	if ( '' !== $c ) { return $c; }
 	$d = trim( (string) md_inv_set( 'me_default' ) );
 	return '' !== $d ? $d : wp_get_current_user()->user_login;
+}
+
+/** 여럿이 함께 쓰는 공용 계정이 아닌 개인 계정인가 */
+function md_inv_is_personal() {
+	if ( ! is_user_logged_in() ) { return false; }
+	$login  = wp_get_current_user()->user_login;
+	$shared = array( defined( 'MD_SUP_MANAGER_LOGIN' ) ? MD_SUP_MANAGER_LOGIN : 'moondentalmanager', defined( 'MD_SUP_STAFF_LOGIN' ) ? MD_SUP_STAFF_LOGIN : 'moondentalhospital' );
+	return ! in_array( $login, $shared, true );
+}
+
+/* ============================================================
+ * 초성 검색 — 「ㅇㅋㅅ」 → 「알콜솜」
+ * ============================================================ */
+
+function md_inv_choseong( $s ) {
+	static $cho = array( 'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ' );
+	$out = '';
+	foreach ( preg_split( '//u', (string) $s, -1, PREG_SPLIT_NO_EMPTY ) as $ch ) {
+		$c = mb_ord( $ch, 'UTF-8' );
+		if ( $c >= 0xAC00 && $c <= 0xD7A3 ) { $out .= $cho[ intdiv( $c - 0xAC00, 588 ) ]; }
+		else { $out .= mb_strtolower( $ch, 'UTF-8' ); }
+	}
+	return $out;
+}
+
+/** 검색어가 초성(ㄱ~ㅎ)만으로 되어 있나 */
+function md_inv_is_choseong_query( $q ) {
+	return (bool) preg_match( '/^[\x{3131}-\x{314E}\s]+$/u', (string) $q );
 }
 
 /* ============================================================
@@ -313,7 +348,10 @@ function md_inv_items( $a = array() ) {
 	$p = array();
 	if ( 1 === (int) $a['active'] ) { $w[] = 'i.active = 1'; }
 	elseif ( 0 === (int) $a['active'] ) { $w[] = 'i.active = 0'; }
-	if ( '' !== $a['search'] ) {
+	$cho_q = '';
+	if ( '' !== $a['search'] && md_inv_is_choseong_query( $a['search'] ) ) {
+		$cho_q = preg_replace( '/\s+/u', '', $a['search'] ); /* 초성은 PHP 에서 거른다 */
+	} elseif ( '' !== $a['search'] ) {
 		$like = '%' . $wpdb->esc_like( $a['search'] ) . '%';
 		$w[] = '(i.name LIKE %s OR i.code LIKE %s OR i.barcode LIKE %s)';
 		array_push( $p, $like, $like, $like );
@@ -344,7 +382,94 @@ function md_inv_items( $a = array() ) {
 		$r->stock = (int) $r->stock; $r->pend = (int) $r->pend; $r->onord = (int) $r->onord;
 		$r->price = (int) $r->price; $r->min_stock = (int) $r->min_stock;
 	}
+	if ( '' !== $cho_q ) {
+		$rows = array_values( array_filter( $rows, function ( $r ) use ( $cho_q ) {
+			return false !== mb_strpos( preg_replace( '/\s+/u', '', md_inv_choseong( $r->name ) ), $cho_q );
+		} ) );
+	}
 	return $rows;
+}
+
+/* ============================================================
+ * 6 · 안전재고 제안 — 최근 N주 출고량으로
+ * ============================================================ */
+
+/**
+ * @return array [ item_id => (object) { weekly, suggest } ] 최근 12주에 출고된 품목만
+ */
+function md_inv_min_suggestions() {
+	global $wpdb;
+	$weeks = 12;
+	$cover = max( 1, (int) md_inv_set( 'min_cover_weeks' ) );
+	$since = date( 'Y-m-d H:i:s', current_time( 'timestamp' ) - $weeks * WEEK_IN_SECONDS );
+	$rows  = $wpdb->get_results( $wpdb->prepare( 'SELECT item_id, SUM(-qty) AS q FROM ' . md_inv_t( 'ledger' ) . " WHERE type = 'out' AND voided = 0 AND created_at >= %s GROUP BY item_id", $since ) );
+	$out = array();
+	foreach ( $rows as $r ) {
+		$wk = (int) $r->q / $weeks;
+		if ( $wk <= 0 ) { continue; }
+		$out[ (int) $r->item_id ] = (object) array( 'weekly' => round( $wk, 2 ), 'used' => (int) $r->q, 'suggest' => (int) max( 1, ceil( $wk * $cover ) ) );
+	}
+	return $out;
+}
+
+/* ============================================================
+ * 7 · 중복 품목 — 같은 업체 · 같은 이름
+ * ============================================================ */
+
+function md_inv_duplicate_groups() {
+	$g = array();
+	foreach ( md_inv_items( array( 'active' => -1 ) ) as $it ) {
+		$k = (int) $it->vendor_id . '|' . mb_strtolower( preg_replace( '/\s+/u', ' ', trim( $it->name ) ) );
+		$g[ $k ][] = $it;
+	}
+	return array_values( array_filter( $g, function ( $x ) { return count( $x ) > 1; } ) );
+}
+
+/**
+ * 품목 합치기 — $drop 의 기록(원장 · 신청 · 주문)을 $keep 으로 옮기고 $drop 을 지운다.
+ * 비어 있는 칸(단가 · 단위 · 바코드 · 안전재고 · 분류)은 지울 품목의 값으로 채운다.
+ */
+function md_inv_item_merge( $keep, $drop ) {
+	global $wpdb;
+	$t = md_inv_t();
+	$k = md_inv_item( $keep );
+	$d = md_inv_item( $drop );
+	if ( ! $k || ! $d || (int) $k->id === (int) $d->id ) { return new WP_Error( 'item', '합칠 두 품목을 골라 주세요.' ); }
+	md_inv_lock();
+	md_inv_begin();
+	foreach ( array( 'ledger', 'req', 'ord' ) as $tb ) {
+		$wpdb->query( $wpdb->prepare( "UPDATE {$t[$tb]} SET item_id = %d WHERE item_id = %d", (int) $k->id, (int) $d->id ) );
+	}
+	$fill = array();
+	if ( ! $k->price && $d->price ) { $fill['price'] = (int) $d->price; }
+	if ( '' === trim( (string) $k->unit ) && '' !== trim( (string) $d->unit ) ) { $fill['unit'] = $d->unit; }
+	if ( ! $k->min_stock && $d->min_stock ) { $fill['min_stock'] = (int) $d->min_stock; }
+	if ( ! (int) $k->cat2 && (int) $d->cat2 ) { $fill['cat1'] = (int) $d->cat1; $fill['cat2'] = (int) $d->cat2; $fill['cat3'] = (int) $d->cat3; }
+	if ( '' === $k->barcode && '' !== $d->barcode ) { $wpdb->update( $t['item'], array( 'barcode' => '' ), array( 'id' => (int) $d->id ) ); $fill['barcode'] = $d->barcode; }
+	if ( '' !== trim( (string) $d->note ) ) { $fill['note'] = trim( (string) $k->note . "\n" . $d->note ); }
+	if ( ! (int) $k->active && (int) $d->active ) { $fill['active'] = 1; }
+	if ( $fill ) { $fill['updated_at'] = current_time( 'mysql' ); $wpdb->update( $t['item'], $fill, array( 'id' => (int) $k->id ) ); }
+	$wpdb->delete( $t['item'], array( 'id' => (int) $d->id ) );
+	md_inv_commit();
+	md_inv_unlock();
+	md_inv_log( '품목 합치기', $d->name . ' (#' . $d->id . ') → #' . $k->id );
+	return true;
+}
+
+/* ============================================================
+ * 5 · 월말 업체 정산 — 한 달 입고 · 반품 내역
+ * ============================================================ */
+
+/** @return array [ vendor_id => [ 줄 … ] ] 줄 = 원장 행 (입고 · 반품, 취소 아님) */
+function md_inv_settlement( $ym ) {
+	if ( ! preg_match( '/^\d{4}-\d{2}$/', (string) $ym ) ) { $ym = date( 'Y-m', strtotime( '-1 month', current_time( 'timestamp' ) ) ); }
+	$from = $ym . '-01';
+	$to   = date( 'Y-m-t', strtotime( $from ) );
+	$rows = md_inv_ledger( array( 'type' => 'in,return', 'from' => $from, 'to' => $to, 'limit' => 0, 'with_void' => 0 ) );
+	$out  = array();
+	foreach ( array_reverse( $rows ) as $l ) { $out[ (int) $l->vendor_id ][] = $l; }
+	uksort( $out, function ( $a, $b ) { return strcmp( md_inv_vendor_name( $a ), md_inv_vendor_name( $b ) ); } );
+	return $out;
 }
 
 function md_inv_item( $id ) {

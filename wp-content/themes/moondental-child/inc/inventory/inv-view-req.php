@@ -156,6 +156,7 @@ function md_inv_view_req() {
 		<label class="iv-f"><span>직접 입력</span><input class="iv-input" id="iv-scan-manual" inputmode="numeric" placeholder="바코드 숫자"></label>
 	</dialog>
 
+	<?php md_inv_install_help(); ?>
 	<script type="application/json" id="iv-req-data"><?php echo wp_json_encode( $cfg, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP ); ?></script>
 	<?php
 }
@@ -215,7 +216,7 @@ function md_inv_view_mine() {
 			$d = substr( $r->created_at, 0, 10 );
 			if ( $d !== $day ) { $day = $d; echo '<h3 class="iv-day">' . esc_html( date( 'n월 j일', strtotime( $d ) ) . ' (' . array( '일', '월', '화', '수', '목', '금', '토' )[ (int) date( 'w', strtotime( $d ) ) ] . ')' ) . '</h3>'; }
 			?>
-			<article class="iv-card iv-card--req is-<?php echo esc_attr( $r->status ); ?><?php echo ( '' !== $nb && $r->batch === $nb ) ? ' is-new' : ''; ?>">
+			<article class="iv-card iv-card--req is-<?php echo esc_attr( $r->status ); ?><?php echo ( '' !== $nb && $r->batch === $nb ) ? ' is-new' : ''; ?>" data-team="<?php echo (int) $r->team_id; ?>" data-done="<?php echo esc_attr( (string) $r->done_at ); ?>">
 				<div class="iv-card__main">
 					<div class="iv-card__title"><?php echo esc_html( $r->name ); ?><?php if ( ! $r->item_id ) : ?> <span class="iv-tag">목록에 없음</span><?php endif; ?><?php if ( $r->urgent ) : ?> <span class="iv-tag iv-tag--hot">급함</span><?php endif; ?></div>
 					<div class="iv-card__sub"><?php echo esc_html( md_inv_team_name( $r->team_id ) . ' · ' . $r->requester . ' · ' . md_inv_date( $r->created_at, 'H:i' ) ); ?></div>

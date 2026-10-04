@@ -115,7 +115,13 @@ function md_inv_view_fix() {
 	$all   = md_inv_items();
 	$cnt   = md_inv_fix_counts( $all );
 	$k     = md_inv_get( 'ik', 'noprice' );
-	$kinds = array( 'noprice' => '단가 없음', 'nounit' => '단위 없음', 'nocat' => $S['label_cat2'] . ' 없음', 'neg' => '재고 음수' );
+	$sug   = md_inv_min_suggestions();
+	$dups  = md_inv_duplicate_groups();
+	$nsug  = 0;
+	foreach ( $all as $it ) { if ( isset( $sug[ (int) $it->id ] ) && $sug[ (int) $it->id ]->suggest !== (int) $it->min_stock ) { $nsug++; } }
+	$cnt['minsug'] = $nsug;
+	$cnt['dup']    = count( $dups );
+	$kinds = array( 'noprice' => '단가 없음', 'nounit' => '단위 없음', 'nocat' => $S['label_cat2'] . ' 없음', 'neg' => '재고 음수', 'minsug' => '안전재고 제안', 'dup' => '중복 품목' );
 	if ( ! isset( $kinds[ $k ] ) ) { $k = 'noprice'; }
 	$q    = md_inv_get( 'iq' );
 	$rows = array();
@@ -141,6 +147,8 @@ function md_inv_view_fix() {
 		<?php endforeach; ?>
 		<a class="iv-subnav__a" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'barcode' ) ) ); ?>">바코드 없음 <b><?php echo (int) $cnt['nobar']; ?></b></a>
 	</nav>
+	<?php if ( 'minsug' === $k ) { md_inv_fix_minsug( $all, $sug ); return; } ?>
+	<?php if ( 'dup' === $k ) { md_inv_fix_dups( $dups ); return; } ?>
 	<form class="iv-filter" method="get"><input type="hidden" name="app" value="stock"><input type="hidden" name="iv" value="fix"><input type="hidden" name="ik" value="<?php echo esc_attr( $k ); ?>">
 		<label class="iv-f iv-f--grow"><span>찾기</span><input class="iv-input" type="search" name="iq" value="<?php echo esc_attr( $q ); ?>" placeholder="품목 · 업체"></label><button class="iv-btn iv-btn--ghost">보기</button></form>
 	<?php if ( ! $rows ) { md_inv_empty( '정리할 품목이 없습니다. 👍' ); return; } ?>
@@ -390,4 +398,59 @@ function md_inv_view_po() {
 		</section>
 	<?php endforeach; ?>
 	<?php
+}
+
+
+/* ---- 정리할 품목 › 안전재고 제안 ------------------------------- */
+
+function md_inv_fix_minsug( $all, $sug ) {
+	$cover = (int) md_inv_set( 'min_cover_weeks' );
+	$rows  = array();
+	foreach ( $all as $it ) {
+		if ( ! isset( $sug[ (int) $it->id ] ) ) { continue; }
+		if ( $sug[ (int) $it->id ]->suggest === (int) $it->min_stock ) { continue; }
+		$rows[] = $it;
+	}
+	echo '<p class="iv-help">최근 12주 동안 출고된 양으로 <b>' . (int) $cover . '주 쓸 만큼</b>을 안전재고로 제안합니다(설정 › 운영 설정에서 주 수를 바꿀 수 있음). 출고 기록이 없는 품목은 제안하지 않습니다. 맞는 것만 고르고 적용하세요.</p>';
+	if ( ! $rows ) { md_inv_empty( '바꿀 만한 안전재고가 없습니다. (출고 기록이 쌓이면 제안이 나옵니다)' ); return; }
+	echo '<form method="post" data-confirm="고른 품목의 안전재고를 바꿀까요?">';
+	md_inv_hidden( 'min_apply' );
+	echo '<div class="iv-bulkbar"><label class="iv-check"><input type="checkbox" data-checkall="ids[]"> 모두 고르기</label><button class="iv-btn iv-btn--primary iv-btn--sm" data-needcheck="ids[]">고른 것 적용</button></div>';
+	echo '<div class="iv-table-wrap iv-sec"><table class="iv-table"><thead><tr><th></th><th>품목</th><th class="r">12주 출고</th><th class="r">주 평균</th><th class="r">지금 안전재고</th><th class="r">제안</th><th class="r">재고</th></tr></thead><tbody>';
+	foreach ( $rows as $it ) {
+		$s = $sug[ (int) $it->id ];
+		echo '<tr><td data-l=""><input type="checkbox" name="ids[]" value="' . (int) $it->id . '" aria-label="선택"></td>';
+		echo '<td data-l="품목"><a href="' . esc_url( md_inv_url( array( 'iv' => 'item', 'id' => $it->id ) ) ) . '">' . esc_html( $it->name ) . '</a></td>';
+		echo '<td data-l="12주 출고" class="r">' . (int) $s->used . '</td><td data-l="주 평균" class="r">' . esc_html( $s->weekly ) . '</td>';
+		echo '<td data-l="지금 안전재고" class="r">' . (int) $it->min_stock . '</td>';
+		echo '<td data-l="제안" class="r"><input class="iv-input iv-input--sm iv-input--num" type="number" min="0" name="v[' . (int) $it->id . ']" value="' . (int) $s->suggest . '"></td>';
+		echo '<td data-l="재고" class="r">' . md_inv_stock_badge( $it ) . '</td></tr>';
+	}
+	echo '</tbody></table></div></form>';
+}
+
+/* ---- 정리할 품목 › 중복 품목 ------------------------------------ */
+
+function md_inv_fix_dups( $dups ) {
+	echo '<p class="iv-help">같은 업체에 같은 이름으로 두 번 이상 등록된 품목입니다. <b>남길 품목</b>을 고르고 「합치기」를 누르면 다른 쪽의 입출고 · 신청 · 주문 기록과 재고가 남길 품목으로 옮겨지고, 다른 쪽은 지워집니다. 비어 있던 단가 · 단위 · 바코드는 지울 쪽 값으로 채웁니다.</p>';
+	if ( ! $dups ) { md_inv_empty( '중복 품목이 없습니다. 👍' ); return; }
+	foreach ( $dups as $g ) {
+		$keep = $g[0];
+		foreach ( $g as $it ) { if ( $it->active && ! $keep->active ) { $keep = $it; } }
+		echo '<section class="iv-panel iv-dup"><h3 class="iv-h3">' . esc_html( $g[0]->name ) . ' <small>' . esc_html( md_inv_vendor_name( $g[0]->vendor_id ) ) . '</small></h3>';
+		echo '<div class="iv-table-wrap"><table class="iv-table"><thead><tr><th>코드</th><th class="r">재고</th><th class="r">단가</th><th>단위</th><th class="r">기록</th><th>상태</th><th></th></tr></thead><tbody>';
+		foreach ( $g as $it ) {
+			echo '<tr><td data-l="코드"><a href="' . esc_url( md_inv_url( array( 'iv' => 'item', 'id' => $it->id ) ) ) . '">' . esc_html( $it->code ) . '</a></td><td data-l="재고" class="r">' . (int) $it->stock . '</td><td data-l="단가" class="r">' . esc_html( md_inv_num( $it->price ) ) . '</td><td data-l="단위">' . esc_html( $it->unit ) . '</td><td data-l="기록" class="r">' . (int) md_inv_item_refs( $it->id ) . '</td><td data-l="상태">' . ( $it->active ? '사용' : '<span class="iv-muted">숨김</span>' ) . '</td>';
+			echo '<td class="iv-td-act">';
+			if ( (int) $it->id !== (int) $keep->id ) {
+				echo '<form method="post" class="iv-inline-form" data-confirm="' . esc_attr( $it->code . ' 을(를) ' . $keep->code . ' 에 합칠까요? ' . $it->code . ' 은(는) 지워집니다.' ) . '">';
+				md_inv_hidden( 'item_merge' );
+				echo '<input type="hidden" name="keep" value="' . (int) $keep->id . '"><input type="hidden" name="drop" value="' . (int) $it->id . '"><button class="iv-btn iv-btn--ghost iv-btn--xs">' . esc_html( $keep->code ) . '에 합치기</button></form>';
+			} else {
+				echo '<span class="iv-tag">남길 품목</span>';
+			}
+			echo '</td></tr>';
+		}
+		echo '</tbody></table></div></section>';
+	}
 }

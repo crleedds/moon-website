@@ -521,7 +521,7 @@ textarea.iv-input { min-height: 44px; resize: vertical; line-height: 1.5; }
 /* =============================================================
    v5.5 · 도구 — 휴대폰 실사 · 바코드 등록 · 정리할 품목 · 출고 준비 · 발주서
    ============================================================= */
-.iv-tools { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0 0 14px; }
+.iv-tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0 0 14px; }
 .iv-tool { display: flex; flex-direction: column; gap: 3px; padding: 12px 14px; border: 1px solid var(--iv-line); border-radius: var(--iv-r); background: var(--iv-card); text-decoration: none; }
 .iv-tool:hover { border-color: var(--iv-pri); }
 .iv-tool .iv-ico { color: var(--iv-pri-d); }
@@ -594,3 +594,14 @@ textarea.iv-input { min-height: 44px; resize: vertical; line-height: 1.5; }
 }
 .iv-qc-card__num { -moz-appearance: textfield; }
 .iv-qc-card__num::-webkit-inner-spin-button, .iv-qc-card__num::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* v5.6 */
+.iv-nav__badge--ok { background: var(--iv-ok) !important; color: #fff !important; }
+.iv-tag--fresh { background: var(--iv-ok); color: #fff; border-color: var(--iv-ok); }
+.iv-card.is-fresh { border-color: var(--iv-ok); }
+.iv-install { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 16px 0 0; padding: 12px 44px 12px 16px; position: relative; border-radius: var(--iv-r); background: var(--iv-info-bg); color: var(--iv-info); font-size: .9rem; }
+.iv-install .iv-x { position: absolute; top: 6px; right: 6px; }
+.iv-ordpick { margin: 10px 0; padding: 10px 12px; border: 1px solid var(--iv-line); border-radius: 12px; }
+.iv-ordpick legend { padding: 0 6px; font-weight: 800; font-size: .86rem; color: var(--iv-sub); }
+.iv-dup .iv-h3 small { font-weight: 600; }
+@media (max-width: 760px) { .iv-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

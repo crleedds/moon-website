@@ -30,6 +30,8 @@ function md_inv_views() {
 		'fix'      => array( 'label' => '정리할 품목', 'icon' => 'edit', 'admin' => true, 'hidden' => true ),
 		'pick'     => array( 'label' => '출고 준비 목록', 'icon' => 'list', 'admin' => true, 'hidden' => true ),
 		'po'       => array( 'label' => '업체별 발주서', 'icon' => 'truck', 'admin' => true, 'hidden' => true ),
+		'receive'  => array( 'label' => '바코드 입고', 'icon' => 'scan', 'admin' => true, 'hidden' => true ),
+		'settle'   => array( 'label' => '월말 업체 정산', 'icon' => 'list', 'admin' => true, 'hidden' => true ),
 	);
 }
 
@@ -253,7 +255,7 @@ function md_inv_render() {
 		if ( 'orders' === $k ) { $badge = $c['ordered']; }
 		$items[ $k ] = array( 'label' => $v['label'], 'icon' => $v['icon'], 'badge' => $badge );
 	}
-	$parent = array( 'item' => 'stock', 'count' => 'stock', 'qcount' => 'stock', 'barcode' => 'stock', 'fix' => 'stock', 'pick' => 'todo', 'po' => 'orders' );
+	$parent = array( 'item' => 'stock', 'count' => 'stock', 'qcount' => 'stock', 'barcode' => 'stock', 'fix' => 'stock', 'pick' => 'todo', 'po' => 'orders', 'receive' => 'todo', 'settle' => 'orders' );
 	$on = isset( $parent[ $view ] ) ? $parent[ $view ] : $view;
 	echo '<nav class="iv-nav" aria-label="품목신청 메뉴">';
 	foreach ( $items as $k => $v ) {
@@ -297,6 +299,7 @@ function md_inv_render() {
 		echo '<div class="iv-flash iv-flash--' . $cls . '" role="' . ( 'ok' === $cls ? 'status' : 'alert' ) . '">' . esc_html( $f[1] ) . '<button type="button" class="iv-x" data-dismiss aria-label="닫기">' . md_inv_icon( 'x', 16 ) . '</button></div>';
 	}
 
+	echo '<script type="application/json" id="iv-done-feed">' . wp_json_encode( md_inv_done_feed(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG ) . '</script>';
 	echo '<div class="iv-view iv-view--' . esc_attr( $view ) . '">';
 	switch ( $view ) {
 		case 'mine':     md_inv_view_mine(); break;
@@ -309,6 +312,8 @@ function md_inv_render() {
 		case 'fix':      md_inv_view_fix(); break;
 		case 'pick':     md_inv_view_pick(); break;
 		case 'po':       md_inv_view_po(); break;
+		case 'receive':  md_inv_view_receive(); break;
+		case 'settle':   md_inv_view_settle(); break;
 		case 'orders':   md_inv_view_orders(); break;
 		case 'prepaid':  md_inv_view_prepaid(); break;
 		case 'ledger':   md_inv_view_ledger(); break;
@@ -319,7 +324,9 @@ function md_inv_render() {
 	echo '</div>';
 
 	/* 관리자 — 기록에 남길 이름 */
-	if ( $admin ) {
+	if ( $admin && md_inv_is_personal() ) {
+		echo '<p class="iv-me">기록에 남는 이름: <b>' . esc_html( md_inv_me() ) . '</b> (개인 계정)</p>';
+	} elseif ( $admin ) {
 		echo '<p class="iv-me">기록에 남는 이름: <b>' . esc_html( md_inv_me() ) . '</b> <button type="button" class="iv-link" data-dlg="iv-me-dlg">바꾸기</button></p>';
 		echo '<dialog class="iv-dlg" id="iv-me-dlg"><form method="post">';
 		md_inv_hidden( 'me' );

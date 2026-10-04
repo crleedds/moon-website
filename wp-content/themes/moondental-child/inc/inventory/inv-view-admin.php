@@ -298,7 +298,7 @@ function md_inv_view_todo() {
 	</section>
 
 	<section id="iv-sec-ord" class="iv-sec">
-		<h2 class="iv-h2">입고 대기 <span class="iv-n"><?php echo count( $ords ); ?></span> <a class="iv-link" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'orders' ) ) ); ?>">주문 전체 보기</a></h2>
+		<h2 class="iv-h2">입고 대기 <span class="iv-n"><?php echo count( $ords ); ?></span> <a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'receive' ) ) ); ?>"><?php echo md_inv_icon( 'scan', 16 ); // phpcs:ignore ?>바코드로 입고</a> <a class="iv-link" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'orders' ) ) ); ?>">주문 전체 보기</a></h2>
 		<?php if ( ! $ords ) : md_inv_empty( '들어오기를 기다리는 주문이 없습니다.' ); else : md_inv_order_cards( $ords ); endif; ?>
 	</section>
 
@@ -407,6 +407,8 @@ function md_inv_view_stock() {
 		<a class="iv-tool" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'barcode' ) ) ); ?>"><?php echo md_inv_icon( 'scan', 22 ); // phpcs:ignore ?><b>바코드 등록</b><small>없는 품목 <?php echo (int) $fx['nobar']; ?>개</small></a>
 		<a class="iv-tool<?php echo ( $fx['noprice'] + $fx['nounit'] + $fx['neg'] ) ? ' is-hot' : ''; ?>" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'fix' ) ) ); ?>"><?php echo md_inv_icon( 'edit', 22 ); // phpcs:ignore ?><b>정리할 품목</b><small>단가 없음 <?php echo (int) $fx['noprice']; ?> · 단위 없음 <?php echo (int) $fx['nounit']; ?> · 음수 <?php echo (int) $fx['neg']; ?></small></a>
 		<a class="iv-tool" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'po' ) ) ); ?>"><?php echo md_inv_icon( 'truck', 22 ); // phpcs:ignore ?><b>업체별 발주서</b><small>주문 · 엑셀 · 인쇄</small></a>
+		<a class="iv-tool" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'receive' ) ) ); ?>"><?php echo md_inv_icon( 'scan', 22 ); // phpcs:ignore ?><b>바코드 입고</b><small>찍고 들어온 수량만</small></a>
+		<a class="iv-tool" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'fix', 'ik' => 'minsug' ) ) ); ?>"><?php echo md_inv_icon( 'chart', 22 ); // phpcs:ignore ?><b>안전재고 제안</b><small>최근 사용량으로 계산</small></a>
 	</div>
 	<?php endif; ?>
 
@@ -627,6 +629,8 @@ function md_inv_view_orders() {
 	<div class="iv-toolbar iv-toolbar--actions">
 		<button type="button" class="iv-btn iv-btn--primary" data-dlg="dlg-order"><?php echo md_inv_icon( 'plus', 18 ); // phpcs:ignore ?>주문 넣기</button>
 		<a class="iv-btn iv-btn--ghost" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'po' ) ) ); ?>"><?php echo md_inv_icon( 'truck', 18 ); // phpcs:ignore ?>업체별 발주서</a>
+		<a class="iv-btn iv-btn--ghost" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'receive' ) ) ); ?>"><?php echo md_inv_icon( 'scan', 18 ); // phpcs:ignore ?>바코드 입고</a>
+		<a class="iv-btn iv-btn--ghost" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'settle' ) ) ); ?>"><?php echo md_inv_icon( 'list', 18 ); // phpcs:ignore ?>월말 업체 정산</a>
 		<?php md_inv_dl_buttons( 'orders', array( 'df' => date( 'Y-m-d', current_time( 'timestamp' ) - 365 * DAY_IN_SECONDS ) ) ); ?>
 	</div>
 	<form class="iv-filter" method="get" data-autosubmit>
