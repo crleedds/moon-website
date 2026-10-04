@@ -141,3 +141,10 @@ add_action( 'init', function () {
 	if ( function_exists( 'wp_cache_clear_cache' ) ) wp_cache_clear_cache();
 	update_option( 'md_design_v5_init', 'done' );
 }, 7 );
+
+/* v5.1 · 외국어 홈도 새 구성으로 (6개 언어 문구 사전 · languages/md_phrases_*_v5.php) — 한 번 */
+add_action( 'init', function () {
+	if ( get_option( 'md_design_v5_i18n_init' ) === 'done' ) return;
+	update_option( 'md_design_v5_i18n', 'on' );
+	update_option( 'md_design_v5_i18n_init', 'done' );
+}, 8 );
