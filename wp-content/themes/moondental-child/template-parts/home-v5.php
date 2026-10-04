@@ -345,20 +345,4 @@ $addr = $info['address'] ?? '충청남도 천안시 동남구 만남로 52, 문�
 	</div>
 </section>
 
-<section class="v5-mapsec" aria-label="오시는 길">
-	<div class="v5-wrap v5-mapgrid">
-		<div class="v5-mapcard">
-			<span class="v5-label">Location</span>
-			<p class="v5-mapcard__addr"><a href="<?php echo esc_url( $place_url ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $addr ); ?></a></p>
-			<p class="v5-mapcard__note">천안고속 · 시외버스터미널 맞은편 터미널사거리</p>
-			<div class="v5-maps">
-				<a href="<?php echo esc_url( $place_url ); ?>" target="_blank" rel="noopener">네이버 지도</a>
-				<a href="https://map.kakao.com/?q=%ED%95%9C%EC%95%84%EC%9D%98%EB%A3%8C%EC%9E%AC%EB%8B%A8%20%EB%AC%B8%EC%B9%98%EA%B3%BC%EB%B3%91%EC%9B%90" target="_blank" rel="noopener">카카오맵</a>
-				<a href="https://maps.app.goo.gl/MNt59kcxeKL92nCU9" target="_blank" rel="noopener">Google Maps</a>
-			</div>
-		</div>
-		<div class="v5-mapbox">
-			<iframe src="<?php echo esc_url( $gmap ); ?>" title="문치과병원 위치 · 구글 지도" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-		</div>
-	</div>
-</section>
+<?php get_template_part( 'template-parts/v5-location' ); ?>

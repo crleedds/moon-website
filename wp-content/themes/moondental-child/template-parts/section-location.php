@@ -58,6 +58,7 @@ $park_walk  = function_exists( 'md_content' ) ? md_content( 'loc_park_walk',  "�
 $park_train = function_exists( 'md_content' ) ? md_content( 'loc_park_train', '🚆 천안역·두정역에서 버스로 약 10분' )                : '🚆 천안역·두정역에서 버스로 약 10분';
 $park_ktx   = function_exists( 'md_content' ) ? md_content( 'loc_park_ktx',   '🚄 천안아산역에서 버스로 약 25분' )              : '🚄 천안아산역에서 버스로 약 25분';
 ?>
+<?php if ( function_exists( 'md_v5' ) && md_v5() ) { get_template_part( 'template-parts/v5-location' ); return; } /* v5.3 · Location 카드 + 구글 지도 */ ?>
 <section class="md-flocation" aria-label="<?php echo esc_attr( md_content( 'aria_sec_location', '오시는 길' ) ); ?>">
 	<div class="md-container">
 		<header class="md-flocation__head">

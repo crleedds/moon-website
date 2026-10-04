@@ -210,6 +210,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 </section>
 
 <!-- ============ 2. 지도 + 3 맵 버튼 ============ -->
+<?php if ( function_exists( 'md_v5' ) && md_v5() ) : get_template_part( 'template-parts/v5-location', null, array( 'id' => 'map' ) ); else : /* v5.3 */ ?>
 <section class="md-section md-section--tight" id="map">
 	<div class="md-container">
 		<?php /* v3.98.3 · 상단 지도 = 구글 지도 임베드 (API 키·결제 불필요). Customizer URL 을 비우면 예전 네이버 이미지 타일 */
@@ -259,6 +260,7 @@ $off_text = $info['hours_off'] ?: '휴진';
 		</div>
 	</div>
 </section>
+<?php endif; ?>
 
 <?php /* v3.99 · 주변 랜드마크 · 편의 시설 — Customizer 「오시는 길」에서 편집 (한 줄에 하나 · 아이콘|이름|소요시간|네이버 검색어 / 아이콘|이름|설명) */
 $md_lines  = function ( $raw ) { $out = array(); foreach ( preg_split( '/\r?\n/', (string) $raw ) as $l ) { $l = trim( $l ); if ( $l === '' ) continue; $out[] = array_map( 'trim', explode( '|', $l ) ); } return $out; };

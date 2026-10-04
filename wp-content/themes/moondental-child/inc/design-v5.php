@@ -179,3 +179,44 @@ add_action( 'template_redirect', function () {
 		return md_v5_strip_emoji( $html );
 	} );
 }, 1 );
+
+/* v5.3 · 원장 지시 · 「라미네이트」 → 「비니어(최소삭제 라미네이트)」 (한국어 화면 글자만)
+ *   첫 번째 → 비니어(최소삭제 라미네이트), 그 뒤 → 비니어 (머리 · 본문 따로 셈)
+ *   「최소침습 / 최소삭제 라미네이트」 · 「라미네이트(Laminate)」 는 한 덩어리로 바꾸고
+ *   「무삭제 라미네이트」 는 「무삭제 비니어」 (최소삭제와 뜻이 어긋나지 않게)
+ *   검색 설명(meta) · 주소 · 속성값은 그대로 → 「라미네이트」 검색어는 유지 */
+function md_v5_veneer_text( $text, &$first ) {
+	return preg_replace_callback(
+		'/(무삭제\s?)?(최소\s?(?:삭제|침습)\s?(?:·\s?무삭제\s?)?)?라미네이트(?:\s?\((?:[Ll]aminate|LAMINATE)[^)]*\))?/u',
+		function ( $m ) use ( &$first ) {
+			if ( ! empty( $m[1] ) ) return $m[1] . '비니어';
+			if ( $first ) { $first = false; return '비니어(최소삭제 라미네이트)'; }
+			return ! empty( $m[2] ) ? '최소삭제 비니어' : '비니어';
+		},
+		$text
+	);
+}
+function md_v5_veneer( $html ) {
+	if ( strpos( $html, '라미네이트' ) === false ) return $html;
+	$parts = preg_split( '#(<script\b.*?</script>|<style\b.*?</style>|<textarea\b.*?</textarea>|<[^>]+>)#is', $html, -1, PREG_SPLIT_DELIM_CAPTURE );
+	if ( ! is_array( $parts ) ) return $html;
+	$first_head = true; $first_body = true; $in_body = false;
+	foreach ( $parts as $i => $p ) {
+		if ( $p === '' ) continue;
+		if ( $p[0] === '<' ) { if ( ! $in_body && stripos( $p, '<body' ) === 0 ) $in_body = true; continue; }
+		if ( strpos( $p, '라미네이트' ) === false ) continue;
+		if ( $in_body ) $parts[ $i ] = md_v5_veneer_text( $p, $first_body );
+		else            $parts[ $i ] = md_v5_veneer_text( $p, $first_head );
+	}
+	return implode( '', $parts );
+}
+add_action( 'template_redirect', function () {
+	if ( is_admin() || ! md_v5() || is_feed() ) return;
+	if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax() ) return;
+	if ( function_exists( 'moondental_current_language' ) && 'ko' !== moondental_current_language() ) return;
+	if ( function_exists( 'md_sup_is_page' ) && md_sup_is_page() ) return;
+	ob_start( function ( $html ) {
+		if ( ! is_string( $html ) || stripos( $html, '<html' ) === false ) return $html;
+		return md_v5_veneer( $html );
+	} );
+}, 2 );
