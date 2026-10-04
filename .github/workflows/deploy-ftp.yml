@@ -15,6 +15,14 @@ on:
         options:
           - 'false'
           - 'true'
+      full:
+        description: '전체 파일 다시 배포 (평소엔 바뀐 파일만)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
   deploy:
@@ -22,6 +30,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # v5.3 · 지난 배포 커밋과 비교하려면 전체 기록이 필요
 
       - name: Install lftp
         run: |
@@ -99,6 +109,7 @@ jobs:
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
           FTP_PORT: ${{ secrets.FTP_PORT }}
           DRY_RUN: ${{ github.event.inputs.dry_run }}
+          FULL_DEPLOY: ${{ github.event.inputs.full }}
         run: |
           set -uo pipefail
 
@@ -244,38 +255,83 @@ jobs:
             exit 1
           fi
 
-          # ── 4. 배포 ─────────────────────────────────────────────────
-          DRY_FLAG=""
-          if [ "${DRY_RUN:-}" = "true" ]; then
-            DRY_FLAG="--dry-run"
-            echo ""
-            echo "★ Dry run 모드 — 실제 파일은 바뀌지 않습니다"
+          # ── 4. 배포 (v5.3 · 원장 지시 · 바뀐 파일만 · 임시 이름으로 올린 뒤 한꺼번에 이름 바꾸기) ──
+          #   예전 방식(mirror)은 매번 테마 파일 전체를 몇 분에 걸쳐 실제 파일 위에 바로 덮어써서
+          #   그동안 사이트 곳곳이 반쯤 쓰인 파일 때문에 치명적 오류를 냈다.
+          #   이제는 ① 서버의 .deploy-sha(지난 배포 커밋)와 비교해 바뀐 파일만 고르고
+          #   ② 모두 「이름.deploying」 으로 먼저 올린 다음 ③ 한 번에 rename(즉시 · 원자적)한다.
+          #   functions.php 는 맨 마지막에 바꾼다. 지운 파일은 그 뒤에 지운다.
+          THEME=wp-content/themes/moondental-child
+          NEW_SHA="$(git rev-parse HEAD)"
+          echo ""
+          echo "════════ 4. 배포: $WORKING_PATH (→ $NEW_SHA) ════════"
+
+          OLD_SHA="$(run_lftp "$SSL_MODE" "cat $WORKING_PATH/.deploy-sha;" 2>/dev/null | tr -dc '0-9a-f' | head -c 40 || true)"
+          FULL="${FULL_DEPLOY:-false}"
+          if [ -z "$OLD_SHA" ] || ! git cat-file -e "$OLD_SHA^{commit}" 2>/dev/null; then
+            echo "· 지난 배포 기록이 없거나 찾을 수 없음 → 전체 파일 배포"
+            FULL=true
           fi
 
-          echo ""
-          echo "════════ 4. 배포: $WORKING_PATH ════════"
-          if ! run_lftp "$SSL_MODE" "
-            set mirror:parallel-transfer-count 3;
-            cd $WORKING_PATH;
-            mirror --reverse --delete --verbose --no-perms $DRY_FLAG \
-              --exclude-glob '.git*' \
-              --exclude-glob '.github/**' \
-              --exclude-glob 'node_modules/**' \
-              --exclude-glob '.DS_Store' \
-              --exclude-glob 'README.md' \
-              --exclude-glob '.ftp-deploy-sync-state.json' \
-              wp-content/themes/moondental-child/ \
-              .;
-          "; then
-            echo ""
-            echo "❌ 업로드 중 오류가 발생했습니다 (위 로그 확인)."
-            exit 1
+          : > /tmp/up.txt; : > /tmp/del.txt
+          if [ "$FULL" = "true" ]; then
+            git ls-files "$THEME" > /tmp/up.txt
+          else
+            echo "· 지난 배포: $OLD_SHA"
+            git diff --name-status --no-renames "$OLD_SHA" "$NEW_SHA" -- "$THEME" > /tmp/diff.txt || true
+            cat /tmp/diff.txt
+            awk -F'\t' '$1!="D"{print $2}' /tmp/diff.txt > /tmp/up.txt
+            awk -F'\t' '$1=="D"{print $2}' /tmp/diff.txt > /tmp/del.txt
           fi
+
+          # 공백 · 따옴표 등 이상한 이름은 건너뛴다 (lftp 명령 안전)
+          SAFE='^[A-Za-z0-9._/@+-]+$'
+          grep -vE "$SAFE" /tmp/up.txt  | sed 's/^/  · 이름 때문에 건너뜀: /' || true
+          grep -E  "$SAFE" /tmp/up.txt  | grep -vE '(^|/)(\.git|\.github|node_modules)(/|$)|/README\.md$|\.DS_Store$' > /tmp/up2.txt || true
+          grep -E  "$SAFE" /tmp/del.txt > /tmp/del2.txt || true
+          # functions.php 를 맨 뒤로
+          { grep -v "^$THEME/functions.php$" /tmp/up2.txt || true; grep -x "$THEME/functions.php" /tmp/up2.txt || true; } > /tmp/up3.txt
+
+          NUP=$(wc -l < /tmp/up3.txt); NDEL=$(wc -l < /tmp/del2.txt)
+          echo "· 올릴 파일 $NUP개 · 지울 파일 $NDEL개"
+
+          if [ "${DRY_RUN:-}" = "true" ]; then
+            echo "★ Dry run — 목록만 보여주고 끝냅니다"; cat /tmp/up3.txt; cat /tmp/del2.txt; exit 0
+          fi
+
+          if [ "$NUP" -gt 0 ]; then
+            # ② 임시 이름으로 업로드
+            { echo "cd $WORKING_PATH;"
+              while IFS= read -r F; do
+                R="${F#$THEME/}"; D="$(dirname "$R")"
+                [ "$D" != "." ] && echo "mkdir -p -f $D;"
+                echo "put $F -o $R.deploying;"
+              done < /tmp/up3.txt; } > /tmp/put.lftp
+            if ! run_lftp "$SSL_MODE" "$(cat /tmp/put.lftp)"; then
+              echo "❌ 업로드 실패 — 실제 파일은 아직 바뀌지 않았습니다 (임시 파일만 남음)"; exit 1
+            fi
+            # ③ 한꺼번에 이름 바꾸기 (functions.php 마지막)
+            { echo "cd $WORKING_PATH;"
+              while IFS= read -r F; do R="${F#$THEME/}"; echo "mv $R.deploying $R;"; done < /tmp/up3.txt; } > /tmp/mv.lftp
+            if ! run_lftp "$SSL_MODE" "$(cat /tmp/mv.lftp)"; then
+              echo "❌ 이름 바꾸기 중 오류 — 위 로그 확인"; exit 1
+            fi
+          fi
+
+          if [ "$NDEL" -gt 0 ]; then
+            { echo "cd $WORKING_PATH;"
+              while IFS= read -r F; do echo "rm -f ${F#$THEME/};"; done < /tmp/del2.txt; } > /tmp/rm.lftp
+            run_lftp "$SSL_MODE" "$(cat /tmp/rm.lftp)" || echo "! 일부 파일 삭제 실패 (계속)"
+          fi
+
+          # 배포한 커밋 기록
+          echo "$NEW_SHA" > /tmp/.deploy-sha
+          run_lftp "$SSL_MODE" "cd $WORKING_PATH; put /tmp/.deploy-sha -o .deploy-sha.deploying; mv .deploy-sha.deploying .deploy-sha;"
 
           # ── 5. 검증 ─────────────────────────────────────────────────
           echo ""
           echo "════════ 5. 업로드 검증 ════════"
-          run_lftp "$SSL_MODE" "cd $WORKING_PATH; cls -l style.css functions.php page-templates/page-location.php;" || true
+          run_lftp "$SSL_MODE" "cd $WORKING_PATH; cls -l style.css functions.php .deploy-sha;" || true
 
           echo ""
-          echo "★ Deploy complete. (경로: $WORKING_PATH)"
+          echo "★ Deploy complete. (경로: $WORKING_PATH · 파일 $NUP개 · 삭제 $NDEL개)"
