@@ -788,7 +788,6 @@ function md_inv_returnable( $in_id ) {
 
 /** 입고 (주문 없이) */
 function md_inv_do_in( $item_id, $qty, $o = array() ) {
-	if ( ! empty( $o['free'] ) && '' === trim( (string) ( isset( $o['note'] ) ? $o['note'] : '' ) ) ) { return new WP_Error( 'free_note', '무상으로 받은 사유를 메모에 적어 주세요 (예: 서비스 · 샘플 · 교환 · 프로모션).' ); }
 	md_inv_lock();
 	$r = md_inv_ledger_add( 'in', $item_id, $qty, $o );
 	if ( ! is_wp_error( $r ) && isset( $o['price'] ) && '' !== trim( (string) $o['price'] ) ) { md_inv_price_from_in( $item_id, md_inv_int( $o['price'] ) ); }
@@ -1235,7 +1234,6 @@ function md_inv_ord_receive( $id, $qty, $d = array() ) {
 	}
 	$price = isset( $d['price'] ) && '' !== (string) $d['price'] ? max( 0, md_inv_int( $d['price'] ) ) : (int) $ord->price;
 	$free  = ! empty( $d['free'] );
-	if ( $free && '' === trim( (string) ( isset( $d['note'] ) ? $d['note'] : '' ) ) ) { return new WP_Error( 'free_note', '무상으로 받은 사유를 메모에 적어 주세요 (예: 서비스 · 샘플 · 교환 · 프로모션).' ); }
 
 	md_inv_lock();
 	md_inv_begin();

@@ -82,6 +82,7 @@ function md_inv_view_req() {
 			</div>
 		</div>
 		<div class="iv-chips" id="iv-chips" role="tablist" aria-label="<?php echo esc_attr( $S['label_cat2'] ); ?>"></div>
+		<div class="iv-chips iv-subchips" id="iv-subchips" role="tablist" aria-label="<?php echo esc_attr( $S['label_cat3'] ); ?>" hidden></div>
 		<div id="iv-list" class="iv-list" aria-live="polite"><p class="iv-loading">품목을 불러오는 중…</p></div>
 		<?php if ( $S['req_allow_custom'] ) : ?>
 			<div class="iv-custom-cta">

@@ -54,8 +54,9 @@ function md_inv_team_save( $id, $d ) {
 	}
 	$row['sort_no'] = (int) $wpdb->get_var( "SELECT COALESCE(MAX(sort_no),0) FROM $t" ) + 10;
 	$wpdb->insert( $t, $row );
+	$new_id = (int) $wpdb->insert_id; /* 작업 기록을 남기면 insert_id 가 바뀐다 */
 	md_inv_log( '팀 추가', $name );
-	return (int) $wpdb->insert_id;
+	return $new_id;
 }
 
 function md_inv_team_delete( $id ) {
@@ -107,8 +108,9 @@ function md_inv_vendor_save( $id, $d ) {
 	}
 	$row['sort_no'] = (int) $wpdb->get_var( "SELECT COALESCE(MAX(sort_no),0) FROM $t" ) + 10;
 	$wpdb->insert( $t, $row );
+	$new_id = (int) $wpdb->insert_id; /* 작업 기록을 남기면 insert_id 가 바뀐다 */
 	md_inv_log( '업체 추가', $name );
-	return (int) $wpdb->insert_id;
+	return $new_id;
 }
 
 function md_inv_vendor_delete( $id ) {
@@ -163,8 +165,9 @@ function md_inv_cat_save( $id, $d ) {
 	$row['parent_id'] = $par;
 	$row['sort_no']   = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(MAX(sort_no),0) FROM $t WHERE level = %d AND parent_id = %d", $level, $par ) ) + 10;
 	$wpdb->insert( $t, $row );
+	$new_id = (int) $wpdb->insert_id; /* 작업 기록을 남기면 insert_id 가 바뀐다 */
 	md_inv_log( '분류 추가', $name );
-	return (int) $wpdb->insert_id;
+	return $new_id;
 }
 
 /** 분류를 지우면 그 아래 분류도 지우고, 그 분류를 쓰던 품목은 그 칸이 비워진다 */

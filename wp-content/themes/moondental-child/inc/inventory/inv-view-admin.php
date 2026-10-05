@@ -86,11 +86,11 @@ function md_inv_admin_dialogs( $which ) {
 		echo '<input type="hidden" name="track_item" value="" data-fill><input type="hidden" name="item_ref" value="" data-fill>';
 		md_inv_verify_fields();
 		md_inv_lot_fields( 'in' );
-		echo '<label class="iv-check"><input type="checkbox" name="free" value="1"> 무상 제공 (선납 잔액에서 빼지 않음 · 사유를 메모에)</label>';
+		echo '<label class="iv-check"><input type="checkbox" name="free" value="1"> 무상 제공 (선납 잔액에서 빼지 않음)</label>';
 		echo '<label class="iv-check"><input type="checkbox" name="close" value="1"> 덜 왔지만 이 주문은 여기서 마감</label>';
 		echo '<label class="iv-check"><input type="checkbox" name="allow_more" value="1"> 주문보다 많이 들어옴</label>';
 		echo '<p class="iv-help" data-t="hint"></p>';
-		echo '<label class="iv-f"><span>메모 <small>(무상이면 사유 필수)</small></span><input class="iv-input" name="note" maxlength="300" placeholder="예: 거래명세서 번호 · 무상 사유"></label>';
+		echo '<label class="iv-f"><span>메모 <small>(무상 사유는 적어도 되고 안 적어도 됨)</small></span><input class="iv-input" name="note" maxlength="300" placeholder="예: 거래명세서 번호"></label>';
 		md_inv_dlg_close( '입고' );
 	}
 	if ( isset( $which['ordedit'] ) ) {
@@ -113,8 +113,8 @@ function md_inv_admin_dialogs( $which ) {
 		echo '<div class="iv-grid2"><label class="iv-f"><span>수량 <em>*</em></span><input class="iv-input" type="number" inputmode="numeric" name="qty" min="1" required></label>';
 		echo '<label class="iv-f"><span>단가 (비우면 품목 단가)</span><input class="iv-input" name="price" inputmode="numeric"></label></div>';
 		md_inv_lot_fields( 'in' );
-		echo '<label class="iv-check"><input type="checkbox" name="free" value="1"> 무상 제공 (선납 잔액에서 빼지 않음 · 사유를 메모에)</label>';
-		echo '<label class="iv-f"><span>메모 <small>(무상이면 사유 필수)</small></span><input class="iv-input" name="note" maxlength="300"></label>';
+		echo '<label class="iv-check"><input type="checkbox" name="free" value="1"> 무상 제공 (선납 잔액에서 빼지 않음)</label>';
+		echo '<label class="iv-f"><span>메모 <small>(무상 사유는 적어도 되고 안 적어도 됨)</small></span><input class="iv-input" name="note" maxlength="300"></label>';
 		md_inv_dlg_close( '입고' );
 	}
 	if ( isset( $which['out'] ) ) {
@@ -401,8 +401,9 @@ function md_inv_view_stock() {
 	$st = md_inv_get( 'ist' );
 	$c1 = (int) md_inv_get( 'ic1', 0 );
 	$c2 = (int) md_inv_get( 'ic2', 0 );
+	$c3 = $c2 ? (int) md_inv_get( 'ic3', 0 ) : 0;
 	$vd = (int) md_inv_get( 'ivd', 0 );
-	$args = array( 'search' => $q, 'cat1' => $c1, 'cat2' => $c2, 'vendor' => $vd, 'active' => 'hidden' === $st ? 0 : 1 );
+	$args = array( 'search' => $q, 'cat1' => $c1, 'cat2' => $c2, 'cat3' => $c3, 'vendor' => $vd, 'active' => 'hidden' === $st ? 0 : 1 );
 	$all  = md_inv_items( $args );
 	$rows = array();
 	foreach ( $all as $it ) {
@@ -432,6 +433,8 @@ function md_inv_view_stock() {
 		<a class="iv-tool" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'po' ) ) ); ?>"><?php echo md_inv_icon( 'truck', 22 ); // phpcs:ignore ?><b>업체별 발주서</b><small>주문 · 엑셀 · 인쇄</small></a>
 		<a class="iv-tool" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'receive' ) ) ); ?>"><?php echo md_inv_icon( 'scan', 22 ); // phpcs:ignore ?><b>바코드 입고</b><small>찍고 들어온 수량만</small></a>
 		<a class="iv-tool" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'fix', 'ik' => 'minsug' ) ) ); ?>"><?php echo md_inv_icon( 'chart', 22 ); // phpcs:ignore ?><b>안전재고 제안</b><small>최근 사용량으로 계산</small></a>
+		<?php $nc3 = 0; foreach ( md_inv_items() as $ci ) { if ( (int) $ci->cat2 && ! (int) $ci->cat3 ) { $nc3++; } } ?>
+		<a class="iv-tool<?php echo $nc3 > 30 ? ' is-hot' : ''; ?>" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'catsort' ) ) ); ?>"><?php echo md_inv_icon( 'list', 22 ); // phpcs:ignore ?><b>분류 정리 도우미</b><small><?php echo esc_html( $S['label_cat3'] ); ?> 없는 품목 <?php echo (int) $nc3; ?>개</small></a>
 	</div>
 	<?php endif; ?>
 
@@ -440,6 +443,8 @@ function md_inv_view_stock() {
 		<label class="iv-f iv-f--grow"><span>찾기</span><input class="iv-input" type="search" name="iq" value="<?php echo esc_attr( $q ); ?>" placeholder="품목명 · 코드 · 바코드"></label>
 		<label class="iv-f"><span><?php echo esc_html( $S['label_cat1'] ); ?></span><select class="iv-input" name="ic1"><option value="">전체</option><?php foreach ( md_inv_cats_of( 1 ) as $c ) : ?><option value="<?php echo (int) $c->id; ?>"<?php selected( $c1, (int) $c->id ); ?>><?php echo esc_html( $c->name ); ?></option><?php endforeach; ?></select></label>
 		<label class="iv-f"><span><?php echo esc_html( $S['label_cat2'] ); ?></span><select class="iv-input" name="ic2"><option value="">전체</option><?php foreach ( md_inv_cats_of( 2 ) as $c ) : if ( $c1 && (int) $c->parent_id !== $c1 ) { continue; } ?><option value="<?php echo (int) $c->id; ?>"<?php selected( $c2, (int) $c->id ); ?>><?php echo esc_html( $c->name ); ?></option><?php endforeach; ?></select></label>
+		<?php $c3s = array(); if ( $c2 ) { foreach ( md_inv_cats_of( 3 ) as $c ) { if ( (int) $c->parent_id === $c2 ) { $c3s[] = $c; } } } ?>
+		<?php if ( $c3s ) : ?><label class="iv-f"><span><?php echo esc_html( $S['label_cat3'] ); ?></span><select class="iv-input" name="ic3"><option value="">전체</option><?php foreach ( $c3s as $c ) : ?><option value="<?php echo (int) $c->id; ?>"<?php selected( $c3, (int) $c->id ); ?>><?php echo esc_html( $c->name ); ?></option><?php endforeach; ?></select></label><?php endif; ?>
 		<label class="iv-f"><span>업체</span><select class="iv-input" name="ivd"><option value="">전체</option><?php foreach ( md_inv_vendors() as $v ) : ?><option value="<?php echo (int) $v->id; ?>"<?php selected( $vd, (int) $v->id ); ?>><?php echo esc_html( $v->name ); ?></option><?php endforeach; ?></select></label>
 		<label class="iv-f"><span>보기</span><select class="iv-input" name="ist">
 			<?php foreach ( array( '' => '모든 품목', 'low' => '부족 · 품절', 'out' => '품절만', 'noprice' => '단가 없는 품목', 'nobar' => '바코드 없는 품목', 'hidden' => '숨긴 품목' ) as $k => $lb ) : ?><option value="<?php echo esc_attr( $k ); ?>"<?php selected( $st, $k ); ?>><?php echo esc_html( $lb ); ?></option><?php endforeach; ?>

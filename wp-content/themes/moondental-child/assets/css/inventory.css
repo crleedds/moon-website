@@ -663,3 +663,16 @@ details.iv-panel > summary { cursor: pointer; }
 .iv-stmt--ok em { color: #9A6B1E; }
 .iv-h4 { margin: 12px 0 4px; font-size: .95rem; }
 .iv-mailpref { margin: 16px 0 4px; padding: 10px 12px; border-radius: 10px; background: var(--iv-soft, #FBF2E8); font-size: .9rem; }
+
+/* v6.2 · 세부 분류 칩 · 분류 정리 도우미 */
+.iv-subchips { margin-top: -4px; padding-left: 8px; border-left: 3px solid var(--iv-line, #E8DDD3); }
+.iv-chipbtn--sub { font-size: .86rem; padding: 6px 12px; min-height: 36px; }
+.iv-catgrp { border: 1px solid var(--iv-line, #E8DDD3); border-radius: 12px; padding: 8px 12px; margin: 8px 0; background: #fff; }
+.iv-catgrp > summary { cursor: pointer; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.iv-check--inline { margin-left: auto; font-size: .84rem; }
+.iv-catrows { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 4px 16px; margin-top: 8px; }
+.iv-catrow { display: flex; align-items: center; gap: 8px; justify-content: space-between; border-bottom: 1px dashed var(--iv-line, #E8DDD3); padding: 3px 0; }
+.iv-catrow .iv-check { flex: 1; min-width: 0; }
+.iv-catrow select { width: 150px; flex: none; }
+@media (max-width: 600px) { .iv-catrows { grid-template-columns: 1fr; } .iv-catrow select { width: 130px; } }
+.iv-catall { margin: 6px 0 0; font-size: .86rem; font-weight: 600; }
