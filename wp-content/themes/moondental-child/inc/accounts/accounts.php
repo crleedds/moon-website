@@ -148,19 +148,59 @@ function md_acc_norm_date( $v ) {
 }
 
 /** 비밀번호 규칙 — 8자 이상, 글자와 숫자를 함께 */
+/** v7.1 · 비밀번호는 숫자 6자리 (원장 지시) */
 function md_acc_pass_ok( $p ) {
-	if ( strlen( $p ) < 8 ) { return '비밀번호는 8자 이상이어야 합니다.'; }
-	if ( ! preg_match( '/[A-Za-z]/', $p ) || ! preg_match( '/\d/', $p ) ) { return '비밀번호에 영문과 숫자를 함께 넣어 주세요.'; }
-	if ( strlen( $p ) > 100 ) { return '비밀번호가 너무 깁니다.'; }
+	if ( ! preg_match( '/^\d{6}$/', (string) $p ) ) { return '비밀번호는 숫자 6자리입니다.'; }
 	return '';
 }
 
-/** 임시 비밀번호 — 읽고 받아 적기 쉬운 글자만 */
+/* ============================================================
+ * v7.1 · 이름으로 로그인 (원장 지시) — 아이디는 자동으로 만들고 직원은 이름 + 숫자 6자리만 쓴다
+ *   공용 계정(moondentalhospital · moondentalmanager)은 지금처럼 아이디로.
+ * ============================================================ */
+
+function md_acc_name_key( $n ) {
+	return preg_replace( '/\s+/u', '', (string) $n );
+}
+
+/** 이 이름(띄어쓰기 무시)의 개인 계정들 */
+function md_acc_users_by_name( $name, $exclude = 0 ) {
+	global $wpdb;
+	$key = md_acc_name_key( $name );
+	if ( '' === $key ) { return array(); }
+	$ids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->users} WHERE REPLACE(display_name, ' ', '') = %s", $key ) );
+	$out = array();
+	foreach ( $ids as $id ) {
+		if ( (int) $id === (int) $exclude ) { continue; }
+		$u = get_userdata( (int) $id );
+		if ( $u && md_acc_is_personal_user( $u ) ) { $out[] = $u; }
+	}
+	return $out;
+}
+
+/** 로그인 칸에 이름을 적었으면 그 계정의 아이디로 바꿔 넣는다 (같은 이름이 둘이면 바꾸지 않는다) */
+function md_acc_name_login( &$username, &$password ) {
+	$n = trim( (string) $username );
+	if ( '' === $n || is_email( $n ) || username_exists( $n ) ) { return; }
+	$us = md_acc_users_by_name( $n );
+	if ( 1 === count( $us ) ) { $username = $us[0]->user_login; }
+}
+add_action( 'wp_authenticate', 'md_acc_name_login', 1, 2 );
+
+/** 자동 아이디 — 직원은 볼 일이 없다 */
+function md_acc_auto_login() {
+	do { $l = 'staff' . random_int( 100000, 999999 ); } while ( username_exists( $l ) );
+	return $l;
+}
+
+function md_acc_name_taken_msg( $name ) {
+	return '「' . $name . '」 이름의 계정이 이미 있습니다. 이름으로 로그인하므로 「' . $name . 'B」처럼 구분해 주세요.';
+}
+
+/** 임시 비밀번호 — v7.1 · 숫자 6자리 */
 function md_acc_temp_pass() {
-	$a = 'abcdefghjkmnpqrstuvwxyz'; $d = '23456789';
 	$s = '';
-	for ( $i = 0; $i < 5; $i++ ) { $s .= $a[ random_int( 0, strlen( $a ) - 1 ) ]; }
-	for ( $i = 0; $i < 4; $i++ ) { $s .= $d[ random_int( 0, strlen( $d ) - 1 ) ]; }
+	for ( $i = 0; $i < 6; $i++ ) { $s .= (string) random_int( 0, 9 ); }
 	return $s;
 }
 
@@ -193,7 +233,7 @@ function md_acc_render_flash() {
 	if ( ! $f ) { return; }
 	echo '<div class="mds-notice mds-notice--' . ( 'ok' === $f['t'] ? 'ok' : 'warn' ) . ' mda-flash">' . esc_html( $f['m'] );
 	if ( ! empty( $f['pass'] ) ) {
-		echo '<div class="mda-temp"><span>아이디</span><code>' . esc_html( $f['login'] ) . '</code><span>임시 비밀번호</span><code class="mda-temp__pw">' . esc_html( $f['pass'] ) . '</code></div>';
+		echo '<div class="mda-temp"><span>로그인 이름</span><code>' . esc_html( $f['login'] ) . '</code><span>임시 비밀번호</span><code class="mda-temp__pw">' . esc_html( $f['pass'] ) . '</code></div>';
 		echo '<small>이 화면을 벗어나면 다시 볼 수 없습니다. 본인에게 전해 주세요 — 처음 로그인하면 새 비밀번호로 바꾸게 됩니다.</small>';
 	}
 	echo '</div>';
@@ -229,7 +269,7 @@ function md_acc_login_top( $html ) {
 		'md_acc_pending' => '가입 신청을 확인하고 있습니다. 승인되면 이메일로 알려 드립니다.',
 		'md_acc_off'     => '사용이 중지된 계정입니다. 경영지원실에 문의해 주세요.',
 		'md_acc_locked'  => '비밀번호를 여러 번 틀려 ' . MD_ACC_LOCK_MIN . '분 동안 잠겼습니다. 잠시 뒤에 다시 하거나, 급하면 경영지원실에 잠금 풀기를 부탁해 주세요.',
-		'bad'            => '아이디(또는 이메일)나 비밀번호가 맞지 않습니다.',
+		'bad'            => '이름이나 비밀번호(숫자 6자리)가 맞지 않습니다.',
 	);
 	$k = sanitize_key( wp_unslash( $_GET['md_le'] ) );
 	return $html . '<p class="mda-login-err" role="alert">' . esc_html( isset( $m[ $k ] ) ? $m[ $k ] : $m['bad'] ) . '</p>';
@@ -254,7 +294,7 @@ add_action( 'after_password_reset', function ( $user ) { delete_user_meta( $user
  * ============================================================ */
 
 function md_acc_join_fields() {
-	return array( 'jname', 'birthday', 'hired', 'email', 'phone', 'dept', 'login' ); /* 'name' 은 워드프레스 공개 쿼리 변수라 쓰면 404 가 된다 */
+	return array( 'jname', 'birthday', 'hired', 'email', 'phone', 'dept' ); /* 'name' 은 워드프레스 공개 쿼리 변수라 쓰면 404 가 된다 · v6.10 아이디 칸 없앰 */
 }
 
 function md_acc_join_submit() {
@@ -277,6 +317,7 @@ function md_acc_join_submit() {
 
 	$name = mb_substr( $f['jname'], 0, 20 );
 	if ( mb_strlen( $name ) < 2 ) { $err['name'] = '이름을 적어 주세요.'; }
+	elseif ( md_acc_users_by_name( $name ) ) { $err['name'] = md_acc_name_taken_msg( $name ); }
 	$bd = md_acc_norm_date( $f['birthday'] );
 	if ( ! $bd ) { $err['birthday'] = '생년월일을 넣어 주세요.'; }
 	elseif ( (int) substr( $bd, 0, 4 ) < 1940 || $bd > gmdate( 'Y-m-d', strtotime( '-15 years' ) ) ) { $err['birthday'] = '생년월일을 다시 확인해 주세요.'; }
@@ -290,9 +331,7 @@ function md_acc_join_submit() {
 	elseif ( email_exists( $email ) ) { $err['email'] = '이미 가입했거나 신청한 이메일입니다. 승인을 기다리는 중이면 조금만 기다려 주세요.'; }
 	$phone = md_acc_norm_phone( $f['phone'] );
 	if ( '' === $phone ) { $err['phone'] = '전화번호를 확인해 주세요 (예: 010-1234-5678).'; }
-	$login = strtolower( $f['login'] );
-	if ( ! preg_match( '/^[a-z0-9][a-z0-9._\-]{3,29}$/', $login ) ) { $err['login'] = '아이디는 영문 소문자 · 숫자로 4~30자입니다.'; }
-	elseif ( username_exists( $login ) || in_array( $login, array_merge( md_acc_shared_logins(), array( 'admin', 'administrator', 'root', 'test' ) ), true ) ) { $err['login'] = '이미 쓰는 아이디입니다. 다른 아이디를 골라 주세요.'; }
+	$login = md_acc_auto_login();
 	$pe = md_acc_pass_ok( $pass );
 	if ( $pe ) { $err['pass'] = $pe; }
 	elseif ( $pass !== $pass2 ) { $err['pass2'] = '비밀번호 확인이 다릅니다.'; }
@@ -371,13 +410,13 @@ function md_acc_render_join() {
 			</fieldset>
 
 			<fieldset class="mda-set"><legend>로그인 정보</legend>
-				<label class="mda-f"><span>아이디 <b>*</b> <small>영문 소문자 · 숫자 4~30자</small></span><input type="text" name="login" required maxlength="30" autocomplete="username" autocapitalize="none" spellcheck="false" pattern="[a-z0-9][a-z0-9._\-]{3,29}" value="<?php echo esc_attr( $v( 'login' ) ); ?>" placeholder="예: gildong"><?php echo $er( 'login' ); // phpcs:ignore ?></label>
-				<label class="mda-f"><span>비밀번호 <b>*</b> <small>8자 이상, 영문 + 숫자</small></span><input type="password" name="pass" required minlength="8" autocomplete="new-password"><?php echo $er( 'pass' ); // phpcs:ignore ?></label>
-				<label class="mda-f"><span>비밀번호 확인 <b>*</b></span><input type="password" name="pass2" required minlength="8" autocomplete="new-password"><?php echo $er( 'pass2' ); // phpcs:ignore ?></label>
+				<p class="mda-note">로그인할 때는 위의 <b>이름</b>과 아래 <b>숫자 6자리</b>를 씁니다.</p>
+				<label class="mda-f"><span>비밀번호 <b>*</b> <small>숫자 6자리</small></span><input type="password" name="pass" required minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password"><?php echo $er( 'pass' ); // phpcs:ignore ?></label>
+				<label class="mda-f"><span>비밀번호 확인 <b>*</b></span><input type="password" name="pass2" required minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password"><?php echo $er( 'pass2' ); // phpcs:ignore ?></label>
 			</fieldset>
 
 			<details class="mda-privacy"><summary>개인정보 수집 · 이용 안내</summary>
-				<p><b>수집 항목</b> 이름 · 생년월일 · 입사일 · 이메일 · 전화번호 · 아이디<br><b>목적</b> 직원 라운지 계정 관리 · 직원 명단 · 라운지 달력의 생일 · 입사 기념일 표시 · 업무 연락<br><b>보관</b> 재직 기간 동안 (퇴사하면 지웁니다)<br>동의하지 않으면 계정을 만들 수 없고, 병원 공용 계정으로 이용할 수 있습니다.</p>
+				<p><b>수집 항목</b> 이름 · 생년월일 · 입사일 · 이메일 · 전화번호<br><b>목적</b> 직원 라운지 계정 관리 · 직원 명단 · 라운지 달력의 생일 · 입사 기념일 표시 · 업무 연락<br><b>보관</b> 재직 기간 동안 (퇴사하면 지웁니다)<br>동의하지 않으면 계정을 만들 수 없고, 병원 공용 계정으로 이용할 수 있습니다.</p>
 			</details>
 			<label class="mda-agree mds-check"><input type="checkbox" name="agree" value="1" required <?php checked( ! empty( $_POST['agree'] ) ); ?>> 개인정보 수집 · 이용에 동의합니다 <b>*</b></label><?php echo $er( 'agree' ); // phpcs:ignore ?>
 
@@ -466,7 +505,7 @@ function md_acc_handle() {
 			if ( function_exists( 'md_staff_sync_site' ) ) { md_staff_sync_site(); }
 			md_acc_log( '가입 승인', $u->display_name . ' (' . $u->user_login . ') · ' . md_acc_perm_label( get_userdata( $uid ) ) );
 			wp_mail( $u->user_email, '[문치과병원 직원 라운지] 가입이 승인되었습니다',
-				$u->display_name . " 님, 직원 라운지 가입이 승인되었습니다.\n\n아이디: " . $u->user_login . "\n로그인: " . md_acc_lounge_url() . "\n\n비밀번호를 잊으면 로그인 화면의 「비밀번호를 잊으셨나요?」를 눌러 주세요." );
+				$u->display_name . " 님, 직원 라운지 가입이 승인되었습니다.\n\n로그인: " . md_acc_lounge_url() . "\n이름 「" . $u->display_name . "」과 가입할 때 정한 숫자 6자리로 로그인합니다.\n\n비밀번호를 잊으면 경영지원실에 임시 비밀번호를 부탁해 주세요." );
 			md_acc_flash( 'ok', $u->display_name . ' 님을 승인했습니다 (' . md_acc_perm_label( get_userdata( $uid ) ) . '). 승인 메일을 보냈습니다.' );
 			$back .= '#s' . (int) $sid;
 			break;
@@ -495,7 +534,7 @@ function md_acc_handle() {
 			wp_set_password( $tp, $uid );
 			update_user_meta( $uid, 'md_acc_must_change', 1 );
 			md_acc_log( '비밀번호 초기화', $u->display_name . ' (' . $u->user_login . ')' );
-			md_acc_flash( 'ok', $u->display_name . ' 님 비밀번호를 임시 비밀번호로 바꿨습니다.', array( 'pass' => $tp, 'login' => $u->user_login ) );
+			md_acc_flash( 'ok', $u->display_name . ' 님 비밀번호를 임시 비밀번호로 바꿨습니다.', array( 'pass' => $tp, 'login' => $u->display_name ) );
 			$back .= md_acc_anchor( $uid );
 			break;
 
@@ -540,11 +579,10 @@ function md_acc_handle() {
 		case 'create':
 			$row = md_acc_staff_row( $sid );
 			$map = md_acc_staff_user_map();
-			$login = isset( $_POST['login'] ) ? strtolower( trim( sanitize_text_field( wp_unslash( $_POST['login'] ) ) ) ) : '';
+			$login = md_acc_auto_login(); /* v7.1 · 아이디는 자동, 로그인은 이름으로 */
 			if ( ! $row ) { md_acc_flash( 'err', '직원을 다시 골라 주세요.' ); break; }
 			if ( isset( $map[ $sid ] ) ) { md_acc_flash( 'err', $row->name . ' 님은 이미 계정이 있습니다.' ); break; }
-			if ( ! preg_match( '/^[a-z0-9][a-z0-9._\-]{3,29}$/', $login ) ) { md_acc_flash( 'err', '아이디는 영문 소문자 · 숫자로 4~30자입니다.' ); $back .= '#s' . $sid; break; }
-			if ( username_exists( $login ) ) { md_acc_flash( 'err', '이미 쓰는 아이디입니다: ' . $login ); $back .= '#s' . $sid; break; }
+			if ( md_acc_users_by_name( $row->name ) ) { md_acc_flash( 'err', md_acc_name_taken_msg( $row->name ) . ' (직원 정보에서 이름을 고친 뒤 만들어 주세요)' ); $back .= '#s' . $sid; break; }
 			$email = ( $row->email && is_email( $row->email ) && ! email_exists( $row->email ) ) ? $row->email : '';
 			$tp  = md_acc_temp_pass();
 			md_acc_roles();
@@ -555,7 +593,7 @@ function md_acc_handle() {
 			update_user_meta( $nid, 'md_staff_id', $sid );
 			update_user_meta( $nid, 'md_acc_must_change', 1 );
 			md_acc_log( '계정 만들기', $row->name . ' (' . $login . ') · ' . md_acc_perm_label( get_userdata( $nid ) ) );
-			md_acc_flash( 'ok', $row->name . ' 님 계정을 만들었습니다.', array( 'pass' => $tp, 'login' => $login ) );
+			md_acc_flash( 'ok', $row->name . ' 님 계정을 만들었습니다.', array( 'pass' => $tp, 'login' => $row->name ) );
 			$back .= '#s' . $sid;
 			break;
 
@@ -733,7 +771,7 @@ function md_acc_render_me() {
 		<section class="mds-card mda-card">
 			<h2 class="mda-h">👤 <?php echo esc_html( '' !== trim( $u->display_name ) ? $u->display_name : $u->user_login ); ?></h2>
 			<dl class="mda-dl">
-				<dt>아이디</dt><dd><code><?php echo esc_html( $u->user_login ); ?></code></dd>
+				<dt>로그인</dt><dd>이름 「<?php echo esc_html( $u->display_name ); ?>」 + 숫자 6자리</dd>
 				<?php if ( $mine ) : ?>
 					<dt>권한</dt><dd><?php echo esc_html( md_acc_perm_label( $u ) ); ?></dd>
 					<?php if ( $row ) : ?>
@@ -782,8 +820,8 @@ function md_acc_render_me() {
 				<?php wp_nonce_field( 'md_acc_me', 'md_acc_nonce' ); ?>
 				<input type="text" name="username" value="<?php echo esc_attr( $u->user_login ); ?>" autocomplete="username" hidden>
 				<label class="mda-f"><span><?php echo $first ? '받은 임시 비밀번호' : '지금 비밀번호'; ?></span><input type="password" name="cur" required autocomplete="current-password"></label>
-				<label class="mda-f"><span>새 비밀번호 <small>8자 이상, 영문 + 숫자</small></span><input type="password" name="pass" required minlength="8" autocomplete="new-password"></label>
-				<label class="mda-f"><span>새 비밀번호 확인</span><input type="password" name="pass2" required minlength="8" autocomplete="new-password"></label>
+				<label class="mda-f"><span>새 비밀번호 <small>숫자 6자리</small></span><input type="password" name="pass" required minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password"></label>
+				<label class="mda-f"><span>새 비밀번호 확인</span><input type="password" name="pass2" required minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password"></label>
 				<button type="submit" class="mds-btn mds-btn--fill">비밀번호 바꾸기</button>
 			</form>
 		<?php endif; ?>
@@ -945,7 +983,7 @@ function md_acc_render_row( $r ) {
 		<details class="mda-manage"><summary>계정 만들어 주기</summary>
 			<form method="post" class="mda-form mda-form--compact">
 				<?php md_acc_hidden( 'create' ); ?><input type="hidden" name="sid" value="<?php echo (int) $r->id; ?>">
-				<label class="mda-f"><span>아이디 (영문 소문자 · 숫자)</span><input type="text" name="login" required maxlength="30" autocapitalize="none" spellcheck="false" pattern="[a-z0-9][a-z0-9._\-]{3,29}"></label>
+				<p class="mda-note">로그인은 이름 「<?php echo esc_html( $r->name ); ?>」 + 임시 비밀번호(숫자 6자리)로 합니다.</p>
 				<div class="mda-perms"><span class="mda-perms__base">✓ 직원</span><?php md_acc_perm_checks(); ?></div>
 				<button type="submit" class="mds-btn mds-btn--fill">만들기 (임시 비밀번호 발급)</button>
 			</form>

@@ -898,7 +898,7 @@ function md_sup_render_login() {
 			<?php
 			wp_login_form( array(
 				'redirect'       => md_sup_url(),
-				'label_username' => '아이디',
+				'label_username' => '이름', /* v7.1 · 직원은 이름 + 숫자 6자리 (공용 계정은 아이디) */
 				'label_password' => '비밀번호',
 				'label_log_in'   => '로그인',
 				'remember'       => true,
@@ -909,8 +909,19 @@ function md_sup_render_login() {
 			         이 두 계정은 재설정 메일을 받을 수 없게 막아 두었으므로
 			         눌러도 아무 일도 일어나지 않는다. 안내 문구로 대신한다. */ ?>
 			<p class="mds-gate__help">
-				아이디나 비밀번호를 모르시면 경영지원실에 문의해 주세요.
+				이름과 비밀번호(숫자 6자리)로 로그인합니다. 공용 계정은 아이디로 로그인합니다.<br>
+				5번 틀리면 15분 동안 잠깁니다. 비밀번호를 모르시면 경영지원실에 문의해 주세요.
 			</p>
+			<script>
+			/* 이름(한글)을 적으면 비밀번호 칸은 숫자 자판, 영문 아이디(공용 계정)를 적으면 일반 자판 */
+			(function () {
+				var u = document.getElementById('user_login'), p = document.getElementById('user_pass');
+				if (!u || !p) { return; }
+				u.setAttribute('autocomplete', 'username');
+				var sync = function () { p.setAttribute('inputmode', /^[A-Za-z0-9._@\-]+$/.test(u.value.trim()) ? 'text' : 'numeric'); };
+				u.addEventListener('input', sync); sync();
+			})();
+			</script>
 		</div>
 	</div>
 	<?php

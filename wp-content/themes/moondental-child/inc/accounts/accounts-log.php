@@ -97,14 +97,12 @@ function md_acc_locked_until( $login, $ip = null ) {
 	$since = gmdate( 'Y-m-d H:i:s', current_time( 'timestamp' ) - MD_ACC_LOCK_MIN * MINUTE_IN_SECONDS );
 	$fail  = "ok = 0 AND reason NOT IN ('locked', 'unlock', 'pending', 'off') AND created_at >= %s"; /* 승인 대기 · 사용 중지는 비밀번호가 맞은 것이라 세지 않는다 */
 	/* 관리자가 잠금을 풀면 그 뒤 실패만 센다 */
-	$reset = (string) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(created_at) FROM $t WHERE reason = 'unlock' AND (login = %s OR ip = %s)", $login, $ip ) );
+	$reset = (string) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(created_at) FROM $t WHERE reason = 'unlock' AND login = %s", $login ) );
 	if ( $reset > $since ) { $since = $reset; }
-	$row = $wpdb->get_row( $wpdb->prepare( "SELECT COUNT(*) AS n, MAX(created_at) AS last FROM $t WHERE $fail AND login = %s AND ip = %s", $since, $login, $ip ) );
+	/* v7.1 · 원장 지시 — 그 계정이 어디서든 5번 틀리면 15분 잠금. 다른 장치(IP 단위 잠금 등)는 두지 않는다
+	   (병원 직원은 같은 인터넷을 쓰므로 IP 잠금은 병원 전체를 막을 수 있었다) */
+	$row = $wpdb->get_row( $wpdb->prepare( "SELECT COUNT(*) AS n, MAX(created_at) AS last FROM $t WHERE $fail AND login = %s", $since, $login ) );
 	if ( $row && (int) $row->n >= MD_ACC_LOCK_FAILS ) { return gmdate( 'Y-m-d H:i:s', strtotime( $row->last ) + MD_ACC_LOCK_MIN * MINUTE_IN_SECONDS ); }
-	if ( '' !== $ip ) {
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT COUNT(*) AS n, MAX(created_at) AS last FROM $t WHERE $fail AND ip = %s", $since, $ip ) );
-		if ( $row && (int) $row->n >= MD_ACC_LOCK_IP_FAILS ) { return gmdate( 'Y-m-d H:i:s', strtotime( $row->last ) + MD_ACC_LOCK_MIN * MINUTE_IN_SECONDS ); }
-	}
 	return '';
 }
 
