@@ -88,12 +88,14 @@ function md_inv_admin_dialogs( $which ) {
 		md_inv_verify_fields();
 		md_inv_lot_fields( 'in' );
 		md_inv_bonus_field();
-		echo '<label class="iv-check"><input type="checkbox" name="free" value="1"> 전부 무상 제공 (선납 잔액에서 빼지 않음)</label>';
-		echo '<label class="iv-check"><input type="checkbox" name="close" value="1"> 덜 왔지만 이 주문은 여기서 마감</label>';
-		echo '<label class="iv-check"><input type="checkbox" name="allow_more" value="1"> 주문보다 많이 들어옴</label>';
+		/* v6.4 · 원장 지시 — 「덜 왔지만 여기서 마감」(주문 목록의 「여기서 마감」 버튼이 같은 일) · 「주문보다 많이 들어옴」(입고 누를 때 확인 창) 체크 없앰 */
+		echo '<label class="iv-check"><input type="checkbox" name="free" value="1"> 전부 무상 제공 <small>(금액 0원으로 기록 · 선납 품목이면 잔액에서도 빼지 않음)</small></label>';
+		echo '<input type="hidden" name="allow_more" value=""><input type="hidden" name="ord_left" value="" data-fill>';
 		echo '<p class="iv-help" data-t="hint"></p>';
 		echo '<label class="iv-f"><span>메모 <small>(무상 사유는 적어도 되고 안 적어도 됨)</small></span><input class="iv-input" name="note" maxlength="300" placeholder="예: 거래명세서 번호"></label>';
 		md_inv_dlg_close( '입고' );
+		/* 주문보다 많이(덤 빼고) 들어왔으면 한 번 묻고 보낸다 */
+		echo "<script>(function(){var d=document.getElementById('dlg-receive');var f=d&&d.querySelector('form');if(!f)return;f.addEventListener('submit',function(e){var n=function(k){var el=f.querySelector('[name=\"'+k+'\"]');return el?parseInt(el.value,10)||0:0;};var am=f.querySelector('[name=\"allow_more\"]');var over=n('qty')-n('bonus_qty')-n('ord_left');if(am)am.value='';if(f.querySelector('[name=\"ord_left\"]').value!==''&&over>0){if(!confirm('주문보다 '+over+'개 많이 들어왔습니다. 그대로 입고할까요?')){e.preventDefault();e.stopImmediatePropagation();return;}if(am)am.value='1';}},true);})();</script>";
 	}
 	if ( isset( $which['ordedit'] ) ) {
 		md_inv_dlg_open( 'dlg-ordedit', '주문 고치기', 'ord_update' );
@@ -116,7 +118,7 @@ function md_inv_admin_dialogs( $which ) {
 		echo '<label class="iv-f"><span>단가 (비우면 품목 단가)</span><input class="iv-input" name="price" inputmode="numeric"></label></div>';
 		md_inv_lot_fields( 'in' );
 		md_inv_bonus_field();
-		echo '<label class="iv-check"><input type="checkbox" name="free" value="1"> 전부 무상 제공 (선납 잔액에서 빼지 않음)</label>';
+		echo '<label class="iv-check"><input type="checkbox" name="free" value="1"> 전부 무상 제공 <small>(금액 0원으로 기록 · 선납 품목이면 잔액에서도 빼지 않음)</small></label>';
 		echo '<label class="iv-f"><span>메모 <small>(무상 사유는 적어도 되고 안 적어도 됨)</small></span><input class="iv-input" name="note" maxlength="300"></label>';
 		md_inv_dlg_close( '입고' );
 	}
@@ -383,9 +385,9 @@ function md_inv_order_cards( $ords ) {
 		echo '</div>';
 		if ( 'ordered' === $o->status ) {
 			echo '<div class="iv-actions">';
-			echo '<button type="button" class="iv-btn iv-btn--primary iv-btn--sm" data-dlg="dlg-receive" data-set="' . esc_attr( wp_json_encode( array( 'id' => (int) $o->id, 'what' => $what, 'qty' => $left, 'price' => (int) $o->price, 'track_item' => (int) $o->track_lot ? (int) $o->item_id : '', 'item_ref' => (int) $o->item_id, 'hint' => '남은 수량 ' . $left . '개' . ( $v && $v->prepaid ? ' · 선납 업체 — 입고 금액이 선납 잔액에서 빠집니다' : '' ) ) ) ) . '">입고</button>';
+			echo '<button type="button" class="iv-btn iv-btn--primary iv-btn--sm" data-dlg="dlg-receive" data-set="' . esc_attr( wp_json_encode( array( 'id' => (int) $o->id, 'what' => $what, 'qty' => $left, 'price' => (int) $o->price, 'track_item' => (int) $o->track_lot ? (int) $o->item_id : '', 'item_ref' => (int) $o->item_id, 'ord_left' => $left, 'hint' => '남은 수량 ' . $left . '개' . ( $v && $v->prepaid ? ' · 선납 업체 — 입고 금액이 선납 잔액에서 빠집니다' : '' ) ) ) ) . '">입고</button>';
 			echo '<button type="button" class="iv-btn iv-btn--ghost iv-btn--sm" data-dlg="dlg-ordedit" data-set="' . esc_attr( wp_json_encode( array( 'id' => (int) $o->id, 'what' => $what, 'qty' => (int) $o->qty, 'price' => (int) $o->price, 'amount' => (int) $o->amount, 'note' => $o->note ) ) ) . '">고치기</button>';
-			echo '<button type="button" class="iv-btn iv-btn--ghost iv-btn--sm" data-dlg="dlg-ordcancel" data-set="' . esc_attr( wp_json_encode( array( 'id' => (int) $o->id, 'what' => $what ) ) ) . '">취소</button>';
+			echo '<button type="button" class="iv-btn iv-btn--ghost iv-btn--sm" data-dlg="dlg-ordcancel" data-set="' . esc_attr( wp_json_encode( array( 'id' => (int) $o->id, 'what' => $what ) ) ) . '">' . ( (int) $o->recv_qty > 0 ? '여기서 마감' : '취소' ) . '</button>'; /* v6.4 · 일부 들어온 주문은 취소가 아니라 마감 */
 			echo '</div>';
 		}
 		echo '</article>';

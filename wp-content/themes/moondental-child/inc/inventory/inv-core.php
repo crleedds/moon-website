@@ -1248,7 +1248,7 @@ function md_inv_ord_receive( $id, $qty, $d = array() ) {
 	if ( $bonus > $qty ) { return new WP_Error( 'bonus', '덤 수량이 들어온 수량보다 많습니다.' ); }
 	if ( $bonus && $qty - $bonus <= $left ) { $d['allow_more'] = 1; } /* 덤으로 더 온 것은 「주문보다 많이」가 아니다 */
 	if ( $qty > $left && empty( $d['allow_more'] ) ) {
-		return new WP_Error( 'more', '주문한 것보다 많습니다 (남은 수량 ' . $left . '개). 더 들어왔으면 「주문보다 많이 들어옴」을 체크해 주세요.' );
+		return new WP_Error( 'more', '주문한 것보다 많습니다 (남은 수량 ' . $left . '개). 수량을 다시 확인하고, 정말 더 들어왔으면 입고를 한 번 더 눌러 「그대로 입고」를 골라 주세요.' );
 	}
 	$price = isset( $d['price'] ) && '' !== (string) $d['price'] ? max( 0, md_inv_int( $d['price'] ) ) : (int) $ord->price;
 	$free  = ! empty( $d['free'] );

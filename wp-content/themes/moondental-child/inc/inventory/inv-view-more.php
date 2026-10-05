@@ -104,7 +104,7 @@ function md_inv_view_receive() {
 				<label class="iv-f"><span>LOT 번호</span><span class="iv-inline"><input class="iv-input" name="lot" maxlength="80" placeholder="상자 · 라벨의 LOT"><button type="button" class="iv-btn iv-btn--icon" data-scanto="lot" aria-label="LOT 바코드 스캔"><?php echo md_inv_icon( 'scan', 18 ); // phpcs:ignore ?></button></span></label>
 			<?php endif; ?>
 			<?php md_inv_bonus_field(); ?>
-			<label class="iv-check"><input type="checkbox" name="free" value="1"> 전부 무상 제공<?php echo $v && $v->prepaid ? ' (선납 잔액에서 빼지 않음)' : ''; ?></label>
+			<label class="iv-check"><input type="checkbox" name="free" value="1"> 전부 무상 제공 <small>(<?php echo $v && $v->prepaid ? '선납 잔액에서 빼지 않음 · 금액 0원으로 기록' : '금액 0원으로 기록'; ?>)</small></label>
 			<label class="iv-f"><span>메모 <small>(선택)</small></span><input class="iv-input" name="note" maxlength="200" placeholder="예: 거래명세서 번호"></label>
 			<button class="iv-btn iv-btn--primary iv-btn--lg iv-qc-card__save">입고</button>
 		</form>
