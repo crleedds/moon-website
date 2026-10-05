@@ -45,9 +45,9 @@ function md_inv_act_recv_scan() {
 		$o = md_inv_ord( $oid );
 		if ( ! $o || (int) $o->item_id !== $item ) { md_inv_go( 'err', '주문을 다시 골라 주세요.', $back ); }
 		$left = (int) $o->qty - (int) $o->recv_qty;
-		$r = md_inv_ord_receive( $oid, $qty, array( 'free' => md_inv_p( 'free' ) ? 1 : 0, 'allow_more' => $qty > $left ? 1 : 0, 'note' => md_inv_p( 'note' ) ) );
+		$r = md_inv_ord_receive( $oid, $qty, array( 'free' => md_inv_p( 'free' ) ? 1 : 0, 'allow_more' => $qty > $left ? 1 : 0, 'note' => md_inv_p( 'note' ), 'lot' => md_inv_p( 'lot' ) ) );
 	} else {
-		$r = md_inv_do_in( $item, $qty, array( 'price' => md_inv_p( 'price' ), 'free' => md_inv_p( 'free' ) ? 1 : 0, 'note' => md_inv_txt( md_inv_p( 'note' ), 300 ) ) );
+		$r = md_inv_do_in( $item, $qty, array( 'price' => md_inv_p( 'price' ), 'free' => md_inv_p( 'free' ) ? 1 : 0, 'note' => md_inv_txt( md_inv_p( 'note' ), 300 ), 'lot' => md_inv_p( 'lot' ) ) );
 	}
 	if ( is_wp_error( $r ) ) { md_inv_go( 'err', $r->get_error_message(), add_query_arg( 'id', $item, $back ) ); }
 	md_inv_go( 'ok', '「' . $it->name . '」 ' . $qty . ( $it->unit ? $it->unit : '개' ) . ' 입고 · 지금 재고 ' . md_inv_stock( $item ), $back );
@@ -100,8 +100,11 @@ function md_inv_view_receive() {
 				<p class="iv-help">이 품목은 주문해 둔 것이 없습니다 — 그냥 입고합니다.</p>
 			<?php endif; ?>
 			<label class="iv-f"><span>들어온 수량</span><input class="iv-input iv-qc-card__num" type="number" inputmode="numeric" min="1" name="qty" required value="<?php echo $mine ? (int) $mine[0]->qty - (int) $mine[0]->recv_qty : ''; ?>"></label>
-			<label class="iv-check"><input type="checkbox" name="free" value="1"> 무상 제공<?php echo $v && $v->prepaid ? ' (선납 잔액에서 빼지 않음)' : ''; ?></label>
-			<label class="iv-f"><span>메모 (선택)</span><input class="iv-input" name="note" maxlength="200" placeholder="예: 거래명세서 번호"></label>
+			<?php if ( (int) $it->track_lot ) : ?>
+				<label class="iv-f"><span>LOT 번호</span><span class="iv-inline"><input class="iv-input" name="lot" maxlength="80" placeholder="상자 · 라벨의 LOT"><button type="button" class="iv-btn iv-btn--icon" data-scanto="lot" aria-label="LOT 바코드 스캔"><?php echo md_inv_icon( 'scan', 18 ); // phpcs:ignore ?></button></span></label>
+			<?php endif; ?>
+			<label class="iv-check"><input type="checkbox" name="free" value="1"> 무상 제공<?php echo $v && $v->prepaid ? ' (선납 잔액에서 빼지 않음)' : ''; ?> — 사유를 메모에</label>
+			<label class="iv-f"><span>메모 <small>(무상이면 사유 필수)</small></span><input class="iv-input" name="note" maxlength="200" placeholder="예: 거래명세서 번호 · 무상 사유"></label>
 			<button class="iv-btn iv-btn--primary iv-btn--lg iv-qc-card__save">입고</button>
 		</form>
 	<?php endif; ?>

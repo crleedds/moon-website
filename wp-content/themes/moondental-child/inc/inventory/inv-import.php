@@ -283,7 +283,7 @@ function md_inv_import_appsheet( $files, $opt = array() ) {
 	$t = md_inv_t();
 	md_inv_lock();
 	md_inv_begin();
-	foreach ( array( 'cat', 'team', 'vendor', 'item', 'ledger', 'req', 'ord', 'deposit', 'fav', 'price' ) as $k ) { $wpdb->query( "DELETE FROM {$t[$k]}" ); }
+	foreach ( array( 'cat', 'team', 'vendor', 'item', 'ledger', 'req', 'ord', 'deposit', 'fav', 'price', 'recon' ) as $k ) { $wpdb->query( "DELETE FROM {$t[$k]}" ); }
 
 	/* 분류 */
 	$map1 = array(); $map2 = array(); $map3 = array();
@@ -426,6 +426,7 @@ function md_inv_import_appsheet( $files, $opt = array() ) {
 	md_inv_commit();
 	md_inv_unlock();
 	update_option( 'md_inv_imported', current_time( 'mysql' ), false );
+	if ( function_exists( 'md_inv_deposit_fix_credit' ) ) { md_inv_deposit_fix_credit(); } /* v6.0 · 쓸 수 있는 금액 = 입금액 */
 	md_inv_log( 'AppSheet 가져오기', '품목 ' . count( $items ) . ' · 업체 ' . count( $vends ) . ' · 원장 ' . $lines . '줄' . ( $opt['history'] ? ' (기록 포함)' : '' ) );
 	$summary['ledger'] = $lines;
 	return $summary;

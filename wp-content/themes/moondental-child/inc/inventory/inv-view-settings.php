@@ -178,7 +178,7 @@ function md_inv_settings_vendors() {
 	<div class="iv-cards iv-cards--grid">
 	<?php foreach ( md_inv_vendors( false ) as $v ) :
 		if ( '' !== $q && false === mb_stripos( $v->name . ' ' . $v->goods . ' ' . $v->contact, $q ) ) { continue; }
-		$set = array( 'id' => (int) $v->id, 'title' => '업체 고치기', 'name' => $v->name, 'contact' => $v->contact, 'phone' => $v->phone, 'email' => $v->email, 'shop_info' => (string) $v->shop_info, 'goods' => (string) $v->goods, 'note' => (string) $v->note, 'prepaid' => (int) $v->prepaid, 'active' => (int) $v->active );
+		$set = array( 'id' => (int) $v->id, 'title' => '업체 고치기', 'name' => $v->name, 'contact' => $v->contact, 'phone' => $v->phone, 'email' => $v->email, 'shop_info' => (string) $v->shop_info, 'goods' => (string) $v->goods, 'note' => (string) $v->note, 'prepaid' => (int) $v->prepaid, 'active' => (int) $v->active, 'pp_bonus' => (float) $v->pp_bonus ? rtrim( rtrim( number_format( (float) $v->pp_bonus, 2, '.', '' ), '0' ), '.' ) : '', 'pp_alert' => (int) $v->pp_alert ? (int) $v->pp_alert : '' );
 		?>
 		<article class="iv-card iv-card--vendor<?php echo $v->active ? '' : ' is-off'; ?>">
 			<div class="iv-card__main">
@@ -209,6 +209,10 @@ function md_inv_settings_vendors() {
 		<label class="iv-f"><span>취급 품목</span><textarea class="iv-input" name="goods" rows="2"></textarea></label>
 		<label class="iv-f"><span>비고 (발주 · 정산 · 결제 방법 등)</span><textarea class="iv-input" name="note" rows="4"></textarea></label>
 		<label class="iv-check"><input type="checkbox" name="prepaid" value="1"> 선납 업체 (미리 낸 돈에서 입고 금액을 차감)</label>
+		<div class="iv-grid2">
+			<label class="iv-f"><span>선납 적립률 (%) <small>예: 1,000만 원에 1,100만 원어치면 10</small></span><input class="iv-input" name="pp_bonus" inputmode="decimal" placeholder="없으면 비움"></label>
+			<label class="iv-f"><span>잔액 알림 기준 (원) <small>쓸 수 있는 잔액이 이보다 적으면 알림</small></span><input class="iv-input" name="pp_alert" inputmode="numeric" placeholder="예: 3000000"></label>
+		</div>
 		<input type="hidden" name="active" value="0" data-unchecked-for="active">
 		<label class="iv-check"><input type="checkbox" name="active" value="1"> 사용</label>
 		<?php md_inv_dlg_close(); ?>

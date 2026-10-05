@@ -32,6 +32,8 @@ function md_inv_dataset_names() {
 		'teams'    => '팀',
 		'cats'     => '분류',
 		'prices'   => '단가 변동',
+		'passbook' => '선납 거래 내역',
+		'lots'     => 'LOT · 차트번호',
 	);
 }
 
@@ -62,13 +64,13 @@ function md_inv_dataset( $key, $a = array() ) {
 			break;
 
 		case 'ledger':
-			$out['head']  = array( '일시', '구분', '코드', '품목', '수량', '단위', '단가', '금액', '팀', '업체', '무상', '처리자', '비고', '요청 번호', '주문 번호', '실사 수량', '취소됨', '받은 사람' );
+			$out['head']  = array( '일시', '구분', '코드', '품목', '수량', '단위', '단가', '금액', '팀', '업체', '무상', '처리자', '비고', '요청 번호', '주문 번호', '실사 수량', '취소됨', '받은 사람', 'LOT', '차트번호' );
 			$out['num']   = array( 4 => 'n', 6 => 'won', 7 => 'won', 15 => 'n' );
 			$out['width'] = array( 16, 6, 9, 36, 7, 6, 10, 12, 14, 14, 5, 10, 30, 8, 8, 8, 14 );
 			foreach ( md_inv_ledger( array( 'from' => $a['from'], 'to' => $a['to'], 'limit' => 0 ) ) as $l ) {
 				$out['rows'][] = array( substr( $l->created_at, 0, 16 ), md_inv_type_label( $l->type ), $l->item_code, $l->item_name, (int) $l->qty, $l->unit, (int) $l->price, (int) $l->qty * (int) $l->price,
 					md_inv_team_name( $l->team_id ), md_inv_vendor_name( $l->vendor_id ), $l->free ? '무상' : '', $l->person, $l->note,
-					$l->req_id ? $l->req_id : '', $l->ord_id ? $l->ord_id : '', null === $l->counted ? '' : (int) $l->counted, $l->voided ? '취소 · ' . $l->void_note : '', (string) $l->receiver );
+					$l->req_id ? $l->req_id : '', $l->ord_id ? $l->ord_id : '', null === $l->counted ? '' : (int) $l->counted, $l->voided ? '취소 · ' . $l->void_note : '', (string) $l->receiver, (string) $l->lot, (string) $l->chart );
 			}
 			break;
 
@@ -173,20 +175,47 @@ function md_inv_dataset( $key, $a = array() ) {
 			break;
 
 		case 'prepaid':
-			$out['head']  = array( '업체', '입금 합계', '차감 (입고)', '환원 (반품)', '잔액', '주문 중', '쓸 수 있는 잔액', '마지막 입고' );
-			$out['num']   = array( 1 => 'won', 2 => 'won', 3 => 'won', 4 => 'won', 5 => 'won', 6 => 'won' );
-			$out['width'] = array( 18, 14, 14, 14, 14, 12, 16, 12 );
+			$out['head']  = array( '업체', '입금 (낸 돈)', '적립', '조정', '쓸 수 있는 금액 합계', '차감 (입고)', '환원 (반품)', '잔액', '주문 중', '쓸 수 있는 잔액', '마지막 입고', '한 달 평균 차감', '소진 예상', '알림 기준', '알림' );
+			$out['num']   = array( 1 => 'won', 2 => 'won', 3 => 'won', 4 => 'won', 5 => 'won', 6 => 'won', 7 => 'won', 8 => 'won', 9 => 'won', 11 => 'won', 13 => 'won' );
+			$out['width'] = array( 18, 14, 12, 12, 16, 14, 14, 14, 12, 16, 12, 14, 12, 12, 8 );
 			foreach ( md_inv_prepaid_summary() as $p ) {
-				$out['rows'][] = array( $p->vendor->name, $p->deposit, $p->spent, $p->returned, $p->balance, $p->pending, $p->available, $p->last_in ? substr( $p->last_in, 0, 10 ) : '' );
+				$out['rows'][] = array( $p->vendor->name, $p->paid, $p->bonus, $p->adjust, $p->deposit, $p->spent, $p->returned, $p->balance, $p->pending, $p->available, $p->last_in ? substr( $p->last_in, 0, 10 ) : '',
+					$p->burn, null === $p->months_left ? '' : md_inv_months_txt( $p->months_left ), (int) $p->vendor->pp_alert, $p->alert ? '잔액 부족' : '' );
 			}
 			break;
 
 		case 'deposits':
-			$out['head']  = array( '입금일', '업체', '금액', '메모', '입력자', '입력 일시' );
-			$out['num']   = array( 2 => 'won' );
-			$out['width'] = array( 11, 18, 14, 30, 10, 16 );
+			$out['head']  = array( '입금일', '업체', '종류', '입금액', '쓸 수 있는 금액', '메모', '입력자', '입력 일시' );
+			$out['num']   = array( 3 => 'won', 4 => 'won' );
+			$out['width'] = array( 11, 18, 8, 14, 16, 30, 10, 16 );
 			foreach ( md_inv_deposits() as $d ) {
-				$out['rows'][] = array( $d->paid_on, md_inv_vendor_name( $d->vendor_id ), (int) $d->amount, $d->note, $d->person, substr( $d->created_at, 0, 16 ) );
+				$out['rows'][] = array( $d->paid_on, md_inv_vendor_name( $d->vendor_id ), 'adjust' === $d->kind ? '조정' : ( (int) $d->amount < 0 ? '돌려받음' : '입금' ), (int) $d->amount, (int) $d->credit, $d->note, $d->person, substr( $d->created_at, 0, 16 ) );
+			}
+			break;
+
+		case 'passbook':
+			$vids = ! empty( $a['vendor'] ) ? array( (int) $a['vendor'] ) : md_inv_prepaid_vendor_ids();
+			if ( ! empty( $a['vendor'] ) ) { $out['title'] = '선납 거래 내역 ' . md_inv_vendor_name( $a['vendor'] ); }
+			$out['head']  = array( '업체', '날짜', '내용', '품목', '수량', 'LOT', '들어옴', '나감', '잔액', '메모', '처리자' );
+			$out['num']   = array( 4 => 'n', 6 => 'won', 7 => 'won', 8 => 'won' );
+			$out['width'] = array( 16, 11, 10, 34, 6, 14, 13, 13, 14, 34, 10 );
+			$from = isset( $a['from'] ) ? (string) $a['from'] : '';
+			$to   = isset( $a['to'] ) ? (string) $a['to'] : '';
+			foreach ( $vids as $vid ) {
+				$pb = md_inv_passbook( $vid, $from, $to );
+				if ( '' !== $from ) { $out['rows'][] = array( md_inv_vendor_name( $vid ), $from, '이전 잔액', '', '', '', '', '', $pb['open'], '', '' ); }
+				foreach ( $pb['rows'] as $e ) {
+					$out['rows'][] = array( md_inv_vendor_name( $vid ), $e->date, $e->label, $e->item, $e->qty ? $e->qty : '', $e->lot, $e->plus ? $e->plus : '', $e->minus ? $e->minus : '', $e->bal, $e->note, $e->person );
+				}
+			}
+			break;
+
+		case 'lots':
+			$out['head']  = array( '일시', '구분', '품목', '수량', 'LOT', '차트번호', '팀', '처리자', '받은 사람' );
+			$out['num']   = array( 3 => 'n' );
+			$out['width'] = array( 16, 6, 36, 6, 16, 12, 14, 10, 12 );
+			foreach ( md_inv_lot_search( isset( $a['q'] ) ? $a['q'] : '', 5000 ) as $l ) {
+				$out['rows'][] = array( substr( $l->created_at, 0, 16 ), md_inv_type_label( $l->type ), $l->item_name, (int) $l->qty, (string) $l->lot, (string) $l->chart, md_inv_team_name( $l->team_id ), $l->person, (string) $l->receiver );
 			}
 			break;
 
@@ -378,7 +407,7 @@ function md_inv_xlsx_sheet( $ds ) {
 
 /** 보고서 엑셀 — 표 여러 개를 한 파일로 */
 function md_inv_report_xlsx( $from, $to, $keys = null ) {
-	if ( null === $keys ) { $keys = array( 'items', 'low', 'ledger', 'requests', 'orders', 'usage', 'monthly', 'prepaid', 'deposits', 'vendors' ); }
+	if ( null === $keys ) { $keys = array( 'items', 'low', 'ledger', 'requests', 'orders', 'usage', 'monthly', 'prepaid', 'deposits', 'passbook', 'vendors' ); }
 	$sheets = array();
 	foreach ( $keys as $k ) { $sheets[] = md_inv_dataset( $k, array( 'from' => $from, 'to' => $to ) ); }
 	return md_inv_xlsx( $sheets );

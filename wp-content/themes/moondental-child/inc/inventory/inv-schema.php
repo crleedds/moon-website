@@ -17,7 +17,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_INV_SCHEMA', 2 );
+define( 'MD_INV_SCHEMA', 3 );
 
 /** 테이블 이름 */
 function md_inv_t( $key = '' ) {
@@ -36,6 +36,7 @@ function md_inv_t( $key = '' ) {
 		'log'     => $p . 'log',      // 작업 기록 (누가 언제 무엇을)
 		'fav'     => $p . 'fav',      // 팀 즐겨찾기 (v5.7)
 		'price'   => $p . 'price',    // 단가 변동 기록 (v5.7)
+		'recon'   => $p . 'recon',    // 선납 업체 잔액 대조 (v6.0)
 	);
 	return '' === $key ? $t : $t[ $key ];
 }
@@ -57,6 +58,7 @@ function md_inv_migrate() {
 		}
 	}
 	if ( $cur < 2 ) { md_inv_schema_2(); }
+	if ( $cur < 3 ) { md_inv_schema_3(); }
 
 	update_option( 'md_inv_schema', MD_INV_SCHEMA );
 	delete_transient( 'md_inv_migrating' );
@@ -301,6 +303,38 @@ function md_inv_schema_2() {
 	md_inv_add_col( $t['item'], 'location', "VARCHAR(100) NOT NULL DEFAULT ''" );
 	md_inv_add_col( $t['ledger'], 'receiver', "VARCHAR(100) NOT NULL DEFAULT ''" );
 	md_inv_add_col( $t['req'], 'receiver', "VARCHAR(100) NOT NULL DEFAULT ''" );
+}
+
+/**
+ * 3단계 (v6.0) · 선납 개선 — 입금 적립(credit) · 조정(kind) · 업체 적립률 · 잔액 알림 기준 · LOT · 차트번호 · 잔액 대조
+ */
+function md_inv_schema_3() {
+	global $wpdb;
+	$t = md_inv_t();
+	$c = $wpdb->get_charset_collate();
+	md_inv_add_col( $t['deposit'], 'credit', 'BIGINT NOT NULL DEFAULT 0' );
+	md_inv_add_col( $t['deposit'], 'kind', "VARCHAR(10) NOT NULL DEFAULT 'pay'" );
+	md_inv_add_col( $t['vendor'], 'pp_bonus', 'DECIMAL(6,2) NOT NULL DEFAULT 0' );
+	md_inv_add_col( $t['vendor'], 'pp_alert', 'BIGINT NOT NULL DEFAULT 0' );
+	md_inv_add_col( $t['item'], 'track_lot', 'TINYINT(1) NOT NULL DEFAULT 0' );
+	md_inv_add_col( $t['ledger'], 'lot', "VARCHAR(80) NOT NULL DEFAULT ''" );
+	md_inv_add_col( $t['ledger'], 'chart', "VARCHAR(40) NOT NULL DEFAULT ''" );
+	dbDelta( "CREATE TABLE {$t['recon']} (
+		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		vendor_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		as_of DATE NULL DEFAULT NULL,
+		vendor_bal BIGINT NOT NULL DEFAULT 0,
+		our_bal BIGINT NOT NULL DEFAULT 0,
+		adj_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		note VARCHAR(255) NOT NULL DEFAULT '',
+		person VARCHAR(100) NOT NULL DEFAULT '',
+		user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		created_at DATETIME NULL DEFAULT NULL,
+		PRIMARY KEY  (id),
+		KEY vendor_id (vendor_id)
+	) $c;" );
+	/* 지금까지의 입금은 낸 돈 = 쓸 수 있는 돈 */
+	$wpdb->query( "UPDATE {$t['deposit']} SET credit = amount WHERE credit = 0 AND amount <> 0" );
 }
 
 /** 열이 없을 때만 더한다 */

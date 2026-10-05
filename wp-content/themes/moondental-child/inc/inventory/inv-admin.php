@@ -97,6 +97,9 @@ function md_inv_vendor_save( $id, $d ) {
 		'prepaid' => ! empty( $d['prepaid'] ) ? 1 : 0,
 		'active'  => isset( $d['active'] ) ? ( $d['active'] ? 1 : 0 ) : 1,
 	);
+	/* v6.0 · 선납 적립률(%) · 잔액 알림 기준(원) — 칸이 있을 때만 */
+	if ( isset( $d['pp_bonus'] ) && null !== $d['pp_bonus'] ) { $row['pp_bonus'] = max( 0, min( 100, round( (float) str_replace( array( ',', '%' ), '', (string) $d['pp_bonus'] ), 2 ) ) ); }
+	if ( isset( $d['pp_alert'] ) && null !== $d['pp_alert'] ) { $row['pp_alert'] = max( 0, md_inv_int( $d['pp_alert'] ) ); }
 	if ( $id ) {
 		$wpdb->update( $t, $row, array( 'id' => (int) $id ) );
 		md_inv_log( '업체 수정', $name );

@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /** 백업에 담는 표 (백업 보관함 자신은 빼고) */
 function md_inv_backup_tables() {
-	return array( 'cat', 'team', 'vendor', 'item', 'ledger', 'req', 'ord', 'deposit', 'log', 'fav', 'price' );
+	return array( 'cat', 'team', 'vendor', 'item', 'ledger', 'req', 'ord', 'deposit', 'log', 'fav', 'price', 'recon' );
 }
 
 /** 지금 상태를 JSON 문자열로 */
@@ -130,6 +130,7 @@ function md_inv_backup_restore( $d ) {
 	}
 	md_inv_commit();
 	md_inv_unlock();
+	if ( function_exists( 'md_inv_deposit_fix_credit' ) ) { md_inv_deposit_fix_credit(); } /* v6.0 전 백업 — 쓸 수 있는 금액 칸이 없다 */
 	if ( ! empty( $d['settings'] ) && is_array( $d['settings'] ) ) {
 		update_option( 'md_inv_settings', wp_parse_args( $d['settings'], md_inv_setting_defaults() ), false );
 	}
@@ -269,7 +270,7 @@ function md_inv_report_send( $why = 'manual', $to = '' ) {
 	$body .= '· 기간 사용금액: ' . md_inv_won( $usage ) . "\n";
 	$body .= '· 지금 재고 금액: ' . md_inv_won( md_inv_stock_value( $items ) ) . ' (' . count( $items ) . "개 품목)\n";
 	foreach ( md_inv_prepaid_summary() as $p ) {
-		$body .= '· 선납 ' . $p->vendor->name . ' 쓸 수 있는 잔액: ' . md_inv_won( $p->available ) . "\n";
+		$body .= '· 선납 ' . $p->vendor->name . ' 쓸 수 있는 잔액: ' . md_inv_won( $p->available ) . ( $p->burn ? ' (약 ' . md_inv_months_txt( $p->months_left ) . '분)' : '' ) . ( $p->alert ? ' ⚠ 잔액 부족 — 알림 기준 ' . md_inv_won( $p->vendor->pp_alert ) : '' ) . "\n";
 	}
 	$body .= "\n첨부: 엑셀 보고서" . ( $s['report_backup'] ? ' · 백업 파일(.json.gz — 직원 라운지 › 재료실 › 설정 › 백업에서 올리면 이 시점으로 되돌릴 수 있음)' : '' ) . "\n";
 	$body .= '재료실 열기: ' . home_url( '/직원/?app=stock' ) . "\n";

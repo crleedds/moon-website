@@ -64,7 +64,34 @@
     $$('[data-newonly]', d).forEach(function (el) { el.hidden = !!(idf && idf.value); });
     $$('.iv-catsel', d).forEach(catselInit);
     $$('[data-calc]', d).length && calcInit(d);
+    lotSync(d);
   }
+
+  /* v6.0 · LOT · 차트번호 — 고른 품목이 추적 품목이면 칸을 보이고 남은 LOT 를 목록에 (먼저 들어온 것부터) */
+  var trackMap = null;
+  function lotSync(d) {
+    var box = d && $$('[data-if="track"]', d);
+    if (!box || !box.length) return;
+    if (trackMap === null) { var el = document.getElementById('iv-track-map'); try { trackMap = el ? JSON.parse(el.textContent) : {}; } catch (x) { trackMap = {}; } }
+    var id = '', ti = d.querySelector('[name="track_item"]'), hi = d.querySelector('input[type=hidden][name="item_id"]'), pk = d.querySelector('[data-pick="item_id"]');
+    if (ti && ti.value) id = ti.value;
+    else if (hi && hi.value) id = hi.value;
+    else if (pk) { var m = /#(\d+)\s*$/.exec(pk.value || ''); if (m) id = m[1]; }
+    var lots = id && trackMap[id];
+    box.forEach(function (b) { b.hidden = !lots; });
+    var dl = document.getElementById('iv-lot-dl');
+    if (dl && lots) dl.innerHTML = lots.map(function (l) { return '<option value="' + String(l[0]).replace(/"/g, '&quot;') + '">남은 ' + l[1] + '</option>'; }).join('');
+    var li = d.querySelector('[data-lots]');
+    if (li && lots) li.placeholder = lots.length ? '비우면 ' + lots[0][0] : '남은 LOT 없음';
+  }
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.matches && t.matches('[data-pick="item_id"]')) { var d = t.closest('dialog'); if (d) lotSync(d); }
+  });
+  document.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t.matches && t.matches('[data-pick="item_id"]')) { var d = t.closest('dialog'); if (d) lotSync(d); }
+  });
 
   document.addEventListener('click', function (e) {
     var b = e.target.closest('[data-dlg]');

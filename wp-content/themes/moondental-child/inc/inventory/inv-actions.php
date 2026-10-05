@@ -132,7 +132,7 @@ function md_inv_act_req_cancel() {
  * ============================================================ */
 
 function md_inv_act_req_release() {
-	$res = md_inv_req_release( (int) md_inv_p( 'id' ), (int) md_inv_p( 'qty' ), true, (string) md_inv_p( 'note' ), (string) md_inv_p( 'receiver' ) );
+	$res = md_inv_req_release( (int) md_inv_p( 'id' ), (int) md_inv_p( 'qty' ), true, (string) md_inv_p( 'note' ), (string) md_inv_p( 'receiver' ), array( 'lot' => md_inv_p( 'lot' ), 'chart' => md_inv_p( 'chart' ) ) );
 	if ( is_wp_error( $res ) ) { md_inv_go( 'err', $res->get_error_message() ); }
 	md_inv_go( 'ok', $res['rest'] ? '출고했습니다. 남은 수량은 새 대기 요청으로 남겨 두었습니다.' : '출고했습니다. 재고에서 뺐습니다.' );
 }
@@ -185,7 +185,25 @@ function md_inv_act_req_register() {
 function md_inv_act_req_order() {
 	$req = md_inv_req( (int) md_inv_p( 'id' ) );
 	if ( ! $req || ! $req->item_id ) { md_inv_go( 'err', '품목이 연결된 요청만 주문할 수 있습니다. 먼저 품목으로 등록해 주세요.' ); }
-	md_inv_done( md_inv_ord_create( $req->item_id, (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'amount' => md_inv_p( 'amount' ), 'note' => (string) md_inv_p( 'note' ), 'req_id' => $req->id ) ), '주문을 넣었습니다. 「할 일 › 입고 대기」에 있습니다.' );
+	md_inv_ord_done( md_inv_ord_create( $req->item_id, (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'amount' => md_inv_p( 'amount' ), 'note' => (string) md_inv_p( 'note' ), 'req_id' => $req->id ) ), '주문을 넣었습니다. 「할 일 › 입고 대기」에 있습니다.' );
+}
+
+/** v6.0 · 선납 업체 주문이면 「주문 뒤 쓸 수 있는 잔액」을 알리고, 모자라거나 알림 기준 아래면 경고 */
+function md_inv_ord_done( $res, $ok_text ) {
+	if ( is_wp_error( $res ) ) { md_inv_go( 'err', $res->get_error_message() ); }
+	$o = md_inv_ord( (int) $res );
+	$v = $o ? md_inv_vendor( $o->vendor_id ) : null;
+	if ( $v && (int) $v->prepaid ) {
+		$s = md_inv_prepaid_summary();
+		$p = isset( $s[ (int) $v->id ] ) ? $s[ (int) $v->id ] : null;
+		if ( $p ) {
+			$txt = $ok_text . ' ' . $v->name . ' 선납 — 이 주문까지 잡으면 쓸 수 있는 잔액 ' . md_inv_won( $p->available ) . '.';
+			if ( $p->available < 0 ) { md_inv_go( 'warn', $txt . ' 잔액보다 많이 주문했습니다. 입금을 기록하거나 업체에 확인해 주세요.' ); }
+			if ( $p->alert ) { md_inv_go( 'warn', $txt . ' 알림 기준(' . md_inv_won( $v->pp_alert ) . ')보다 적습니다 — 재입금을 준비해 주세요.' ); }
+			md_inv_go( 'ok', $txt );
+		}
+	}
+	md_inv_go( 'ok', $ok_text );
 }
 
 /* ============================================================
@@ -198,6 +216,7 @@ function md_inv_item_fields_from_post() {
 		'price' => md_inv_p( 'price' ), 'cat1' => (int) md_inv_p( 'cat1' ), 'cat2' => (int) md_inv_p( 'cat2' ), 'cat3' => (int) md_inv_p( 'cat3' ),
 		'min_stock' => md_inv_p( 'min_stock' ), 'barcode' => md_inv_p( 'barcode' ), 'note' => md_inv_p( 'note' ), 'location' => md_inv_p( 'location' ),
 		'code' => md_inv_p( 'code' ), 'open_qty' => md_inv_p( 'open_qty' ),
+		'track_lot' => isset( $_POST['track_lot'] ) ? md_inv_p( 'track_lot' ) : '',
 	);
 }
 
@@ -217,12 +236,12 @@ function md_inv_act_item_delete() {
 }
 
 function md_inv_act_stock_in() {
-	md_inv_done( md_inv_do_in( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'free' => md_inv_p( 'free' ) ? 1 : 0, 'note' => md_inv_txt( md_inv_p( 'note' ), 500 ) ) ), '입고를 기록했습니다.' );
+	md_inv_done( md_inv_do_in( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'free' => md_inv_p( 'free' ) ? 1 : 0, 'note' => md_inv_txt( md_inv_p( 'note' ), 500 ), 'lot' => md_inv_p( 'lot' ) ) ), '입고를 기록했습니다.' );
 }
 
 function md_inv_act_stock_out() {
 	if ( md_inv_set( 'out_need_receiver' ) && '' === trim( (string) md_inv_p( 'receiver' ) ) ) { md_inv_go( 'err', '받은 사람 이름을 적어 주세요.' ); }
-	md_inv_done( md_inv_do_out( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'team_id' => (int) md_inv_p( 'team_id' ), 'receiver' => md_inv_p( 'receiver' ), 'note' => md_inv_txt( md_inv_p( 'note' ), 500 ) ) ), '출고를 기록했습니다.' );
+	md_inv_done( md_inv_do_out( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'team_id' => (int) md_inv_p( 'team_id' ), 'receiver' => md_inv_p( 'receiver' ), 'note' => md_inv_txt( md_inv_p( 'note' ), 500 ), 'lot' => md_inv_p( 'lot' ), 'chart' => md_inv_p( 'chart' ) ) ), '출고를 기록했습니다.' );
 }
 
 function md_inv_act_stock_adjust() {
@@ -263,7 +282,7 @@ function md_inv_act_stock_return() {
  * ============================================================ */
 
 function md_inv_act_ord_create() {
-	md_inv_done( md_inv_ord_create( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'amount' => md_inv_p( 'amount' ), 'note' => md_inv_p( 'note' ) ) ), '주문을 넣었습니다.' );
+	md_inv_ord_done( md_inv_ord_create( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'amount' => md_inv_p( 'amount' ), 'note' => md_inv_p( 'note' ) ) ), '주문을 넣었습니다.' );
 }
 
 /** 주문 필요 품목 한꺼번에 주문 */
@@ -284,7 +303,7 @@ function md_inv_act_ord_many() {
 function md_inv_act_ord_receive() {
 	md_inv_done( md_inv_ord_receive( (int) md_inv_p( 'id' ), (int) md_inv_p( 'qty' ), array(
 		'price' => md_inv_p( 'price' ), 'free' => md_inv_p( 'free' ) ? 1 : 0, 'close' => md_inv_p( 'close' ) ? 1 : 0,
-		'allow_more' => md_inv_p( 'allow_more' ) ? 1 : 0, 'note' => md_inv_p( 'note' ),
+		'allow_more' => md_inv_p( 'allow_more' ) ? 1 : 0, 'note' => md_inv_p( 'note' ), 'lot' => md_inv_p( 'lot' ),
 	) ), '입고를 기록했습니다. 재고에 더했습니다.' );
 }
 
@@ -303,7 +322,7 @@ function md_inv_act_ord_update() {
  * ============================================================ */
 
 function md_inv_act_dep_add() {
-	md_inv_done( md_inv_deposit_add( (int) md_inv_p( 'vendor_id' ), md_inv_p( 'amount' ), (string) md_inv_p( 'paid_on' ), (string) md_inv_p( 'note' ) ), '입금을 기록했습니다.' );
+	md_inv_done( md_inv_deposit_add( (int) md_inv_p( 'vendor_id' ), md_inv_p( 'amount' ), (string) md_inv_p( 'paid_on' ), (string) md_inv_p( 'note' ), (string) md_inv_p( 'credit' ) ), '입금을 기록했습니다.' );
 }
 
 function md_inv_act_dep_delete() {
@@ -335,6 +354,7 @@ function md_inv_act_vendor_save() {
 	$res = md_inv_vendor_save( $id, array(
 		'name' => md_inv_p( 'name' ), 'contact' => md_inv_p( 'contact' ), 'phone' => md_inv_p( 'phone' ), 'email' => md_inv_p( 'email' ),
 		'shop_info' => md_inv_p( 'shop_info' ), 'goods' => md_inv_p( 'goods' ), 'note' => md_inv_p( 'note' ), 'prepaid' => md_inv_p( 'prepaid' ), 'active' => md_inv_p( 'active', 1 ),
+		'pp_bonus' => md_inv_p( 'pp_bonus' ), 'pp_alert' => md_inv_p( 'pp_alert' ),
 	) );
 	md_inv_done( $res, '업체를 저장했습니다.' );
 }
@@ -500,6 +520,11 @@ function md_inv_handle_download() {
 		$ym = isset( $_GET['im'] ) && preg_match( '/^\d{4}-\d{2}$/', $_GET['im'] ) ? $_GET['im'] : date( 'Y-m', strtotime( '-1 month', current_time( 'timestamp' ) ) );
 		md_inv_log( '엑셀 내려받기', $ym . ' 업체 정산' );
 		md_inv_send_xlsx( md_inv_settle_xlsx( $ym ), '문치과병원 업체 정산 ' . $ym . '.xlsx' );
+	}
+	if ( 'passbook' === $what || 'lots' === $what ) {
+		$ds = md_inv_dataset( $what, array( 'vendor' => isset( $_GET['ivd'] ) ? (int) $_GET['ivd'] : 0, 'from' => isset( $_GET['df'] ) ? $from : '', 'to' => $to, 'q' => isset( $_GET['iq'] ) ? sanitize_text_field( wp_unslash( $_GET['iq'] ) ) : '' ) );
+		md_inv_log( '엑셀 내려받기', $ds['title'] );
+		md_inv_send_xlsx( md_inv_xlsx( array( $ds ) ), '문치과병원 ' . $ds['title'] . ' ' . current_time( 'Y-m-d' ) . '.xlsx' );
 	}
 	if ( 'po' === $what ) {
 		$vid = isset( $_GET['ivd'] ) ? (int) $_GET['ivd'] : 0;

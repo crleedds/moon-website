@@ -26,7 +26,7 @@ if ( is_readable( dirname( __DIR__ ) . '/accounts/accounts.php' ) && filesize( d
 
 /* 배포 중 파일이 하나라도 비면(자동 배포가 쓰는 수십 초) 모듈 전체를 쉬게 한다 —
  * 반쪽만 올라와 함수가 없는 채로 돌면 사이트 전체가 500 이 된다. */
-$md_inv_files = array( 'inv-schema', 'inv-core', 'inv-admin', 'inv-export', 'inv-backup', 'inv-import', 'inv-actions', 'inv-ui', 'inv-view-req', 'inv-view-admin', 'inv-view-stats', 'inv-view-settings', 'inv-view-tools', 'inv-view-more' );
+$md_inv_files = array( 'inv-schema', 'inv-core', 'inv-admin', 'inv-export', 'inv-backup', 'inv-import', 'inv-actions', 'inv-ui', 'inv-view-req', 'inv-view-admin', 'inv-view-stats', 'inv-view-settings', 'inv-view-tools', 'inv-view-more', 'inv-prepaid' );
 $md_inv_ok    = true;
 foreach ( $md_inv_files as $md_inv_f ) {
 	if ( ! is_readable( MD_INV_DIR . '/' . $md_inv_f . '.php' ) || filesize( MD_INV_DIR . '/' . $md_inv_f . '.php' ) < 100 ) { $md_inv_ok = false; }
