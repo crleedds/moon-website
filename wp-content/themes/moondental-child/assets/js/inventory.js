@@ -559,7 +559,7 @@
     if (!cart || !Array.isArray(cart.lines)) cart = { lines: [], tok: '' };
     cart.lines = cart.lines.filter(function (l) { return l.custom || byId[l.id]; });
     var who = O.remember ? store.get(WHO, {}) : {};
-    var state = { q: '', chip: '', sub: '', all: false, team: teamName[who.team] ? Number(who.team) : (teamName[D.myTeam] ? Number(D.myTeam) : 0), shown: PAGE };
+    var state = { q: '', chip: '', sub: '', all: false, path: [], showAll: false, team: teamName[who.team] ? Number(who.team) : (teamName[D.myTeam] ? Number(D.myTeam) : 0), shown: PAGE };
     var favs = D.favs || {};
     function favList() { return state.team && favs[state.team] ? favs[state.team] : []; }
     function isFav(id) { return favList().indexOf(id) >= 0; }
@@ -588,7 +588,7 @@
       $$('#iv-teamgrid [data-team]').forEach(function (b) { b.classList.toggle('is-on', Number(b.dataset.team) === state.team); });
       var ct = $('#iv-cart-team'); if (ct && state.team) ct.value = String(state.team);
       if (O.remember) { who.team = state.team; store.set(WHO, who); }
-      if (!silent) { state.chip = favList().length ? 'fav' : (recentOf().length ? 'star' : 'browse'); state.sub = ''; state.showAll = false; state.shown = PAGE; renderChips(); render(); }
+      if (!silent) { if (favList().length) state.chip = 'fav'; else if (state.chip === 'fav') state.chip = 'browse'; state.showAll = false; state.shown = PAGE; renderChips(); render(); }
       steps();
     }
     $('#iv-teamgrid').addEventListener('click', function (e) {
@@ -606,79 +606,68 @@
       $('#iv-step3').className = s1 && s2 ? 'is-now' : '';
     }
 
-    /* 2 · 품목군 칩 */
+    /* 2 · 칩 — 「우리 팀 즐겨찾기 · 분류별로 고르기 · 전체」만 (v6.5 · 원장 지시)
+     *   분류별로 고르기: 결제 방식(건별결제 · 선납차감) → 품목군 → 세부 분류 → 품목. 빈 분류도 보여 준다 (0개). */
     function recentOf() {
       return state.team && D.recent[state.team] ? D.recent[state.team].map(function (id) { return byId[id]; }).filter(Boolean) : [];
     }
-    var groups = {}, groupOrder = [];
-    D.items.forEach(function (it) { var g = it.c2 || 0; if (!groups[g]) { groups[g] = []; groupOrder.push(g); } groups[g].push(it); });
-    groupOrder.sort(function (a, b) { if (!a) return 1; if (!b) return -1; var pa = catSort[catParent[a]] || 0, pb = catSort[catParent[b]] || 0; return pa !== pb ? pa - pb : (catSort[a] || 0) - (catSort[b] || 0); });
-    /* v6.2 · 세부 분류(3단계) — 품목군을 누르면 둘째 줄로 나눠 보인다 */
-    var subCache = {};
-    function subsOf(g) {
-      if (subCache[g]) return subCache[g];
-      var m = {}, order = [], none = [];
-      (groups[g] || []).forEach(function (it) {
-        if (it.c3 && catName[it.c3]) { var k = 's' + it.c3; if (!m[k]) { m[k] = []; order.push(it.c3); } m[k].push(it); }
-        else none.push(it);
+    var kids = {};
+    D.cats.forEach(function (c) { (kids[c.p] = kids[c.p] || []).push(c.id); });
+    var LV = ['c1', 'c2', 'c3'];
+    /* 지금 경로(state.path = [결제 방식, 품목군, 세부 분류] — 값은 분류 id 또는 'none')에 드는 품목 */
+    function pathItems(path) {
+      return D.items.filter(function (it) {
+        for (var i = 0; i < path.length; i++) {
+          var v = it[LV[i]], want = path[i];
+          if (want === 'none') { if (v && catName[v]) return false; }
+          else if (Number(v) !== Number(want)) return false;
+        }
+        return true;
       });
-      order.sort(function (a, b) { return (catSort[a] || 0) - (catSort[b] || 0); });
-      var out = order.map(function (c) { return { k: 's' + c, n: catName[c], items: m['s' + c] }; });
-      if (out.length && none.length) out.push({ k: 'none', n: '기타', items: none });
-      return (subCache[g] = out);
     }
-    function isGroup(chip) { return !!chip && chip.charAt(0) === 'g'; }
-    function scoped() { return isGroup(state.chip) && !state.all; }
-    function scopeLabel() {
-      var g = Number(state.chip.slice(1)), lab = g ? (catName[g] || '기타') : '분류 없음';
-      if (state.sub) { var s = subsOf(g).filter(function (x) { return x.k === state.sub; })[0]; if (s) lab += ' › ' + s.n; }
-      return lab;
+    function nodeName(v) { return v === 'none' ? '기타 (분류 없음)' : (catName[v] || '기타'); }
+    function isGroup() { return false; } /* 옛 품목군 칩 — 이제 없음 */
+    function scoped() { return state.chip === 'browse' && state.path.length > 0 && !state.all; }
+    function scopeLabel() { return state.path.map(nodeName).join(' › '); }
+    /* 이 경로 아래 고를 타일 — 하위 분류(빈 것 포함) + 하위 분류가 없는 품목이 있으면 「기타」 */
+    function tilesAt(path) {
+      var lv = path.length;
+      if (lv >= 3) return [];
+      var parent = lv ? path[lv - 1] : 0;
+      if (parent === 'none') return [];
+      var base = lv ? pathItems(path) : D.items;
+      var ids = (kids[parent] || []).filter(function (id) { return (D.cats.filter(function (c) { return c.id === id; })[0] || {}).l === lv + 1; });
+      var out = ids.map(function (id) { return { v: id, n: catName[id], items: base.filter(function (it) { return Number(it[LV[lv]]) === id; }) }; });
+      var none = base.filter(function (it) { var v = it[LV[lv]]; return !v || !catName[v]; });
+      if (none.length && out.length) out.push({ v: 'none', n: '기타 (분류 없음)', items: none });
+      return out;
     }
     function itemsOfChip(chip) {
       if (chip === 'fav') return favList().map(function (id) { return byId[id]; }).filter(Boolean);
-      if (chip === 'star') return recentOf();
-      if (chip === 'cart') return cart.lines.filter(function (l) { return !l.custom; }).map(function (l) { return byId[l.id]; });
-      if (chip === 'all' || chip === '') return D.items;
-      if (chip === 'browse') return [];
-      var g = Number(chip.slice(1));
-      if (state.sub) { var s = subsOf(g).filter(function (x) { return x.k === state.sub; })[0]; if (s) return s.items; }
-      return groups[g] || [];
+      if (chip === 'browse') return state.path.length ? pathItems(state.path) : D.items;
+      return D.items;
     }
     function chipBtn(key, label, n) {
-      var on = (!state.q || scoped()) && (state.chip === key || (state.chip === '' && key === 'all'));
-      return '<button type="button" class="iv-chipbtn' + (on ? ' is-on' : '') + '" role="tab" aria-selected="' + on + '" data-chip="' + key + '">' + esc(label) + ' <small>' + n + '</small></button>';
+      var on = (!state.q || scoped()) && state.chip === key;
+      return '<button type="button" class="iv-chipbtn' + (on ? ' is-on' : '') + '" role="tab" aria-selected="' + on + '" data-chip="' + key + '">' + esc(label) + (n !== '' ? ' <small>' + n + '</small>' : '') + '</button>';
     }
     function renderChips() {
       var h = '';
-      var rc = recentOf().length, cc = cart.lines.filter(function (l) { return !l.custom; }).length;
       var fc = favList().filter(function (id) { return byId[id]; }).length;
-      if (state.team) h += chipBtn('fav', '★ 우리 팀 즐겨찾기', fc);
-      if (rc) h += chipBtn('star', '🕘 우리 팀 최근 신청', rc);
-      if (cc) h += chipBtn('cart', '🛒 담은 품목', cc);
-      if (groupOrder.length > 1) h += chipBtn('browse', '📂 분류별로 고르기', groupOrder.length);
+      h += chipBtn('fav', '★ 우리 팀 즐겨찾기', state.team ? fc : '');
+      h += chipBtn('browse', '📂 분류별로 고르기', '');
       h += chipBtn('all', '전체', D.items.length);
-      groupOrder.forEach(function (g) { h += chipBtn('g' + g, g ? (catName[g] || '기타') : '분류 없음', groups[g].length); });
       chipsEl.innerHTML = h;
-      /* 둘째 줄 — 세부 분류 */
-      var subs = isGroup(state.chip) ? subsOf(Number(state.chip.slice(1))) : [];
-      if (subEl) {
-        if (subs.length > 1 && (!state.q || scoped())) {
-          var sh = '<button type="button" class="iv-chipbtn iv-chipbtn--sub' + (!state.sub && state.showAll ? ' is-on' : '') + '" data-sub="">전체 <small>' + groups[Number(state.chip.slice(1))].length + '</small></button>';
-          subs.forEach(function (s) { sh += '<button type="button" class="iv-chipbtn iv-chipbtn--sub' + (state.sub === s.k ? ' is-on' : '') + '" data-sub="' + s.k + '">' + esc(s.n) + ' <small>' + s.items.length + '</small></button>'; });
-          subEl.innerHTML = sh; subEl.hidden = false;
-        } else { subEl.innerHTML = ''; subEl.hidden = true; }
-      }
+      if (subEl) { subEl.innerHTML = ''; subEl.hidden = true; }
     }
-    if (subEl) subEl.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-sub]'); if (!b) return;
-      state.sub = b.dataset.sub; state.showAll = !b.dataset.sub; state.all = false; state.shown = PAGE;
-      renderChips(); render();
-      if (b.scrollIntoView) b.scrollIntoView({ block: 'nearest', inline: 'center' });
-    });
+    function savePath() { store.set('md_inv_path_v1', state.path); }
     chipsEl.addEventListener('click', function (e) {
       var b = e.target.closest('[data-chip]'); if (!b) return;
-      state.chip = b.dataset.chip; state.sub = ''; state.all = false; state.showAll = false; state.q = ''; q.value = ''; state.shown = PAGE;
-      if (state.chip !== 'cart' && state.chip !== 'star') store.set('md_inv_chip_v1', state.chip);
+      if (b.dataset.chip === 'fav' && !state.team) { openDlg('iv-team-dlg'); toast('즐겨찾기는 팀마다 따로 있어요. 먼저 우리 팀을 골라 주세요'); return; }
+      /* 「분류별로 고르기」를 다시 누르면 맨 처음 단계로 */
+      if (b.dataset.chip === 'browse' && state.chip === 'browse') { state.path = []; savePath(); }
+      state.chip = b.dataset.chip; state.all = false; state.showAll = false; state.q = ''; q.value = ''; state.shown = PAGE;
+      store.set('md_inv_chip_v1', state.chip);
       renderChips(); render();
       var on = chipsEl.querySelector('.is-on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'center' });
     });
@@ -701,8 +690,8 @@
     function rowHtml(it) {
       var v = vendors[it.v] ? vendors[it.v].n : '';
       var pend = state.team && D.pending[state.team] && D.pending[state.team][it.i];
-      var showCat = (state.q || state.chip === 'all' || state.chip === 'star' || state.chip === 'cart' || state.chip === 'fav') && it.c2;
-      var showSub = isGroup(state.chip) && !state.sub && it.c3 && catName[it.c3];
+      var showCat = (state.q || state.chip === 'all' || state.chip === 'fav') && it.c2;
+      var showSub = state.chip === 'browse' && state.path.length < 3 && it.c3 && catName[it.c3];
       var sub = [v, it.u, (O.price && it.p ? num(it.p) + '원' : ''), showCat ? catName[it.c2] + (it.c3 && catName[it.c3] ? ' › ' + catName[it.c3] : '') : (showSub ? catName[it.c3] : ''), it.l ? '📍' + it.l : ''].filter(Boolean).join(' · ');
       return '<div class="iv-row' + (qtyOf(it.i) ? ' is-in' : '') + '" data-id="' + it.i + '">' +
         '<button type="button" class="iv-row__main" data-add="' + it.i + '"><span class="iv-row__name">' + hl(it.n) + '</span><span class="iv-row__sub">' + esc(sub) + '</span>' +
@@ -753,7 +742,7 @@
         var words = state.q.toLowerCase().split(/\s+/).filter(Boolean);
         var everywhere = D.items.filter(function (it) { return match(it, words); });
         if (scoped()) {
-          arr = itemsOfChip(state.chip).filter(function (it) { return match(it, words); });
+          arr = pathItems(state.path).filter(function (it) { return match(it, words); });
           head = '<p class="iv-list__count">「' + esc(state.q) + '」 <b>' + esc(scopeLabel()) + '</b> 안에서 <b>' + arr.length + '</b>개' +
             (everywhere.length > arr.length ? ' · <button type="button" class="iv-link" data-scope="all">전체에서 찾기 (' + everywhere.length + '개)</button>' : '') + '</p>';
           if (!arr.length && everywhere.length) {
@@ -762,7 +751,7 @@
           }
         } else {
           arr = everywhere;
-          head = '<p class="iv-list__count">「' + esc(state.q) + '」 찾은 품목 <b>' + arr.length + '</b>개' + (isGroup(state.chip) ? ' · <button type="button" class="iv-link" data-scope="cat">' + esc(scopeLabel()) + ' 안에서만</button>' : '') + '</p>';
+          head = '<p class="iv-list__count">「' + esc(state.q) + '」 찾은 품목 <b>' + arr.length + '</b>개' + (state.chip === 'browse' && state.path.length ? ' · <button type="button" class="iv-link" data-scope="cat">' + esc(scopeLabel()) + ' 안에서만</button>' : '') + '</p>';
         }
         if (!arr.length) {
           list.innerHTML = head + '<div class="iv-nohit"><b>목록에서 찾지 못했어요.</b><span>이름을 줄여 다시 찾아보거나, 목록에 없는 품목으로 신청하세요.</span>' +
@@ -770,44 +759,51 @@
           return;
         }
       } else if (state.chip === 'browse') {
-        /* 1단계 — 품목군 타일 */
-        var th = '<p class="iv-list__count iv-crumbs"><b>분류별로 고르기</b> — ' + esc(D.L.c2 || '품목군') + '을 고르세요</p><div class="iv-tiles">';
-        groupOrder.forEach(function (g) {
-          var subs = subsOf(g);
-          th += '<button type="button" class="iv-tile" data-tile-group="' + g + '"><b>' + esc(g ? (catName[g] || '기타') : '분류 없음') + '</b><small>' + groups[g].length + '개' + (subs.length > 1 ? ' · ' + esc(D.L.c3 || '세부 분류') + ' ' + subs.length : '') + '</small></button>';
-        });
-        list.innerHTML = th + '</div>';
-        return;
-      } else if (isGroup(state.chip) && !state.sub && !state.showAll && subsOf(Number(state.chip.slice(1))).length > 1) {
-        /* 2단계 — 세부 분류 타일 */
-        var g2 = Number(state.chip.slice(1));
-        var sh2 = crumbs() + '<div class="iv-tiles">';
-        subsOf(g2).forEach(function (s) { sh2 += '<button type="button" class="iv-tile" data-tile-sub="' + s.k + '"><b>' + esc(s.n) + '</b><small>' + s.items.length + '개</small></button>'; });
-        sh2 += '<button type="button" class="iv-tile iv-tile--all" data-tile-all><b>모두 보기</b><small>' + groups[g2].length + '개</small></button></div>';
-        list.innerHTML = sh2;
-        return;
+        var tiles = state.showAll ? [] : tilesAt(state.path);
+        if (tiles.length) {
+          /* 타일 단계 — 결제 방식 → 품목군 → 세부 분류 */
+          var what = [D.L.c1 || '결제 방식', D.L.c2 || '품목군', D.L.c3 || '세부 분류'][state.path.length];
+          var th = crumbs(what + '을(를) 고르세요') + '<div class="iv-tiles">';
+          tiles.forEach(function (t) {
+            var n = t.items.length, sub = state.path.length < 2 && t.v !== 'none' ? tilesAt(state.path.concat([t.v])).length : 0;
+            th += '<button type="button" class="iv-tile' + (n ? '' : ' iv-tile--empty') + '" data-tile="' + t.v + '"><b>' + esc(t.n) + '</b><small>' + (n ? n + '개' : '아직 품목 없음') + (sub ? ' · ' + sub + '가지' : '') + '</small></button>';
+          });
+          if (state.path.length) { var allN = pathItems(state.path).length; if (allN) th += '<button type="button" class="iv-tile iv-tile--all" data-tile-all><b>모두 보기</b><small>' + allN + '개</small></button>'; }
+          list.innerHTML = th + '</div>';
+          return;
+        }
+        arr = pathItems(state.path);
+        head = crumbs('');
+        if (!arr.length) {
+          list.innerHTML = head + '<div class="iv-nohit"><b>이 분류에는 아직 품목이 없어요.</b><span>필요한 품목은 목록에 없는 품목으로 신청하세요.</span>' +
+            (O.custom ? '<button type="button" class="iv-btn iv-btn--primary" data-dlg="iv-custom">＋ 목록에 없는 품목 신청</button>' : '') + '</div>';
+          return;
+        }
       } else {
         arr = itemsOfChip(state.chip || 'all');
-        if (isGroup(state.chip)) head = crumbs();
-        if (!state.team && (state.chip === '' || state.chip === 'all')) head = '<div class="iv-hint">먼저 <button type="button" class="iv-link" data-dlg="iv-team-dlg">우리 팀</button>을 고르면 우리 팀이 자주 신청한 품목이 첫 칸에 모입니다.</div>';
-        if (state.chip === 'star') head = '<p class="iv-list__count">최근 ' + (D.recentDays || 60) + '일 동안 우리 팀이 신청한 품목</p>';
+        if (state.chip === 'fav') {
+          if (!state.team) head = '<div class="iv-hint">즐겨찾기는 팀마다 따로 있어요. 먼저 <button type="button" class="iv-link" data-dlg="iv-team-dlg">우리 팀</button>을 골라 주세요.</div>';
+          else if (!arr.length) head = '<div class="iv-hint">아직 우리 팀 즐겨찾기가 없어요. 품목 줄의 ☆ 를 누르면 여기에 모입니다. 「📂 분류별로 고르기」로 찾아 보세요.</div>';
+        }
+        if (!state.team && state.chip === 'all') head = '<div class="iv-hint">먼저 <button type="button" class="iv-link" data-dlg="iv-team-dlg">우리 팀</button>을 골라 주세요.</div>';
       }
       var h = head;
       arr.slice(0, state.shown).forEach(function (it) { h += rowHtml(it); });
       if (arr.length > state.shown) h += '<button type="button" class="iv-btn iv-btn--ghost iv-more-btn" data-more>' + (arr.length - state.shown) + '개 더 보기</button>';
-      if (!arr.length) h += '<div class="iv-empty">품목이 없습니다.</div>';
+      if (!arr.length && state.chip !== 'fav') h += '<div class="iv-empty">품목이 없습니다.</div>';
       list.innerHTML = h;
     }
 
     /* 지금 어디인지 — 누르면 그 단계로 돌아감 */
-    function crumbs() {
-      var g = Number(state.chip.slice(1)), h = '<p class="iv-list__count iv-crumbs">';
-      if (groupOrder.length > 1) h += '<button type="button" class="iv-link" data-crumb="browse">분류별로</button> › ';
-      var subs = subsOf(g);
-      if (state.sub || state.showAll) h += (subs.length > 1 ? '<button type="button" class="iv-link" data-crumb="group">' + esc(g ? (catName[g] || '기타') : '분류 없음') + '</button>' : '<b>' + esc(catName[g] || '기타') + '</b>');
-      else h += '<b>' + esc(g ? (catName[g] || '기타') : '분류 없음') + '</b>' + (subs.length > 1 ? ' — ' + esc(D.L.c3 || '세부 분류') + '를 고르세요' : '');
-      if (state.sub) { var s = subs.filter(function (x) { return x.k === state.sub; })[0]; if (s) h += ' › <b>' + esc(s.n) + '</b>'; }
-      else if (state.showAll && subs.length > 1) h += ' › <b>모두</b>';
+    function crumbs(ask) {
+      var h = '<p class="iv-list__count iv-crumbs">';
+      h += state.path.length ? '<button type="button" class="iv-link" data-crumb="0">분류별로</button>' : '<b>분류별로 고르기</b>';
+      state.path.forEach(function (v, i) {
+        var last = i === state.path.length - 1 && !state.showAll;
+        h += ' › ' + (last ? '<b>' + esc(nodeName(v)) + '</b>' : '<button type="button" class="iv-link" data-crumb="' + (i + 1) + '">' + esc(nodeName(v)) + '</button>');
+      });
+      if (state.showAll) h += ' › <b>모두</b>';
+      if (ask) h += ' — ' + esc(ask);
       return h + '</p>';
     }
 
@@ -815,16 +811,11 @@
     function nudgeTeam() { if (nudged) return; nudged = true; toast('담았습니다. 신청 전에 우리 팀을 골라 주세요'); $('#iv-teambtn').classList.add('is-pulse'); }
     var favBusy = false;
     list.addEventListener('click', function (e) {
-      var tg = e.target.closest('[data-tile-group]');
-      if (tg) { state.chip = 'g' + tg.dataset.tileGroup; state.sub = ''; state.showAll = false; state.shown = PAGE; store.set('md_inv_chip_v1', state.chip); renderChips(); render(); list.scrollIntoView({ block: 'start' }); return; }
-      var ts = e.target.closest('[data-tile-sub]');
-      if (ts) { state.sub = ts.dataset.tileSub; state.showAll = false; state.shown = PAGE; renderChips(); render(); list.scrollIntoView({ block: 'start' }); return; }
-      if (e.target.closest('[data-tile-all]')) { state.sub = ''; state.showAll = true; state.shown = PAGE; renderChips(); render(); return; }
+      var tl = e.target.closest('[data-tile]');
+      if (tl) { var v = tl.dataset.tile; state.path = state.path.concat([v === 'none' ? 'none' : Number(v)]); state.showAll = false; state.shown = PAGE; savePath(); renderChips(); render(); list.scrollIntoView({ block: 'start' }); return; }
+      if (e.target.closest('[data-tile-all]')) { state.showAll = true; state.shown = PAGE; renderChips(); render(); return; }
       var cr = e.target.closest('[data-crumb]');
-      if (cr) {
-        if (cr.dataset.crumb === 'browse') { state.chip = 'browse'; store.set('md_inv_chip_v1', 'browse'); }
-        state.sub = ''; state.showAll = false; state.shown = PAGE; renderChips(); render(); return;
-      }
+      if (cr) { state.path = state.path.slice(0, Number(cr.dataset.crumb)); state.showAll = false; state.shown = PAGE; savePath(); renderChips(); render(); return; }
       var sc = e.target.closest('[data-scope]');
       if (sc) { state.all = sc.dataset.scope === 'all'; state.shown = PAGE; renderChips(); render(); return; }
       var fb = e.target.closest('[data-fav]');
@@ -973,9 +964,10 @@
     }
 
     setTeam(state.team, true);
-    state.chip = favList().length ? 'fav' : (recentOf().length ? 'star' : (store.get('md_inv_chip_v1', 'browse') || 'browse'));
-    if (isGroup(state.chip) && !groups[Number(state.chip.slice(1))]) state.chip = 'browse';
-    if (state.chip.charAt(0) === 'g' && !groups[Number(state.chip.slice(1))]) state.chip = 'all';
+    var savedChip = store.get('md_inv_chip_v1', 'browse');
+    state.chip = favList().length ? 'fav' : (savedChip === 'all' ? 'all' : 'browse');
+    /* 지난번에 보던 분류 경로 — 지금도 있는 분류만 */
+    state.path = (store.get('md_inv_path_v1', []) || []).filter(function (v, i, arr) { return i < 3 && (v === 'none' || catName[v]); }).slice(0, 3);
     renderChips(); render(); renderBar(); steps();
     /* 팀을 한 번도 고르지 않은 기기면 먼저 묻는다 */
     if (!state.team && D.teams.length) setTimeout(function () { openDlg('iv-team-dlg'); }, 250);

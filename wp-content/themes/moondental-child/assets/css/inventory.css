@@ -695,3 +695,7 @@ details.iv-panel > summary { cursor: pointer; }
 .iv-crumbs .iv-link { font-weight: 600; }
 @media (max-width: 600px) { .iv-tiles { grid-template-columns: 1fr 1fr; } .iv-tile { min-height: 68px; padding: 12px; } }
 .iv-pricehint { display: block; margin-top: 4px; font-size: .78rem; font-weight: 500; color: var(--iv-sub, #7A6B5F); }
+
+/* v6.5 · 분류별로 고르기 3단계 — 빈 분류 */
+.iv-tile--empty { background: transparent; border-style: dashed; opacity: .7; }
+.iv-tile--empty small { font-style: italic; }
