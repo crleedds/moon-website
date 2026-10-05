@@ -65,6 +65,8 @@
     $$('.iv-catsel', d).forEach(catselInit);
     $$('[data-calc]', d).length && calcInit(d);
     lotSync(d);
+    $$('[data-verify-msg]', d).forEach(function (m) { m.textContent = ''; m.className = 'iv-verify__msg'; });
+    if (form) form.dataset.verifyBad = '';
   }
 
   /* v6.0 · LOT · 차트번호 — 고른 품목이 추적 품목이면 칸을 보이고 남은 LOT 를 목록에 (먼저 들어온 것부터) */
@@ -378,8 +380,114 @@
     if (!$('#iv-scan-dlg')) { var v = window.prompt('바코드 숫자를 입력하세요'); if (v && inp) inp.value = v.trim(); return; }
     var host = b.closest('dialog');
     if (host) closeDlg(host);
-    startScan(function (code) { if (inp) inp.value = code; if (host) openDlg(host.id); });
+    startScan(function (code) {
+      if (inp) {
+        /* LOT 칸에 GS1 바코드(상자의 2D 코드)를 찍으면 LOT 만 꺼내 넣는다 */
+        var g = inp.name === 'lot' ? gs1(code) : null;
+        inp.value = g && g['10'] ? g['10'] : code;
+        if (g && host) verifyShow(host, g, code);
+      }
+      if (host) openDlg(host.id);
+    });
   });
+
+  /* ---------------------------------------------------------
+   * v6.1 · GS1 바코드 읽기 — (01) 제품번호 · (10) LOT · (17) 유효기간 · (21) 일련번호
+   *   2D 코드는 칸 사이를 GS(\x1d) 로 나눈다. 사람이 읽는 (01)…(10)… 꼴도 받는다.
+   * ------------------------------------------------------- */
+  function gs1(raw) {
+    var s = String(raw || '').replace(/^\][A-Za-z]\d/, '').replace(/\u001d$/, '');
+    var out = {}, m;
+    if (/\(\d{2,4}\)/.test(s)) {
+      var re = /\((\d{2,4})\)([^(]*)/g;
+      while ((m = re.exec(s))) out[m[1]] = m[2].replace(/\u001d/g, '').trim();
+      return out['01'] || out['10'] ? out : null;
+    }
+    if (!/^(01|02)\d{14}/.test(s)) return null;
+    var fixed = { '00': 18, '01': 14, '02': 14, '11': 6, '12': 6, '13': 6, '15': 6, '16': 6, '17': 6, '20': 2 };
+    var vari = { '10': 1, '21': 1, '22': 1, '30': 1, '37': 1, '90': 1, '91': 1, '92': 1 };
+    var i = 0, guard = 0;
+    while (i < s.length && guard++ < 20) {
+      if (s.charAt(i) === '\u001d') { i++; continue; }
+      var ai = s.substr(i, 2);
+      if (fixed[ai]) { out[ai] = s.substr(i + 2, fixed[ai]); i += 2 + fixed[ai]; continue; }
+      if (vari[ai]) { var j = s.indexOf('\u001d', i + 2); if (j < 0) j = s.length; out[ai] = s.substring(i + 2, j); i = j; continue; }
+      if (/^24[01]$/.test(s.substr(i, 3))) { var k = s.indexOf('\u001d', i + 3); if (k < 0) k = s.length; out[s.substr(i, 3)] = s.substring(i + 3, k); i = k; continue; }
+      break;
+    }
+    return out['01'] ? out : null;
+  }
+  window.mdInvGs1 = gs1; /* 시험용 */
+  function bcSame(want, code, g) {
+    var w = String(want || '').replace(/\s/g, ''), c = String(code || '').replace(/\s/g, '');
+    if (!w) return null;
+    if (w === c) return true;
+    var gt = g && g['01'] ? g['01'] : '';
+    if (gt) { if (gt === w || gt.slice(1) === w || gt.slice(-13) === w.slice(-13) || gt === ('0' + w)) return true; }
+    if (/^\d+$/.test(c) && /^\d+$/.test(w) && c.length >= 8 && (c.slice(-13) === w.slice(-13))) return true;
+    return false;
+  }
+  var bcMap = null;
+  function dlgItem(d) {
+    var ref = d.querySelector('[name="item_ref"]'), hi = d.querySelector('input[type=hidden][name="item_id"]'), pk = d.querySelector('[data-pick="item_id"]');
+    if (ref && ref.value) return ref.value;
+    if (hi && hi.value) return hi.value;
+    if (pk) { var m = /#(\d+)\s*$/.exec(pk.value || ''); if (m) return m[1]; }
+    return '';
+  }
+  function bcOwner(code, g) {
+    var name = '';
+    Object.keys(bcMap || {}).some(function (k) { if (bcSame(bcMap[k][0], code, g)) { name = bcMap[k][1]; return true; } return false; });
+    return name;
+  }
+  function verifyShow(d, g, code) {
+    var msg = d.querySelector('[data-verify-msg]');
+    if (!msg) return;
+    if (bcMap === null) { var el = document.getElementById('iv-bc-map'); try { bcMap = el ? JSON.parse(el.textContent) : {}; } catch (x) { bcMap = {}; } }
+    var id = dlgItem(d), want = id && bcMap[id] ? bcMap[id][0] : '';
+    var ok = bcSame(want, code, g);
+    var extra = [];
+    if (g && g['10']) {
+      var lot = d.querySelector('[name="lot"]');
+      if (lot && !lot.value) lot.value = g['10'];
+      extra.push('LOT ' + g['10']);
+    }
+    if (g && g['17']) extra.push('유효기간 20' + g['17'].slice(0, 2) + '-' + g['17'].slice(2, 4) + (g['17'].slice(4) !== '00' ? '-' + g['17'].slice(4) : ''));
+    var form = d.querySelector('form');
+    var shown = g && g['01'] ? g['01'] : code;
+    if (ok === null) {
+      /* 이 품목엔 바코드가 등록돼 있지 않다 — 다른 품목 바코드인지라도 본다 */
+      var other = bcOwner(code, g);
+      msg.className = 'iv-verify__msg ' + (other ? 'is-bad' : 'is-warn');
+      msg.textContent = other ? '✕ 다른 품목 바코드입니다: ' + other + ' — 물건을 다시 확인해 주세요.' : '이 품목엔 바코드가 등록돼 있지 않아 확인할 수 없습니다 (찍은 값 ' + shown + ')' + (extra.length ? ' · ' + extra.join(' · ') : '');
+      if (form) form.dataset.verifyBad = other ? '1' : '';
+      return;
+    }
+    if (ok) {
+      msg.className = 'iv-verify__msg is-ok';
+      msg.textContent = '✓ 맞는 품목입니다' + (extra.length ? ' · ' + extra.join(' · ') : '');
+      if (form) form.dataset.verifyBad = '';
+    } else {
+      var name = bcOwner(code, g);
+      msg.className = 'iv-verify__msg is-bad';
+      msg.textContent = '✕ 다른 품목입니다' + (name ? ': ' + name : ' (찍은 값 ' + shown + ')') + ' — 물건을 다시 확인해 주세요.';
+      if (form) form.dataset.verifyBad = '1';
+    }
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-verify]');
+    if (!b) return;
+    e.preventDefault();
+    var host = b.closest('dialog');
+    if (!$('#iv-scan-dlg')) { var v = window.prompt('바코드를 찍거나 숫자를 입력하세요'); if (v && host) verifyShow(host, gs1(v), v.trim()); return; }
+    if (host) closeDlg(host);
+    startScan(function (code) { if (host) { openDlg(host.id); verifyShow(host, gs1(code), code); } });
+  });
+  /* 다른 품목으로 확인된 채 처리하려 하면 한 번 더 묻는다 */
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (f && f.dataset && f.dataset.verifyBad === '1' && !window.confirm('바코드가 다른 품목으로 확인됐습니다. 그래도 처리할까요?')) { e.preventDefault(); e.stopImmediatePropagation(); }
+  }, true);
 
   /* ---------------------------------------------------------
    * 품목신청 화면

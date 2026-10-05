@@ -29,12 +29,13 @@ function md_inv_dlg_close( $button = '저장', $cls = 'primary' ) {
 /** 화면에서 쓰는 대화상자들 — 한 번만 */
 function md_inv_admin_dialogs( $which ) {
 	$which = array_flip( $which );
-	if ( array_intersect_key( $which, array_flip( array( 'release', 'receive', 'in', 'out' ) ) ) ) { md_inv_track_map_script(); }
+	if ( array_intersect_key( $which, array_flip( array( 'release', 'receive', 'in', 'out' ) ) ) ) { md_inv_track_map_script(); md_inv_bc_map_script(); md_inv_scan_dialog(); }
 	if ( isset( $which['release'] ) ) {
 		md_inv_dlg_open( 'dlg-release', '출고', 'req_release' );
 		echo '<label class="iv-f"><span>내줄 수량</span><input class="iv-input" type="number" inputmode="numeric" name="qty" min="1" required></label>';
 		echo '<label class="iv-f"><span>받은 사람' . ( md_inv_set( 'out_need_receiver' ) ? ' <em>*</em>' : '' ) . '</span><input class="iv-input" name="receiver" maxlength="40" placeholder="실제로 받아 간 사람"' . ( md_inv_set( 'out_need_receiver' ) ? ' required' : '' ) . '></label>';
-		echo '<input type="hidden" name="track_item" value="" data-fill>';
+		echo '<input type="hidden" name="track_item" value="" data-fill><input type="hidden" name="item_ref" value="" data-fill>';
+		md_inv_verify_fields();
 		md_inv_lot_fields( 'out' );
 		echo '<p class="iv-help" data-t="hint"></p>';
 		echo '<label class="iv-f"><span>메모 (요청한 팀에 보임)</span><input class="iv-input" name="note" maxlength="300"></label>';
@@ -82,7 +83,8 @@ function md_inv_admin_dialogs( $which ) {
 		md_inv_dlg_open( 'dlg-receive', '입고', 'ord_receive' );
 		echo '<div class="iv-grid2"><label class="iv-f"><span>들어온 수량 <em>*</em></span><input class="iv-input" type="number" inputmode="numeric" name="qty" min="1" required></label>';
 		echo '<label class="iv-f"><span>단가 (원)</span><input class="iv-input" name="price" inputmode="numeric"></label></div>';
-		echo '<input type="hidden" name="track_item" value="" data-fill>';
+		echo '<input type="hidden" name="track_item" value="" data-fill><input type="hidden" name="item_ref" value="" data-fill>';
+		md_inv_verify_fields();
 		md_inv_lot_fields( 'in' );
 		echo '<label class="iv-check"><input type="checkbox" name="free" value="1"> 무상 제공 (선납 잔액에서 빼지 않음 · 사유를 메모에)</label>';
 		echo '<label class="iv-check"><input type="checkbox" name="close" value="1"> 덜 왔지만 이 주문은 여기서 마감</label>';
@@ -123,6 +125,7 @@ function md_inv_admin_dialogs( $which ) {
 		echo '<div class="iv-grid2"><label class="iv-f"><span>수량 <em>*</em></span><input class="iv-input" type="number" inputmode="numeric" name="qty" min="1" required></label>';
 		echo '<label class="iv-f"><span>팀 <em>*</em></span>'; md_inv_team_select( 'team_id', 0, true ); echo '</label></div>';
 		echo '<label class="iv-f"><span>받은 사람' . ( md_inv_set( 'out_need_receiver' ) ? ' <em>*</em>' : '' ) . '</span><input class="iv-input" name="receiver" maxlength="40"' . ( md_inv_set( 'out_need_receiver' ) ? ' required' : '' ) . '></label>';
+		md_inv_verify_fields();
 		md_inv_lot_fields( 'out' );
 		echo '<label class="iv-f"><span>메모</span><input class="iv-input" name="note" maxlength="300"></label>';
 		md_inv_dlg_close( '출고' );
@@ -216,6 +219,7 @@ function md_inv_req_actions( $r ) {
 		$stock = (int) $r->stock;
 		$need_rcv = (bool) md_inv_set( 'out_need_receiver' ) || (int) $r->track_lot; /* v6.0 · LOT 추적 품목은 차트번호를 받으려고 창으로 */
 		$base['track_item'] = (int) $r->track_lot ? (int) $r->item_id : '';
+		$base['item_ref']   = (int) $r->item_id;
 		if ( $need_rcv && ( $stock > 0 || md_inv_set( 'out_allow_negative' ) ) ) {
 			$q1 = ( $stock >= $r->qty || md_inv_set( 'out_allow_negative' ) ) ? $r->qty : $stock;
 			echo '<button type="button" class="iv-btn iv-btn--primary iv-btn--sm" data-dlg="dlg-release" data-set="' . esc_attr( wp_json_encode( array_merge( $base, array( 'qty' => $q1, 'qty@max' => $r->qty, 'receiver' => $r->requester, 'hint' => $q1 < $r->qty ? '재고가 ' . $stock . '개라 있는 만큼 먼저 내주고, 남은 ' . ( $r->qty - $q1 ) . '개는 대기로 남깁니다.' : '' ) ) ) ) . '">' . ( $q1 < $r->qty ? '있는 만큼 ' . (int) $q1 . '개 출고' : (int) $r->qty . '개 출고' ) . '</button>';
@@ -376,7 +380,7 @@ function md_inv_order_cards( $ords ) {
 		echo '</div>';
 		if ( 'ordered' === $o->status ) {
 			echo '<div class="iv-actions">';
-			echo '<button type="button" class="iv-btn iv-btn--primary iv-btn--sm" data-dlg="dlg-receive" data-set="' . esc_attr( wp_json_encode( array( 'id' => (int) $o->id, 'what' => $what, 'qty' => $left, 'price' => (int) $o->price, 'track_item' => (int) $o->track_lot ? (int) $o->item_id : '', 'hint' => '남은 수량 ' . $left . '개' . ( $v && $v->prepaid ? ' · 선납 업체 — 입고 금액이 선납 잔액에서 빠집니다' : '' ) ) ) ) . '">입고</button>';
+			echo '<button type="button" class="iv-btn iv-btn--primary iv-btn--sm" data-dlg="dlg-receive" data-set="' . esc_attr( wp_json_encode( array( 'id' => (int) $o->id, 'what' => $what, 'qty' => $left, 'price' => (int) $o->price, 'track_item' => (int) $o->track_lot ? (int) $o->item_id : '', 'item_ref' => (int) $o->item_id, 'hint' => '남은 수량 ' . $left . '개' . ( $v && $v->prepaid ? ' · 선납 업체 — 입고 금액이 선납 잔액에서 빠집니다' : '' ) ) ) ) . '">입고</button>';
 			echo '<button type="button" class="iv-btn iv-btn--ghost iv-btn--sm" data-dlg="dlg-ordedit" data-set="' . esc_attr( wp_json_encode( array( 'id' => (int) $o->id, 'what' => $what, 'qty' => (int) $o->qty, 'price' => (int) $o->price, 'amount' => (int) $o->amount, 'note' => $o->note ) ) ) . '">고치기</button>';
 			echo '<button type="button" class="iv-btn iv-btn--ghost iv-btn--sm" data-dlg="dlg-ordcancel" data-set="' . esc_attr( wp_json_encode( array( 'id' => (int) $o->id, 'what' => $what ) ) ) . '">취소</button>';
 			echo '</div>';
@@ -722,7 +726,7 @@ function md_inv_view_prepaid() {
 		<h2 class="iv-h2"><?php echo esc_html( $p->vendor->name ); ?></h2>
 		<div class="iv-toolbar iv-toolbar--actions">
 			<button type="button" class="iv-btn iv-btn--primary" data-dlg="dlg-dep" data-set="<?php echo esc_attr( wp_json_encode( array( 'vendor_id' => $vid, 'what' => $p->vendor->name, 'bhint' => (float) $p->vendor->pp_bonus > 0 ? '이 업체 기본 적립률 ' . rtrim( rtrim( number_format( (float) $p->vendor->pp_bonus, 2 ), '0' ), '.' ) . '% — 비우면 입금액 × ' . ( 1 + (float) $p->vendor->pp_bonus / 100 ) . '로 계산합니다.' : '적립이 없으면 비워 두세요 (= 입금액). 기본 적립률은 설정 › 업체에서 정합니다.' ) ) ); ?>">입금 기록</button>
-			<a class="iv-btn iv-btn--ghost" href="#iv-passbook">통장식 내역</a><a class="iv-btn iv-btn--ghost" href="#iv-recon">잔액 대조</a>
+			<a class="iv-btn iv-btn--ghost" href="#iv-passbook">통장식 내역</a><a class="iv-btn iv-btn--ghost" href="#iv-recon">잔액 대조</a><a class="iv-btn iv-btn--ghost" href="#iv-stmt">명세서 대조</a><a class="iv-btn iv-btn--ghost" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'pricelist', 'ivd' => $vid ) ) ); ?>">단가표 올리기</a>
 		</div>
 		<?php $zero = md_inv_prepaid_zero_items( $vid ); if ( $zero ) : ?><p class="iv-help iv-danger">단가 0원 품목 <?php echo count( $zero ); ?>개: <?php echo esc_html( implode( ', ', array_map( function ( $z ) { return $z->name; }, $zero ) ) ); ?></p><?php endif; ?>
 		<h3 class="iv-h3">입금 내역</h3>
@@ -737,6 +741,7 @@ function md_inv_view_prepaid() {
 		<?php if ( $ords ) : ?><h3 class="iv-h3">주문 중</h3><?php md_inv_order_cards( $ords ); endif; ?>
 		<?php md_inv_prepaid_passbook_section( $vid ); ?>
 		<?php md_inv_prepaid_recon_section( $vid ); ?>
+		<?php md_inv_prepaid_statement_section( $vid ); ?>
 		<?php md_inv_prepaid_lot_section( $vid ); ?>
 		<details class="iv-panel"><summary class="iv-h3">입고 · 반품 기록 (반품 · 취소는 여기서)</summary>
 		<?php md_inv_ledger_table( $led ); ?>

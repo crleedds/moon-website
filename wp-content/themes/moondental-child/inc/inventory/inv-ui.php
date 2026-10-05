@@ -29,6 +29,7 @@ function md_inv_views() {
 		'barcode'  => array( 'label' => '바코드 등록', 'icon' => 'scan', 'admin' => true, 'hidden' => true ),
 		'fix'      => array( 'label' => '정리할 품목', 'icon' => 'edit', 'admin' => true, 'hidden' => true ),
 		'lot'      => array( 'label' => 'LOT · 차트번호 찾기', 'icon' => 'scan', 'admin' => true, 'hidden' => true ),
+		'pricelist' => array( 'label' => '업체 단가표 올리기', 'icon' => 'edit', 'admin' => true, 'hidden' => true ),
 		'pick'     => array( 'label' => '출고 준비 목록', 'icon' => 'list', 'admin' => true, 'hidden' => true ),
 		'po'       => array( 'label' => '업체별 발주서', 'icon' => 'truck', 'admin' => true, 'hidden' => true ),
 		'receive'  => array( 'label' => '바코드 입고', 'icon' => 'scan', 'admin' => true, 'hidden' => true ),
@@ -256,7 +257,7 @@ function md_inv_render() {
 		if ( 'orders' === $k ) { $badge = $c['ordered']; }
 		$items[ $k ] = array( 'label' => $v['label'], 'icon' => $v['icon'], 'badge' => $badge );
 	}
-	$parent = array( 'item' => 'stock', 'count' => 'stock', 'qcount' => 'stock', 'barcode' => 'stock', 'fix' => 'stock', 'pick' => 'todo', 'po' => 'orders', 'receive' => 'todo', 'settle' => 'orders', 'lot' => 'prepaid' );
+	$parent = array( 'item' => 'stock', 'count' => 'stock', 'qcount' => 'stock', 'barcode' => 'stock', 'fix' => 'stock', 'pick' => 'todo', 'po' => 'orders', 'receive' => 'todo', 'settle' => 'orders', 'lot' => 'prepaid', 'pricelist' => 'prepaid' );
 	$on = isset( $parent[ $view ] ) ? $parent[ $view ] : $view;
 	echo '<nav class="iv-nav" aria-label="재료실 메뉴">';
 	foreach ( $items as $k => $v ) {
@@ -318,6 +319,7 @@ function md_inv_render() {
 		case 'orders':   md_inv_view_orders(); break;
 		case 'prepaid':  md_inv_view_prepaid(); break;
 		case 'lot':      md_inv_view_lot(); break;
+		case 'pricelist': md_inv_view_pricelist(); break;
 		case 'ledger':   md_inv_view_ledger(); break;
 		case 'stats':    md_inv_view_stats(); break;
 		case 'settings': md_inv_view_settings(); break;

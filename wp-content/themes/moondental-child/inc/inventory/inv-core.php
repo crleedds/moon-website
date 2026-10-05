@@ -41,6 +41,7 @@ function md_inv_setting_defaults() {
 		'min_cover_weeks'     => 4,   // 안전재고 제안: 몇 주 쓸 만큼
 		'out_need_receiver'   => 1,   // 출고할 때 받은 사람 확인 (신청자 이름이 미리 채워짐)
 		'price_follow_in'     => 1,   // 입고 단가가 다르면 품목 단가도 따라 바꿈
+		'notify_staff'        => 1,   // v6.1 · 개인 계정 신청이 처리되면 이메일
 		'notify_new'          => 0,   // 새 요청 메일
 		'notify_to'           => '',
 		'report_on'           => 1,   // 정기 엑셀 보고서 메일
@@ -1045,6 +1046,7 @@ function md_inv_req_release( $id, $qty_out, $split = true, $note = '', $receiver
 	md_inv_commit();
 	md_inv_unlock();
 	md_inv_log( '출고', $req->name . ' ' . $qty_out . ( $qty_out < $req->qty ? '/' . $req->qty : '' ) . ' · ' . md_inv_team_name( $req->team_id ) . ' · ' . $req->requester . ( '' !== $receiver ? ' · 받음 ' . $receiver : '' ) );
+	if ( function_exists( 'md_inv_notify_req' ) ) { md_inv_notify_req( $req->id, 'done', array( 'qty' => $qty_out, 'receiver' => $receiver, 'note' => trim( $note ) ) ); }
 	return array( 'ledger' => $lid, 'rest' => $rest_id );
 }
 
@@ -1059,6 +1061,7 @@ function md_inv_req_complete_custom( $id, $note = '' ) {
 	) );
 	if ( ! $n ) { return new WP_Error( 'race', '방금 처리된 요청입니다.' ); }
 	md_inv_log( '처리 완료', $req->name . ' · ' . md_inv_team_name( $req->team_id ) );
+	if ( function_exists( 'md_inv_notify_req' ) ) { md_inv_notify_req( $req->id, 'completed', array( 'note' => trim( $note ) ) ); }
 	return true;
 }
 
@@ -1074,6 +1077,7 @@ function md_inv_req_reject( $id, $reason ) {
 	) );
 	if ( ! $n ) { return new WP_Error( 'race', '이미 처리된 요청입니다.' ); }
 	md_inv_log( '반려', $req->name . ' · ' . md_inv_team_name( $req->team_id ) . ' · ' . $reason );
+	if ( function_exists( 'md_inv_notify_req' ) ) { md_inv_notify_req( $req->id, 'rejected', array( 'reason' => $reason ) ); }
 	return true;
 }
 
@@ -1089,6 +1093,7 @@ function md_inv_req_cancel( $id ) {
 	) );
 	if ( ! $n ) { return new WP_Error( 'race', '이미 처리된 요청은 취소할 수 없습니다 — ' . md_inv_req_status_label( $req->status ) ); }
 	md_inv_log( '요청 취소', $req->name . ' · ' . md_inv_team_name( $req->team_id ) );
+	if ( md_inv_is_admin() && function_exists( 'md_inv_notify_req' ) ) { md_inv_notify_req( $req->id, 'cancelled' ); } /* 본인이 취소한 건 알릴 것 없음 */
 	return true;
 }
 
@@ -1164,6 +1169,7 @@ function md_inv_ord_create( $item_id, $qty, $d = array() ) {
 	if ( ! $ok ) { return new WP_Error( 'db', '주문을 저장하지 못했습니다.' ); }
 	$id = (int) $wpdb->insert_id;
 	md_inv_log( '주문', $it->name . ' ' . $qty . ' · ' . md_inv_vendor_name( $it->vendor_id ) . ' · ' . md_inv_won( $amount ) );
+	if ( $req_id && function_exists( 'md_inv_notify_req' ) ) { md_inv_notify_req( $req_id, 'ordered' ); }
 	return $id;
 }
 

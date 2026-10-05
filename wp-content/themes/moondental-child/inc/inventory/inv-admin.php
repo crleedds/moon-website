@@ -307,29 +307,51 @@ function md_inv_account_delete( $user_id ) {
 
 
 /* ============================================================
- * 시험 계정 moondentaltesting (2026-10-04 원장 지시 — v5.7 운영 재시험용)
- *   재료실 관리자 역할(md_stock_manager) · 워드프레스 관리 권한 없음.
- *   비밀번호는 저장소에 없다 — 해시만 둔다. 시험이 끝나면 MODE 를 'remove' 로 바꿔 지운다.
+ * 시험 계정 moondentaltesting (2026-10-05 원장 지시 — v6.1 운영 재시험)
+ *   직원 + 「재료실 관리」 권한 · 워드프레스 관리 권한 없음 · 이메일 없음(알림 메일이 나가지 않게).
+ *   비밀번호는 저장소에 없다 — 해시만 둔다.
+ *   create  → 계정을 만든다
+ *   restore → 「운영 시험 전」 백업으로 한 번 되돌린다 (백업 뒤 시험 계정 말고 다른 사람 기록이 있으면 되돌리지 않는다)
+ *            되돌리기는 원장만 할 수 있어 시험 계정이 직접 못 하므로 서버가 한 번만 한다.
+ *   remove  → 계정을 지운다
  * ============================================================ */
-define( 'MD_INV_TESTACCT_MODE', 'remove' ); // 2026-10-04 운영 재시험 보류 — 계정 삭제
+define( 'MD_INV_TESTACCT_MODE', 'create' );
 function md_inv_test_account() {
 	$login = 'moondentaltesting';
+	$u     = get_user_by( 'login', $login );
 	if ( 'remove' === MD_INV_TESTACCT_MODE ) {
-		$u = get_user_by( 'login', $login );
 		if ( $u && ! user_can( $u, 'manage_options' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/user.php';
 			wp_delete_user( $u->ID );
 		}
-		delete_option( 'md_inv_testacct_v57' );
+		delete_option( 'md_inv_testacct_v61' );
 		return;
 	}
-	if ( get_option( 'md_inv_testacct_v57' ) || username_exists( $login ) ) { return; }
+	if ( 'restore' === MD_INV_TESTACCT_MODE ) {
+		if ( ! $u || get_option( 'md_inv_testacct_v61_restored' ) || ! function_exists( 'md_inv_backup_restore' ) ) { return; }
+		if ( ! add_option( 'md_inv_testacct_v61_restored', 'working ' . current_time( 'mysql' ), '', 'no' ) ) { return; } /* 한 번만 */
+		global $wpdb;
+		$bk = $wpdb->get_row( "SELECT id, note, created_at FROM " . md_inv_t( 'backup' ) . " WHERE note LIKE '운영 시험 전 %' ORDER BY id DESC LIMIT 1" );
+		if ( ! $bk ) { update_option( 'md_inv_testacct_v61_restored', 'no backup' ); return; }
+		$others = (int) $wpdb->get_var( $wpdb->prepare(
+			'SELECT COUNT(*) FROM ' . md_inv_t( 'log' ) . " WHERE created_at >= %s AND user_id <> %d AND action NOT IN ('백업', '보고서 메일', '엑셀 내려받기', '백업 내려받기')",
+			$bk->created_at, (int) $u->ID ) );
+		if ( $others ) { update_option( 'md_inv_testacct_v61_restored', 'skipped: ' . $others . ' other entries' ); md_inv_log( '시험 되돌리기 건너뜀', '시험 중 다른 사람 기록 ' . $others . '건' ); return; }
+		$d = md_inv_backup_parse( md_inv_backup_blob( (int) $bk->id ) );
+		if ( is_wp_error( $d ) ) { update_option( 'md_inv_testacct_v61_restored', 'parse error' ); return; }
+		$n = md_inv_backup_restore( $d );
+		update_option( 'md_inv_testacct_v61_restored', is_wp_error( $n ) ? 'error: ' . $n->get_error_message() : 'ok ' . (int) $n . ' rows from #' . $bk->id );
+		return;
+	}
+	if ( get_option( 'md_inv_testacct_v61' ) || $u ) { return; }
 	if ( function_exists( 'md_sup_add_roles' ) ) { md_sup_add_roles(); }
-	$id = wp_insert_user( array( 'user_login' => $login, 'user_pass' => wp_generate_password( 32 ), 'display_name' => '시험 계정', 'role' => 'md_stock_manager', 'show_admin_bar_front' => 'false' ) );
+	$id = wp_insert_user( array( 'user_login' => $login, 'user_pass' => wp_generate_password( 32 ), 'display_name' => '시험계정', 'role' => 'md_stock_staff', 'show_admin_bar_front' => 'false' ) );
 	if ( is_wp_error( $id ) ) { return; }
 	global $wpdb;
-	$wpdb->update( $wpdb->users, array( 'user_pass' => '$P$B3ytRA6xYUVGheRCF8YSaq6uhLthqI.' ), array( 'ID' => (int) $id ) );
+	$wpdb->update( $wpdb->users, array( 'user_pass' => '$P$B2CVq4VaHu0uvmsDWYXhrP7f5amEV11' ), array( 'ID' => (int) $id ) );
 	clean_user_cache( $id );
-	update_option( 'md_inv_testacct_v57', current_time( 'mysql' ), false );
+	get_userdata( $id )->add_cap( 'md_inv_manage' );
+	delete_option( 'md_inv_testacct_v61_restored' );
+	update_option( 'md_inv_testacct_v61', current_time( 'mysql' ), false );
 }
 add_action( 'init', 'md_inv_test_account', 20 );

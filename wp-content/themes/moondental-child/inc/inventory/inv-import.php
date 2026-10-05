@@ -92,7 +92,16 @@ function md_inv_xlsx_read( $path ) {
 				$k   = $c->children( $ns );
 				$v   = isset( $k->v ) ? (string) $k->v : '';
 				if ( 's' === $t ) { $v = isset( $shared[ (int) $v ] ) ? $shared[ (int) $v ] : ''; }
-				elseif ( 'inlineStr' === $t ) { $v = (string) $k->is->children( $ns )->t; }
+				elseif ( 'inlineStr' === $t ) {
+					/* 글자를 칸 안에 바로 넣은 파일(다른 프로그램이 만든 엑셀) — 서식이 섞인 글자(r)도 이어 붙인다 */
+					$v = '';
+					$is = $c->children( $ns )->is;
+					if ( $is && $is->count() ) {
+						$ik = $is->children( $ns );
+						if ( isset( $ik->t ) ) { $v = (string) $ik->t; }
+						foreach ( $ik->r as $run ) { $v .= (string) $run->children( $ns )->t; }
+					}
+				}
 				elseif ( 'b' === $t ) { $v = '1' === $v ? 'TRUE' : 'FALSE'; }
 				$cells[ $col ] = $v;
 			}

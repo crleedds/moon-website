@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /** 직원(공용 계정)도 할 수 있는 일 */
 function md_inv_staff_actions() {
-	return array( 'req_send', 'req_cancel', 'fav_toggle' );
+	return array( 'req_send', 'req_cancel', 'fav_toggle', 'mail_pref' );
 }
 
 /** 결과 문구를 한 번만 보이게 넘긴다 */

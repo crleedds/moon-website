@@ -252,4 +252,5 @@ function md_inv_view_mine() {
 		<?php endforeach; ?>
 	</div>
 	<?php
+	if ( function_exists( 'md_inv_mail_pref_box' ) ) { md_inv_mail_pref_box(); } /* v6.1 · 처리 알림 메일 켜고 끄기 */
 }

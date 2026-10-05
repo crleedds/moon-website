@@ -313,7 +313,7 @@ function md_inv_prepaid_warnings( $sum ) {
 		$names = array_map( function ( $z ) { return $z->name; }, array_slice( $zero, 0, 6 ) );
 		echo '<div class="iv-flash iv-flash--warn iv-ppwarn" id="iv-ppzero"><b>단가 없는 선납 품목 ' . count( $zero ) . '개</b> — 입고해도 잔액에서 빠지지 않아 입고를 막아 두었습니다. 단가를 넣어 주세요: '
 			. esc_html( implode( ', ', $names ) . ( count( $zero ) > 6 ? ' 외 ' . ( count( $zero ) - 6 ) . '개' : '' ) )
-			. ' <a class="iv-link" href="' . esc_url( md_inv_url( array( 'iv' => 'fix', 'ik' => 'noprice', 'ivd' => (int) $zero[0]->vendor_id ) ) ) . '">단가 넣으러 가기 →</a></div>';
+			. ' <a class="iv-link" href="' . esc_url( md_inv_url( array( 'iv' => 'pricelist', 'ivd' => (int) $zero[0]->vendor_id ) ) ) . '">업체 단가표(엑셀)로 한 번에 →</a> · <a class="iv-link" href="' . esc_url( md_inv_url( array( 'iv' => 'fix', 'ik' => 'noprice', 'ivd' => (int) $zero[0]->vendor_id ) ) ) . '">하나씩 넣기 →</a></div>';
 	}
 	foreach ( $sum as $p ) {
 		if ( ! $p->alert ) { continue; }

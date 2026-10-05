@@ -643,3 +643,23 @@ tr.iv-recon--diff td { background: rgba(198,107,94,.07); }
 details.iv-panel > summary { cursor: pointer; }
 @media (max-width: 600px) { .iv-recon-form .iv-f { flex: 1 1 100%; } }
 .iv-table--pb td[data-l="날짜"], .iv-table--lot td[data-l="일시"] { white-space: nowrap; }
+
+/* v6.1 · 바코드 확인 · 단가표 · 명세서 대조 · 알림 */
+.iv-verify { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 2px 0 8px; }
+.iv-verify__msg { font-size: .86rem; font-weight: 600; line-height: 1.5; }
+.iv-verify__msg.is-ok { color: var(--iv-ok, #4F7A55); }
+.iv-verify__msg.is-bad { color: var(--iv-danger, #C66B5E); }
+.iv-verify__msg.is-warn { color: #9A6B1E; }
+.iv-pl-form fieldset { border: 0; padding: 0; margin: 8px 0; }
+.iv-table--pl select { max-width: 100%; }
+.iv-pl--s1 td { color: var(--iv-sub, #7A6B5F); }
+.iv-pl--s2 td[data-l="우리 품목"] select { border-color: #D9A441; }
+.iv-pl-key b { margin: 0 4px; padding: 1px 6px; border-radius: 6px; font-size: .78rem; }
+.iv-pl-s3 { background: rgba(143,174,146,.2); } .iv-pl-s2 { background: rgba(217,164,65,.2); } .iv-pl-s1 { background: rgba(122,107,95,.15); }
+.iv-stmt-sum { font-size: .92rem; }
+.iv-stmt { margin: 4px 0 12px 18px; padding: 0; font-size: .86rem; line-height: 1.6; }
+.iv-stmt li { margin-bottom: 4px; }
+.iv-stmt em { color: var(--iv-danger, #C66B5E); font-style: normal; font-weight: 600; }
+.iv-stmt--ok em { color: #9A6B1E; }
+.iv-h4 { margin: 12px 0 4px; font-size: .95rem; }
+.iv-mailpref { margin: 16px 0 4px; padding: 10px 12px; border-radius: 10px; background: var(--iv-soft, #FBF2E8); font-size: .9rem; }
