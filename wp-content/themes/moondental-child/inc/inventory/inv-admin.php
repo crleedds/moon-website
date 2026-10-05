@@ -315,7 +315,7 @@ function md_inv_account_delete( $user_id ) {
  *            되돌리기는 원장만 할 수 있어 시험 계정이 직접 못 하므로 서버가 한 번만 한다.
  *   remove  → 계정을 지운다
  * ============================================================ */
-define( 'MD_INV_TESTACCT_MODE', 'restore' );
+define( 'MD_INV_TESTACCT_MODE', 'remove' ); // 2026-10-05 운영 재시험 끝 · 되돌림 확인 — 계정 삭제
 function md_inv_test_account() {
 	$login = 'moondentaltesting';
 	$u     = get_user_by( 'login', $login );
