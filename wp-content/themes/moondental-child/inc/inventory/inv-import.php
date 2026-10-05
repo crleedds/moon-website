@@ -436,6 +436,7 @@ function md_inv_import_appsheet( $files, $opt = array() ) {
 	md_inv_unlock();
 	update_option( 'md_inv_imported', current_time( 'mysql' ), false );
 	if ( function_exists( 'md_inv_deposit_fix_credit' ) ) { md_inv_deposit_fix_credit(); } /* v6.0 · 쓸 수 있는 금액 = 입금액 */
+	if ( function_exists( 'md_inv_money_fix' ) ) { md_inv_money_fix(); } /* v6.5 · 입고 금액 = 수량 × 단가 */
 	md_inv_log( 'AppSheet 가져오기', '품목 ' . count( $items ) . ' · 업체 ' . count( $vends ) . ' · 원장 ' . $lines . '줄' . ( $opt['history'] ? ' (기록 포함)' : '' ) );
 	$summary['ledger'] = $lines;
 	return $summary;

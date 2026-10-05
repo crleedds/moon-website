@@ -131,6 +131,7 @@ function md_inv_backup_restore( $d ) {
 	md_inv_commit();
 	md_inv_unlock();
 	if ( function_exists( 'md_inv_deposit_fix_credit' ) ) { md_inv_deposit_fix_credit(); } /* v6.0 전 백업 — 쓸 수 있는 금액 칸이 없다 */
+	if ( function_exists( 'md_inv_money_fix' ) ) { md_inv_money_fix(); } /* v6.5 전 백업 — 입고 금액 칸이 없다 */
 	if ( ! empty( $d['settings'] ) && is_array( $d['settings'] ) ) {
 		update_option( 'md_inv_settings', wp_parse_args( $d['settings'], md_inv_setting_defaults() ), false );
 	}

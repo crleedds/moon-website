@@ -369,7 +369,7 @@ function md_inv_view_po() {
 		$v    = md_inv_vendor( $vid );
 		$ord  = isset( $g['ord'] ) ? $g['ord'] : array();
 		$nd   = isset( $g['need'] ) ? $g['need'] : array();
-		$sum  = 0; foreach ( $ord as $o ) { $sum += (int) $o->amount * max( 0, (int) $o->qty - (int) $o->recv_qty ) / max( 1, (int) $o->qty ); }
+		$sum  = 0; foreach ( $ord as $o ) { $sum += md_inv_ord_amount_left( $o ); } /* v6.5 · 주문 합계 − 받은 금액 */
 		?>
 		<section class="iv-po" id="iv-po-<?php echo (int) $vid; ?>">
 			<div class="iv-po__head">
@@ -402,7 +402,7 @@ function md_inv_view_po() {
 					<thead><tr><th>품목</th><th class="r">수량</th><th>단위</th><th class="r">단가</th><th class="r">금액</th><th>주문일</th></tr></thead>
 					<tbody>
 					<?php foreach ( $ord as $o ) : $left = (int) $o->qty - (int) $o->recv_qty; ?>
-						<tr><td data-l="품목"><?php echo esc_html( $o->item_name ); ?><?php echo $o->recv_qty ? ' <small>(' . (int) $o->recv_qty . '개 받음)</small>' : ''; ?></td><td data-l="수량" class="r"><b><?php echo (int) $left; ?></b></td><td data-l="단위"><?php echo esc_html( $o->unit ); ?></td><td data-l="단가" class="r"><?php echo esc_html( md_inv_num( $o->price ) ); ?></td><td data-l="금액" class="r"><?php echo esc_html( md_inv_num( round( (int) $o->amount * $left / max( 1, (int) $o->qty ) ) ) ); ?></td><td data-l="주문일"><?php echo esc_html( md_inv_date( $o->created_at, 'n/j' ) ); ?></td></tr>
+						<tr><td data-l="품목"><?php echo esc_html( $o->item_name ); ?><?php echo $o->recv_qty ? ' <small>(' . (int) $o->recv_qty . '개 받음)</small>' : ''; ?></td><td data-l="수량" class="r"><b><?php echo (int) $left; ?></b></td><td data-l="단위"><?php echo esc_html( $o->unit ); ?></td><td data-l="단가" class="r"><?php echo esc_html( md_inv_num( $o->price ) ); ?></td><td data-l="금액" class="r"><?php echo esc_html( md_inv_num( md_inv_ord_amount_left( $o ) ) ); ?></td><td data-l="주문일"><?php echo esc_html( md_inv_date( $o->created_at, 'n/j' ) ); ?></td></tr>
 					<?php endforeach; ?>
 					</tbody>
 					<tfoot><tr><td colspan="4" class="r"><b>합계</b></td><td class="r"><b><?php echo esc_html( md_inv_num( round( $sum ) ) ); ?></b></td><td></td></tr></tfoot>

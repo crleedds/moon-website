@@ -263,7 +263,8 @@ function md_inv_mtxt( $v, $max = 2000 ) {
 
 /** 정수 (콤마·원·공백 허용) */
 function md_inv_int( $v ) {
-	$v = preg_replace( '/[^\d\-]/', '', (string) $v );
+	$v = preg_replace( '/\..*$/', '', (string) $v ); /* v6.5 · 「3333.33」 을 333,333 으로 읽던 것 — 소수점 뒤는 버림 (돈 칸은 md_inv_money_in 이 되묻는다) */
+	$v = preg_replace( '/[^\d\-]/', '', $v );
 	if ( '' === $v || '-' === $v ) { return 0; }
 	return (int) $v;
 }
@@ -447,7 +448,7 @@ function md_inv_item_merge( $keep, $drop ) {
 	if ( ! $k || ! $d || (int) $k->id === (int) $d->id ) { return new WP_Error( 'item', '합칠 두 품목을 골라 주세요.' ); }
 	md_inv_lock();
 	md_inv_begin();
-	foreach ( array( 'ledger', 'req', 'ord' ) as $tb ) {
+	foreach ( array( 'ledger', 'req', 'ord', 'adj' ) as $tb ) { /* v6.5 · adj 도 */
 		$wpdb->query( $wpdb->prepare( "UPDATE {$t[$tb]} SET item_id = %d WHERE item_id = %d", (int) $k->id, (int) $d->id ) );
 	}
 	$fill = array();
@@ -538,6 +539,8 @@ function md_inv_item_save( $id, $d ) {
 	global $wpdb;
 	$t   = md_inv_t( 'item' );
 	$id  = (int) $id;
+	$pchk = md_inv_money_in( isset( $d['price'] ) ? $d['price'] : '', '단가' ); /* v6.5 · 소수점 · 글자는 되묻는다 */
+	if ( is_wp_error( $pchk ) ) { return $pchk; }
 	$row = array(
 		'name'      => md_inv_txt( isset( $d['name'] ) ? $d['name'] : '', 255 ),
 		'vendor_id' => (int) ( isset( $d['vendor_id'] ) ? $d['vendor_id'] : 0 ),
@@ -665,9 +668,19 @@ function md_inv_ledger_add( $type, $item_id, $qty, $o = array() ) {
 
 	/* 단가 칸을 비워 두면 품목 단가 (빈 문자열을 0원으로 읽으면 선납 차감·통계가 0이 된다) */
 	$price = ( isset( $o['price'] ) && '' !== trim( (string) $o['price'] ) ) ? max( 0, md_inv_int( $o['price'] ) ) : (int) $it->price;
-	/* v6.0 · 선납 품목을 0원으로 입고하면 잔액이 그대로라 모르고 지나간다 — 막는다 (무상은 체크로) */
-	if ( 'in' === $type && empty( $o['free'] ) && 0 === $price && function_exists( 'md_inv_is_prepaid_vendor' ) && md_inv_is_prepaid_vendor( $it->vendor_id ) ) {
-		return new WP_Error( 'pp_zero', '「' . $it->name . '」은 선납 업체(' . md_inv_vendor_name( $it->vendor_id ) . ') 품목인데 단가가 0원이라 잔액에서 빠지지 않습니다. 단가를 넣거나, 서비스로 받았으면 「무상」을 체크해 주세요.' );
+	/* v6.5 · 금액은 계산하지 않고 그대로 — 입고: 실제로 낸 금액(배송비 포함), 반품 · 교환: 돌려받은 금액 */
+	$free_qty = 0; $amount = 0; $extra = 0;
+	if ( 'in' === $type ) {
+		$free_qty = ! empty( $o['free'] ) ? $qty : ( isset( $o['free_qty'] ) ? min( $qty, max( 0, (int) $o['free_qty'] ) ) : 0 );
+		$goods    = ( $qty - $free_qty ) * $price;
+		$amount   = isset( $o['amount'] ) && null !== $o['amount'] ? max( 0, (int) $o['amount'] ) : $goods;
+		$extra    = $amount - $goods;
+		/* v6.0 · 선납 품목을 0원으로 입고하면 잔액이 그대로라 모르고 지나간다 — 막는다 (무상 수량은 제외) */
+		if ( $qty > $free_qty && 0 === $amount && function_exists( 'md_inv_is_prepaid_vendor' ) && md_inv_is_prepaid_vendor( isset( $o['vendor_id'] ) ? (int) $o['vendor_id'] : $it->vendor_id ) ) {
+			return new WP_Error( 'pp_zero', '「' . $it->name . '」은 선납 업체(' . md_inv_vendor_name( $it->vendor_id ) . ') 품목인데 단가가 0원(낸 금액 0원)이라 잔액에서 빠지지 않습니다. 단가를 넣거나, 서비스로 받았으면 무상 수량에 적어 주세요.' );
+		}
+	} elseif ( 'return' === $type ) {
+		$amount = isset( $o['amount'] ) && null !== $o['amount'] ? max( 0, (int) $o['amount'] ) : ( ! empty( $o['free'] ) ? 0 : $qty * $price );
 	}
 	$lot   = isset( $o['lot'] ) && function_exists( 'md_inv_lot_txt' ) ? md_inv_lot_txt( $o['lot'] ) : '';
 	$chart = isset( $o['chart'] ) && function_exists( 'md_inv_chart_txt' ) ? md_inv_chart_txt( $o['chart'] ) : '';
@@ -677,13 +690,17 @@ function md_inv_ledger_add( $type, $item_id, $qty, $o = array() ) {
 		'type'       => $type,
 		'qty'        => $signed,
 		'price'      => $price,
-		'vendor_id'  => (int) $it->vendor_id,
+		'amount'     => $amount,
+		'extra'      => $extra,
+		'free_qty'   => $free_qty,
+		'money_set'  => 1,
+		'vendor_id'  => isset( $o['vendor_id'] ) && (int) $o['vendor_id'] ? (int) $o['vendor_id'] : (int) $it->vendor_id, /* v6.5 · 반품 · 교환은 원래 입고의 업체로 */
 		'team_id'    => isset( $o['team_id'] ) ? (int) $o['team_id'] : 0,
 		'req_id'     => isset( $o['req_id'] ) ? (int) $o['req_id'] : 0,
 		'ord_id'     => isset( $o['ord_id'] ) ? (int) $o['ord_id'] : 0,
 		'ref_id'     => isset( $o['ref_id'] ) ? (int) $o['ref_id'] : 0,
 		'counted'    => $counted,
-		'free'       => ! empty( $o['free'] ) ? 1 : 0,
+		'free'       => ( 'in' === $type ? ( $qty === $free_qty ) : ( 'return' === $type && 0 === $amount && ! empty( $o['free'] ) ) ) ? 1 : 0,
 		'person'     => mb_substr( isset( $o['person'] ) ? (string) $o['person'] : md_inv_me(), 0, 100 ),
 		'note'       => mb_substr( isset( $o['note'] ) ? (string) $o['note'] : '', 0, 500 ),
 		'receiver'   => mb_substr( isset( $o['receiver'] ) ? md_inv_txt( $o['receiver'], 100 ) : '', 0, 100 ),
@@ -753,7 +770,11 @@ function md_inv_ledger_void( $id, $why = '' ) {
 	/* 이 입고를 근거로 한 반품이 살아 있으면 먼저 그 반품을 취소해야 한다 */
 	if ( 'in' === $l->type ) {
 		$ret = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t['ledger']} WHERE ref_id = %d AND type = 'return' AND voided = 0", $l->id ) );
-		if ( $ret ) { return new WP_Error( 'ret', '이 입고에 연결된 반품 기록이 있습니다. 반품을 먼저 취소해 주세요.' ); }
+		if ( $ret ) { return new WP_Error( 'ret', '이 입고에 연결된 반품 · 교환 기록이 있습니다. 그 기록을 먼저 취소해 주세요.' ); }
+		/* v6.5 · 환불 · 정정이 붙어 있으면 그대로 두고 입고만 취소하면 돈이 남는다 */
+		if ( (int) get_option( 'md_inv_schema', 0 ) >= 4 && (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t['adj']} WHERE ledger_id = %d AND voided = 0", $l->id ) ) ) {
+			return new WP_Error( 'adj', '이 입고에 환불 · 정정 기록이 붙어 있습니다. 그 기록을 먼저 취소해 주세요.' );
+		}
 		/* 취소하면 재고가 음수가 되는가 */
 		if ( ! md_inv_set( 'out_allow_negative' ) && md_inv_stock( $l->item_id ) - (int) $l->qty < 0 ) {
 			return new WP_Error( 'neg', '이 입고를 취소하면 재고가 0 아래로 내려갑니다. 그 사이 출고된 기록을 먼저 확인해 주세요.' );
@@ -772,8 +793,11 @@ function md_inv_ledger_void( $id, $why = '' ) {
 			$wpdb->query( $wpdb->prepare( "UPDATE {$t['req']} SET status = 'pending', qty_out = 0, done_at = NULL, done_by = '' WHERE id = %d AND status = 'done'", $l->req_id ) );
 		}
 	}
-	if ( 'in' === $l->type && (int) $l->ord_id ) {
-		$wpdb->query( $wpdb->prepare( "UPDATE {$t['ord']} SET recv_qty = CASE WHEN recv_qty > %d THEN recv_qty - %d ELSE 0 END, status = 'ordered', received_at = NULL WHERE id = %d AND status <> 'cancelled'", (int) $l->qty, (int) $l->qty, $l->ord_id ) );
+	if ( 'in' === $l->type && (int) $l->ord_id && ! (int) $l->ref_id ) { /* 교환으로 받은 줄(ref_id)은 주문 수량과 상관없다 */
+		/* v6.5 · 주문 입고 수량은 유상 수량만 셌다. 「여기서 마감」(cancel_note 있음)한 주문은 다시 열지 않는다 */
+		$paid = max( 0, (int) $l->qty - (int) $l->free_qty );
+		$wpdb->query( $wpdb->prepare( "UPDATE {$t['ord']} SET recv_qty = CASE WHEN recv_qty > %d THEN recv_qty - %d ELSE 0 END WHERE id = %d AND status <> 'cancelled'", $paid, $paid, $l->ord_id ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE {$t['ord']} SET status = 'ordered', received_at = NULL WHERE id = %d AND status = 'received' AND cancel_note = '' AND recv_qty < qty", $l->ord_id ) );
 	}
 	md_inv_commit();
 	md_inv_unlock();
@@ -793,21 +817,23 @@ function md_inv_returnable( $in_id ) {
 
 /* ---- 재고를 움직이는 일 (관리자) ---------------------------- */
 
-/** 입고 (주문 없이) */
+/**
+ * 입고 (주문 없이) — v6.5 · 무상 수량 · 실제로 낸 금액(배송비 포함)까지 한 줄로 (두 줄로 나누던 덤 방식 대신)
+ * $o: price, free_qty(또는 예전 bonus_qty · free), total(실제로 낸 금액, 비우면 유상 수량 × 단가), note, lot
+ */
 function md_inv_do_in( $item_id, $qty, $o = array() ) {
-	$bonus = isset( $o['bonus_qty'] ) ? max( 0, (int) $o['bonus_qty'] ) : 0;
-	if ( $bonus > (int) $qty ) { return new WP_Error( 'bonus', '덤 수량이 들어온 수량보다 많습니다.' ); }
-	if ( $bonus && ! empty( $o['free'] ) ) { $bonus = 0; } /* 전부 무상이면 나눌 것 없음 */
+	$it = md_inv_item( $item_id );
+	if ( ! $it ) { return new WP_Error( 'item', '품목을 찾을 수 없습니다.' ); }
+	$f = md_inv_receipt_from_post( $qty, $o );
+	if ( is_wp_error( $f ) ) { return $f; }
+	$c = md_inv_receipt_calc( $qty, $f['free'], null === $f['price'] ? (int) $it->price : $f['price'], $f['total'] );
+	if ( is_wp_error( $c ) ) { return $c; }
 	md_inv_lock();
-	if ( $bonus ) {
-		md_inv_in_bonus_split( $item_id, $bonus, $o );
-		if ( $bonus === (int) $qty ) { md_inv_unlock(); $it = md_inv_item( $item_id ); md_inv_log( '입고', $it->name . ' +' . (int) $qty . ' (모두 덤)' ); return true; }
-		$qty = (int) $qty - $bonus;
-	}
-	$r = md_inv_ledger_add( 'in', $item_id, $qty, $o );
-	if ( ! is_wp_error( $r ) && isset( $o['price'] ) && '' !== trim( (string) $o['price'] ) ) { md_inv_price_from_in( $item_id, md_inv_int( $o['price'] ) ); }
+	$r = md_inv_ledger_add( 'in', $item_id, $c['qty'], array_merge( $o, array( 'price' => $c['price'], 'free_qty' => $c['free_qty'], 'free' => 0, 'amount' => $c['total'] ) ) );
 	md_inv_unlock();
-	if ( ! is_wp_error( $r ) ) { $it = md_inv_item( $item_id ); md_inv_log( '입고', $it->name . ' +' . (int) $qty ); }
+	if ( is_wp_error( $r ) ) { return $r; }
+	if ( $c['paid_qty'] > 0 && null !== $f['price'] ) { md_inv_price_from_in( $item_id, $c['price'] ); }
+	md_inv_log( '입고', $it->name . ' +' . $c['qty'] . ( $c['free_qty'] ? ' (무상 ' . $c['free_qty'] . ')' : '' ) . ' · ' . md_inv_won( $c['total'] ) . ( $c['extra'] ? ' (배송비 등 ' . ( $c['extra'] > 0 ? '+' : '−' ) . md_inv_num( abs( $c['extra'] ) ) . ')' : '' ) );
 	return $r;
 }
 
@@ -839,23 +865,35 @@ function md_inv_do_adjust( $item_id, $counted, $note = '' ) {
 	return $r;
 }
 
-/** 반품 (업체로 돌려보냄) — 원 입고 기록 기준 */
-function md_inv_do_return( $in_id, $qty, $note = '', $free = null ) {
+/**
+ * 반품 (업체로 돌려보냄) — 원 입고 기록 기준
+ * v6.5 · 돌려받는 금액 = 그 입고에서 실제로 낸 금액 − 이미 돌려받은 것(환불 · 정정 · 반품)을 남은 수량으로 나눈 몫.
+ *        $amount 를 주면 그 금액(남은 금액 안에서) — 업체가 다르게 돌려준 경우
+ */
+function md_inv_do_return( $in_id, $qty, $note = '', $free = null, $amount = null ) {
 	$l = md_inv_ledger_row( $in_id );
 	if ( ! $l || 'in' !== $l->type || (int) $l->voided ) { return new WP_Error( 'src', '반품할 입고 기록을 찾을 수 없습니다.' ); }
 	if ( '' === trim( (string) $note ) ) { return new WP_Error( 'note', '반품 사유를 적어 주세요.' ); }
 	md_inv_lock();
 	$can   = md_inv_returnable( $in_id );
 	$stock = md_inv_stock( $l->item_id );
+	if ( (int) $qty < 1 ) { md_inv_unlock(); return new WP_Error( 'qty', '반품 수량을 적어 주세요.' ); }
 	if ( (int) $qty > $can ) { md_inv_unlock(); return new WP_Error( 'qty', '이 입고에서 반품할 수 있는 수량은 ' . $can . '개입니다.' ); }
 	if ( (int) $qty > $stock ) { md_inv_unlock(); return new WP_Error( 'stock', '지금 재고가 ' . $stock . '개라 ' . (int) $qty . '개를 반품할 수 없습니다.' ); }
+	$mm  = md_inv_in_money( $l );
+	$def = md_inv_return_value( $l, (int) $qty );
+	if ( true === $free ) { $amt = 0; }
+	elseif ( null !== $amount && '' !== $amount ) {
+		$amt = (int) $amount;
+		if ( $amt < 0 || $amt > max( 0, $mm['net'] ) ) { md_inv_unlock(); return new WP_Error( 'amount', '돌려받는 금액은 0 ~ ' . md_inv_num( max( 0, $mm['net'] ) ) . '원 (이 입고에서 아직 돌려받지 않은 금액) 사이여야 합니다.' ); }
+	} else { $amt = $def; }
 	$r = md_inv_ledger_add( 'return', $l->item_id, $qty, array(
-		'ref_id' => $l->id, 'ord_id' => $l->ord_id, 'price' => $l->price,
-		'free'   => null === $free ? (int) $l->free : ( $free ? 1 : 0 ),
+		'ref_id' => $l->id, 'ord_id' => $l->ord_id, 'price' => $l->price, 'vendor_id' => (int) $l->vendor_id,
+		'amount' => $amt, 'free' => 0 === $amt,
 		'note'   => $note,
 	) );
 	md_inv_unlock();
-	if ( ! is_wp_error( $r ) ) { $it = md_inv_item( $l->item_id ); md_inv_log( '반품', $it->name . ' −' . (int) $qty . ' · ' . $note ); }
+	if ( ! is_wp_error( $r ) ) { $it = md_inv_item( $l->item_id ); md_inv_log( '반품', $it->name . ' −' . (int) $qty . ' · 돌려받음 ' . md_inv_won( $amt ) . ' · ' . $note ); }
 	return $r;
 }
 
@@ -1164,8 +1202,14 @@ function md_inv_ord_create( $item_id, $qty, $d = array() ) {
 	if ( ! $it ) { return new WP_Error( 'item', '품목을 찾을 수 없습니다.' ); }
 	$qty = (int) $qty;
 	if ( $qty < 1 || $qty > 99999 ) { return new WP_Error( 'qty', '주문 수량을 확인해 주세요.' ); }
-	$price  = isset( $d['price'] ) && '' !== (string) $d['price'] ? max( 0, md_inv_int( $d['price'] ) ) : (int) $it->price;
-	$amount = isset( $d['amount'] ) && '' !== (string) $d['amount'] ? max( 0, md_inv_int( $d['amount'] ) ) : $price * $qty;
+	/* v6.5 · 돈 칸은 원 단위 숫자만 (소수점을 지워 100배가 되던 것), 합계는 배송비 · 할인까지 그대로 */
+	$price = md_inv_money_in( isset( $d['price'] ) ? $d['price'] : '', '단가' );
+	if ( is_wp_error( $price ) ) { return $price; }
+	$price  = null === $price ? (int) $it->price : $price;
+	$total  = md_inv_money_in( isset( $d['total'] ) ? $d['total'] : ( isset( $d['amount'] ) ? $d['amount'] : '' ), '주문 합계' );
+	if ( is_wp_error( $total ) ) { return $total; }
+	$amount = null === $total ? $price * $qty : $total;
+	$free_q = isset( $d['free_qty'] ) ? max( 0, (int) $d['free_qty'] ) : 0;
 	$req_id = isset( $d['req_id'] ) ? (int) $d['req_id'] : 0;
 
 	/* 같은 요청으로 이미 주문해 둔 것이 있으면 또 만들지 않는다 (AppSheet 에서 한 요청에 주문 4건이 생긴 일) */
@@ -1176,13 +1220,13 @@ function md_inv_ord_create( $item_id, $qty, $d = array() ) {
 
 	$ok = $wpdb->insert( md_inv_t( 'ord' ), array(
 		'item_id' => (int) $it->id, 'vendor_id' => (int) $it->vendor_id, 'qty' => $qty, 'recv_qty' => 0,
-		'price' => $price, 'amount' => $amount, 'status' => 'ordered', 'req_id' => $req_id,
+		'price' => $price, 'amount' => $amount, 'free_qty' => $free_q, 'extra' => $amount - $price * $qty, 'status' => 'ordered', 'req_id' => $req_id,
 		'note' => md_inv_txt( isset( $d['note'] ) ? $d['note'] : '', 500 ),
 		'person' => md_inv_me(), 'user_id' => get_current_user_id(), 'created_at' => current_time( 'mysql' ),
 	) );
 	if ( ! $ok ) { return new WP_Error( 'db', '주문을 저장하지 못했습니다.' ); }
 	$id = (int) $wpdb->insert_id;
-	md_inv_log( '주문', $it->name . ' ' . $qty . ' · ' . md_inv_vendor_name( $it->vendor_id ) . ' · ' . md_inv_won( $amount ) );
+	md_inv_log( '주문', $it->name . ' ' . $qty . ( $free_q ? ' + 무상 ' . $free_q : '' ) . ' · ' . md_inv_vendor_name( $it->vendor_id ) . ' · ' . md_inv_won( $amount ) . ( $amount !== $price * $qty ? ' (배송비 등 ' . md_inv_num( $amount - $price * $qty ) . ')' : '' ) );
 	if ( $req_id && function_exists( 'md_inv_notify_req' ) ) { md_inv_notify_req( $req_id, 'ordered' ); }
 	return $id;
 }
@@ -1233,7 +1277,8 @@ function md_inv_ords( $a = array(), $count_only = false ) {
 /**
  * 입고 — 주문한 것이 도착했다.
  * 주문 수량보다 적게 오면 주문은 「주문함」으로 남고 남은 수량을 계속 기다린다.
- * 더 이상 오지 않을 거면 $close 로 닫는다.
+ * v6.5 · $qty 는 들어온 총 수량(무상 포함). 주문 입고 수량에는 유상 수량만 더한다.
+ *        $d: free_qty(또는 예전 bonus_qty · free), price, total(실제로 낸 금액 — 비우면 유상 × 단가, 마지막 입고면 주문 합계의 남은 금액), allow_more, close, note, lot
  */
 function md_inv_ord_receive( $id, $qty, $d = array() ) {
 	global $wpdb;
@@ -1243,40 +1288,41 @@ function md_inv_ord_receive( $id, $qty, $d = array() ) {
 	if ( 'ordered' !== $ord->status ) { return new WP_Error( 'done', '이미 ' . md_inv_ord_status_label( $ord->status ) . ' 된 주문입니다.' ); }
 	$qty = (int) $qty;
 	if ( $qty < 1 ) { return new WP_Error( 'qty', '들어온 수량을 적어 주세요.' ); }
-	$left = (int) $ord->qty - (int) $ord->recv_qty;
-	$bonus = isset( $d['bonus_qty'] ) ? max( 0, (int) $d['bonus_qty'] ) : 0;
-	if ( $bonus > $qty ) { return new WP_Error( 'bonus', '덤 수량이 들어온 수량보다 많습니다.' ); }
-	if ( $bonus && $qty - $bonus <= $left ) { $d['allow_more'] = 1; } /* 덤으로 더 온 것은 「주문보다 많이」가 아니다 */
-	if ( $qty > $left && empty( $d['allow_more'] ) ) {
-		return new WP_Error( 'more', '주문한 것보다 많습니다 (남은 수량 ' . $left . '개). 수량을 다시 확인하고, 정말 더 들어왔으면 입고를 한 번 더 눌러 「그대로 입고」를 골라 주세요.' );
+	$f = md_inv_receipt_from_post( $qty, $d );
+	if ( is_wp_error( $f ) ) { return $f; }
+	$price = null === $f['price'] ? (int) $ord->price : $f['price'];
+	$left  = (int) $ord->qty - (int) $ord->recv_qty;
+	$paid  = $qty - min( $qty, max( 0, (int) $f['free'] ) );
+	if ( $paid > $left && empty( $d['allow_more'] ) ) {
+		return new WP_Error( 'more', '주문한 것보다 많습니다 (남은 수량 ' . $left . '개, 이번 유상 ' . $paid . '개). 수량을 다시 확인하고, 정말 더 들어왔으면 입고를 한 번 더 눌러 「그대로 입고」를 골라 주세요.' );
 	}
-	$price = isset( $d['price'] ) && '' !== (string) $d['price'] ? max( 0, md_inv_int( $d['price'] ) ) : (int) $ord->price;
-	$free  = ! empty( $d['free'] );
+	/* 낸 금액을 비우면: 남은 수량이 다 들어오고 단가도 그대로면 주문 합계의 남은 금액(배송비 포함), 아니면 유상 수량 × 단가 */
+	$total = $f['total'];
+	if ( null === $total ) {
+		$recv_amt = md_inv_ord_received_amounts( array( (int) $ord->id ) );
+		$total = ( $paid === $left && $price === (int) $ord->price ) ? max( 0, (int) $ord->amount - ( isset( $recv_amt[ (int) $ord->id ] ) ? $recv_amt[ (int) $ord->id ] : 0 ) ) : $paid * $price;
+	}
+	$c = md_inv_receipt_calc( $qty, $f['free'], $price, $total );
+	if ( is_wp_error( $c ) ) { return $c; }
 
 	md_inv_lock();
 	md_inv_begin();
-	$new_recv = (int) $ord->recv_qty + $qty;
+	$new_recv = (int) $ord->recv_qty + $c['paid_qty'];
 	$done     = $new_recv >= (int) $ord->qty || ! empty( $d['close'] );
 	$n = $wpdb->query( $wpdb->prepare(
-		"UPDATE {$t['ord']} SET recv_qty = %d, status = %s, received_at = %s WHERE id = %d AND status = 'ordered' AND recv_qty = %d",
-		$new_recv, $done ? 'received' : 'ordered', current_time( 'mysql' ), (int) $id, (int) $ord->recv_qty
+		"UPDATE {$t['ord']} SET recv_qty = %d, status = %s, received_at = %s, cancel_note = %s WHERE id = %d AND status = 'ordered' AND recv_qty = %d",
+		$new_recv, $done ? 'received' : 'ordered', current_time( 'mysql' ), ( ! empty( $d['close'] ) && $new_recv < (int) $ord->qty ) ? '여기서 마감' : '', (int) $id, (int) $ord->recv_qty
 	) );
 	if ( ! $n ) { md_inv_rollback(); md_inv_unlock(); return new WP_Error( 'race', '방금 다른 곳에서 이 주문을 처리했습니다. 새로고침해 주세요.' ); }
-	$lo = array(
-		'ord_id' => $ord->id, 'price' => $price, 'free' => $free, 'lot' => isset( $d['lot'] ) ? $d['lot'] : '',
+	$lid = md_inv_ledger_add( 'in', $ord->item_id, $c['qty'], array(
+		'ord_id' => $ord->id, 'price' => $c['price'], 'free_qty' => $c['free_qty'], 'amount' => $c['total'], 'lot' => isset( $d['lot'] ) ? $d['lot'] : '',
 		'note'   => trim( '주문 입고' . ( ! empty( $d['note'] ) ? ' · ' . md_inv_txt( $d['note'], 300 ) : '' ) ),
-	);
-	if ( $bonus && ! $free ) {
-		md_inv_in_bonus_split( $ord->item_id, $bonus, $lo );
-		$lid = $bonus < $qty ? md_inv_ledger_add( 'in', $ord->item_id, $qty - $bonus, $lo ) : 1;
-	} else {
-		$lid = md_inv_ledger_add( 'in', $ord->item_id, $qty, $lo );
-	}
+	) );
 	if ( is_wp_error( $lid ) ) { md_inv_rollback(); md_inv_unlock(); return $lid; }
 	md_inv_commit();
 	md_inv_unlock();
-	if ( ! $free ) { md_inv_price_from_in( $ord->item_id, $price ); }
-	md_inv_log( '입고', $ord->item_name . ' +' . $qty . ' (주문 #' . $ord->id . ( $free ? ', 무상' : '' ) . ')' );
+	if ( $c['paid_qty'] > 0 ) { md_inv_price_from_in( $ord->item_id, $c['price'] ); }
+	md_inv_log( '입고', $ord->item_name . ' +' . $c['qty'] . ( $c['free_qty'] ? ' (무상 ' . $c['free_qty'] . ')' : '' ) . ' · ' . md_inv_won( $c['total'] ) . ' (주문 #' . $ord->id . ')' );
 	return $lid;
 }
 
@@ -1287,6 +1333,8 @@ function md_inv_ord_cancel( $id, $why = '' ) {
 	if ( 'ordered' !== $ord->status ) { return new WP_Error( 'done', '주문함 상태만 취소할 수 있습니다.' ); }
 	/* 일부라도 들어왔으면 「취소」가 아니라 「여기서 마감」이다 */
 	$status = (int) $ord->recv_qty > 0 ? 'received' : 'cancelled';
+	$why    = trim( (string) $why );
+	if ( 'received' === $status && '' === $why ) { $why = '여기서 마감'; } /* v6.5 · 마감 표시 — 기록 취소 때 다시 열지 않는다 */
 	$n = $wpdb->query( $wpdb->prepare(
 		'UPDATE ' . md_inv_t( 'ord' ) . " SET status = %s, cancel_note = %s WHERE id = %d AND status = 'ordered'",
 		$status, md_inv_txt( $why, 255 ), (int) $id
@@ -1300,16 +1348,20 @@ function md_inv_ord_update( $id, $d ) {
 	global $wpdb;
 	$ord = md_inv_ord( $id );
 	if ( ! $ord || 'ordered' !== $ord->status ) { return new WP_Error( 'done', '주문함 상태만 고칠 수 있습니다.' ); }
-	$row = array();
-	if ( isset( $d['qty'] ) ) {
-		$q = (int) $d['qty'];
-		if ( $q < max( 1, (int) $ord->recv_qty ) ) { return new WP_Error( 'qty', '주문 수량은 이미 들어온 수량(' . (int) $ord->recv_qty . ')보다 적을 수 없습니다.' ); }
-		$row['qty'] = $q;
-	}
-	if ( isset( $d['price'] ) )  { $row['price'] = max( 0, md_inv_int( $d['price'] ) ); }
-	if ( isset( $d['amount'] ) ) { $row['amount'] = max( 0, md_inv_int( $d['amount'] ) ); }
-	if ( isset( $d['note'] ) )   { $row['note'] = md_inv_txt( $d['note'], 500 ); }
-	if ( $row ) { $wpdb->update( md_inv_t( 'ord' ), $row, array( 'id' => (int) $id ) ); md_inv_log( '주문 수정', $ord->item_name ); }
+	$qty = isset( $d['qty'] ) && '' !== (string) $d['qty'] ? (int) $d['qty'] : (int) $ord->qty;
+	if ( $qty < max( 1, (int) $ord->recv_qty ) ) { return new WP_Error( 'qty', '주문 수량은 이미 들어온 수량(' . (int) $ord->recv_qty . ')보다 적을 수 없습니다.' ); }
+	$price = md_inv_money_in( isset( $d['price'] ) ? $d['price'] : '', '단가' );
+	if ( is_wp_error( $price ) ) { return $price; }
+	$price = null === $price ? (int) $ord->price : $price;
+	$total = md_inv_money_in( isset( $d['total'] ) ? $d['total'] : ( isset( $d['amount'] ) ? $d['amount'] : '' ), '주문 합계' );
+	if ( is_wp_error( $total ) ) { return $total; }
+	/* v6.5 · 합계를 비우면 0 원이 아니라 수량 × 단가 (+ 그대로인 배송비) */
+	$amount = null === $total ? $qty * $price + ( (int) $ord->amount - (int) $ord->qty * (int) $ord->price ) : $total;
+	$row = array( 'qty' => $qty, 'price' => $price, 'amount' => max( 0, $amount ), 'extra' => max( 0, $amount ) - $qty * $price );
+	if ( isset( $d['free_qty'] ) && '' !== (string) $d['free_qty'] ) { $row['free_qty'] = max( 0, (int) $d['free_qty'] ); }
+	if ( isset( $d['note'] ) ) { $row['note'] = md_inv_txt( $d['note'], 500 ); }
+	$wpdb->update( md_inv_t( 'ord' ), $row, array( 'id' => (int) $id ) );
+	md_inv_log( '주문 수정', $ord->item_name . ' · ' . $qty . ' · ' . md_inv_won( $row['amount'] ) );
 	return true;
 }
 
@@ -1321,6 +1373,11 @@ function md_inv_deposit_add( $vendor_id, $amount, $paid_on, $note = '', $credit 
 	global $wpdb;
 	$v = md_inv_vendor( $vendor_id );
 	if ( ! $v || ! (int) $v->prepaid ) { return new WP_Error( 'vendor', '선납 업체를 골라 주세요.' ); }
+	/* v6.5 · 돈 칸은 원 단위 숫자만 — 소수점을 지워 100배가 되던 것 */
+	foreach ( array( array( $amount, '입금액' ), array( $credit, '쓸 수 있는 금액' ) ) as $chk ) {
+		$e = md_inv_money_in( $chk[0], $chk[1], true );
+		if ( is_wp_error( $e ) ) { return $e; }
+	}
 	$amount = md_inv_int( $amount );
 	if ( 'credit' === $kind ) {
 		/* v6.3 · 업체 보상 · 리베이트 — 돈은 안 냈고 쓸 수 있는 잔액만 늘어남 */
@@ -1343,18 +1400,19 @@ function md_inv_deposit_add( $vendor_id, $amount, $paid_on, $note = '', $credit 
 	return $id;
 }
 
-function md_inv_deposit_delete( $id ) {
+function md_inv_deposit_delete( $id, $why = '' ) {
 	global $wpdb;
-	$d = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . md_inv_t( 'deposit' ) . ' WHERE id = %d', (int) $id ) );
+	$d = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . md_inv_t( 'deposit' ) . ' WHERE id = %d AND voided = 0', (int) $id ) );
 	if ( ! $d ) { return new WP_Error( 'gone', '입금 기록을 찾을 수 없습니다.' ); }
-	$wpdb->delete( md_inv_t( 'deposit' ), array( 'id' => (int) $id ) );
-	md_inv_log( '선납 입금 삭제', md_inv_vendor_name( $d->vendor_id ) . ' ' . md_inv_won( $d->amount ) );
+	/* v6.5 · 지우지 않고 「취소」로 남긴다 — 누가 언제 무엇을 지웠는지 남게 */
+	$wpdb->update( md_inv_t( 'deposit' ), array( 'voided' => 1, 'void_note' => mb_substr( md_inv_me() . ' · ' . current_time( 'mysql' ) . ( '' !== trim( (string) $why ) ? ' · ' . $why : '' ), 0, 255 ) ), array( 'id' => (int) $id ) );
+	md_inv_log( '선납 입금 취소', md_inv_vendor_name( $d->vendor_id ) . ' ' . md_inv_won( $d->amount ) . ( (int) $d->credit !== (int) $d->amount ? ' (쓸 수 있는 금액 ' . md_inv_won( $d->credit ) . ')' : '' ) . ' · ' . $d->paid_on );
 	return true;
 }
 
 function md_inv_deposits( $vendor_id = 0 ) {
 	global $wpdb;
-	$sql = 'SELECT * FROM ' . md_inv_t( 'deposit' ) . ( $vendor_id ? $wpdb->prepare( ' WHERE vendor_id = %d', (int) $vendor_id ) : '' ) . ' ORDER BY paid_on DESC, id DESC';
+	$sql = 'SELECT * FROM ' . md_inv_t( 'deposit' ) . ' WHERE voided = 0' . ( $vendor_id ? $wpdb->prepare( ' AND vendor_id = %d', (int) $vendor_id ) : '' ) . ' ORDER BY paid_on DESC, id DESC';
 	return $wpdb->get_results( $sql );
 }
 
@@ -1373,7 +1431,7 @@ function md_inv_prepaid_summary() {
 	if ( ! $out ) { return array(); }
 	$in = implode( ',', array_keys( $out ) );
 	/* 입금(낸 돈) · 쓸 수 있는 금액(적립 포함) · 조정 */
-	foreach ( $wpdb->get_results( "SELECT vendor_id, kind, SUM(amount) AS a, SUM(credit) AS c FROM {$t['deposit']} WHERE vendor_id IN ($in) GROUP BY vendor_id, kind" ) as $r ) {
+	foreach ( $wpdb->get_results( "SELECT vendor_id, kind, SUM(amount) AS a, SUM(credit) AS c FROM {$t['deposit']} WHERE vendor_id IN ($in) AND voided = 0 GROUP BY vendor_id, kind" ) as $r ) {
 		$o = $out[ (int) $r->vendor_id ];
 		$o->deposit += (int) $r->c;
 		if ( 'adjust' === $r->kind ) { $o->adjust += (int) $r->c; }
@@ -1381,8 +1439,8 @@ function md_inv_prepaid_summary() {
 	}
 	/* 최근 90일 차감(입고 − 반품) → 한 달 평균 */
 	$since = date( 'Y-m-d H:i:s', current_time( 'timestamp' ) - 90 * DAY_IN_SECONDS );
-	foreach ( $wpdb->get_results( $wpdb->prepare( "SELECT vendor_id, SUM(CASE WHEN type = 'in' THEN ABS(qty) * price ELSE -ABS(qty) * price END) AS s FROM {$t['ledger']}
-	                               WHERE vendor_id IN ($in) AND voided = 0 AND free = 0 AND type IN ('in','return') AND created_at >= %s GROUP BY vendor_id", $since ) ) as $r ) {
+	foreach ( $wpdb->get_results( $wpdb->prepare( "SELECT vendor_id, SUM(CASE WHEN type = 'in' THEN amount ELSE -amount END) AS s FROM {$t['ledger']}
+	                               WHERE vendor_id IN ($in) AND voided = 0 AND type IN ('in','return') AND created_at >= %s GROUP BY vendor_id", $since ) ) as $r ) {
 		$out[ (int) $r->vendor_id ]->burn = max( 0, (int) round( (float) $r->s / 3 ) );
 	}
 	/* v6.3 · 입고 뒤 환불 · 정정 중 선납 잔액으로 돌려받은 것 */
@@ -1390,14 +1448,16 @@ function md_inv_prepaid_summary() {
 		foreach ( md_inv_adj_balance_sums() as $vid => $s ) { if ( isset( $out[ $vid ] ) ) { $out[ $vid ]->refund = (int) $s; } }
 		foreach ( md_inv_adj_balance_sums( $since ) as $vid => $s ) { if ( isset( $out[ $vid ] ) ) { $out[ $vid ]->burn = max( 0, $out[ $vid ]->burn - (int) round( $s / 3 ) ); } }
 	}
-	foreach ( $wpdb->get_results( "SELECT vendor_id, type, SUM(ABS(qty) * price) AS s, MAX(created_at) AS last FROM {$t['ledger']}
-	                               WHERE vendor_id IN ($in) AND voided = 0 AND free = 0 AND type IN ('in','return') GROUP BY vendor_id, type" ) as $r ) {
+	foreach ( $wpdb->get_results( "SELECT vendor_id, type, SUM(amount) AS s, MAX(created_at) AS last FROM {$t['ledger']}
+	                               WHERE vendor_id IN ($in) AND voided = 0 AND type IN ('in','return') GROUP BY vendor_id, type" ) as $r ) {
 		if ( 'in' === $r->type ) { $out[ (int) $r->vendor_id ]->spent = (int) $r->s; $out[ (int) $r->vendor_id ]->last_in = $r->last; }
 		else { $out[ (int) $r->vendor_id ]->returned = (int) $r->s; }
 	}
-	foreach ( $wpdb->get_results( "SELECT vendor_id, SUM(CASE WHEN qty > 0 THEN amount * (qty - recv_qty) / qty ELSE 0 END) AS s FROM {$t['ord']}
-	                               WHERE vendor_id IN ($in) AND status = 'ordered' GROUP BY vendor_id" ) as $r ) {
-		$out[ (int) $r->vendor_id ]->pending = (int) round( (float) $r->s );
+	/* v6.5 · 주문 중 = 주문 합계(배송비 포함) − 그 주문으로 이미 받은 금액 */
+	$open = $wpdb->get_results( "SELECT id, vendor_id, amount, status FROM {$t['ord']} WHERE vendor_id IN ($in) AND status = 'ordered'" );
+	$recv = md_inv_ord_received_amounts( wp_list_pluck( (array) $open, 'id' ) );
+	foreach ( (array) $open as $o ) {
+		$out[ (int) $o->vendor_id ]->pending += md_inv_ord_amount_left( $o, isset( $recv[ (int) $o->id ] ) ? $recv[ (int) $o->id ] : 0 );
 	}
 	foreach ( $out as $o ) {
 		$o->balance   = $o->deposit - $o->spent + $o->returned + $o->refund;
@@ -1526,16 +1586,23 @@ function md_inv_usage_monthly( $months, $team_id = 0 ) {
 /** 구매(입고) 금액 — 업체별 (무상 제외, 반품 차감) */
 function md_inv_purchase_by_vendor( $from, $to ) {
 	global $wpdb;
-	$t = md_inv_t();
-	return $wpdb->get_results( $wpdb->prepare(
+	$t    = md_inv_t();
+	$rows = (array) $wpdb->get_results( $wpdb->prepare(
 		"SELECT l.vendor_id AS k,
-		        SUM(CASE WHEN l.type = 'in' THEN l.qty * l.price ELSE 0 END) AS bought,
-		        SUM(CASE WHEN l.type = 'return' THEN -l.qty * l.price ELSE 0 END) AS returned
+		        SUM(CASE WHEN l.type = 'in' THEN l.amount ELSE 0 END) AS bought,
+		        SUM(CASE WHEN l.type = 'return' THEN l.amount ELSE 0 END) AS returned
 		 FROM {$t['ledger']} l
-		 WHERE l.voided = 0 AND l.free = 0 AND l.type IN ('in','return') AND l.created_at >= %s AND l.created_at <= %s
+		 WHERE l.voided = 0 AND l.type IN ('in','return') AND l.created_at >= %s AND l.created_at <= %s
 		 GROUP BY l.vendor_id ORDER BY bought DESC",
 		$from . ' 00:00:00', $to . ' 23:59:59'
 	) );
+	/* v6.5 · 입고 뒤 환불 · 정정도 (업체 정산과 같은 숫자가 나오게) */
+	$adj = array();
+	if ( function_exists( 'md_inv_adjs' ) ) { foreach ( md_inv_adjs( array( 'from' => $from, 'to' => $to ) ) as $a ) { $adj[ (int) $a->vendor_id ] = ( isset( $adj[ (int) $a->vendor_id ] ) ? $adj[ (int) $a->vendor_id ] : 0 ) + (int) $a->amount; } }
+	$seen = array();
+	foreach ( $rows as $r ) { $r->adjusted = isset( $adj[ (int) $r->k ] ) ? $adj[ (int) $r->k ] : 0; $seen[ (int) $r->k ] = 1; }
+	foreach ( $adj as $vid => $sum ) { if ( ! isset( $seen[ $vid ] ) ) { $rows[] = (object) array( 'k' => $vid, 'bought' => 0, 'returned' => 0, 'adjusted' => $sum ); } }
+	return $rows;
 }
 
 /** 재고 금액 합계 (현재고 × 단가) */

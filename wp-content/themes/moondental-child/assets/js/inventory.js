@@ -67,6 +67,8 @@
     lotSync(d);
     var pin = d.querySelector('input[name=price]'); if (pin) { pin.dataset.auto = set.price !== undefined && set.price !== '' ? '1' : ''; }
     priceSync(d);
+    $$('.iv-rcpt', d).forEach(function (r) { rcptInit(r, true); }); /* v6.5 · 거래명세서 칸 */
+    retInit(d);
     /* v6.3 · 값이 있을 때만 보이는 칸 (예: 선납 업체일 때만 「돌려받은 곳」) */
     $$('[data-ifset]', d).forEach(function (el) { el.hidden = !set[el.dataset.ifset]; });
     adjKind(d);
@@ -311,6 +313,102 @@
     };
     if (!d.dataset.calcBound) { d.dataset.calcBound = '1'; q.addEventListener('input', upd); p.addEventListener('input', upd); }
     upd();
+  }
+
+  /* v6.5 · 거래명세서 칸 — 총 수량 · 무상 · 단가 · 실제로 낸 금액(주문은 합계).
+   * 낸 금액은 손대기 전까지 자동(유상 × 단가, 주문의 남은 수량이 다 오면 주문 합계의 남은 금액), 배송비 등 · 실제 개당 금액을 바로 보여 준다.
+   * 주문보다 많이(무상 빼고) 들어오면 보내기 전에 한 번 묻는다. */
+  function moneyVal(v) { var s = String(v == null ? '' : v).replace(/[,\s원₩]/g, ''); if (s === '') return null; return /^-?\d+$/.test(s) ? Number(s) : NaN; }
+  function rcptInit(box, reset) {
+    var f = box.closest('form'); if (!f) return;
+    var g = function (k) { return box.querySelector('[data-r=' + k + ']'); };
+    var q = g('qty'), fr = g('free'), p = g('price'), t = g('total'), sum = g('sum');
+    if (!q || !fr || !p || !t || !sum) return;
+    var mode = box.dataset.rcpt;
+    var hv = function (n) { var el = f.querySelector('[name="' + n + '"]'); return el && el.value !== '' ? Number(el.value) : null; };
+    var ordInfo = function () {
+      if (mode === 'order') return null;
+      var r = f.querySelector('input[name=ord_id]:checked');
+      if (r && r.dataset.left !== undefined) return r.value === '0' ? null : { left: Number(r.dataset.left), price: Number(r.dataset.price), amt: r.dataset.amtLeft === '' ? null : Number(r.dataset.amtLeft) };
+      var l = hv('ord_left'); if (l === null) return null;
+      return { left: l, price: hv('ord_price'), amt: hv('ord_amt_left') };
+    };
+    if (reset) {
+      t.dataset.touched = ''; t.dataset.extra0 = '';
+      if (mode === 'order') { var p0 = moneyVal(p.value), t0 = moneyVal(t.value); if (p0 !== null && !isNaN(p0) && t0 !== null && !isNaN(t0)) t.dataset.extra0 = String(t0 - (Number(q.value) || 0) * p0); }
+      else if (t.value !== '') t.dataset.touched = '1';
+    }
+    var calc = function () {
+      var qty = Number(q.value) || 0, free = Math.min(qty, Math.max(0, Number(fr.value) || 0));
+      var paid = mode === 'order' ? qty : qty - free;
+      var price = moneyVal(p.value);
+      if (price !== null && isNaN(price)) { sum.textContent = '단가는 원 단위 숫자로만 적어 주세요 (소수점 · 글자 없이).'; sum.className = 'iv-rcpt__sum is-bad'; return; }
+      price = price || 0;
+      var goods = paid * price, o = ordInfo(), auto;
+      if (mode === 'order') auto = goods + (Number(t.dataset.extra0) || 0);
+      else if (o && paid === o.left && price === o.price && o.amt !== null) auto = o.amt;
+      else auto = goods;
+      if (!t.dataset.touched) t.value = qty ? String(auto) : '';
+      var total = moneyVal(t.value);
+      if (total !== null && isNaN(total)) { sum.textContent = '금액은 원 단위 숫자로만 적어 주세요 (소수점 · 글자 없이).'; sum.className = 'iv-rcpt__sum is-bad'; return; }
+      if (total === null) total = auto;
+      var extra = total - goods, parts = [];
+      if (!qty) { sum.textContent = ''; return; }
+      if (mode === 'order') {
+        parts.push(qty + '개 × ' + num(price) + '원 = ' + num(goods) + '원');
+        if (free) parts.push('무상 ' + free + '개 더 받기로');
+        if (extra) parts.push((extra > 0 ? '배송비 등 +' : '할인 −') + num(Math.abs(extra)) + '원');
+        parts.push('주문 합계 ' + num(total) + '원');
+      } else {
+        parts.push(paid ? '유상 ' + paid + '개 × ' + num(price) + '원 = ' + num(goods) + '원' : '전부 무상');
+        if (free && paid) parts.push('무상 ' + free + '개');
+        if (extra) parts.push((extra > 0 ? '배송비 등 +' : '할인 −') + num(Math.abs(extra)) + '원');
+        parts.push('낸 금액 ' + num(total) + '원');
+        parts.push('실제 개당 ' + num(Math.round(total / qty)) + '원' + (free ? ' (무상 포함 ' + qty + '개로 나눔)' : ''));
+        if (o && paid > o.left) parts.push('⚠ 주문보다 ' + (paid - o.left) + '개 많음');
+      }
+      sum.textContent = parts.join(' · ');
+      sum.className = 'iv-rcpt__sum' + (o && paid > o.left ? ' is-warn' : '');
+    };
+    if (!box.dataset.bound) {
+      box.dataset.bound = '1';
+      t.addEventListener('input', function () { t.dataset.touched = t.value.trim() === '' ? '' : '1'; calc(); });
+      [q, fr, p].forEach(function (el) { el.addEventListener('input', calc); el.addEventListener('change', calc); });
+      $$('input[name=ord_id]', f).forEach(function (r) {
+        r.addEventListener('change', function () {
+          if (r.value !== '0') { q.value = String(Number(r.dataset.left) + (Number(r.dataset.free) || 0)); p.value = r.dataset.price; fr.value = r.dataset.free || ''; }
+          else { var ip = f.querySelector('[name=item_price]'); if (ip) p.value = ip.value; fr.value = ''; }
+          t.dataset.touched = ''; calc();
+        });
+      });
+      f.addEventListener('submit', function (e) {
+        var am = f.querySelector('[name=allow_more]'); if (am) am.value = '';
+        var o = ordInfo(); if (!o) return;
+        var qty = Number(q.value) || 0, paid = qty - Math.min(qty, Math.max(0, Number(fr.value) || 0));
+        if (paid > o.left) {
+          if (!window.confirm('주문보다 ' + (paid - o.left) + '개 많이 들어왔습니다 (무상 빼고). 그대로 입고할까요?')) { e.preventDefault(); e.stopImmediatePropagation(); return; }
+          if (am) am.value = '1';
+        }
+      }, true);
+    }
+    calc();
+  }
+  $$('.iv-rcpt').forEach(function (r) { if (!r.closest('dialog')) rcptInit(r, true); });
+
+  /* v6.5 · 반품 — 돌려받는 금액은 손대기 전까지 (남은 금액 ÷ 남은 수량) × 반품 수량, 마지막이면 남은 금액 전부 */
+  function retInit(d) {
+    var q = d.querySelector('[data-ret=qty]'), a = d.querySelector('[data-ret=amount]');
+    if (!q || !a) return;
+    var f = q.form, hv = function (n) { var el = f.querySelector('[name="' + n + '"]'); return el && el.value !== '' ? Number(el.value) : null; };
+    a.dataset.touched = '';
+    var calc = function () {
+      if (a.dataset.touched) return;
+      var n = Number(q.value) || 0, N = hv('ret_net'), U = hv('ret_units');
+      if (N === null || !U) return;
+      a.value = String(n >= U ? N : Math.round(N * n / U));
+    };
+    if (!d.dataset.retBound) { d.dataset.retBound = '1'; q.addEventListener('input', calc); a.addEventListener('input', function () { a.dataset.touched = a.value.trim() === '' ? '' : '1'; }); }
+    calc();
   }
 
   /* ---------------------------------------------------------

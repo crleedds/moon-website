@@ -69,7 +69,7 @@ function md_inv_passbook( $vendor_id, $from = '', $to = '' ) {
 	$t   = md_inv_t();
 	$vid = (int) $vendor_id;
 	$ev  = array();
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$t['deposit']} WHERE vendor_id = %d", $vid ) ) as $d ) {
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$t['deposit']} WHERE vendor_id = %d AND voided = 0", $vid ) ) as $d ) { /* v6.5 · 취소한 입금은 뺀다 */
 		$adj   = 'adjust' === $d->kind;
 		$bonus = ! $adj && 'credit' !== $d->kind && (int) $d->credit !== (int) $d->amount ? (int) $d->credit - (int) $d->amount : 0;
 		$ev[]  = (object) array(
@@ -86,14 +86,17 @@ function md_inv_passbook( $vendor_id, $from = '', $to = '' ) {
 		"SELECT l.*, COALESCE(i.name,'') AS item_name, COALESCE(i.unit,'') AS unit FROM {$t['ledger']} l LEFT JOIN {$t['item']} i ON i.id = l.item_id
 		 WHERE l.vendor_id = %d AND l.voided = 0 AND l.type IN ('in','return')", $vid ) );
 	foreach ( (array) $rows as $l ) {
-		$amt  = abs( (int) $l->qty ) * (int) $l->price;
+		/* v6.5 · 저장된 금액 그대로 — 입고는 실제로 낸 금액(배송비 포함), 반품 · 교환은 돌려받은 금액 */
+		$amt  = (int) $l->amount;
+		$fq   = 'in' === $l->type ? (int) $l->free_qty : 0;
+		$ex   = 'in' === $l->type ? (int) $l->extra : 0;
 		$ev[] = (object) array(
 			'at' => $l->created_at, 'date' => substr( $l->created_at, 0, 10 ),
 			'kind' => 'in' === $l->type ? ( $l->free ? 'free' : 'in' ) : 'return',
-			'label' => 'in' === $l->type ? ( $l->free ? '무상 입고' : '입고' ) : '반품',
+			'label' => 'in' === $l->type ? ( $l->free ? '무상 입고' : ( (int) $l->ref_id ? '교환 받음' : '입고' ) ) : ( false !== strpos( (string) $l->note, '교환' ) ? '교환 보냄' : '반품' ),
 			'item' => $l->item_name, 'qty' => abs( (int) $l->qty ), 'lot' => (string) $l->lot,
-			'delta' => $l->free ? 0 : ( 'in' === $l->type ? -$amt : $amt ),
-			'note' => trim( (string) $l->note ), 'person' => $l->person, 'ref' => 'l' . $l->id, 'price' => (int) $l->price, 'unit' => $l->unit,
+			'delta' => 'in' === $l->type ? -$amt : $amt,
+			'note' => trim( ( $fq && ! $l->free ? '무상 ' . $fq . '개 포함 · ' : '' ) . ( $ex ? ( $ex > 0 ? '배송비 등 ' : '할인 ' ) . md_inv_num( abs( $ex ) ) . '원 · ' : '' ) . (string) $l->note, ' ·' ), 'person' => $l->person, 'ref' => 'l' . $l->id, 'price' => (int) $l->price, 'unit' => $l->unit,
 		);
 	}
 	/* v6.3 · 입고 뒤 환불 · 정정 — 선납 잔액으로 받은 것만 잔액이 바뀐다 (돈으로 받은 것은 기록만) */
@@ -197,7 +200,7 @@ function md_inv_recon_hints( $vendor_id, $as_of, $diff ) {
 		}
 	}
 	foreach ( md_inv_ords( array( 'vendor_id' => $vendor_id, 'status' => 'ordered', 'limit' => 50 ) ) as $o ) {
-		$left = (int) round( (float) $o->amount * ( (int) $o->qty - (int) $o->recv_qty ) / max( 1, (int) $o->qty ) );
+		$left = md_inv_ord_amount_left( $o ); /* v6.5 · 주문 합계 − 받은 금액 */
 		if ( $left === $abs && $diff < 0 ) { $out[] = '아직 입고 안 한 주문 「' . $o->item_name . '」(' . md_inv_num( $left ) . ') — 업체는 이미 출고하며 뺐을 수 있습니다. 물건이 왔다면 입고해 주세요.'; }
 	}
 	return array_slice( array_values( array_unique( $out ) ), 0, 8 );

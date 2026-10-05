@@ -84,7 +84,7 @@ function md_inv_view_stats() {
 		<div class="iv-kpi"><span>출고 건수</span><b><?php echo esc_html( md_inv_num( $cnt ) ); ?></b></div>
 		<?php if ( $admin ) : $items = md_inv_items(); ?>
 			<div class="iv-kpi"><span>지금 재고 금액</span><b><?php echo esc_html( md_inv_won( md_inv_stock_value( $items ) ) ); ?></b></div>
-			<?php $buy = 0; foreach ( md_inv_purchase_by_vendor( $from, $to ) as $r ) { $buy += (int) $r->bought - (int) $r->returned; } ?>
+			<?php $buy = 0; foreach ( md_inv_purchase_by_vendor( $from, $to ) as $r ) { $buy += (int) $r->bought - (int) $r->returned - (int) $r->adjusted; } /* v6.5 · 환불 · 정정까지 */ ?>
 			<div class="iv-kpi"><span><?php echo esc_html( $pname ); ?> 구매(입고) 금액</span><b><?php echo esc_html( md_inv_won( $buy ) ); ?></b></div>
 		<?php endif; ?>
 	</div>
@@ -142,10 +142,10 @@ function md_inv_view_stats() {
 			<?php endif; ?>
 		</section>
 		<section class="iv-panel iv-panel--wide">
-			<h3 class="iv-h3">업체별 구매(입고) 금액 <small><?php echo esc_html( $pname ); ?> · 무상 제외 · 반품 차감</small></h3>
+			<h3 class="iv-h3">업체별 구매(입고) 금액 <small><?php echo esc_html( $pname ); ?> · 실제로 낸 금액(배송비 포함) · 반품 · 환불 · 정정 차감</small></h3>
 			<?php
 			$rows = array();
-			foreach ( md_inv_purchase_by_vendor( $from, $to ) as $r ) { $rows[] = array( 'k' => md_inv_vendor_name( $r->k ) ? md_inv_vendor_name( $r->k ) : '(업체 없음)', 'v' => (int) $r->bought - (int) $r->returned ); }
+			foreach ( md_inv_purchase_by_vendor( $from, $to ) as $r ) { $rows[] = array( 'k' => md_inv_vendor_name( $r->k ) ? md_inv_vendor_name( $r->k ) : '(업체 없음)', 'v' => (int) $r->bought - (int) $r->returned - (int) $r->adjusted ); }
 			md_inv_bars( $rows );
 			?>
 		</section>

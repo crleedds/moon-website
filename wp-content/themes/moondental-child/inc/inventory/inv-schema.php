@@ -17,7 +17,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_INV_SCHEMA', 4 );
+define( 'MD_INV_SCHEMA', 5 ); /* v6.5 · 5 = 입고 · 주문 금액을 그대로 (amount · extra · free_qty), 입금 기록 지우지 않고 취소 */
 
 /** 테이블 이름 */
 function md_inv_t( $key = '' ) {
@@ -61,6 +61,7 @@ function md_inv_migrate() {
 	if ( $cur < 2 ) { md_inv_schema_2(); }
 	if ( $cur < 3 ) { md_inv_schema_3(); }
 	if ( $cur < 4 ) { md_inv_schema_4(); }
+	if ( $cur < 5 ) { md_inv_schema_5(); }
 
 	update_option( 'md_inv_schema', MD_INV_SCHEMA );
 	delete_transient( 'md_inv_migrating' );
@@ -363,6 +364,24 @@ function md_inv_schema_4() {
 		KEY ledger_id (ledger_id),
 		KEY vendor_id (vendor_id)
 	) $c;" );
+}
+
+/**
+ * 5단계 (v6.5) · 금액을 빈틈없이 — 입고 한 줄에 실제로 낸 금액(배송비 포함) · 무상 수량, 주문에 무상 · 배송비,
+ * 입금 기록은 지우지 않고 「취소」로
+ */
+function md_inv_schema_5() {
+	$t = md_inv_t();
+	md_inv_add_col( $t['ledger'], 'amount', 'BIGINT NOT NULL DEFAULT 0' );
+	md_inv_add_col( $t['ledger'], 'extra', 'BIGINT NOT NULL DEFAULT 0' );
+	md_inv_add_col( $t['ledger'], 'free_qty', 'INT NOT NULL DEFAULT 0' );
+	md_inv_add_col( $t['ledger'], 'money_set', 'TINYINT(1) NOT NULL DEFAULT 0' );
+	md_inv_add_col( $t['ord'], 'free_qty', 'INT NOT NULL DEFAULT 0' );
+	md_inv_add_col( $t['ord'], 'extra', 'BIGINT NOT NULL DEFAULT 0' );
+	md_inv_add_col( $t['deposit'], 'voided', 'TINYINT(1) NOT NULL DEFAULT 0' );
+	md_inv_add_col( $t['deposit'], 'void_note', "VARCHAR(255) NOT NULL DEFAULT ''" );
+	update_option( 'md_inv_schema', 4 ); /* md_inv_money_fix 가 4 이상에서만 돈다 */
+	if ( function_exists( 'md_inv_money_fix' ) ) { md_inv_money_fix(); }
 }
 
 /** 열이 없을 때만 더한다 */

@@ -185,7 +185,7 @@ function md_inv_act_req_register() {
 function md_inv_act_req_order() {
 	$req = md_inv_req( (int) md_inv_p( 'id' ) );
 	if ( ! $req || ! $req->item_id ) { md_inv_go( 'err', '품목이 연결된 요청만 주문할 수 있습니다. 먼저 품목으로 등록해 주세요.' ); }
-	md_inv_ord_done( md_inv_ord_create( $req->item_id, (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'amount' => md_inv_p( 'amount' ), 'note' => (string) md_inv_p( 'note' ), 'req_id' => $req->id ) ), '주문을 넣었습니다. 「할 일 › 입고 대기」에 있습니다.' );
+	md_inv_ord_done( md_inv_ord_create( $req->item_id, (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'total' => md_inv_ord_total_p(), 'free_qty' => md_inv_p( 'free_qty' ), 'note' => (string) md_inv_p( 'note' ), 'req_id' => $req->id ) ), '주문을 넣었습니다. 「할 일 › 입고 대기」에 있습니다.' );
 }
 
 /** v6.0 · 선납 업체 주문이면 「주문 뒤 쓸 수 있는 잔액」을 알리고, 모자라거나 알림 기준 아래면 경고 */
@@ -236,7 +236,7 @@ function md_inv_act_item_delete() {
 }
 
 function md_inv_act_stock_in() {
-	md_inv_done( md_inv_do_in( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'free' => md_inv_p( 'free' ) ? 1 : 0, 'note' => md_inv_txt( md_inv_p( 'note' ), 500 ), 'lot' => md_inv_p( 'lot' ), 'bonus_qty' => md_inv_p( 'bonus_qty' ) ) ), '입고를 기록했습니다.' );
+	md_inv_done( md_inv_do_in( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'free' => md_inv_p( 'free' ) ? 1 : 0, 'free_qty' => md_inv_p( 'free_qty' ), 'bonus_qty' => md_inv_p( 'bonus_qty' ), 'total' => md_inv_p( 'total' ), 'note' => md_inv_txt( md_inv_p( 'note' ), 500 ), 'lot' => md_inv_p( 'lot' ) ) ), '입고를 기록했습니다.' );
 }
 
 function md_inv_act_stock_out() {
@@ -274,7 +274,10 @@ function md_inv_act_ledger_void() {
 
 function md_inv_act_stock_return() {
 	$free = md_inv_p( 'free', null );
-	md_inv_done( md_inv_do_return( (int) md_inv_p( 'in_id' ), (int) md_inv_p( 'qty' ), md_inv_txt( md_inv_p( 'note' ), 500 ), null === $free ? null : (bool) $free ), '반품을 기록했습니다.' );
+	/* v6.5 · 돌려받는 금액 (비우면 그 입고에서 실제로 낸 금액의 남은 몫) */
+	$amt = md_inv_money_in( md_inv_p( 'amount' ), '돌려받는 금액' );
+	if ( is_wp_error( $amt ) ) { md_inv_go( 'err', $amt->get_error_message() ); }
+	md_inv_done( md_inv_do_return( (int) md_inv_p( 'in_id' ), (int) md_inv_p( 'qty' ), md_inv_txt( md_inv_p( 'note' ), 500 ), null === $free ? null : (bool) $free, $amt ), '반품을 기록했습니다.' );
 }
 
 /* ============================================================
@@ -282,7 +285,7 @@ function md_inv_act_stock_return() {
  * ============================================================ */
 
 function md_inv_act_ord_create() {
-	md_inv_ord_done( md_inv_ord_create( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'amount' => md_inv_p( 'amount' ), 'note' => md_inv_p( 'note' ) ) ), '주문을 넣었습니다.' );
+	md_inv_ord_done( md_inv_ord_create( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'total' => md_inv_ord_total_p(), 'free_qty' => md_inv_p( 'free_qty' ), 'note' => md_inv_p( 'note' ) ) ), '주문을 넣었습니다.' );
 }
 
 /** 주문 필요 품목 한꺼번에 주문 */
@@ -303,7 +306,8 @@ function md_inv_act_ord_many() {
 function md_inv_act_ord_receive() {
 	md_inv_done( md_inv_ord_receive( (int) md_inv_p( 'id' ), (int) md_inv_p( 'qty' ), array(
 		'price' => md_inv_p( 'price' ), 'free' => md_inv_p( 'free' ) ? 1 : 0, 'close' => md_inv_p( 'close' ) ? 1 : 0,
-		'allow_more' => md_inv_p( 'allow_more' ) ? 1 : 0, 'note' => md_inv_p( 'note' ), 'lot' => md_inv_p( 'lot' ), 'bonus_qty' => md_inv_p( 'bonus_qty' ),
+		'allow_more' => md_inv_p( 'allow_more' ) ? 1 : 0, 'note' => md_inv_p( 'note' ), 'lot' => md_inv_p( 'lot' ),
+		'free_qty' => md_inv_p( 'free_qty' ), 'bonus_qty' => md_inv_p( 'bonus_qty' ), 'total' => md_inv_p( 'total' ), /* v6.5 */
 	) ), '입고를 기록했습니다. 재고에 더했습니다.' );
 }
 
@@ -314,7 +318,7 @@ function md_inv_act_ord_cancel() {
 }
 
 function md_inv_act_ord_update() {
-	md_inv_done( md_inv_ord_update( (int) md_inv_p( 'id' ), array( 'qty' => md_inv_p( 'qty' ), 'price' => md_inv_p( 'price' ), 'amount' => md_inv_p( 'amount' ), 'note' => md_inv_p( 'note' ) ) ), '주문을 고쳤습니다.' );
+	md_inv_done( md_inv_ord_update( (int) md_inv_p( 'id' ), array( 'qty' => md_inv_p( 'qty' ), 'price' => md_inv_p( 'price' ), 'total' => md_inv_ord_total_p(), 'free_qty' => md_inv_p( 'free_qty' ), 'note' => md_inv_p( 'note' ) ) ), '주문을 고쳤습니다.' );
 }
 
 /* ============================================================
@@ -326,7 +330,7 @@ function md_inv_act_dep_add() {
 }
 
 function md_inv_act_dep_delete() {
-	md_inv_done( md_inv_deposit_delete( (int) md_inv_p( 'id' ) ), '입금 기록을 지웠습니다.' );
+	md_inv_done( md_inv_deposit_delete( (int) md_inv_p( 'id' ), (string) md_inv_p( 'why' ) ), '입금 기록을 취소했습니다 (잔액에서 빠졌고, 기록은 「취소됨」으로 남습니다).' );
 }
 
 /* ============================================================
@@ -543,4 +547,10 @@ add_action( 'template_redirect', 'md_inv_handle_download', 2 );
 
 function md_inv_dl_url( $what, $args = array() ) {
 	return add_query_arg( array_merge( array( 'md_inv_dl' => $what, '_mdinv' => wp_create_nonce( 'md_inv_dl' ) ), $args ), md_inv_url() );
+}
+
+/** v6.5 · 주문 합계 칸 — 새 이름 total, 예전 이름 amount 도 받는다 */
+function md_inv_ord_total_p() {
+	$t = (string) md_inv_p( 'total' );
+	return '' !== trim( $t ) ? $t : (string) md_inv_p( 'amount' );
 }
