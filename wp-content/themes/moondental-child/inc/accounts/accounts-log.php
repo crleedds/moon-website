@@ -132,6 +132,12 @@ function md_acc_log_fail( $username, $error = null ) {
 }
 add_action( 'wp_login_failed', 'md_acc_log_fail', 5, 2 );
 
+/** v7.4 · 기록의 아이디 → 화면에 보일 이름 (개인 계정은 이름) */
+function md_acc_login_label( $login ) {
+	$u = get_user_by( 'login', (string) $login );
+	return $u && function_exists( 'md_acc_who' ) ? md_acc_who( $u ) : (string) $login;
+}
+
 function md_acc_reason_label( $r ) {
 	$m = array( '' => '로그인', 'password' => '비밀번호 틀림', 'no_user' => '없는 아이디', 'locked' => '잠김 상태에서 시도', 'pending' => '승인 대기 계정', 'off' => '사용 중지 계정', 'unlock' => '잠금 풀기' );
 	return isset( $m[ $r ] ) ? $m[ $r ] : $r;
@@ -187,16 +193,17 @@ function md_acc_when( $dt ) {
 function md_acc_render_log_table( $rows, $show_who = true ) {
 	if ( ! $rows ) { echo '<p class="mds-hint" style="margin:0">기록이 없습니다.</p>'; return; }
 	$names = array();
-	echo '<div class="mda-logwrap"><table class="mda-log"><thead><tr><th>언제</th>' . ( $show_who ? '<th>아이디</th>' : '' ) . '<th>결과</th><th>기기</th><th>접속 위치(IP)</th></tr></thead><tbody>';
+	echo '<div class="mda-logwrap"><table class="mda-log"><thead><tr><th>언제</th>' . ( $show_who ? '<th>누구</th>' : '' ) . '<th>결과</th><th>기기</th><th>접속 위치(IP)</th></tr></thead><tbody>';
 	foreach ( $rows as $r ) {
-		$who = $r->login;
+		$who = md_acc_login_label( $r->login );
 		if ( $show_who && $r->user_id && 'unlock' !== $r->reason ) {
-			if ( ! isset( $names[ $r->user_id ] ) ) { $u = get_userdata( $r->user_id ); $names[ $r->user_id ] = $u ? $u->display_name : ''; }
-			if ( $names[ $r->user_id ] && $names[ $r->user_id ] !== $r->login ) { $who .= ' (' . $names[ $r->user_id ] . ')'; }
+			/* v7.4 · 개인 계정은 이름만 (자동 아이디는 보이지 않게) */
+			if ( ! isset( $names[ $r->user_id ] ) ) { $u = get_userdata( $r->user_id ); $names[ $r->user_id ] = $u && function_exists( 'md_acc_who' ) ? md_acc_who( $u ) : ( $u ? $u->user_login : '' ); }
+			if ( $names[ $r->user_id ] ) { $who = $names[ $r->user_id ]; }
 		}
 		$cls = (int) $r->ok ? 'is-ok' : ( 'unlock' === $r->reason ? 'is-unlock' : 'is-fail' );
 		echo '<tr class="' . esc_attr( $cls ) . '"><td data-l="언제">' . esc_html( md_acc_when( $r->created_at ) ) . '</td>'
-			. ( $show_who ? '<td data-l="아이디"><code>' . esc_html( $who ) . '</code></td>' : '' )
+			. ( $show_who ? '<td data-l="누구">' . esc_html( $who ) . '</td>' : '' )
 			. '<td data-l="결과">' . ( (int) $r->ok ? '✓ 로그인' : esc_html( ( 'unlock' === $r->reason ? '🔓 ' : '✕ ' ) . md_acc_reason_label( $r->reason ) ) ) . ( 'lounge' === $r->via ? '' : ( 'wp' === $r->via ? ' <small>관리 화면</small>' : '' ) ) . '</td>'
 			. '<td data-l="기기">' . esc_html( 'unlock' === $r->reason ? '처리: ' . $r->device : $r->device ) . '</td>'
 			. '<td data-l="IP"><small>' . esc_html( $r->ip ) . '</small></td></tr>';
@@ -214,7 +221,7 @@ function md_acc_render_log_panel() {
 		<?php foreach ( $locks as $l ) : ?>
 			<form method="post" class="mda-lock">
 				<?php md_acc_hidden( 'unlock' ); ?><input type="hidden" name="lk_login" value="<?php echo esc_attr( $l->login ); ?>"><input type="hidden" name="lk_ip" value="<?php echo esc_attr( $l->ip ); ?>">
-				<span>🔒 <code><?php echo esc_html( $l->login ); ?></code> · <?php echo esc_html( $l->ip ); ?> — <?php echo esc_html( gmdate( 'H:i', strtotime( $l->until ) ) ); ?>까지 잠김</span>
+				<span>🔒 <b><?php echo esc_html( md_acc_login_label( $l->login ) ); ?></b> · <?php echo esc_html( $l->ip ); ?> — <?php echo esc_html( gmdate( 'H:i', strtotime( $l->until ) ) ); ?>까지 잠김</span>
 				<button type="submit" class="mds-btn">잠금 풀기</button>
 			</form>
 		<?php endforeach; ?>

@@ -187,6 +187,12 @@ function md_acc_name_login( &$username, &$password ) {
 }
 add_action( 'wp_authenticate', 'md_acc_name_login', 1, 2 );
 
+/** v7.4 · 화면에 보일 계정 이름 — 개인 계정은 이름(자동 아이디 staffNNNNNN 은 보이지 않게), 공용 계정은 아이디 */
+function md_acc_who( $u ) {
+	if ( ! $u ) { return ''; }
+	return ( md_acc_is_personal_user( $u ) && '' !== trim( $u->display_name ) ) ? $u->display_name : $u->user_login;
+}
+
 /** 자동 아이디 — 직원은 볼 일이 없다 */
 function md_acc_auto_login() {
 	do { $l = 'staff' . random_int( 100000, 999999 ); } while ( username_exists( $l ) );
@@ -496,14 +502,14 @@ function md_acc_handle() {
 				$sid = (int) $link;
 				$row = md_acc_staff_row( $sid );
 				if ( ! $row ) { md_acc_flash( 'err', '연결할 직원을 다시 골라 주세요.' ); break; }
-				if ( isset( $map[ $sid ] ) ) { md_acc_flash( 'err', $row->name . ' 님은 이미 다른 계정(' . $map[ $sid ]->user_login . ')과 연결되어 있습니다.' ); break; }
+				if ( isset( $map[ $sid ] ) ) { md_acc_flash( 'err', $row->name . ' 님은 이미 다른 계정(' . md_acc_who( $map[ $sid ] ) . ')과 연결되어 있습니다.' ); break; }
 				md_acc_staff_fill( $sid, array( 'birthday' => $app['birthday'] ?? '', 'hired' => $app['hired'] ?? '', 'phone' => $app['phone'] ?? '', 'email' => $u->user_email, 'dept' => $dept ) );
 			}
 			if ( $sid ) { update_user_meta( $uid, 'md_staff_id', (int) $sid ); }
 			md_acc_apply_perms( $u, $perms );
 			update_user_meta( $uid, 'md_acc_approved', current_time( 'mysql' ) . ' · ' . md_acc_me_name() );
 			if ( function_exists( 'md_staff_sync_site' ) ) { md_staff_sync_site(); }
-			md_acc_log( '가입 승인', $u->display_name . ' (' . $u->user_login . ') · ' . md_acc_perm_label( get_userdata( $uid ) ) );
+			md_acc_log( '가입 승인', $u->display_name . ' · ' . md_acc_perm_label( get_userdata( $uid ) ) );
 			wp_mail( $u->user_email, '[문치과병원 직원 라운지] 가입이 승인되었습니다',
 				$u->display_name . " 님, 직원 라운지 가입이 승인되었습니다.\n\n로그인: " . md_acc_lounge_url() . "\n이름 「" . $u->display_name . "」과 가입할 때 정한 숫자 6자리로 로그인합니다.\n\n비밀번호를 잊으면 경영지원실에 임시 비밀번호를 부탁해 주세요." );
 			md_acc_flash( 'ok', $u->display_name . ' 님을 승인했습니다 (' . md_acc_perm_label( get_userdata( $uid ) ) . '). 승인 메일을 보냈습니다.' );
@@ -533,14 +539,14 @@ function md_acc_handle() {
 			$tp = md_acc_temp_pass();
 			wp_set_password( $tp, $uid );
 			update_user_meta( $uid, 'md_acc_must_change', 1 );
-			md_acc_log( '비밀번호 초기화', $u->display_name . ' (' . $u->user_login . ')' );
+			md_acc_log( '비밀번호 초기화', $u->display_name );
 			md_acc_flash( 'ok', $u->display_name . ' 님 비밀번호를 임시 비밀번호로 바꿨습니다.', array( 'pass' => $tp, 'login' => $u->display_name ) );
 			$back .= md_acc_anchor( $uid );
 			break;
 
 		case 'off':
 			md_acc_turn_off( $u );
-			md_acc_log( '계정 사용 중지', $u->display_name . ' (' . $u->user_login . ')' );
+			md_acc_log( '계정 사용 중지', $u->display_name );
 			md_acc_flash( 'ok', $u->display_name . ' 님 계정을 사용 중지했습니다. 로그인돼 있던 기기에서도 바로 나가집니다.' );
 			$back .= md_acc_anchor( $uid );
 			break;
@@ -566,13 +572,13 @@ function md_acc_handle() {
 			if ( ! $row ) { md_acc_flash( 'err', '연결할 직원을 골라 주세요.' ); break; }
 			if ( isset( $map[ $sid ] ) && (int) $map[ $sid ]->ID !== $uid ) { md_acc_flash( 'err', $row->name . ' 님은 이미 다른 계정과 연결되어 있습니다.' ); break; }
 			update_user_meta( $uid, 'md_staff_id', $sid );
-			md_acc_flash( 'ok', $u->user_login . ' 계정을 ' . $row->name . ' 님과 연결했습니다.' );
+			md_acc_flash( 'ok', md_acc_who( $u ) . ' 계정을 ' . $row->name . ' 님과 연결했습니다.' );
 			$back .= '#s' . $sid;
 			break;
 
 		case 'unlink':
 			delete_user_meta( $uid, 'md_staff_id' );
-			md_acc_flash( 'ok', $u->user_login . ' 계정과 명단의 연결을 끊었습니다.' );
+			md_acc_flash( 'ok', md_acc_who( $u ) . ' 계정과 명단의 연결을 끊었습니다.' );
 			$back .= '#mda-loose';
 			break;
 
@@ -872,7 +878,7 @@ function md_acc_render_staff_panel() {
 			} ?>
 			<div class="mda-app" data-uid="<?php echo (int) $u->ID; ?>">
 				<div class="mda-app__who">
-					<b><?php echo esc_html( $u->display_name ); ?></b> <code><?php echo esc_html( $u->user_login ); ?></code>
+					<b><?php echo esc_html( $u->display_name ); ?></b>
 					<span class="mda-app__when"><?php echo esc_html( substr( (string) ( $app['at'] ?? $u->user_registered ), 0, 16 ) ); ?> 신청</span>
 				</div>
 				<dl class="mda-dl mda-dl--app">
@@ -930,7 +936,7 @@ function md_acc_render_staff_panel() {
 			<h2 class="mdst-title">명단과 연결 안 된 계정 <small><?php echo count( $loose ); ?></small></h2>
 			<?php foreach ( $loose as $u ) : ?>
 				<div class="mda-acc mda-acc--loose">
-					<div class="mda-acc__line"><b><?php echo esc_html( $u->display_name ); ?></b> <code><?php echo esc_html( $u->user_login ); ?></code> <span class="mda-chip mda-chip--<?php echo esc_attr( md_acc_status( $u ) ); ?>"><?php echo esc_html( md_acc_perm_label( $u ) ); ?></span></div>
+					<div class="mda-acc__line"><b><?php echo esc_html( $u->display_name ); ?></b> <span class="mda-chip mda-chip--<?php echo esc_attr( md_acc_status( $u ) ); ?>"><?php echo esc_html( md_acc_perm_label( $u ) ); ?></span></div>
 					<form method="post" class="mda-inline">
 						<?php md_acc_hidden( 'link' ); ?><input type="hidden" name="uid" value="<?php echo (int) $u->ID; ?>">
 						<select name="sid" required><option value="">명단에서 고르기</option><?php foreach ( $rows as $r ) : if ( isset( $map[ $r->id ] ) ) continue; ?><option value="<?php echo (int) $r->id; ?>" <?php selected( $r->name, $u->display_name ); ?>><?php echo esc_html( $r->name . ( $r->dept ? ' · ' . $r->dept : '' ) ); ?></option><?php endforeach; ?></select>
@@ -954,7 +960,7 @@ function md_acc_render_retired( $rows ) {
 			<p class="mds-hint">회원가입 때 「퇴사하면 개인정보를 지운다」고 안내했습니다. 정리가 끝나면 「완전 삭제」로 연락처 · 생일 · 사진 · 계정을 지워 주세요.</p>
 			<?php foreach ( $rows as $r ) : $acc = isset( $map[ $r->id ] ) ? $map[ $r->id ] : null; $lo = md_acc_left_on( $r->id ); ?>
 				<div class="mda-ret" id="s<?php echo (int) $r->id; ?>" data-sid="<?php echo (int) $r->id; ?>">
-					<div class="mda-ret__who"><b><?php echo esc_html( $r->name ); ?></b> <span><?php echo esc_html( trim( $r->dept . ' ' . $r->position ) ); ?></span> <small><?php echo $lo ? esc_html( $lo ) . ' 퇴사' : '퇴사'; ?><?php echo $acc ? ' · 계정 ' . esc_html( $acc->user_login ) . ' (' . esc_html( md_acc_perm_label( $acc ) ) . ')' : ''; ?></small></div>
+					<div class="mda-ret__who"><b><?php echo esc_html( $r->name ); ?></b> <span><?php echo esc_html( trim( $r->dept . ' ' . $r->position ) ); ?></span> <small><?php echo $lo ? esc_html( $lo ) . ' 퇴사' : '퇴사'; ?><?php echo $acc ? ' · 계정 있음 (' . esc_html( md_acc_perm_label( $acc ) ) . ')' : ''; ?></small></div>
 					<div class="mda-btnrow">
 						<form method="post"><?php md_acc_hidden( 'rehire' ); ?><input type="hidden" name="sid" value="<?php echo (int) $r->id; ?>"><button type="submit" class="mds-btn">복직</button></form>
 						<form method="post" data-mda-confirm="<?php echo esc_attr( $r->name . ' 님의 명단 · 연락처 · 생일 · 사진' . ( $acc ? ' · 계정' : '' ) . '을 완전히 지울까요? 되돌릴 수 없습니다.' ); ?>"><?php md_acc_hidden( 'purge' ); ?><input type="hidden" name="sid" value="<?php echo (int) $r->id; ?>"><button type="submit" class="mds-btn mda-btn-danger">완전 삭제</button></form>
@@ -975,7 +981,7 @@ function md_acc_render_row( $r ) {
 	if ( $u && 'pending' === md_acc_status( $u ) ) { $u = null; }
 	echo '<div class="mda-acc" data-sid="' . (int) $r->id . '">';
 	if ( $u ) {
-		echo '<div class="mda-acc__line"><span class="mda-acc__ic" aria-hidden="true">👤</span><code>' . esc_html( $u->user_login ) . '</code> <span class="mda-chip mda-chip--' . esc_attr( md_acc_status( $u ) ) . '">' . esc_html( md_acc_perm_label( $u ) ) . '</span>'
+		echo '<div class="mda-acc__line"><span class="mda-acc__ic" aria-hidden="true">👤</span>계정 <span class="mda-chip mda-chip--' . esc_attr( md_acc_status( $u ) ) . '">' . esc_html( md_acc_perm_label( $u ) ) . '</span>'
 			. ( (int) $u->ID === get_current_user_id() ? ' <span class="mda-chip">나</span>' : '' )
 			. ' <small class="mda-last">마지막 로그인 ' . esc_html( md_acc_when( md_acc_last_login( $u->ID ) ) ) . '</small></div>';
 		md_acc_render_manage( $u );
@@ -1029,7 +1035,7 @@ function md_acc_render_manage( $u ) {
 				<?php else : ?>
 					<form method="post" onsubmit="return confirm('<?php echo esc_js( $u->display_name ); ?> 님 계정을 사용 중지할까요? (퇴사 · 휴직 때)');"><?php md_acc_hidden( 'off' ); ?><input type="hidden" name="uid" value="<?php echo (int) $u->ID; ?>"><button type="submit" class="mds-btn">사용 중지</button></form>
 				<?php endif; ?>
-				<form method="post" onsubmit="return confirm('<?php echo esc_js( $u->display_name ); ?> 님 계정(<?php echo esc_js( $u->user_login ); ?>)을 지울까요? 직원 명단과 지난 기록은 남습니다.');"><?php md_acc_hidden( 'delete' ); ?><input type="hidden" name="uid" value="<?php echo (int) $u->ID; ?>"><button type="submit" class="mds-btn mda-btn-danger">계정 삭제</button></form>
+				<form method="post" onsubmit="return confirm('<?php echo esc_js( $u->display_name ); ?> 님 계정을 지울까요? 직원 명단과 지난 기록은 남습니다.');"><?php md_acc_hidden( 'delete' ); ?><input type="hidden" name="uid" value="<?php echo (int) $u->ID; ?>"><button type="submit" class="mds-btn mda-btn-danger">계정 삭제</button></form>
 			<?php endif; ?>
 			<?php if ( (int) get_user_meta( $u->ID, 'md_staff_id', true ) ) : ?>
 				<form method="post"><?php md_acc_hidden( 'unlink' ); ?><input type="hidden" name="uid" value="<?php echo (int) $u->ID; ?>"><button type="submit" class="mds-btn mds-btn--ghost">명단 연결 끊기</button></form>
