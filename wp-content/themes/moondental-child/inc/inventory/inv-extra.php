@@ -468,3 +468,16 @@ function md_inv_mail_pref_box() {
 	</form>
 	<?php
 }
+
+/* ============================================================
+ * v6.4 · 주문 · 입고 창에서 품목을 고르면 단가 자동 (고칠 수 있음)
+ * ============================================================ */
+function md_inv_price_map_script() {
+	static $done = false;
+	if ( $done ) { return; }
+	$done = true;
+	global $wpdb;
+	$map = array();
+	foreach ( (array) $wpdb->get_results( 'SELECT id, price, unit FROM ' . md_inv_t( 'item' ) ) as $r ) { $map[ (int) $r->id ] = array( (int) $r->price, (string) $r->unit ); }
+	echo '<script type="application/json" id="iv-price-map">' . wp_json_encode( (object) $map, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP ) . '</script>';
+}

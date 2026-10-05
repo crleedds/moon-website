@@ -684,3 +684,14 @@ details.iv-panel > summary { cursor: pointer; }
 .iv-adj-all { align-self: end; margin-bottom: 10px; }
 .iv-bonusf input { max-width: 160px; }
 .iv-settle-adj td { color: #2F6B8F; }
+
+/* v6.4 · 분류별로 고르기 — 품목군 → 세부 분류 → 품목 */
+.iv-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin: 6px 0 14px; }
+.iv-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 76px; padding: 14px 16px; border-radius: 14px; border: 1.5px solid var(--iv-line, #E8DDD3); background: #fff; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.iv-tile b { font-size: 1.02rem; line-height: 1.35; }
+.iv-tile small { color: var(--iv-sub, #7A6B5F); }
+.iv-tile:hover, .iv-tile:focus-visible { border-color: var(--iv-primary, #7B5236); box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.iv-tile--all { background: var(--iv-soft, #FBF2E8); }
+.iv-crumbs .iv-link { font-weight: 600; }
+@media (max-width: 600px) { .iv-tiles { grid-template-columns: 1fr 1fr; } .iv-tile { min-height: 68px; padding: 12px; } }
+.iv-pricehint { display: block; margin-top: 4px; font-size: .78rem; font-weight: 500; color: var(--iv-sub, #7A6B5F); }

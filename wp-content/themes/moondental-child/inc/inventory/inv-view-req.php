@@ -50,7 +50,7 @@ function md_inv_view_req() {
 		'items' => $items, 'cats' => $cats, 'vendors' => $vend, 'teams' => $teams,
 		'favs' => md_inv_fav_map(), 'favNonce' => wp_create_nonce( 'md_inv_post' ),
 		'recent' => md_inv_recent_by_team( (int) $S['recent_days'] ), 'pending' => $pend, 'recentDays' => (int) $S['recent_days'],
-		'L' => array( 'c1' => $S['label_cat1'], 'c2' => $S['label_cat2'], 'c3' => $S['label_cat3'] ),
+		'L' => array( 'c1' => $S['label_cat1'], 'c2' => $S['label_cat2'], 'c3' => $S['label_cat3'] ), /* 분류별로 고르기 타일 문구에도 쓴다 */
 		'opt' => array(
 			'needName' => (int) $S['req_need_name'], 'custom' => (int) $S['req_allow_custom'], 'over' => (int) $S['req_allow_over'],
 			'remember' => (int) $S['req_remember'], 'max' => (int) $S['req_max_qty'], 'stock' => $see_stock ? 1 : 0, 'price' => $see_price ? 1 : 0,

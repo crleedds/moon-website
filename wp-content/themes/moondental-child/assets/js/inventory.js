@@ -65,6 +65,8 @@
     $$('.iv-catsel', d).forEach(catselInit);
     $$('[data-calc]', d).length && calcInit(d);
     lotSync(d);
+    var pin = d.querySelector('input[name=price]'); if (pin) { pin.dataset.auto = set.price !== undefined && set.price !== '' ? '1' : ''; }
+    priceSync(d);
     /* v6.3 · 값이 있을 때만 보이는 칸 (예: 선납 업체일 때만 「돌려받은 곳」) */
     $$('[data-ifset]', d).forEach(function (el) { el.hidden = !set[el.dataset.ifset]; });
     adjKind(d);
@@ -117,12 +119,33 @@
   }
   document.addEventListener('change', function (e) {
     var t = e.target;
-    if (t.matches && t.matches('[data-pick="item_id"]')) { var d = t.closest('dialog'); if (d) lotSync(d); }
+    if (t.matches && t.matches('[data-pick="item_id"]')) { var d = t.closest('dialog'); if (d) { lotSync(d); priceSync(d); } }
   });
   document.addEventListener('input', function (e) {
     var t = e.target;
-    if (t.matches && t.matches('[data-pick="item_id"]')) { var d = t.closest('dialog'); if (d) lotSync(d); }
+    if (t.matches && t.matches('[data-pick="item_id"]')) { var d = t.closest('dialog'); if (d) { lotSync(d); priceSync(d); } }
+    /* 사람이 단가를 직접 고치면 그다음엔 자동으로 덮어쓰지 않는다 */
+    if (t.matches && t.matches('input[name=price]') && e.isTrusted) { t.dataset.auto = ''; var h = t.closest('label') && t.closest('label').querySelector('.iv-pricehint'); if (h) h.textContent = ''; }
   });
+
+  /* v6.4 · 주문 · 입고 창 — 품목을 고르면 그 품목 단가를 넣는다 (비어 있거나 자동으로 넣은 값일 때만 · 고칠 수 있음) */
+  var priceMap = null;
+  function priceSync(d) {
+    var pin = d && d.querySelector('input[name=price]');
+    if (!pin || !d.querySelector('[data-pick="item_id"]')) return;
+    if (priceMap === null) { var el = document.getElementById('iv-price-map'); try { priceMap = el ? JSON.parse(el.textContent) : {}; } catch (x) { priceMap = {}; } }
+    var pk = d.querySelector('[data-pick="item_id"]'), m = /#(\d+)\s*$/.exec(pk.value || ''), id = m ? m[1] : '';
+    var info = id && priceMap[id];
+    var lab = pin.closest('label'), hint = lab && lab.querySelector('.iv-pricehint');
+    if (lab && !hint) { hint = document.createElement('small'); hint.className = 'iv-pricehint'; lab.appendChild(hint); }
+    if (!info) { if (hint) hint.textContent = ''; return; }
+    if (pin.value === '' || pin.dataset.auto === '1') {
+      pin.value = info[0] ? String(info[0]) : '';
+      pin.dataset.auto = '1';
+      pin.dispatchEvent(new Event('input', { bubbles: false }));
+    }
+    if (hint) hint.textContent = info[0] ? '품목 단가 ' + num(info[0]) + '원' + (info[1] ? ' / ' + info[1] : '') + ' — 다르면 고쳐 주세요' : '이 품목은 단가가 없습니다 — 적어 주세요';
+  }
 
   document.addEventListener('click', function (e) {
     var b = e.target.closest('[data-dlg]');
@@ -565,7 +588,7 @@
       $$('#iv-teamgrid [data-team]').forEach(function (b) { b.classList.toggle('is-on', Number(b.dataset.team) === state.team); });
       var ct = $('#iv-cart-team'); if (ct && state.team) ct.value = String(state.team);
       if (O.remember) { who.team = state.team; store.set(WHO, who); }
-      if (!silent) { state.chip = favList().length ? 'fav' : (recentOf().length ? 'star' : 'all'); state.shown = PAGE; renderChips(); render(); }
+      if (!silent) { state.chip = favList().length ? 'fav' : (recentOf().length ? 'star' : 'browse'); state.sub = ''; state.showAll = false; state.shown = PAGE; renderChips(); render(); }
       steps();
     }
     $('#iv-teamgrid').addEventListener('click', function (e) {
@@ -616,6 +639,7 @@
       if (chip === 'star') return recentOf();
       if (chip === 'cart') return cart.lines.filter(function (l) { return !l.custom; }).map(function (l) { return byId[l.id]; });
       if (chip === 'all' || chip === '') return D.items;
+      if (chip === 'browse') return [];
       var g = Number(chip.slice(1));
       if (state.sub) { var s = subsOf(g).filter(function (x) { return x.k === state.sub; })[0]; if (s) return s.items; }
       return groups[g] || [];
@@ -631,6 +655,7 @@
       if (state.team) h += chipBtn('fav', '★ 우리 팀 즐겨찾기', fc);
       if (rc) h += chipBtn('star', '🕘 우리 팀 최근 신청', rc);
       if (cc) h += chipBtn('cart', '🛒 담은 품목', cc);
+      if (groupOrder.length > 1) h += chipBtn('browse', '📂 분류별로 고르기', groupOrder.length);
       h += chipBtn('all', '전체', D.items.length);
       groupOrder.forEach(function (g) { h += chipBtn('g' + g, g ? (catName[g] || '기타') : '분류 없음', groups[g].length); });
       chipsEl.innerHTML = h;
@@ -638,7 +663,7 @@
       var subs = isGroup(state.chip) ? subsOf(Number(state.chip.slice(1))) : [];
       if (subEl) {
         if (subs.length > 1 && (!state.q || scoped())) {
-          var sh = '<button type="button" class="iv-chipbtn iv-chipbtn--sub' + (!state.sub ? ' is-on' : '') + '" data-sub="">전체 <small>' + groups[Number(state.chip.slice(1))].length + '</small></button>';
+          var sh = '<button type="button" class="iv-chipbtn iv-chipbtn--sub' + (!state.sub && state.showAll ? ' is-on' : '') + '" data-sub="">전체 <small>' + groups[Number(state.chip.slice(1))].length + '</small></button>';
           subs.forEach(function (s) { sh += '<button type="button" class="iv-chipbtn iv-chipbtn--sub' + (state.sub === s.k ? ' is-on' : '') + '" data-sub="' + s.k + '">' + esc(s.n) + ' <small>' + s.items.length + '</small></button>'; });
           subEl.innerHTML = sh; subEl.hidden = false;
         } else { subEl.innerHTML = ''; subEl.hidden = true; }
@@ -646,13 +671,13 @@
     }
     if (subEl) subEl.addEventListener('click', function (e) {
       var b = e.target.closest('[data-sub]'); if (!b) return;
-      state.sub = b.dataset.sub; state.all = false; state.shown = PAGE;
+      state.sub = b.dataset.sub; state.showAll = !b.dataset.sub; state.all = false; state.shown = PAGE;
       renderChips(); render();
       if (b.scrollIntoView) b.scrollIntoView({ block: 'nearest', inline: 'center' });
     });
     chipsEl.addEventListener('click', function (e) {
       var b = e.target.closest('[data-chip]'); if (!b) return;
-      state.chip = b.dataset.chip; state.sub = ''; state.all = false; state.q = ''; q.value = ''; state.shown = PAGE;
+      state.chip = b.dataset.chip; state.sub = ''; state.all = false; state.showAll = false; state.q = ''; q.value = ''; state.shown = PAGE;
       if (state.chip !== 'cart' && state.chip !== 'star') store.set('md_inv_chip_v1', state.chip);
       renderChips(); render();
       var on = chipsEl.querySelector('.is-on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'center' });
@@ -744,8 +769,26 @@
             (O.custom ? '<button type="button" class="iv-btn iv-btn--primary" data-custom-from-q>「' + esc(state.q) + '」 목록에 없는 품목으로 신청</button>' : '') + '</div>';
           return;
         }
+      } else if (state.chip === 'browse') {
+        /* 1단계 — 품목군 타일 */
+        var th = '<p class="iv-list__count iv-crumbs"><b>분류별로 고르기</b> — ' + esc(D.L.c2 || '품목군') + '을 고르세요</p><div class="iv-tiles">';
+        groupOrder.forEach(function (g) {
+          var subs = subsOf(g);
+          th += '<button type="button" class="iv-tile" data-tile-group="' + g + '"><b>' + esc(g ? (catName[g] || '기타') : '분류 없음') + '</b><small>' + groups[g].length + '개' + (subs.length > 1 ? ' · ' + esc(D.L.c3 || '세부 분류') + ' ' + subs.length : '') + '</small></button>';
+        });
+        list.innerHTML = th + '</div>';
+        return;
+      } else if (isGroup(state.chip) && !state.sub && !state.showAll && subsOf(Number(state.chip.slice(1))).length > 1) {
+        /* 2단계 — 세부 분류 타일 */
+        var g2 = Number(state.chip.slice(1));
+        var sh2 = crumbs() + '<div class="iv-tiles">';
+        subsOf(g2).forEach(function (s) { sh2 += '<button type="button" class="iv-tile" data-tile-sub="' + s.k + '"><b>' + esc(s.n) + '</b><small>' + s.items.length + '개</small></button>'; });
+        sh2 += '<button type="button" class="iv-tile iv-tile--all" data-tile-all><b>모두 보기</b><small>' + groups[g2].length + '개</small></button></div>';
+        list.innerHTML = sh2;
+        return;
       } else {
         arr = itemsOfChip(state.chip || 'all');
+        if (isGroup(state.chip)) head = crumbs();
         if (!state.team && (state.chip === '' || state.chip === 'all')) head = '<div class="iv-hint">먼저 <button type="button" class="iv-link" data-dlg="iv-team-dlg">우리 팀</button>을 고르면 우리 팀이 자주 신청한 품목이 첫 칸에 모입니다.</div>';
         if (state.chip === 'star') head = '<p class="iv-list__count">최근 ' + (D.recentDays || 60) + '일 동안 우리 팀이 신청한 품목</p>';
       }
@@ -756,10 +799,32 @@
       list.innerHTML = h;
     }
 
+    /* 지금 어디인지 — 누르면 그 단계로 돌아감 */
+    function crumbs() {
+      var g = Number(state.chip.slice(1)), h = '<p class="iv-list__count iv-crumbs">';
+      if (groupOrder.length > 1) h += '<button type="button" class="iv-link" data-crumb="browse">분류별로</button> › ';
+      var subs = subsOf(g);
+      if (state.sub || state.showAll) h += (subs.length > 1 ? '<button type="button" class="iv-link" data-crumb="group">' + esc(g ? (catName[g] || '기타') : '분류 없음') + '</button>' : '<b>' + esc(catName[g] || '기타') + '</b>');
+      else h += '<b>' + esc(g ? (catName[g] || '기타') : '분류 없음') + '</b>' + (subs.length > 1 ? ' — ' + esc(D.L.c3 || '세부 분류') + '를 고르세요' : '');
+      if (state.sub) { var s = subs.filter(function (x) { return x.k === state.sub; })[0]; if (s) h += ' › <b>' + esc(s.n) + '</b>'; }
+      else if (state.showAll && subs.length > 1) h += ' › <b>모두</b>';
+      return h + '</p>';
+    }
+
     var nudged = false;
     function nudgeTeam() { if (nudged) return; nudged = true; toast('담았습니다. 신청 전에 우리 팀을 골라 주세요'); $('#iv-teambtn').classList.add('is-pulse'); }
     var favBusy = false;
     list.addEventListener('click', function (e) {
+      var tg = e.target.closest('[data-tile-group]');
+      if (tg) { state.chip = 'g' + tg.dataset.tileGroup; state.sub = ''; state.showAll = false; state.shown = PAGE; store.set('md_inv_chip_v1', state.chip); renderChips(); render(); list.scrollIntoView({ block: 'start' }); return; }
+      var ts = e.target.closest('[data-tile-sub]');
+      if (ts) { state.sub = ts.dataset.tileSub; state.showAll = false; state.shown = PAGE; renderChips(); render(); list.scrollIntoView({ block: 'start' }); return; }
+      if (e.target.closest('[data-tile-all]')) { state.sub = ''; state.showAll = true; state.shown = PAGE; renderChips(); render(); return; }
+      var cr = e.target.closest('[data-crumb]');
+      if (cr) {
+        if (cr.dataset.crumb === 'browse') { state.chip = 'browse'; store.set('md_inv_chip_v1', 'browse'); }
+        state.sub = ''; state.showAll = false; state.shown = PAGE; renderChips(); render(); return;
+      }
       var sc = e.target.closest('[data-scope]');
       if (sc) { state.all = sc.dataset.scope === 'all'; state.shown = PAGE; renderChips(); render(); return; }
       var fb = e.target.closest('[data-fav]');
@@ -908,7 +973,8 @@
     }
 
     setTeam(state.team, true);
-    state.chip = favList().length ? 'fav' : (recentOf().length ? 'star' : (store.get('md_inv_chip_v1', 'all') || 'all'));
+    state.chip = favList().length ? 'fav' : (recentOf().length ? 'star' : (store.get('md_inv_chip_v1', 'browse') || 'browse'));
+    if (isGroup(state.chip) && !groups[Number(state.chip.slice(1))]) state.chip = 'browse';
     if (state.chip.charAt(0) === 'g' && !groups[Number(state.chip.slice(1))]) state.chip = 'all';
     renderChips(); render(); renderBar(); steps();
     /* 팀을 한 번도 고르지 않은 기기면 먼저 묻는다 */

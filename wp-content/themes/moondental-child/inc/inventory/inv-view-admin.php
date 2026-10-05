@@ -30,7 +30,8 @@ function md_inv_dlg_close( $button = '저장', $cls = 'primary' ) {
 function md_inv_admin_dialogs( $which ) {
 	$which = array_flip( $which );
 	if ( array_intersect_key( $which, array_flip( array( 'release', 'receive', 'in', 'out' ) ) ) ) { md_inv_track_map_script(); md_inv_bc_map_script(); md_inv_scan_dialog(); }
-	if ( isset( $which['return'] ) ) { md_inv_adj_dialogs(); } /* 입출고 표가 있는 화면 — 입고 뒤 환불 · 정정 · 교환 */
+	if ( isset( $which['return'] ) ) { md_inv_adj_dialogs(); }
+	if ( array_intersect_key( $which, array_flip( array( 'order', 'in' ) ) ) ) { md_inv_price_map_script(); } /* v6.4 · 품목 고르면 단가 자동 */ /* 입출고 표가 있는 화면 — 입고 뒤 환불 · 정정 · 교환 */
 	if ( isset( $which['release'] ) ) {
 		md_inv_dlg_open( 'dlg-release', '출고', 'req_release' );
 		echo '<label class="iv-f"><span>내줄 수량</span><input class="iv-input" type="number" inputmode="numeric" name="qty" min="1" required></label>';
