@@ -115,6 +115,9 @@ add_action( 'wp_enqueue_scripts', function () {
 
 add_filter( 'body_class', function ( $c ) {
 	if ( md_v5() ) $c[] = 'md-v5';
+	/* v7 미리보기 · ?look=a (화이트 + 차콜 + 브론즈) · ?look=b (화이트 + 차콜 + 딥그린) — 확정 전까지는 주소에 붙였을 때만 */
+	$look = function_exists( 'md_v7_look' ) ? md_v7_look() : '';
+	if ( $look ) { $c[] = 'md-look'; $c[] = 'md-look-' . $look; }
 	return $c;
 } );
 
@@ -231,3 +234,16 @@ add_action( 'template_redirect', function () {
 function md_v5_ko() {
 	return md_v5() && ( ! function_exists( 'moondental_current_language' ) || 'ko' === moondental_current_language() );
 }
+
+/* v7 미리보기 · 모양 선택 (주소 ?look=a|b · 옵션 md_design_look 으로 확정 가능) */
+function md_v7_look() {
+	if ( isset( $_GET['look'] ) && in_array( $_GET['look'], array( 'a', 'b' ), true ) ) return $_GET['look'];
+	$o = get_option( 'md_design_look', '' );
+	return in_array( $o, array( 'a', 'b' ), true ) ? $o : '';
+}
+/* 미리보기 중에는 사이트 안 링크에도 ?look 을 붙여 계속 같은 모양으로 둘러볼 수 있게 */
+add_action( 'wp_footer', function () {
+	if ( ! isset( $_GET['look'] ) || ! md_v7_look() ) return;
+	$l = md_v7_look();
+	echo "<script>(function(){var l='" . esc_js( $l ) . "';document.querySelectorAll('a[href]').forEach(function(a){try{var u=new URL(a.href,location.href);if(u.host!==location.host)return;u.searchParams.set('look',l);a.href=u.toString()}catch(e){}})})()</script>";
+}, 99 );
