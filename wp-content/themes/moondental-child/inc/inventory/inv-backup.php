@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /** 백업에 담는 표 (백업 보관함 자신은 빼고) */
 function md_inv_backup_tables() {
-	return array( 'cat', 'team', 'vendor', 'item', 'ledger', 'req', 'ord', 'deposit', 'log', 'fav', 'price', 'recon' );
+	return array( 'cat', 'team', 'vendor', 'item', 'ledger', 'req', 'ord', 'deposit', 'log', 'fav', 'price', 'recon', 'adj' );
 }
 
 /** 지금 상태를 JSON 문자열로 */

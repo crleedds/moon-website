@@ -65,9 +65,31 @@
     $$('.iv-catsel', d).forEach(catselInit);
     $$('[data-calc]', d).length && calcInit(d);
     lotSync(d);
+    /* v6.3 · 값이 있을 때만 보이는 칸 (예: 선납 업체일 때만 「돌려받은 곳」) */
+    $$('[data-ifset]', d).forEach(function (el) { el.hidden = !set[el.dataset.ifset]; });
+    adjKind(d);
     $$('[data-verify-msg]', d).forEach(function (m) { m.textContent = ''; m.className = 'iv-verify__msg'; });
     if (form) form.dataset.verifyBad = '';
   }
+
+  /* v6.3 · 환불 · 정정 — 종류마다 칸 · 「전액」이면 금액 칸 잠그기 */
+  function adjKind(d) {
+    if (!d || d.id !== 'dlg-adj') return;
+    var k = (d.querySelector('[name=kind]:checked') || {}).value || 'refund';
+    $$('[data-adj]', d).forEach(function (el) { el.hidden = el.dataset.adj !== k; });
+    var all = d.querySelector('[name=all]'), amt = d.querySelector('[name=amount]');
+    if (all && amt) { amt.disabled = all.checked; if (all.checked) amt.value = ''; }
+  }
+  document.addEventListener('change', function (e) {
+    var d = e.target.closest && e.target.closest('#dlg-adj');
+    if (d) adjKind(d);
+    var dk = e.target.closest && e.target.closest('#dlg-dep');
+    if (dk && e.target.name === 'dkind') {
+      var credit = e.target.value === 'credit';
+      var am = dk.querySelector('[name=amount]'); if (am) { am.required = !credit; am.closest('label').hidden = credit; if (credit) am.value = ''; }
+      var cr = dk.querySelector('[name=credit]'); if (cr) { cr.required = credit; cr.placeholder = credit ? '업체가 넣어 준 금액' : '비우면 업체 적립률로 계산'; }
+    }
+  });
 
   /* v6.2 · 분류 정리 도우미 — 묶음 「모두」 · 분류를 고르면 그 줄 체크 */
   document.addEventListener('change', function (e) {

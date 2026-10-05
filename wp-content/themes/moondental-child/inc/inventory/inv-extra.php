@@ -279,6 +279,11 @@ function md_inv_statement_match( $vendor_id, $lines ) {
 	$ours  = array();
 	foreach ( $pb['rows'] as $e ) {
 		if ( in_array( $e->kind, array( 'free', 'adjust' ), true ) ) { continue; }
+		if ( 'adj' === $e->kind ) {
+			/* 입고 뒤 환불 · 정정 — 명세서에는 보통 마이너스 줄(반품처럼)로 나온다 */
+			$ours[] = (object) array( 'date' => $e->date, 'kind' => $e->adj_amount >= 0 ? 'return' : 'in', 'name' => $e->label . ' ' . $e->item, 'item' => $e->item, 'qty' => 0, 'amt' => abs( $e->adj_amount ), 'used' => false );
+			continue;
+		}
 		$k = 'refund' === $e->kind ? 'deposit' : $e->kind;
 		$ours[] = (object) array( 'date' => $e->date, 'kind' => $k, 'name' => trim( $e->item . ( $e->qty ? ' ' . $e->qty . '개' : '' ) ), 'item' => $e->item, 'qty' => $e->qty, 'amt' => $e->plus + $e->minus, 'used' => false );
 	}

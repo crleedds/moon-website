@@ -676,3 +676,11 @@ details.iv-panel > summary { cursor: pointer; }
 .iv-catrow select { width: 150px; flex: none; }
 @media (max-width: 600px) { .iv-catrows { grid-template-columns: 1fr; } .iv-catrow select { width: 130px; } }
 .iv-catall { margin: 6px 0 0; font-size: .86rem; font-weight: 600; }
+
+/* v6.3 · 환불 · 정정 · 교환 · 덤 */
+.iv-adjline { color: #2F6B8F; }
+.iv-link--xs { font-size: .76rem; padding: 0 2px; }
+.iv-adjkind, .iv-adjdest, .iv-depkind { border: 0; padding: 0; margin: 4px 0 8px; display: flex; flex-direction: column; gap: 4px; }
+.iv-adj-all { align-self: end; margin-bottom: 10px; }
+.iv-bonusf input { max-width: 160px; }
+.iv-settle-adj td { color: #2F6B8F; }

@@ -45,9 +45,9 @@ function md_inv_act_recv_scan() {
 		$o = md_inv_ord( $oid );
 		if ( ! $o || (int) $o->item_id !== $item ) { md_inv_go( 'err', '주문을 다시 골라 주세요.', $back ); }
 		$left = (int) $o->qty - (int) $o->recv_qty;
-		$r = md_inv_ord_receive( $oid, $qty, array( 'free' => md_inv_p( 'free' ) ? 1 : 0, 'allow_more' => $qty > $left ? 1 : 0, 'note' => md_inv_p( 'note' ), 'lot' => md_inv_p( 'lot' ) ) );
+		$r = md_inv_ord_receive( $oid, $qty, array( 'free' => md_inv_p( 'free' ) ? 1 : 0, 'allow_more' => $qty > $left ? 1 : 0, 'note' => md_inv_p( 'note' ), 'lot' => md_inv_p( 'lot' ), 'bonus_qty' => md_inv_p( 'bonus_qty' ) ) );
 	} else {
-		$r = md_inv_do_in( $item, $qty, array( 'price' => md_inv_p( 'price' ), 'free' => md_inv_p( 'free' ) ? 1 : 0, 'note' => md_inv_txt( md_inv_p( 'note' ), 300 ), 'lot' => md_inv_p( 'lot' ) ) );
+		$r = md_inv_do_in( $item, $qty, array( 'price' => md_inv_p( 'price' ), 'free' => md_inv_p( 'free' ) ? 1 : 0, 'note' => md_inv_txt( md_inv_p( 'note' ), 300 ), 'lot' => md_inv_p( 'lot' ), 'bonus_qty' => md_inv_p( 'bonus_qty' ) ) );
 	}
 	if ( is_wp_error( $r ) ) { md_inv_go( 'err', $r->get_error_message(), add_query_arg( 'id', $item, $back ) ); }
 	md_inv_go( 'ok', '「' . $it->name . '」 ' . $qty . ( $it->unit ? $it->unit : '개' ) . ' 입고 · 지금 재고 ' . md_inv_stock( $item ), $back );
@@ -103,7 +103,8 @@ function md_inv_view_receive() {
 			<?php if ( (int) $it->track_lot ) : ?>
 				<label class="iv-f"><span>LOT 번호</span><span class="iv-inline"><input class="iv-input" name="lot" maxlength="80" placeholder="상자 · 라벨의 LOT"><button type="button" class="iv-btn iv-btn--icon" data-scanto="lot" aria-label="LOT 바코드 스캔"><?php echo md_inv_icon( 'scan', 18 ); // phpcs:ignore ?></button></span></label>
 			<?php endif; ?>
-			<label class="iv-check"><input type="checkbox" name="free" value="1"> 무상 제공<?php echo $v && $v->prepaid ? ' (선납 잔액에서 빼지 않음)' : ''; ?></label>
+			<?php md_inv_bonus_field(); ?>
+			<label class="iv-check"><input type="checkbox" name="free" value="1"> 전부 무상 제공<?php echo $v && $v->prepaid ? ' (선납 잔액에서 빼지 않음)' : ''; ?></label>
 			<label class="iv-f"><span>메모 <small>(선택)</small></span><input class="iv-input" name="note" maxlength="200" placeholder="예: 거래명세서 번호"></label>
 			<button class="iv-btn iv-btn--primary iv-btn--lg iv-qc-card__save">입고</button>
 		</form>
@@ -144,10 +145,12 @@ function md_inv_settle_sum( $lines ) {
 	foreach ( $lines as $l ) {
 		$amt = abs( (int) $l->qty ) * (int) $l->price;
 		$s['n']++;
+		if ( 'adj' === $l->type ) { $s['refund'] = ( isset( $s['refund'] ) ? $s['refund'] : 0 ) + (int) $l->price; continue; }
 		if ( $l->free ) { $s['free'] += 'in' === $l->type ? $amt : 0; continue; }
 		if ( 'in' === $l->type ) { $s['buy'] += $amt; } else { $s['ret'] += $amt; }
 	}
-	$s['net'] = $s['buy'] - $s['ret'];
+	$s['refund'] = isset( $s['refund'] ) ? $s['refund'] : 0;
+	$s['net'] = $s['buy'] - $s['ret'] - $s['refund'];
 	return $s;
 }
 
@@ -188,7 +191,9 @@ function md_inv_view_settle() {
 		<h3 class="iv-h3"><?php echo esc_html( md_inv_vendor_name( $vid ) ); ?> 상세</h3>
 		<div class="iv-table-wrap"><table class="iv-table">
 			<thead><tr><th>일자</th><th>구분</th><th>품목</th><th class="r">수량</th><th class="r">단가</th><th class="r">금액</th><th>비고</th></tr></thead>
-			<tbody><?php foreach ( $lines as $l ) : $amt = abs( (int) $l->qty ) * (int) $l->price; ?>
+			<tbody><?php foreach ( $lines as $l ) : $amt = 'adj' === $l->type ? -(int) $l->price : abs( (int) $l->qty ) * (int) $l->price; if ( 'adj' === $l->type ) : ?>
+				<tr class="iv-settle-adj"><td data-l="일자"><?php echo esc_html( md_inv_date( $l->created_at, 'n/j' ) ); ?></td><td data-l="구분">환불 · 정정</td><td data-l="품목"><?php echo esc_html( $l->item_name ); ?></td><td data-l="수량" class="r"></td><td data-l="단가" class="r"></td><td data-l="금액" class="r"><?php echo esc_html( ( $amt < 0 ? '−' : '+' ) . md_inv_num( abs( $amt ) ) ); ?></td><td data-l="비고"><?php echo esc_html( $l->note ); ?></td></tr>
+				<?php continue; endif; ?>
 				<tr><td data-l="일자"><?php echo esc_html( md_inv_date( $l->created_at, 'n/j' ) ); ?></td><td data-l="구분"><?php echo esc_html( $l->free ? '무상' : md_inv_type_label( $l->type ) ); ?></td><td data-l="품목"><?php echo esc_html( $l->item_name ); ?></td><td data-l="수량" class="r"><?php echo abs( (int) $l->qty ); ?></td><td data-l="단가" class="r"><?php echo esc_html( md_inv_num( $l->price ) ); ?></td><td data-l="금액" class="r"><?php echo esc_html( ( 'return' === $l->type ? '−' : '' ) . md_inv_num( $l->free ? 0 : $amt ) ); ?></td><td data-l="비고"><?php echo esc_html( $l->note ); ?></td></tr>
 			<?php endforeach; ?></tbody>
 		</table></div>
@@ -209,6 +214,7 @@ function md_inv_settle_xlsx( $ym ) {
 		$tot += $s['net'];
 		$sum['rows'][] = array( $v ? $v->name : '업체 없음', $s['n'], $s['buy'], $s['ret'], $s['free'], $s['net'], $v && $v->prepaid ? '선납' : '' );
 		foreach ( $lines as $l ) {
+			if ( 'adj' === $l->type ) { $det['rows'][] = array( $v ? $v->name : '', substr( $l->created_at, 0, 10 ), '환불 · 정정', $l->item_name, '', $l->unit, '', -(int) $l->price, $l->note ); continue; }
 			$amt = abs( (int) $l->qty ) * (int) $l->price;
 			$det['rows'][] = array( $v ? $v->name : '', substr( $l->created_at, 0, 10 ), $l->free ? '무상' : md_inv_type_label( $l->type ), $l->item_name, abs( (int) $l->qty ), $l->unit, (int) $l->price, $l->free ? 0 : ( 'return' === $l->type ? -$amt : $amt ), $l->note );
 		}

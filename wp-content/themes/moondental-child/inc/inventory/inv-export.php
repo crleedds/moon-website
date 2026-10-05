@@ -34,6 +34,7 @@ function md_inv_dataset_names() {
 		'prices'   => '단가 변동',
 		'passbook' => '선납 거래 내역',
 		'lots'     => 'LOT · 차트번호',
+		'adjs'     => '환불 · 정정',
 	);
 }
 
@@ -207,6 +208,15 @@ function md_inv_dataset( $key, $a = array() ) {
 				foreach ( $pb['rows'] as $e ) {
 					$out['rows'][] = array( md_inv_vendor_name( $vid ), $e->date, $e->label, $e->item, $e->qty ? $e->qty : '', $e->lot, $e->plus ? $e->plus : '', $e->minus ? $e->minus : '', $e->bal, $e->note, $e->person );
 				}
+			}
+			break;
+
+		case 'adjs':
+			$out['head']  = array( '일시', '업체', '품목', '종류', '입고 일시', '입고 수량', '입고 단가', '금액 (+돌려받음 · −더 냄)', '덤 개수', '돌려받은 곳', '메모', '처리자' );
+			$out['num']   = array( 5 => 'n', 6 => 'won', 7 => 'won', 8 => 'n' );
+			$out['width'] = array( 16, 16, 34, 10, 16, 8, 11, 16, 7, 12, 30, 10 );
+			foreach ( md_inv_adjs( array( 'from' => $a['from'], 'to' => $a['to'] ) ) as $x ) {
+				$out['rows'][] = array( substr( $x->created_at, 0, 16 ), md_inv_vendor_name( $x->vendor_id ), $x->item_name, md_inv_adj_kinds()[ $x->kind ], substr( (string) $x->in_at, 0, 16 ), abs( (int) $x->in_qty ), (int) $x->in_price, (int) $x->amount, (int) $x->qty ? (int) $x->qty : '', 'balance' === $x->dest ? '선납 잔액' : '돈', $x->note, $x->person );
 			}
 			break;
 
@@ -407,7 +417,7 @@ function md_inv_xlsx_sheet( $ds ) {
 
 /** 보고서 엑셀 — 표 여러 개를 한 파일로 */
 function md_inv_report_xlsx( $from, $to, $keys = null ) {
-	if ( null === $keys ) { $keys = array( 'items', 'low', 'ledger', 'requests', 'orders', 'usage', 'monthly', 'prepaid', 'deposits', 'passbook', 'vendors' ); }
+	if ( null === $keys ) { $keys = array( 'items', 'low', 'ledger', 'requests', 'orders', 'usage', 'monthly', 'prepaid', 'deposits', 'passbook', 'adjs', 'vendors' ); }
 	$sheets = array();
 	foreach ( $keys as $k ) { $sheets[] = md_inv_dataset( $k, array( 'from' => $from, 'to' => $to ) ); }
 	return md_inv_xlsx( $sheets );

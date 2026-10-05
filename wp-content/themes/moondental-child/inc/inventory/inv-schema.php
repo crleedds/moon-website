@@ -17,7 +17,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_INV_SCHEMA', 3 );
+define( 'MD_INV_SCHEMA', 4 );
 
 /** 테이블 이름 */
 function md_inv_t( $key = '' ) {
@@ -37,6 +37,7 @@ function md_inv_t( $key = '' ) {
 		'fav'     => $p . 'fav',      // 팀 즐겨찾기 (v5.7)
 		'price'   => $p . 'price',    // 단가 변동 기록 (v5.7)
 		'recon'   => $p . 'recon',    // 선납 업체 잔액 대조 (v6.0)
+		'adj'     => $p . 'adj',      // 입고 뒤 환불 · 정정 (v6.3)
 	);
 	return '' === $key ? $t : $t[ $key ];
 }
@@ -59,6 +60,7 @@ function md_inv_migrate() {
 	}
 	if ( $cur < 2 ) { md_inv_schema_2(); }
 	if ( $cur < 3 ) { md_inv_schema_3(); }
+	if ( $cur < 4 ) { md_inv_schema_4(); }
 
 	update_option( 'md_inv_schema', MD_INV_SCHEMA );
 	delete_transient( 'md_inv_migrating' );
@@ -335,6 +337,32 @@ function md_inv_schema_3() {
 	) $c;" );
 	/* 지금까지의 입금은 낸 돈 = 쓸 수 있는 돈 */
 	$wpdb->query( "UPDATE {$t['deposit']} SET credit = amount WHERE credit = 0 AND amount <> 0" );
+}
+
+/** 4단계 (v6.3) · 입고 뒤 환불 · 정정 (물건은 그대로) */
+function md_inv_schema_4() {
+	global $wpdb;
+	$t = md_inv_t();
+	$c = $wpdb->get_charset_collate();
+	dbDelta( "CREATE TABLE {$t['adj']} (
+		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		ledger_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		item_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		vendor_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		kind VARCHAR(10) NOT NULL DEFAULT 'refund',
+		amount BIGINT NOT NULL DEFAULT 0,
+		qty INT NOT NULL DEFAULT 0,
+		dest VARCHAR(10) NOT NULL DEFAULT 'balance',
+		note VARCHAR(300) NOT NULL DEFAULT '',
+		person VARCHAR(100) NOT NULL DEFAULT '',
+		user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		voided TINYINT(1) NOT NULL DEFAULT 0,
+		void_note VARCHAR(200) NOT NULL DEFAULT '',
+		created_at DATETIME NULL DEFAULT NULL,
+		PRIMARY KEY  (id),
+		KEY ledger_id (ledger_id),
+		KEY vendor_id (vendor_id)
+	) $c;" );
 }
 
 /** 열이 없을 때만 더한다 */

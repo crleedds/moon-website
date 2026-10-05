@@ -237,7 +237,7 @@ function md_inv_date( $dt, $fmt = 'n/j H:i' ) {
 }
 
 function md_inv_type_label( $type ) {
-	$m = array( 'open' => '기초', 'in' => '입고', 'out' => '출고', 'return' => '반품', 'adjust' => '실사' );
+	$m = array( 'open' => '기초', 'in' => '입고', 'out' => '출고', 'return' => '반품', 'adjust' => '실사', 'adj' => '환불 · 정정' );
 	return isset( $m[ $type ] ) ? $m[ $type ] : $type;
 }
 
@@ -478,6 +478,13 @@ function md_inv_settlement( $ym ) {
 	$rows = md_inv_ledger( array( 'type' => 'in,return', 'from' => $from, 'to' => $to, 'limit' => 0, 'with_void' => 0 ) );
 	$out  = array();
 	foreach ( array_reverse( $rows ) as $l ) { $out[ (int) $l->vendor_id ][] = $l; }
+	/* v6.3 · 입고 뒤 환불 · 정정 — 정산 금액에서 뺀다 (선납 잔액으로든 돈으로든) */
+	if ( function_exists( 'md_inv_adjs' ) ) {
+		foreach ( md_inv_adjs( array( 'from' => $from, 'to' => $to ) ) as $a ) {
+			$out[ (int) $a->vendor_id ][] = (object) array( 'type' => 'adj', 'created_at' => $a->created_at, 'item_name' => $a->item_name, 'unit' => $a->unit, 'qty' => 0, 'price' => (int) $a->amount, 'free' => 0,
+				'note' => md_inv_adj_kinds()[ $a->kind ] . ( 'balance' === $a->dest ? ' · 선납 잔액으로' : ' · 돈으로' ) . ( '' !== (string) $a->note ? ' · ' . $a->note : '' ), 'vendor_id' => $a->vendor_id );
+		}
+	}
 	uksort( $out, function ( $a, $b ) { return strcmp( md_inv_vendor_name( $a ), md_inv_vendor_name( $b ) ); } );
 	return $out;
 }
@@ -788,7 +795,15 @@ function md_inv_returnable( $in_id ) {
 
 /** 입고 (주문 없이) */
 function md_inv_do_in( $item_id, $qty, $o = array() ) {
+	$bonus = isset( $o['bonus_qty'] ) ? max( 0, (int) $o['bonus_qty'] ) : 0;
+	if ( $bonus > (int) $qty ) { return new WP_Error( 'bonus', '덤 수량이 들어온 수량보다 많습니다.' ); }
+	if ( $bonus && ! empty( $o['free'] ) ) { $bonus = 0; } /* 전부 무상이면 나눌 것 없음 */
 	md_inv_lock();
+	if ( $bonus ) {
+		md_inv_in_bonus_split( $item_id, $bonus, $o );
+		if ( $bonus === (int) $qty ) { md_inv_unlock(); $it = md_inv_item( $item_id ); md_inv_log( '입고', $it->name . ' +' . (int) $qty . ' (모두 덤)' ); return true; }
+		$qty = (int) $qty - $bonus;
+	}
 	$r = md_inv_ledger_add( 'in', $item_id, $qty, $o );
 	if ( ! is_wp_error( $r ) && isset( $o['price'] ) && '' !== trim( (string) $o['price'] ) ) { md_inv_price_from_in( $item_id, md_inv_int( $o['price'] ) ); }
 	md_inv_unlock();
@@ -1229,6 +1244,9 @@ function md_inv_ord_receive( $id, $qty, $d = array() ) {
 	$qty = (int) $qty;
 	if ( $qty < 1 ) { return new WP_Error( 'qty', '들어온 수량을 적어 주세요.' ); }
 	$left = (int) $ord->qty - (int) $ord->recv_qty;
+	$bonus = isset( $d['bonus_qty'] ) ? max( 0, (int) $d['bonus_qty'] ) : 0;
+	if ( $bonus > $qty ) { return new WP_Error( 'bonus', '덤 수량이 들어온 수량보다 많습니다.' ); }
+	if ( $bonus && $qty - $bonus <= $left ) { $d['allow_more'] = 1; } /* 덤으로 더 온 것은 「주문보다 많이」가 아니다 */
 	if ( $qty > $left && empty( $d['allow_more'] ) ) {
 		return new WP_Error( 'more', '주문한 것보다 많습니다 (남은 수량 ' . $left . '개). 더 들어왔으면 「주문보다 많이 들어옴」을 체크해 주세요.' );
 	}
@@ -1244,10 +1262,16 @@ function md_inv_ord_receive( $id, $qty, $d = array() ) {
 		$new_recv, $done ? 'received' : 'ordered', current_time( 'mysql' ), (int) $id, (int) $ord->recv_qty
 	) );
 	if ( ! $n ) { md_inv_rollback(); md_inv_unlock(); return new WP_Error( 'race', '방금 다른 곳에서 이 주문을 처리했습니다. 새로고침해 주세요.' ); }
-	$lid = md_inv_ledger_add( 'in', $ord->item_id, $qty, array(
+	$lo = array(
 		'ord_id' => $ord->id, 'price' => $price, 'free' => $free, 'lot' => isset( $d['lot'] ) ? $d['lot'] : '',
 		'note'   => trim( '주문 입고' . ( ! empty( $d['note'] ) ? ' · ' . md_inv_txt( $d['note'], 300 ) : '' ) ),
-	) );
+	);
+	if ( $bonus && ! $free ) {
+		md_inv_in_bonus_split( $ord->item_id, $bonus, $lo );
+		$lid = $bonus < $qty ? md_inv_ledger_add( 'in', $ord->item_id, $qty - $bonus, $lo ) : 1;
+	} else {
+		$lid = md_inv_ledger_add( 'in', $ord->item_id, $qty, $lo );
+	}
 	if ( is_wp_error( $lid ) ) { md_inv_rollback(); md_inv_unlock(); return $lid; }
 	md_inv_commit();
 	md_inv_unlock();
@@ -1293,18 +1317,24 @@ function md_inv_ord_update( $id, $d ) {
  * 선납 (선불) 업체
  * ============================================================ */
 
-function md_inv_deposit_add( $vendor_id, $amount, $paid_on, $note = '', $credit = '' ) {
+function md_inv_deposit_add( $vendor_id, $amount, $paid_on, $note = '', $credit = '', $kind = 'pay' ) {
 	global $wpdb;
 	$v = md_inv_vendor( $vendor_id );
 	if ( ! $v || ! (int) $v->prepaid ) { return new WP_Error( 'vendor', '선납 업체를 골라 주세요.' ); }
 	$amount = md_inv_int( $amount );
-	if ( 0 === $amount ) { return new WP_Error( 'amount', '금액을 적어 주세요. 돌려받은 돈은 앞에 − 를 붙입니다.' ); }
+	if ( 'credit' === $kind ) {
+		/* v6.3 · 업체 보상 · 리베이트 — 돈은 안 냈고 쓸 수 있는 잔액만 늘어남 */
+		$cr = md_inv_int( $credit );
+		if ( $cr <= 0 ) { return new WP_Error( 'credit', '업체가 넣어 준 금액(쓸 수 있는 금액)을 적어 주세요.' ); }
+		$amount = 0; $credit = (string) $cr;
+	} elseif ( 0 === $amount ) { return new WP_Error( 'amount', '금액을 적어 주세요. 돌려받은 돈은 앞에 − 를 붙입니다.' ); }
 	if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $paid_on ) ) { $paid_on = current_time( 'Y-m-d' ); }
 	/* v6.0 · 적립 — 비우면 업체 기본 적립률로 */
 	$credit = '' === trim( (string) $credit ) ? md_inv_credit_for( $v->id, $amount ) : md_inv_int( $credit );
 	if ( $amount > 0 && $credit < $amount ) { return new WP_Error( 'credit', '쓸 수 있는 금액은 입금액보다 적을 수 없습니다.' ); }
+	$kind = 'credit' === $kind ? 'credit' : 'pay';
 	$wpdb->insert( md_inv_t( 'deposit' ), array(
-		'vendor_id' => (int) $v->id, 'paid_on' => $paid_on, 'amount' => $amount, 'credit' => $credit, 'kind' => 'pay',
+		'vendor_id' => (int) $v->id, 'paid_on' => $paid_on, 'amount' => $amount, 'credit' => $credit, 'kind' => $kind,
 		'note' => md_inv_txt( $note, 255 ), 'person' => md_inv_me(), 'user_id' => get_current_user_id(),
 		'created_at' => current_time( 'mysql' ),
 	) );
@@ -1338,7 +1368,7 @@ function md_inv_prepaid_summary() {
 	$out = array();
 	foreach ( md_inv_vendors( false ) as $v ) {
 		if ( ! (int) $v->prepaid ) { continue; }
-		$out[ (int) $v->id ] = (object) array( 'vendor' => $v, 'deposit' => 0, 'paid' => 0, 'bonus' => 0, 'adjust' => 0, 'spent' => 0, 'returned' => 0, 'pending' => 0, 'last_in' => '', 'burn' => 0, 'months_left' => null, 'alert' => false );
+		$out[ (int) $v->id ] = (object) array( 'vendor' => $v, 'deposit' => 0, 'paid' => 0, 'bonus' => 0, 'adjust' => 0, 'spent' => 0, 'returned' => 0, 'refund' => 0, 'pending' => 0, 'last_in' => '', 'burn' => 0, 'months_left' => null, 'alert' => false );
 	}
 	if ( ! $out ) { return array(); }
 	$in = implode( ',', array_keys( $out ) );
@@ -1355,6 +1385,11 @@ function md_inv_prepaid_summary() {
 	                               WHERE vendor_id IN ($in) AND voided = 0 AND free = 0 AND type IN ('in','return') AND created_at >= %s GROUP BY vendor_id", $since ) ) as $r ) {
 		$out[ (int) $r->vendor_id ]->burn = max( 0, (int) round( (float) $r->s / 3 ) );
 	}
+	/* v6.3 · 입고 뒤 환불 · 정정 중 선납 잔액으로 돌려받은 것 */
+	if ( function_exists( 'md_inv_adj_balance_sums' ) ) {
+		foreach ( md_inv_adj_balance_sums() as $vid => $s ) { if ( isset( $out[ $vid ] ) ) { $out[ $vid ]->refund = (int) $s; } }
+		foreach ( md_inv_adj_balance_sums( $since ) as $vid => $s ) { if ( isset( $out[ $vid ] ) ) { $out[ $vid ]->burn = max( 0, $out[ $vid ]->burn - (int) round( $s / 3 ) ); } }
+	}
 	foreach ( $wpdb->get_results( "SELECT vendor_id, type, SUM(ABS(qty) * price) AS s, MAX(created_at) AS last FROM {$t['ledger']}
 	                               WHERE vendor_id IN ($in) AND voided = 0 AND free = 0 AND type IN ('in','return') GROUP BY vendor_id, type" ) as $r ) {
 		if ( 'in' === $r->type ) { $out[ (int) $r->vendor_id ]->spent = (int) $r->s; $out[ (int) $r->vendor_id ]->last_in = $r->last; }
@@ -1365,7 +1400,7 @@ function md_inv_prepaid_summary() {
 		$out[ (int) $r->vendor_id ]->pending = (int) round( (float) $r->s );
 	}
 	foreach ( $out as $o ) {
-		$o->balance   = $o->deposit - $o->spent + $o->returned;
+		$o->balance   = $o->deposit - $o->spent + $o->returned + $o->refund;
 		$o->available = $o->balance - $o->pending;
 		$o->months_left = $o->burn > 0 ? $o->available / $o->burn : null;
 		$o->alert = (int) $o->vendor->pp_alert > 0 && $o->available < (int) $o->vendor->pp_alert;

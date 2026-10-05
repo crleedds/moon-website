@@ -236,7 +236,7 @@ function md_inv_act_item_delete() {
 }
 
 function md_inv_act_stock_in() {
-	md_inv_done( md_inv_do_in( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'free' => md_inv_p( 'free' ) ? 1 : 0, 'note' => md_inv_txt( md_inv_p( 'note' ), 500 ), 'lot' => md_inv_p( 'lot' ) ) ), '입고를 기록했습니다.' );
+	md_inv_done( md_inv_do_in( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'free' => md_inv_p( 'free' ) ? 1 : 0, 'note' => md_inv_txt( md_inv_p( 'note' ), 500 ), 'lot' => md_inv_p( 'lot' ), 'bonus_qty' => md_inv_p( 'bonus_qty' ) ) ), '입고를 기록했습니다.' );
 }
 
 function md_inv_act_stock_out() {
@@ -303,7 +303,7 @@ function md_inv_act_ord_many() {
 function md_inv_act_ord_receive() {
 	md_inv_done( md_inv_ord_receive( (int) md_inv_p( 'id' ), (int) md_inv_p( 'qty' ), array(
 		'price' => md_inv_p( 'price' ), 'free' => md_inv_p( 'free' ) ? 1 : 0, 'close' => md_inv_p( 'close' ) ? 1 : 0,
-		'allow_more' => md_inv_p( 'allow_more' ) ? 1 : 0, 'note' => md_inv_p( 'note' ), 'lot' => md_inv_p( 'lot' ),
+		'allow_more' => md_inv_p( 'allow_more' ) ? 1 : 0, 'note' => md_inv_p( 'note' ), 'lot' => md_inv_p( 'lot' ), 'bonus_qty' => md_inv_p( 'bonus_qty' ),
 	) ), '입고를 기록했습니다. 재고에 더했습니다.' );
 }
 
@@ -322,7 +322,7 @@ function md_inv_act_ord_update() {
  * ============================================================ */
 
 function md_inv_act_dep_add() {
-	md_inv_done( md_inv_deposit_add( (int) md_inv_p( 'vendor_id' ), md_inv_p( 'amount' ), (string) md_inv_p( 'paid_on' ), (string) md_inv_p( 'note' ), (string) md_inv_p( 'credit' ) ), '입금을 기록했습니다.' );
+	md_inv_done( md_inv_deposit_add( (int) md_inv_p( 'vendor_id' ), md_inv_p( 'amount' ), (string) md_inv_p( 'paid_on' ), (string) md_inv_p( 'note' ), (string) md_inv_p( 'credit' ), 'credit' === md_inv_p( 'dkind' ) ? 'credit' : 'pay' ), 'credit' === md_inv_p( 'dkind' ) ? '업체 보상 · 리베이트를 기록했습니다 (쓸 수 있는 잔액만 늘어남).' : '입금을 기록했습니다.' );
 }
 
 function md_inv_act_dep_delete() {

@@ -71,11 +71,11 @@ function md_inv_passbook( $vendor_id, $from = '', $to = '' ) {
 	$ev  = array();
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$t['deposit']} WHERE vendor_id = %d", $vid ) ) as $d ) {
 		$adj   = 'adjust' === $d->kind;
-		$bonus = ! $adj && (int) $d->credit !== (int) $d->amount ? (int) $d->credit - (int) $d->amount : 0;
+		$bonus = ! $adj && 'credit' !== $d->kind && (int) $d->credit !== (int) $d->amount ? (int) $d->credit - (int) $d->amount : 0;
 		$ev[]  = (object) array(
 			'at' => $d->paid_on . ' ' . substr( (string) $d->created_at, 11, 8 ), 'date' => $d->paid_on,
 			'kind' => $adj ? 'adjust' : ( (int) $d->amount < 0 ? 'refund' : 'deposit' ),
-			'label' => $adj ? '잔액 조정' : ( (int) $d->amount < 0 ? '돌려받음' : '입금' ),
+			'label' => $adj ? '잔액 조정' : ( 'credit' === $d->kind ? '보상 · 리베이트' : ( (int) $d->amount < 0 ? '돌려받음' : '입금' ) ),
 			'item' => '', 'qty' => 0, 'lot' => '',
 			'delta' => (int) $d->credit,
 			'note' => trim( ( $bonus ? '입금 ' . md_inv_num( $d->amount ) . ' + 적립 ' . md_inv_num( $bonus ) . ' · ' : '' ) . (string) $d->note, ' ·' ),
@@ -95,6 +95,20 @@ function md_inv_passbook( $vendor_id, $from = '', $to = '' ) {
 			'delta' => $l->free ? 0 : ( 'in' === $l->type ? -$amt : $amt ),
 			'note' => trim( (string) $l->note ), 'person' => $l->person, 'ref' => 'l' . $l->id, 'price' => (int) $l->price, 'unit' => $l->unit,
 		);
+	}
+	/* v6.3 · 입고 뒤 환불 · 정정 — 선납 잔액으로 받은 것만 잔액이 바뀐다 (돈으로 받은 것은 기록만) */
+	if ( function_exists( 'md_inv_adjs' ) ) {
+		foreach ( md_inv_adjs( array( 'vendor_id' => $vid ) ) as $a ) {
+			$bal_in = 'balance' === $a->dest;
+			$ev[] = (object) array(
+				'at' => $a->created_at, 'date' => substr( $a->created_at, 0, 10 ), 'kind' => 'adj',
+				'label' => md_inv_adj_kinds()[ $a->kind ] . ( (int) $a->amount >= 0 ? '' : ' (더 냄)' ),
+				'item' => $a->item_name, 'qty' => 0, 'lot' => '',
+				'delta' => $bal_in ? (int) $a->amount : 0, 'adj_amount' => (int) $a->amount,
+				'note' => trim( ( $bal_in ? '' : '돈으로 ' . ( (int) $a->amount >= 0 ? '돌려받음 ' : '더 냄 ' ) . md_inv_num( abs( (int) $a->amount ) ) . '원 · ' ) . (string) $a->note, ' ·' ),
+				'person' => $a->person, 'ref' => 'a' . $a->id,
+			);
+		}
 	}
 	usort( $ev, function ( $a, $b ) { return strcmp( $a->at . $a->ref, $b->at . $b->ref ); } );
 	$bal = 0; $open = 0; $out = array();
