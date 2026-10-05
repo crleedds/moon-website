@@ -797,6 +797,17 @@ function md_acc_render_me() {
 				<p class="mds-hint" style="margin:0">여럿이 함께 쓰는 공용 계정입니다. 신청 · 요청에 내 이름이 자동으로 남게 하려면 로그아웃한 뒤 로그인 화면의 <b>「회원가입 신청」</b>으로 내 계정을 만들어 주세요.</p>
 			</section>
 		<?php else : ?>
+			<?php /* v7.3 · 비밀번호 바꾸기를 맨 위로 (원장 지시) */ ?>
+			<form method="post" class="mds-card mda-card mda-form" id="mda-pass">
+				<h3 class="mda-h3"><?php echo $first ? '새 비밀번호 정하기' : '비밀번호 바꾸기'; ?></h3>
+				<input type="hidden" name="md_acc" value="me"><input type="hidden" name="what" value="pass">
+				<?php wp_nonce_field( 'md_acc_me', 'md_acc_nonce' ); ?>
+				<input type="text" name="username" value="<?php echo esc_attr( $u->user_login ); ?>" autocomplete="username" hidden>
+				<label class="mda-f"><span><?php echo $first ? '받은 임시 비밀번호' : '지금 비밀번호'; ?></span><input type="password" name="cur" required autocomplete="current-password"></label>
+				<label class="mda-f"><span>새 비밀번호 <small>숫자 6자리</small></span><input type="password" name="pass" required minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password"></label>
+				<label class="mda-f"><span>새 비밀번호 확인</span><input type="password" name="pass2" required minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password"></label>
+				<button type="submit" class="mds-btn mds-btn--fill">비밀번호 바꾸기</button>
+			</form>
 			<?php if ( ! $first ) : ?>
 			<form method="post" class="mds-card mda-card mda-form">
 				<h3 class="mda-h3">연락처</h3>
@@ -814,16 +825,6 @@ function md_acc_render_me() {
 				<?php md_acc_render_log_table( md_acc_log_rows( array( 'user_id' => $u->ID, 'limit' => 8 ) ), false ); ?>
 			</section>
 			<?php endif; ?>
-			<form method="post" class="mds-card mda-card mda-form" id="mda-pass">
-				<h3 class="mda-h3"><?php echo $first ? '새 비밀번호 정하기' : '비밀번호 바꾸기'; ?></h3>
-				<input type="hidden" name="md_acc" value="me"><input type="hidden" name="what" value="pass">
-				<?php wp_nonce_field( 'md_acc_me', 'md_acc_nonce' ); ?>
-				<input type="text" name="username" value="<?php echo esc_attr( $u->user_login ); ?>" autocomplete="username" hidden>
-				<label class="mda-f"><span><?php echo $first ? '받은 임시 비밀번호' : '지금 비밀번호'; ?></span><input type="password" name="cur" required autocomplete="current-password"></label>
-				<label class="mda-f"><span>새 비밀번호 <small>숫자 6자리</small></span><input type="password" name="pass" required minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password"></label>
-				<label class="mda-f"><span>새 비밀번호 확인</span><input type="password" name="pass2" required minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password"></label>
-				<button type="submit" class="mds-btn mds-btn--fill">비밀번호 바꾸기</button>
-			</form>
 		<?php endif; ?>
 	</div>
 	<?php

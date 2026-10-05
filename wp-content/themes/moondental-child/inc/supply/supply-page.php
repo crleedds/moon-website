@@ -120,10 +120,11 @@ function md_sup_apps() {
 		),
 		// v5.8 · 내 정보 (inc/accounts) — 머리의 아이디를 누르면 들어온다
 		'me' => array(
-			'label'  => '내 정보',
+			'label'  => '내 정보 · 비밀번호',
 			'icon'   => '👤',
 			'desc'   => '연락처 · 비밀번호',
-			'hidden' => true,
+			/* v7.3 · 개인 계정이면 첫 화면에 타일로 (원장 지시 — 직원이 비밀번호를 바꿀 수 있게) */
+			'hidden' => ! ( is_user_logged_in() && function_exists( 'md_acc_is_personal_user' ) && md_acc_is_personal_user( wp_get_current_user() ) ),
 		),
 	);
 }
@@ -963,7 +964,9 @@ function md_sup_render_header( $app, $tab ) {
 				<h1><?php echo esc_html( $app ? $apps[ $app ]['label'] : '직원 라운지' ); ?></h1>
 			</div>
 			<div class="mds-head__me">
-				<a class="mds-head__name" href="<?php echo esc_url( md_sup_url( array( 'app' => 'me' ) ) ); ?>" title="내 정보"><?php echo esc_html( $user->user_login ); /* v4.21.1 · 표시 이름 대신 로그인 아이디 · v5.8 · 누르면 내 정보 */ ?></a>
+				<?php $md_personal = function_exists( 'md_acc_is_personal_user' ) && md_acc_is_personal_user( $user ); ?>
+				<a class="mds-head__name" href="<?php echo esc_url( md_sup_url( array( 'app' => 'me' ) ) ); ?>" title="내 정보"><?php echo esc_html( $md_personal && '' !== trim( $user->display_name ) ? $user->display_name : $user->user_login ); /* v4.21.1 · 공용 계정은 로그인 아이디 · v5.8 · 누르면 내 정보 · v7.3 · 개인 계정은 이름 (아이디는 자동이라) */ ?></a>
+				<?php if ( $md_personal ) : ?><a class="mds-head__out" href="<?php echo esc_url( md_sup_url( array( 'app' => 'me' ) ) . '#mda-pass' ); ?>">비밀번호 바꾸기</a><?php endif; ?>
 				<a class="mds-head__out" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">로그아웃</a>
 			</div>
 		</div>
