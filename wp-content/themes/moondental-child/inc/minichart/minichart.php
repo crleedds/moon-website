@@ -353,10 +353,11 @@ function md_mc_dr_parse( $dr ) {
 	return array( $main, $pairs, implode( "\n", $extra ) );
 }
 
-function md_mc_dr_compose( $main, $depts, $docs, $extra ) {
+function md_mc_dr_compose( $main, $depts, $docs, $extra, $main_dept = '' ) {
 	$lines = array();
 	$main  = trim( sanitize_text_field( (string) $main ) );
-	if ( '' !== $main ) { $lines[] = $main; }
+	$md    = trim( sanitize_text_field( (string) $main_dept ) );
+	if ( '' !== $main ) { $lines[] = '' !== $md ? $md . ': ' . $main : $main; } /* v8.3 · 첫 담당의도 과를 고를 수 있다 */
 	foreach ( array_values( (array) $depts ) as $i => $dept ) {
 		$dept = trim( sanitize_text_field( (string) $dept ) );
 		$doc  = trim( sanitize_text_field( (string) ( array_values( (array) $docs )[ $i ] ?? '' ) ) );
@@ -373,8 +374,8 @@ function md_mc_dr_html( $dr ) {
 	if ( '' === trim( (string) $dr ) ) { return '<span class="mc-none">—</span>'; }
 	list( $main, $pairs, $extra ) = md_mc_dr_parse( $dr );
 	$out = array();
-	if ( '' !== $main ) { $out[] = '<span class="mc-dr__main"><small>기본</small> <b>' . esc_html( $main ) . '</b></span>'; }
-	foreach ( $pairs as $pr ) { $out[] = '<span class="mc-dr__pairv"><small>' . esc_html( $pr[0] ) . '</small> ' . esc_html( $pr[1] ) . '</span>'; }
+	if ( '' !== $main ) { $out[] = '<span class="mc-dr__main"><b>' . esc_html( $main ) . '</b></span>'; }
+	foreach ( $pairs as $pr ) { $out[] = '<span class="mc-dr__pairv"><small>' . esc_html( $pr[0] ) . '</small> <b>' . esc_html( $pr[1] ) . '</b></span>'; }
 	if ( '' !== $extra ) { $out[] = md_mc_text( $extra ); }
 	return implode( '<br>', $out );
 }
@@ -756,7 +757,7 @@ function md_mc_handle_post() {
 			$data['pin'] = ! empty( $post['pin'] );
 			/* v6.4 · 담당의는 칸마다 고른 원장님 + 그 밖의 줄 */
 			if ( 'patient' === $kind && isset( $post['dr_main'] ) ) {
-				$data['dr'] = md_mc_dr_compose( $post['dr_main'], $post['dr_dept'] ?? array(), $post['dr_doc'] ?? array(), $post['dr_extra'] ?? '' );
+				$data['dr'] = md_mc_dr_compose( $post['dr_main'], $post['dr_dept'] ?? array(), $post['dr_doc'] ?? array(), $post['dr_extra'] ?? '', $post['dr_main_dept'] ?? '' );
 			}
 			/* v6.8 · 「해당없음」 체크 → 그 칸은 「해당없음」 */
 			if ( 'patient' === $kind ) {
@@ -1141,11 +1142,12 @@ function md_mc_render_patient( $id ) {
 			<?php md_mc_addform( $r, 'tx_hist', '진료기록 직접 입력 (날짜 고를 수 있음)' ); ?>
 			<div class="mc-block__b"><?php echo function_exists( 'md_mc_dw_timeline' ) ? md_mc_dw_timeline( $r, $d ) : md_mc_text( $r->tx_hist ); // phpcs:ignore ?></div>
 		</section>
-		<section class="mc-block mc-block--log" id="f-memo">
-			<h3 class="mc-block__h"><?php echo esc_html( $f['memo'][0] ); ?></h3>
+		<?php $mn = count( array_filter( preg_split( '/\r\n|\r|\n/', (string) $r->memo ), 'strlen' ) ); /* v8.3 · 환자 보는 화면에서 바로 보이지 않게 — 눌러야 펼쳐짐 (원장 지시) */ ?>
+		<details class="mc-block mc-block--log mc-memo" id="f-memo"<?php echo isset( $_GET['memo'] ) ? ' open' : ''; ?>>
+			<summary class="mc-block__h"><?php echo esc_html( $f['memo'][0] ); ?> <small class="mc-sub"><?php echo $mn ? $mn . '줄 · ' : ''; ?>눌러서 보기</small></summary>
 			<?php md_mc_addform( $r, 'memo', '참고사항입력 (날짜없이)' ); ?>
 			<div class="mc-block__b"><?php echo md_mc_text( $r->memo ); // phpcs:ignore ?></div>
-		</section>
+		</details>
 		<?php if ( $d ) : ?><p class="mc-chart__meta mc-dwnote">덴트웹 자료 <?php echo esc_html( md_mc_short_date( $d['_synced'] ) . ' ' . date( 'H:i', strtotime( $d['_synced'] ) ) ); ?> 기준 (30분마다 새로 받음)</p><?php endif; ?>
 
 		<div class="mc-chart__foot">
@@ -1210,8 +1212,10 @@ function md_mc_dr_pair_html( $dept, $doc ) {
 
 /** v6.8 · 담당의 — 기본 담당의 한 분 + 「담당의 추가」로 과 · 담당의 줄 (원장 지시) */
 function md_mc_dr_field( $vals ) {
+	$main_dept = '';
 	if ( isset( $vals['dr_main'] ) ) {
 		$main  = (string) $vals['dr_main'];
+		$main_dept = (string) ( $vals['dr_main_dept'] ?? '' );
 		$pairs = array();
 		foreach ( array_values( (array) ( $vals['dr_dept'] ?? array() ) ) as $i => $d ) {
 			$doc = (string) ( array_values( (array) ( $vals['dr_doc'] ?? array() ) )[ $i ] ?? '' );
@@ -1220,19 +1224,21 @@ function md_mc_dr_field( $vals ) {
 		$extra = (string) ( $vals['dr_extra'] ?? '' );
 	} else {
 		list( $main, $pairs, $extra ) = md_mc_dr_parse( $vals['dr'] ?? '' );
+		/* v8.3 · 과가 붙은 첫 줄도 첫 담당의로 */
+		if ( '' === $main && $pairs ) { list( $main_dept, $main ) = array_shift( $pairs ); }
 	}
 	?>
 	<div class="mc-field mc-dr" data-mc-dr>
 		<span class="mc-field__l"><em class="mc-req">*</em>담당의</span>
-		<label class="mc-dr__row">
-			<span class="mc-dr__role">기본 담당의</span>
-			<?php echo md_mc_select( 'dr_main', md_mc_doctors(), $main, '선택' ); // phpcs:ignore ?>
-		</label>
+		<div class="mc-dr__pair mc-dr__first">
+			<?php echo md_mc_select( 'dr_main_dept', md_mc_dr_roles(), $main_dept, '과 선택' ); // phpcs:ignore ?>
+			<?php echo md_mc_select( 'dr_main', md_mc_doctors(), $main, '담당의 선택' ); // phpcs:ignore ?>
+		</div>
 		<div class="mc-dr__list" data-mc-dr-list>
 			<?php foreach ( $pairs as $pr ) { echo md_mc_dr_pair_html( $pr[0], $pr[1] ); } // phpcs:ignore ?>
 		</div>
 		<template data-mc-dr-tpl><?php echo md_mc_dr_pair_html( '', '' ); // phpcs:ignore ?></template>
-		<button type="button" class="mds-btn mc-dr__add" data-mc-dr-add>＋ 담당의 추가 <small>(과 · 담당의)</small></button>
+		<button type="button" class="mds-btn mc-dr__add" data-mc-dr-add>＋ 담당의 추가</button>
 		<?php if ( '' !== trim( $extra ) ) : ?>
 			<textarea name="dr_extra" rows="1" data-grow aria-label="담당의 그 밖의 내용"><?php echo esc_textarea( $extra ); ?></textarea>
 		<?php endif; ?>
@@ -1269,7 +1275,7 @@ function md_mc_render_edit( $id, $kind ) {
 	/* v8.1 · 담당의가 비었으면 덴트웹 담당의를 기본으로 */
 	if ( $r && 'patient' === $kind && ! isset( $vals['dr_main'] ) && function_exists( 'md_mc_dw_get' ) ) {
 		$dwd = md_mc_dw_get( $r->chart_no );
-		if ( $dwd && '' !== $dwd['doctor'] ) { list( $m0 ) = md_mc_dr_parse( $vals['dr'] ?? '' ); if ( '' === $m0 ) { $vals['dr'] = trim( $dwd['doctor'] . "\n" . (string) ( $vals['dr'] ?? '' ) ); } }
+		if ( $dwd && '' !== $dwd['doctor'] ) { list( $m0, $p0 ) = md_mc_dr_parse( $vals['dr'] ?? '' ); if ( '' === $m0 && ! $p0 ) { $vals['dr'] = trim( $dwd['doctor'] . "\n" . (string) ( $vals['dr'] ?? '' ) ); } }
 	}
 	$v    = function ( $k ) use ( $vals ) { return isset( $vals[ $k ] ) ? (string) $vals[ $k ] : ''; };
 	$back = $r ? md_mc_url( array( 'mv' => 'note' === $kind ? 'note' : 'p', 'mid' => $r->id ) ) : md_mc_url( array( 'mv' => 'note' === $kind ? 'notes' : '' ) );

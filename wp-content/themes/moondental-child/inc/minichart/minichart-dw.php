@@ -261,10 +261,11 @@ function md_mc_dw_dr_html( $r, $d ) {
 	list( $main, $pairs, $extra ) = md_mc_dr_parse( $r->dr );
 	$dw  = $d ? (string) $d['doctor'] : '';
 	$out = array();
-	if ( '' === $main && '' !== $dw ) { $main = $dw; $dw = ''; }
-	if ( '' !== $main ) { $out[] = '<span class="mc-dr__main"><small>기본</small> <b>' . esc_html( $main ) . '</b></span>'; }
-	foreach ( $pairs as $pr ) { $out[] = '<span class="mc-dr__pairv"><small>' . esc_html( $pr[0] ) . '</small> ' . esc_html( $pr[1] ) . '</span>'; }
-	if ( '' !== $dw && $dw !== $main ) { $out[] = '<span class="mc-dr__pairv"><small>덴트웹 담당의</small> ' . esc_html( $dw ) . '</span>'; }
+	$names = array_merge( array( $main ), array_column( $pairs, 1 ) );
+	if ( '' === $main && ! $pairs && '' !== $dw ) { $main = $dw; }
+	if ( '' !== $main ) { $out[] = '<span class="mc-dr__main"><b>' . esc_html( $main ) . '</b></span>'; }
+	foreach ( $pairs as $pr ) { $out[] = '<span class="mc-dr__pairv"><small>' . esc_html( $pr[0] ) . '</small> <b>' . esc_html( $pr[1] ) . '</b></span>'; }
+	if ( '' !== $dw && ! in_array( $dw, $names, true ) && $dw !== $main ) { $out[] = '<span class="mc-dr__pairv"><small>덴트웹</small> ' . esc_html( $dw ) . '</span>'; }
 	if ( '' !== $extra ) { $out[] = md_mc_text( $extra ); }
 	return $out ? implode( '<br>', $out ) : '<span class="mc-none">—</span>';
 }

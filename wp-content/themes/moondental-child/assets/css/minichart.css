@@ -294,3 +294,11 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
   .mc-tl li { grid-template-columns: 64px 1fr; }
   .mc-tl__tx { grid-column: 1 / -1; }
 }
+
+/* v8.3 · 참고사항 접기 · 첫 담당의도 과 */
+.mc-memo > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; }
+.mc-memo > summary::-webkit-details-marker { display: none; }
+.mc-memo > summary::after { content: '▾'; margin-left: auto; color: var(--color-text-mute, #A89685); transition: transform .15s; }
+.mc-memo[open] > summary::after { transform: rotate(180deg); }
+.mc-memo[open] > summary { margin-bottom: 8px; }
+.mc-dr__first { margin-bottom: 6px; }

@@ -333,11 +333,10 @@ function md_sec_handle_post() {
 				if ( ! $tu || ! md_sec_can_edit_user( $tu ) ) { continue; }
 				/* 등급 — 총괄만, 공용 계정은 늘 직원 */
 				$was = md_sec_grade( $tu ); $up = false;
-				if ( $owner && ! md_sec_is_shared_staff( $tu ) && isset( $grd[ $t ] ) ) {
+				if ( $owner && isset( $grd[ $t ] ) ) {
 					$g = sanitize_key( $grd[ $t ] );
 					$up = 'staff' === $was && in_array( $g, array( 'mgr', 'owner' ), true );
-					if ( 'owner' === $g ) { $tu->add_cap( 'md_supply_owner' ); $tu->add_cap( 'md_supply_manage' ); }
-					elseif ( 'mgr' === $g ) { $tu->remove_cap( 'md_supply_owner' ); $tu->add_cap( 'md_supply_manage' ); }
+					if ( 'mgr' === $g ) { $tu->remove_cap( 'md_supply_owner' ); $tu->add_cap( 'md_supply_manage' ); }
 					elseif ( 'staff' === $g ) { $tu->remove_cap( 'md_supply_owner' ); $tu->remove_cap( 'md_supply_manage' ); }
 					$tu = get_userdata( $t );
 				}
@@ -547,7 +546,7 @@ function md_sec_render_access( $tab ) {
 		$owner = md_sec_is_owner();
 		?>
 		<form method="post" class="mds-card mdsec-card"><?php md_sec_hidden( 'perms' ); ?>
-			<p class="mds-hint"><b>등급</b> — 총괄 관리자: 라운지의 모든 것 · 관리자 등급을 주고 뺌 / 라운지 관리자: 직원 정보 · 계정 승인 · 관리 화면 (일반 직원의 권한만 바꿈) / 직원. 등급은 총괄 관리자만 바꿉니다. 다른 총괄 관리자와 내 계정은 바꿀 수 없습니다.<br><b>재료실 관리</b> — 출고 · 입고 · 주문 · 품목 · 재료실 설정. <b>탭</b> — 열 수 있는 라운지 탭 (🔒 = 병원 밖에서 열 때 이메일 인증). 회색 칸은 라운지 관리자 이상만.</p>
+			<p class="mds-hint"><b>등급</b> — 총괄 관리자(한 명): 라운지의 모든 것 · 라운지 관리자를 주고 뺌 / 라운지 관리자: 직원 정보 · 계정 승인 · 관리 화면 (일반 직원의 권한만 바꿈) / 직원. 등급은 총괄 관리자만 바꿉니다. 총괄 관리자는 다른 계정에 줄 수 없습니다.<br><b>재료실 관리</b> — 출고 · 입고 · 주문 · 품목 · 재료실 설정. <b>탭</b> — 열 수 있는 라운지 탭 (🔒 = 병원 밖에서 열 때 이메일 인증). 회색 칸은 라운지 관리자 이상만.</p>
 			<div class="mdsec-matrix-wrap"><table class="mds-table mdsec-matrix">
 				<thead><tr><th>계정</th><th>등급</th><th>재료실<br>관리</th><?php foreach ( $tabs as $k => $a ) : ?><th><?php echo esc_html( ( $a['icon'] ?? '' ) . ' ' . preg_replace( '/\s*·\s*권한$/u', '', $a['label'] ) . ( in_array( $k, md_sec_sensitive(), true ) ? ' 🔒' : '' ) ); ?></th><?php endforeach; ?></tr></thead>
 				<tbody>
@@ -555,8 +554,8 @@ function md_sec_render_access( $tab ) {
 					$edit = md_sec_can_edit_user( $u ); $g = md_sec_grade( $u ); $shared = md_sec_is_shared_staff( $u );
 					$have = md_sec_is_owner_user( $u ) ? array_keys( $tabs ) : (array) md_sec_user_tabs( $u ); $mgr = md_sec_is_mgr_user( $u ); ?>
 					<tr class="<?php echo $edit ? '' : 'is-lock'; ?>"><th><?php if ( $edit ) : ?><input type="hidden" name="uids[]" value="<?php echo (int) $u->ID; ?>"><?php endif; ?><?php echo esc_html( '' !== trim( $u->display_name ) ? $u->display_name : $u->user_login ); ?><?php echo (int) $u->ID === get_current_user_id() ? ' <small>(나)</small>' : ''; ?><?php echo $shared ? ' <small>공용 계정</small>' : ''; ?></th>
-						<td><?php if ( $edit && $owner && ! $shared ) : ?>
-							<select name="grade[<?php echo (int) $u->ID; ?>]"><?php foreach ( array( 'staff', 'mgr', 'owner' ) as $o ) : ?><option value="<?php echo esc_attr( $o ); ?>"<?php selected( $g, $o ); ?>><?php echo esc_html( md_sec_grade_label( $o ) ); ?></option><?php endforeach; ?></select>
+						<td><?php if ( $edit && $owner ) : /* v8.3 · 직원공용도 등급을 고를 수 있다 (원장 지시) */ ?>
+							<select name="grade[<?php echo (int) $u->ID; ?>]"><?php foreach ( array( 'staff', 'mgr' ) as $o ) : /* v8.3 · 총괄 관리자는 한 명뿐 — 다른 직원은 지정할 수 없다 */ ?><option value="<?php echo esc_attr( $o ); ?>"<?php selected( $g, $o ); ?>><?php echo esc_html( md_sec_grade_label( $o ) ); ?></option><?php endforeach; ?></select>
 						<?php else : ?><span class="mdsec-grade mdsec-grade--<?php echo esc_attr( $g ); ?>"><?php echo esc_html( md_sec_grade_label( $g ) ); ?></span><?php endif; ?></td>
 						<td><label class="mdsec-cell"><input type="checkbox" name="inv[<?php echo (int) $u->ID; ?>]" value="1"<?php checked( user_can( $u, 'md_inv_manage' ) || md_sec_is_owner_user( $u ) ); disabled( ! $edit || md_sec_is_owner_user( $u ) ); ?>></label></td>
 						<?php foreach ( $tabs as $k => $a ) : $lock = ! $edit || ( ! empty( $a['manage'] ) && ! $mgr ) || md_sec_is_owner_user( $u ); ?>
@@ -628,3 +627,14 @@ function md_sec_enqueue() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'md_sec_enqueue', 42 );
+
+/* v8.3 · 직원공용 계정 이메일 (원장 지시 2026-10-07) — 한 번만 */
+add_action( 'init', function () {
+	if ( get_option( 'md_sec_staffmail_v1' ) || ! defined( 'MD_SUP_STAFF_LOGIN' ) ) { return; }
+	$u = get_user_by( 'login', MD_SUP_STAFF_LOGIN );
+	if ( ! $u ) { return; }
+	$mail = 'moondentalhospital@gmail.com';
+	$other = email_exists( $mail );
+	if ( ! $other || (int) $other === (int) $u->ID ) { wp_update_user( array( 'ID' => $u->ID, 'user_email' => $mail ) ); }
+	update_option( 'md_sec_staffmail_v1', $other && (int) $other !== (int) $u->ID ? 'taken #' . $other : 'done', false );
+}, 30 );
