@@ -785,6 +785,7 @@ function md_mc_handle_post() {
 				$back = $err( $res->get_error_message(), $args );
 			} else {
 				delete_transient( 'md_mc_draft_' . get_current_user_id() . '_' . $id );
+				if ( ! $id && 'patient' === $kind ) { do_action( 'md_mc_created', (int) $res ); } /* v8.4 · 덴트웹 진료기록을 1분 안에 받아 오게 */
 				$back = md_mc_url( array( 'mv' => 'note' === $kind ? 'note' : 'p', 'mid' => $res, 'saved' => 1 ) );
 			}
 			break;
@@ -838,6 +839,10 @@ function md_mc_handle_post() {
 				$s['doctors'] = $clean( $post['doctors'] ?? '' );
 				$roles        = $clean( $post['roles'] ?? '' );
 				$s['roles']   = $roles ? $roles : array( '임플란트', '보철', '교정' );
+				/* v8.4 · 병력 · 내원경로 눌러서 넣는 목록 (원장 지시) */
+				foreach ( array( 'mhx_chips', 'ref_chips' ) as $ck ) {
+					if ( isset( $post[ $ck ] ) ) { $v = $clean( $post[ $ck ] ); if ( $v ) { $s[ $ck ] = $v; } else { unset( $s[ $ck ] ); } }
+				}
 				if ( ! empty( $post['alert_reset'] ) ) { unset( $s['alert_words'] ); }
 				elseif ( isset( $post['alert_words'] ) ) { $s['alert_words'] = $clean( $post['alert_words'] ); }
 				update_option( 'md_mc_settings', $s, false );
@@ -1246,14 +1251,26 @@ function md_mc_dr_field( $vals ) {
 	<?php
 }
 
-/** v8.1 · 병력 — 눌러서 넣는 칸 (다시 누르면 빠짐) + 직접 더 적기 */
-function md_mc_mhx_chips() {
-	$st    = md_mc_settings();
-	$chips = ! empty( $st['mhx_chips'] ) && is_array( $st['mhx_chips'] ) ? $st['mhx_chips'] : array( '고혈압', '당뇨', '심장질환', '부정맥', '뇌졸중', '갑상선', '간질환', '신장질환 · 투석', '골다공증 약', '항응고제 · 아스피린', '스텐트', '항암 · 방사선', '알레르기', '임신', '흡연', '천식', 'B형간염' );
-	$h = '<div class="mc-chips" data-mc-chips="mhx" aria-label="병력 눌러서 넣기">';
-	foreach ( $chips as $c ) { $h .= '<button type="button" class="mc-chip" data-chip="' . esc_attr( $c ) . '">' . esc_html( $c ) . '</button>'; }
-	return $h . '<span class="mc-chips__hint">눌러서 넣고, 아래 칸에 더 적어도 됩니다 (예: 당뇨 — 인슐린, 공복 혈당 140)</span></div>';
+/** v8.4 · 눌러서 넣는 목록 — 설정에서 바꾼다 (병력 mhx · 내원경로 ref) */
+function md_mc_chip_list( $kind ) {
+	$st = md_mc_settings();
+	$k  = 'mhx' === $kind ? 'mhx_chips' : 'ref_chips';
+	if ( ! empty( $st[ $k ] ) && is_array( $st[ $k ] ) ) { return $st[ $k ]; }
+	return 'mhx' === $kind
+		? array( '고혈압', '당뇨', '심장질환', '부정맥', '뇌졸중', '갑상선', '간질환', '신장질환 · 투석', '골다공증 약', '항응고제 · 아스피린', '스텐트', '항암 · 방사선', '알레르기', '임신', '흡연', '천식', 'B형간염' )
+		: array( '인터넷 검색', '네이버 지도 · 플레이스', '블로그 · 카페', '인스타그램 · 유튜브', '지인 소개', '간판 · 지나가다', '광고 · 이벤트', '이전 내원', '가족:', '소개자:', '협력기관:' );
 }
+
+/** v8.1 · 병력 / v8.4 · 내원경로 — 눌러서 넣는 칸 (다시 누르면 빠짐) + 직접 더 적기 */
+function md_mc_chips( $field, $kind, $hint ) {
+	$h = '<div class="mc-chips" data-mc-chips="' . esc_attr( $field ) . '" aria-label="눌러서 넣기">';
+	foreach ( md_mc_chip_list( $kind ) as $c ) {
+		$pre = ':' === mb_substr( $c, -1 );
+		$h  .= '<button type="button" class="mc-chip' . ( $pre ? ' mc-chip--pre' : '' ) . '" data-chip="' . esc_attr( $pre ? rtrim( $c, ':' ) . ':' : $c ) . '">' . esc_html( $pre ? rtrim( $c, ':' ) . ' …' : $c ) . '</button>';
+	}
+	return $h . '<span class="mc-chips__hint">' . esc_html( $hint ) . '</span></div>';
+}
+function md_mc_mhx_chips() { return md_mc_chips( 'mhx', 'mhx', '눌러서 넣고, 위 칸에 더 적어도 됩니다 (예: 당뇨 — 인슐린, 공복 혈당 140)' ); }
 
 /** 수정 · 새로 만들기 — 칸 순서와 이름은 AppSheet 폼 그대로 */
 function md_mc_render_edit( $id, $kind ) {
@@ -1305,6 +1322,7 @@ function md_mc_render_edit( $id, $kind ) {
 				$na = ! empty( $vals['na'][ $k ] ) || ( '' !== $v( $k ) && md_mc_is_na( $v( $k ) ) );
 				md_mc_field( $k, $f[ $k ][0], $v( $k ), array( 'req' => true, 'rows' => 'mhx' === $k ? 2 : 1, 'attrs' => 'required', 'na' => $na ) );
 				if ( 'mhx' === $k ) { echo md_mc_mhx_chips(); } // phpcs:ignore
+				if ( 'referral' === $k ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「가족 …」 「협력기관 …」을 누르면 이름을 바로 이어 적습니다 (예: 가족: 홍길동 #12345)' ); } // phpcs:ignore
 				$latest( $k );
 			}
 			md_mc_dr_field( $vals );
@@ -1512,6 +1530,8 @@ function md_mc_render_settings() {
 		<?php md_mc_field( 'roles', '과 목록', implode( "\n", md_mc_dr_roles() ), array( 'rows' => 4, 'hint' => '담당의 추가할 때 고르는 과 · 한 줄에 하나 · 예) 임플란트 · 보철 · 교정' ) ); ?>
 		<?php md_mc_field( 'alert_words', '병력 주의 단어', implode( "\n", md_mc_alert_words() ), array( 'rows' => 8, 'hint' => '병력에 이 단어가 있으면 붉게 표시 · 한 줄에 하나 · 뒤에 x · 없음이 붙으면 표시하지 않음' ) ); ?>
 		<label class="mc-check"><input type="checkbox" name="alert_reset" value="1"> 병력 주의 단어를 처음 값으로 되돌리기</label>
+		<?php md_mc_field( 'mhx_chips', '병력 — 눌러서 넣는 목록', implode( "\n", md_mc_chip_list( 'mhx' ) ), array( 'rows' => 8, 'hint' => '새 환자 · 수정 화면의 병력 버튼 · 한 줄에 하나 · 비우면 처음 값' ) ); ?>
+		<?php md_mc_field( 'ref_chips', '내원경로 · 가족 · 협력기관 — 눌러서 넣는 목록', implode( "\n", md_mc_chip_list( 'ref' ) ), array( 'rows' => 8, 'hint' => '한 줄에 하나 · 끝을 「:」으로 쓰면(예: 가족:) 누를 때 「가족: 」을 넣고 이름을 바로 적게 됩니다 · 비우면 처음 값' ) ); ?>
 		<div class="mc-form__foot">
 			<a class="mds-btn mds-btn--ghost mc-form__cancel" href="<?php echo esc_url( md_mc_url() ); ?>">취소</a>
 			<button type="submit" class="mds-btn mds-btn--fill mc-form__save">저장</button>

@@ -167,12 +167,22 @@
       prev.hidden = false;
     }
   }
+  /* v8.4 · 같은 차트번호가 이미 있으면 저장 전에 크게 알림 */
+  var dupBox = document.createElement('div');
+  dupBox.className = 'mds-notice mds-notice--warn mc-dup'; dupBox.hidden = true;
+  chart.parentNode.appendChild(dupBox);
+  function dupShow(x) {
+    hint.hidden = true;
+    dupBox.innerHTML = '이미 미니차트에 있는 환자입니다 — <b>' + esc(x.chart) + ' ' + esc(x.name) + '</b> <a class="mds-btn" href="' + esc(x.url) + '">그 차트 열기</a>';
+    dupBox.hidden = false;
+  }
   function ask(c) {
     var u = form.getAttribute('data-dw');
     fetch(u + (u.indexOf('?') > -1 ? '&' : '?') + 'md_mc_dw=' + encodeURIComponent(c), { credentials: 'same-origin' })
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (chart.value.trim() !== c) return;
+        if (d && d.dup) { dupShow(d.dup); return; }
         if (d && d.ok) { show(d); return; }
         if (d && d.pending && tries < 24) {
           tries++; hint.textContent = '덴트웹에서 찾는 중… (병원 PC 가 1분 안에 가져옵니다)'; hint.hidden = false;
@@ -185,7 +195,7 @@
   function look() {
     var c = chart.value.trim();
     if (c === last) return;
-    last = c; undo(); clearTimeout(timer); tries = 0; hint.hidden = true; hint.textContent = '';
+    last = c; undo(); clearTimeout(timer); tries = 0; hint.hidden = true; hint.textContent = ''; dupBox.hidden = true;
     if (c) ask(c);
   }
   chart.addEventListener('change', look);
@@ -214,13 +224,16 @@
       var c = b.getAttribute('data-chip'), ps = parts();
       var i = -1;
       ps.forEach(function (p, k) { if (i < 0 && p.indexOf(c) === 0) i = k; });
-      if (i > -1) ps.splice(i, 1); else ps.push(c);
+      var pre = c.slice(-1) === ':';
+      if (i > -1) ps.splice(i, 1); else ps.push(pre ? c + ' ' : c);
       ps = ps.filter(function (p) { return p !== '해당없음' && p !== '.'; });
       var na = document.querySelector('[name="na[' + name + ']"]');
       if (na && na.checked) { na.click(); }
-      ta.value = ps.join(', ');
+      ta.value = ps.join(', ') + (pre && i < 0 ? ' ' : '');
+      ta.value = ta.value.replace(/: {2}$/, ': ');
       ta.dispatchEvent(new Event('input', { bubbles: true }));
       sync();
+      if (pre && i < 0) { ta.focus(); var n = ta.value.length; try { ta.setSelectionRange(n, n); } catch (x) {} }
     });
     ta.addEventListener('input', sync);
     sync();

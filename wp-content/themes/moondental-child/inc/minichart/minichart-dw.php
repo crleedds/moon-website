@@ -134,6 +134,7 @@ function md_mc_dw_rest_save( $request ) {
 	$rows  = isset( $body['patients'] ) && is_array( $body['patients'] ) ? $body['patients'] : array();
 	$scope = ( $body['scope'] ?? '' ) === 'full' ? 'full' : 'upcoming';
 	$mc    = md_mc_dw_mc_keys();
+	$reqd  = (array) get_option( 'md_mc_dw_req', array() ); /* v8.4 · 새 차트에서 찾은 환자는 진료기록도 */
 	$now   = current_time( 'mysql' );
 	$t     = md_mc_t( 'dw' );
 	$n = 0; $lv = 0;
@@ -144,7 +145,7 @@ function md_mc_dw_rest_save( $request ) {
 		$key  = md_mc_dw_key( $chart );
 		$in   = isset( $mc[ $key ] ) ? 1 : 0;
 		$data = md_mc_dw_clean( $p );
-		if ( ! $in ) { $data['visits'] = array(); $data['next'] = null; } /* 미니차트에 없는 환자는 기본 정보만 */
+		if ( ! $in && ! isset( $reqd[ $key ] ) ) { $data['visits'] = array(); $data['next'] = null; } /* 미니차트에 없는 환자는 기본 정보만 (새 차트에서 찾은 환자 빼고) */
 		$wpdb->replace( $t, array( 'chart_key' => $key, 'chart_no' => $chart, 'data' => wp_json_encode( $data, JSON_UNESCAPED_UNICODE ), 'in_mc' => $in, 'synced_at' => $now ) );
 		$n++;
 		/* 미니차트 「최근 내원순」 — 덴트웹 최종 내원일이 더 늦으면 */
@@ -185,6 +186,15 @@ add_action( 'rest_api_init', function () {
 	register_rest_route( 'md-mc/v1', '/dw', array( 'methods' => 'POST', 'callback' => 'md_mc_dw_rest_save', 'permission_callback' => 'md_mc_dw_permission' ) );
 } );
 
+function md_mc_dw_enqueue( $chart ) {
+	$k = md_mc_dw_key( $chart );
+	if ( '' === $k || ! preg_match( '/^[0-9A-Za-z\-]{1,20}$/', $k ) ) { return; }
+	$req = (array) get_option( 'md_mc_dw_req', array() );
+	if ( count( $req ) < 50 || isset( $req[ $k ] ) ) { $req[ $k ] = time(); update_option( 'md_mc_dw_req', $req, false ); }
+}
+/* v8.4 · 새 환자를 저장하면 그 차트의 덴트웹 진료기록 · 다음 예약을 1분 안에 받아 오게 */
+add_action( 'md_mc_created', function ( $id ) { $r = md_mc_get( $id ); if ( $r ) { md_mc_dw_enqueue( $r->chart_no ); } } );
+
 /* ============================================================
  * 새 차트 — 차트번호를 넣으면 덴트웹 기본 정보로 채움 (GET ?app=minichart&md_mc_dw=차트번호 · JSON)
  * ============================================================ */
@@ -193,18 +203,24 @@ function md_mc_dw_lookup() {
 	if ( ! isset( $_GET['md_mc_dw'] ) ) { return; }
 	if ( ! md_mc_can_use() ) { wp_send_json( array( 'ok' => false ), 403 ); }
 	$c = sanitize_text_field( wp_unslash( $_GET['md_mc_dw'] ) );
+	/* v8.4 · 같은 차트번호가 미니차트에 이미 있으면 저장 전에 알린다 */
+	$dup = null;
+	$mc  = md_mc_dw_mc_keys();
+	$k   = md_mc_dw_key( $c );
+	if ( isset( $mc[ $k ] ) ) {
+		$e = md_mc_get( $mc[ $k ][0] );
+		if ( $e ) { $dup = array( 'id' => (int) $e->id, 'chart' => $e->chart_no, 'name' => $e->pname, 'url' => md_mc_url( array( 'mv' => 'p', 'mid' => $e->id ) ) ); }
+	}
 	$d = md_mc_dw_get( $c );
 	if ( ! $d ) {
 		/* 아직 받아 둔 게 없으면 병원 PC 에 찾아 달라고 줄 세운다 (1분 안에 답) */
-		$k = md_mc_dw_key( $c );
-		if ( '' !== $k && preg_match( '/^[0-9A-Za-z\-]{1,20}$/', $k ) ) {
-			$req = (array) get_option( 'md_mc_dw_req', array() );
-			if ( count( $req ) < 50 ) { $req[ $k ] = time(); update_option( 'md_mc_dw_req', $req, false ); }
-		}
+		if ( ! $dup ) { md_mc_dw_enqueue( $c ); }
 		$last = get_option( 'md_mc_dw_poll' );
-		wp_send_json( array( 'ok' => false, 'pending' => $last && ( time() - (int) $last ) < 10 * MINUTE_IN_SECONDS ) );
+		wp_send_json( array( 'ok' => false, 'dup' => $dup, 'pending' => ! $dup && $last && ( time() - (int) $last ) < 10 * MINUTE_IN_SECONDS ) );
 	}
-	wp_send_json( array( 'ok' => true, 'name' => $d['name'], 'region' => $d['region'], 'doctor' => $d['doctor'], 'age' => md_mc_dw_age( $d['birth'] ), 'sex' => $d['sex'],
+	/* 기본 정보만 있으면(진료기록 없음) 지금 진료기록도 받아 오게 줄 세움 — 저장하면 바로 보이도록 */
+	if ( ! $dup && empty( $d['visits'] ) ) { md_mc_dw_enqueue( $c ); }
+	wp_send_json( array( 'ok' => true, 'dup' => $dup, 'visits' => count( (array) $d['visits'] ), 'name' => $d['name'], 'region' => $d['region'], 'doctor' => $d['doctor'], 'age' => md_mc_dw_age( $d['birth'] ), 'sex' => $d['sex'],
 		'phone' => $d['phone'] ?? '', 'addr' => $d['addr'] ?? '', 'first' => $d['first'], 'last' => $d['last'] ) );
 }
 add_action( 'template_redirect', 'md_mc_dw_lookup', 2 );

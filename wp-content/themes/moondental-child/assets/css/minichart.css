@@ -302,3 +302,8 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
 .mc-memo[open] > summary::after { transform: rotate(180deg); }
 .mc-memo[open] > summary { margin-bottom: 8px; }
 .mc-dr__first { margin-bottom: 6px; }
+
+/* v8.4 · 같은 차트번호 알림 · 이어 적는 칩 */
+.mc-dup { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mc-dup[hidden] { display: none; }
+.mc-chip--pre { border-style: dashed; }
