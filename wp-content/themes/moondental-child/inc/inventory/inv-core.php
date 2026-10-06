@@ -237,7 +237,7 @@ function md_inv_date( $dt, $fmt = 'n/j H:i' ) {
 }
 
 function md_inv_type_label( $type ) {
-	$m = array( 'open' => '기초', 'in' => '입고', 'out' => '출고', 'return' => '반품', 'adjust' => '실사', 'adj' => '환불 · 정정' );
+	$m = array( 'open' => '재고 수량', 'in' => '입고', 'out' => '출고', 'return' => '반품', 'adjust' => '실사', 'adj' => '환불 · 정정' );
 	return isset( $m[ $type ] ) ? $m[ $type ] : $type;
 }
 
