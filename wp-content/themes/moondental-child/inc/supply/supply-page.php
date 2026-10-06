@@ -117,6 +117,7 @@ function md_sup_apps() {
 			'label' => '접수수납목록', /* v4.19.4 · 원장 지시 — 「환자 만족도 조사」 대신 */
 			'icon'  => '📋',
 			'desc'  => '덴트웹 접수수납목록 엑셀 올리기 (하루 한 번)',
+			'hidden' => true, /* v7.9 · 덴트웹 DB 자동 연동(병원 PC sync.ps1)으로 엑셀 올리기가 필요 없어 타일 없앰 (원장 지시 2026-10-06) — 명단 데이터 · 만족도 조사는 그대로 */
 		),
 		// v4.19.7 · 만족도 응답·집계·설정은 관리자 전용 타일 (데스크 화면에서 탭 제거 — 원장 지시)
 		'survey_result' => array(
@@ -1077,7 +1078,7 @@ function md_sup_render_page() {
 		md_staff_render(); // v4.18 · 직원 정보
 	} elseif ( 'fees' === $app && function_exists( 'md_fees_render' ) ) {
 		md_fees_render(); // v4.13 · 진료비
-	} elseif ( 'survey' === $app && function_exists( 'md_survey_render' ) ) {
+	} elseif ( 'survey' === $app && function_exists( 'md_survey_render' ) && md_sup_can_manage() ) { /* v7.9 · 타일은 없앰 — 관리자만 주소로 (덴트웹 연동이 끊겼을 때 비상용) */
 		md_survey_render(); // v4.10 · 접수수납목록 (만족도 조사 명단)
 	} elseif ( 'survey_result' === $app && function_exists( 'md_survey_render_result' ) ) {
 		md_survey_render_result(); // v4.19.7 · 만족도 응답·집계·설정 (관리자)
