@@ -169,9 +169,9 @@ function md_brief_html( $x, $mail = false ) {
 	$tdg = 'style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap;color:#888"';
 	$th = 'style="padding:6px 8px;border-bottom:2px solid #ddd;text-align:left;font-weight:600;color:#555"'; $thr = 'style="padding:6px 8px;border-bottom:2px solid #ddd;text-align:right;font-weight:600;color:#555"';
 	$h  = '<h2 style="margin:0 0 4px;font-size:20px">' . esc_html( date( 'Y년 n월 j일', strtotime( $x['date'] ) ) . ' (' . md_brief_dow( $x['date'] ) . ')' ) . ' 진료</h2>';
-	$h .= '<p style="margin:0 0 16px;color:#666">지난주 같은 요일(' . esc_html( date( 'n/j', strtotime( $lw['from'] ?? $x['date'] ) ) ) . ')과 비교</p>';
+	$h .= '<p style="margin:0 0 16px;color:#666">직전 같은 요일 진료일(' . esc_html( date( 'n/j', strtotime( $lw['from'] ?? $x['date'] ) ) ) . ')과 비교</p>';
 
-	$h .= '<table style="border-collapse:collapse;width:100%;margin-bottom:18px"><tr><th ' . $th . '></th><th ' . $thr . '>이날</th><th ' . $thr . '>지난주</th><th ' . $th . '></th></tr>';
+	$h .= '<table style="border-collapse:collapse;width:100%;margin-bottom:18px"><tr><th ' . $th . '></th><th ' . $thr . '>이날</th><th ' . $thr . '>' . esc_html( date( 'n/j', strtotime( $lw['from'] ?? $x['date'] ) ) ) . '</th><th ' . $th . '></th></tr>';
 	$rows = array(
 		array( '내원', $day['visits'] ?? 0, $lw['visits'] ?? 0, '명' ),
 		array( '신환', $day['new'] ?? 0, $lw['new'] ?? 0, '명' ),
