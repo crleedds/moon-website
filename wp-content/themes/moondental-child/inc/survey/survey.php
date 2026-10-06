@@ -278,6 +278,19 @@ function md_survey_doctor_title( $name ) {
 	return $n . ' 원장님'; /* v4.21.32 · 문은수도 「원장」 (원장 지시 — 병원장 호칭 철회) */
 }
 
+/** 담당직원 표시 — 직원 정보(라운지)의 직책을 이름 옆에 (예: 홍길동 → 홍길동 실장 · 원장 지시) */
+function md_survey_staff_title( $name ) {
+	$name = trim( (string) $name );
+	if ( '' === $name || ! function_exists( 'md_staff_all' ) ) { return $name; }
+	$key = md_survey_name_key( $name );
+	foreach ( md_staff_all( true ) as $r ) {
+		if ( md_survey_name_key( $r->name ) !== $key ) { continue; }
+		$pos = trim( (string) ( $r->position ?? '' ) );
+		return '' !== $pos && false === mb_strpos( $name, $pos ) ? trim( $r->name ) . ' ' . $pos : $name;
+	}
+	return $name;
+}
+
 /** 「다른 선생님이었어요」 고르기 목록 — 직원 정보의 재직 직원(의료진 제외) 중 명단의 담당 스탭이 아닌 사람 */
 function md_survey_staff_choices( $current = '' ) {
 	if ( ! function_exists( 'md_staff_all' ) ) { return array(); }
@@ -1068,7 +1081,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<div class="sv-who">
 			<span>진료일</span><b><?php echo esc_html( date_i18n( 'Y년 n월 j일 (D)', strtotime( $visit->visit_date ) ) ); ?></b>
 			<?php if ( $doc_titles ) : ?><span>담당의사</span><b><?php echo esc_html( preg_replace( '/님$/u', '', $doc_titles[0] ) ); /* v4.21.15 · 「○○○ 원장」 */ ?></b><?php endif; ?>
-			<?php if ( '' !== trim( (string) $staff ) ) : ?><span>담당직원</span><b><?php echo esc_html( $staff ); ?></b><?php endif; ?>
+			<?php if ( '' !== trim( (string) $staff ) ) : ?><span>담당직원</span><b><?php echo esc_html( md_survey_staff_title( $staff ) ); ?></b><?php endif; ?>
 		</div>
 
 		<?php $qn++; /* v4.21.18 · 담당의사가 엑셀에 없어도 문항은 항상 */ ?>
