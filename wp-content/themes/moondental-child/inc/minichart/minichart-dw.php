@@ -95,6 +95,8 @@ function md_mc_dw_clean( $p ) {
 		'sex'    => in_array( $p['sex'] ?? '', array( 'M', 'F' ), true ) ? $p['sex'] : '',
 		'birth'  => md_mc_dw_date( $p['birth'] ?? '' ),
 		'region' => md_mc_dw_txt( $p['region'] ?? '', 60 ),
+		'phone'  => preg_replace( '/[^0-9\-]/', '', md_mc_dw_txt( $p['phone'] ?? '', 20 ) ), /* v8.1 · 원장 지시 — 연락처 · 주소도 */
+		'addr'   => md_mc_dw_txt( $p['addr'] ?? '', 150 ),
 		'doctor' => md_mc_dw_txt( $p['doctor'] ?? '', 30 ),
 		'first'  => md_mc_dw_date( $p['first'] ?? '' ),
 		'last'   => md_mc_dw_date( $p['last'] ?? '' ),
@@ -160,10 +162,25 @@ function md_mc_dw_rest_save( $request ) {
 		}
 	}
 	update_option( 'md_mc_dw_last', array( 'at' => $now, 'scope' => $scope, 'n' => $n ), false );
+	/* 찾아 달라고 한 차트번호 중 답이 온 것은 지운다 */
+	$req = (array) get_option( 'md_mc_dw_req', array() );
+	foreach ( $rows as $p ) { if ( is_array( $p ) && isset( $p['chart_no'] ) ) { unset( $req[ md_mc_dw_key( $p['chart_no'] ) ] ); } }
+	foreach ( $req as $k => $t ) { if ( $t < time() - 10 * MINUTE_IN_SECONDS ) { unset( $req[ $k ] ); } }
+	update_option( 'md_mc_dw_req', $req, false );
 	return rest_ensure_response( array( 'saved' => $n, 'last_visit_updated' => $lv, 'removed' => $gone ) );
 }
 
+/** v8.1 · 새 차트에서 찾아 달라고 한 차트번호 (병원 PC 가 1분마다 가져가 덴트웹에서 찾아 보낸다) */
+function md_mc_dw_rest_requests() {
+	update_option( 'md_mc_dw_poll', time(), false );
+	$req = (array) get_option( 'md_mc_dw_req', array() );
+	$out = array();
+	foreach ( $req as $k => $t ) { if ( $t >= time() - 10 * MINUTE_IN_SECONDS ) { $out[] = (string) $k; } }
+	return rest_ensure_response( array( 'charts' => $out ) );
+}
+
 add_action( 'rest_api_init', function () {
+	register_rest_route( 'md-mc/v1', '/requests', array( 'methods' => 'GET', 'callback' => 'md_mc_dw_rest_requests', 'permission_callback' => 'md_mc_dw_permission' ) );
 	register_rest_route( 'md-mc/v1', '/charts', array( 'methods' => 'GET', 'callback' => 'md_mc_dw_rest_charts', 'permission_callback' => 'md_mc_dw_permission' ) );
 	register_rest_route( 'md-mc/v1', '/dw', array( 'methods' => 'POST', 'callback' => 'md_mc_dw_rest_save', 'permission_callback' => 'md_mc_dw_permission' ) );
 } );
@@ -175,9 +192,20 @@ add_action( 'rest_api_init', function () {
 function md_mc_dw_lookup() {
 	if ( ! isset( $_GET['md_mc_dw'] ) ) { return; }
 	if ( ! md_mc_can_use() ) { wp_send_json( array( 'ok' => false ), 403 ); }
-	$d = md_mc_dw_get( sanitize_text_field( wp_unslash( $_GET['md_mc_dw'] ) ) );
-	if ( ! $d ) { wp_send_json( array( 'ok' => false ) ); }
-	wp_send_json( array( 'ok' => true, 'name' => $d['name'], 'region' => $d['region'], 'doctor' => $d['doctor'], 'age' => md_mc_dw_age( $d['birth'] ), 'sex' => $d['sex'] ) );
+	$c = sanitize_text_field( wp_unslash( $_GET['md_mc_dw'] ) );
+	$d = md_mc_dw_get( $c );
+	if ( ! $d ) {
+		/* 아직 받아 둔 게 없으면 병원 PC 에 찾아 달라고 줄 세운다 (1분 안에 답) */
+		$k = md_mc_dw_key( $c );
+		if ( '' !== $k && preg_match( '/^[0-9A-Za-z\-]{1,20}$/', $k ) ) {
+			$req = (array) get_option( 'md_mc_dw_req', array() );
+			if ( count( $req ) < 50 ) { $req[ $k ] = time(); update_option( 'md_mc_dw_req', $req, false ); }
+		}
+		$last = get_option( 'md_mc_dw_poll' );
+		wp_send_json( array( 'ok' => false, 'pending' => $last && ( time() - (int) $last ) < 10 * MINUTE_IN_SECONDS ) );
+	}
+	wp_send_json( array( 'ok' => true, 'name' => $d['name'], 'region' => $d['region'], 'doctor' => $d['doctor'], 'age' => md_mc_dw_age( $d['birth'] ), 'sex' => $d['sex'],
+		'phone' => $d['phone'] ?? '', 'addr' => $d['addr'] ?? '', 'first' => $d['first'], 'last' => $d['last'] ) );
 }
 add_action( 'template_redirect', 'md_mc_dw_lookup', 2 );
 
@@ -193,41 +221,50 @@ function md_mc_dw_age( $birth ) {
 	return $a >= 0 && $a < 130 ? $a : '';
 }
 
-function md_mc_dw_card( $r ) {
-	$d = md_mc_dw_get( $r->chart_no );
-	$last = get_option( 'md_mc_dw_last' );
-	if ( ! $d ) {
-		if ( ! $last ) { return ''; }
-		return '<section class="mds-card mc-dw mc-dw--none"><h3 class="mc-block__h">덴트웹</h3><p class="mds-hint">덴트웹에서 이 차트번호를 찾지 못했습니다. 차트번호를 확인해 주세요.</p></section>';
+/** v8.1 · 진료기록 — 덴트웹 진료비 내역의 치료내용 + 미니차트에 직접 적은 「YYMMDD: …」 를 날짜별로 합친다 */
+function md_mc_dw_timeline( $r, $d ) {
+	$rows = array();
+	if ( $d && ! empty( $d['visits'] ) ) {
+		foreach ( $d['visits'] as $v ) { $rows[ $v['d'] ] = array( 'dr' => $v['dr'], 'dw' => $v['tx'], 'own' => array() ); }
 	}
-	$age = md_mc_dw_age( $d['birth'] );
-	$sex = 'M' === $d['sex'] ? '남' : ( 'F' === $d['sex'] ? '여' : '' );
-	$h   = '<section class="mds-card mc-dw"><h3 class="mc-block__h">덴트웹 <small>' . esc_html( md_mc_short_date( $d['_synced'] ) . ' ' . date( 'H:i', strtotime( $d['_synced'] ) ) ) . ' 자동</small></h3>';
-	/* 이름이 다르면 차트번호가 잘못 붙었을 수 있다 */
-	$nm = preg_replace( '/\s+/u', '', (string) $d['name'] );
-	if ( '' !== $nm && false === mb_strpos( preg_replace( '/\s+/u', '', (string) $r->pname ), $nm ) ) {
-		$h .= '<p class="mds-notice mds-notice--warn">덴트웹 이름은 「' . esc_html( $d['name'] ) . '」입니다 — 차트번호를 확인해 주세요.</p>';
-	}
-	$items = array();
-	if ( $sex || '' !== $age ) { $items[] = array( '성별 · 나이', trim( $sex . ( '' !== $age ? ' ' . $age . '세' : '' ) ) ); }
-	if ( '' !== $d['region'] ) { $items[] = array( '지역', $d['region'] ); }
-	if ( '' !== $d['doctor'] ) { $items[] = array( '덴트웹 담당의', $d['doctor'] ); }
-	if ( $d['first'] ) { $items[] = array( '첫 등록', $d['first'] ); }
-	if ( $d['last'] ) { $items[] = array( '최근 내원', $d['last'] ); }
-	$h .= '<dl class="mc-dw__facts">';
-	foreach ( $items as $it ) { $h .= '<div><dt>' . esc_html( $it[0] ) . '</dt><dd>' . esc_html( $it[1] ) . '</dd></div>'; }
-	$h .= '</dl>';
-	if ( $d['next'] ) {
-		$n = $d['next'];
-		$h .= '<p class="mc-dw__next"><b>다음 예약</b> ' . esc_html( $n['at'] ) . ( '' !== $n['doctor'] ? ' · ' . esc_html( $n['doctor'] ) : '' ) . ( '' !== $n['what'] ? ' · ' . esc_html( $n['what'] ) : '' ) . ( '' !== $n['memo'] ? '<br><small>' . esc_html( $n['memo'] ) . '</small>' : '' ) . '</p>';
-	}
-	if ( $d['visits'] ) {
-		$h .= '<h4 class="mc-dw__h">진료 기록 <small>(덴트웹 진료비 내역의 치료내용)</small></h4><ol class="mc-dw__visits">';
-		foreach ( $d['visits'] as $i => $v ) {
-			if ( 8 === $i ) { $h .= '</ol><details class="mc-dw__more"><summary>이전 기록 ' . ( count( $d['visits'] ) - 8 ) . '건 더 보기</summary><ol class="mc-dw__visits">'; }
-			$h .= '<li><span class="mc-dw__d">' . esc_html( substr( $v['d'], 2 ) ) . '</span>' . ( '' !== $v['dr'] ? '<span class="mc-dw__dr">' . esc_html( $v['dr'] ) . '</span>' : '' ) . '<span class="mc-dw__tx">' . esc_html( '' !== $v['tx'] ? $v['tx'] : '—' ) . '</span></li>';
+	$undated = array(); $cur = null;
+	foreach ( preg_split( '/\r\n|\r|\n/', (string) $r->tx_hist ) as $ln ) {
+		if ( '' === trim( $ln ) ) { continue; }
+		if ( preg_match( '/^\s*(\d{2})(\d{2})(\d{2})\s*:\s*(.*)$/u', $ln, $m ) && checkdate( (int) $m[2], (int) $m[3], 2000 + (int) $m[1] ) ) {
+			$cur = sprintf( '20%s-%s-%s', $m[1], $m[2], $m[3] );
+			if ( ! isset( $rows[ $cur ] ) ) { $rows[ $cur ] = array( 'dr' => '', 'dw' => '', 'own' => array() ); }
+			$t = trim( $m[4] );
+			$same = '' !== $t && '' !== $rows[ $cur ]['dw'] && preg_replace( '/\s+/u', '', $t ) === preg_replace( '/\s+/u', '', $rows[ $cur ]['dw'] );
+			if ( '' !== $t && ! $same ) { $rows[ $cur ]['own'][] = $t; }
+			continue;
 		}
-		$h .= '</ol>' . ( count( $d['visits'] ) > 8 ? '</details>' : '' );
+		if ( null !== $cur ) { $rows[ $cur ]['own'][] = trim( $ln ); } else { $undated[] = trim( $ln ); }
 	}
-	return $h . '</section>';
+	krsort( $rows );
+	$h = '<ol class="mc-tl">'; $i = 0; $n = count( $rows );
+	foreach ( $rows as $date => $x ) {
+		if ( 10 === $i ) { $h .= '</ol><details class="mc-tl__more"><summary>이전 기록 ' . ( $n - 10 ) . '건 더 보기</summary><ol class="mc-tl">'; }
+		$h .= '<li><span class="mc-tl__d">' . esc_html( substr( str_replace( '-', '.', $date ), 2 ) ) . '</span><span class="mc-tl__dr">' . esc_html( $x['dr'] ) . '</span><span class="mc-tl__tx">';
+		if ( '' !== $x['dw'] ) { $h .= '<span class="mc-tl__dw">' . esc_html( $x['dw'] ) . '</span>'; }
+		foreach ( $x['own'] as $o ) { $h .= '<span class="mc-tl__own" title="미니차트에 직접 적은 기록">✎ ' . esc_html( $o ) . '</span>'; }
+		$h .= '</span></li>';
+		$i++;
+	}
+	$h .= '</ol>' . ( $n > 10 ? '</details>' : '' );
+	if ( $undated ) { $h .= '<p class="mc-tl__undated"><b>날짜 없는 기록</b><br>' . implode( '<br>', array_map( 'esc_html', $undated ) ) . '</p>'; }
+	if ( ! $n && ! $undated ) { $h = '<p class="mc-none">아직 진료기록이 없습니다.</p>'; }
+	return $h;
+}
+
+/** v8.1 · 담당의 — 미니차트 기본 담당의가 비었으면 덴트웹 담당의, 다르면 둘 다 */
+function md_mc_dw_dr_html( $r, $d ) {
+	list( $main, $pairs, $extra ) = md_mc_dr_parse( $r->dr );
+	$dw  = $d ? (string) $d['doctor'] : '';
+	$out = array();
+	if ( '' === $main && '' !== $dw ) { $main = $dw; $dw = ''; }
+	if ( '' !== $main ) { $out[] = '<span class="mc-dr__main"><small>기본</small> <b>' . esc_html( $main ) . '</b></span>'; }
+	foreach ( $pairs as $pr ) { $out[] = '<span class="mc-dr__pairv"><small>' . esc_html( $pr[0] ) . '</small> ' . esc_html( $pr[1] ) . '</span>'; }
+	if ( '' !== $dw && $dw !== $main ) { $out[] = '<span class="mc-dr__pairv"><small>덴트웹 담당의</small> ' . esc_html( $dw ) . '</span>'; }
+	if ( '' !== $extra ) { $out[] = md_mc_text( $extra ); }
+	return $out ? implode( '<br>', $out ) : '<span class="mc-none">—</span>';
 }

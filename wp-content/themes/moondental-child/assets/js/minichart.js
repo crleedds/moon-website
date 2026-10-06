@@ -122,8 +122,8 @@
   });
 })();
 
-/* v7.0 · 새 환자 — 차트번호를 넣으면 덴트웹 이름 · 지역 · 담당의로 빈 칸 채우기
-   번호를 바꾸면 앞에서 자동으로 채운 값(손대지 않은 것)은 지우고 다시 */
+/* v8.1 · 새 환자 — 차트번호만 넣으면 덴트웹에서 성명 · 지역 · 담당의를 채우고 연락처 · 주소 · 성별 · 나이를 보여 준다.
+   아직 받아 둔 게 없으면 병원 PC 가 1분 안에 찾아 온다 (5초마다 다시 물음). 번호를 바꾸면 자동으로 채운 값(손대지 않은 것)만 지운다. */
 (function () {
   'use strict';
   var form = document.querySelector('form.mc-form[data-dw]');
@@ -133,13 +133,16 @@
   var hint = document.createElement('p');
   hint.className = 'mc-dw-hint'; hint.hidden = true;
   chart.parentNode.appendChild(hint);
-  var last = '', auto = {};
+  var prev = form.querySelector('.mc-dw-prev');
+  var last = '', auto = {}, timer = null, tries = 0;
+  function esc(s) { return String(s || '').replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); }
   function undo() {
     Object.keys(auto).forEach(function (n) {
       var el = form.querySelector('[name=' + n + ']');
       if (el && el.value === auto[n]) { el.value = ''; el.dispatchEvent(new Event('input', { bubbles: true })); }
     });
     auto = {};
+    if (prev) { prev.hidden = true; prev.innerHTML = ''; }
   }
   function fill(name, val) {
     var el = form.querySelector('[name=' + name + ']');
@@ -147,31 +150,79 @@
     el.value = val; auto[name] = el.value; el.dispatchEvent(new Event('input', { bubbles: true }));
     return true;
   }
-  function look() {
-    var c = chart.value.trim();
-    if (c === last) return;
-    last = c; undo(); hint.hidden = true; hint.textContent = '';
-    if (!c) return;
+  function show(d) {
+    var done = [];
+    if (fill('pname', d.name)) done.push('성명');
+    if (fill('addr', d.region || d.addr)) done.push('지역');
+    var sel = form.querySelector('[name=dr_main]');
+    if (sel && !sel.value && d.doctor) {
+      Array.prototype.some.call(sel.options, function (o) { if (o.value && (o.value === d.doctor || o.textContent.indexOf(d.doctor) > -1)) { sel.value = o.value; auto.dr_main = o.value; done.push('담당의'); return true; } return false; });
+    }
+    hint.textContent = '덴트웹: ' + d.name + (done.length ? ' — ' + done.join(' · ') + ' 채움' : '');
+    hint.hidden = false;
+    if (prev) {
+      var age = (d.age !== '' && d.age != null) ? ' ' + d.age + '세' : '';
+      var rows = [['성명', d.name], ['성별 · 나이', (d.sex === 'M' ? '남' : d.sex === 'F' ? '여' : '') + age], ['연락처', d.phone], ['주소', d.addr], ['담당의', d.doctor], ['첫 등록', d.first], ['최근 내원', d.last]];
+      prev.innerHTML = '<b class="mc-dw-prev__h">덴트웹에서 가져온 정보</b><dl>' + rows.filter(function (r) { return r[1] && String(r[1]).trim(); }).map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>'; }).join('') + '</dl>';
+      prev.hidden = false;
+    }
+  }
+  function ask(c) {
     var u = form.getAttribute('data-dw');
     fetch(u + (u.indexOf('?') > -1 ? '&' : '?') + 'md_mc_dw=' + encodeURIComponent(c), { credentials: 'same-origin' })
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (chart.value.trim() !== c) return;
-        if (!d || !d.ok) { hint.textContent = '덴트웹에서 이 차트번호를 찾지 못했습니다 (30분마다 새로 받음).'; hint.hidden = false; return; }
-        var done = [];
-        if (fill('pname', d.name)) done.push('성명');
-        if (fill('addr', d.region)) done.push('지역');
-        var sel = form.querySelector('[name=dr_main]');
-        if (sel && !sel.value && d.doctor) {
-          Array.prototype.some.call(sel.options, function (o) { if (o.value && (o.value === d.doctor || o.textContent.indexOf(d.doctor) > -1)) { sel.value = o.value; auto.dr_main = o.value; done.push('담당의'); return true; } return false; });
+        if (d && d.ok) { show(d); return; }
+        if (d && d.pending && tries < 24) {
+          tries++; hint.textContent = '덴트웹에서 찾는 중… (병원 PC 가 1분 안에 가져옵니다)'; hint.hidden = false;
+          timer = setTimeout(function () { ask(c); }, 5000); return;
         }
-        var who = d.name + (d.sex ? ' · ' + (d.sex === 'M' ? '남' : '여') : '') + (d.age !== '' ? ' · ' + d.age + '세' : '');
-        hint.textContent = '덴트웹: ' + who + (done.length ? ' — ' + done.join(' · ') + ' 채움' : '');
-        hint.hidden = false;
+        hint.textContent = '덴트웹에서 이 차트번호를 찾지 못했습니다.'; hint.hidden = false;
       })
       .catch(function () {});
+  }
+  function look() {
+    var c = chart.value.trim();
+    if (c === last) return;
+    last = c; undo(); clearTimeout(timer); tries = 0; hint.hidden = true; hint.textContent = '';
+    if (c) ask(c);
   }
   chart.addEventListener('change', look);
   chart.addEventListener('blur', look);
   if (chart.value.trim()) look();
+})();
+
+/* v8.1 · 병력 칩 — 누르면 넣고 다시 누르면 뺀다 · 「해당없음」 체크는 풀림 */
+(function () {
+  'use strict';
+  Array.prototype.forEach.call(document.querySelectorAll('[data-mc-chips]'), function (box) {
+    var name = box.getAttribute('data-mc-chips');
+    var ta = document.querySelector('form.mc-form [name=' + name + ']');
+    if (!ta) return;
+    function parts() { return ta.value.split(/\s*[,，\n]\s*/).map(function (x) { return x.trim(); }).filter(Boolean); }
+    function sync() {
+      var ps = parts();
+      Array.prototype.forEach.call(box.querySelectorAll('[data-chip]'), function (b) {
+        var c = b.getAttribute('data-chip');
+        b.classList.toggle('is-on', ps.some(function (p) { return p.indexOf(c) === 0; }));
+      });
+    }
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-chip]');
+      if (!b) return;
+      var c = b.getAttribute('data-chip'), ps = parts();
+      var i = -1;
+      ps.forEach(function (p, k) { if (i < 0 && p.indexOf(c) === 0) i = k; });
+      if (i > -1) ps.splice(i, 1); else ps.push(c);
+      ps = ps.filter(function (p) { return p !== '해당없음' && p !== '.'; });
+      var na = document.querySelector('[name="na[' + name + ']"]');
+      if (na && na.checked) { na.click(); }
+      ta.value = ps.join(', ');
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      sync();
+    });
+    ta.addEventListener('input', sync);
+    sync();
+  });
 })();

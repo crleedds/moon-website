@@ -1081,11 +1081,21 @@ function md_mc_render_patient( $id ) {
 	if ( isset( $_GET['saved'] ) )    { echo '<div class="mds-notice mds-notice--ok">저장했습니다.</div>'; }
 	if ( isset( $_GET['reverted'] ) ) { echo '<div class="mds-notice mds-notice--ok">이전 내용으로 되돌렸습니다.</div>'; }
 	?>
+	<?php
+	/* v8.1 · 덴트웹 자료와 합쳐 한 화면으로 (원장 지시) — 같은 내용은 한 번만, 순서: 병력 → 기본 정보 → 치료계획 → 진료기록 → 참고사항 */
+	$d   = function_exists( 'md_mc_dw_get' ) ? md_mc_dw_get( $r->chart_no ) : null;
+	$age = $d && function_exists( 'md_mc_dw_age' ) ? md_mc_dw_age( $d['birth'] ) : '';
+	$sex = $d ? ( 'M' === $d['sex'] ? '남' : ( 'F' === $d['sex'] ? '여' : '' ) ) : '';
+	$lv  = $r->last_visit;
+	if ( $d && $d['last'] && $d['last'] > (string) $lv ) { $lv = $d['last']; }
+	$nm  = $d ? preg_replace( '/\s+/u', '', (string) $d['name'] ) : '';
+	?>
 	<article class="mc-chart" data-mc-id="<?php echo (int) $r->id; ?>" data-mc-label="<?php echo esc_attr( $r->chart_no . ' ' . $r->pname ); ?>">
 		<header class="mds-card mc-chart__head">
 			<div class="mc-chart__id">
 				<button type="button" class="mc-copy" data-copy="<?php echo esc_attr( $r->chart_no ); ?>" title="차트번호 복사"><?php echo esc_html( $r->chart_no ); ?></button>
 				<h2 class="mc-chart__name"><?php echo esc_html( $r->pname ); ?></h2>
+				<?php if ( $sex || '' !== $age ) : ?><span class="mc-tag"><?php echo esc_html( trim( $sex . ( '' !== $age ? ' ' . $age . '세' : '' ) ) ); ?></span><?php endif; ?>
 				<?php if ( $r->pin ) : ?><span class="mc-tag mc-tag--pin">📌 상단고정</span><?php endif; ?>
 			</div>
 			<div class="mc-chart__acts">
@@ -1095,30 +1105,48 @@ function md_mc_render_patient( $id ) {
 					<button type="submit" class="mds-btn"><?php echo $r->pin ? '상단고정 해제' : '📌 상단고정'; ?></button>
 				</form>
 			</div>
-			<p class="mc-chart__meta"><?php if ( $r->last_visit ) : ?>최근 내원 <?php echo esc_html( md_mc_short_date( $r->last_visit ) ); ?> · <?php endif; ?>마지막 수정 <?php echo esc_html( $r->updated_at ? md_mc_short_date( $r->updated_at ) . ' ' . date( 'H:i', strtotime( $r->updated_at ) ) : '—' ); ?><?php echo $r->updated_by ? ' · ' . esc_html( $r->updated_by ) : ''; ?> · <a href="<?php echo esc_url( md_mc_url( array( 'mv' => 'log', 'mid' => $r->id ) ) ); ?>">변경 기록</a></p>
+			<?php if ( $d && $d['next'] ) : $nx = $d['next']; ?>
+				<p class="mc-next"><b>다음 예약</b> <?php echo esc_html( $nx['at'] . ( '' !== $nx['doctor'] ? ' · ' . $nx['doctor'] : '' ) . ( '' !== $nx['what'] ? ' · ' . $nx['what'] : '' ) ); ?><?php echo '' !== $nx['memo'] ? '<small> — ' . esc_html( $nx['memo'] ) . '</small>' : ''; ?></p>
+			<?php endif; ?>
+			<p class="mc-chart__meta"><?php if ( $lv ) : ?>최근 내원 <?php echo esc_html( md_mc_short_date( $lv ) ); ?> · <?php endif; ?><?php if ( $d && $d['first'] ) : ?>첫 등록 <?php echo esc_html( md_mc_short_date( $d['first'] ) ); ?> · <?php endif; ?>마지막 수정 <?php echo esc_html( $r->updated_at ? md_mc_short_date( $r->updated_at ) . ' ' . date( 'H:i', strtotime( $r->updated_at ) ) : '—' ); ?><?php echo $r->updated_by ? ' · ' . esc_html( $r->updated_by ) : ''; ?> · <a href="<?php echo esc_url( md_mc_url( array( 'mv' => 'log', 'mid' => $r->id ) ) ); ?>">변경 기록</a></p>
+			<?php if ( $d && '' !== $nm && false === mb_strpos( preg_replace( '/\s+/u', '', (string) $r->pname ), $nm ) ) : ?>
+				<p class="mds-notice mds-notice--warn">덴트웹 이름은 「<?php echo esc_html( $d['name'] ); ?>」입니다 — 차트번호를 확인해 주세요.</p>
+			<?php elseif ( ! $d && get_option( 'md_mc_dw_last' ) ) : ?>
+				<p class="mc-chart__meta">덴트웹에서 이 차트번호를 찾지 못했습니다 — 차트번호를 확인해 주세요.</p>
+			<?php endif; ?>
 		</header>
-		<?php if ( function_exists( 'md_mc_dw_card' ) ) { echo md_mc_dw_card( $r ); } /* v7.0 · 덴트웹 자동 연동 */ // phpcs:ignore ?>
+
+		<?php md_mc_block( $f['mhx'][2] . ( $alrt ? ' — 주의: ' . implode( ', ', $alrt ) : '' ), md_mc_mark_alerts( md_mc_text( $r->mhx ), $alrt ), md_mc_mhx_real( $r->mhx ) ? 'mc-block--alert' : '' ); ?>
 
 		<div class="mc-grid">
 			<?php
-			md_mc_block( $f['mhx'][2] . ( $alrt ? ' — 주의: ' . implode( ', ', $alrt ) : '' ), md_mc_mark_alerts( md_mc_text( $r->mhx ), $alrt ), md_mc_mhx_real( $r->mhx ) ? 'mc-block--alert' : '' );
-			md_mc_block( $f['dr'][0], md_mc_dr_html( $r->dr ) );
+			if ( $d && '' !== (string) ( $d['phone'] ?? '' ) ) { md_mc_block( '연락처', '<a href="tel:' . esc_attr( preg_replace( '/\D/', '', $d['phone'] ) ) . '">' . esc_html( $d['phone'] ) . '</a>' ); }
+			/* 주소 — 덴트웹 주소가 있으면 그것, 미니차트 「지역」이 그 안에 이미 들어 있으면 한 번만 */
+			$addr = $d ? (string) ( $d['addr'] ?? '' ) : '';
+			$reg  = trim( (string) $r->addr );
+			if ( '' !== $addr ) {
+				$dup = md_mc_blank( $reg ) || false !== mb_strpos( preg_replace( '/\s+/u', '', $addr ), preg_replace( '/\s+/u', '', $reg ) ) || ( $d && preg_replace( '/\s+/u', '', $reg ) === preg_replace( '/\s+/u', '', (string) $d['region'] ) );
+				md_mc_block( '주소', esc_html( $addr ) . ( $dup ? '' : '<br><small class="mc-sub">지역 메모: ' . md_mc_text( $reg ) . '</small>' ) );
+			} else {
+				md_mc_block( $f['addr'][0], md_mc_text( $r->addr ) );
+			}
+			md_mc_block( $f['dr'][0], function_exists( 'md_mc_dw_dr_html' ) ? md_mc_dw_dr_html( $r, $d ) : md_mc_dr_html( $r->dr ) );
 			md_mc_block( $f['referral'][0], md_mc_text( $r->referral ) );
-			md_mc_block( $f['addr'][0], md_mc_text( $r->addr ) );
 			?>
 		</div>
 		<?php md_mc_block( $f['tx_plan'][0], md_mc_text( $r->tx_plan ), 'mc-block--plan' ); ?>
 
 		<section class="mc-block mc-block--log" id="f-tx_hist">
-			<h3 class="mc-block__h"><?php echo esc_html( $f['tx_hist'][0] ); ?></h3>
-			<?php md_mc_addform( $r, 'tx_hist', '치료입력 (날짜없이)' ); ?>
-			<div class="mc-block__b"><?php echo md_mc_text( $r->tx_hist ); // phpcs:ignore ?></div>
+			<h3 class="mc-block__h">진료기록 <small class="mc-sub"><?php echo $d ? '덴트웹 치료내용 + ✎ 직접 적은 기록' : '✎ 직접 적은 기록'; ?></small></h3>
+			<?php md_mc_addform( $r, 'tx_hist', '진료기록 직접 입력 (날짜 고를 수 있음)' ); ?>
+			<div class="mc-block__b"><?php echo function_exists( 'md_mc_dw_timeline' ) ? md_mc_dw_timeline( $r, $d ) : md_mc_text( $r->tx_hist ); // phpcs:ignore ?></div>
 		</section>
 		<section class="mc-block mc-block--log" id="f-memo">
 			<h3 class="mc-block__h"><?php echo esc_html( $f['memo'][0] ); ?></h3>
 			<?php md_mc_addform( $r, 'memo', '참고사항입력 (날짜없이)' ); ?>
 			<div class="mc-block__b"><?php echo md_mc_text( $r->memo ); // phpcs:ignore ?></div>
 		</section>
+		<?php if ( $d ) : ?><p class="mc-chart__meta mc-dwnote">덴트웹 자료 <?php echo esc_html( md_mc_short_date( $d['_synced'] ) . ' ' . date( 'H:i', strtotime( $d['_synced'] ) ) ); ?> 기준 (30분마다 새로 받음)</p><?php endif; ?>
 
 		<div class="mc-chart__foot">
 			<a href="<?php echo esc_url( md_mc_url() ); ?>">← 환자 목록</a>
@@ -1212,6 +1240,15 @@ function md_mc_dr_field( $vals ) {
 	<?php
 }
 
+/** v8.1 · 병력 — 눌러서 넣는 칸 (다시 누르면 빠짐) + 직접 더 적기 */
+function md_mc_mhx_chips() {
+	$st    = md_mc_settings();
+	$chips = ! empty( $st['mhx_chips'] ) && is_array( $st['mhx_chips'] ) ? $st['mhx_chips'] : array( '고혈압', '당뇨', '심장질환', '부정맥', '뇌졸중', '갑상선', '간질환', '신장질환 · 투석', '골다공증 약', '항응고제 · 아스피린', '스텐트', '항암 · 방사선', '알레르기', '임신', '흡연', '천식', 'B형간염' );
+	$h = '<div class="mc-chips" data-mc-chips="mhx" aria-label="병력 눌러서 넣기">';
+	foreach ( $chips as $c ) { $h .= '<button type="button" class="mc-chip" data-chip="' . esc_attr( $c ) . '">' . esc_html( $c ) . '</button>'; }
+	return $h . '<span class="mc-chips__hint">눌러서 넣고, 아래 칸에 더 적어도 됩니다 (예: 당뇨 — 인슐린, 공복 혈당 140)</span></div>';
+}
+
 /** 수정 · 새로 만들기 — 칸 순서와 이름은 AppSheet 폼 그대로 */
 function md_mc_render_edit( $id, $kind ) {
 	$r = $id ? md_mc_get( $id ) : null;
@@ -1228,6 +1265,11 @@ function md_mc_render_edit( $id, $kind ) {
 	}
 	if ( $conflict ) {
 		echo '<div class="mds-notice mds-notice--warn">아래는 방금 적으신 내용입니다. 다른 분이 저장한 최신 내용은 각 칸 아래 「저장된 최신 내용」에서 확인하고, 합쳐서 다시 저장해 주세요.</div>';
+	}
+	/* v8.1 · 담당의가 비었으면 덴트웹 담당의를 기본으로 */
+	if ( $r && 'patient' === $kind && ! isset( $vals['dr_main'] ) && function_exists( 'md_mc_dw_get' ) ) {
+		$dwd = md_mc_dw_get( $r->chart_no );
+		if ( $dwd && '' !== $dwd['doctor'] ) { list( $m0 ) = md_mc_dr_parse( $vals['dr'] ?? '' ); if ( '' === $m0 ) { $vals['dr'] = trim( $dwd['doctor'] . "\n" . (string) ( $vals['dr'] ?? '' ) ); } }
 	}
 	$v    = function ( $k ) use ( $vals ) { return isset( $vals[ $k ] ) ? (string) $vals[ $k ] : ''; };
 	$back = $r ? md_mc_url( array( 'mv' => 'note' === $kind ? 'note' : 'p', 'mid' => $r->id ) ) : md_mc_url( array( 'mv' => 'note' === $kind ? 'notes' : '' ) );
@@ -1252,17 +1294,19 @@ function md_mc_render_edit( $id, $kind ) {
 			<?php
 			md_mc_field( 'chart_no', $f['chart_no'][0], $v( 'chart_no' ), array( 'req' => true, 'input' => true, 'attrs' => 'required inputmode="numeric" maxlength="60" autocomplete="off"' . ( $r ? '' : ' autofocus' ) ) );
 			md_mc_field( 'pname', $f['pname'][0], $v( 'pname' ), array( 'req' => true, 'input' => true, 'attrs' => 'required maxlength="250" autocomplete="off"' ) );
+			if ( ! $r ) { echo '<div class="mc-dw-prev" hidden aria-live="polite"></div>'; } /* v8.1 · 새 환자 — 덴트웹에서 가져온 것 미리 보기 */
 			foreach ( array( 'addr', 'mhx', 'referral' ) as $k ) {
 				$na = ! empty( $vals['na'][ $k ] ) || ( '' !== $v( $k ) && md_mc_is_na( $v( $k ) ) );
 				md_mc_field( $k, $f[ $k ][0], $v( $k ), array( 'req' => true, 'rows' => 'mhx' === $k ? 2 : 1, 'attrs' => 'required', 'na' => $na ) );
+				if ( 'mhx' === $k ) { echo md_mc_mhx_chips(); } // phpcs:ignore
 				$latest( $k );
 			}
 			md_mc_dr_field( $vals );
 			if ( $conflict ) { $latest( 'dr' ); }
 			md_mc_field( 'tx_plan', $f['tx_plan'][0], $v( 'tx_plan' ), array( 'rows' => 2 ) );
 			$latest( 'tx_plan' );
-			md_mc_field( 'tx_new', '치료입력 (날짜없이)', '', array( 'rows' => 1, 'hint' => '저장하면 오늘 날짜를 붙여 주요치과치료이력 맨 위에' ) );
-			md_mc_field( 'tx_hist', $f['tx_hist'][0], $v( 'tx_hist' ), array( 'rows' => 3 ) );
+			md_mc_field( 'tx_new', '진료기록 직접 입력 (날짜없이)', '', array( 'rows' => 1, 'hint' => '저장하면 오늘 날짜를 붙여 진료기록에 (덴트웹 치료내용은 자동으로 들어옵니다)' ) );
+			md_mc_field( 'tx_hist', '진료기록 — 직접 적은 것 전체', $v( 'tx_hist' ), array( 'rows' => 3 ) );
 			$latest( 'tx_hist' );
 			md_mc_field( 'memo_new', '참고사항입력 (날짜없이)', '', array( 'rows' => 1, 'hint' => '저장하면 오늘 날짜를 붙여 참고사항 맨 위에' ) );
 			?>

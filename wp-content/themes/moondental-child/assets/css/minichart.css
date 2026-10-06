@@ -267,3 +267,30 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
   .mc-dw__visits li { grid-template-columns: 62px 1fr; }
   .mc-dw__tx { grid-column: 1 / -1; }
 }
+
+/* v8.1 · 덴트웹과 합친 차트 · 진료기록 · 병력 칩 · 새 환자 미리 보기 */
+.mc-next { margin: 6px 0 0; padding: 8px 12px; border-radius: 10px; background: var(--color-accent-bg, rgba(143,174,146,.12)); font-size: .92rem; }
+.mc-sub { color: var(--color-text-mute, #A89685); font-weight: 500; font-size: .8rem; }
+.mc-dwnote { text-align: right; }
+.mc-tl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.mc-tl li { display: grid; grid-template-columns: 74px 64px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px dashed var(--color-border, #E8DDD3); font-size: .9rem; line-height: 1.55; }
+.mc-tl__d { font-variant-numeric: tabular-nums; color: var(--color-text-sub, #7A6B5F); font-weight: 700; }
+.mc-tl__dr { color: var(--color-text-sub, #7A6B5F); }
+.mc-tl__tx { display: flex; flex-direction: column; gap: 2px; word-break: keep-all; overflow-wrap: anywhere; }
+.mc-tl__own { color: var(--color-primary-dark, #B86347); }
+.mc-tl__more summary { cursor: pointer; margin: 8px 0; font-size: .85rem; color: var(--color-primary-dark, #B86347); }
+.mc-tl__undated { margin: 10px 0 0; font-size: .88rem; color: var(--color-text-sub, #7A6B5F); }
+.mc-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 10px; }
+.mc-chip { border: 1px solid var(--color-border, #E8DDD3); background: #fff; border-radius: 999px; padding: 6px 12px; font-size: .86rem; cursor: pointer; min-height: 34px; }
+.mc-chip.is-on { background: var(--color-primary, #D88062); border-color: var(--color-primary, #D88062); color: #fff; font-weight: 700; }
+.mc-chips__hint { flex: 1 1 100%; font-size: .78rem; color: var(--color-text-mute, #A89685); }
+.mc-dw-prev { margin: 0 0 14px; padding: 10px 14px; border-radius: 12px; border-left: 4px solid var(--color-accent, #8FAE92); background: var(--color-accent-bg, rgba(143,174,146,.10)); }
+.mc-dw-prev[hidden] { display: none; }
+.mc-dw-prev__h { font-size: .8rem; color: var(--color-accent-dark, #6B8F72); }
+.mc-dw-prev dl { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 6px 0 0; }
+.mc-dw-prev dt { font-size: .72rem; font-weight: 800; color: var(--color-text-mute, #A89685); }
+.mc-dw-prev dd { margin: 0; font-weight: 700; }
+@media (max-width: 640px) {
+  .mc-tl li { grid-template-columns: 64px 1fr; }
+  .mc-tl__tx { grid-column: 1 / -1; }
+}
