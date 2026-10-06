@@ -3,7 +3,7 @@
  * v4.18 · 직원 라운지 · 달력 — 생일 · 입사 기념일 · 병원 행사
  *
  *  라운지 첫 화면에 바로 월 달력이 보인다. 생일(🎂)과 입사 기념일(🎉 N주년)은 「직원 정보」 표에서
- *  자동으로 읽고, 병원 행사 · 휴진 · 교육 · 기타는 누구나 달력에서 넣고 고치고 지운다.
+ *  자동으로 읽고, 병원 행사 · 교육 · 기타는 누구나 달력에서 넣고 고치고 지운다.
  *
  *  저장: 전용 테이블 하나(wp_md_events). 화면은 서버에서 그린다(PRG). 자바스크립트 없이 전부 동작.
  *
@@ -22,7 +22,6 @@ function md_cal_types() {
 		'birthday' => array( 'label' => '생일',       'icon' => '🎂', 'class' => 'is-birthday', 'yearly' => true,  'auto' => true ),
 		'anniv'    => array( 'label' => '입사 기념일', 'icon' => '🎉', 'class' => 'is-anniv',    'yearly' => true,  'auto' => true ),
 		'event'    => array( 'label' => '병원 행사',   'icon' => '📌', 'class' => 'is-event',    'yearly' => false, 'auto' => false ),
-		'closed'   => array( 'label' => '휴진 · 휴무', 'icon' => '🌙', 'class' => 'is-closed',   'yearly' => false, 'auto' => false ),
 		'edu'      => array( 'label' => '교육 · 세미나', 'icon' => '📚', 'class' => 'is-edu',    'yearly' => false, 'auto' => false ),
 		'other'    => array( 'label' => '기타',       'icon' => '📎', 'class' => 'is-other',    'yearly' => false, 'auto' => false ),
 	);
@@ -336,7 +335,7 @@ function md_cal_render_form( $r = null, $month = '' ) {
 					<?php foreach ( $types as $k => $t ) : if ( ! empty( $t['auto'] ) ) continue; ?><option value="<?php echo esc_attr( $k ); ?>" <?php selected( $k, $r->type ?? 'event' ); ?>><?php echo esc_html( $t['icon'] . ' ' . $t['label'] ); ?></option><?php endforeach; ?>
 				</select>
 			</label>
-			<label class="mds-field mds-field--grow"><span>제목</span><input type="text" name="title" required maxlength="120" value="<?php echo esc_attr( $r->title ?? '' ); ?>" placeholder="예) 전직원 워크숍 · 추석 연휴 휴진 · 감염관리 교육"></label>
+			<label class="mds-field mds-field--grow"><span>제목</span><input type="text" name="title" required maxlength="120" value="<?php echo esc_attr( $r->title ?? '' ); ?>" placeholder="예) 전직원 워크숍 · 감염관리 교육"></label>
 		</div>
 		<div class="mdcal-form__row">
 			<label class="mds-field"><span>날짜</span><input type="date" name="date_start" required value="<?php echo esc_attr( $r->date_start ?? ( $month ? $month . '-01' : current_time( 'Y-m-d' ) ) ); ?>"></label>
