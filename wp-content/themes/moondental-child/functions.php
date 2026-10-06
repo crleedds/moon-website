@@ -2163,6 +2163,7 @@ if ( file_exists( MOONDENTAL_DIR . '/inc/inventory/inventory.php' ) ) { require_
 /* v6.2 · 미니차트 — AppSheet 「Mini Chart」를 옮긴 라운지 도구 (inc/minichart) */
 if ( file_exists( MOONDENTAL_DIR . '/inc/minichart/minichart.php' ) ) { require_once MOONDENTAL_DIR . '/inc/minichart/minichart.php'; }
 if ( file_exists( MOONDENTAL_DIR . '/inc/forms/forms.php' ) ) { require_once MOONDENTAL_DIR . '/inc/forms/forms.php'; } // v7.6 · 양식 (상담용지 등 올리고 내려받기)
+if ( file_exists( MOONDENTAL_DIR . '/inc/security/lounge-security.php' ) ) { require_once MOONDENTAL_DIR . '/inc/security/lounge-security.php'; } // v8.0 · 라운지 탭 권한 · 환자 정보 이메일 인증 · 기기 · 열람 기록
 
 
 /* ============================================================

@@ -55,7 +55,7 @@ function md_sup_current_tab() {
  * 도구가 늘면 여기에 한 줄만 더하면 된다.
  */
 function md_sup_apps() {
-	return array(
+	return apply_filters( 'md_sup_apps', array( /* v8.0 · 탭 권한 · 🔒 표시 (inc/security) */
 		'stock' => array(
 			'label' => '재료실', /* v5.6 · 이름 「품목신청」 → 「재료실」 (원장 지시, 그 전엔 「재고관리」). 화면은 inc/inventory */
 			'icon'  => '📦',
@@ -86,7 +86,7 @@ function md_sup_apps() {
 			'label' => '미니차트',
 			'icon'  => '🗂️',
 			'desc'  => '환자 병력 · 치료이력 · 계획 · 참고사항 · 팀 노트',
-			'manage' => true, /* v6.9 · 일단 관리자만 (원장 지시 2026-10-06) */
+			/* v8.0 · 누가 열지는 「접근 권한 · 보안」의 탭 권한으로 (기본: 라운지 관리자만) */
 		),
 		// v4.0 · 환자 설명용 자료
 		'care'  => array(
@@ -141,7 +141,7 @@ function md_sup_apps() {
 			/* v7.3 · 개인 계정이면 첫 화면에 타일로 (원장 지시 — 직원이 비밀번호를 바꿀 수 있게) */
 			'hidden' => ! ( is_user_logged_in() && function_exists( 'md_acc_is_personal_user' ) && md_acc_is_personal_user( wp_get_current_user() ) ),
 		),
-	);
+	) );
 }
 
 function md_sup_current_app() {
@@ -1065,8 +1065,9 @@ function md_sup_render_page() {
 	}
 
 	if ( 'staff' === $app && ! md_sup_can_manage() ) { $app = ''; } /* v4.18 */
-	if ( 'minichart' === $app && ! md_sup_can_manage() ) { $app = ''; } /* v6.9 · 미니차트는 일단 관리자만 */
-	if ( 'care' === $app && function_exists( 'md_care_render' ) ) {
+	if ( function_exists( 'md_sec_render_gate' ) && md_sec_render_gate( $app ) ) {
+		// v8.0 · 접근 권한 · 보안 탭, 또는 환자 정보 화면의 이메일 인증 화면을 그렸다
+	} elseif ( 'care' === $app && function_exists( 'md_care_render' ) ) {
 		md_care_render(); // v4.0 · Moon Dental Care
 	} elseif ( 'support' === $app && function_exists( 'md_support_render' ) ) {
 		md_support_render(); // v4.3 · 지원 요청

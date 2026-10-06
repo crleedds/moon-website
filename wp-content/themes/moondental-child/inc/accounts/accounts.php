@@ -824,6 +824,7 @@ function md_acc_render_me() {
 			</section>
 			<?php endif; ?>
 		<?php endif; ?>
+		<?php do_action( 'md_acc_me_after', $u ); /* v8.0 · 로그인한 기기 (inc/security) */ ?>
 	</div>
 	<?php
 }

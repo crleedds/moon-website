@@ -151,8 +151,8 @@ add_action( 'init', 'md_mc_maybe_install', 20 );
  * 도움 함수
  * ============================================================ */
 
-/* v6.9 · 미니차트는 「일단」 관리자(라운지 관리자 · 원장)만 (원장 지시 2026-10-06) — 직원에게 다시 열려면 이 줄을 md_sup_can_use() 로 */
-function md_mc_can_use()    { return function_exists( 'md_sup_can_manage' ) && md_sup_can_manage(); }
+/* v8.0 · 누가 쓸지는 라운지 탭 권한(inc/security, 기본 라운지 관리자만)이 정한다 — 여기서는 라운지 사용자면 된다 */
+function md_mc_can_use()    { return function_exists( 'md_sup_can_use' ) && md_sup_can_use() && ( ! function_exists( 'md_sec_can_tab' ) || md_sec_can_tab( 'minichart' ) ); }
 function md_mc_can_manage() { return function_exists( 'md_sup_can_manage' ) && md_sup_can_manage(); }
 /**
  * v6.8 · 권한 세 단계 (원장 지시)
@@ -1077,6 +1077,7 @@ function md_mc_render_patient( $id ) {
 	/* v6.5 · 연 차트는 목록 맨 위로 (최근 본 순) — rev 는 바꾸지 않는다 */
 	global $wpdb;
 	$wpdb->update( md_mc_t(), array( 'viewed_at' => current_time( 'mysql' ) ), array( 'id' => (int) $r->id ) );
+	do_action( 'md_mc_viewed', $r ); /* v8.0 · 열람 기록 (2년) */
 	if ( isset( $_GET['saved'] ) )    { echo '<div class="mds-notice mds-notice--ok">저장했습니다.</div>'; }
 	if ( isset( $_GET['reverted'] ) ) { echo '<div class="mds-notice mds-notice--ok">이전 내용으로 되돌렸습니다.</div>'; }
 	?>
