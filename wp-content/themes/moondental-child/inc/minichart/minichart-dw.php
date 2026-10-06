@@ -118,6 +118,10 @@ function md_mc_dw_clean( $p ) {
 		if ( ! $d ) { continue; }
 		$o['visits'][] = array( 'd' => $d, 'dr' => md_mc_dw_txt( $v['dr'] ?? '', 30 ), 'tx' => md_mc_dw_txt( $v['tx'] ?? '', 500 ) );
 	}
+	/* 최근 내원 = 덴트웹 최종 내원일과 진료 기록의 가장 늦은 날 중 늦은 것 (오늘 이후는 버림) */
+	$today = current_time( 'Y-m-d' );
+	foreach ( $o['visits'] as $v ) { if ( $v['d'] <= $today && $v['d'] > $o['last'] ) { $o['last'] = $v['d']; } }
+	if ( $o['last'] > $today ) { $o['last'] = ''; }
 	return $o;
 }
 
