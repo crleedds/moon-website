@@ -121,8 +121,9 @@ function md_brief_receive( $request ) {
 	$b['counts'] = array( 'dropout' => count( $clean['dropout'] ), 'recall' => count( $clean['recall'] ), 'noshow' => count( $clean['noshow'] ) );
 	$wpdb->replace( $t, array( 'd' => $d, 'data' => wp_json_encode( $b, JSON_UNESCAPED_UNICODE ), 'made_at' => current_time( 'mysql' ), 'mailed_at' => $old ? $old->mailed_at : null ) );
 
+	/* 메일은 서버 PC 가 「send」를 붙였을 때만 — brief.ps1 이 하루 한 번(휴진일 포함) 붙인다 (원장 지시) */
 	$mailed = 0;
-	if ( ! $old || ! $old->mailed_at ) {
+	if ( ! empty( $b['send'] ) ) {
 		$mailed = md_brief_send( $d );
 		if ( $mailed ) { $wpdb->update( $t, array( 'mailed_at' => current_time( 'mysql' ) ), array( 'd' => $d ) ); }
 	}
@@ -313,7 +314,7 @@ function md_brief_render() {
 
 function md_brief_render_day() {
 	$dates = md_brief_dates();
-	if ( ! $dates ) { echo '<div class="mds-card"><div class="mds-empty">아직 받은 브리핑이 없습니다. 서버 PC 가 진료하는 날 아침 7시 30분 뒤에 보냅니다.</div></div>'; return; }
+	if ( ! $dates ) { echo '<div class="mds-card"><div class="mds-empty">아직 받은 브리핑이 없습니다. 서버 PC 가 매일 아침 7시 30분 뒤에 보냅니다.</div></div>'; return; }
 	$d = isset( $_GET['bd'] ) && in_array( $_GET['bd'], $dates, true ) ? sanitize_text_field( wp_unslash( $_GET['bd'] ) ) : $dates[0];
 	$x = md_brief_get( $d );
 	?>
@@ -385,7 +386,7 @@ function md_brief_render_to() {
 	?>
 	<div class="mds-card">
 		<h2 class="mdst-title" style="margin-top:0">브리핑 메일 받는 사람</h2>
-		<p class="mds-hint">진료하는 날 아침 7시 30분쯤, 지난 진료일 브리핑을 아래 주소로 보냅니다. 메일에는 숫자와 인원수만 들어갑니다(환자 이름 없음).</p>
+		<p class="mds-hint">매일 아침 7시 30분쯤(휴진일 포함), 가장 최근 진료일 브리핑을 아래 주소로 보냅니다. 메일에는 숫자와 인원수만 들어갑니다(환자 이름 없음).</p>
 		<?php if ( ! $to ) : ?><div class="mds-empty">받는 사람이 없습니다 — 메일을 보내지 않습니다.</div><?php endif; ?>
 		<?php foreach ( $to as $m ) : ?>
 			<form method="post" class="mdb-to" onsubmit="return confirm('<?php echo esc_js( $m ); ?> 을(를) 뺄까요?');">
@@ -402,6 +403,7 @@ function md_brief_render_to() {
 			<span style="flex:1;color:#555">가장 최근 브리핑을 지금 다시 보내 보기 (주소를 비우면 받는 사람 모두에게)</span>
 			<input type="email" name="email" placeholder="이 주소로만 (선택)" style="flex:0 1 240px"><button type="submit" class="mds-btn">시험 메일 보내기</button>
 		</form>
+		<?php echo function_exists( 'md_bridge_status_html' ) ? md_bridge_status_html() : ''; // phpcs:ignore -- 안에서 이스케이프 ?>
 	</div>
 	<?php
 }

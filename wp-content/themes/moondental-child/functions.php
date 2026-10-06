@@ -2128,6 +2128,7 @@ if ( file_exists( MOONDENTAL_DIR . '/inc/staff/staff.php' ) ) { require_once MOO
 if ( file_exists( MOONDENTAL_DIR . '/inc/calendar/calendar.php' ) ) { require_once MOONDENTAL_DIR . '/inc/calendar/calendar.php'; } // v4.17 · 달력
 if ( file_exists( MOONDENTAL_DIR . '/inc/survey/survey.php' ) ) { require_once MOONDENTAL_DIR . '/inc/survey/survey.php'; } // v4.10 · 환자 만족도 조사 (/만족도/ + 직원 전용 관리)
 if ( file_exists( MOONDENTAL_DIR . '/inc/briefing/briefing.php' ) ) { require_once MOONDENTAL_DIR . '/inc/briefing/briefing.php'; } // v7.7 · 경영 브리핑 (덴트웹 연동 · 진료 중단 · 리콜 · 노쇼)
+if ( file_exists( MOONDENTAL_DIR . '/inc/bridge/bridge.php' ) ) { require_once MOONDENTAL_DIR . '/inc/bridge/bridge.php'; } // v7.8 · 서버 PC 연동 프로그램 자동 업데이트 (서명 확인)
 require_once MOONDENTAL_DIR . '/inc/customizer-content.php';
 require_once MOONDENTAL_DIR . '/inc/auto-translate.php'; // v3.44.0
 require_once MOONDENTAL_DIR . '/inc/phrase-translate.php'; // v3.44.217 · 문구 기반 번역
