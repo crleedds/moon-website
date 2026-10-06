@@ -11,7 +11,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_STAFF_SCHEMA', 2 ); /* v4.18.2 · phone · email · photo */
+define( 'MD_STAFF_SCHEMA', 3 ); /* v4.18.2 · phone · email · photo / 3 · dw_id (덴트웹 직원 번호) */
 
 function md_staff_table() { global $wpdb; return $wpdb->prefix . 'md_staff'; }
 
@@ -43,6 +43,7 @@ function md_staff_maybe_install() {
 		phone VARCHAR(40) NOT NULL DEFAULT '',
 		email VARCHAR(120) NOT NULL DEFAULT '',
 		photo VARCHAR(255) NOT NULL DEFAULT '',
+		dw_id INT NOT NULL DEFAULT 0,
 		created_at DATETIME NOT NULL,
 		updated_at DATETIME NULL,
 		PRIMARY KEY  (id),
@@ -160,6 +161,9 @@ function md_staff_save( $data, $id = 0 ) {
 
 function md_staff_delete( $id ) {
 	global $wpdb;
+	/* 덴트웹과 이어진 직원을 지우면 다음 연동 때 다시 추가하지 않도록 기억해 둔다 */
+	$dw = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT dw_id FROM ' . md_staff_table() . ' WHERE id = %d', (int) $id ) );
+	if ( $dw ) { $ig = (array) get_option( 'md_staff_dw_ignore', array() ); $ig[ $dw ] = 1; update_option( 'md_staff_dw_ignore', $ig, false ); }
 	md_staff_photo_remove( $id );
 	return (bool) $wpdb->delete( md_staff_table(), array( 'id' => (int) $id ) );
 }
@@ -219,6 +223,138 @@ function md_staff_photo_save( $id, $file ) {
 	$wpdb->update( md_staff_table(), array( 'photo' => $name, 'updated_at' => current_time( 'mysql' ) ), array( 'id' => (int) $id ) );
 	return $name;
 }
+
+/* ============================================================
+ * 덴트웹 연동 — 서버 PC 의 sync.ps1 이 덴트웹 직원정보(PUB_V직원정보)를 올린다
+ *   POST /wp-json/md-staff/v1/sync   헤더 X-MD-Survey-Key: <만족도 설정의 연동 키>
+ *   본문 { "staff": [ { "id":12, "name":"홍길동", "job":4, "birthday":"19900101", "hired":"20200301", "retired":"" }, … ] }
+ *   퇴사자는 id · retired 만 온다 (이름 · 생일은 보내지 않음).
+ *
+ *  - 처음엔 근무 중인 덴트웹 직원과 라운지 직원을 이름으로 짝지어 dw_id 로 잇는다 (같은 이름이 둘이면 잇지 않음).
+ *  - 이어진 직원: 생일 · 입사일을 덴트웹 값으로, 이름도 덴트웹 값으로(원장은 홈페이지에서 관리하므로 이름 제외).
+ *  - 덴트웹에 퇴사일이 들어가면 라운지에서도 퇴사 처리(계정 중지 — 라운지 관리자 계정은 원장이 직접).
+ *    덴트웹 연동이 퇴사시킨 사람만 퇴사일이 지워지면 복직시킨다 (라운지에서 손으로 퇴사시킨 사람은 그대로).
+ *  - 덴트웹에만 있는 근무 직원은 추가(부서는 직종으로 추정). 원장(직종 1)은 가상 의사(「예방과」 등)가 있어 추가하지 않는다.
+ *  - 라운지에서 지운 직원은 다시 추가하지 않는다 (md_staff_dw_ignore).
+ * ============================================================ */
+function md_staff_dw_date( $v ) {
+	$v = preg_replace( '/\D+/', '', (string) $v );
+	if ( 8 !== strlen( $v ) ) { return null; }
+	return md_staff_norm_date( substr( $v, 0, 4 ) . '-' . substr( $v, 4, 2 ) . '-' . substr( $v, 6, 2 ) );
+}
+
+function md_staff_dw_dept( $job ) {
+	$m = array( 1 => '의료진', 3 => '경영지원실', 4 => '진료실', 5 => '진료실', 6 => '서비스지원실', 8 => '기공실', 11 => '경영지원실' );
+	return $m[ (int) $job ] ?? '기타';
+}
+
+function md_staff_dw_sync( $list ) {
+	global $wpdb;
+	$t      = md_staff_table();
+	$today  = current_time( 'Y-m-d' );
+	$ignore = (array) get_option( 'md_staff_dw_ignore', array() );
+	$left   = (array) get_option( 'md_staff_left', array() );
+	$byDw   = (array) get_option( 'md_staff_dw_retired', array() ); /* 연동이 퇴사시킨 직원 sid => 1 */
+	$rows   = (array) $wpdb->get_results( "SELECT * FROM $t" );
+	$linked = array(); $byName = array();
+	foreach ( $rows as $r ) {
+		if ( (int) $r->dw_id ) { $linked[ (int) $r->dw_id ] = $r; }
+		else { $byName[ trim( $r->name ) ][] = $r; }
+	}
+	/* 근무 중인 덴트웹 이름 — 같은 이름이 둘이면 이름으로 잇지 않는다 */
+	$dwCount = array();
+	foreach ( $list as $s ) { $n = trim( (string) ( $s['name'] ?? '' ) ); if ( '' !== $n ) { $dwCount[ $n ] = ( $dwCount[ $n ] ?? 0 ) + 1; } }
+
+	$out  = array( 'linked' => 0, 'updated' => 0, 'added' => 0, 'retired' => 0, 'rehired' => 0, 'skipped' => array() );
+	$site = false;
+	$acc  = function_exists( 'md_acc_staff_user_map' ) ? md_acc_staff_user_map() : array();
+	foreach ( $list as $s ) {
+		$id = (int) ( $s['id'] ?? 0 );
+		if ( $id <= 0 ) { continue; }
+		$ret  = md_staff_dw_date( $s['retired'] ?? '' );
+		$gone = $ret && $ret <= $today;
+		$name = mb_substr( trim( sanitize_text_field( (string) ( $s['name'] ?? '' ) ) ), 0, 60 );
+		$r    = $linked[ $id ] ?? null;
+
+		if ( ! $r && ! $gone && '' !== $name && 1 === ( $dwCount[ $name ] ?? 0 ) && 1 === count( $byName[ $name ] ?? array() ) ) {
+			$r = $byName[ $name ][0];
+			if ( (int) $r->active ) { /* 라운지에서 퇴사 처리된 사람은 잇지 않는다 */
+				$wpdb->update( $t, array( 'dw_id' => $id ), array( 'id' => (int) $r->id ) );
+				$r->dw_id = $id; $linked[ $id ] = $r; unset( $byName[ $name ] ); $out['linked']++;
+			} else { $r = null; }
+		}
+
+		if ( $r ) {
+			$sid = (int) $r->id;
+			if ( $gone ) {
+				if ( (int) $r->active ) {
+					$u = $acc[ $sid ] ?? null;
+					if ( $u && user_can( $u, 'md_supply_manage' ) ) { $out['skipped'][] = $r->name . ' (라운지 관리자 계정 — 원장님이 직접 퇴사 처리)'; continue; }
+					$wpdb->update( $t, array( 'active' => 0, 'updated_at' => current_time( 'mysql' ) ), array( 'id' => $sid ) );
+					$left[ $sid ] = $ret; $byDw[ $sid ] = 1;
+					if ( $u && function_exists( 'md_acc_status' ) && 'active' === md_acc_status( $u ) && function_exists( 'md_acc_turn_off' ) ) { md_acc_turn_off( $u ); }
+					if ( function_exists( 'md_acc_log' ) ) { md_acc_log( '퇴사 처리 (덴트웹)', $r->name . ' · ' . $ret . ( $u ? ' · 계정 중지' : '' ) ); }
+					$out['retired']++; $site = true;
+				}
+				continue;
+			}
+			$set = array();
+			if ( ! (int) $r->active && ! empty( $byDw[ $sid ] ) ) { /* 덴트웹에서 퇴사일을 지웠다 → 복직 */
+				$set['active'] = 1; unset( $left[ $sid ], $byDw[ $sid ] );
+				$u = $acc[ $sid ] ?? null;
+				if ( $u && function_exists( 'md_acc_status' ) && 'off' === md_acc_status( $u ) && function_exists( 'md_acc_turn_on' ) ) { md_acc_turn_on( $u ); }
+				if ( function_exists( 'md_acc_log' ) ) { md_acc_log( '복직 (덴트웹)', $r->name ); }
+				$out['rehired']++; $site = true;
+			}
+			foreach ( array( 'birthday', 'hired' ) as $k ) {
+				$v = md_staff_dw_date( $s[ $k ] ?? '' );
+				if ( $v && $v !== (string) $r->$k ) { $set[ $k ] = $v; }
+			}
+			if ( '' !== $name && $name !== $r->name && '의료진' !== $r->dept ) { $set['name'] = $name; $site = true; }
+			if ( $set ) {
+				$set['updated_at'] = current_time( 'mysql' );
+				$wpdb->update( $t, $set, array( 'id' => $sid ) );
+				$out['updated']++;
+			}
+			continue;
+		}
+
+		/* 라운지에 없는 근무 직원 → 추가 */
+		if ( $gone || '' === $name || ! empty( $ignore[ $id ] ) || 1 === (int) ( $s['job'] ?? 0 ) ) { continue; }
+		$wpdb->insert( $t, array(
+			'name'       => $name,
+			'dept'       => md_staff_dw_dept( $s['job'] ?? 0 ),
+			'birthday'   => md_staff_dw_date( $s['birthday'] ?? '' ),
+			'hired'      => md_staff_dw_date( $s['hired'] ?? '' ),
+			'dw_id'      => $id,
+			'sort'       => (int) $wpdb->get_var( "SELECT COALESCE(MAX(sort),0) FROM $t" ) + 1,
+			'created_at' => current_time( 'mysql' ),
+		) );
+		$out['added']++; $site = true;
+	}
+	update_option( 'md_staff_left', $left, false );
+	update_option( 'md_staff_dw_retired', $byDw, false );
+	if ( $site ) { md_staff_sync_site(); }
+	update_option( 'md_staff_dw_last', array( 'at' => current_time( 'mysql' ) ) + $out, false );
+	return $out;
+}
+
+add_action( 'rest_api_init', function () {
+	register_rest_route( 'md-staff/v1', '/sync', array(
+		'methods'             => 'POST',
+		'callback'            => function ( $request ) {
+			$body = $request->get_json_params();
+			$list = isset( $body['staff'] ) && is_array( $body['staff'] ) ? array_values( array_filter( $body['staff'], 'is_array' ) ) : array();
+			if ( ! $list ) { return new WP_Error( 'md_staff', '직원 목록이 비어 있습니다.', array( 'status' => 400 ) ); }
+			return rest_ensure_response( md_staff_dw_sync( $list ) );
+		},
+		'permission_callback' => function ( $request ) {
+			$key  = (string) $request->get_header( 'x-md-survey-key' );
+			$want = (string) get_option( 'md_survey_api_key' );
+			return '' !== $want && '' !== $key && hash_equals( $want, $key );
+		},
+	) );
+} );
 
 /* ============================================================
  * 폼 처리 (관리자만 · PRG)
@@ -315,6 +451,13 @@ function md_staff_render() {
 				여기서 추가 · 수정 · 삭제하면 홈페이지 <a href="<?php echo esc_url( home_url( '/의료진/' ) ); ?>" target="_blank" rel="noopener">의료진 페이지</a>의 직원 명단이 바로 바뀌고, 생일 · 입사일은 라운지 달력에 🎂 🎉 로 표시됩니다(생일 연도는 표시하지 않음).
 				원장(의료진)은 사진 · 약력과 함께 관리되므로 이름 · 직책은 홈페이지 설정에서, 생일 · 입사일만 여기서 넣습니다.
 			</p>
+			<?php $dw = get_option( 'md_staff_dw_last' ); if ( is_array( $dw ) && ! empty( $dw['at'] ) ) : ?>
+			<p class="mds-hint" style="margin:.5em 0 0">
+				🔗 <strong>덴트웹 연동</strong> · 마지막 <?php echo esc_html( date_i18n( 'm.d H:i', strtotime( $dw['at'] ) ) ); ?> —
+				이름 · 생일 · 입사일 · 퇴사는 <strong>덴트웹 직원정보에서</strong> 고쳐 주세요(여기서 고쳐도 한 시간 안에 덴트웹 값으로 돌아갑니다). 덴트웹에 새 직원을 넣으면 여기에 자동으로 추가됩니다 — 부서만 확인해 주세요.
+				<?php if ( ! empty( $dw['skipped'] ) ) : ?><br>⚠ <?php echo esc_html( implode( ', ', (array) $dw['skipped'] ) ); ?><?php endif; ?>
+			</p>
+			<?php endif; ?>
 		</div>
 
 		<?php if ( function_exists( 'md_acc_render_staff_panel' ) ) { md_acc_render_staff_panel(); } /* v5.8 · 가입 신청 · 계정 (inc/accounts) */ ?>
