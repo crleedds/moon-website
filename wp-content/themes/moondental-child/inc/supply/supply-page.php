@@ -80,6 +80,7 @@ function md_sup_apps() {
 			'label' => '미니차트',
 			'icon'  => '🗂️',
 			'desc'  => '환자 병력 · 치료이력 · 계획 · 참고사항 · 팀 노트',
+			'manage' => true, /* v6.9 · 일단 관리자만 (원장 지시 2026-10-06) */
 		),
 		// v4.0 · 환자 설명용 자료
 		'care'  => array(
@@ -1050,6 +1051,7 @@ function md_sup_render_page() {
 	}
 
 	if ( 'staff' === $app && ! md_sup_can_manage() ) { $app = ''; } /* v4.18 */
+	if ( 'minichart' === $app && ! md_sup_can_manage() ) { $app = ''; } /* v6.9 · 미니차트는 일단 관리자만 */
 	if ( 'care' === $app && function_exists( 'md_care_render' ) ) {
 		md_care_render(); // v4.0 · Moon Dental Care
 	} elseif ( 'support' === $app && function_exists( 'md_support_render' ) ) {

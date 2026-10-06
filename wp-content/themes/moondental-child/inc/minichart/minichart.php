@@ -151,7 +151,8 @@ add_action( 'init', 'md_mc_maybe_install', 20 );
  * 도움 함수
  * ============================================================ */
 
-function md_mc_can_use()    { return function_exists( 'md_sup_can_use' ) && md_sup_can_use(); }
+/* v6.9 · 미니차트는 「일단」 관리자(라운지 관리자 · 원장)만 (원장 지시 2026-10-06) — 직원에게 다시 열려면 이 줄을 md_sup_can_use() 로 */
+function md_mc_can_use()    { return function_exists( 'md_sup_can_manage' ) && md_sup_can_manage(); }
 function md_mc_can_manage() { return function_exists( 'md_sup_can_manage' ) && md_sup_can_manage(); }
 /**
  * v6.8 · 권한 세 단계 (원장 지시)
@@ -906,6 +907,7 @@ function md_mc_nonce_fields( $action, $id = 0 ) {
 }
 
 function md_mc_render() {
+	if ( ! md_mc_can_use() ) { echo '<div class="mds-notice mds-notice--warn">미니차트는 지금 관리자만 볼 수 있습니다.</div>'; return; } /* v6.9 */
 	if ( (int) get_option( 'md_mc_schema', 0 ) < MD_MC_SCHEMA ) { md_mc_maybe_install(); }
 	$mv  = isset( $_GET['mv'] ) ? sanitize_key( wp_unslash( $_GET['mv'] ) ) : '';
 	$mid = isset( $_GET['mid'] ) ? (int) $_GET['mid'] : 0;
