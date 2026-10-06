@@ -3,7 +3,7 @@
  * v8.0 · 직원 라운지 보안 — 탭별 접근 권한 · 환자 정보 화면 이메일 인증 · 기기 관리 · 미니차트 열람 기록
  * (원장 지시 2026-10-06)
  *
- *  1) 탭 권한: 계정마다 라운지 탭(앱)을 켜고 끈다. 원장 계정(moondentalmanager · 워드프레스 관리자)은 늘 전부.
+ *  1) 탭 권한: 계정마다 라운지 탭(앱)을 켜고 끈다. 총괄 관리자(md_supply_owner · v8.2)는 늘 전부. 직원 정보 › 권한 탭.
  *     설정은 「접근 권한 · 보안」 탭(원장만) — 사용자 메타 md_lounge_tabs. 정하지 않은 계정은 예전 그대로
  *     (관리 전용 탭은 라운지 관리자, 미니차트는 라운지 관리자만).
  *  2) 환자 정보 화면(미니차트 · 만족도 결과 · 경영 브리핑 · 접수수납목록)은 병원 밖에서 열 때 이메일 코드 6자리.
@@ -56,11 +56,25 @@ function md_sec_device_label() {
 	return mb_substr( (string) ( $_SERVER['HTTP_USER_AGENT'] ?? '' ), 0, 60 );
 }
 
-/** 원장 계정 (늘 모든 탭 · 다른 사람 기기 끊기 · 권한 정하기) */
+/** 총괄 관리자 (v8.2 · md_supply_owner — 늘 모든 탭 · 관리자 등급 정하기 · 모든 기기 끊기). 홈페이지 관리자도 같은 대우 */
 function md_sec_is_owner_user( $u ) {
 	if ( ! $u || ! $u->exists() ) { return false; }
-	if ( user_can( $u, 'manage_options' ) ) { return true; }
-	return $u->user_login === ( defined( 'MD_SUP_MANAGER_LOGIN' ) ? MD_SUP_MANAGER_LOGIN : 'moondentalmanager' );
+	return user_can( $u, 'md_supply_owner' ) || user_can( $u, 'manage_options' );
+}
+function md_sec_is_mgr_user( $u ) { return $u && $u->exists() && ( user_can( $u, 'md_supply_manage' ) || md_sec_is_owner_user( $u ) ); }
+function md_sec_grade( $u ) { return user_can( $u, 'md_supply_owner' ) ? 'owner' : ( user_can( $u, 'md_supply_manage' ) ? 'mgr' : 'staff' ); }
+function md_sec_grade_label( $g ) { return array( 'owner' => '총괄 관리자', 'mgr' => '라운지 관리자', 'staff' => '직원' )[ $g ]; }
+function md_sec_is_shared_staff( $u ) { return $u && defined( 'MD_SUP_STAFF_LOGIN' ) && MD_SUP_STAFF_LOGIN === $u->user_login; }
+
+/** 지금 사람이 그 계정의 권한을 바꿀 수 있나 — 총괄: 다른 총괄 빼고 다 / 라운지 관리자: 일반 직원만 / 내 계정은 못 바꿈 */
+function md_sec_can_edit_user( $t ) {
+	$me = wp_get_current_user();
+	if ( ! $t || (int) $t->ID === (int) $me->ID ) { return false; }
+	if ( user_can( $t, 'manage_options' ) ) { return false; }
+	if ( current_user_can( 'manage_options' ) ) { return true; }
+	if ( user_can( $me, 'md_supply_owner' ) ) { return ! user_can( $t, 'md_supply_owner' ); }
+	if ( user_can( $me, 'md_supply_manage' ) ) { return ! md_sec_is_mgr_user( $t ); }
+	return false;
 }
 function md_sec_is_owner() { return is_user_logged_in() && md_sec_is_owner_user( wp_get_current_user() ); }
 
@@ -105,7 +119,6 @@ function md_sec_user_tabs( $u ) {
 function md_sec_can_tab( $k, $u = null ) {
 	$u = $u ? $u : wp_get_current_user();
 	if ( in_array( $k, array( 'me' ), true ) ) { return true; }
-	if ( 'access' === $k ) { return md_sec_is_owner_user( $u ); }
 	$t = md_sec_user_tabs( $u );
 	return null === $t || in_array( $k, $t, true );
 }
@@ -114,8 +127,7 @@ function md_sec_can_tab( $k, $u = null ) {
 function md_sec_filter_apps( $apps ) {
 	global $md_sec_raw_apps;
 	if ( isset( $apps['minichart'] ) ) { unset( $apps['minichart']['manage'] ); } /* 미니차트는 이제 탭 권한으로 */
-	$apps['access'] = array( 'label' => '접근 권한 · 보안', 'icon' => '🛡️', 'desc' => '탭 권한 · 병원 인터넷 · 기기 · 미니차트 열람 기록', 'manage' => true );
-	$md_sec_raw_apps = $apps;
+	$md_sec_raw_apps = $apps; /* v8.2 · 「접근 권한 · 보안」은 직원 정보 안으로 합침 */
 	if ( ! is_user_logged_in() ) { return $apps; }
 	$u = wp_get_current_user();
 	foreach ( $apps as $k => $a ) {
@@ -242,6 +254,11 @@ function md_sec_guard() {
 	if ( ! function_exists( 'md_sup_is_page' ) || ! md_sup_is_page() || ! is_user_logged_in() ) { return; }
 	$app = md_sec_req_app();
 	$is_post = 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' );
+	/* v8.2 · moondentalmanager 는 홈페이지 관리 전용 — 라운지에서는 쓰지 않는다 (원장 지시) */
+	if ( defined( 'MD_SUP_MANAGER_LOGIN' ) && wp_get_current_user()->user_login === MD_SUP_MANAGER_LOGIN && ! get_option( 'md_sec_allow_manager_lounge' ) && get_users( array( 'capability' => 'md_supply_owner', 'number' => 1, 'fields' => 'ID' ) ) ) { /* 로컬 시험 환경만 옵션으로 허용 · 총괄 관리자가 한 명도 없으면 막지 않는다(잠김 방지) */
+		wp_die( '<p>이 계정(moondentalmanager)은 홈페이지 관리 전용이라 직원 라운지에서는 쓰지 않습니다.</p><p>본인 계정으로 로그인해 주세요. <a href="' . esc_url( wp_logout_url( home_url( '/직원/' ) ) ) . '">로그아웃</a></p>', '직원 라운지', array( 'response' => 403 ) );
+	}
+	if ( 'access' === $app ) { wp_safe_redirect( md_sup_url( array( 'app' => 'staff', 'tab' => 'perm' ) ) ); exit; }
 
 	/* 이 화면의 코드 보내기 · 확인 */
 	if ( $is_post && isset( $_POST['md_sec'] ) ) { md_sec_handle_post(); return; }
@@ -297,26 +314,45 @@ function md_sec_handle_post() {
 			WP_Session_Tokens::get_instance( $uid )->destroy_others( wp_get_session_token() );
 			$go( '이 기기 말고 모든 기기를 끊었습니다.', true );
 			break;
-		case 'owner_drop': /* 원장 — 다른 사람 기기 모두 끊기 */
-			if ( ! md_sec_is_owner() ) { $go( '원장 계정만 할 수 있습니다.' ); }
-			$t = (int) ( $_POST['uid'] ?? 0 );
-			if ( $t && $t !== $uid ) { md_sec_drop_all( $t ); }
-			$go( '그 계정의 기기를 모두 끊었습니다.', true );
+		case 'owner_drop': /* 다른 사람 기기 모두 끊기 — 총괄: 다른 총괄 빼고, 라운지 관리자: 일반 직원만 */
+			$t = get_userdata( (int) ( $_POST['uid'] ?? 0 ) );
+			if ( ! $t || ! md_sec_can_edit_user( $t ) ) { $go( '그 계정의 기기는 끊을 수 없습니다.' ); }
+			md_sec_drop_all( (int) $t->ID );
+			$go( $t->display_name . ' 님의 기기를 모두 끊었습니다.', true );
 			break;
-		case 'tabs':
-			if ( ! md_sec_is_owner() ) { $go( '원장 계정만 할 수 있습니다.' ); }
-			$sent = isset( $_POST['tabs'] ) && is_array( $_POST['tabs'] ) ? wp_unslash( $_POST['tabs'] ) : array();
+		case 'perms':
+			if ( ! md_sup_can_manage() ) { $go( '관리자만 할 수 있습니다.' ); }
 			$keys = array_keys( md_sec_tab_list() );
+			$tabs = isset( $_POST['tabs'] ) && is_array( $_POST['tabs'] ) ? wp_unslash( $_POST['tabs'] ) : array();
+			$grd  = isset( $_POST['grade'] ) && is_array( $_POST['grade'] ) ? wp_unslash( $_POST['grade'] ) : array();
+			$inv  = isset( $_POST['inv'] ) && is_array( $_POST['inv'] ) ? wp_unslash( $_POST['inv'] ) : array();
+			$owner = md_sec_is_owner();
+			$n = 0;
 			foreach ( array_map( 'intval', (array) ( $_POST['uids'] ?? array() ) ) as $t ) {
 				$tu = get_userdata( $t );
-				if ( ! $tu || md_sec_is_owner_user( $tu ) ) { continue; }
-				$want = array_values( array_intersect( array_map( 'sanitize_key', (array) ( $sent[ $t ] ?? array() ) ), $keys ) );
+				if ( ! $tu || ! md_sec_can_edit_user( $tu ) ) { continue; }
+				/* 등급 — 총괄만, 공용 계정은 늘 직원 */
+				$was = md_sec_grade( $tu ); $up = false;
+				if ( $owner && ! md_sec_is_shared_staff( $tu ) && isset( $grd[ $t ] ) ) {
+					$g = sanitize_key( $grd[ $t ] );
+					$up = 'staff' === $was && in_array( $g, array( 'mgr', 'owner' ), true );
+					if ( 'owner' === $g ) { $tu->add_cap( 'md_supply_owner' ); $tu->add_cap( 'md_supply_manage' ); }
+					elseif ( 'mgr' === $g ) { $tu->remove_cap( 'md_supply_owner' ); $tu->add_cap( 'md_supply_manage' ); }
+					elseif ( 'staff' === $g ) { $tu->remove_cap( 'md_supply_owner' ); $tu->remove_cap( 'md_supply_manage' ); }
+					$tu = get_userdata( $t );
+				}
+				if ( ! empty( $inv[ $t ] ) ) { $tu->add_cap( 'md_inv_manage' ); } else { $tu->remove_cap( 'md_inv_manage' ); }
+				$want = array_values( array_intersect( array_map( 'sanitize_key', (array) ( $tabs[ $t ] ?? array() ) ), $keys ) );
+				/* 관리자로 올리면 관리 전용 탭(직원 정보 등)도 같이 켠다 — 직원일 땐 칸이 잠겨 있었으니까 */
+				if ( $up ) { foreach ( md_sec_tab_list() as $k => $a ) { if ( ! empty( $a['manage'] ) && ! in_array( $k, $want, true ) ) { $want[] = $k; } } }
 				update_user_meta( $t, 'md_lounge_tabs', $want );
+				$n++;
 			}
-			$go( '탭 권한을 저장했습니다.', true );
+			if ( function_exists( 'md_acc_log' ) ) { md_acc_log( '권한 변경', $n . '개 계정 (권한 탭)' ); }
+			$go( '권한을 저장했습니다.', true );
 			break;
 		case 'ips':
-			if ( ! md_sec_is_owner() ) { $go( '원장 계정만 할 수 있습니다.' ); }
+			if ( ! md_sec_is_owner() ) { $go( '총괄 관리자만 할 수 있습니다.' ); }
 			$S = md_sec_settings();
 			$list = preg_split( '/[\s,]+/', (string) wp_unslash( $_POST['ips'] ?? '' ) );
 			if ( ! empty( $_POST['add_mine'] ) ) { $list[] = md_sec_ip(); }
@@ -346,7 +382,12 @@ function md_sec_flash() {
 
 function md_sec_render_gate( $app ) {
 	if ( isset( $_GET['noperm'] ) && '' === $app ) { echo '<div class="mds-notice mds-notice--warn">그 화면을 쓸 권한이 없습니다. 필요하면 원장님께 말씀해 주세요.</div>'; }
-	if ( 'access' === $app ) { md_sec_render_access(); return true; }
+	if ( 'staff' === $app && function_exists( 'md_sup_can_manage' ) && md_sup_can_manage() ) {
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+		md_sec_render_staff_nav( $tab );
+		if ( in_array( $tab, array( 'perm', 'devices', 'net', 'views' ), true ) ) { md_sec_render_access( $tab ); return true; }
+		return false; /* 직원 명단은 원래 화면 (inc/staff) */
+	}
 	if ( '' !== $app && in_array( $app, md_sec_sensitive(), true ) && ! md_sec_verified() ) { md_sec_render_otp( $app ); return true; }
 	return false;
 }
@@ -474,40 +515,53 @@ add_action( 'md_mc_viewed', 'md_sec_log_view' );
 function md_sec_accounts() {
 	$out = array();
 	foreach ( get_users( array( 'role__in' => array( 'md_stock_staff', 'md_stock_manager' ), 'orderby' => 'display_name' ) ) as $u ) {
-		if ( md_sec_is_owner_user( $u ) ) { continue; }
+		if ( user_can( $u, 'manage_options' ) ) { continue; }
+		if ( defined( 'MD_SUP_MANAGER_LOGIN' ) && MD_SUP_MANAGER_LOGIN === $u->user_login ) { continue; }
 		$out[] = $u;
 	}
+	/* 총괄 → 관리자 → 직원 → 공용 순 */
+	usort( $out, function ( $a, $b ) {
+		$r = function ( $u ) { return md_sec_is_shared_staff( $u ) ? 3 : array( 'owner' => 0, 'mgr' => 1, 'staff' => 2 )[ md_sec_grade( $u ) ]; };
+		return $r( $a ) - $r( $b ) ?: strcmp( $a->display_name, $b->display_name );
+	} );
 	return $out;
 }
 
-function md_sec_render_access() {
-	if ( ! md_sec_is_owner() ) { echo '<div class="mds-notice mds-notice--warn">원장 계정만 볼 수 있습니다.</div>'; return; }
+function md_sec_render_staff_nav( $tab ) {
+	$nav = array( '' => '직원 명단', 'perm' => '권한', 'devices' => '기기' );
+	if ( md_sec_is_owner() ) { $nav['net'] = '병원 인터넷'; $nav['views'] = '미니차트 열람 기록'; }
+	echo '<nav class="mdsec-nav mdsec-nav--staff">';
+	foreach ( $nav as $k => $l ) { echo '<a class="mds-tab' . ( $tab === $k ? ' is-on' : '' ) . '" href="' . esc_url( md_sup_url( array( 'app' => 'staff', 'tab' => $k ) ) ) . '">' . esc_html( $l ) . '</a>'; }
+	echo '</nav>';
+}
+
+function md_sec_render_access( $tab ) {
 	global $wpdb;
-	$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'tabs';
-	$S   = md_sec_settings();
-	$nav = array( 'tabs' => '탭 권한', 'devices' => '기기', 'net' => '병원 인터넷', 'views' => '미니차트 열람 기록' );
+	if ( in_array( $tab, array( 'net', 'views' ), true ) && ! md_sec_is_owner() ) { echo '<div class="mds-notice mds-notice--warn">총괄 관리자만 볼 수 있습니다.</div>'; return; }
+	$S = md_sec_settings();
 	echo '<div class="mdsec">';
 	md_sec_flash();
-	echo '<nav class="mdsec-nav">';
-	foreach ( $nav as $k => $l ) { echo '<a class="mds-tab' . ( $tab === $k ? ' is-on' : '' ) . '" href="' . esc_url( md_sup_url( array( 'app' => 'access', 'tab' => $k ) ) ) . '">' . esc_html( $l ) . '</a>'; }
-	echo '</nav>';
 
-	if ( 'tabs' === $tab ) {
-		$tabs = md_sec_tab_list();
-		$accs = md_sec_accounts();
+	if ( 'perm' === $tab ) {
+		$tabs  = md_sec_tab_list();
+		$owner = md_sec_is_owner();
 		?>
-		<form method="post" class="mds-card mdsec-card"><?php md_sec_hidden( 'tabs' ); ?>
-			<p class="mds-hint">계정마다 열 수 있는 탭을 고릅니다. 🔒 는 병원 밖에서 열 때 이메일 인증을 하는 환자 정보 탭입니다. 회색 칸은 라운지 관리자 권한이 있어야 줄 수 있습니다(직원 정보에서). 원장 계정은 늘 모든 탭을 엽니다.</p>
+		<form method="post" class="mds-card mdsec-card"><?php md_sec_hidden( 'perms' ); ?>
+			<p class="mds-hint"><b>등급</b> — 총괄 관리자: 라운지의 모든 것 · 관리자 등급을 주고 뺌 / 라운지 관리자: 직원 정보 · 계정 승인 · 관리 화면 (일반 직원의 권한만 바꿈) / 직원. 등급은 총괄 관리자만 바꿉니다. 다른 총괄 관리자와 내 계정은 바꿀 수 없습니다.<br><b>재료실 관리</b> — 출고 · 입고 · 주문 · 품목 · 재료실 설정. <b>탭</b> — 열 수 있는 라운지 탭 (🔒 = 병원 밖에서 열 때 이메일 인증). 회색 칸은 라운지 관리자 이상만.</p>
 			<div class="mdsec-matrix-wrap"><table class="mds-table mdsec-matrix">
-				<thead><tr><th>계정</th><?php foreach ( $tabs as $k => $a ) : ?><th><?php echo esc_html( ( $a['icon'] ?? '' ) . ' ' . $a['label'] . ( in_array( $k, md_sec_sensitive(), true ) ? ' 🔒' : '' ) ); ?></th><?php endforeach; ?></tr></thead>
+				<thead><tr><th>계정</th><th>등급</th><th>재료실<br>관리</th><?php foreach ( $tabs as $k => $a ) : ?><th><?php echo esc_html( ( $a['icon'] ?? '' ) . ' ' . preg_replace( '/\s*·\s*권한$/u', '', $a['label'] ) . ( in_array( $k, md_sec_sensitive(), true ) ? ' 🔒' : '' ) ); ?></th><?php endforeach; ?></tr></thead>
 				<tbody>
-				<?php foreach ( $accs as $u ) :
-					$have = (array) md_sec_user_tabs( $u ); $mgr = user_can( $u, 'md_supply_manage' );
-					$shared = function_exists( 'md_acc_shared_logins' ) && in_array( $u->user_login, md_acc_shared_logins(), true ); ?>
-					<tr><th><input type="hidden" name="uids[]" value="<?php echo (int) $u->ID; ?>"><?php echo esc_html( '' !== trim( $u->display_name ) ? $u->display_name : $u->user_login ); ?> <small><?php echo $shared ? '공용 계정' : ( $mgr ? '라운지 관리자' : '' ); ?></small></th>
-					<?php foreach ( $tabs as $k => $a ) : $lock = ! empty( $a['manage'] ) && ! $mgr; ?>
-						<td><label class="mdsec-cell<?php echo $lock ? ' is-lock' : ''; ?>"><input type="checkbox" name="tabs[<?php echo (int) $u->ID; ?>][]" value="<?php echo esc_attr( $k ); ?>"<?php checked( in_array( $k, $have, true ) ); disabled( $lock ); ?> aria-label="<?php echo esc_attr( $u->display_name . ' ' . $a['label'] ); ?>"></label></td>
-					<?php endforeach; ?></tr>
+				<?php foreach ( md_sec_accounts() as $u ) :
+					$edit = md_sec_can_edit_user( $u ); $g = md_sec_grade( $u ); $shared = md_sec_is_shared_staff( $u );
+					$have = md_sec_is_owner_user( $u ) ? array_keys( $tabs ) : (array) md_sec_user_tabs( $u ); $mgr = md_sec_is_mgr_user( $u ); ?>
+					<tr class="<?php echo $edit ? '' : 'is-lock'; ?>"><th><?php if ( $edit ) : ?><input type="hidden" name="uids[]" value="<?php echo (int) $u->ID; ?>"><?php endif; ?><?php echo esc_html( '' !== trim( $u->display_name ) ? $u->display_name : $u->user_login ); ?><?php echo (int) $u->ID === get_current_user_id() ? ' <small>(나)</small>' : ''; ?><?php echo $shared ? ' <small>공용 계정</small>' : ''; ?></th>
+						<td><?php if ( $edit && $owner && ! $shared ) : ?>
+							<select name="grade[<?php echo (int) $u->ID; ?>]"><?php foreach ( array( 'staff', 'mgr', 'owner' ) as $o ) : ?><option value="<?php echo esc_attr( $o ); ?>"<?php selected( $g, $o ); ?>><?php echo esc_html( md_sec_grade_label( $o ) ); ?></option><?php endforeach; ?></select>
+						<?php else : ?><span class="mdsec-grade mdsec-grade--<?php echo esc_attr( $g ); ?>"><?php echo esc_html( md_sec_grade_label( $g ) ); ?></span><?php endif; ?></td>
+						<td><label class="mdsec-cell"><input type="checkbox" name="inv[<?php echo (int) $u->ID; ?>]" value="1"<?php checked( user_can( $u, 'md_inv_manage' ) || md_sec_is_owner_user( $u ) ); disabled( ! $edit || md_sec_is_owner_user( $u ) ); ?>></label></td>
+						<?php foreach ( $tabs as $k => $a ) : $lock = ! $edit || ( ! empty( $a['manage'] ) && ! $mgr ) || md_sec_is_owner_user( $u ); ?>
+						<td><label class="mdsec-cell<?php echo ( ! empty( $a['manage'] ) && ! $mgr ) ? ' is-lock' : ''; ?>"><input type="checkbox" name="tabs[<?php echo (int) $u->ID; ?>][]" value="<?php echo esc_attr( $k ); ?>"<?php checked( in_array( $k, $have, true ) ); disabled( $lock ); ?> aria-label="<?php echo esc_attr( $u->display_name . ' ' . $a['label'] ); ?>"></label></td>
+						<?php endforeach; ?></tr>
 				<?php endforeach; ?>
 				</tbody>
 			</table></div>
@@ -516,20 +570,23 @@ function md_sec_render_access() {
 		<?php
 	} elseif ( 'devices' === $tab ) {
 		$any = false;
-		echo '<section class="mds-card mdsec-card"><p class="mds-hint">계정마다 로그인 중인 기기와 이메일 인증한 기기입니다. 「모두 끊기」를 누르면 그 사람은 모든 기기에서 로그아웃되고 다음에 다시 인증합니다. 사용 중지 · 퇴사 처리하면 자동으로 끊깁니다.</p><table class="mds-table mdsec-devtable"><thead><tr><th>계정</th><th>로그인 기기</th><th>인증 기기</th><th></th></tr></thead><tbody>';
+		echo '<section class="mds-card mdsec-card"><p class="mds-hint">계정마다 로그인 중인 기기와 이메일 인증한 기기입니다. 「모두 끊기」를 누르면 그 사람은 모든 기기에서 로그아웃되고 다음에 다시 인증합니다. 사용 중지 · 퇴사 처리하면 자동으로 끊깁니다. 총괄 관리자는 다른 총괄 관리자 말고 모두, 라운지 관리자는 일반 직원만 끊을 수 있습니다.</p><table class="mds-table mdsec-devtable"><thead><tr><th>계정</th><th>로그인 기기</th><th>인증 기기</th><th></th></tr></thead><tbody>';
 		foreach ( md_sec_accounts() as $u ) {
-			$sess = array_filter( (array) get_user_meta( $u->ID, 'session_tokens', true ), function ( $s ) { return is_array( $s ) && ( $s['expiration'] ?? 0 ) > time(); } );
+			$sess = array_filter( (array) get_user_meta( $u->ID, 'session_tokens', true ), function ( $x ) { return is_array( $x ) && ( $x['expiration'] ?? 0 ) > time(); } );
 			$devs = array_filter( md_sec_devices( $u->ID ), function ( $d ) { return $d['expires'] > time(); } );
 			if ( ! $sess && ! $devs ) { continue; }
 			$any = true;
-			$sl = implode( '<br>', array_map( function ( $s ) { return esc_html( md_sec_ua_label( $s['ua'] ?? '' ) . ' · ' . wp_date( 'n/j', (int) ( $s['login'] ?? 0 ) ) ); }, $sess ) );
+			$sl = implode( '<br>', array_map( function ( $x ) { return esc_html( md_sec_ua_label( $x['ua'] ?? '' ) . ' · ' . wp_date( 'n/j', (int) ( $x['login'] ?? 0 ) ) ); }, $sess ) );
 			$dl = implode( '<br>', array_map( function ( $d ) { return esc_html( $d['label'] . ' · ' . wp_date( 'n/j', (int) $d['last'] ) ); }, $devs ) );
-			echo '<tr><th>' . esc_html( $u->display_name ) . '</th><td>' . $sl . '</td><td>' . ( $dl ? $dl : '—' ) . '</td><td><form method="post" onsubmit="return confirm(\'' . esc_js( $u->display_name ) . ' 님의 모든 기기를 끊을까요?\');">'; // phpcs:ignore
-			md_sec_hidden( 'owner_drop' );
-			echo '<input type="hidden" name="uid" value="' . (int) $u->ID . '"><button class="mds-btn">모두 끊기</button></form></td></tr>';
+			echo '<tr><th>' . esc_html( $u->display_name ) . '</th><td>' . $sl . '</td><td>' . ( $dl ? $dl : '—' ) . '</td><td>'; // phpcs:ignore
+			if ( md_sec_can_edit_user( $u ) ) {
+				echo '<form method="post" onsubmit="return confirm(\'' . esc_js( $u->display_name ) . ' 님의 모든 기기를 끊을까요?\');">';
+				md_sec_hidden( 'owner_drop' );
+				echo '<input type="hidden" name="uid" value="' . (int) $u->ID . '"><button class="mds-btn">모두 끊기</button></form>';
+			}
+			echo '</td></tr>';
 		}
-		echo '</tbody></table>' . ( $any ? '' : '<p class="mds-hint">지금 로그인 중인 직원 기기가 없습니다.</p>' );
-		echo '</section>';
+		echo '</tbody></table>' . ( $any ? '' : '<p class="mds-hint">지금 로그인 중인 기기가 없습니다.</p>' ) . '</section>';
 	} elseif ( 'net' === $tab ) {
 		$me = md_sec_ip();
 		?>
@@ -548,7 +605,7 @@ function md_sec_render_access() {
 		$rows = $wpdb->get_results( "SELECT * FROM $t$w ORDER BY id DESC LIMIT 300" ); // phpcs:ignore
 		?>
 		<section class="mds-card mdsec-card">
-			<form method="get" class="mdsec-row"><input type="hidden" name="app" value="access"><input type="hidden" name="tab" value="views">
+			<form method="get" class="mdsec-row"><input type="hidden" name="app" value="staff"><input type="hidden" name="tab" value="views">
 				<input name="vq" value="<?php echo esc_attr( $q ); ?>" placeholder="차트번호 · 환자 이름 · 본 사람"><button class="mds-btn">찾기</button></form>
 			<p class="mds-hint">누가 언제 어떤 미니차트를 열었는지 2년 동안 남깁니다 (최근 300건).</p>
 			<div class="mdsec-matrix-wrap"><table class="mds-table"><thead><tr><th>일시</th><th>본 사람</th><th>차트</th><th>기기 · 주소</th></tr></thead><tbody>
@@ -571,3 +628,48 @@ function md_sec_enqueue() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'md_sec_enqueue', 42 );
+
+/* ============================================================
+ * v8.2 · 1회 작업 (2026-10-07 원장 지시) — 총괄 관리자 · 라운지 관리자 지정, 직원공용 계정 만들기, moondentalhospital 지우기
+ *   값(이름 · 공용 비밀번호)은 저장소에 적지 않고 FTP 로 uploads/md-inv-seed-(무작위)/acc261007.json 에 올린다(.htaccess 403).
+ *   한 번만 돈다(옵션 md_sec_once_acc_261007) · 결과는 같은 폴더 acc261007.result.json
+ * ============================================================ */
+function md_sec_once_accounts() {
+	if ( get_option( 'md_sec_once_acc_261007' ) || ! function_exists( 'md_inv_seed_dir' ) || ! function_exists( 'md_acc_users_by_name' ) ) { return; }
+	$dir = md_inv_seed_dir();
+	if ( '' === $dir || ! is_readable( $dir . '/acc261007.json' ) ) { return; }
+	if ( ! add_option( 'md_sec_once_acc_261007', 'running', '', 'no' ) ) { return; }
+	$d   = json_decode( (string) file_get_contents( $dir . '/acc261007.json' ), true );
+	$rep = array( 'at' => current_time( 'mysql' ) );
+	$one = function ( $name ) use ( &$rep ) {
+		$us = array_values( array_filter( md_acc_users_by_name( $name ), function ( $u ) { return 'active' === md_acc_status( $u ); } ) );
+		if ( 1 !== count( $us ) ) { $rep['skip'][] = $name . ' — 사용 중인 계정 ' . count( $us ) . '개'; return null; }
+		return $us[0];
+	};
+	if ( ! empty( $d['owner'] ) && ( $u = $one( $d['owner'] ) ) ) {
+		foreach ( array( 'md_supply_owner', 'md_supply_manage', 'md_inv_manage' ) as $c ) { $u->add_cap( $c ); }
+		$rep['owner'] = $u->display_name . ' #' . $u->ID . ' · 이메일 ' . ( is_email( $u->user_email ) ? '있음' : '없음' );
+	}
+	foreach ( (array) ( $d['managers'] ?? array() ) as $n ) {
+		if ( $u = $one( $n ) ) { $u->add_cap( 'md_supply_manage' ); $rep['managers'][] = $u->display_name . ' #' . $u->ID; }
+	}
+	$old = get_user_by( 'login', (string) ( $d['delete'] ?? '' ) );
+	if ( defined( 'MD_SUP_STAFF_LOGIN' ) && ! empty( $d['shared_pass'] ) ) {
+		$s = get_user_by( 'login', MD_SUP_STAFF_LOGIN );
+		if ( ! $s ) {
+			$id = wp_insert_user( array( 'user_login' => MD_SUP_STAFF_LOGIN, 'user_pass' => (string) $d['shared_pass'], 'display_name' => defined( 'MD_SUP_STAFF_NAME' ) ? MD_SUP_STAFF_NAME : '직원공용', 'nickname' => defined( 'MD_SUP_STAFF_NAME' ) ? MD_SUP_STAFF_NAME : '직원공용', 'role' => 'md_stock_staff' ) );
+			if ( is_wp_error( $id ) ) { $rep['shared'] = '만들지 못함: ' . $id->get_error_message(); }
+			else {
+				$rep['shared'] = '만듦 #' . $id;
+				if ( $old ) { $t = get_user_meta( $old->ID, 'md_lounge_tabs', true ); if ( is_array( $t ) ) { update_user_meta( $id, 'md_lounge_tabs', $t ); } }
+			}
+		} else { wp_set_password( (string) $d['shared_pass'], $s->ID ); $rep['shared'] = '이미 있음 #' . $s->ID . ' · 비밀번호 다시 정함'; }
+	}
+	if ( $old && ! user_can( $old, 'manage_options' ) && get_user_by( 'login', MD_SUP_STAFF_LOGIN ) ) {
+		require_once ABSPATH . 'wp-admin/includes/user.php';
+		$rep['deleted'] = wp_delete_user( $old->ID ) ? $old->user_login . ' 지움' : '지우지 못함';
+	}
+	update_option( 'md_sec_once_acc_261007', wp_json_encode( $rep, JSON_UNESCAPED_UNICODE ), false );
+	@file_put_contents( $dir . '/acc261007.result.json', wp_json_encode( $rep, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT ) );
+}
+add_action( 'wp_loaded', 'md_sec_once_accounts', 30 );

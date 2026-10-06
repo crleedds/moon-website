@@ -1490,7 +1490,7 @@ function md_mc_render_trash() {
 			<?php endforeach; ?>
 		</ul>
 	<?php endif; ?>
-	<?php if ( ! $manage ) : ?><p class="mds-hint">휴지통 비우기 · 영구 삭제는 원장 계정(moondentalmanager)이 합니다.</p><?php endif;
+	<?php if ( ! $manage ) : ?><p class="mds-hint">휴지통 비우기 · 영구 삭제는 총괄 관리자가 합니다.</p><?php endif;
 }
 
 /** v6.5 · 설정 (관리자만) — 담당의 목록 · 담당의 칸 · 병력 주의 단어 · 휴지통 */

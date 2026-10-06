@@ -42,7 +42,7 @@ function md_acc_can_manage() {
 
 /** 「라운지 관리자」 권한을 주고 뺄 수 있는 사람 — 원장(워드프레스 관리자)만 */
 function md_acc_can_grant_admin() {
-	return current_user_can( 'manage_options' );
+	return current_user_can( 'md_supply_owner' ) || current_user_can( 'manage_options' ); /* v8.2 · 총괄 관리자 */
 }
 
 /** 여기서 다룰 수 있는 개인 계정인가 */
@@ -79,6 +79,7 @@ function md_acc_perm_label( $u ) {
 	if ( 'pending' === md_acc_status( $u ) ) { return '승인 대기'; }
 	if ( 'off' === md_acc_status( $u ) ) { return '사용 중지'; }
 	$p = md_acc_user_perms( $u );
+	if ( user_can( $u, 'md_supply_owner' ) ) { return '총괄 관리자'; } /* v8.2 */
 	if ( in_array( 'md_supply_manage', $p, true ) ) { return '라운지 관리자'; }
 	if ( in_array( 'md_inv_manage', $p, true ) ) { return '직원 + 재료실 관리'; }
 	return '직원';
@@ -183,7 +184,9 @@ function md_acc_name_login( &$username, &$password ) {
 	$n = trim( (string) $username );
 	if ( '' === $n || is_email( $n ) || username_exists( $n ) ) { return; }
 	$us = md_acc_users_by_name( $n );
-	if ( 1 === count( $us ) ) { $username = $us[0]->user_login; }
+	if ( 1 === count( $us ) ) { $username = $us[0]->user_login; return; }
+	/* v8.2 · 직원 공용 계정은 이름 「직원공용」으로 */
+	if ( defined( 'MD_SUP_STAFF_NAME' ) && md_acc_name_key( $n ) === md_acc_name_key( MD_SUP_STAFF_NAME ) && defined( 'MD_SUP_STAFF_LOGIN' ) ) { $username = MD_SUP_STAFF_LOGIN; }
 }
 add_action( 'wp_authenticate', 'md_acc_name_login', 1, 2 );
 
@@ -474,7 +477,11 @@ function md_acc_handle() {
 	if ( $self && in_array( $act, array( 'perms', 'off', 'delete', 'reject' ), true ) ) {
 		md_acc_flash( 'err', '내 계정의 권한 · 사용 중지 · 삭제는 다른 관리자가 해야 합니다.' ); wp_safe_redirect( $back ); exit;
 	}
-	/* 라운지 관리자 계정은 원장만 손댄다 */
+	/* v8.2 · 총괄 관리자 계정은 홈페이지 관리자만 손댄다 */
+	if ( $u && ! $self && user_can( $u, 'md_supply_owner' ) && ! current_user_can( 'manage_options' ) && in_array( $act, array( 'perms', 'reset', 'off', 'delete' ), true ) ) {
+		md_acc_flash( 'err', '총괄 관리자 계정은 바꿀 수 없습니다.' ); wp_safe_redirect( $back ); exit;
+	}
+	/* 라운지 관리자 계정은 총괄 관리자만 손댄다 */
 	if ( $u && user_can( $u, 'md_supply_manage' ) && ! md_acc_can_grant_admin() && in_array( $act, array( 'perms', 'reset', 'off', 'delete' ), true ) ) {
 		md_acc_flash( 'err', '라운지 관리자 계정은 원장님만 바꿀 수 있습니다.' ); wp_safe_redirect( $back ); exit;
 	}
@@ -834,6 +841,9 @@ function md_acc_render_me() {
  * ============================================================ */
 
 function md_acc_perm_checks( $u = null, $name_prefix = 'perms' ) {
+	/* v8.2 · 권한은 직원 정보 › 「권한」 탭에서 (원장 지시 — 여기서는 고르지 않는다) */
+	echo '<span class="mda-perms__note">권한은 위 「권한」 탭에서 정합니다</span>';
+	return;
 	$have = $u ? md_acc_user_perms( $u ) : array();
 	foreach ( md_acc_perms() as $cap => $p ) {
 		$lock = 'md_supply_manage' === $cap && ! md_acc_can_grant_admin();
@@ -1008,16 +1018,10 @@ function md_acc_render_manage( $u ) {
 	$self  = (int) $u->ID === get_current_user_id();
 	$lock  = user_can( $u, 'md_supply_manage' ) && ! md_acc_can_grant_admin();
 	$st    = md_acc_status( $u );
-	if ( $lock ) { echo '<p class="mda-note">라운지 관리자 계정은 원장님만 바꿀 수 있습니다.</p>'; return; }
+	if ( $lock ) { echo '<p class="mda-note">관리자 계정은 총괄 관리자만 바꿀 수 있습니다.</p>'; return; }
 	?>
 	<details class="mda-manage"><summary>계정 관리</summary>
-		<?php if ( 'active' === $st && ! $self ) : ?>
-			<form method="post" class="mda-form mda-form--compact">
-				<?php md_acc_hidden( 'perms' ); ?><input type="hidden" name="uid" value="<?php echo (int) $u->ID; ?>">
-				<div class="mda-perms"><span class="mda-perms__base">✓ 직원</span><?php md_acc_perm_checks( $u ); ?></div>
-				<button type="submit" class="mds-btn">권한 저장</button>
-			</form>
-		<?php endif; ?>
+		<p class="mda-note">권한(등급 · 재료실 관리 · 탭)은 위 「권한」 탭에서 정합니다.</p>
 		<div class="mda-btnrow">
 			<?php if ( 'active' === $st ) : ?>
 				<form method="post" onsubmit="return confirm('<?php echo esc_js( $u->display_name ); ?> 님 비밀번호를 임시 비밀번호로 바꿀까요?');"><?php md_acc_hidden( 'reset' ); ?><input type="hidden" name="uid" value="<?php echo (int) $u->ID; ?>"><button type="submit" class="mds-btn">비밀번호 초기화</button></form>

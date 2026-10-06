@@ -70,7 +70,7 @@ function md_sup_apps() {
 		),
 		// v4.18 · 직원 정보 (관리자) — 생일 · 입사일 → 달력
 		'staff' => array(
-			'label'  => '직원 정보',
+			'label'  => '직원 정보 · 권한',
 			'icon'   => '👥',
 			'desc'   => '이름 · 부서 · 생일 · 입사일 · 계정 승인 · 권한', /* v5.8 · 계정 관리를 여기로 합침 */
 			'manage' => true,
@@ -1065,6 +1065,7 @@ function md_sup_render_page() {
 	}
 
 	if ( 'staff' === $app && ! md_sup_can_manage() ) { $app = ''; } /* v4.18 */
+	/* v8.2 · 직원 정보 위에 「직원 명단 · 권한 · 기기 · 병원 인터넷 · 열람 기록」 (inc/security) */
 	if ( function_exists( 'md_sec_render_gate' ) && md_sec_render_gate( $app ) ) {
 		// v8.0 · 접근 권한 · 보안 탭, 또는 환자 정보 화면의 이메일 인증 화면을 그렸다
 	} elseif ( 'care' === $app && function_exists( 'md_care_render' ) ) {

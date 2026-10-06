@@ -19,7 +19,8 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 define( 'MD_SUP_MANAGER_LOGIN', 'moondentalmanager' ); // v4.19.9 · 워드프레스 관리자 계정을 그대로 라운지 관리자로 쓴다 (원장 결정 — v4.19.8 의 분리안은 철회)
-define( 'MD_SUP_STAFF_LOGIN', 'moondentalhospital' ); // v4.2 · 직원 공용 계정 아이디 변경
+define( 'MD_SUP_STAFF_LOGIN', 'staffcommon' ); // v8.2 · 직원 공용 계정 「직원공용」 (원장 지시 — moondentalhospital 대신, 로그인 칸에 이름 「직원공용」)
+define( 'MD_SUP_STAFF_NAME', '직원공용' );
 
 /**
  * 계정은 둘뿐이다.
