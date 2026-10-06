@@ -339,6 +339,54 @@ function md_staff_dw_sync( $list ) {
 	return $out;
 }
 
+/**
+ * 덴트웹 개인별 휴무일(TB_개인별휴무일) — sync.ps1 이 걸러서(종일 · 2시간 이상, 점심 · 외출 · 상시 일정 제외)
+ * 오늘 -1달 ~ +1년 치를 통째로 보낸다. 달력(inc/calendar)이 🌴 로 표시.
+ *   항목: { sid: 덴트웹 직원 번호, d1, d2: 'Y-m-d', t1, t2: 'HHmm'(종일이면 ''), memo }
+ */
+function md_staff_dw_dayoffs() {
+	$o = get_option( 'md_staff_dw_dayoff' );
+	return is_array( $o ) && isset( $o['items'] ) ? (array) $o['items'] : array();
+}
+
+/** 덴트웹 직원 번호 → 달력에 쓸 이름 (원장은 「이창률 원장」) · 라운지 직원 id */
+function md_staff_dw_who( $dw ) {
+	static $map = null;
+	if ( null === $map ) {
+		global $wpdb; $map = array();
+		foreach ( (array) $wpdb->get_results( 'SELECT id, name, dept, position, dw_id FROM ' . md_staff_table() . ' WHERE dw_id > 0' ) as $r ) {
+			$map[ (int) $r->dw_id ] = array( 'sid' => (int) $r->id, 'name' => '의료진' === $r->dept ? trim( $r->name . ' ' . ( false !== strpos( $r->position, '원장' ) ? '원장' : $r->position ) ) : $r->name );
+		}
+	}
+	return $map[ (int) $dw ] ?? null;
+}
+
+add_action( 'rest_api_init', function () {
+	register_rest_route( 'md-staff/v1', '/dayoff', array(
+		'methods'             => 'POST',
+		'callback'            => function ( $request ) {
+			$body  = $request->get_json_params();
+			$items = array();
+			foreach ( (array) ( $body['items'] ?? array() ) as $it ) {
+				if ( ! is_array( $it ) ) { continue; }
+				$d1 = md_staff_norm_date( $it['d1'] ?? '' ); $d2 = md_staff_norm_date( $it['d2'] ?? '' ) ?: $d1;
+				if ( ! $d1 || $d2 < $d1 ) { continue; }
+				$tm = function ( $v ) { $v = preg_replace( '/\D+/', '', (string) $v ); return 4 === strlen( $v ) ? $v : ''; };
+				$items[] = array( 'sid' => (int) ( $it['sid'] ?? 0 ), 'd1' => $d1, 'd2' => $d2, 't1' => $tm( $it['t1'] ?? '' ), 't2' => $tm( $it['t2'] ?? '' ), 'memo' => mb_substr( sanitize_text_field( (string) ( $it['memo'] ?? '' ) ), 0, 120 ) );
+			}
+			update_option( 'md_staff_dw_dayoff', array( 'at' => current_time( 'mysql' ), 'items' => $items ), false );
+			return rest_ensure_response( array( 'saved' => count( $items ) ) );
+		},
+		'permission_callback' => 'md_staff_dw_permission',
+	) );
+} );
+
+function md_staff_dw_permission( $request ) {
+	$key  = (string) $request->get_header( 'x-md-survey-key' );
+	$want = (string) get_option( 'md_survey_api_key' );
+	return '' !== $want && '' !== $key && hash_equals( $want, $key );
+}
+
 add_action( 'rest_api_init', function () {
 	register_rest_route( 'md-staff/v1', '/sync', array(
 		'methods'             => 'POST',
@@ -348,11 +396,7 @@ add_action( 'rest_api_init', function () {
 			if ( ! $list ) { return new WP_Error( 'md_staff', '직원 목록이 비어 있습니다.', array( 'status' => 400 ) ); }
 			return rest_ensure_response( md_staff_dw_sync( $list ) );
 		},
-		'permission_callback' => function ( $request ) {
-			$key  = (string) $request->get_header( 'x-md-survey-key' );
-			$want = (string) get_option( 'md_survey_api_key' );
-			return '' !== $want && '' !== $key && hash_equals( $want, $key );
-		},
+		'permission_callback' => 'md_staff_dw_permission',
 	) );
 } );
 

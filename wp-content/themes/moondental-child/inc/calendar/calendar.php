@@ -21,6 +21,7 @@ function md_cal_types() {
 	return array(
 		'birthday' => array( 'label' => '생일',       'icon' => '🎂', 'class' => 'is-birthday', 'yearly' => true,  'auto' => true ),
 		'anniv'    => array( 'label' => '입사 기념일', 'icon' => '🎉', 'class' => 'is-anniv',    'yearly' => true,  'auto' => true ),
+		'dayoff'   => array( 'label' => '개인 휴무 (덴트웹)', 'icon' => '🌴', 'class' => 'is-closed', 'yearly' => false, 'auto' => true ),
 		'event'    => array( 'label' => '병원 행사',   'icon' => '📌', 'class' => 'is-event',    'yearly' => false, 'auto' => false ),
 		'closed'   => array( 'label' => '휴진 · 휴무', 'icon' => '🌙', 'class' => 'is-closed',   'yearly' => false, 'auto' => false ),
 		'edu'      => array( 'label' => '교육 · 세미나', 'icon' => '📚', 'class' => 'is-edu',    'yearly' => false, 'auto' => false ),
@@ -103,6 +104,19 @@ function md_cal_between( $from, $to ) {
 					if ( $yrs < 1 ) { continue; } /* 입사한 해에는 표시하지 않는다 */
 					$out[ $d ][] = (object) array( 'id' => 's' . $s->id . 'a', 'type' => 'anniv', 'title' => $s->name, 'memo' => trim( $s->dept . ' ' . $s->position ), 'occurs' => $d, 'years' => $yrs, 'yearly' => 1, 'auto' => true, 'date_start' => $d, 'date_end' => null );
 				}
+			}
+		}
+	}
+
+	/* 1-2) 덴트웹 개인별 휴무일 (inc/staff · sync.ps1 이 한 시간마다) */
+	if ( function_exists( 'md_staff_dw_dayoffs' ) ) {
+		foreach ( md_staff_dw_dayoffs() as $i => $h ) {
+			if ( $h['d1'] > $to || $h['d2'] < $from ) { continue; }
+			$who = md_staff_dw_who( $h['sid'] );
+			if ( ! $who ) { continue; } /* 라운지 명단과 이어지지 않은 사람(퇴사자 · 가상 의사)은 표시하지 않음 */
+			$time = '' !== $h['t1'] ? ' ' . substr( $h['t1'], 0, 2 ) . ':' . substr( $h['t1'], 2 ) . '~' . substr( $h['t2'], 0, 2 ) . ':' . substr( $h['t2'], 2 ) : '';
+			for ( $d = max( $h['d1'], $from ); $d <= min( $h['d2'], $to ); $d = date( 'Y-m-d', strtotime( $d . ' +1 day' ) ) ) {
+				$out[ $d ][] = (object) array( 'id' => 's' . $who['sid'] . 'h' . $i, 'type' => 'dayoff', 'title' => $who['name'] . ( $time ? $time : ' 휴무' ), 'memo' => $h['memo'], 'occurs' => $d, 'years' => 0, 'yearly' => 0, 'auto' => true, 'date_start' => $h['d1'], 'date_end' => $h['d2'] );
 			}
 		}
 	}
@@ -259,6 +273,7 @@ function md_cal_render_grid( $m, $nav_app = 'calendar' ) {
 	$cur   = current_time( 'Y-m' );
 	$nav   = function ( $month ) use ( $nav_app ) { return md_sup_url( array( 'app' => $nav_app, 'cm' => $month ) ); };
 	$link  = function ( $r, $d ) use ( $nav_app ) {
+		if ( 'dayoff' === $r->type ) { return md_sup_url( array( 'app' => 'calendar', 'cm' => substr( $d, 0, 7 ) ) ) . '#a' . $r->id; }
 		if ( ! empty( $r->auto ) ) { return md_sup_url( array( 'app' => 'staff' ) ) . '#s' . (int) substr( $r->id, 1 ); }
 		return md_sup_url( array( 'app' => 'calendar', 'cm' => substr( $d, 0, 7 ) ) ) . '#e' . (int) $r->id;
 	};
@@ -373,7 +388,9 @@ function md_cal_render() {
 						<span class="mdcal-row__title"><?php echo esc_html( md_cal_label( $r ) ); ?></span>
 						<?php if ( ! empty( $r->yearly ) ) : ?><span class="mds-status is-pending">매년</span><?php endif; ?>
 						<?php if ( ! empty( $r->memo ) ) : ?><span class="mdcal-row__memo"><?php echo esc_html( $r->memo ); ?></span><?php endif; ?>
-						<?php if ( ! empty( $r->auto ) ) : ?>
+						<?php if ( 'dayoff' === $r->type ) : ?>
+							<span class="mdcal-row__memo">덴트웹 「개인별 휴무」에서 고치면 한 시간 안에 반영</span>
+						<?php elseif ( ! empty( $r->auto ) ) : ?>
 							<a class="mdcal-btn mdcal-row__staff" href="<?php echo esc_url( md_sup_url( array( 'app' => 'staff' ) ) . '#s' . (int) substr( $r->id, 1 ) ); ?>">직원 정보에서 고치기</a>
 						<?php else : ?>
 							<form method="post" class="mdcal-row__del" onsubmit="return confirm('이 일정을 지울까요?');">
