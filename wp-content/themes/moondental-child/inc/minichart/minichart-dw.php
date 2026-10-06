@@ -149,7 +149,8 @@ function md_mc_dw_rest_save( $request ) {
 	}
 	/* 정리 — 미니차트에 없는 사람은 14일, 전체 동기화 때 미니차트에서 빠진 사람은 바로 */
 	$gone = (int) $wpdb->query( $wpdb->prepare( "DELETE FROM $t WHERE in_mc = 0 AND synced_at < %s", date( 'Y-m-d H:i:s', current_time( 'timestamp' ) - 14 * DAY_IN_SECONDS ) ) );
-	if ( 'full' === $scope ) {
+	/* 여러 번에 나눠 보낼 때는 마지막 묶음(final)에서만 「미니차트에서 빠진 사람」 정리 */
+	if ( 'full' === $scope && ( ! isset( $body['final'] ) || ! empty( $body['final'] ) ) ) {
 		foreach ( (array) $wpdb->get_col( "SELECT chart_key FROM $t WHERE in_mc = 1" ) as $k ) {
 			if ( ! isset( $mc[ $k ] ) ) { $wpdb->delete( $t, array( 'chart_key' => $k ) ); $gone++; }
 		}
