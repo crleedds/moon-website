@@ -35,6 +35,7 @@ function md_inv_dataset_names() {
 		'passbook' => '선납 거래 내역',
 		'lots'     => 'LOT · 차트번호',
 		'adjs'     => '환불 · 정정',
+		'log'      => '활동 기록',
 	);
 }
 
@@ -248,6 +249,15 @@ function md_inv_dataset( $key, $a = array() ) {
 			}
 			break;
 
+		case 'log':
+			$out['head']  = array( '일시', '누가', '무엇을', '내용' );
+			$out['width'] = array( 16, 12, 14, 80 );
+			global $wpdb;
+			foreach ( $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . md_inv_t( 'log' ) . ' WHERE created_at >= %s AND created_at < %s ORDER BY id DESC LIMIT 50000', $a['from'] . ' 00:00:00', date( 'Y-m-d', strtotime( $a['to'] . ' +1 day' ) ) . ' 00:00:00' ) ) as $g ) {
+				$out['rows'][] = array( substr( (string) $g->created_at, 0, 16 ), $g->person, $g->action, $g->detail );
+			}
+			break;
+
 		case 'cats':
 			$out['head']  = array( $L['label_cat1'], $L['label_cat2'], $L['label_cat3'], '비고', '사용' );
 			$out['width'] = array( 16, 18, 16, 24, 9 );
@@ -424,6 +434,19 @@ function md_inv_report_xlsx( $from, $to, $keys = null ) {
 	$sheets = array();
 	foreach ( $keys as $k ) { $sheets[] = md_inv_dataset( $k, array( 'from' => $from, 'to' => $to ) ); }
 	return md_inv_xlsx( $sheets );
+}
+
+/**
+ * v6.8 · 재료실 전체 엑셀 — 처음부터 오늘까지 모든 표를 한 파일로 (원장 지시 2026-10-06)
+ * 주소 md_inv_all_url() 은 즐겨찾기에 넣어 두고 쓸 수 있다 (관리자 로그인 필요).
+ */
+function md_inv_all_xlsx() {
+	$keys = array( 'items', 'low', 'ledger', 'requests', 'orders', 'prices', 'usage', 'monthly', 'prepaid', 'deposits', 'passbook', 'adjs', 'lots', 'vendors', 'teams', 'cats', 'log' );
+	return md_inv_report_xlsx( '2000-01-01', current_time( 'Y-m-d' ), $keys );
+}
+
+function md_inv_all_url() {
+	return md_inv_url( array( 'md_inv_dl' => 'all' ) );
 }
 
 function md_inv_send_xlsx( $bin, $filename ) {

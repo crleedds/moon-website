@@ -486,7 +486,10 @@ function md_inv_act_import() {
 function md_inv_handle_download() {
 	if ( empty( $_GET['md_inv_dl'] ) ) { return; }
 	if ( ! is_user_logged_in() || ! md_inv_can_use() ) { wp_die( '권한이 없습니다.', '', array( 'response' => 403 ) ); }
-	if ( ! isset( $_GET['_mdinv'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_mdinv'] ) ), 'md_inv_dl' ) ) { wp_die( '링크가 오래되었습니다. 새로고침한 뒤 다시 눌러 주세요.' ); }
+	/* v6.8 · 전체 엑셀은 즐겨찾기 주소로 쓰게 표식 없이도 받는다 (관리자만 · 읽기만 하는 내려받기) */
+	$is_all = 'all' === sanitize_key( wp_unslash( $_GET['md_inv_dl'] ) );
+	if ( $is_all && ! md_inv_is_admin() ) { wp_die( '관리자만 내려받을 수 있습니다.', '', array( 'response' => 403 ) ); }
+	if ( ! $is_all && ( ! isset( $_GET['_mdinv'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_mdinv'] ) ), 'md_inv_dl' ) ) ) { wp_die( '링크가 오래되었습니다. 새로고침한 뒤 다시 눌러 주세요.' ); }
 	md_inv_migrate();
 	$what = sanitize_key( wp_unslash( $_GET['md_inv_dl'] ) );
 	$from = isset( $_GET['df'] ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $_GET['df'] ) ? $_GET['df'] : date( 'Y-m-d', current_time( 'timestamp' ) - 30 * DAY_IN_SECONDS );
@@ -507,6 +510,10 @@ function md_inv_handle_download() {
 		$keys = array_values( array_intersect( array( 'requests', 'usage', 'monthly' ), $staff_ok ) );
 		if ( ! $keys ) { wp_die( '내려받을 수 있는 표가 없습니다.', '', array( 'response' => 403 ) ); }
 		md_inv_send_xlsx( md_inv_report_xlsx( $from, $to, $keys ), '문치과병원 재료실 ' . current_time( 'Y-m-d' ) . '.xlsx' );
+	}
+	if ( 'all' === $what ) {
+		md_inv_log( '엑셀 내려받기', '전체 (모든 기록)' );
+		md_inv_send_xlsx( md_inv_all_xlsx(), '문치과병원 재료실 전체 ' . current_time( 'Y-m-d' ) . '.xlsx' );
 	}
 	if ( 'backup' === $what ) {
 		$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
