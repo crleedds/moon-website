@@ -125,6 +125,13 @@ function md_sup_apps() {
 			'desc'   => '응답 · 스탭별 집계 · 설정',
 			'manage' => true,
 		),
+		// v7.7 · 경영 브리핑 (inc/briefing · 덴트웹 연동) — 매출은 원장 계정만, 연락할 환자 명단은 라운지 관리자도
+		'brief' => array(
+			'label'  => '경영 브리핑',
+			'icon'   => '📊',
+			'desc'   => '어제 진료 · 매출 · 예약 · 진료 중단 · 리콜 · 노쇼 환자',
+			'manage' => true,
+		),
 		// v5.8 · 내 정보 (inc/accounts) — 머리의 아이디를 누르면 들어온다
 		'me' => array(
 			'label'  => '내 정보 · 비밀번호',
@@ -1074,6 +1081,8 @@ function md_sup_render_page() {
 		md_survey_render(); // v4.10 · 접수수납목록 (만족도 조사 명단)
 	} elseif ( 'survey_result' === $app && function_exists( 'md_survey_render_result' ) ) {
 		md_survey_render_result(); // v4.19.7 · 만족도 응답·집계·설정 (관리자)
+	} elseif ( 'brief' === $app && function_exists( 'md_brief_render' ) && md_sup_can_manage() ) {
+		md_brief_render(); // v7.7 · 경영 브리핑
 	} elseif ( 'me' === $app && function_exists( 'md_acc_render_me' ) ) {
 		md_acc_render_me(); // v5.8 · 내 정보
 	} elseif ( 'forms' === $app && function_exists( 'md_forms_render' ) ) {
