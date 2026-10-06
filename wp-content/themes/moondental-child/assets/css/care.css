@@ -117,10 +117,6 @@
 .mdc-btn--edit[aria-pressed="true"] { background: var(--color-accent-dark); border-color: var(--color-accent-dark); color: #fff; }
 .mdc-editbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: rgba(143, 174, 146, 0.14); border: 1px solid var(--color-accent-dark); font-size: 0.92rem; }
 .mdc-editbar span { flex: 1; }
-/* 편집을 켜기 전에는 편집 막대 · 사진 추가 칸을 숨김 (display:flex 가 hidden 을 이기지 않게) */
-.mdc-editbar[hidden], .mdc-drop[hidden] { display: none !important; }
-.is-editing .mdc-card__tools { z-index: 2; }
-.mdc-pane .mdc-topic__foot { margin-top: 18px; }
 .mdc-drop { display: flex; align-items: center; gap: 14px; padding: 18px 20px; margin-bottom: 14px; border: 2px dashed var(--color-primary); border-radius: 16px; background: rgba(216, 128, 98, 0.06); cursor: pointer; transition: background 0.2s; }
 .mdc-drop:hover, .mdc-drop.is-over { background: rgba(216, 128, 98, 0.14); }
 .mdc-drop.is-busy { opacity: 0.7; pointer-events: none; }
