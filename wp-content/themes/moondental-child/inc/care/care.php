@@ -173,6 +173,7 @@ function md_care_render_topic( $slug ) {
 			<?php foreach ( $embeds as $e ) : ?>
 				<div class="mdc-embed"><h3><?php echo esc_html( $e['title'] ?? '' ); ?></h3><div class="mdc-embed__frame"><iframe src="<?php echo esc_url( $e['src'] ); ?>" loading="lazy" allowfullscreen title="<?php echo esc_attr( $e['title'] ?? '' ); ?>"></iframe></div></div>
 			<?php endforeach; ?>
+			<?php if ( ! empty( $t['links'] ) ) : ?><footer class="mdc-topic__foot"><?php md_care_links_html( $t['links'] ); ?></footer><?php endif; ?>
 		</section>
 		<?php endif; ?>
 
@@ -200,12 +201,8 @@ function md_care_render_topic( $slug ) {
 		</section>
 		<?php endif; ?>
 
-		<?php if ( ! empty( $t['links'] ) ) : ?>
-		<footer class="mdc-topic__foot">
-			<?php foreach ( (array) $t['links'] as $l ) : ?>
-				<a class="mdc-link" href="<?php echo esc_url( preg_match( '#^https?://#', $l['url'] ) ? $l['url'] : home_url( $l['url'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $l['label'] ); ?> ↗</a>
-			<?php endforeach; ?>
-		</footer>
+		<?php if ( ! empty( $t['links'] ) && ! $embeds ) : ?>
+		<footer class="mdc-topic__foot"><?php md_care_links_html( $t['links'] ); ?></footer>
 		<?php endif; ?>
 	</article>
 
@@ -230,6 +227,14 @@ function md_care_render_topic( $slug ) {
 		<button type="button" class="mdc-zoom__close" data-care-lightbox-close aria-label="닫기">✕</button>
 	</div>
 	<?php
+}
+
+/* 관련 링크 — 자료 탭이 있으면 그 안에만 보인다 */
+function md_care_links_html( $links ) {
+	foreach ( (array) $links as $l ) {
+		$u = preg_match( '#^https?://#', $l['url'] ) ? $l['url'] : home_url( $l['url'] );
+		echo '<a class="mdc-link" href="' . esc_url( $u ) . '" target="_blank" rel="noopener">' . esc_html( $l['label'] ) . ' ↗</a>';
+	}
 }
 
 function md_care_render() {
