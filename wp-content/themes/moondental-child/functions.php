@@ -2160,6 +2160,7 @@ unset( $_md_sup_f, $_md_sup_p );
 if ( file_exists( MOONDENTAL_DIR . '/inc/inventory/inventory.php' ) ) { require_once MOONDENTAL_DIR . '/inc/inventory/inventory.php'; }
 /* v6.2 · 미니차트 — AppSheet 「Mini Chart」를 옮긴 라운지 도구 (inc/minichart) */
 if ( file_exists( MOONDENTAL_DIR . '/inc/minichart/minichart.php' ) ) { require_once MOONDENTAL_DIR . '/inc/minichart/minichart.php'; }
+if ( file_exists( MOONDENTAL_DIR . '/inc/forms/forms.php' ) ) { require_once MOONDENTAL_DIR . '/inc/forms/forms.php'; } // v7.6 · 양식 (상담용지 등 올리고 내려받기)
 
 
 /* ============================================================

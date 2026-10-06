@@ -1,0 +1,45 @@
+/* 직원 라운지 · 양식 (v7.6) */
+.mdf { display: flex; flex-direction: column; gap: 12px; }
+.mdf [hidden] { display: none !important; }
+.mdf-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.mdf-head h2 { margin: 0 0 4px; font-size: 1.3rem; }
+.mdf-head .mds-hint { margin: 0; }
+.mdf-head > div:first-child { flex: 1 1 260px; }
+.mdf-head__act { display: flex; flex-wrap: wrap; gap: 8px; }
+.mdf-up, .mdf-edit form { display: flex; flex-direction: column; gap: 12px; }
+.mdf-up h3 { margin: 0; font-size: 1.05rem; }
+.mdf-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+.mdf-grid .mds-field { flex: 1 1 180px; }
+.mdf-grid .mds-field--grow { flex: 2 1 260px; }
+.mdf-up input[type=file], .mdf-edit input[type=file] { padding: 14px; border: 2px dashed var(--color-border, #E8DDD3); border-radius: 12px; background: var(--color-surface, #FBF2E8); font-size: 15px; }
+.mdf-drop__names { font-style: normal; font-size: .82rem; color: var(--color-text-mute, #A89685); word-break: break-all; }
+.mdf-up__btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.mdf-bar { display: flex; flex-direction: column; gap: 10px; }
+.mdf-q { width: 100%; min-height: 46px; padding: 10px 14px; border: 1px solid var(--color-border, #E8DDD3); border-radius: 12px; font-size: 16px; background: #fff; }
+.mdf-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.mdf-chips small { opacity: .7; margin-left: 2px; }
+.mdf-list { display: flex; flex-direction: column; gap: 8px; }
+.mdf-cat { margin: 10px 2px 0; font-size: .86rem; font-weight: 800; letter-spacing: .04em; color: var(--color-text-sub, #7A6B5F); }
+.mdf-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; padding: 14px 16px; }
+.mdf-ico { display: inline-flex; align-items: center; justify-content: center; width: 46px; height: 54px; border-radius: 8px; font-size: .72rem; font-weight: 800; color: #fff; background: #9A8B7E; letter-spacing: .02em; }
+.mdf-ico--pdf { background: #C66B5E; } .mdf-ico--hwp { background: #3C7DBF; } .mdf-ico--doc { background: #2F5FA8; }
+.mdf-ico--xls { background: #3E8A5B; } .mdf-ico--ppt { background: #C9773A; } .mdf-ico--img { background: #8B6FB0; }
+.mdf-item__body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.mdf-item__title { font-size: 1.02rem; line-height: 1.4; word-break: keep-all; overflow-wrap: anywhere; }
+.mdf-item__meta { font-size: .8rem; color: var(--color-text-mute, #A89685); }
+.mdf-item__note { font-size: .86rem; color: var(--color-text-sub, #7A6B5F); }
+.mdf-item__act { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.mdf-item__act form { margin: 0; }
+.mdf-item__act .mds-btn, .mdf-head__act .mds-btn, .mdf-up__btns .mds-btn { justify-content: center; text-align: center; }
+.mdf-edit { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid var(--color-border, #E8DDD3); }
+.mdf-del { margin: 0; }
+.mdf-danger { color: var(--color-danger, #C66B5E) !important; }
+.mdf-empty { text-align: center; color: var(--color-text-mute, #A89685); padding: 28px 16px; }
+@media (max-width: 640px) {
+  .mdf-item { grid-template-columns: auto 1fr; gap: 10px 12px; padding: 12px; }
+  .mdf-ico { width: 40px; height: 46px; }
+  .mdf-item__act { grid-column: 1 / -1; justify-content: stretch; }
+  .mdf-item__act .mds-btn, .mdf-item__act form { flex: 1 1 0; }
+  .mdf-item__act form .mds-btn { width: 100%; }
+  .mdf-head__act, .mdf-head__act .mds-btn { width: 100%; }
+}

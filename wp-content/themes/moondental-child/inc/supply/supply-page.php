@@ -75,6 +75,12 @@ function md_sup_apps() {
 			'desc'   => '이름 · 부서 · 생일 · 입사일 · 계정 승인 · 권한', /* v5.8 · 계정 관리를 여기로 합침 */
 			'manage' => true,
 		),
+		// v7.6 · 양식 — 상담용지 · 동의서 · 안내문 올리고 내려받기 (inc/forms · 원장 지시)
+		'forms' => array(
+			'label' => '양식',
+			'icon'  => '📄',
+			'desc'  => '상담용지 · 동의서 · 안내문 — 열어서 인쇄하거나 내려받기',
+		),
 		// v6.2 · 미니차트 (AppSheet 「Mini Chart」를 옮김 · inc/minichart)
 		'minichart' => array(
 			'label' => '미니차트',
@@ -1070,6 +1076,8 @@ function md_sup_render_page() {
 		md_survey_render_result(); // v4.19.7 · 만족도 응답·집계·설정 (관리자)
 	} elseif ( 'me' === $app && function_exists( 'md_acc_render_me' ) ) {
 		md_acc_render_me(); // v5.8 · 내 정보
+	} elseif ( 'forms' === $app && function_exists( 'md_forms_render' ) ) {
+		md_forms_render(); // v7.6 · 양식
 	} elseif ( 'minichart' === $app && function_exists( 'md_mc_render' ) ) {
 		md_mc_render(); // v6.2 · 미니차트
 	} elseif ( 'stock' === $app && function_exists( 'md_inv_render' ) ) {
