@@ -355,7 +355,7 @@ function md_staff_dw_who( $dw ) {
 	if ( null === $map ) {
 		global $wpdb; $map = array();
 		foreach ( (array) $wpdb->get_results( 'SELECT id, name, dept, position, dw_id FROM ' . md_staff_table() . ' WHERE dw_id > 0' ) as $r ) {
-			$map[ (int) $r->dw_id ] = array( 'sid' => (int) $r->id, 'name' => '의료진' === $r->dept ? trim( $r->name . ' ' . ( false !== strpos( $r->position, '원장' ) ? '원장' : $r->position ) ) : $r->name );
+			$map[ (int) $r->dw_id ] = array( 'sid' => (int) $r->id, 'name' => '의료진' === $r->dept ? trim( $r->name . ' ' . ( '' !== trim( $r->position ) ? $r->position : '원장' ) ) : $r->name );
 		}
 	}
 	return $map[ (int) $dw ] ?? null;

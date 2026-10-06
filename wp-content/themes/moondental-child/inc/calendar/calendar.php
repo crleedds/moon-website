@@ -110,12 +110,16 @@ function md_cal_between( $from, $to ) {
 
 	/* 1-2) 덴트웹 개인별 휴무일 (inc/staff · sync.ps1 이 한 시간마다) */
 	if ( function_exists( 'md_staff_dw_dayoffs' ) ) {
+		$seen = array(); /* 덴트웹에 같은 날 두 번 넣은 휴무는 한 줄로 */
 		foreach ( md_staff_dw_dayoffs() as $i => $h ) {
 			if ( $h['d1'] > $to || $h['d2'] < $from ) { continue; }
 			$who = md_staff_dw_who( $h['sid'] );
 			if ( ! $who ) { continue; } /* 라운지 명단과 이어지지 않은 사람(퇴사자 · 가상 의사)은 표시하지 않음 */
 			$time = '' !== $h['t1'] ? ' ' . substr( $h['t1'], 0, 2 ) . ':' . substr( $h['t1'], 2 ) . '~' . substr( $h['t2'], 0, 2 ) . ':' . substr( $h['t2'], 2 ) : '';
 			for ( $d = max( $h['d1'], $from ); $d <= min( $h['d2'], $to ); $d = date( 'Y-m-d', strtotime( $d . ' +1 day' ) ) ) {
+				$k = $d . '|' . $who['sid'] . '|' . $time;
+				if ( isset( $seen[ $k ] ) ) { continue; }
+				$seen[ $k ] = 1;
 				$out[ $d ][] = (object) array( 'id' => 's' . $who['sid'] . 'h' . $i, 'type' => 'dayoff', 'title' => $who['name'] . ( $time ? $time : ' 휴무' ), 'memo' => $h['memo'], 'occurs' => $d, 'years' => 0, 'yearly' => 0, 'auto' => true, 'date_start' => $h['d1'], 'date_end' => $h['d2'] );
 			}
 		}
