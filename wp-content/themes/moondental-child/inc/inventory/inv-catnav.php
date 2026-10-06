@@ -2,7 +2,7 @@
 /**
  * v6.6 · 재고 · 실사 화면 분류 단계 (원장 지시 2026-10-06)
  *
- *   결제 방식 › 품목군 › 세부 분류 — 단계 버튼 줄(품목 수 · 부족 수), 표 안 분류별 묶음 머리줄(소계 · 접기),
+ *   결제 방식 › 품목군 › 세부 분류 — 단계 버튼 줄(품목 수 · 부족 수), 표 안 분류별 묶음 머리줄(소계 · 접기 — inventory.js),
  *   휴대폰 실사의 분류 타일, 화면마다 마지막에 보던 분류 기억(계정마다).
  *
  * @package moondental-child
@@ -90,15 +90,6 @@ function md_inv_cat_bar( $items, $c1, $c2, $c3, $args ) {
 	return $h . '</nav>';
 }
 
-/** 표 묶음 — 지금 경로 바로 아래 단계로 묶을 이름 */
-function md_inv_group_key( $it, $c1, $c2, $c3 ) {
-	if ( $c3 ) { return ''; }
-	if ( $c2 ) { return (int) $it->cat3 ? md_inv_cat_name( $it->cat3 ) : ''; }
-	if ( $c1 ) { return (int) $it->cat2 ? md_inv_cat_name( $it->cat2 ) : '분류 없음'; }
-	$a = (int) $it->cat1 ? md_inv_cat_name( $it->cat1 ) : '분류 없음';
-	return $a . ( (int) $it->cat2 ? ' › ' . md_inv_cat_name( $it->cat2 ) : '' );
-}
-
 /** 분류 순서(설정 › 분류의 순서) → 이름 순으로 정렬 */
 function md_inv_sort_by_cat( $rows ) {
 	$ord = array();
@@ -111,70 +102,57 @@ function md_inv_sort_by_cat( $rows ) {
 	return $rows;
 }
 
-/** 묶음 소계 [이름 => [n, 재고 금액, 부족]] */
-function md_inv_group_sums( $rows, $c1, $c2, $c3 ) {
-	$out = array();
-	foreach ( $rows as $it ) {
-		$g = md_inv_group_key( $it, $c1, $c2, $c3 );
-		if ( ! isset( $out[ $g ] ) ) { $out[ $g ] = array( 0, 0, 0 ); }
-		$out[ $g ][0]++;
-		$out[ $g ][1] += max( 0, (int) $it->stock ) * (int) $it->price;
-		if ( 'ok' !== md_inv_stock_state( $it ) ) { $out[ $g ][2]++; }
-	}
-	return $out;
+/**
+ * v6.6.1 · 분류 단계는 다시 불러오지 않고 브라우저에서 바로 바꾼다 (원장 「좀 느린데?」 — 운영 서버는 화면 한 번에 0.8초).
+ * 표에는 거르기(찾기 · 업체 · 보기)를 거친 품목을 모두 싣고, 줄마다 분류 · 재고 금액 · 부족 표시를 붙인다.
+ * 지금 경로 밖의 줄은 hidden — 묶음 머리줄 · 단계 버튼 · 품목 수는 inventory.js 가 그린다.
+ */
+function md_inv_row_attr( $it, $c1, $c2, $c3 ) {
+	return ' data-c="' . (int) $it->cat1 . ',' . (int) $it->cat2 . ',' . (int) $it->cat3 . '" data-v="' . ( max( 0, (int) $it->stock ) * (int) $it->price ) . '" data-low="' . ( 'ok' !== md_inv_stock_state( $it ) ? 1 : 0 ) . '"'
+		. ( md_inv_in_path( $it, $c1, $c2, $c3 ) ? '' : ' hidden' );
 }
 
-/** 묶음 머리줄 (표 한 줄) */
-function md_inv_group_row( $g, $sum, $cols, $admin, $cont = false ) {
-	$label = '' === $g ? '기타 (세부 분류 없음)' : $g;
-	return '<tr class="iv-grp" data-grp="' . esc_attr( md5( $g ) ) . '"><th colspan="' . (int) $cols . '"><button type="button" class="iv-grp__btn" data-grp-toggle aria-expanded="true"><span class="iv-grp__arrow" aria-hidden="true">▾</span> <b>' . esc_html( $label ) . '</b>' . ( $cont ? ' <small>(앞 쪽에서 이어서)</small>' : '' ) . '</button>'
-		. ' <span class="iv-grp__sum">' . (int) $sum[0] . '개' . ( $admin ? ' · 재고 금액 ' . esc_html( md_inv_won( $sum[1] ) ) : '' ) . ( $sum[2] ? ' · <em>부족 ' . (int) $sum[2] . '</em>' : '' ) . '</span></th></tr>';
+/** 브라우저가 쓸 분류 목록 · 지금 경로 */
+function md_inv_catnav_data( $scope, $c1, $c2, $c3, $extra = array() ) {
+	$S    = md_inv_settings();
+	$cats = array();
+	foreach ( md_inv_cats( true ) as $c ) { $cats[] = array( (int) $c->id, (int) $c->level, (int) $c->parent_id, (string) $c->name ); }
+	$d = array_merge( array(
+		'scope' => $scope,
+		'path'  => array( (int) $c1, (int) $c2, (int) $c3 ),
+		'cats'  => $cats,
+		'lab'   => array( $S['label_cat1'], $S['label_cat2'], $S['label_cat3'] ),
+		'admin' => md_inv_is_admin() ? 1 : 0,
+		'ajax'  => admin_url( 'admin-ajax.php' ),
+		'nonce' => wp_create_nonce( 'md_inv_path' ),
+	), $extra );
+	return '<script type="application/json" id="iv-catnav-data">' . wp_json_encode( $d, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP ) . '</script>';
 }
 
-/** 휴대폰 실사 — 분류 타일 → 품목 목록 (오늘 센 것 ✓) */
+/** 경로 기억 (브라우저가 단계 버튼을 누를 때 뒤에서 보냄) */
+function md_inv_ajax_path() {
+	if ( ! is_user_logged_in() || ! check_ajax_referer( 'md_inv_path', 'nonce', false ) ) { wp_die( '0', '', array( 'response' => 403 ) ); }
+	$scope = sanitize_key( wp_unslash( isset( $_POST['scope'] ) ? $_POST['scope'] : '' ) );
+	if ( ! in_array( $scope, array( 'stock', 'count', 'qcount' ), true ) ) { wp_die( '0', '', array( 'response' => 400 ) ); }
+	foreach ( array( 'ic1', 'ic2', 'ic3' ) as $k ) { $_GET[ $k ] = isset( $_POST[ $k ] ) ? (int) $_POST[ $k ] : 0; }
+	md_inv_cat_path( $scope );
+	wp_die( '1' );
+}
+add_action( 'wp_ajax_md_inv_path', 'md_inv_ajax_path' );
+
+/** 휴대폰 실사 — 분류 타일 → 품목 목록 (오늘 센 것 ✓). 타일 · 경로 · 목록 거르기는 inventory.js (다시 불러오지 않음) */
 function md_inv_qcount_browse() {
 	list( $c1, $c2, $c3 ) = md_inv_cat_path( 'qcount' );
-	$S     = md_inv_settings();
-	$items = md_inv_items();
-	$here  = function ( $p ) { return md_inv_url( array( 'iv' => 'qcount', 'ic1' => $p[0], 'ic2' => $p[1], 'ic3' => $p[2] ) ); };
+	$items = md_inv_sort_by_cat( md_inv_items() );
 	$today = array();
 	foreach ( md_inv_ledger( array( 'type' => 'adjust', 'from' => current_time( 'Y-m-d' ), 'to' => current_time( 'Y-m-d' ), 'limit' => 0, 'with_void' => 0 ) ) as $l ) { $today[ (int) $l->item_id ] = (int) $l->counted; }
-	$in   = function ( $p ) use ( $items ) { $r = array(); foreach ( $items as $it ) { if ( md_inv_in_path( $it, $p[0], $p[1], $p[2] ) ) { $r[] = $it; } } return $r; };
-	/* 경로 */
-	$crumb = '<p class="iv-list__count iv-crumbs">' . ( $c1 ? '<a class="iv-link" href="' . esc_url( $here( array( 0, 0, 0 ) ) ) . '">분류별로</a>' : '<b>분류별로 세기</b>' );
-	if ( $c1 ) { $crumb .= ' › ' . ( $c2 ? '<a class="iv-link" href="' . esc_url( $here( array( $c1, 0, 0 ) ) ) . '">' . esc_html( md_inv_cat_name( $c1 ) ) . '</a>' : '<b>' . esc_html( md_inv_cat_name( $c1 ) ) . '</b>' ); }
-	if ( $c2 ) { $crumb .= ' › ' . ( $c3 ? '<a class="iv-link" href="' . esc_url( $here( array( $c1, $c2, 0 ) ) ) . '">' . esc_html( md_inv_cat_name( $c2 ) ) . '</a>' : '<b>' . esc_html( md_inv_cat_name( $c2 ) ) . '</b>' ); }
-	if ( $c3 ) { $crumb .= ' › <b>' . esc_html( -1 === $c3 ? '기타' : md_inv_cat_name( $c3 ) ) . '</b>'; }
-	$crumb .= '</p>';
-	/* 타일 단계 */
-	$tiles = array();
-	if ( ! $c1 ) { foreach ( md_inv_cats_of( 1 ) as $c ) { $tiles[] = array( $c->name, array( (int) $c->id, 0, 0 ) ); } }
-	elseif ( ! $c2 ) { foreach ( md_inv_cats_of( 2, $c1 ) as $c ) { $tiles[] = array( $c->name, array( $c1, (int) $c->id, 0 ) ); } }
-	elseif ( ! $c3 && md_inv_cats_of( 3, $c2 ) ) {
-		foreach ( md_inv_cats_of( 3, $c2 ) as $c ) { $tiles[] = array( $c->name, array( $c1, $c2, (int) $c->id ) ); }
-		$tiles[] = array( '기타', array( $c1, $c2, -1 ) );
-	}
-	echo '<section class="iv-panel iv-qcbrowse" id="iv-qcbrowse"><h3 class="iv-h3">분류별로 세기</h3>' . $crumb; // phpcs:ignore
-	if ( $tiles ) {
-		echo '<div class="iv-tiles">';
-		foreach ( $tiles as $t ) {
-			$list = $in( $t[1] );
-			if ( '기타' === $t[0] && ! $list ) { continue; }
-			$done = 0; foreach ( $list as $it ) { if ( isset( $today[ (int) $it->id ] ) ) { $done++; } }
-			echo '<a class="iv-tile' . ( $list ? '' : ' iv-tile--empty' ) . '" href="' . esc_url( $here( $t[1] ) ) . '"><b>' . esc_html( $t[0] ) . '</b><small>' . ( $list ? count( $list ) . '개' . ( $done ? ' · 오늘 ' . $done . '개 셈' : '' ) : '아직 품목 없음' ) . '</small></a>';
-		}
-		if ( $c1 ) { $all = $in( array( $c1, $c2, 0 ) ); if ( $all ) { echo '<a class="iv-tile iv-tile--all" href="' . esc_url( add_query_arg( 'iall', 1, $here( array( $c1, $c2, 0 ) ) ) ) . '"><b>모두 보기</b><small>' . count( $all ) . '개</small></a>'; } }
-		echo '</div>';
-		if ( ! md_inv_get( 'iall' ) ) { echo '</section>'; return; }
-	}
-	$list = $in( array( $c1, $c2, $c3 ) );
-	$list = md_inv_sort_by_cat( $list );
-	if ( ! $list ) { echo '<p class="iv-help">이 분류에는 아직 품목이 없습니다.</p></section>'; return; }
-	$n_done = 0; foreach ( $list as $it ) { if ( isset( $today[ (int) $it->id ] ) ) { $n_done++; } }
-	echo '<p class="iv-help">' . count( $list ) . '개 중 오늘 센 것 <b>' . (int) $n_done . '</b>개 — 품목을 누르면 센 수량을 넣고, 저장하면 이 목록으로 돌아옵니다.</p><div class="iv-qclist">';
-	foreach ( $list as $it ) {
+	$here = md_inv_url( array( 'iv' => 'qcount', 'ic1' => $c1, 'ic2' => $c2, 'ic3' => $c3 ) );
+	echo md_inv_catnav_data( 'qcount', $c1, $c2, $c3, array( 'iall' => md_inv_get( 'iall' ) ? 1 : 0 ) ); // phpcs:ignore
+	echo '<section class="iv-panel iv-qcbrowse" id="iv-qcbrowse"><h3 class="iv-h3">분류별로 세기</h3><p class="iv-list__count iv-crumbs"><b>분류별로 세기</b></p><div class="iv-tiles"></div>'
+		. '<p class="iv-help iv-qcbrowse__help" hidden></p><p class="iv-help iv-qcbrowse__empty" hidden>이 분류에는 아직 품목이 없습니다.</p><div class="iv-qclist">'; // phpcs:ignore
+	foreach ( $items as $it ) {
 		$d = isset( $today[ (int) $it->id ] );
-		echo '<a class="iv-qcitem' . ( $d ? ' is-done' : '' ) . '" href="' . esc_url( add_query_arg( 'id', (int) $it->id, $here( array( $c1, $c2, $c3 ) ) ) . '#iv-qc-card' ) . '"><span class="iv-qcitem__name">' . ( $d ? '✓ ' : '' ) . esc_html( $it->name ) . '</span><span class="iv-qcitem__book">장부 ' . (int) $it->stock . ( $d ? ' · 센 ' . (int) $today[ (int) $it->id ] : '' ) . '</span>' . ( '' !== (string) $it->location ? '<small>📍' . esc_html( $it->location ) . '</small>' : '' ) . '</a>';
+		echo '<a class="iv-qcitem' . ( $d ? ' is-done' : '' ) . '" data-c="' . (int) $it->cat1 . ',' . (int) $it->cat2 . ',' . (int) $it->cat3 . '" data-id="' . (int) $it->id . '"' . ( $d ? ' data-done="1"' : '' ) . ' hidden href="' . esc_url( add_query_arg( 'id', (int) $it->id, $here ) . '#iv-qc-card' ) . '"><span class="iv-qcitem__name">' . ( $d ? '✓ ' : '' ) . esc_html( $it->name ) . '</span><span class="iv-qcitem__book">장부 ' . (int) $it->stock . ( $d ? ' · 센 ' . (int) $today[ (int) $it->id ] : '' ) . '</span>' . ( '' !== (string) $it->location ? '<small>📍' . esc_html( $it->location ) . '</small>' : '' ) . '</a>'; // phpcs:ignore
 	}
 	echo '</div></section>';
 }

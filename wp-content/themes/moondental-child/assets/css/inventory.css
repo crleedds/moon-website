@@ -737,3 +737,5 @@ tr.iv-grp.is-closed .iv-grp__arrow { transform: rotate(-90deg); }
   /* 휴대폰: 표가 카드로 바뀌므로 묶음 머리줄도 카드 폭 */
   tr.iv-grp, tr.iv-grp th { display: block; width: 100%; box-sizing: border-box; }
 }
+/* v6.6.1 · 분류 밖 줄은 숨김 (휴대폰 카드 모양 표에서도) */
+.iv-table tr[hidden], .iv-qcitem[hidden], .iv-tiles[hidden] { display: none !important; }

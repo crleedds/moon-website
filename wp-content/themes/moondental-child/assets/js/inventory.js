@@ -1213,24 +1213,204 @@
   if (fl) setTimeout(function () { fl.classList.add('is-fade'); }, 6000);
 })();
 
-/* v6.6 · 재고 · 실사 표 — 분류 묶음 접기 (기억) */
+/* v6.6.1 · 분류 단계 — 다시 불러오지 않고 바로 (재고 · 실사 모드 · 휴대폰 실사). 묶음 머리줄(소계 · 접기 기억)도 여기서 그린다.
+   운영 서버는 화면 한 번 여는 데 0.8초 — 단계 버튼마다 새로 불러오면 느려서 (원장 「좀 느린데?」) */
 (function () {
   'use strict';
-  var KEY = 'md_inv_grp_closed_v1', closed = {};
+  var cfgEl = document.getElementById('iv-catnav-data');
+  if (!cfgEl) return;
+  var C; try { C = JSON.parse(cfgEl.textContent); } catch (e) { return; }
+  var KEY = 'md_inv_grp_closed_v2', closed = {};
   try { closed = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { closed = {}; }
-  function apply(row, shut) {
-    var g = row.getAttribute('data-grp'), tb = row.parentNode;
-    row.classList.toggle('is-closed', shut);
-    var b = row.querySelector('[data-grp-toggle]'); if (b) b.setAttribute('aria-expanded', shut ? 'false' : 'true');
-    Array.prototype.forEach.call(tb.querySelectorAll('tr[data-g="' + g + '"]'), function (r) { r.hidden = shut; });
+  var byId = {};
+  C.cats.forEach(function (c) { byId[c[0]] = c; });
+  function name(id) { return byId[id] ? byId[id][3] : ''; }
+  function kids(lv, parent) { return C.cats.filter(function (c) { return c[1] === lv && (lv === 1 || c[2] === parent); }); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]; }); }
+  function won(n) { return Math.round(n).toLocaleString('en-US') + '원'; }
+  var isList = C.scope === 'qcount';
+  var items = Array.prototype.map.call(document.querySelectorAll(isList ? '#iv-qcbrowse [data-c]' : '.iv-table [data-c]'), function (el) {
+    return { el: el, c: el.getAttribute('data-c').split(',').map(Number), v: +(el.getAttribute('data-v') || 0), low: el.getAttribute('data-low') === '1', done: el.getAttribute('data-done') === '1', g: null };
+  });
+  var P = C.path.slice(), iall = !!C.iall;
+  function inPath(c, p) {
+    if (p[0] && c[0] !== p[0]) return false;
+    if (p[1] && c[1] !== p[1]) return false;
+    if (p[2] === -1) return !c[2];
+    if (p[2] && c[2] !== p[2]) return false;
+    return true;
   }
-  Array.prototype.forEach.call(document.querySelectorAll('tr.iv-grp'), function (r) { if (closed[r.getAttribute('data-grp')]) apply(r, true); });
+  function count(p) {
+    var r = { n: 0, low: 0, done: 0 };
+    items.forEach(function (it) { if (inPath(it.c, p)) { r.n++; if (it.low) r.low++; if (it.done) r.done++; } });
+    return r;
+  }
+  function url(p, extra) {
+    var u = new URL(location.href);
+    ['pg', 'iall', 'id', 'bc', 'id_pick'].forEach(function (k) { u.searchParams.delete(k); });
+    u.searchParams.set('ic1', p[0]); u.searchParams.set('ic2', p[1]); u.searchParams.set('ic3', p[2]);
+    Object.keys(extra || {}).forEach(function (k) { u.searchParams.set(k, extra[k]); });
+    u.hash = '';
+    return u.toString();
+  }
+  function setLinks(p) {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-catnav-link]'), function (a) {
+      var u = new URL(a.href, location.href);
+      u.searchParams.set('ic1', p[0]); u.searchParams.set('ic2', p[1]); u.searchParams.set('ic3', p[2]);
+      a.href = u.toString();
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('form.iv-filter'), function (f) {
+      ['ic1', 'ic2', 'ic3'].forEach(function (k, i) { if (f.elements[k]) f.elements[k].value = p[i]; });
+    });
+  }
+
+  /* 단계 버튼 줄 (서버 md_inv_cat_bar 와 같은 모양) */
+  function btn(label, on, p, c) {
+    return '<a class="iv-catbtn' + (on ? ' is-on' : '') + (c.n ? '' : ' is-empty') + '" href="' + esc(url(p)) + '" data-p="' + p.join(',') + '"' + (on ? ' aria-current="true"' : '') + '>' + esc(label) + ' <small>' + c.n + '</small>' + (c.low ? ' <em class="iv-catbtn__low" title="부족 · 품절">부족 ' + c.low + '</em>' : '') + '</a>';
+  }
+  function bar(p) {
+    var nav = document.querySelector('.iv-catbar');
+    if (!nav) return;
+    var h = '<div class="iv-catbar__row"><span class="iv-catbar__lab">' + esc(C.lab[0]) + '</span>' + btn('전체', !p[0], [0, 0, 0], count([0, 0, 0]));
+    kids(1).forEach(function (c) { h += btn(c[3], p[0] === c[0], [c[0], 0, 0], count([c[0], 0, 0])); });
+    h += '</div>';
+    if (p[0]) {
+      h += '<div class="iv-catbar__row"><span class="iv-catbar__lab">' + esc(C.lab[1]) + '</span>' + btn('전체', !p[1], [p[0], 0, 0], count([p[0], 0, 0]));
+      kids(2, p[0]).forEach(function (c) { h += btn(c[3], p[1] === c[0], [p[0], c[0], 0], count([p[0], c[0], 0])); });
+      h += '</div>';
+    }
+    var subs = p[1] ? kids(3, p[1]) : [];
+    if (subs.length) {
+      h += '<div class="iv-catbar__row"><span class="iv-catbar__lab">' + esc(C.lab[2]) + '</span>' + btn('전체', !p[2], [p[0], p[1], 0], count([p[0], p[1], 0]));
+      subs.forEach(function (c) { h += btn(c[3], p[2] === c[0], [p[0], p[1], c[0]], count([p[0], p[1], c[0]])); });
+      var none = count([p[0], p[1], -1]);
+      if (none.n) h += btn('기타', p[2] === -1, [p[0], p[1], -1], none);
+      h += '</div>';
+    }
+    nav.innerHTML = h;
+  }
+
+  /* 표 — 경로 밖 줄 숨김 · 묶음 머리줄(소계 · 접기) */
+  function gkey(c, p) {
+    if (p[2]) return '';
+    if (p[1]) return c[2] ? name(c[2]) : '';
+    if (p[0]) return c[1] ? name(c[1]) : '분류 없음';
+    return (c[0] ? name(c[0]) : '분류 없음') + (c[1] ? ' › ' + name(c[1]) : '');
+  }
+  function table(p) {
+    Array.prototype.forEach.call(document.querySelectorAll('tr.iv-grp'), function (r) { r.parentNode.removeChild(r); });
+    var vis = [], sums = {}, keys = [], value = 0;
+    items.forEach(function (it) {
+      if (!inPath(it.c, p)) { it.el.hidden = true; it.g = null; it.el.removeAttribute('data-g'); return; }
+      var k = it.g = gkey(it.c, p);
+      if (!sums[k]) { sums[k] = { n: 0, v: 0, low: 0 }; keys.push(k); }
+      sums[k].n++; sums[k].v += it.v; if (it.low) sums[k].low++;
+      value += it.v;
+      vis.push(it);
+    });
+    var heads = !p[2] && (keys.length > 1 || (keys.length === 1 && keys[0] !== '')), prev = null;
+    vis.forEach(function (it) {
+      var k = it.g, shut = heads && !!closed[k];
+      it.el.setAttribute('data-g', k);
+      it.el.hidden = shut;
+      if (heads && k !== prev) {
+        var s = sums[k], tr = document.createElement('tr');
+        tr.className = 'iv-grp' + (shut ? ' is-closed' : '');
+        tr.setAttribute('data-grp', k);
+        tr.innerHTML = '<th colspan="' + (C.cols || 8) + '"><button type="button" class="iv-grp__btn" data-grp-toggle aria-expanded="' + (shut ? 'false' : 'true') + '"><span class="iv-grp__arrow" aria-hidden="true">▾</span> <b>' + esc(k === '' ? '기타 (세부 분류 없음)' : k) + '</b></button> <span class="iv-grp__sum">' + s.n + '개' + (C.admin ? ' · 재고 금액 ' + won(s.v) : '') + (s.low ? ' · <em>부족 ' + s.low + '</em>' : '') + '</span></th>';
+        it.el.parentNode.insertBefore(tr, it.el);
+      }
+      prev = k;
+    });
+    var n = document.getElementById('iv-catnav-n');
+    if (n) n.textContent = vis.length + '개 품목' + (C.admin ? ' · 재고 금액 ' + won(value) : '');
+    var em = document.querySelector('.iv-catnav-empty');
+    if (em) em.hidden = vis.length > 0;
+  }
+
+  /* 휴대폰 실사 — 경로 · 타일 · 목록 */
+  function plink(p, label) { return '<a class="iv-link" href="' + esc(url(p)) + '" data-p="' + p.join(',') + '">' + esc(label) + '</a>'; }
+  function list(p) {
+    var box = document.getElementById('iv-qcbrowse');
+    if (!box) return;
+    var crumb = '<b>분류별로 세기</b>';
+    if (p[0]) {
+      crumb = plink([0, 0, 0], '분류별로') + ' › ' + (p[1] ? plink([p[0], 0, 0], name(p[0])) : '<b>' + esc(name(p[0])) + '</b>');
+      if (p[1]) crumb += ' › ' + (p[2] ? plink([p[0], p[1], 0], name(p[1])) : '<b>' + esc(name(p[1])) + '</b>');
+      if (p[2]) crumb += ' › <b>' + esc(p[2] === -1 ? '기타' : name(p[2])) + '</b>';
+    }
+    box.querySelector('.iv-crumbs').innerHTML = crumb;
+    var tiles = [];
+    if (!p[0]) kids(1).forEach(function (c) { tiles.push([c[3], [c[0], 0, 0]]); });
+    else if (!p[1]) kids(2, p[0]).forEach(function (c) { tiles.push([c[3], [p[0], c[0], 0]]); });
+    else if (!p[2] && kids(3, p[1]).length) {
+      kids(3, p[1]).forEach(function (c) { tiles.push([c[3], [p[0], p[1], c[0]]]); });
+      tiles.push(['기타', [p[0], p[1], -1]]);
+    }
+    var th = '';
+    tiles.forEach(function (t) {
+      var c = count(t[1]);
+      if (t[0] === '기타' && !c.n) return;
+      th += '<a class="iv-tile' + (c.n ? '' : ' iv-tile--empty') + '" href="' + esc(url(t[1])) + '" data-p="' + t[1].join(',') + '"><b>' + esc(t[0]) + '</b><small>' + (c.n ? c.n + '개' + (c.done ? ' · 오늘 ' + c.done + '개 셈' : '') : '아직 품목 없음') + '</small></a>';
+    });
+    if (tiles.length && p[0]) {
+      var all = count([p[0], p[1], 0]);
+      if (all.n) th += '<a class="iv-tile iv-tile--all" href="' + esc(url([p[0], p[1], 0], { iall: 1 })) + '" data-p="' + p[0] + ',' + p[1] + ',0" data-iall><b>모두 보기</b><small>' + all.n + '개</small></a>';
+    }
+    var tl = box.querySelector('.iv-tiles');
+    tl.innerHTML = th; tl.hidden = !tiles.length;
+    var showList = !tiles.length || iall, c = count(p), help = box.querySelector('.iv-qcbrowse__help'), em = box.querySelector('.iv-qcbrowse__empty');
+    var back = url(p, iall ? { iall: 1 } : {});
+    items.forEach(function (it) {
+      var on = showList && inPath(it.c, p);
+      it.el.hidden = !on;
+      if (on) { var u = new URL(back); u.searchParams.set('id', it.el.getAttribute('data-id')); u.hash = 'iv-qc-card'; it.el.href = u.toString(); }
+    });
+    help.hidden = !showList || !c.n;
+    em.hidden = !showList || !!c.n;
+    help.innerHTML = c.n + '개 중 오늘 센 것 <b>' + c.done + '</b>개 — 품목을 누르면 센 수량을 넣고, 저장하면 이 목록으로 돌아옵니다.';
+  }
+
+  function render() { if (isList) { list(P); } else { bar(P); table(P); setLinks(P); } }
+  var saveT;
+  function save() {
+    clearTimeout(saveT);
+    saveT = setTimeout(function () {
+      var f = new FormData();
+      f.append('action', 'md_inv_path'); f.append('nonce', C.nonce); f.append('scope', C.scope);
+      f.append('ic1', P[0]); f.append('ic2', P[1]); f.append('ic3', P[2]);
+      try { if (!(navigator.sendBeacon && navigator.sendBeacon(C.ajax, f))) fetch(C.ajax, { method: 'POST', body: f, credentials: 'same-origin', keepalive: true }); } catch (e) {}
+    }, 150);
+  }
+  function go(p, all) {
+    P = p; iall = !!all;
+    render();
+    try { history.pushState({ ivp: P, iall: iall }, '', url(P, iall ? { iall: 1 } : {}) + (isList ? '#iv-qcbrowse' : '')); } catch (e) {}
+    save();
+  }
   document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    var t = e.target.closest && e.target.closest('.iv-catbar [data-p], #iv-qcbrowse [data-p]');
+    if (t) { e.preventDefault(); go(t.getAttribute('data-p').split(',').map(Number), t.hasAttribute('data-iall')); return; }
     var b = e.target.closest && e.target.closest('[data-grp-toggle]');
     if (!b) return;
     var row = b.closest('tr.iv-grp'), g = row.getAttribute('data-grp'), shut = !row.classList.contains('is-closed');
-    apply(row, shut);
+    row.classList.toggle('is-closed', shut);
+    b.setAttribute('aria-expanded', shut ? 'false' : 'true');
+    items.forEach(function (it) { if (it.g === g) it.el.hidden = shut; });
     if (shut) closed[g] = 1; else delete closed[g];
     try { localStorage.setItem(KEY, JSON.stringify(closed)); } catch (x) {}
   });
+  window.addEventListener('popstate', function (e) {
+    var st = e.state;
+    if (st && st.ivp) { P = st.ivp; iall = !!st.iall; }
+    else {
+      var u = new URL(location.href);
+      P = [+(u.searchParams.get('ic1') || 0), +(u.searchParams.get('ic2') || 0), +(u.searchParams.get('ic3') || 0)];
+      iall = !!u.searchParams.get('iall');
+    }
+    render(); save();
+  });
+  try { history.replaceState({ ivp: P, iall: iall }, ''); } catch (e) {}
+  render();
 })();
