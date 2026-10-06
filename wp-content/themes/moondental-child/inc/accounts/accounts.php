@@ -329,8 +329,8 @@ function md_acc_join_submit() {
 	$email = sanitize_email( $f['email'] );
 	if ( ! is_email( $email ) ) { $err['email'] = '이메일 주소를 확인해 주세요.'; }
 	elseif ( email_exists( $email ) ) { $err['email'] = '이미 가입했거나 신청한 이메일입니다. 승인을 기다리는 중이면 조금만 기다려 주세요.'; }
-	$phone = '' !== trim( $f['phone'] ) ? md_acc_norm_phone( $f['phone'] ) : '';
-	if ( '' !== trim( $f['phone'] ) && '' === $phone ) { $err['phone'] = '전화번호를 확인해 주세요 (예: 010-1234-5678). 모르면 비워 두세요.'; }
+	$phone = md_acc_norm_phone( $f['phone'] ); /* 덴트웹 직원정보엔 전화번호가 없어서 가입 때 받는다 */
+	if ( '' === $phone ) { $err['phone'] = '휴대전화 번호를 확인해 주세요 (예: 010-1234-5678).'; }
 	$login = md_acc_auto_login();
 	$pe = md_acc_pass_ok( $pass );
 	if ( $pe ) { $err['pass'] = $pe; }
@@ -404,7 +404,7 @@ function md_acc_render_join() {
 				<label class="mda-f"><span>부서 <small>선택</small></span><select name="dept"><option value="">모르겠어요 / 나중에</option><?php foreach ( $depts as $d ) : if ( '의료진' === $d ) continue; ?><option value="<?php echo esc_attr( $d ); ?>" <?php selected( $d, $v( 'dept' ) ); ?>><?php echo esc_html( $d ); ?></option><?php endforeach; ?></select></label>
 				<?php endif; ?>
 				<label class="mda-f"><span>이메일 <b>*</b></span><input type="email" name="email" required maxlength="120" autocomplete="email" inputmode="email" value="<?php echo esc_attr( $v( 'email' ) ); ?>" placeholder="name@example.com"><?php echo $er( 'email' ); // phpcs:ignore ?></label>
-				<label class="mda-f"><span>전화번호 <small>선택</small></span><input type="tel" name="phone" maxlength="20" autocomplete="tel" inputmode="numeric" value="<?php echo esc_attr( $v( 'phone' ) ); ?>" placeholder="010-1234-5678" data-mda-phone><?php echo $er( 'phone' ); // phpcs:ignore ?></label>
+				<label class="mda-f"><span>휴대전화 <b>*</b></span><input type="tel" name="phone" required maxlength="20" autocomplete="tel" inputmode="numeric" value="<?php echo esc_attr( $v( 'phone' ) ); ?>" placeholder="010-1234-5678" data-mda-phone><?php echo $er( 'phone' ); // phpcs:ignore ?></label>
 			</fieldset>
 
 			<fieldset class="mda-set"><legend>로그인 정보</legend>
@@ -414,7 +414,7 @@ function md_acc_render_join() {
 			</fieldset>
 
 			<details class="mda-privacy"><summary>개인정보 수집 · 이용 안내</summary>
-				<p><b>수집 항목</b> 이름 · 이메일 · 전화번호(선택) — 생일 · 입사일은 병원 전산(덴트웹) 직원정보에서 가져옵니다<br><b>목적</b> 직원 라운지 계정 관리 · 직원 명단 · 라운지 달력의 생일 · 입사 기념일 표시 · 업무 연락<br><b>보관</b> 재직 기간 동안 (퇴사하면 지웁니다)<br>동의하지 않으면 계정을 만들 수 없고, 병원 공용 계정으로 이용할 수 있습니다.</p>
+				<p><b>수집 항목</b> 이름 · 이메일 · 휴대전화 — 생일 · 입사일은 병원 전산(덴트웹) 직원정보에서 가져옵니다<br><b>목적</b> 직원 라운지 계정 관리 · 직원 명단 · 라운지 달력의 생일 · 입사 기념일 표시 · 업무 연락<br><b>보관</b> 재직 기간 동안 (퇴사하면 지웁니다)<br>동의하지 않으면 계정을 만들 수 없고, 병원 공용 계정으로 이용할 수 있습니다.</p>
 			</details>
 			<label class="mda-agree mds-check"><input type="checkbox" name="agree" value="1" required <?php checked( ! empty( $_POST['agree'] ) ); ?>> 개인정보 수집 · 이용에 동의합니다 <b>*</b></label><?php echo $er( 'agree' ); // phpcs:ignore ?>
 
@@ -739,10 +739,9 @@ function md_acc_me_save() {
 		exit;
 	}
 	/* 연락처 */
-	$praw  = trim( (string) ( isset( $_POST['phone'] ) ? wp_unslash( $_POST['phone'] ) : '' ) );
-	$phone = '' !== $praw ? md_acc_norm_phone( $praw ) : '';
+	$phone = md_acc_norm_phone( isset( $_POST['phone'] ) ? wp_unslash( $_POST['phone'] ) : '' );
 	$email = sanitize_email( isset( $_POST['email'] ) ? wp_unslash( $_POST['email'] ) : '' );
-	if ( '' !== $praw && '' === $phone ) { md_acc_flash( 'err', '전화번호를 확인해 주세요.' ); wp_safe_redirect( $back ); exit; } /* 전화번호는 선택 */
+	if ( '' === $phone ) { md_acc_flash( 'err', '전화번호를 확인해 주세요.' ); wp_safe_redirect( $back ); exit; }
 	if ( ! is_email( $email ) ) { md_acc_flash( 'err', '이메일 주소를 확인해 주세요.' ); wp_safe_redirect( $back ); exit; }
 	$owner = email_exists( $email );
 	if ( $owner && (int) $owner !== (int) $u->ID ) { md_acc_flash( 'err', '다른 계정이 쓰는 이메일입니다.' ); wp_safe_redirect( $back ); exit; }
@@ -812,7 +811,7 @@ function md_acc_render_me() {
 				<h3 class="mda-h3">연락처</h3>
 				<input type="hidden" name="md_acc" value="me"><input type="hidden" name="what" value="contact">
 				<?php wp_nonce_field( 'md_acc_me', 'md_acc_nonce' ); ?>
-				<label class="mda-f"><span>전화번호 <small>선택</small></span><input type="tel" name="phone" inputmode="numeric" maxlength="20" value="<?php echo esc_attr( $phone ); ?>" data-mda-phone></label>
+				<label class="mda-f"><span>전화번호</span><input type="tel" name="phone" required inputmode="numeric" maxlength="20" value="<?php echo esc_attr( $phone ); ?>" data-mda-phone></label>
 				<label class="mda-f"><span>이메일</span><input type="email" name="email" required maxlength="120" value="<?php echo esc_attr( $u->user_email ); ?>"></label>
 				<button type="submit" class="mds-btn mds-btn--fill">저장</button>
 			</form>
