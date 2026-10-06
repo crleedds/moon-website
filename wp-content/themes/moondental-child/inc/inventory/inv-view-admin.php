@@ -402,21 +402,23 @@ function md_inv_view_stock() {
 	$S  = md_inv_settings();
 	$q  = md_inv_get( 'iq' );
 	$st = md_inv_get( 'ist' );
-	$c1 = (int) md_inv_get( 'ic1', 0 );
-	$c2 = (int) md_inv_get( 'ic2', 0 );
-	$c3 = $c2 ? (int) md_inv_get( 'ic3', 0 ) : 0;
+	/* v6.6 · 분류는 단계 버튼 줄로 (결제 방식 › 품목군 › 세부 분류 · 마지막 경로 기억) */
+	list( $c1, $c2, $c3 ) = md_inv_cat_path( 'stock' );
 	$vd = (int) md_inv_get( 'ivd', 0 );
-	$args = array( 'search' => $q, 'cat1' => $c1, 'cat2' => $c2, 'cat3' => $c3, 'vendor' => $vd, 'active' => 'hidden' === $st ? 0 : 1 );
+	$args = array( 'search' => $q, 'vendor' => $vd, 'active' => 'hidden' === $st ? 0 : 1 );
 	$all  = md_inv_items( $args );
-	$rows = array();
+	$base = array();
 	foreach ( $all as $it ) {
 		$s = md_inv_stock_state( $it );
 		if ( 'low' === $st && 'ok' === $s ) { continue; }
 		if ( 'out' === $st && 'out' !== $s ) { continue; }
 		if ( 'nobar' === $st && '' !== $it->barcode ) { continue; }
 		if ( 'noprice' === $st && $it->price > 0 ) { continue; }
-		$rows[] = $it;
+		$base[] = $it;
 	}
+	$rows = array();
+	foreach ( $base as $it ) { if ( md_inv_in_path( $it, $c1, $c2, $c3 ) ) { $rows[] = $it; } }
+	$rows = md_inv_sort_by_cat( $rows );
 	$value = md_inv_stock_value( $rows );
 	?>
 	<?php if ( $admin ) : ?>
@@ -425,7 +427,7 @@ function md_inv_view_stock() {
 		<button type="button" class="iv-btn iv-btn--ghost" data-dlg="dlg-in">입고</button>
 		<button type="button" class="iv-btn iv-btn--ghost" data-dlg="dlg-out">바로 출고</button>
 		<button type="button" class="iv-btn iv-btn--ghost" data-dlg="dlg-adjust">실사 한 품목</button>
-		<a class="iv-btn iv-btn--ghost" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'count', 'ic2' => $c2 ?: '', 'ivd' => $vd ?: '' ) ) ); ?>">실사 모드 (여러 품목)</a>
+		<a class="iv-btn iv-btn--ghost" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'count', 'ic1' => $c1, 'ic2' => $c2, 'ic3' => $c3, 'ivd' => $vd ?: '' ) ) ); ?>">실사 모드 (여러 품목)</a>
 		<button type="button" class="iv-btn iv-btn--ghost" data-dlg="dlg-order">주문</button>
 	</div>
 	<?php $fx = md_inv_fix_counts( md_inv_items() ); ?>
@@ -444,10 +446,7 @@ function md_inv_view_stock() {
 	<form class="iv-filter" method="get" data-autosubmit>
 		<input type="hidden" name="app" value="stock"><input type="hidden" name="iv" value="stock">
 		<label class="iv-f iv-f--grow"><span>찾기</span><input class="iv-input" type="search" name="iq" value="<?php echo esc_attr( $q ); ?>" placeholder="품목명 · 코드 · 바코드"></label>
-		<label class="iv-f"><span><?php echo esc_html( $S['label_cat1'] ); ?></span><select class="iv-input" name="ic1"><option value="">전체</option><?php foreach ( md_inv_cats_of( 1 ) as $c ) : ?><option value="<?php echo (int) $c->id; ?>"<?php selected( $c1, (int) $c->id ); ?>><?php echo esc_html( $c->name ); ?></option><?php endforeach; ?></select></label>
-		<label class="iv-f"><span><?php echo esc_html( $S['label_cat2'] ); ?></span><select class="iv-input" name="ic2"><option value="">전체</option><?php foreach ( md_inv_cats_of( 2 ) as $c ) : if ( $c1 && (int) $c->parent_id !== $c1 ) { continue; } ?><option value="<?php echo (int) $c->id; ?>"<?php selected( $c2, (int) $c->id ); ?>><?php echo esc_html( $c->name ); ?></option><?php endforeach; ?></select></label>
-		<?php $c3s = array(); if ( $c2 ) { foreach ( md_inv_cats_of( 3 ) as $c ) { if ( (int) $c->parent_id === $c2 ) { $c3s[] = $c; } } } ?>
-		<?php if ( $c3s ) : ?><label class="iv-f"><span><?php echo esc_html( $S['label_cat3'] ); ?></span><select class="iv-input" name="ic3"><option value="">전체</option><?php foreach ( $c3s as $c ) : ?><option value="<?php echo (int) $c->id; ?>"<?php selected( $c3, (int) $c->id ); ?>><?php echo esc_html( $c->name ); ?></option><?php endforeach; ?></select></label><?php endif; ?>
+		<input type="hidden" name="ic1" value="<?php echo (int) $c1; ?>"><input type="hidden" name="ic2" value="<?php echo (int) $c2; ?>"><input type="hidden" name="ic3" value="<?php echo (int) $c3; ?>">
 		<label class="iv-f"><span>업체</span><select class="iv-input" name="ivd"><option value="">전체</option><?php foreach ( md_inv_vendors() as $v ) : ?><option value="<?php echo (int) $v->id; ?>"<?php selected( $vd, (int) $v->id ); ?>><?php echo esc_html( $v->name ); ?></option><?php endforeach; ?></select></label>
 		<label class="iv-f"><span>보기</span><select class="iv-input" name="ist">
 			<?php foreach ( array( '' => '모든 품목', 'low' => '부족 · 품절', 'out' => '품절만', 'noprice' => '단가 없는 품목', 'nobar' => '바코드 없는 품목', 'hidden' => '숨긴 품목' ) as $k => $lb ) : ?><option value="<?php echo esc_attr( $k ); ?>"<?php selected( $st, $k ); ?>><?php echo esc_html( $lb ); ?></option><?php endforeach; ?>
@@ -455,6 +454,7 @@ function md_inv_view_stock() {
 		<button class="iv-btn iv-btn--ghost">보기</button>
 	</form>
 
+	<?php echo md_inv_cat_bar( $base, $c1, $c2, $c3, array( 'iv' => 'stock', 'iq' => $q, 'ist' => $st, 'ivd' => $vd ?: '' ) ); // phpcs:ignore ?>
 	<div class="iv-toolbar">
 		<span class="iv-muted"><?php echo count( $rows ); ?>개 품목<?php echo $admin ? ' · 재고 금액 ' . esc_html( md_inv_won( $value ) ) : ''; ?></span>
 		<?php if ( $admin ) : md_inv_dl_buttons( 'items', array(), '재고 현황 엑셀' ); ?><a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_dl_url( 'xlsx' ) ); ?>"><?php echo md_inv_icon( 'down', 16 ); // phpcs:ignore ?>전체 보고서 엑셀</a><?php endif; ?>
@@ -464,13 +464,19 @@ function md_inv_view_stock() {
 	$pg_n  = max( 1, (int) md_inv_get( 'pg', 1 ) );
 	$per_n = 100;
 	$total_rows = count( $rows );
+	$all_rows = $rows;
+	$prev_last = $pg_n > 1 && isset( $rows[ ( $pg_n - 1 ) * $per_n - 1 ] ) ? md_inv_group_key( $rows[ ( $pg_n - 1 ) * $per_n - 1 ], $c1, $c2, $c3 ) : null;
 	$rows  = array_slice( $rows, ( $pg_n - 1 ) * $per_n, $per_n );
 	if ( ! $rows ) { md_inv_empty( '이 조건의 품목이 없습니다.' ); } else { ?>
 	<div class="iv-table-wrap"><table class="iv-table iv-table--stock">
 		<thead><tr><th>품목</th><th>업체</th><th><?php echo esc_html( $S['label_cat2'] ); ?></th><th class="r">단가</th><th class="r">재고</th><th class="r">안전</th><th class="r">대기</th><th class="r">주문 중</th><?php echo $admin ? '<th></th>' : ''; ?></tr></thead>
 		<tbody>
-		<?php foreach ( $rows as $it ) : ?>
-			<tr class="is-<?php echo esc_attr( md_inv_stock_state( $it ) ); ?>">
+		<?php $gsum = md_inv_group_sums( $all_rows, $c1, $c2, $c3 ); $gprev = null; $first = true; $ncol = $admin ? 9 : 8;
+		foreach ( $rows as $it ) :
+			$gk = md_inv_group_key( $it, $c1, $c2, $c3 );
+			if ( ! $c3 && $gk !== $gprev && ( count( $gsum ) > 1 || '' !== $gk ) ) { echo md_inv_group_row( $gk, $gsum[ $gk ], $ncol, $admin, $first && $pg_n > 1 && isset( $prev_last ) && $prev_last === $gk ); } // phpcs:ignore
+			$gprev = $gk; $first = false; ?>
+			<tr class="is-<?php echo esc_attr( md_inv_stock_state( $it ) ); ?>" data-g="<?php echo esc_attr( md5( $gk ) ); ?>">
 				<td data-l="품목" class="iv-td-name"><?php if ( $admin ) : ?><a href="<?php echo esc_url( md_inv_url( array( 'iv' => 'item', 'id' => $it->id ) ) ); ?>"><?php echo esc_html( $it->name ); ?></a><?php else : echo esc_html( $it->name ); endif; ?><small><?php echo esc_html( $it->unit ); ?><?php echo $it->barcode ? ' · ▮▮' : ''; ?><?php echo '' !== (string) $it->location ? ' · 📍' . esc_html( $it->location ) : ''; ?></small></td>
 				<td data-l="업체"><?php echo esc_html( md_inv_vendor_name( $it->vendor_id ) ); ?></td>
 				<td data-l="<?php echo esc_attr( $S['label_cat2'] ); ?>"><?php echo esc_html( md_inv_item_catpath( $it ) ); ?></td>
@@ -636,29 +642,36 @@ function md_inv_ledger_table( $rows, $with_item = true ) {
 
 function md_inv_view_count() {
 	$S  = md_inv_settings();
-	$c2 = (int) md_inv_get( 'ic2', 0 );
+	list( $c1, $c2, $c3 ) = md_inv_cat_path( 'count' );
 	$vd = (int) md_inv_get( 'ivd', 0 );
 	$q  = md_inv_get( 'iq' );
-	$rows = md_inv_items( array( 'cat2' => $c2, 'vendor' => $vd, 'search' => $q ) );
+	$base = md_inv_items( array( 'vendor' => $vd, 'search' => $q ) );
+	$rows = array();
+	foreach ( $base as $it ) { if ( md_inv_in_path( $it, $c1, $c2, $c3 ) ) { $rows[] = $it; } }
+	$rows = md_inv_sort_by_cat( $rows );
 	?>
 	<p class="iv-crumb"><a href="<?php echo esc_url( md_inv_url( array( 'iv' => 'stock' ) ) ); ?>">← 재고</a></p>
 	<h2 class="iv-h2">실사 모드</h2>
-	<p class="iv-help">창고에서 센 수량을 적으세요. <b>빈 칸은 건드리지 않습니다.</b> 장부와 같은 수량은 기록하지 않고, 다른 것만 차이를 「실사」로 남깁니다. 많으면 <?php echo esc_html( $S['label_cat2'] ); ?>나 업체로 나눠서 하세요.</p>
+	<p class="iv-help">창고에서 센 수량을 적으세요. <b>빈 칸은 건드리지 않습니다.</b> 장부와 같은 수량은 기록하지 않고, 다른 것만 차이를 「실사」로 남깁니다. 많으면 아래 분류 버튼으로 나눠서 하세요 (예: 선납차감품목 › 메가젠임플란트 › 픽스처).</p>
 	<form class="iv-filter" method="get" data-autosubmit>
 		<input type="hidden" name="app" value="stock"><input type="hidden" name="iv" value="count">
-		<label class="iv-f"><span><?php echo esc_html( $S['label_cat2'] ); ?></span><select class="iv-input" name="ic2"><option value="">전체</option><?php foreach ( md_inv_cats_of( 2 ) as $c ) : ?><option value="<?php echo (int) $c->id; ?>"<?php selected( $c2, (int) $c->id ); ?>><?php echo esc_html( $c->name ); ?></option><?php endforeach; ?></select></label>
+		<input type="hidden" name="ic1" value="<?php echo (int) $c1; ?>"><input type="hidden" name="ic2" value="<?php echo (int) $c2; ?>"><input type="hidden" name="ic3" value="<?php echo (int) $c3; ?>">
 		<label class="iv-f"><span>업체</span><select class="iv-input" name="ivd"><option value="">전체</option><?php foreach ( md_inv_vendors() as $v ) : ?><option value="<?php echo (int) $v->id; ?>"<?php selected( $vd, (int) $v->id ); ?>><?php echo esc_html( $v->name ); ?></option><?php endforeach; ?></select></label>
 		<label class="iv-f iv-f--grow"><span>찾기</span><input class="iv-input" type="search" name="iq" value="<?php echo esc_attr( $q ); ?>"></label>
 		<button class="iv-btn iv-btn--ghost">보기</button>
 	</form>
-	<?php if ( ! $rows ) { md_inv_empty( '품목이 없습니다.' ); return; } ?>
+	<?php echo md_inv_cat_bar( $base, $c1, $c2, $c3, array( 'iv' => 'count', 'iq' => $q, 'ivd' => $vd ?: '' ) ); // phpcs:ignore ?>
+	<?php if ( ! $rows ) { md_inv_empty( '이 분류에는 품목이 없습니다.' ); return; } ?>
 	<form method="post" data-confirm="적은 수량으로 재고를 맞출까요?" data-dirtywarn>
 		<?php md_inv_hidden( 'stock_count' ); ?>
 		<div class="iv-toolbar"><label class="iv-f iv-f--grow"><span>사유</span><input class="iv-input" name="note" maxlength="200" value="<?php echo esc_attr( '정기 실사 ' . current_time( 'Y-m-d' ) ); ?>"></label></div>
 		<div class="iv-table-wrap"><table class="iv-table iv-table--count">
 			<thead><tr><th>품목</th><th>업체</th><th class="r">장부 재고</th><th class="r">센 수량</th></tr></thead>
-			<tbody><?php foreach ( $rows as $it ) : ?>
-				<tr><td data-l="품목"><?php echo esc_html( $it->name ); ?> <small><?php echo esc_html( $it->unit ); ?></small></td><td data-l="업체"><?php echo esc_html( md_inv_vendor_name( $it->vendor_id ) ); ?></td><td data-l="장부" class="r"><?php echo (int) $it->stock; ?></td>
+			<tbody><?php $gsum = md_inv_group_sums( $rows, $c1, $c2, $c3 ); $gprev = null; foreach ( $rows as $it ) :
+				$gk = md_inv_group_key( $it, $c1, $c2, $c3 );
+				if ( ! $c3 && $gk !== $gprev && ( count( $gsum ) > 1 || '' !== $gk ) ) { echo md_inv_group_row( $gk, $gsum[ $gk ], 4, false ); } // phpcs:ignore
+				$gprev = $gk; ?>
+				<tr data-g="<?php echo esc_attr( md5( $gk ) ); ?>"><td data-l="품목"><?php echo esc_html( $it->name ); ?> <small><?php echo esc_html( $it->unit ); ?></small></td><td data-l="업체"><?php echo esc_html( md_inv_vendor_name( $it->vendor_id ) ); ?></td><td data-l="장부" class="r"><?php echo (int) $it->stock; ?></td>
 				<td data-l="센 수량" class="r"><input class="iv-input iv-input--num" type="number" inputmode="numeric" min="0" name="cnt[<?php echo (int) $it->id; ?>]" data-book="<?php echo (int) $it->stock; ?>" aria-label="<?php echo esc_attr( $it->name . ' 센 수량' ); ?>"></td></tr>
 			<?php endforeach; ?></tbody>
 		</table></div>

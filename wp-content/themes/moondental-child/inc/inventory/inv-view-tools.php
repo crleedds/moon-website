@@ -265,7 +265,8 @@ function md_inv_view_qcount() {
 		if ( ! $it ) { $miss = $bc; }
 	}
 	$note_default = '정기 실사 ' . current_time( 'Y-m-d' );
-	$here = md_inv_url( array( 'iv' => 'qcount' ) );
+	/* v6.6 · 분류로 고른 목록에서 왔으면 저장 뒤 그 목록으로 돌아간다 */
+	$here = md_inv_url( array_filter( array( 'iv' => 'qcount', 'ic1' => (int) md_inv_get( 'ic1', 0 ), 'ic2' => (int) md_inv_get( 'ic2', 0 ), 'ic3' => (int) md_inv_get( 'ic3', 0 ), 'iall' => md_inv_get( 'iall' ) ) ) ) . '#iv-qcbrowse';
 	?>
 	<p class="iv-crumb"><a href="<?php echo esc_url( md_inv_url( array( 'iv' => 'stock' ) ) ); ?>">← 재고</a></p>
 	<h2 class="iv-h2">휴대폰 실사</h2>
@@ -281,7 +282,7 @@ function md_inv_view_qcount() {
 		<div class="iv-flash iv-flash--warn">「<?php echo esc_html( $miss ); ?>」 바코드로 등록된 품목이 없습니다. 이름으로 찾거나 <a class="iv-link" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'barcode', 'bc' => $miss ) ) ); ?>">이 바코드를 품목에 등록</a>하세요.</div>
 	<?php endif; ?>
 	<?php if ( $it ) : ?>
-		<form method="post" class="iv-qc-card">
+		<form method="post" class="iv-qc-card" id="iv-qc-card">
 			<?php md_inv_hidden( 'stock_adjust', $here ); ?>
 			<input type="hidden" name="item_id" value="<?php echo (int) $it->id; ?>">
 			<div class="iv-qc-card__name"><?php echo esc_html( $it->name ); ?></div>
@@ -293,6 +294,7 @@ function md_inv_view_qcount() {
 		</form>
 	<?php endif; ?>
 	<?php
+	if ( ! $it ) { md_inv_qcount_browse(); } /* v6.6 · 분류별로 세기 */
 	$done = md_inv_ledger( array( 'type' => 'adjust', 'from' => current_time( 'Y-m-d' ), 'to' => current_time( 'Y-m-d' ), 'limit' => 50, 'with_void' => 0 ) );
 	if ( $done ) {
 		echo '<h3 class="iv-h3">오늘 센 품목 <span class="iv-n">' . count( $done ) . '</span></h3><div class="iv-cards">';

@@ -1212,3 +1212,25 @@
   var fl = $('.iv-flash--ok');
   if (fl) setTimeout(function () { fl.classList.add('is-fade'); }, 6000);
 })();
+
+/* v6.6 · 재고 · 실사 표 — 분류 묶음 접기 (기억) */
+(function () {
+  'use strict';
+  var KEY = 'md_inv_grp_closed_v1', closed = {};
+  try { closed = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { closed = {}; }
+  function apply(row, shut) {
+    var g = row.getAttribute('data-grp'), tb = row.parentNode;
+    row.classList.toggle('is-closed', shut);
+    var b = row.querySelector('[data-grp-toggle]'); if (b) b.setAttribute('aria-expanded', shut ? 'false' : 'true');
+    Array.prototype.forEach.call(tb.querySelectorAll('tr[data-g="' + g + '"]'), function (r) { r.hidden = shut; });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('tr.iv-grp'), function (r) { if (closed[r.getAttribute('data-grp')]) apply(r, true); });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-grp-toggle]');
+    if (!b) return;
+    var row = b.closest('tr.iv-grp'), g = row.getAttribute('data-grp'), shut = !row.classList.contains('is-closed');
+    apply(row, shut);
+    if (shut) closed[g] = 1; else delete closed[g];
+    try { localStorage.setItem(KEY, JSON.stringify(closed)); } catch (x) {}
+  });
+})();

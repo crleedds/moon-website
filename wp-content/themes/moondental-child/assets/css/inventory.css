@@ -705,3 +705,35 @@ details.iv-panel > summary { cursor: pointer; }
 /* v6.5 · 분류별로 고르기 3단계 — 빈 분류 */
 .iv-tile--empty { background: transparent; border-style: dashed; opacity: .7; }
 .iv-tile--empty small { font-style: italic; }
+
+/* v6.6 · 재고 · 실사 — 분류 단계 버튼 줄 · 묶음 머리줄 · 휴대폰 실사 목록 */
+.iv-catbar { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 12px; }
+.iv-catbar__row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.iv-catbar__row + .iv-catbar__row { padding-left: 10px; border-left: 3px solid var(--iv-line, #E8DDD3); }
+.iv-catbar__lab { font-size: .76rem; font-weight: 700; color: var(--iv-sub, #7A6B5F); min-width: 62px; }
+.iv-catbtn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--iv-line, #E8DDD3); background: #fff; color: inherit; text-decoration: none; font-size: .88rem; line-height: 1.3; }
+.iv-catbtn small { color: var(--iv-sub, #7A6B5F); }
+.iv-catbtn.is-on { background: var(--iv-ink, #2B2420); color: #fff; border-color: transparent; }
+.iv-catbtn.is-on small { color: rgba(255,255,255,.75); }
+.iv-catbtn.is-empty { opacity: .55; border-style: dashed; }
+.iv-catbtn__low { font-style: normal; font-size: .72rem; font-weight: 700; color: #B5523F; background: rgba(198,107,94,.12); border-radius: 999px; padding: 1px 6px; }
+.iv-catbtn.is-on .iv-catbtn__low { color: #fff; background: rgba(255,255,255,.2); }
+tr.iv-grp th { text-align: left; background: var(--iv-soft, #FBF2E8); padding: 8px 10px; font-weight: 600; }
+.iv-grp__btn { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; }
+.iv-grp__arrow { display: inline-block; transition: transform .15s; }
+tr.iv-grp.is-closed .iv-grp__arrow { transform: rotate(-90deg); }
+.iv-grp__sum { margin-left: 8px; font-size: .82rem; color: var(--iv-sub, #7A6B5F); font-weight: 400; }
+.iv-grp__sum em { font-style: normal; color: #B5523F; font-weight: 700; }
+.iv-qclist { display: flex; flex-direction: column; gap: 6px; }
+.iv-qcitem { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 10px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--iv-line, #E8DDD3); background: #fff; color: inherit; text-decoration: none; }
+.iv-qcitem.is-done { background: rgba(143,174,146,.12); border-color: rgba(143,174,146,.6); }
+.iv-qcitem__name { font-weight: 600; }
+.iv-qcitem__book { color: var(--iv-sub, #7A6B5F); font-size: .86rem; }
+.iv-qcitem small { flex-basis: 100%; color: var(--iv-sub, #7A6B5F); }
+@media (max-width: 600px) {
+  .iv-catbar__row { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+  .iv-catbtn { flex: none; }
+  .iv-catbar__lab { flex: none; min-width: auto; }
+  /* 휴대폰: 표가 카드로 바뀌므로 묶음 머리줄도 카드 폭 */
+  tr.iv-grp, tr.iv-grp th { display: block; width: 100%; box-sizing: border-box; }
+}
