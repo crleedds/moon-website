@@ -298,13 +298,13 @@ function md_inv_view_todo() {
 							<div class="iv-card__main">
 								<div class="iv-card__title">
 									<?php if ( $r->item_id ) : ?><a href="<?php echo esc_url( md_inv_url( array( 'iv' => 'item', 'id' => $r->item_id ) ) ); ?>"><?php echo esc_html( $r->name ); ?></a><?php else : ?><?php echo esc_html( $r->name ); ?> <span class="iv-tag">목록에 없음</span><?php endif; ?>
+									<?php $vn = $r->item_id ? ( (int) $r->vendor_id ? md_inv_vendor_name( $r->vendor_id ) : '' ) : (string) $r->custom_vendor; /* v6.9 · 업체가 있으면 품목 옆에 (원장 지시) */ if ( '' !== trim( $vn ) ) : ?><span class="iv-card__vendor"><?php echo esc_html( $vn ); ?></span><?php endif; ?>
 									<?php if ( $r->urgent ) : ?><span class="iv-tag iv-tag--hot">급함</span><?php endif; ?>
 								</div>
 								<div class="iv-card__sub">
 									요청 <b><?php echo (int) $r->qty; ?></b><?php echo esc_html( $r->unit ); ?>
 									<?php if ( $r->item_id ) : ?> · 재고 <b class="<?php echo $short ? 'iv-danger' : ''; ?>"><?php echo (int) $r->stock; ?></b><?php endif; ?>
 									<?php if ( (int) $r->ord_id ) : ?> · <span class="iv-accent">주문 중 <?php echo (int) $r->onord; ?></span><?php endif; ?>
-									<?php if ( ! $r->item_id && $r->custom_vendor ) : ?> · <?php echo esc_html( $r->custom_vendor ); ?><?php endif; ?>
 									<?php if ( ! $r->item_id && $r->custom_price ) : ?> · <?php echo esc_html( md_inv_won( $r->custom_price ) ); ?><?php endif; ?>
 								</div>
 								<?php if ( '' !== $r->note ) : ?><div class="iv-card__note">“<?php echo esc_html( $r->note ); ?>”</div><?php endif; ?>

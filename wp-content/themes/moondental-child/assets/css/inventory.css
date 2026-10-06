@@ -739,3 +739,6 @@ tr.iv-grp.is-closed .iv-grp__arrow { transform: rotate(-90deg); }
 }
 /* v6.6.1 · 분류 밖 줄은 숨김 (휴대폰 카드 모양 표에서도) */
 .iv-table tr[hidden], .iv-qcitem[hidden], .iv-tiles[hidden] { display: none !important; }
+
+/* v6.9 · 출고 대기 — 품목 옆 업체 이름 */
+.iv-card__vendor { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; font-size: .76rem; font-weight: 700; color: var(--iv-sub); background: var(--iv-bg); border: 1px solid var(--iv-line); vertical-align: 2px; white-space: nowrap; }
