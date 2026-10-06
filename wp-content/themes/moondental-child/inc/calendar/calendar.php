@@ -95,14 +95,14 @@ function md_cal_between( $from, $to ) {
 		foreach ( md_staff_all( true ) as $s ) {
 			if ( $s->birthday ) {
 				foreach ( md_cal_yearly_dates( substr( $s->birthday, 5 ), $from, $to ) as $d ) {
-					$out[ $d ][] = (object) array( 'id' => 's' . $s->id . 'b', 'type' => 'birthday', 'title' => $s->name, 'memo' => trim( $s->dept . ' ' . $s->position ), 'occurs' => $d, 'years' => 0, 'yearly' => 1, 'auto' => true, 'date_start' => $d, 'date_end' => null );
+					$out[ $d ][] = (object) array( 'id' => 's' . $s->id . 'b', 'type' => 'birthday', 'title' => trim( $s->name . ' ' . $s->position ), 'memo' => $s->dept, 'occurs' => $d, 'years' => 0, 'yearly' => 1, 'auto' => true, 'date_start' => $d, 'date_end' => null );
 				}
 			}
 			if ( $s->hired ) {
 				foreach ( md_cal_yearly_dates( substr( $s->hired, 5 ), $from, $to ) as $d ) {
 					$yrs = (int) substr( $d, 0, 4 ) - (int) substr( $s->hired, 0, 4 );
 					if ( $yrs < 1 ) { continue; } /* 입사한 해에는 표시하지 않는다 */
-					$out[ $d ][] = (object) array( 'id' => 's' . $s->id . 'a', 'type' => 'anniv', 'title' => $s->name, 'memo' => trim( $s->dept . ' ' . $s->position ), 'occurs' => $d, 'years' => $yrs, 'yearly' => 1, 'auto' => true, 'date_start' => $d, 'date_end' => null );
+					$out[ $d ][] = (object) array( 'id' => 's' . $s->id . 'a', 'type' => 'anniv', 'title' => trim( $s->name . ' ' . $s->position ), 'memo' => $s->dept, 'occurs' => $d, 'years' => $yrs, 'yearly' => 1, 'auto' => true, 'date_start' => $d, 'date_end' => null );
 				}
 			}
 		}
