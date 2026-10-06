@@ -1096,6 +1096,7 @@ function md_mc_render_patient( $id ) {
 			</div>
 			<p class="mc-chart__meta"><?php if ( $r->last_visit ) : ?>최근 내원 <?php echo esc_html( md_mc_short_date( $r->last_visit ) ); ?> · <?php endif; ?>마지막 수정 <?php echo esc_html( $r->updated_at ? md_mc_short_date( $r->updated_at ) . ' ' . date( 'H:i', strtotime( $r->updated_at ) ) : '—' ); ?><?php echo $r->updated_by ? ' · ' . esc_html( $r->updated_by ) : ''; ?> · <a href="<?php echo esc_url( md_mc_url( array( 'mv' => 'log', 'mid' => $r->id ) ) ); ?>">변경 기록</a></p>
 		</header>
+		<?php if ( function_exists( 'md_mc_dw_card' ) ) { echo md_mc_dw_card( $r ); } /* v7.0 · 덴트웹 자동 연동 */ // phpcs:ignore ?>
 
 		<div class="mc-grid">
 			<?php
@@ -1236,7 +1237,7 @@ function md_mc_render_edit( $id, $kind ) {
 	};
 	$f = md_mc_fields();
 	?>
-	<form method="post" class="mds-card mc-form" action="<?php echo esc_url( md_mc_url() ); ?>">
+	<form method="post" class="mds-card mc-form" action="<?php echo esc_url( md_mc_url() ); ?>"<?php echo ( ! $r && 'note' !== $kind && function_exists( 'md_mc_dw_get' ) ) ? ' data-dw="' . esc_url( md_mc_url() ) . '"' : ''; /* v7.0 · 새 환자 — 덴트웹으로 채우기 */ ?>>
 		<?php md_mc_nonce_fields( 'save', $r ? $r->id : 0 ); ?>
 		<input type="hidden" name="kind" value="<?php echo esc_attr( $kind ); ?>">
 		<input type="hidden" name="rev" value="<?php echo $r ? (int) $r->rev : 0; ?>">
@@ -1477,3 +1478,6 @@ function md_mc_render_settings() {
 	</section>
 	<?php
 }
+
+/* v7.0 · 덴트웹 자동 연동 (병원 PC mc-sync.ps1 → REST md-mc/v1) */
+if ( file_exists( __DIR__ . '/minichart-dw.php' ) ) { require_once __DIR__ . '/minichart-dw.php'; }

@@ -121,3 +121,57 @@
     c.addEventListener('change', sync);
   });
 })();
+
+/* v7.0 · 새 환자 — 차트번호를 넣으면 덴트웹 이름 · 지역 · 담당의로 빈 칸 채우기
+   번호를 바꾸면 앞에서 자동으로 채운 값(손대지 않은 것)은 지우고 다시 */
+(function () {
+  'use strict';
+  var form = document.querySelector('form.mc-form[data-dw]');
+  if (!form) return;
+  var chart = form.querySelector('[name=chart_no]');
+  if (!chart) return;
+  var hint = document.createElement('p');
+  hint.className = 'mc-dw-hint'; hint.hidden = true;
+  chart.parentNode.appendChild(hint);
+  var last = '', auto = {};
+  function undo() {
+    Object.keys(auto).forEach(function (n) {
+      var el = form.querySelector('[name=' + n + ']');
+      if (el && el.value === auto[n]) { el.value = ''; el.dispatchEvent(new Event('input', { bubbles: true })); }
+    });
+    auto = {};
+  }
+  function fill(name, val) {
+    var el = form.querySelector('[name=' + name + ']');
+    if (!el || !val || el.value.trim() !== '') return false;
+    el.value = val; auto[name] = el.value; el.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  }
+  function look() {
+    var c = chart.value.trim();
+    if (c === last) return;
+    last = c; undo(); hint.hidden = true; hint.textContent = '';
+    if (!c) return;
+    var u = form.getAttribute('data-dw');
+    fetch(u + (u.indexOf('?') > -1 ? '&' : '?') + 'md_mc_dw=' + encodeURIComponent(c), { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (chart.value.trim() !== c) return;
+        if (!d || !d.ok) { hint.textContent = '덴트웹에서 이 차트번호를 찾지 못했습니다 (30분마다 새로 받음).'; hint.hidden = false; return; }
+        var done = [];
+        if (fill('pname', d.name)) done.push('성명');
+        if (fill('addr', d.region)) done.push('지역');
+        var sel = form.querySelector('[name=dr_main]');
+        if (sel && !sel.value && d.doctor) {
+          Array.prototype.some.call(sel.options, function (o) { if (o.value && (o.value === d.doctor || o.textContent.indexOf(d.doctor) > -1)) { sel.value = o.value; auto.dr_main = o.value; done.push('담당의'); return true; } return false; });
+        }
+        var who = d.name + (d.sex ? ' · ' + (d.sex === 'M' ? '남' : '여') : '') + (d.age !== '' ? ' · ' + d.age + '세' : '');
+        hint.textContent = '덴트웹: ' + who + (done.length ? ' — ' + done.join(' · ') + ' 채움' : '');
+        hint.hidden = false;
+      })
+      .catch(function () {});
+  }
+  chart.addEventListener('change', look);
+  chart.addEventListener('blur', look);
+  if (chart.value.trim()) look();
+})();
