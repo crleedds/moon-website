@@ -88,15 +88,45 @@ function md_mc_dw_date( $v ) {
 	return checkdate( $m, $dd, $y ) ? sprintf( '%04d-%02d-%02d', $y, $m, $dd ) : '';
 }
 
+/** v9.8 · 주소는 동 · 읍 · 면까지만 (원장 지시 — 번지 · 도로명 번호 · 아파트 · 호수 · 리는 보이지 않게) */
+function md_mc_addr_short( $s ) {
+	$s = trim( preg_replace( '/\s+/u', ' ', (string) $s ) );
+	if ( '' === $s ) { return ''; }
+	$paren = '';
+	if ( preg_match( '/[\(（]\s*([^,，\)）]+)/u', $s, $m ) ) { $paren = trim( $m[1] ); }
+	$s   = trim( preg_replace( '/[\(（][^\)）]*[\)）]?/u', ' ', $s ) );
+	$out = array();
+	$adm = '/^(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)$|(특별시|광역시|특별자치시|특별자치도|도|시|군|구)$/u';
+	foreach ( preg_split( '/[\s,]+/u', $s ) as $i => $tk ) {
+		if ( '' === $tk ) { continue; }
+		if ( preg_match( '/^[가-힣]+[0-9]*[가-힣]*(동|읍|면|가)$/u', $tk ) && $out && ! preg_match( '/(로|길)[0-9]*(번길)?$/u', $tk ) ) { $out[] = $tk; return implode( ' ', $out ); }
+		if ( preg_match( $adm, $tk ) && ! preg_match( '/[0-9]/', $tk ) ) { $out[] = $tk; continue; }
+		break;
+	}
+	if ( $out && '' !== $paren && preg_match( '/^[가-힣]+[0-9]*[가-힣]*(동|읍|면|가)$/u', $paren ) ) { $out[] = $paren; }
+	return implode( ' ', $out );
+}
+
+/** 덴트웹 지역 — 리는 빼고 동 · 읍 · 면까지 */
+function md_mc_dw_region( $s ) { $s = md_mc_dw_txt( $s, 60 ); $t = md_mc_addr_short( $s ); return '' !== $t ? $t : $s; }
+
+/** 「지역」 메모에 번지 · 호수 같은 세부 주소가 적혀 있으면 동 · 읍 · 면까지만 */
+function md_mc_addr_memo( $s ) {
+	$s = (string) $s;
+	if ( ! preg_match( '/\d+\s*-\s*\d+|\d+\s*(번지|호|층)|(로|길)\s*\d|아파트|빌라|오피스텔|맨션/u', $s ) ) { return $s; }
+	$short = md_mc_addr_short( $s );
+	return '' !== $short ? $short : $s;
+}
+
 /** 받은 한 명을 정리 — 정해진 칸만, 길이 제한 */
 function md_mc_dw_clean( $p ) {
 	$o = array(
 		'name'   => md_mc_dw_txt( $p['name'] ?? '', 60 ),
 		'sex'    => in_array( $p['sex'] ?? '', array( 'M', 'F' ), true ) ? $p['sex'] : '',
 		'birth'  => md_mc_dw_date( $p['birth'] ?? '' ),
-		'region' => md_mc_dw_txt( $p['region'] ?? '', 60 ),
+		'region' => md_mc_dw_region( $p['region'] ?? '' ),
 		'phone'  => preg_replace( '/[^0-9\-]/', '', md_mc_dw_txt( $p['phone'] ?? '', 20 ) ), /* v8.1 · 원장 지시 — 연락처 · 주소도 */
-		'addr'   => md_mc_dw_txt( $p['addr'] ?? '', 150 ),
+		'addr'   => md_mc_addr_short( md_mc_dw_txt( $p['addr'] ?? '', 150 ) ), /* v9.8 · 세부 주소는 받지도 두지도 않는다 */
 		'doctor' => md_mc_dw_txt( $p['doctor'] ?? '', 30 ),
 		'first'  => md_mc_dw_date( $p['first'] ?? '' ),
 		'last'   => md_mc_dw_date( $p['last'] ?? '' ),
@@ -225,8 +255,8 @@ function md_mc_dw_lookup() {
 	}
 	/* 기본 정보만 있으면(진료기록 없음) 지금 진료기록도 받아 오게 줄 세움 — 저장하면 바로 보이도록 */
 	if ( ! $dup && empty( $d['visits'] ) ) { md_mc_dw_enqueue( $c ); }
-	wp_send_json( array( 'ok' => true, 'dup' => $dup, 'visits' => count( (array) $d['visits'] ), 'name' => $d['name'], 'region' => $d['region'], 'doctor' => $d['doctor'], 'age' => md_mc_dw_age( $d['birth'] ), 'sex' => $d['sex'],
-		'phone' => $d['phone'] ?? '', 'addr' => $d['addr'] ?? '', 'first' => $d['first'], 'last' => $d['last'] ) );
+	wp_send_json( array( 'ok' => true, 'dup' => $dup, 'visits' => count( (array) $d['visits'] ), 'name' => $d['name'], 'region' => md_mc_dw_region( $d['region'] ), 'doctor' => $d['doctor'], 'age' => md_mc_dw_age( $d['birth'] ), 'sex' => $d['sex'],
+		'phone' => $d['phone'] ?? '', 'addr' => md_mc_addr_short( $d['addr'] ?? '' ), 'first' => $d['first'], 'last' => $d['last'] ) );
 }
 add_action( 'template_redirect', 'md_mc_dw_lookup', 2 );
 

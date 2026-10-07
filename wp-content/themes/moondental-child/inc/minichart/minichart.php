@@ -1291,13 +1291,14 @@ function md_mc_render_patient( $id ) {
 			<?php
 			if ( $d && '' !== (string) ( $d['phone'] ?? '' ) ) { md_mc_block( '연락처', '<a href="tel:' . esc_attr( preg_replace( '/\D/', '', $d['phone'] ) ) . '">' . esc_html( $d['phone'] ) . '</a>' ); }
 			/* 주소 — 덴트웹 주소가 있으면 그것, 미니차트 「지역」이 그 안에 이미 들어 있으면 한 번만 */
-			$addr = $d ? (string) ( $d['addr'] ?? '' ) : '';
-			$reg  = trim( (string) $r->addr );
+			$addr = $d && function_exists( 'md_mc_addr_short' ) ? md_mc_addr_short( (string) ( $d['addr'] ?? '' ) ) : ''; /* v9.8 · 동 · 읍 · 면까지만 */
+			if ( '' === $addr && $d && function_exists( 'md_mc_dw_region' ) ) { $addr = md_mc_dw_region( (string) ( $d['region'] ?? '' ) ); }
+			$reg  = trim( function_exists( 'md_mc_addr_memo' ) ? md_mc_addr_memo( (string) $r->addr ) : (string) $r->addr );
 			if ( '' !== $addr ) {
 				$dup = md_mc_blank( $reg ) || false !== mb_strpos( preg_replace( '/\s+/u', '', $addr ), preg_replace( '/\s+/u', '', $reg ) ) || ( $d && preg_replace( '/\s+/u', '', $reg ) === preg_replace( '/\s+/u', '', (string) $d['region'] ) );
 				md_mc_block( '주소', esc_html( $addr ) . ( $dup ? '' : '<br><small class="mc-sub">지역 메모: ' . md_mc_text( $reg ) . '</small>' ) );
 			} else {
-				md_mc_block( $f['addr'][0], md_mc_text( $r->addr ) );
+				md_mc_block( $f['addr'][0], md_mc_text( $reg ) );
 			}
 			md_mc_block( $f['dr'][0], function_exists( 'md_mc_dw_dr_html' ) ? md_mc_dw_dr_html( $r, $d ) : md_mc_dr_html( $r->dr ) );
 			md_mc_block( $f['referral'][0], md_mc_text( $r->referral ) );
