@@ -249,9 +249,9 @@
   function grow() { ta.style.height = 'auto'; ta.style.height = Math.max(ta.scrollHeight, 44) + 'px'; }
   ta.addEventListener('input', function () { bar.hidden = ta.value === orig; grow(); });
   ta.form.querySelector('[data-mc-plan-undo]').addEventListener('click', function () { ta.value = orig; bar.hidden = true; grow(); });
-  ta.addEventListener('keydown', function (e) { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); ta.form.submit(); } });
+  ta.addEventListener('keydown', function (e) { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); if (ta.form.requestSubmit) ta.form.requestSubmit(); else ta.form.submit(); } });
   window.addEventListener('beforeunload', function (e) { if (ta.value !== orig && !ta.form.dataset.sending) { e.preventDefault(); e.returnValue = ''; } });
-  ta.form.addEventListener('submit', function () { ta.form.dataset.sending = '1'; });
+  ta.form.addEventListener('mc:plan-saved', function () { orig = ta.value; bar.hidden = true; });
   grow();
 })();
 
@@ -266,3 +266,88 @@ document.addEventListener('click', function (e) {
   var c = e.target.closest && e.target.closest('[data-mc-dwedit-cancel]');
   if (c) { c.closest('.mc-tl__edit').hidden = true; }
 });
+
+/* v9.2 · 빠른 저장 — 진료기록 지우기 · 고치기 · 다시 보이기 · 줄 추가 · 치료계획을 페이지를 다시 불러오지 않고 바로 반영.
+   화면은 먼저 바꾸고(지우기는 즉시 사라짐) 서버 대답이 오면 그 내용으로 맞춘다. 실패하면 예전처럼 보통 저장으로. */
+(function () {
+  'use strict';
+  if (!window.fetch || !window.FormData) return;
+  function box(name) { var s = document.getElementById('f-' + name); return s && s.querySelector('.mc-block__b'); }
+  function toast(msg, bad) {
+    var t = document.querySelector('.mc-toast');
+    if (!t) { t = document.createElement('div'); t.className = 'mc-toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+    t.textContent = msg; t.classList.toggle('is-bad', !!bad); t.classList.add('is-on');
+    clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('is-on'); }, bad ? 4000 : 1600);
+  }
+  function syncRev(rev) { if (!rev) return; Array.prototype.forEach.call(document.querySelectorAll('input[name=rev]'), function (i) { i.value = rev; }); }
+  function send(form, extra) {
+    var fd = new FormData(form);
+    fd.append('md_fast', '1');
+    if (extra) { for (var k in extra) fd.append(k, extra[k]); }
+    return fetch(form.action || location.href, { method: 'POST', body: fd, credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } })
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); });
+  }
+  function apply(res) {
+    if (res.html != null && res.target) {
+      var b = box(res.target);
+      if (b) {
+        var more = b.querySelector('.mc-tl__more'), hid = b.querySelector('.mc-tl__hidden');
+        var openMore = more && more.open, openHid = hid && hid.open;
+        b.innerHTML = res.html;
+        if (openMore && b.querySelector('.mc-tl__more')) b.querySelector('.mc-tl__more').open = true;
+        if (openHid && b.querySelector('.mc-tl__hidden')) b.querySelector('.mc-tl__hidden').open = true;
+      }
+    }
+    syncRev(res.rev);
+  }
+  function fallback(form) { form.removeAttribute('data-mc-fast'); form.dataset.mcSlow = '1'; form.dataset.sending = '1'; HTMLFormElement.prototype.submit.call(form); }
+
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!form || form.dataset.mcSlow) return;
+    var kind = form.getAttribute('data-mc-fast');
+    var act = form.querySelector('input[name=md_mc_action]');
+    act = act ? act.value : '';
+    if (!kind && !(act === 'add' && form.classList.contains('mc-add')) && act !== 'plan') return;
+    if (!kind) kind = act;
+    var sub = e.submitter, extra = null;
+    if (kind === 'dwhide' && !window.confirm('이 덴트웹 진료기록을 미니차트에서 지울까요? (덴트웹 원본은 그대로)')) { e.preventDefault(); return; }
+    if (kind === 'dwunhide') {
+      if (sub && sub.name === 'all') extra = { all: '1' };
+      else if (!form.querySelector('input[name="dwkeys[]"]:checked')) { e.preventDefault(); toast('다시 보이게 할 기록을 골라 주세요.', true); return; }
+    }
+    e.preventDefault();
+    var li = form.closest('li');
+    /* 먼저 화면에서 바로 */
+    if (kind === 'dwhide' && li) {
+      var dw = li.querySelector('.mc-tl__dw'); if (dw) dw.remove();
+      var ed = li.querySelector('.mc-tl__edit'); if (ed) ed.remove();
+      if (!li.querySelector('.mc-tl__own')) li.classList.add('is-gone');
+    } else if (kind === 'dwedit' && li) {
+      var t = form.querySelector('textarea').value.trim();
+      var dw2 = li.querySelector('.mc-tl__dw'); if (dw2) dw2.remove();
+      form.hidden = true;
+      if (t) { var o = document.createElement('span'); o.className = 'mc-tl__own is-pending'; o.textContent = '✎ ' + t; li.querySelector('.mc-tl__tx').appendChild(o); }
+    } else if (kind === 'dwunhide') {
+      Array.prototype.forEach.call(form.querySelectorAll(extra ? 'li' : 'input[name="dwkeys[]"]:checked'), function (x) { (x.closest('li') || x).classList.add('is-gone'); });
+    }
+    var btns = form.querySelectorAll('button[type=submit], button:not([type])');
+    Array.prototype.forEach.call(btns, function (b) { b.disabled = true; });
+    var addText = kind === 'add' ? form.querySelector('textarea[name=text]') : null;
+    send(form, extra).then(function (res) {
+      if (res.reload) { fallback(form); return; }
+      if (!res.ok) { toast(res.msg || '저장하지 못했습니다.', true); if (kind === 'plan') { Array.prototype.forEach.call(btns, function (b) { b.disabled = false; }); } return; }
+      apply(res);
+      if (kind === 'add' && addText) { addText.value = ''; addText.style.height = ''; }
+      if (kind === 'plan') {
+        var ta = form.querySelector('textarea[data-mc-plan]'); if (ta) ta.defaultValue = ta.value;
+        form.dispatchEvent(new CustomEvent('mc:plan-saved'));
+      }
+      toast({ dwhide: '지웠습니다', dwedit: '고쳤습니다', dwunhide: '다시 보이게 했습니다', add: '추가했습니다', plan: '저장했습니다' }[kind] || '저장했습니다');
+    }).catch(function () {
+      fallback(form);
+    }).then(function () {
+      Array.prototype.forEach.call(btns, function (b) { b.disabled = false; });
+    });
+  }, true);
+})();

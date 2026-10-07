@@ -751,6 +751,9 @@ function md_mc_handle_post() {
 	$post = wp_unslash( $_POST );
 	$err  = function ( $msg, $args ) { return md_mc_url( array_merge( $args, array( 'mcerr' => $msg ) ) ); };
 
+	/* v9.2 · 빠른 저장 — 화면이 fetch 로 보내면(md_fast) 페이지를 다시 그리지 않고 바뀐 부분만 돌려준다 (원장 지시: 라운지 속도) */
+	$fast = ! empty( $_POST['md_fast'] ) && in_array( $action, array( 'dwhide', 'dwedit', 'dwunhide', 'plan', 'add' ), true );
+
 	switch ( $action ) {
 		case 'save':
 			$kind = 'note' === ( $post['kind'] ?? '' ) ? 'note' : 'patient';
@@ -807,7 +810,10 @@ function md_mc_handle_post() {
 			$hide = json_decode( (string) $cur->dw_hide, true );
 			$hide = is_array( $hide ) ? $hide : array();
 			$key  = sanitize_text_field( (string) ( $post['dwkey'] ?? '' ) );
-			if ( 'dwunhide' === $action ) { $hide = array(); }
+			if ( 'dwunhide' === $action ) {
+				$pick = isset( $post['dwkeys'] ) && empty( $post['all'] ) ? array_map( 'sanitize_text_field', (array) $post['dwkeys'] ) : null; /* v9.2 · 고른 것만 */
+				if ( null === $pick ) { $hide = array(); } else { foreach ( $pick as $pk ) { unset( $hide[ $pk ] ); } }
+			}
 			elseif ( preg_match( '/^\d{4}-\d{2}-\d{2}:[0-9a-f]{8}$/', $key ) ) { $hide[ $key ] = current_time( 'mysql' ); }
 			global $wpdb;
 			$wpdb->update( md_mc_t(), array( 'dw_hide' => $hide ? wp_json_encode( $hide ) : null, 'rev' => (int) $cur->rev + 1, 'updated_at' => current_time( 'mysql' ), 'updated_by' => md_mc_me() ), array( 'id' => (int) $id ) );
@@ -915,10 +921,33 @@ function md_mc_handle_post() {
 		default:
 			$back = md_mc_url();
 	}
+	if ( $fast ) { md_mc_fast_reply( $action, $id, $back ); }
 	wp_safe_redirect( $back );
 	exit;
 }
 add_action( 'template_redirect', 'md_mc_handle_post', 1 );
+
+/** v9.2 · 빠른 저장의 대답 — 오류면 ok=false + 메시지, 아니면 바뀐 칸의 HTML */
+function md_mc_fast_reply( $action, $id, $back ) {
+	$q = array();
+	wp_parse_str( (string) wp_parse_url( $back, PHP_URL_QUERY ), $q );
+	if ( ! empty( $q['mcerr'] ) ) { wp_send_json( array( 'ok' => false, 'msg' => (string) $q['mcerr'] ) ); }
+	$r = md_mc_get( $id );
+	if ( ! $r ) { wp_send_json( array( 'ok' => false, 'msg' => '차트를 찾을 수 없습니다.' ) ); }
+	$out = array( 'ok' => true, 'rev' => (int) $r->rev );
+	$field = 'add' === $action ? sanitize_key( wp_unslash( $_POST['field'] ?? '' ) ) : '';
+	if ( in_array( $action, array( 'dwhide', 'dwedit', 'dwunhide' ), true ) || 'tx_hist' === $field ) {
+		$d = 'patient' === $r->kind && function_exists( 'md_mc_dw_get' ) ? md_mc_dw_get( $r->chart_no ) : null;
+		$out['target'] = 'tx_hist';
+		$out['html'] = function_exists( 'md_mc_dw_timeline' ) && 'patient' === $r->kind ? md_mc_dw_timeline( $r, $d ) : md_mc_text( $r->tx_hist );
+	} elseif ( 'add' === $action && in_array( $field, array_keys( md_mc_fields() ), true ) ) {
+		$out['target'] = $field;
+		$out['html'] = md_mc_text( $r->$field );
+	} elseif ( 'add' === $action ) {
+		wp_send_json( array( 'ok' => false, 'reload' => true ) );
+	}
+	wp_send_json( $out );
+}
 
 /* ============================================================
  * 화면
