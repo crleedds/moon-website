@@ -310,6 +310,7 @@ function md_inv_view_todo() {
 								<?php if ( '' !== $r->note ) : ?><div class="iv-card__note">“<?php echo esc_html( $r->note ); ?>”</div><?php endif; ?>
 								<?php if ( '' !== $r->admin_note ) : ?><div class="iv-card__sub"><?php echo esc_html( $r->admin_note ); ?></div><?php endif; ?>
 								<?php if ( ! $r->item_id && $r->custom_link ) : ?><div class="iv-card__sub"><a href="<?php echo esc_url( $r->custom_link ); ?>" target="_blank" rel="noopener noreferrer">구매 링크 열기 ↗</a></div><?php endif; ?>
+								<?php echo function_exists( 'md_inv_photo_thumbs' ) ? md_inv_photo_thumbs( $r ) : ''; // phpcs:ignore ?>
 							</div>
 							<?php md_inv_req_actions( $r ); ?>
 						</article>

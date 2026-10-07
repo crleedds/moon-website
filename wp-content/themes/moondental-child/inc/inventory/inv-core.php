@@ -925,6 +925,10 @@ function md_inv_req_create( $team_id, $requester, $lines, $note = '', $urgent = 
 		if ( $qty < 1 ) { return new WP_Error( 'qty', '수량은 1 이상이어야 합니다.' ); }
 		if ( $qty > $max ) { return new WP_Error( 'qty', '한 품목은 ' . $max . '개까지 요청할 수 있습니다.' ); }
 		$r = array( 'qty' => $qty, 'note' => md_inv_txt( isset( $ln['note'] ) ? $ln['note'] : '', 500 ) );
+		if ( ! empty( $ln['photos'] ) && function_exists( 'md_inv_photo_claim' ) && (int) get_option( 'md_inv_schema', 0 ) >= 6 ) { /* v9.3 · 사진 */
+			$ph = md_inv_photo_claim( $ln['photos'] );
+			if ( $ph ) { $r['photos'] = wp_json_encode( $ph ); }
+		}
 		if ( ! empty( $ln['item_id'] ) ) {
 			$it = md_inv_item( (int) $ln['item_id'] );
 			if ( ! $it || ! (int) $it->active ) { return new WP_Error( 'item', '목록에서 사라진 품목이 담겨 있습니다. 장바구니를 확인해 주세요.' ); }

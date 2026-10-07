@@ -100,6 +100,7 @@ function md_inv_act_req_send() {
 				'qty'     => isset( $ln['qty'] ) ? (int) $ln['qty'] : 0,
 				'note'    => isset( $ln['note'] ) ? (string) $ln['note'] : '',
 				'custom'  => isset( $ln['custom'] ) && is_array( $ln['custom'] ) ? $ln['custom'] : array(),
+				'photos'  => isset( $ln['ph'] ) && is_array( $ln['ph'] ) ? array_map( 'strval', $ln['ph'] ) : array(), /* v9.3 */
 			);
 		}
 	}

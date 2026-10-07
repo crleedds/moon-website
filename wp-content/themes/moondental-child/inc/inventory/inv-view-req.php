@@ -55,6 +55,7 @@ function md_inv_view_req() {
 			'needName' => (int) $S['req_need_name'], 'custom' => (int) $S['req_allow_custom'], 'over' => (int) $S['req_allow_over'],
 			'remember' => (int) $S['req_remember'], 'max' => (int) $S['req_max_qty'], 'stock' => $see_stock ? 1 : 0, 'price' => $see_price ? 1 : 0,
 			'admin' => $admin ? 1 : 0,
+			'ph' => function_exists( 'md_inv_photo_url' ) ? array( 'ajax' => admin_url( 'admin-ajax.php' ), 'nonce' => wp_create_nonce( 'md_inv_photo' ), 'max' => MD_INV_PHOTO_PER_LINE ) : null, /* v9.3 · 사진 붙이기 */
 		),
 		'vendorNames' => array_values( array_map( function ( $v ) { return $v['n']; }, $vend ) ),
 		/* v5.8 · 개인 계정 — 이름은 계정 이름으로 고정, 팀은 지난번에 고른 팀 */
@@ -143,7 +144,7 @@ function md_inv_view_req() {
 	<dialog class="iv-dlg" id="iv-custom" aria-labelledby="iv-custom-h">
 		<form id="iv-custom-form">
 			<div class="iv-dlg__head"><b id="iv-custom-h">목록에 없는 품목 신청</b><button type="button" class="iv-x" data-close aria-label="닫기"><?php echo md_inv_icon( 'x' ); // phpcs:ignore ?></button></div>
-			<p class="iv-help">적어 주신 내용을 보고 관리자가 구매하거나 품목으로 등록합니다.</p>
+			<p class="iv-help">적어 주신 내용을 보고 관리자가 구매하거나 품목으로 등록합니다. 담은 뒤 장바구니에서 <b>📷 사진</b>을 붙일 수 있어요.</p>
 			<label class="iv-f"><span>품목 이름 <em>*</em></span><input class="iv-input" name="name" maxlength="200" required placeholder="예: 3M 필텍 Z350 A2"></label>
 			<div class="iv-grid2">
 				<label class="iv-f"><span>업체 (아는 경우)</span><input class="iv-input" name="vendor" maxlength="100" list="iv-vendor-dl"></label>
@@ -231,6 +232,7 @@ function md_inv_view_mine() {
 					<div class="iv-card__title"><?php echo esc_html( $r->name ); ?><?php if ( ! $r->item_id ) : ?> <span class="iv-tag">목록에 없음</span><?php endif; ?><?php if ( $r->urgent ) : ?> <span class="iv-tag iv-tag--hot">급함</span><?php endif; ?></div>
 					<div class="iv-card__sub"><?php echo esc_html( md_inv_team_name( $r->team_id ) . ' · ' . $r->requester . ' · ' . md_inv_date( $r->created_at, 'H:i' ) ); ?></div>
 					<?php if ( '' !== $r->note ) : ?><div class="iv-card__note">“<?php echo esc_html( $r->note ); ?>”</div><?php endif; ?>
+					<?php echo function_exists( 'md_inv_photo_thumbs' ) ? md_inv_photo_thumbs( $r ) : ''; // phpcs:ignore ?>
 					<?php if ( 'rejected' === $r->status && '' !== $r->admin_note ) : ?><div class="iv-card__why">반려 사유: <?php echo esc_html( $r->admin_note ); ?></div><?php endif; ?>
 					<?php if ( 'done' === $r->status ) : ?><div class="iv-card__sub">✓ <?php echo esc_html( md_inv_ago( $r->done_at ) . ' · ' . $r->done_by . ( '' !== (string) $r->receiver ? ' → 받은 사람 ' . $r->receiver : '' ) ); ?><?php echo '' !== $r->admin_note ? ' · ' . esc_html( $r->admin_note ) : ''; ?></div><?php endif; ?>
 					<?php if ( 'pending' === $r->status && (int) $r->ord_id ) : ?><div class="iv-card__sub iv-accent">주문해 두었습니다 — 들어오면 출고됩니다</div><?php endif; ?>

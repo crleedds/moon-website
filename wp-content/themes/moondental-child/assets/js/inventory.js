@@ -995,13 +995,60 @@
         var sub = it ? [vendors[it.v] ? vendors[it.v].n : '', it.u].filter(Boolean).join(' · ') : ['목록에 없는 품목', l.custom.vendor, l.custom.unit].filter(Boolean).join(' · ');
         h += '<div class="iv-cline" data-idx="' + idx + '"><div class="iv-cline__main"><b>' + esc(name) + '</b><small>' + esc(sub) + '</small>' +
           warn.map(function (w) { return '<span class="iv-cline__warn">' + esc(w) + '</span>'; }).join('') +
-          '<input class="iv-input iv-input--sm" maxlength="200" placeholder="이 품목 메모 (선택)" value="' + esc(l.note || '') + '" data-lnote="' + idx + '"></div>' +
+          '<input class="iv-input iv-input--sm" maxlength="200" placeholder="이 품목 메모 (선택)" value="' + esc(l.note || '') + '" data-lnote="' + idx + '">' + photoRow(l, idx) + '</div>' +
           '<span class="iv-step"><button type="button" data-ldec="' + idx + '" aria-label="하나 빼기">−</button><input type="number" inputmode="numeric" min="1" max="' + O.max + '" value="' + l.qty + '" data-lqty="' + idx + '" aria-label="수량"><button type="button" data-linc="' + idx + '" aria-label="하나 더">+</button></span>' +
           '<button type="button" class="iv-x" data-ldel="' + idx + '" aria-label="빼기">×</button></div>';
       });
       lines.innerHTML = h;
       $('#iv-cart-send').textContent = cart.lines.length + '건 신청하기';
     }
+    /* v9.3 · 사진 붙이기 — 폰에서 긴 변 1600px JPEG 로 줄여 올림 (보통 200~400KB) */
+    function photoRow(l, idx) {
+      if (!O.ph) return '';
+      var ph = l.ph || [], h = '<div class="iv-cline__ph">';
+      ph.forEach(function (p, j) { h += '<span class="iv-ph"><img src="' + esc(p.u) + '" alt=""><button type="button" class="iv-ph__x" data-phdel="' + idx + ':' + j + '" aria-label="사진 빼기">×</button></span>'; });
+      if (ph.length < O.ph.max) h += '<label class="iv-ph__add"><input type="file" accept="image/*" data-phadd="' + idx + '" hidden>📷 사진' + (ph.length ? ' 더' : '') + '</label>';
+      return h + (l.phBusy ? '<span class="iv-ph__busy">올리는 중…</span>' : '') + '</div>';
+    }
+    function shrink(file) {
+      return new Promise(function (ok) {
+        if (!/^image\//.test(file.type) || !window.URL || !document.createElement('canvas').toBlob) return ok(file);
+        var url = URL.createObjectURL(file), img = new Image();
+        img.onload = function () {
+          var w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, 1600 / Math.max(w, h));
+          var c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          URL.revokeObjectURL(url);
+          c.toBlob(function (b) { ok(b && b.size < file.size ? b : file); }, 'image/jpeg', 0.8);
+        };
+        img.onerror = function () { URL.revokeObjectURL(url); ok(file); };
+        img.src = url;
+      });
+    }
+    function upPhoto(idx, file) {
+      var l = cart.lines[idx]; if (!l) return;
+      if (file.size > 30 * 1048576) { alert('사진이 너무 큽니다.'); return; }
+      l.phBusy = 1; renderCart();
+      shrink(file).then(function (b) {
+        if (b.size > 8 * 1048576) throw new Error('사진이 너무 큽니다 (8MB 까지).');
+        var f = new FormData(); f.append('action', 'md_inv_photo_up'); f.append('nonce', O.ph.nonce); f.append('photo', b, 'photo.jpg');
+        return fetch(O.ph.ajax, { method: 'POST', body: f, credentials: 'same-origin' }).then(function (r) { return r.json(); });
+      }).then(function (res) {
+        if (!res || !res.ok) throw new Error(res && res.msg || '사진을 올리지 못했습니다.');
+        l.ph = (l.ph || []).concat([{ n: res.n, u: res.u }]).slice(0, O.ph.max); cart.tok = '';
+      }).catch(function (e) { alert(e.message || '사진을 올리지 못했습니다.'); })
+        .then(function () { delete l.phBusy; save(); renderCart(); });
+    }
+    lines.addEventListener('change', function (e) {
+      var t = e.target;
+      if (t.dataset.phadd !== undefined && t.files && t.files[0]) upPhoto(Number(t.dataset.phadd), t.files[0]);
+    });
+    lines.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-phdel]'); if (!b) return;
+      var a = b.dataset.phdel.split(':'), l = cart.lines[a[0]]; if (!l || !l.ph) return;
+      var p = l.ph.splice(Number(a[1]), 1)[0]; cart.tok = ''; save(); renderCart();
+      if (p) { var f = new FormData(); f.append('action', 'md_inv_photo_del'); f.append('nonce', O.ph.nonce); f.append('n', p.n); fetch(O.ph.ajax, { method: 'POST', body: f, credentials: 'same-origin' }); }
+    });
     function lineChanged(idx) { var l = cart.lines[idx]; cart.tok = ''; save(); if (l && !l.custom) updateRow(l.id); }
     lines.addEventListener('click', function (e) {
       var t = e.target, idx;
@@ -1039,7 +1086,7 @@
       if (problem) { e.preventDefault(); e.stopImmediatePropagation(); err.textContent = problem; err.hidden = false; (tm.value ? nm : tm).focus(); return; }
       if (!cart.tok) { cart.tok = (Date.now().toString(36) + Math.random().toString(36).slice(2, 10)).replace(/[^a-z0-9]/gi, ''); store.set(KEY, cart); }
       $('#iv-cart-tok').value = cart.tok;
-      $('#iv-cart-json').value = JSON.stringify(cart.lines.map(function (l) { return l.custom ? { custom: l.custom, qty: l.qty, note: l.note || '' } : { id: l.id, qty: l.qty, note: l.note || '' }; }));
+      $('#iv-cart-json').value = JSON.stringify(cart.lines.map(function (l) { var o = l.custom ? { custom: l.custom, qty: l.qty, note: l.note || '' } : { id: l.id, qty: l.qty, note: l.note || '' }; if (l.ph && l.ph.length) o.ph = l.ph.map(function (p) { return p.n; }); return o; }));
       if (O.remember) { who.team = Number(tm.value); if (!D.me) who.name = nm.value.trim(); store.set(WHO, who); }
     });
 

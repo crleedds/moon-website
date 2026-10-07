@@ -742,3 +742,14 @@ tr.iv-grp.is-closed .iv-grp__arrow { transform: rotate(-90deg); }
 
 /* v6.9 · 출고 대기 — 품목 옆 업체 이름 */
 .iv-card__vendor { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; font-size: .76rem; font-weight: 700; color: var(--iv-sub); background: var(--iv-bg); border: 1px solid var(--iv-line); vertical-align: 2px; white-space: nowrap; }
+
+/* v9.3 · 신청 사진 */
+.iv-cline__ph { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+.iv-ph { position: relative; width: 56px; height: 56px; }
+.iv-ph img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid var(--iv-line, #e5ddd5); display: block; }
+.iv-ph__x { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: #2F2621; color: #fff; font-size: 14px; line-height: 22px; padding: 0; cursor: pointer; }
+.iv-ph__add { display: inline-flex; align-items: center; min-height: 40px; padding: 0 12px; border: 1px dashed var(--iv-line, #d8cec4); border-radius: 10px; font-size: .88rem; cursor: pointer; color: var(--iv-text, #3D3029); background: #fff; }
+.iv-ph__busy { font-size: .82rem; color: var(--iv-mute, #998a7c); }
+.iv-photos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.iv-photos img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; border: 1px solid var(--iv-line, #e5ddd5); display: block; }
+.iv-photos__gone { font-size: .78rem; color: var(--iv-mute, #998a7c); padding: 4px 8px; border: 1px dashed var(--iv-line, #e5ddd5); border-radius: 8px; }
