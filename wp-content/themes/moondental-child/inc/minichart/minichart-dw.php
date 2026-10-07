@@ -131,6 +131,11 @@ function md_mc_dw_rest_save( $request ) {
 	global $wpdb;
 	md_mc_dw_install();
 	$body  = $request->get_json_params();
+	/* v8.5 · 호스팅 방화벽이 진료 문구를 막아(502) 병원 PC 는 묶음을 base64 로 감싸 보낸다 */
+	if ( isset( $body['b64'] ) && is_string( $body['b64'] ) ) {
+		$dec  = json_decode( (string) base64_decode( $body['b64'], true ), true );
+		$body = is_array( $dec ) ? $dec : array();
+	}
 	$rows  = isset( $body['patients'] ) && is_array( $body['patients'] ) ? $body['patients'] : array();
 	$scope = ( $body['scope'] ?? '' ) === 'full' ? 'full' : 'upcoming';
 	$mc    = md_mc_dw_mc_keys();
