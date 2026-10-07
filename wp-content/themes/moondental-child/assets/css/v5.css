@@ -1189,3 +1189,8 @@ body.md-look .v5-hero__photo img { border-radius: 14px; }
   body.md-look .v5-deep, body.md-look.md-v5 .md-footer, body.md-look .v5-closing, body.md-look.md-v5 .md-cta-banner, body.md-look .v5-creds.v5-deep { background: #0B0B0B !important; }
   body.md-look .v5-deep .v5-doc__ph { background: #EDEDEA; }
 }
+
+/* v8 · 심미치료센터 · 전문가 치아 미백 장 — 단계 목록과 아래 두 칸 사이 간격 */
+#whitening .v5-impl__flow { margin-bottom: 64px !important; }
+#whitening .v5-impl__twocol { margin-bottom: 40px; }
+@media (max-width: 700px) { #whitening .v5-impl__flow { margin-bottom: 44px !important; } }
