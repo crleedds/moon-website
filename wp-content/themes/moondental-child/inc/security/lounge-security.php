@@ -410,7 +410,7 @@ function md_sec_render_otp( $app ) {
 			</form>
 			<form method="post" class="mdsec-code"><?php md_sec_hidden( 'verify' ); ?>
 				<label class="mds-field"><span>인증 코드 6자리</span><input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required<?php echo $sent ? ' autofocus' : ''; ?>></label>
-				<label class="mdsec-keep"><input type="checkbox" name="keep" value="1"> 이 기기에서 로그인 상태 유지 <small>(<?php echo (int) $S['keep_days']; ?>일 · <?php echo (int) $S['idle_days']; ?>일 동안 안 쓰면 다시 확인 · 병원 공용 PC에서는 고르지 마세요)</small></label>
+				<label class="mdsec-keep"><input type="checkbox" name="keep" value="1"> 이 기기에서 로그인 상태 유지</label>
 				<button type="submit" class="mds-btn mds-btn--fill">확인</button>
 			</form>
 		<?php endif; ?>
