@@ -219,6 +219,39 @@ function md_v5_veneer( $html ) {
 	}
 	return implode( '', $parts );
 }
+/* v8 · 원장 지시 · 「가이드 임플란트」 → 「네비게이션 임플란트」 (환자들이 「가이드」로는 잘 못 찾음)
+ *   한국어 화면 글자만 바꾼다 — 템플릿 · 관리자에 저장된 글 · 치아이야기 · 종합 안내서 모두.
+ *   수술용 틀 자체를 가리키는 「가이드를 얹고」 같은 말은 그대로 둔다. 주소 · 속성값 · 검색 설명(meta)은 그대로 */
+function md_v8_nav_text( $t ) {
+	static $map = null;
+	if ( null === $map ) {
+		$map = array(
+			'/네비게이션\s?\(가이드\)\s?임플란트/u'          => '네비게이션 임플란트',
+			'/네비게이션\s?\(가이드\)\s?수술/u'              => '네비게이션 임플란트 수술',
+			'/네비게이션\s?가이드\s?임플란트/u'                => '네비게이션 임플란트',
+			'/네비게이션\s?가이드\s?수술/u'                    => '네비게이션 임플란트 수술',
+			'/(?:CBCT\s?)?(?:디지털|컴퓨터)\s?가이드\s?수술(?:\s?\(네비게이션\))?/u' => '네비게이션 임플란트 수술',
+			'/임플란트\s?디지털\s?가이드\s?시스템/u'          => '네비게이션 임플란트 시스템',
+			'/디지털\s?임플란트\s?가이드/u'                    => '네비게이션 임플란트',
+			'/(?:디지털\s?)?가이드\s?임플란트/u'               => '네비게이션 임플란트',
+			'/(?<!네비게이션 )(?<!네비게이션)가이드\s?수술/u'  => '네비게이션 수술',
+			'/디지털\s?가이드(?!라인)/u'                        => '네비게이션 임플란트',
+			'/네비게이션 임플란트\s?임플란트/u'                 => '네비게이션 임플란트',
+		);
+	}
+	return preg_replace( array_keys( $map ), array_values( $map ), $t );
+}
+function md_v8_nav( $html ) {
+	if ( strpos( $html, '가이드' ) === false ) return $html;
+	$parts = preg_split( '#(<script.*?</script>|<style.*?</style>|<textarea.*?</textarea>|<[^>]+>)#is', $html, -1, PREG_SPLIT_DELIM_CAPTURE );
+	if ( ! is_array( $parts ) ) return $html;
+	foreach ( $parts as $i => $p ) {
+		if ( $p === '' || $p[0] === '<' || strpos( $p, '가이드' ) === false ) continue;
+		$n = md_v8_nav_text( $p );
+		if ( is_string( $n ) ) $parts[ $i ] = $n;
+	}
+	return implode( '', $parts );
+}
 add_action( 'template_redirect', function () {
 	if ( is_admin() || ! md_v5() || is_feed() ) return;
 	if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax() ) return;
@@ -226,7 +259,7 @@ add_action( 'template_redirect', function () {
 	if ( function_exists( 'md_sup_is_page' ) && md_sup_is_page() ) return;
 	ob_start( function ( $html ) {
 		if ( ! is_string( $html ) || stripos( $html, '<html' ) === false ) return $html;
-		return md_v5_veneer( $html );
+		return md_v5_veneer( md_v8_nav( $html ) );
 	} );
 }, 2 );
 
