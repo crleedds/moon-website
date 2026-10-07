@@ -405,7 +405,7 @@ function md_sec_render_otp( $app ) {
 			<div class="mds-notice mds-notice--warn">이 계정에는 이메일이 없어 병원 밖에서는 열 수 없습니다. <a href="<?php echo esc_url( md_sup_url( array( 'app' => 'me' ) ) ); ?>">내 정보</a>에서 이메일을 넣거나, 병원에서 열어 주세요.</div>
 		<?php else : ?>
 			<form method="post" class="mdsec-row"><?php md_sec_hidden( 'send' ); ?>
-				<span>받는 곳: <b><?php echo esc_html( md_sec_is_shared_staff( $u ) ? $u->user_email : md_sec_mask_email( $u->user_email ) ); /* v10.1 · 공용 계정은 병원 주소라 다 보여 줌 */ ?></b></span>
+				<span>받는 곳: <b><?php echo esc_html( md_sec_mask_email( $u->user_email ) ); /* v10.2 · 공용 계정도 가려서 (원장 지시) */ ?></b></span>
 				<button type="submit" class="mds-btn<?php echo $sent ? '' : ' mds-btn--fill'; ?>"><?php echo $sent ? '코드 다시 보내기' : '코드 보내기'; ?></button>
 			</form>
 			<form method="post" class="mdsec-code"><?php md_sec_hidden( 'verify' ); ?>
