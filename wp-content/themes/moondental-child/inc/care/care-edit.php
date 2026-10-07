@@ -20,7 +20,7 @@ function md_care_can_edit() {
 	return current_user_can( 'manage_options' ) || ( function_exists( 'md_sup_is_owner' ) && md_sup_is_owner() ) || ( function_exists( 'md_sup_can_manage' ) && md_sup_can_manage() );
 }
 
-/** v8.8 · Clinical Cases 는 누구나 사진을 올린다 (원장 지시) — 지우기 · 제목은 내가 올린 것만, 순서 · 영상 · 되돌리기는 관리자 */
+/** v8.8 · Clinical Cases 는 직원 누구나 사진을 올린다 (원장 지시) — 제목은 내가 올린 것만, 삭제 · 순서 · 영상 · 되돌리기는 라운지 관리자 */
 function md_care_open_slugs() { return array( 'cases' ); }
 function md_care_can_add( $slug ) {
 	if ( md_care_can_edit() ) { return true; }
@@ -135,12 +135,11 @@ add_action( 'wp_ajax_md_care_upload', 'md_care_ajax_upload' );
 
 /** 삭제 · 목록에서 빼고 파일도 지운다 */
 function md_care_ajax_delete() {
-	list( $slug, $t ) = md_care_ajax_guard( 'add' );
+	list( $slug, $t ) = md_care_ajax_guard(); /* v8.8.1 · 삭제는 라운지 관리자(총괄 포함)만 (원장 지시) */
 	$kind = ( $_POST['kind'] ?? 'photo' ) === 'video' ? 'videos' : 'photos';
 	$i = (int) ( $_POST['index'] ?? -1 );
 	$items = md_care_items( $slug, $t );
 	if ( ! isset( $items[ $kind ][ $i ] ) ) wp_send_json_error( array( 'message' => '항목이 없습니다.' ), 400 );
-	if ( ! md_care_can_edit() && ! md_care_item_mine( $items[ $kind ][ $i ] ) ) wp_send_json_error( array( 'message' => '내가 올린 사진만 지울 수 있습니다.' ), 403 );
 	$it = $items[ $kind ][ $i ];
 	array_splice( $items[ $kind ], $i, 1 );
 	md_care_save_items( $slug, $items );

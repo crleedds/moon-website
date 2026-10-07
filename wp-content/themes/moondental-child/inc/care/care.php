@@ -120,7 +120,7 @@ function md_care_render_topic( $slug ) {
 			</div>
 			<?php elseif ( $can_add ) : ?>
 			<div class="mdc-editbar" data-care-editbar hidden>
-				<span>사진을 올려 주세요 — 내가 올린 사진은 <b>✕</b>로 지우고 제목을 눌러 고칠 수 있습니다. 파일 하나 최대 <b><?php echo esc_html( $max_up ); ?></b> · 환자 얼굴 · 이름이 보이는 사진은 올리지 마세요</span>
+				<span>사진을 올려 주세요 — 내가 올린 사진은 제목을 눌러 고칠 수 있습니다. 지우기는 라운지 관리자에게 말씀해 주세요. 파일 하나 최대 <b><?php echo esc_html( $max_up ); ?></b> · 환자 얼굴 · 이름이 보이는 사진은 올리지 마세요</span>
 			</div>
 			<?php endif; ?>
 			<nav class="mdc-tabs" aria-label="자료 종류">
@@ -146,7 +146,7 @@ function md_care_render_topic( $slug ) {
 						<a href="<?php echo esc_url( $src ); ?>" data-care-zoom="<?php echo (int) $i; ?>"><img src="<?php echo esc_url( $src ); ?>" alt="<?php echo esc_attr( $cap ); ?>" loading="lazy"></a>
 						<figcaption data-care-caption><?php echo esc_html( $cap ); ?><?php if ( ! empty( $p['by_name'] ) ) : ?><small class="mdc-card__by"> · <?php echo esc_html( $p['by_name'] ); ?></small><?php endif; ?></figcaption>
 						<?php if ( $can_edit ) : ?><span class="mdc-card__tools"><button type="button" data-care-move="-1" title="앞으로">‹</button><button type="button" data-care-move="1" title="뒤로">›</button><button type="button" class="mdc-card__del" data-care-del title="삭제">✕</button></span>
-						<?php elseif ( $mine ) : ?><span class="mdc-card__tools"><button type="button" class="mdc-card__del" data-care-del title="내가 올린 사진 지우기">✕</button></span><?php endif; ?>
+						<?php endif; ?>
 					</figure>
 				<?php endforeach; ?>
 			</div>
