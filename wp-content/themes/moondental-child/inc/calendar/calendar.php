@@ -91,6 +91,7 @@ function md_cal_between( $from, $to ) {
 	/* 1) 직원 정보 */
 	if ( function_exists( 'md_staff_all' ) ) {
 		foreach ( md_staff_all( true ) as $s ) {
+			if ( function_exists( 'md_staff_is_shared' ) && md_staff_is_shared( $s ) ) { continue; } /* v10.0 · 공용 계정 */
 			if ( $s->birthday ) {
 				foreach ( md_cal_yearly_dates( substr( $s->birthday, 5 ), $from, $to ) as $d ) {
 					$out[ $d ][] = (object) array( 'id' => 's' . $s->id . 'b', 'type' => 'birthday', 'title' => trim( $s->name . ' ' . $s->position ) . '님', 'memo' => $s->dept, 'occurs' => $d, 'years' => 0, 'yearly' => 1, 'auto' => true, 'date_start' => $d, 'date_end' => null );

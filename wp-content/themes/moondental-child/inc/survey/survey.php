@@ -297,7 +297,7 @@ function md_survey_staff_choices( $current = '' ) {
 	$out = array();
 	foreach ( md_staff_all( true ) as $r ) {
 		$n = trim( (string) $r->name );
-		if ( '' === $n || '의료진' === $r->dept || $n === trim( (string) $current ) ) { continue; }
+		if ( '' === $n || '의료진' === $r->dept || $n === trim( (string) $current ) || ( function_exists( 'md_staff_is_shared' ) && md_staff_is_shared( $r ) ) ) { continue; }
 		if ( ! in_array( $r->dept, array( '진료실', '예방과', '서비스지원실' ), true ) && '' !== (string) $r->dept ) { continue; } /* 환자를 직접 응대하는 부서만 */
 		$out[] = array( 'name' => $n, 'photo' => md_survey_person_photo( $n, 'staff' ) );
 	}

@@ -1004,6 +1004,54 @@ function md_mc_find_json() {
 }
 add_action( 'template_redirect', 'md_mc_find_json', 2 );
 
+/* v10.0 · 휴대폰 홈 화면에 「미니차트」 아이콘 (재료실과 같은 방식 · 원장 지시) */
+function md_mc_manifest() {
+	if ( empty( $_GET['md_mc_manifest'] ) ) { return; }
+	$icon = get_stylesheet_directory_uri() . '/assets/img/';
+	nocache_headers();
+	header( 'Content-Type: application/manifest+json; charset=UTF-8' );
+	echo wp_json_encode( array(
+		'id'               => '/?md_app=minichart',
+		'name'             => '문치과병원 미니차트',
+		'short_name'       => '미니차트',
+		'start_url'        => md_mc_url(),
+		'scope'            => home_url( '/' ),
+		'display'          => 'standalone',
+		'background_color' => '#F6F1EA',
+		'theme_color'      => '#8B6A4E',
+		'lang'             => 'ko',
+		'icons'            => array(
+			array( 'src' => $icon . 'mc-icon-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any maskable' ),
+			array( 'src' => $icon . 'mc-icon-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any maskable' ),
+		),
+	), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+	exit;
+}
+add_action( 'init', 'md_mc_manifest', 1 );
+
+function md_mc_head_app() {
+	if ( ! function_exists( 'md_sup_is_page' ) || ! md_sup_is_page() ) { return; }
+	if ( ! function_exists( 'md_sup_current_app' ) || 'minichart' !== md_sup_current_app() ) { return; }
+	echo '<link rel="manifest" href="' . esc_url( add_query_arg( 'md_mc_manifest', '1', home_url( '/' ) ) ) . '">' . "\n";
+	echo '<link rel="apple-touch-icon" href="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/mc-icon-180.png' ) . '">' . "\n";
+	echo '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">' . "\n";
+	echo '<meta name="apple-mobile-web-app-title" content="미니차트">' . "\n";
+}
+add_action( 'wp_head', 'md_mc_head_app', 2 );
+
+/** 환자 목록 위 「홈 화면에 추가」 — 휴대폰이거나 브라우저가 설치를 받아 줄 때만, 앱으로 열었으면 안 보임 (✕ 로 닫으면 그 기기에서는 안 나옴) */
+function md_mc_install_help() {
+	?>
+	<div class="mc-install" id="mc-install" hidden>
+		<b>📱 홈 화면에 「미니차트」 아이콘 만들기</b>
+		<button type="button" class="mds-btn mds-btn--fill mc-install__btn" id="mc-install-btn" hidden>홈 화면에 추가</button>
+		<span class="mc-install__ios" hidden>아이폰: 아래 <b>공유 버튼 ⬆︎</b> → <b>「홈 화면에 추가」</b></span>
+		<span class="mc-install__and" hidden>안드로이드: 오른쪽 위 <b>⋮</b> → <b>「홈 화면에 추가」</b></span>
+		<button type="button" class="mc-install__x" id="mc-install-x" aria-label="닫기">×</button>
+	</div>
+	<?php
+}
+
 /** v9.8 · 차트를 보다가 다른 환자 찾기 — 글자를 치면 아래에 바로 뜨고, Enter 는 목록에서 찾기(내용까지) */
 function md_mc_render_jump() {
 	?>
@@ -1134,6 +1182,7 @@ function md_mc_render_list() {
 			</div>
 		<?php endif; ?>
 	</div>
+	<?php md_mc_install_help(); /* v10.0 · 홈 화면에 추가 */ ?>
 	<?php if ( '' !== $q || '' !== $doc ) : ?>
 		<p class="mc-found"><?php echo '' !== $q ? '「' . esc_html( $q ) . '」 ' : ''; ?><?php echo '' !== $doc ? '담당의 ' . esc_html( $doc ) . ' · ' : ''; ?><?php echo count( $rows ); ?>명 · <a href="<?php echo esc_url( md_mc_url( array( 'mf' => $filter, 'ms' => $ms ) ) ); ?>">지우기</a></p>
 	<?php endif; ?>

@@ -896,7 +896,7 @@ function md_acc_render_staff_panel() {
 					<label class="mda-f"><span>직원 명단과 연결</span>
 						<select name="link">
 							<option value="new">명단에 새로 추가</option>
-							<?php foreach ( $rows as $r ) : if ( isset( $map[ $r->id ] ) ) continue; ?>
+							<?php foreach ( $rows as $r ) : if ( isset( $map[ $r->id ] ) || ( function_exists( 'md_staff_is_shared' ) && md_staff_is_shared( $r ) ) ) continue; ?>
 								<option value="<?php echo (int) $r->id; ?>" <?php selected( $best, (int) $r->id ); ?>><?php echo esc_html( $r->name . ( $r->dept ? ' · ' . $r->dept : '' ) . ( $r->birthday ? ' · ' . substr( $r->birthday, 5 ) : '' ) ); ?></option>
 							<?php endforeach; ?>
 						</select>
@@ -978,6 +978,14 @@ function md_acc_render_retired( $rows ) {
 /** 직원 한 사람 줄 아래 — 계정 칸 */
 function md_acc_render_row( $r ) {
 	if ( ! md_acc_can_manage() || empty( $r->id ) ) { return; }
+	/* v10.0 · 직원 공용 계정 줄 — 계정 만들기 · 퇴사 처리 없이 안내만 (권한은 「권한」 탭) */
+	if ( function_exists( 'md_staff_is_shared' ) && md_staff_is_shared( $r ) ) {
+		$su = defined( 'MD_SUP_STAFF_LOGIN' ) ? get_user_by( 'login', MD_SUP_STAFF_LOGIN ) : null;
+		echo '<div class="mda-acc" data-sid="' . (int) $r->id . '"><div class="mda-acc__line"><span class="mda-acc__ic" aria-hidden="true">👥</span>직원 공용 계정'
+			. ( $su ? ' <span class="mda-chip mda-chip--active">' . esc_html( md_acc_perm_label( $su ) ) . '</span> <small class="mda-last">' . esc_html( $su->user_email ) . ' · 마지막 로그인 ' . esc_html( md_acc_when( md_acc_last_login( $su->ID ) ) ) . '</small>' : ' <small>— 계정이 없습니다</small>' )
+			. '</div><p class="mda-note">로그인 칸에 「' . esc_html( $r->name ) . '」. 권한은 위 「권한」 탭에서 정합니다. 홈페이지 명단 · 달력 · 만족도 담당자에는 나오지 않습니다.</p></div>';
+		return;
+	}
 	static $map = null;
 	if ( null === $map ) { $map = md_acc_staff_user_map(); }
 	$u = isset( $map[ $r->id ] ) ? $map[ $r->id ] : null;

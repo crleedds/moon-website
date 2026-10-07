@@ -57,6 +57,48 @@ function md_staff_maybe_install() {
 }
 add_action( 'init', 'md_staff_maybe_install', 21 );
 
+/* ============================================================
+ * v10.0 · 직원 공용 계정(직원공용)도 명단에 한 줄 (원장 지시)
+ *  홈페이지 의료진 페이지 · 만족도 담당자 · 가입 승인 「명단과 연결」에는 넣지 않는다.
+ * ============================================================ */
+define( 'MD_STAFF_SHARED_MAIL', 'moondental1995@naver.com' );
+
+function md_staff_is_shared( $r ) {
+	$n = defined( 'MD_SUP_STAFF_NAME' ) ? MD_SUP_STAFF_NAME : '직원공용';
+	return $r && preg_replace( '/\s+/u', '', (string) $r->name ) === preg_replace( '/\s+/u', '', $n );
+}
+
+function md_staff_add_shared_once() {
+	if ( get_option( 'md_staff_shared_v1' ) || (int) get_option( 'md_staff_schema', 0 ) < MD_STAFF_SCHEMA ) { return; }
+	global $wpdb;
+	$t = md_staff_table();
+	$have = false;
+	foreach ( md_staff_all() as $r ) { if ( md_staff_is_shared( $r ) ) { $have = (int) $r->id; break; } }
+	if ( ! $have ) {
+		$wpdb->insert( $t, array(
+			'name'       => defined( 'MD_SUP_STAFF_NAME' ) ? MD_SUP_STAFF_NAME : '직원공용',
+			'dept'       => '기타',
+			'position'   => '공용 계정',
+			'email'      => MD_STAFF_SHARED_MAIL,
+			'note'       => '직원 공용 로그인 계정',
+			'sort'       => (int) $wpdb->get_var( "SELECT COALESCE(MAX(sort),0) FROM $t" ) + 1,
+			'created_at' => current_time( 'mysql' ),
+		) );
+		$have = (int) $wpdb->insert_id;
+	} else {
+		$wpdb->update( $t, array( 'email' => MD_STAFF_SHARED_MAIL, 'updated_at' => current_time( 'mysql' ) ), array( 'id' => $have ) );
+	}
+	/* 계정 이메일도 같은 주소로 (v8.8 에서 한 번 맞췄지만 다시 확인) */
+	$u = defined( 'MD_SUP_STAFF_LOGIN' ) ? get_user_by( 'login', MD_SUP_STAFF_LOGIN ) : null;
+	if ( $u ) {
+		update_user_meta( $u->ID, 'md_staff_id', $have );
+		$other = email_exists( MD_STAFF_SHARED_MAIL );
+		if ( $u->user_email !== MD_STAFF_SHARED_MAIL && ( ! $other || (int) $other === (int) $u->ID ) ) { wp_update_user( array( 'ID' => $u->ID, 'user_email' => MD_STAFF_SHARED_MAIL ) ); }
+	}
+	update_option( 'md_staff_shared_v1', $have ? 'sid ' . $have : 'fail', false );
+}
+add_action( 'init', 'md_staff_add_shared_once', 23 );
+
 /** 홈페이지 명단(원장 + 직원)에서 아직 없는 사람만 추가. 돌려주는 값: 추가된 수 */
 function md_staff_import_from_site() {
 	global $wpdb;
@@ -96,7 +138,7 @@ function md_staff_sync_site() {
 	$order = array( '진료실', '기공실', '서비스지원실', '경영지원실', '관리사무소', '예방과', '기타' );
 	$by    = array();
 	foreach ( md_staff_all( true ) as $r ) {
-		if ( '의료진' === $r->dept || '' === trim( $r->name ) ) { continue; }
+		if ( '의료진' === $r->dept || '' === trim( $r->name ) || md_staff_is_shared( $r ) ) { continue; } /* v10.0 · 공용 계정은 홈페이지에 안 나감 */
 		$by[ $r->dept ?: '기타' ][] = $r;
 	}
 	$lines = array();
@@ -447,7 +489,7 @@ function md_staff_render() {
 	$depts = md_staff_depts();
 	if ( isset( $_GET['err'] ) ) { echo '<div class="mds-notice mds-notice--warn">' . esc_html( wp_unslash( $_GET['err'] ) ) . '</div>'; }
 	$n_b = 0; $n_h = 0; $n_a = 0;
-	foreach ( $rows as $r ) { if ( (int) $r->active ) { $n_a++; if ( $r->birthday ) $n_b++; if ( $r->hired ) $n_h++; } }
+	foreach ( $rows as $r ) { if ( (int) $r->active && ! md_staff_is_shared( $r ) ) { $n_a++; if ( $r->birthday ) $n_b++; if ( $r->hired ) $n_h++; } } /* v10.0 · 공용 계정은 인원에서 뺌 */
 	?>
 	<div class="mdst">
 		<div class="mds-card mdst-head">

@@ -415,3 +415,35 @@ document.addEventListener('click', function (e) {
   });
   document.addEventListener('click', function (e) { if (!box.contains(e.target)) close(); });
 })();
+
+/* v10.0 · 홈 화면에 「미니차트」 아이콘 — 브라우저가 설치를 받아 주면 버튼, 아니면 휴대폰별 안내. 앱으로 열었거나 ✕ 로 닫았으면 숨김 */
+(function () {
+  'use strict';
+  var box = document.getElementById('mc-install');
+  if (!box) return;
+  var KEY = 'md_mc_install_x';
+  var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  var closed = false; try { closed = localStorage.getItem(KEY) === '1'; } catch (e) {}
+  if (standalone || closed) return;
+  var ua = navigator.userAgent || '';
+  var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  var mobile = ios || /Android|Mobile/i.test(ua);
+  var btn = document.getElementById('mc-install-btn');
+  var prompt = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault(); prompt = e;
+    box.hidden = false; btn.hidden = false;
+    box.querySelector('.mc-install__and').hidden = true;
+  });
+  if (mobile) { box.hidden = false; box.querySelector(ios ? '.mc-install__ios' : '.mc-install__and').hidden = false; }
+  btn.addEventListener('click', function () {
+    if (!prompt) return;
+    prompt.prompt();
+    prompt.userChoice.then(function (c) { if (c && c.outcome === 'accepted') { box.hidden = true; } }, function () {});
+    prompt = null; btn.hidden = true;
+  });
+  window.addEventListener('appinstalled', function () { box.hidden = true; });
+  document.getElementById('mc-install-x').addEventListener('click', function () {
+    box.hidden = true; try { localStorage.setItem(KEY, '1'); } catch (e) {}
+  });
+})();

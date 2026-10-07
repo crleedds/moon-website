@@ -354,3 +354,11 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
 .mc-jump__upd { color: var(--mc-mute); font-size: .82rem; font-variant-numeric: tabular-nums; }
 .mc-jump__none { padding: 12px 16px; color: var(--mc-sub); }
 @media (max-width: 760px) { .mc-jump__list { left: 16px; right: 16px; top: calc(100% - 6px); } }
+
+/* v10.0 · 홈 화면에 추가 */
+.mc-install { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 0 0 12px; padding: 12px 44px 12px 16px; border: 1px solid var(--mc-line); border-radius: 14px; background: var(--mc-alt); color: var(--mc-ink); font-size: .92rem; }
+.mc-install[hidden], .mc-install [hidden] { display: none !important; }
+.mc .mc-install__btn { width: auto; min-height: 40px; padding: 0 16px; }
+.mc-install__x { position: absolute; top: 6px; right: 6px; width: 34px; height: 34px; border: 0; background: none; color: var(--mc-sub); font-size: 1.4rem; line-height: 1; cursor: pointer; border-radius: 50%; }
+.mc-install__x:hover { background: rgba(0,0,0,.06); }
+@media print { .mc-install { display: none !important; } }
