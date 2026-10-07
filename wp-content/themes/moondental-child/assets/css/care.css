@@ -135,3 +135,6 @@
 .is-editing [data-care-caption]:focus { outline: 2px solid var(--color-primary); background: #fff; }
 .mdc-toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 16px); background: rgba(20, 20, 20, 0.92); color: #fff; padding: 12px 20px; border-radius: 999px; font-weight: 600; opacity: 0; transition: opacity 0.25s, transform 0.25s; z-index: 10005; pointer-events: none; }
 .mdc-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+/* v8.8 · 올린 사람 표시 */
+.mdc-card__by { color: var(--color-text-mute, #A89685); font-weight: 500; font-size: .8em; }

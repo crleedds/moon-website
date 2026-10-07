@@ -15,8 +15,18 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 function md_care_can_edit() {
-	return is_user_logged_in() && current_user_can( 'manage_options' );
+	/* v8.8 · 총괄 관리자 · 라운지 관리자도 (moondentalmanager 는 라운지에서 쓰지 않음) */
+	if ( ! is_user_logged_in() ) { return false; }
+	return current_user_can( 'manage_options' ) || ( function_exists( 'md_sup_is_owner' ) && md_sup_is_owner() ) || ( function_exists( 'md_sup_can_manage' ) && md_sup_can_manage() );
 }
+
+/** v8.8 · Clinical Cases 는 누구나 사진을 올린다 (원장 지시) — 지우기 · 제목은 내가 올린 것만, 순서 · 영상 · 되돌리기는 관리자 */
+function md_care_open_slugs() { return array( 'cases' ); }
+function md_care_can_add( $slug ) {
+	if ( md_care_can_edit() ) { return true; }
+	return is_user_logged_in() && in_array( $slug, md_care_open_slugs(), true ) && function_exists( 'md_sup_can_use' ) && md_sup_can_use();
+}
+function md_care_item_mine( $it ) { return is_array( $it ) && ! empty( $it['by'] ) && (int) $it['by'] === get_current_user_id(); }
 
 /** 주제의 사진·영상 목록 — 옵션(편집본)이 있으면 그것, 없으면 data 파일 */
 /** 편집본 저장 파일 · uploads/care/_data/{slug}.json */
@@ -54,19 +64,22 @@ function md_care_unlink_rel( $rel ) {
 }
 
 /** 공통 · 권한·논스·주제 확인 */
-function md_care_ajax_guard() {
-	if ( ! md_care_can_edit() ) wp_send_json_error( array( 'message' => '관리자만 편집할 수 있습니다.' ), 403 );
+function md_care_ajax_guard( $need = 'edit' ) {
 	check_ajax_referer( 'md_care_edit', 'nonce' );
 	$slug = sanitize_key( $_POST['slug'] ?? '' );
 	$topics = md_care_topics();
 	if ( ! isset( $topics[ $slug ] ) ) wp_send_json_error( array( 'message' => '주제를 찾을 수 없습니다.' ), 400 );
+	$ok = 'edit' === $need ? md_care_can_edit() : md_care_can_add( $slug );
+	if ( ! $ok ) wp_send_json_error( array( 'message' => '관리자만 편집할 수 있습니다.' ), 403 );
 	return array( $slug, $topics[ $slug ] );
 }
 
 /** 업로드 · 사진(jpg/png/webp, 여러 장) 또는 영상(mp4/webm, 포스터 선택) */
 function md_care_ajax_upload() {
-	list( $slug, $t ) = md_care_ajax_guard();
+	list( $slug, $t ) = md_care_ajax_guard( 'add' );
 	$kind  = ( $_POST['kind'] ?? 'photo' ) === 'video' ? 'video' : 'photo';
+	if ( 'video' === $kind && ! md_care_can_edit() ) wp_send_json_error( array( 'message' => '영상은 관리자가 올립니다.' ), 403 );
+	$who = wp_get_current_user();
 	$items = md_care_items( $slug, $t );
 	if ( empty( $_FILES['file'] ) ) wp_send_json_error( array( 'message' => '파일이 없습니다.' ), 400 );
 	require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -92,7 +105,7 @@ function md_care_ajax_upload() {
 		$rel = $subdir . '/' . basename( $r['file'] );
 		$caption = preg_replace( '/\.[a-z0-9]+$/i', '', $orig );
 		if ( $kind === 'photo' ) {
-			$item = array( 'src' => $rel, 'caption' => $caption );
+			$item = array( 'src' => $rel, 'caption' => $caption, 'by' => (int) $who->ID, 'by_name' => '' !== trim( $who->display_name ) ? $who->display_name : $who->user_login, 'at' => current_time( 'mysql' ) );
 			// 큰 사진은 1600px 로 줄인다
 			$ed = wp_get_image_editor( $r['file'] );
 			if ( ! is_wp_error( $ed ) ) { $s = $ed->get_size(); if ( max( $s['width'], $s['height'] ) > 1600 ) { $ed->resize( 1600, 1600, false ); $ed->save( $r['file'] ); } }
@@ -122,11 +135,12 @@ add_action( 'wp_ajax_md_care_upload', 'md_care_ajax_upload' );
 
 /** 삭제 · 목록에서 빼고 파일도 지운다 */
 function md_care_ajax_delete() {
-	list( $slug, $t ) = md_care_ajax_guard();
+	list( $slug, $t ) = md_care_ajax_guard( 'add' );
 	$kind = ( $_POST['kind'] ?? 'photo' ) === 'video' ? 'videos' : 'photos';
 	$i = (int) ( $_POST['index'] ?? -1 );
 	$items = md_care_items( $slug, $t );
 	if ( ! isset( $items[ $kind ][ $i ] ) ) wp_send_json_error( array( 'message' => '항목이 없습니다.' ), 400 );
+	if ( ! md_care_can_edit() && ! md_care_item_mine( $items[ $kind ][ $i ] ) ) wp_send_json_error( array( 'message' => '내가 올린 사진만 지울 수 있습니다.' ), 403 );
 	$it = $items[ $kind ][ $i ];
 	array_splice( $items[ $kind ], $i, 1 );
 	md_care_save_items( $slug, $items );
@@ -141,11 +155,12 @@ add_action( 'wp_ajax_md_care_delete', 'md_care_ajax_delete' );
 
 /** 제목(캡션) 수정 */
 function md_care_ajax_caption() {
-	list( $slug, $t ) = md_care_ajax_guard();
+	list( $slug, $t ) = md_care_ajax_guard( 'add' );
 	$kind = ( $_POST['kind'] ?? 'photo' ) === 'video' ? 'videos' : 'photos';
 	$i = (int) ( $_POST['index'] ?? -1 ); $text = sanitize_text_field( wp_unslash( $_POST['text'] ?? '' ) );
 	$items = md_care_items( $slug, $t );
 	if ( ! isset( $items[ $kind ][ $i ] ) ) wp_send_json_error( array( 'message' => '항목이 없습니다.' ), 400 );
+	if ( ! md_care_can_edit() && ! md_care_item_mine( $items[ $kind ][ $i ] ) ) wp_send_json_error( array( 'message' => '내가 올린 사진만 고칠 수 있습니다.' ), 403 );
 	$items[ $kind ][ $i ][ $kind === 'videos' ? 'title' : 'caption' ] = $text;
 	md_care_save_items( $slug, $items );
 	wp_send_json_success( array( 'text' => $text ) );

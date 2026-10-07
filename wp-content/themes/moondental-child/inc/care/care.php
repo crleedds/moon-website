@@ -94,10 +94,11 @@ function md_care_render_topic( $slug ) {
 	$topics = md_care_topics(); $t = $topics[ $slug ];
 	$it = md_care_items( $slug, $t ); $photos = $it['photos']; $videos = $it['videos']; $embeds = (array) ( $t['embeds'] ?? array() );
 	$can_edit = md_care_can_edit(); $max_up = size_format( wp_max_upload_size() );
+	$can_add  = function_exists( 'md_care_can_add' ) ? md_care_can_add( $slug ) : $can_edit; /* v8.8 · Clinical Cases 는 누구나 사진 추가 */
 	$has_text = ! empty( $t['summary'] ) || ! empty( $t['text'] ) || ! empty( $t['steps'] ) || ! empty( $t['faq'] ) || ! empty( $t['caution'] ) || ! empty( $t['compare'] );
 	$first = $photos ? 'photos' : ( $videos ? 'videos' : ( $embeds ? 'embeds' : 'text' ) );
 	?>
-	<article class="mdc-topic" data-care-topic data-slug="<?php echo esc_attr( $slug ); ?>"<?php if ( $can_edit ) : ?> data-care-ajax="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" data-care-nonce="<?php echo esc_attr( wp_create_nonce( 'md_care_edit' ) ); ?>"<?php endif; ?>>
+	<article class="mdc-topic" data-care-topic data-slug="<?php echo esc_attr( $slug ); ?>"<?php if ( $can_add ) : ?> data-care-ajax="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" data-care-nonce="<?php echo esc_attr( wp_create_nonce( 'md_care_edit' ) ); ?>"<?php endif; ?>>
 		<header class="mdc-topic__head">
 			<a class="mdc-topic__back" href="<?php echo esc_url( md_sup_url( array( 'app' => 'care', 'topic' => '' ) ) ); ?>">← 주제 목록</a>
 			<div class="mdc-topic__row">
@@ -109,7 +110,7 @@ function md_care_render_topic( $slug ) {
 				<div class="mdc-topic__tools">
 					<?php if ( $photos || $videos ) : ?><button type="button" class="mdc-btn mdc-btn--primary" data-care-present>▶ 설명 모드</button><?php endif; ?>
 					<button type="button" class="mdc-btn" onclick="window.print()">🖨 인쇄</button>
-					<?php if ( $can_edit ) : ?><button type="button" class="mdc-btn mdc-btn--edit" data-care-edit-toggle aria-pressed="false">✏️ 편집</button><?php endif; ?>
+					<?php if ( $can_add ) : ?><button type="button" class="mdc-btn mdc-btn--edit" data-care-edit-toggle aria-pressed="false" data-label="<?php echo $can_edit ? '✏️ 편집' : '＋ 사진 추가'; ?>"><?php echo $can_edit ? '✏️ 편집' : '＋ 사진 추가'; ?></button><?php endif; ?>
 				</div>
 			</div>
 			<?php if ( $can_edit ) : ?>
@@ -117,18 +118,22 @@ function md_care_render_topic( $slug ) {
 				<span>편집 중 — 카드의 <b>✕</b>로 삭제, <b>‹ ›</b>로 순서, 제목을 눌러 고칩니다. 파일 하나 최대 <b><?php echo esc_html( $max_up ); ?></b></span>
 				<button type="button" class="mdc-btn mdc-btn--ghost" data-care-reset>원래 목록으로 되돌리기</button>
 			</div>
+			<?php elseif ( $can_add ) : ?>
+			<div class="mdc-editbar" data-care-editbar hidden>
+				<span>사진을 올려 주세요 — 내가 올린 사진은 <b>✕</b>로 지우고 제목을 눌러 고칠 수 있습니다. 파일 하나 최대 <b><?php echo esc_html( $max_up ); ?></b> · 환자 얼굴 · 이름이 보이는 사진은 올리지 마세요</span>
+			</div>
 			<?php endif; ?>
 			<nav class="mdc-tabs" aria-label="자료 종류">
-				<?php if ( $photos || $can_edit ) : ?><button type="button" class="mdc-tab" data-care-tab="photos">📷 사진 <b data-care-count="photo"><?php echo count( $photos ); ?></b></button><?php endif; ?>
+				<?php if ( $photos || $can_add ) : ?><button type="button" class="mdc-tab" data-care-tab="photos">📷 사진 <b data-care-count="photo"><?php echo count( $photos ); ?></b></button><?php endif; ?>
 				<?php if ( $videos || $can_edit ) : ?><button type="button" class="mdc-tab" data-care-tab="videos">🎬 영상 <b data-care-count="video"><?php echo count( $videos ); ?></b></button><?php endif; ?>
 				<?php if ( $embeds ) : ?><button type="button" class="mdc-tab" data-care-tab="embeds">📊 자료 <b><?php echo count( $embeds ); ?></b></button><?php endif; ?>
 				<?php if ( $has_text ) : ?><button type="button" class="mdc-tab" data-care-tab="text">📝 설명</button><?php endif; ?>
 			</nav>
 		</header>
 
-		<?php if ( $photos || $can_edit ) : ?>
+		<?php if ( $photos || $can_add ) : ?>
 		<section class="mdc-pane" data-care-pane="photos">
-			<?php if ( $can_edit ) : ?>
+			<?php if ( $can_add ) : ?>
 			<label class="mdc-drop" data-care-drop="photo" hidden>
 				<input type="file" accept="image/jpeg,image/png,image/webp" multiple data-care-file="photo">
 				<span class="mdc-drop__icon">📷</span><span class="mdc-drop__text"><b>사진 추가</b> — 여기를 누르거나 파일을 끌어다 놓으세요 (JPG·PNG, 여러 장 가능)</span>
@@ -136,11 +141,12 @@ function md_care_render_topic( $slug ) {
 			</label>
 			<?php endif; ?>
 			<div class="mdc-grid" data-care-grid="photo">
-				<?php foreach ( $photos as $i => $p ) : $src = md_care_media_url( $p['src'] ); $cap = $p['caption'] ?? ''; ?>
-					<figure class="mdc-card" data-care-item="photo" data-index="<?php echo (int) $i; ?>" data-src="<?php echo esc_url( $src ); ?>" data-caption="<?php echo esc_attr( $cap ); ?>">
+				<?php foreach ( $photos as $i => $p ) : $src = md_care_media_url( $p['src'] ); $cap = $p['caption'] ?? ''; $mine = $can_edit || ( function_exists( 'md_care_item_mine' ) && md_care_item_mine( $p ) ); ?>
+					<figure class="mdc-card" data-care-item="photo" data-index="<?php echo (int) $i; ?>" data-src="<?php echo esc_url( $src ); ?>" data-caption="<?php echo esc_attr( $cap ); ?>"<?php echo $mine ? ' data-care-can' : ''; ?>>
 						<a href="<?php echo esc_url( $src ); ?>" data-care-zoom="<?php echo (int) $i; ?>"><img src="<?php echo esc_url( $src ); ?>" alt="<?php echo esc_attr( $cap ); ?>" loading="lazy"></a>
-						<figcaption data-care-caption><?php echo esc_html( $cap ); ?></figcaption>
-						<?php if ( $can_edit ) : ?><span class="mdc-card__tools"><button type="button" data-care-move="-1" title="앞으로">‹</button><button type="button" data-care-move="1" title="뒤로">›</button><button type="button" class="mdc-card__del" data-care-del title="삭제">✕</button></span><?php endif; ?>
+						<figcaption data-care-caption><?php echo esc_html( $cap ); ?><?php if ( ! empty( $p['by_name'] ) ) : ?><small class="mdc-card__by"> · <?php echo esc_html( $p['by_name'] ); ?></small><?php endif; ?></figcaption>
+						<?php if ( $can_edit ) : ?><span class="mdc-card__tools"><button type="button" data-care-move="-1" title="앞으로">‹</button><button type="button" data-care-move="1" title="뒤로">›</button><button type="button" class="mdc-card__del" data-care-del title="삭제">✕</button></span>
+						<?php elseif ( $mine ) : ?><span class="mdc-card__tools"><button type="button" class="mdc-card__del" data-care-del title="내가 올린 사진 지우기">✕</button></span><?php endif; ?>
 					</figure>
 				<?php endforeach; ?>
 			</div>

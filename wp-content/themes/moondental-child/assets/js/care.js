@@ -115,10 +115,11 @@
   function setEditing(on) {
     editing = on;
     topic.classList.toggle('is-editing', on);
-    if (toggle) { toggle.setAttribute('aria-pressed', on ? 'true' : 'false'); toggle.textContent = on ? '✓ 편집 끝' : '✏️ 편집'; }
+    if (toggle) { toggle.setAttribute('aria-pressed', on ? 'true' : 'false'); toggle.textContent = on ? '✓ 끝' : (toggle.getAttribute('data-label') || '✏️ 편집'); }
     if (bar) bar.hidden = !on;
     topic.querySelectorAll('[data-care-drop]').forEach(function (d) { d.hidden = !on; });
-    topic.querySelectorAll('[data-care-caption]').forEach(function (c) { c.contentEditable = on ? 'true' : 'false'; });
+    /* v8.8 · 제목은 고칠 수 있는 카드(관리자 · 내가 올린 사진)만 */
+    topic.querySelectorAll('[data-care-caption]').forEach(function (c) { var card = c.closest('[data-care-item]'); c.contentEditable = on && (!card || card.hasAttribute('data-care-can') || card.getAttribute('data-care-item') === 'video') ? 'true' : 'false'; });
   }
   if (toggle) toggle.addEventListener('click', function () { setEditing(!editing); });
 

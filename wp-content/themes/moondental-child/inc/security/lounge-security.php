@@ -226,7 +226,7 @@ function md_sec_send_code() {
 	$hist[] = $now;
 	update_user_meta( $u->ID, 'md_sec_otp', array( 'hash' => wp_hash_password( $code ), 'exp' => $now + 10 * MINUTE_IN_SECONDS, 'tries' => 0, 'sent' => $now, 'hist' => $hist ) );
 	$ok = wp_mail( $u->user_email, '[문치과병원] 직원 라운지 인증 코드 ' . $code,
-		"직원 라운지 인증 코드: " . $code . "\n\n10분 안에 화면에 넣어 주세요.\n기기: " . md_sec_device_label() . ' · ' . md_sec_ip() . "\n\n본인이 요청하지 않았다면 이 메일은 무시하고 라운지 관리자에게 알려 주세요.\n— 한아의료재단 문치과병원" );
+		"직원 라운지 인증 코드: " . $code . "\n\n10분 안에 화면에 넣어 주세요.\n기기: " . md_sec_device_label() . ' · ' . md_sec_ip() . "\n\n본인이 요청하지 않았다면 이 메일은 무시하고 경영지원실로 알려 주세요.\n— 한아의료재단 문치과병원" );
 	return $ok ? true : new WP_Error( 'send', '메일을 보내지 못했습니다. 잠시 뒤에 다시 해 주세요.' );
 }
 
@@ -630,11 +630,11 @@ add_action( 'wp_enqueue_scripts', 'md_sec_enqueue', 42 );
 
 /* v8.3 · 직원공용 계정 이메일 (원장 지시 2026-10-07) — 한 번만 */
 add_action( 'init', function () {
-	if ( get_option( 'md_sec_staffmail_v1' ) || ! defined( 'MD_SUP_STAFF_LOGIN' ) ) { return; }
+	if ( get_option( 'md_sec_staffmail_v2' ) || ! defined( 'MD_SUP_STAFF_LOGIN' ) ) { return; }
 	$u = get_user_by( 'login', MD_SUP_STAFF_LOGIN );
 	if ( ! $u ) { return; }
-	$mail = 'moondentalhospital@gmail.com';
+	$mail = 'moondental1995@naver.com'; /* v8.8 · 원장 지시로 바꿈 (전: moondentalhospital@gmail.com) */
 	$other = email_exists( $mail );
 	if ( ! $other || (int) $other === (int) $u->ID ) { wp_update_user( array( 'ID' => $u->ID, 'user_email' => $mail ) ); }
-	update_option( 'md_sec_staffmail_v1', $other && (int) $other !== (int) $u->ID ? 'taken #' . $other : 'done', false );
+	update_option( 'md_sec_staffmail_v2', $other && (int) $other !== (int) $u->ID ? 'taken #' . $other : 'done', false );
 }, 30 );
