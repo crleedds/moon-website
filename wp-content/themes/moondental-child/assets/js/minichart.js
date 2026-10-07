@@ -254,3 +254,15 @@
   ta.form.addEventListener('submit', function () { ta.form.dataset.sending = '1'; });
   grow();
 })();
+
+/* v8.7 · 덴트웹 진료기록 한 줄 고치기 — ✎ 누르면 그 자리에 고치는 칸 */
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('[data-mc-dwedit]');
+  if (b) {
+    var li = b.closest('li'), f = li && li.querySelector('.mc-tl__edit');
+    if (f) { f.hidden = false; var t = f.querySelector('textarea'); t.focus(); t.setSelectionRange(t.value.length, t.value.length); }
+    return;
+  }
+  var c = e.target.closest && e.target.closest('[data-mc-dwedit-cancel]');
+  if (c) { c.closest('.mc-tl__edit').hidden = true; }
+});

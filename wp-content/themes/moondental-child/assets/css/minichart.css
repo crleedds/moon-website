@@ -314,3 +314,15 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
 .mc-plan textarea:focus { outline: none; border: 1px solid var(--color-primary, #D88062); background: #fff; }
 .mc-plan__bar { display: flex; gap: 8px; margin-top: 8px; }
 .mc-plan__bar[hidden] { display: none; }
+
+/* v8.7 · 덴트웹 진료기록 고치기 · 지우기 */
+.mc-tl__acts { display: inline-flex; gap: 2px; margin-left: 4px; opacity: .35; vertical-align: middle; }
+.mc-tl li:hover .mc-tl__acts, .mc-tl__acts:focus-within { opacity: 1; }
+@media (hover: none) { .mc-tl__acts { opacity: .7; } }
+.mc-tl__btn { border: 0; background: none; padding: 2px 6px; cursor: pointer; font-size: .85rem; color: var(--color-text-sub, #7A6B5F); border-radius: 6px; min-height: 28px; }
+.mc-tl__btn:hover { background: var(--color-surface, #FBF2E8); }
+.mc-tl__edit { display: flex; flex-direction: column; gap: 6px; margin: 4px 0; }
+.mc-tl__edit[hidden] { display: none; }
+.mc-tl__edit textarea { width: 100%; font: inherit; padding: 6px 8px; border: 1px solid var(--color-primary, #D88062); border-radius: 8px; }
+.mc-tl__hidden { margin: 8px 0 0; font-size: .82rem; color: var(--color-text-mute, #A89685); }
+.mc-linkbtn { border: 0; background: none; padding: 0; color: var(--color-primary-dark, #B86347); text-decoration: underline; cursor: pointer; font: inherit; }

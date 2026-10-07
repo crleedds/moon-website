@@ -26,7 +26,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_MC_SCHEMA', 3 ); /* v6.4 · 2 = 팀 노트 고정 해제 · v6.5 · 3 = 최근 본 시각 · 최근 내원일 열 (원장 지시) */
+define( 'MD_MC_SCHEMA', 4 ); /* v6.4 · 2 = 팀 노트 고정 해제 · v6.5 · 3 = 최근 본 시각 · 최근 내원일 열 · v8.7 · 4 = 덴트웹 진료기록 숨김 · 고침 (dw_hide) */
 
 /* ============================================================
  * 테이블
@@ -114,6 +114,7 @@ function md_mc_maybe_install() {
 		deleted_at DATETIME NULL,
 		viewed_at DATETIME NULL,
 		last_visit DATE NULL,
+		dw_hide TEXT NULL,
 		PRIMARY KEY  (id),
 		KEY kind (kind),
 		KEY chart_no (chart_no),
@@ -796,6 +797,25 @@ function md_mc_handle_post() {
 			$rec   = md_mc_get( $id );
 			$view  = $rec && 'note' === $rec->kind ? 'note' : 'p';
 			$back  = is_wp_error( $res ) ? $err( $res->get_error_message(), array( 'mv' => $view, 'mid' => $id ) ) : md_mc_url( array( 'mv' => $view, 'mid' => $id ) ) . '#f-' . $field;
+			break;
+
+		case 'dwhide':   /* v8.7 · 덴트웹에서 온 진료기록 한 줄 — 미니차트에서만 지움(숨김) */
+		case 'dwedit':   /* v8.7 · 고침 = 그 줄은 숨기고 고친 내용을 직접 적은 기록으로 */
+		case 'dwunhide': /* v8.7 · 숨긴 덴트웹 기록 모두 다시 보이기 */
+			$cur = md_mc_get( $id );
+			if ( ! $cur || 'patient' !== $cur->kind ) { $back = md_mc_url(); break; }
+			$hide = json_decode( (string) $cur->dw_hide, true );
+			$hide = is_array( $hide ) ? $hide : array();
+			$key  = sanitize_text_field( (string) ( $post['dwkey'] ?? '' ) );
+			if ( 'dwunhide' === $action ) { $hide = array(); }
+			elseif ( preg_match( '/^\d{4}-\d{2}-\d{2}:[0-9a-f]{8}$/', $key ) ) { $hide[ $key ] = current_time( 'mysql' ); }
+			global $wpdb;
+			$wpdb->update( md_mc_t(), array( 'dw_hide' => $hide ? wp_json_encode( $hide ) : null, 'rev' => (int) $cur->rev + 1, 'updated_at' => current_time( 'mysql' ), 'updated_by' => md_mc_me() ), array( 'id' => (int) $id ) );
+			md_mc_log( $id, 'edit', $cur );
+			if ( 'dwedit' === $action && '' !== trim( (string) ( $post['text'] ?? '' ) ) ) {
+				md_mc_add_line( $id, 'tx_hist', $post['text'], substr( $key, 0, 10 ) );
+			}
+			$back = md_mc_url( array( 'mv' => 'p', 'mid' => $id ) ) . '#f-tx_hist';
 			break;
 
 		case 'plan': /* v8.6 · 차트 화면에서 치료계획만 바로 고치기 */

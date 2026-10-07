@@ -245,8 +245,15 @@ function md_mc_dw_age( $birth ) {
 /** v8.1 · 진료기록 — 덴트웹 진료비 내역의 치료내용 + 미니차트에 직접 적은 「YYMMDD: …」 를 날짜별로 합친다 */
 function md_mc_dw_timeline( $r, $d ) {
 	$rows = array();
+	$hide = json_decode( (string) ( $r->dw_hide ?? '' ), true );
+	$hide = is_array( $hide ) ? $hide : array();
+	$nhid = 0;
 	if ( $d && ! empty( $d['visits'] ) ) {
-		foreach ( $d['visits'] as $v ) { $rows[ $v['d'] ] = array( 'dr' => $v['dr'], 'dw' => $v['tx'], 'own' => array() ); }
+		foreach ( $d['visits'] as $v ) {
+			$k = $v['d'] . ':' . substr( md5( (string) $v['tx'] ), 0, 8 ); /* v8.7 · 미니차트에서 지우거나 고친 덴트웹 줄은 숨김 */
+			if ( isset( $hide[ $k ] ) ) { $nhid++; continue; }
+			$rows[ $v['d'] ] = array( 'dr' => $v['dr'], 'dw' => $v['tx'], 'dwk' => $k, 'own' => array() );
+		}
 	}
 	$undated = array(); $cur = null;
 	foreach ( preg_split( '/\r\n|\r|\n/', (string) $r->tx_hist ) as $ln ) {
@@ -266,12 +273,21 @@ function md_mc_dw_timeline( $r, $d ) {
 	foreach ( $rows as $date => $x ) {
 		if ( 10 === $i ) { $h .= '</ol><details class="mc-tl__more"><summary>이전 기록 ' . ( $n - 10 ) . '건 더 보기</summary><ol class="mc-tl">'; }
 		$h .= '<li><span class="mc-tl__d">' . esc_html( substr( str_replace( '-', '.', $date ), 2 ) ) . '</span><span class="mc-tl__dr">' . esc_html( $x['dr'] ) . '</span><span class="mc-tl__tx">';
-		if ( '' !== $x['dw'] ) { $h .= '<span class="mc-tl__dw">' . esc_html( $x['dw'] ) . '</span>'; }
+		if ( '' !== $x['dw'] ) {
+			$nf = function ( $act ) use ( $r ) { return '<input type="hidden" name="md_mc_action" value="' . $act . '"><input type="hidden" name="md_mc_nonce" value="' . esc_attr( wp_create_nonce( 'md_mc_' . $act ) ) . '"><input type="hidden" name="mid" value="' . (int) $r->id . '">'; };
+			$h .= '<span class="mc-tl__dw">' . esc_html( $x['dw'] )
+				. ' <span class="mc-tl__acts"><button type="button" class="mc-tl__btn" data-mc-dwedit title="이 줄 고치기">✎</button>'
+				. '<form method="post" class="mc-inline" action="' . esc_url( md_mc_url() ) . '" onsubmit="return confirm(\'이 덴트웹 진료기록을 미니차트에서 지울까요? (덴트웹 원본은 그대로)\');">' . $nf( 'dwhide' ) . '<input type="hidden" name="dwkey" value="' . esc_attr( $x['dwk'] ) . '"><button class="mc-tl__btn" title="이 줄 지우기">✕</button></form></span></span>'
+				. '<form method="post" class="mc-tl__edit" action="' . esc_url( md_mc_url() ) . '" hidden>' . $nf( 'dwedit' ) . '<input type="hidden" name="dwkey" value="' . esc_attr( $x['dwk'] ) . '"><textarea name="text" rows="2">' . esc_textarea( $x['dw'] ) . '</textarea><span><button class="mds-btn mds-btn--fill">저장</button> <button type="button" class="mds-btn mds-btn--ghost" data-mc-dwedit-cancel>취소</button></span></form>';
+		}
 		foreach ( $x['own'] as $o ) { $h .= '<span class="mc-tl__own" title="미니차트에 직접 적은 기록">✎ ' . esc_html( $o ) . '</span>'; }
 		$h .= '</span></li>';
 		$i++;
 	}
 	$h .= '</ol>' . ( $n > 10 ? '</details>' : '' );
+	if ( $nhid ) {
+		$h .= '<form method="post" class="mc-tl__hidden" action="' . esc_url( md_mc_url() ) . '"><input type="hidden" name="md_mc_action" value="dwunhide"><input type="hidden" name="md_mc_nonce" value="' . esc_attr( wp_create_nonce( 'md_mc_dwunhide' ) ) . '"><input type="hidden" name="mid" value="' . (int) $r->id . '">숨긴 덴트웹 기록 ' . $nhid . '건 · <button class="mc-linkbtn">다시 보이기</button></form>';
+	}
 	if ( $undated ) { $h .= '<p class="mc-tl__undated"><b>날짜 없는 기록</b><br>' . implode( '<br>', array_map( 'esc_html', $undated ) ) . '</p>'; }
 	if ( ! $n && ! $undated ) { $h = '<p class="mc-none">아직 진료기록이 없습니다.</p>'; }
 	return $h;
