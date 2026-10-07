@@ -362,3 +362,8 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
 .mc-install__x { position: absolute; top: 6px; right: 6px; width: 34px; height: 34px; border: 0; background: none; color: var(--mc-sub); font-size: 1.4rem; line-height: 1; cursor: pointer; border-radius: 50%; }
 .mc-install__x:hover { background: rgba(0,0,0,.06); }
 @media print { .mc-install { display: none !important; } }
+
+/* v10.3 · 차트 받아 오는 동안 위에 얇은 막대 */
+html.mc-loading { cursor: progress; }
+html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top: 0; left: 0; height: 3px; width: 100%; background: linear-gradient(90deg, transparent, var(--color-primary, #D88062), transparent); background-size: 50% 100%; background-repeat: no-repeat; animation: mc-load 0.9s linear infinite; }
+@keyframes mc-load { from { background-position: -50% 0; } to { background-position: 150% 0; } }

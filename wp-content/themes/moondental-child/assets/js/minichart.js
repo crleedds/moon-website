@@ -1,5 +1,8 @@
-/* 직원 라운지 · 미니차트 (v6.2 · v6.8) — 없어도 화면은 모두 동작한다. 바로 찾기 · 더 보기 · 칸 늘리기 · 복사 · 담당의 확인 */
-(function () {
+/* 직원 라운지 · 미니차트 (v6.2 · v6.8) — 없어도 화면은 모두 동작한다. 바로 찾기 · 더 보기 · 칸 늘리기 · 복사 · 담당의 확인
+   v10.3 · 화면마다 붙이는 코드는 window.mcInits 에 넣는다 — 목록 ↔ 차트를 페이지를 다시 불러오지 않고 바꿀 때(맨 아래) 다시 돌린다 */
+window.mcInits = window.mcInits || [];
+window.mcGo = window.mcGo || function (url) { location.href = url; };
+window.mcInits.push(function () {
   'use strict';
   var PAGE = 60;
 
@@ -37,19 +40,23 @@
       q.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' || !norm(q.value) || norm(q.value) === norm(serverQ)) { return; }
         var vis = items.filter(function (li) { return !li.classList.contains('is-hidden'); });
-        if (vis.length === 1) { e.preventDefault(); location.href = vis[0].querySelector('a').href; }
+        if (vis.length === 1) { e.preventDefault(); window.mcGo(vis[0].querySelector('a').href); }
       });
     }
     if (moreBtn) { moreBtn.addEventListener('click', function () { shown += 100; apply(); }); }
     apply();
   }
 
-  /* 「/」 키 → 찾기 칸 */
-  document.addEventListener('keydown', function (e) {
-    if (e.key === '/' && q && document.activeElement !== q && !/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName)) {
-      e.preventDefault(); q.focus(); q.select();
-    }
-  });
+  /* 「/」 키 → 찾기 칸 (한 번만 걸고, 그때그때 화면의 찾기 칸) */
+  if (!window.mcSlashKey) {
+    window.mcSlashKey = true;
+    document.addEventListener('keydown', function (e) {
+      var qq = document.getElementById('mc-q');
+      if (e.key === '/' && qq && document.activeElement !== qq && !/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName)) {
+        e.preventDefault(); qq.focus(); qq.select();
+      }
+    });
+  }
 
   /* 글 칸은 내용만큼 늘어난다 */
   var grow = function (t) { t.style.height = 'auto'; t.style.height = (t.scrollHeight + 4) + 'px'; };
@@ -120,7 +127,7 @@
     var sync = function () { t.disabled = c.checked; if (!c.checked) { t.focus(); } };
     c.addEventListener('change', sync);
   });
-})();
+});
 
 /* v8.1 · 새 환자 — 차트번호만 넣으면 덴트웹에서 성명 · 지역 · 담당의를 채우고 연락처 · 주소 · 성별 · 나이를 보여 준다.
    아직 받아 둔 게 없으면 병원 PC 가 1분 안에 찾아 온다 (5초마다 다시 물음). 번호를 바꾸면 자동으로 채운 값(손대지 않은 것)만 지운다. */
@@ -241,7 +248,7 @@
 })();
 
 /* v8.6 · 치료계획 — 차트 화면에서 바로 고치고, 바뀌면 「저장 · 되돌리기」가 나타남 */
-(function () {
+window.mcInits.push(function () {
   'use strict';
   var ta = document.querySelector('textarea[data-mc-plan]');
   if (!ta) return;
@@ -250,10 +257,12 @@
   ta.addEventListener('input', function () { bar.hidden = ta.value === orig; grow(); });
   ta.form.querySelector('[data-mc-plan-undo]').addEventListener('click', function () { ta.value = orig; bar.hidden = true; grow(); });
   ta.addEventListener('keydown', function (e) { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); if (ta.form.requestSubmit) ta.form.requestSubmit(); else ta.form.submit(); } });
-  window.addEventListener('beforeunload', function (e) { if (ta.value !== orig && !ta.form.dataset.sending) { e.preventDefault(); e.returnValue = ''; } });
+  /* v10.3 · 지금 화면의 치료계획만 본다 (다른 차트로 바꾼 뒤 남은 옛 칸은 무시) */
+  window.addEventListener('beforeunload', function (e) { if (document.contains(ta) && ta.value !== orig && !ta.form.dataset.sending) { e.preventDefault(); e.returnValue = ''; } });
+  ta.mcDirty = function () { return ta.value !== orig && !ta.form.dataset.sending; };
   ta.form.addEventListener('mc:plan-saved', function () { orig = ta.value; bar.hidden = true; });
   grow();
-})();
+});
 
 /* v8.7 · 덴트웹 진료기록 한 줄 고치기 — ✎ 누르면 그 자리에 고치는 칸 */
 document.addEventListener('click', function (e) {
@@ -354,7 +363,7 @@ document.addEventListener('click', function (e) {
 
 /* v9.8 · 차트를 보다가 다른 환자 찾기 — 치는 대로 아래에 12명까지, ↑↓ 로 고르고 Enter 로 열기.
    고른 게 없으면 Enter 는 목록에서 찾기(내용까지). Esc 는 닫기 */
-(function () {
+window.mcInits.push(function () {
   'use strict';
   var box = document.querySelector('[data-mc-jump]');
   if (!box) return;
@@ -408,16 +417,16 @@ document.addEventListener('click', function (e) {
       sel = e.key === 'ArrowDown' ? Math.min(rows.length - 1, sel + 1) : Math.max(-1, sel - 1);
       mark();
     } else if (e.key === 'Enter') {
-      if (sel >= 0 && rows[sel] && !ul.hidden) { e.preventDefault(); location.href = rows[sel].url; }
+      if (sel >= 0 && rows[sel] && !ul.hidden) { e.preventDefault(); window.mcGo(rows[sel].url); }
     } else if (e.key === 'Escape') {
       close();
     }
   });
-  document.addEventListener('click', function (e) { if (!box.contains(e.target)) close(); });
-})();
+  document.addEventListener('click', function (e) { if (document.contains(box) && !box.contains(e.target)) close(); });
+});
 
 /* v10.0 · 홈 화면에 「미니차트」 아이콘 — 브라우저가 설치를 받아 주면 버튼, 아니면 휴대폰별 안내. 앱으로 열었거나 ✕ 로 닫았으면 숨김 */
-(function () {
+window.mcInits.push(function () {
   'use strict';
   var box = document.getElementById('mc-install');
   if (!box) return;
@@ -445,5 +454,119 @@ document.addEventListener('click', function (e) {
   window.addEventListener('appinstalled', function () { box.hidden = true; });
   document.getElementById('mc-install-x').addEventListener('click', function () {
     box.hidden = true; try { localStorage.setItem(KEY, '1'); } catch (e) {}
+  });
+});
+
+/* v10.3 · 목록 ↔ 차트를 페이지를 다시 불러오지 않고 바꾼다 (원장 「미니차트가 너무 느려」).
+   운영 서버는 화면 하나에 서버만 0.7초 — 목록으로 돌아올 때는 들고 있던 목록을 그대로(스크롤 위치까지) 다시 붙이고,
+   차트는 손가락 · 마우스를 누르는 순간 받아 오기 시작해 그 부분(.mc)만 바꾼다. 안 되면 예전처럼 페이지 이동. */
+(function () {
+  'use strict';
+  var runAll = function () { window.mcInits.forEach(function (f) { try { f(); } catch (er) { if (window.console) console.error(er); } }); };
+  var first = document.querySelector('.mc');
+  runAll();
+  if (!first || !window.fetch || !window.DOMParser || !history.pushState || !window.URL) return;
+  first.mcReady = true;
+
+  var cache = {}, pending = {};
+  function u(h) { try { return new URL(h, location.href); } catch (e) { return null; } }
+  function key(x) { return x.pathname + x.search; }
+  /* 주소의 한글 경로는 %EC · %ec 가 섞여 나오므로 풀어서 비교 */
+  function path(p) { try { return decodeURIComponent(p); } catch (e) { return p; } }
+  function ours(x) { return x && x.origin === location.origin && path(x.pathname) === path(location.pathname) && x.searchParams.get('app') === 'minichart'; }
+  function isChart(x) { return ours(x) && x.searchParams.get('mv') === 'p' && !!x.searchParams.get('mid'); }
+  function isList(x) { return ours(x) && !x.searchParams.get('mv') && !x.searchParams.get('mid'); }
+  function dirty() {
+    var ta = document.querySelector('textarea[data-mc-plan]');
+    if (ta && ta.mcDirty && ta.mcDirty()) return true;
+    return Array.prototype.some.call(document.querySelectorAll('.mc .mc-add__text, .mc .mc-tl__edit:not([hidden]) textarea'), function (t) { return t.value.trim() !== '' && t.value !== t.defaultValue; });
+  }
+  function load(x) {
+    var k = key(x);
+    if (!pending[k]) {
+      pending[k] = fetch(x.toString(), { credentials: 'same-origin', headers: { 'X-MD-MC-Nav': '1' } })
+        .then(function (r) { if (!r.ok || !ours(u(r.url))) throw new Error('nav'); return r.text(); })
+        .then(function (t) {
+          var d = new DOMParser().parseFromString(t, 'text/html');
+          var mc = d.querySelector('.mc');
+          if (!mc) throw new Error('nav');
+          return { mc: mc, title: d.title };
+        });
+      pending[k].catch(function () {}).then(function () { setTimeout(function () { delete pending[k]; }, 3000); });
+    }
+    return pending[k];
+  }
+  function busy(on) { document.documentElement.classList.toggle('mc-loading', !!on); }
+  /* 지금 붙어 있는 화면의 주소 — 뒤로 가기에서는 location 이 먼저 바뀌므로 따로 들고 있는다 */
+  var shown = u(location.href), seq = 0;
+  function swap(node, title, y, to) {
+    var cur = document.querySelector('.mc');
+    if (!cur) return false;
+    if (isList(shown)) { cache[key(shown)] = { node: cur, y: window.pageYOffset, title: document.title }; }
+    cur.replaceWith(node);
+    shown = to;
+    if (title) document.title = title;
+    if (!node.mcReady) { node.mcReady = true; runAll(); }
+    window.scrollTo(0, y || 0);
+    return true;
+  }
+  /* 목록으로 돌아왔을 때 — 「최근 본 순」이면 방금 본 환자를 고정 아래 맨 위로 */
+  function bump(listNode, mid, x) {
+    if (!mid || x.searchParams.get('ms')) return;
+    var a = listNode.querySelector('#mc-list a.mc-row[href*="mid=' + mid + '&"], #mc-list a.mc-row[href$="mid=' + mid + '"]');
+    var li = a && a.closest('li');
+    if (!li || li.querySelector('.mc-row__pin')) return;
+    var ul = li.parentNode, pins = ul.querySelectorAll('li .mc-row__pin'), after = pins.length ? pins[pins.length - 1].closest('li') : null;
+    ul.insertBefore(li, after ? after.nextSibling : ul.firstChild);
+  }
+  var lastMid = '';
+  function go(x, push) {
+    var k = key(x), my = ++seq;
+    if (isList(x) && cache[k]) {
+      var c = cache[k]; delete cache[k];
+      bump(c.node, lastMid, x);
+      swap(c.node, c.title, c.y, x);
+      if (push) history.pushState({ mc: 1 }, '', x.toString());
+      return;
+    }
+    busy(true);
+    load(x).then(function (res) {
+      if (my !== seq) return; /* 그 사이 다른 화면으로 갔다 */
+      busy(false);
+      if (isChart(x)) lastMid = x.searchParams.get('mid');
+      swap(document.importNode(res.mc, true), res.title, 0, x);
+      if (push) history.pushState({ mc: 1 }, '', x.toString());
+    }).catch(function () { if (my === seq) { busy(false); location.href = x.toString(); } });
+  }
+  window.mcGo = function (h) {
+    var x = u(h);
+    if (!(isChart(x) || isList(x))) { location.href = h; return; }
+    if (dirty() && !window.confirm('저장하지 않은 내용이 있습니다. 이 화면을 떠날까요?')) return;
+    go(x, true);
+  };
+  history.replaceState({ mc: 1 }, '', location.href);
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+  function linkOf(e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a || !a.closest('.mc') || a.target || a.hasAttribute('download')) return null;
+    var x = u(a.getAttribute('href'));
+    return (isChart(x) || isList(x)) ? x : null;
+  }
+  /* 누르는 순간 미리 받기 (차트만 — 마우스를 올리기만 한 환자를 「봤다」고 남기지 않도록) */
+  /* 휴대폰은 목록을 밀어 올리려고 닿기만 해도 pointerdown 이 오므로 마우스 · 펜만 */
+  var early = function (e) { if (e.button > 0 || e.pointerType === 'touch') return; var x = linkOf(e); if (x && isChart(x)) load(x); };
+  document.addEventListener('pointerdown', early, true);
+  document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var x = linkOf(e);
+    if (!x) return;
+    e.preventDefault();
+    window.mcGo(x.toString());
+  });
+  window.addEventListener('popstate', function (e) {
+    if (!e.state || !e.state.mc) return;
+    var x = u(location.href);
+    if (isChart(x) || isList(x)) go(x, false); else location.reload();
   });
 })();
