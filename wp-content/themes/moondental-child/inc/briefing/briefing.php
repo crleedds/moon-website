@@ -105,7 +105,7 @@ function md_brief_receive( $request ) {
 	$lists = isset( $b['lists'] ) && is_array( $b['lists'] ) ? $b['lists'] : array();
 	unset( $b['lists'] );
 	$clean = array();
-	foreach ( array( 'dropout', 'recall', 'noshow' ) as $k ) {
+	foreach ( array( 'dropout', 'recall', 'noshow', 'confirm' ) as $k ) { /* v9.9 · confirm = 오늘 확인 전화 */
 		$clean[ $k ] = array();
 		foreach ( (array) ( $lists[ $k ] ?? array() ) as $r ) {
 			if ( ! is_array( $r ) ) { continue; }
@@ -116,9 +116,25 @@ function md_brief_receive( $request ) {
 	}
 	update_option( 'md_brief_lists', array( 'date' => $d, 'at' => current_time( 'mysql' ) ) + $clean, false );
 
+	/* v9.9 · 리콜 성과 (「연락함」 환자의 예약 · 내원) — 키별로 덮어씀 */
+	if ( isset( $b['mark_results'] ) && is_array( $b['mark_results'] ) ) {
+		$res = (array) get_option( 'md_brief_mark_res', array() );
+		foreach ( $b['mark_results'] as $mr ) {
+			if ( ! is_array( $mr ) || empty( $mr['k'] ) ) { continue; }
+			$res[ mb_substr( sanitize_text_field( (string) $mr['k'] ), 0, 120 ) ] = array( 'came' => preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) ( $mr['came'] ?? '' ) ) ? $mr['came'] : '', 'booked' => preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) ( $mr['booked'] ?? '' ) ) ? $mr['booked'] : '', 'at' => $d );
+		}
+		$marks = (array) get_option( 'md_brief_marks', array() );
+		foreach ( array_keys( $res ) as $rk ) { if ( ! isset( $marks[ $rk ] ) && ( $res[ $rk ]['at'] ?? '' ) < date( 'Y-m-d', strtotime( $d . ' -120 days' ) ) ) { unset( $res[ $rk ] ); } }
+		update_option( 'md_brief_mark_res', $res, false );
+	}
+	unset( $b['mark_results'] );
+	/* v9.9 · 진료시간 · 체어 설정 표 구조 (빈 예약 시간 준비 · 환자 정보 아님) */
+	if ( isset( $b['schema'] ) ) { update_option( 'md_brief_schema', array( 'at' => current_time( 'mysql' ), 'data' => $b['schema'] ), false ); }
+	unset( $b['schema'] );
+
 	$t   = md_brief_table();
 	$old = $wpdb->get_row( $wpdb->prepare( "SELECT mailed_at FROM $t WHERE d = %s", $d ) );
-	$b['counts'] = array( 'dropout' => count( $clean['dropout'] ), 'recall' => count( $clean['recall'] ), 'noshow' => count( $clean['noshow'] ) );
+	$b['counts'] = array( 'dropout' => count( $clean['dropout'] ), 'recall' => count( $clean['recall'] ), 'noshow' => count( $clean['noshow'] ), 'confirm' => count( $clean['confirm'] ) );
 	$wpdb->replace( $t, array( 'd' => $d, 'data' => wp_json_encode( $b, JSON_UNESCAPED_UNICODE ), 'made_at' => current_time( 'mysql' ), 'mailed_at' => $old ? $old->mailed_at : null ) );
 
 	/* 메일은 서버 PC 가 「send」를 붙였을 때만 — brief.ps1 이 하루 한 번(휴진일 포함) 붙인다 (원장 지시) */
@@ -126,6 +142,7 @@ function md_brief_receive( $request ) {
 	if ( ! empty( $b['send'] ) ) {
 		$mailed = md_brief_send( $d );
 		if ( $mailed ) { $wpdb->update( $t, array( 'mailed_at' => current_time( 'mysql' ) ), array( 'd' => $d ) ); }
+		md_brief_period_mails( $b ); /* v9.9 · 월요일 주간 · 1일 월간 요약 */
 	}
 	return rest_ensure_response( array( 'saved' => $d, 'mailed' => $mailed ) );
 }
@@ -135,6 +152,20 @@ add_action( 'rest_api_init', function () {
 		'methods'             => 'POST',
 		'callback'            => 'md_brief_receive',
 		'permission_callback' => 'md_brief_permission',
+	) );
+	/* v9.9 · 서버 PC 가 「연락함」 표시를 받아 가서 그 뒤 예약 · 내원을 찾아 준다 (차트번호 · 날짜만) */
+	register_rest_route( 'md-brief/v1', '/marks', array(
+		'methods'             => 'GET',
+		'permission_callback' => 'md_brief_permission',
+		'callback'            => function () {
+			$out = array(); $cut = date( 'Y-m-d', current_time( 'timestamp' ) - 90 * DAY_IN_SECONDS );
+			foreach ( (array) get_option( 'md_brief_marks', array() ) as $k => $v ) {
+				$parts = explode( '|', (string) $k );
+				if ( count( $parts ) < 2 || ( $v['d'] ?? '' ) < $cut ) { continue; }
+				$out[] = array( 'k' => (string) $k, 'tab' => $parts[0], 'chart' => $parts[1], 'd' => (string) $v['d'] );
+			}
+			return rest_ensure_response( array( 'marks' => $out ) );
+		},
 	) );
 } );
 
@@ -217,8 +248,30 @@ function md_brief_html( $x, $mail = false ) {
 			. esc_html( implode( ' · ', array_map( function ( $r ) { return $r['key'] . ' ' . $r['rate'] . '%'; }, array_slice( $ns['by_doctor'], 0, 10 ) ) ) ) . '</p>';
 	}
 
+	/* v9.9 · 원장별 지표 — 이번 달 (지난달 같은 기간 · 작년 같은 기간 대비) */
+	if ( ! empty( $x['doc_cmp'] ) ) {
+		$tdr = 'style="padding:6px 6px;border-bottom:1px solid #eee;text-align:right;vertical-align:top"'; /* 좁은 화면에서 줄바꿈 */
+		$h .= '<h3 style="font-size:16px;margin:22px 0 6px">원장별 이번 달</h3><table style="border-collapse:collapse;width:100%"><tr><th ' . $th . '>원장</th><th ' . $thr . '>내원</th><th ' . $thr . '>환자당 진료비</th><th ' . $thr . '>비급여 비율</th><th ' . $thr . '>신환</th></tr>';
+		foreach ( $x['doc_cmp'] as $r ) {
+			$c0 = (array) ( $r['cur'] ?? array() ); $cp = (array) ( $r['prev'] ?? array() ); $cl = (array) ( $r['ly'] ?? array() );
+			$avg = function ( $a ) { return ! empty( $a['visits'] ) ? (float) $a['total'] / (float) $a['visits'] : 0; };
+			$bir = function ( $a ) { return ! empty( $a['total'] ) ? 100 * (float) $a['bi'] / (float) $a['total'] : 0; };
+			$sub = function ( $now, $p, $l, $fmt ) { $o = array(); if ( $p ) { $o[] = '지난달 ' . $fmt( $p ); } if ( $l ) { $o[] = '작년 ' . $fmt( $l ); } return $o ? '<br><small style="color:#888">' . esc_html( implode( ' · ', $o ) ) . '</small>' : ''; };
+			$won = function ( $v ) { return number_format( round( $v / 1000 ) * 1000 ) . '원'; };
+			$pct = function ( $v ) { return number_format( $v, 0 ) . '%'; };
+			$cnt = function ( $v ) { return number_format( (float) $v ) . '명'; };
+			if ( empty( $c0['visits'] ) && empty( $c0['new'] ) ) { continue; }
+			$h .= '<tr><td ' . $td . '>' . esc_html( (string) $r['name'] ) . '</td>'
+				. '<td ' . $tdr . '><b>' . esc_html( $cnt( $c0['visits'] ?? 0 ) ) . '</b> ' . md_brief_delta( $c0['visits'] ?? 0, $cp['visits'] ?? 0 ) . $sub( 0, $cp['visits'] ?? 0, $cl['visits'] ?? 0, $cnt ) . '</td>'
+				. '<td ' . $tdr . '><b>' . esc_html( $won( $avg( $c0 ) ) ) . '</b> ' . md_brief_delta( $avg( $c0 ), $avg( $cp ) ) . $sub( 0, $avg( $cp ), $avg( $cl ), $won ) . '</td>'
+				. '<td ' . $tdr . '><b>' . esc_html( $pct( $bir( $c0 ) ) ) . '</b>' . $sub( 0, $bir( $cp ), $bir( $cl ), $pct ) . '</td>'
+				. '<td ' . $tdr . '><b>' . esc_html( $cnt( $c0['new'] ?? 0 ) ) . '</b>' . $sub( 0, $cp['new'] ?? 0, $cl['new'] ?? 0, $cnt ) . '</td></tr>';
+		}
+		$h .= '</table><p style="margin:4px 0 0;color:#888;font-size:12px">▲▼ 는 지난달 같은 기간 대비. 신환은 덴트웹 담당의사 기준.</p>';
+	}
+
 	$c = $x['counts'] ?? array();
-	$h .= '<h3 style="font-size:16px;margin:22px 0 6px">연락할 환자</h3><p style="margin:0">진료 중단 <b>' . (int) ( $c['dropout'] ?? 0 ) . '명</b> · 리콜 <b>' . (int) ( $c['recall'] ?? 0 ) . '명</b> · 노쇼 <b>' . (int) ( $c['noshow'] ?? 0 ) . '명</b>'
+	$h .= '<h3 style="font-size:16px;margin:22px 0 6px">연락할 환자</h3><p style="margin:0">' . ( isset( $c['confirm'] ) ? '오늘 확인 전화 <b>' . (int) $c['confirm'] . '명</b> · ' : '' ) . '진료 중단 <b>' . (int) ( $c['dropout'] ?? 0 ) . '명</b> · 리콜 <b>' . (int) ( $c['recall'] ?? 0 ) . '명</b> · 노쇼 <b>' . (int) ( $c['noshow'] ?? 0 ) . '명</b>'
 		. ( $mail ? ' — 이름은 메일에 넣지 않습니다. 라운지에서 확인하세요.' : '' ) . '</p>';
 	return $h;
 }
@@ -276,7 +329,7 @@ function md_brief_render() {
 	$money = md_brief_can_money();
 	$tabs  = array();
 	if ( $money ) { $tabs['day'] = '📊 브리핑'; }
-	$tabs += array( 'dropout' => '🦷 진료 중단', 'recall' => '🔔 리콜', 'noshow' => '🚫 노쇼' );
+	$tabs += array( 'confirm' => '📞 확인 전화', 'dropout' => '🦷 진료 중단', 'recall' => '🔔 리콜', 'noshow' => '🚫 노쇼' );
 	if ( $money ) { $tabs['to'] = '✉️ 받는 사람'; }
 	$tab = isset( $_GET['bt'] ) ? sanitize_key( wp_unslash( $_GET['bt'] ) ) : '';
 	if ( ! isset( $tabs[ $tab ] ) ) { $tab = array_key_first( $tabs ); }
@@ -297,6 +350,15 @@ function md_brief_render() {
 		.mdb-filter a.is-on{border-color:#2e7d5b;color:#2e7d5b;font-weight:600}
 		.mdb-to{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
 		.mdb-to input[type=email]{flex:1;min-width:220px;padding:8px;border:1px solid #ccc;border-radius:6px}
+		.mdb-chart__h{font-size:14px;margin:14px 0 6px;color:#555}
+		.mdb-charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+		.mdb-chart{margin:0;padding:10px 12px;border:1px solid #eee;border-radius:10px;background:#fff}
+		.mdb-chart figcaption{font-size:13px;font-weight:600;color:#333;margin:0 0 4px}
+		.mdb-chart__svg{display:block;width:100%;height:auto}
+		.mdb-bar{cursor:pointer}.mdb-bar:hover path,.mdb-bar.is-on path{opacity:.75}
+		.mdb-chart__tip{min-height:18px;font-size:12px;color:#555;margin-top:4px}
+		.mdb-perf{margin:0 0 10px;padding:8px 12px;border-radius:8px;background:#f1f7f4;font-size:14px;color:#2b3a33}
+		.mdb-perf small{color:#6b7c74}
 	</style>
 	<?php
 	if ( isset( $_GET['bm'] ) ) {
@@ -326,6 +388,8 @@ function md_brief_render_day() {
 			<small style="color:#888">만든 시각 <?php echo esc_html( $x['made_at'] ?? '' ); ?><?php echo ! empty( $x['_mailed_at'] ) ? ' · 메일 보냄 ' . esc_html( substr( $x['_mailed_at'], 11, 5 ) ) : ''; ?></small>
 		</form>
 		<div class="mdb-wrap"><?php echo md_brief_html( $x ); // phpcs:ignore -- 안에서 모두 이스케이프 ?></div>
+		<?php echo md_brief_trend_html( $x['trend'] ?? null ); // phpcs:ignore -- 안에서 이스케이프 ?>
+		<?php echo md_brief_mark_stats_html( '' ); // phpcs:ignore ?>
 		<?php if ( ! empty( $x['noshow']['by_dow'] ) ) : ?>
 			<h3 style="font-size:16px;margin:22px 0 6px">노쇼율 — 요일 · 시간대</h3>
 			<div class="mdb-wrap"><table class="mdb-table"><tr><th>요일</th><?php foreach ( $x['noshow']['by_dow'] as $r ) : ?><td><?php echo esc_html( $r['key'] ); ?></td><?php endforeach; ?></tr>
@@ -345,11 +409,13 @@ function md_brief_render_list( $tab ) {
 		'dropout' => '치료가 중간에 멈춘 환자 — 신경치료를 시작하고 한 달 넘게 안 오심 · 신경치료(근관충전) 뒤 두 달 넘게 보철을 안 하심 · 임플란트 수술 반년이 지나도 보철을 안 하심. 앞으로 잡힌 예약이 있는 환자는 뺐습니다.',
 		'recall'  => '스케일링한 지 1년~1년 반 된 환자 · 임플란트 환자 중 6개월~1년 동안 안 오신 환자. 앞으로 잡힌 예약이 있는 환자는 뺐습니다.',
 		'noshow'  => '지난 진료일에 예약하고 오지 않은 환자 · 최근 한 달 동안 두 번 넘게 오지 않은 환자.',
+		'confirm' => '오늘 예약한 환자 중 최근 한 달 안에 예약하고 오지 않았거나(노쇼) 예약을 취소 · 변경한 적이 있는 분 — 아침에 한 번 더 확인 전화를 드려 주세요.',
 	);
 	$filters = array(
 		'dropout' => array( '' => '전체', 'endo' => '신경치료 중단', 'crown' => '보철 안 함', 'imp' => '임플란트' ),
 		'recall'  => array( '' => '전체', 'sc' => '스케일링', 'imp' => '임플란트 정기검진' ),
 		'noshow'  => array( '' => '전체', 'yday' => '지난 진료일', 'repeat' => '자주 노쇼' ),
+		'confirm' => array( '' => '전체' ),
 	);
 	$f = isset( $_GET['bf'] ) ? sanitize_key( wp_unslash( $_GET['bf'] ) ) : '';
 	if ( ! isset( $filters[ $tab ][ $f ] ) ) { $f = ''; }
@@ -359,6 +425,7 @@ function md_brief_render_list( $tab ) {
 		<p class="mds-hint" style="margin-top:0"><?php echo esc_html( $intro[ $tab ] ); ?>
 			<?php if ( is_array( $L ) && ! empty( $L['at'] ) ) : ?><br><small>덴트웹에서 <?php echo esc_html( $L['at'] ); ?> 에 만든 명단 · 덴트웹에서 차트번호로 찾아 연락하고 「연락함」을 눌러 주세요(90일 동안 표시).</small><?php endif; ?></p>
 		<div style="display:flex;justify-content:flex-end;margin:0 0 8px"><a class="mds-btn mds-btn--ghost" href="<?php echo esc_url( md_brief_dl_url( 'lists' ) ); ?>" data-mdb-xl title="진료 중단 · 리콜 · 노쇼 명단과 연락함 표시를 한 파일로">📥 명단 엑셀로 받기</a></div>
+		<?php echo md_brief_mark_stats_html( $tab ); // phpcs:ignore -- 안에서 이스케이프 ?>
 		<div class="mdb-filter"><?php foreach ( $filters[ $tab ] as $k => $label ) : ?><a class="<?php echo $k === $f ? 'is-on' : ''; ?>" href="<?php echo esc_url( md_brief_lounge_url( array( 'bt' => $tab, 'bf' => $k ) ) ); ?>"><?php echo esc_html( $label ); ?></a><?php endforeach; ?></div>
 		<?php if ( ! $rows ) : ?><div class="mds-empty">해당하는 환자가 없습니다.</div><?php else : ?>
 		<p style="margin:0 0 6px;color:#555"><?php echo count( $rows ); ?>명</p>
@@ -477,7 +544,7 @@ function md_brief_xlsx_day() {
 function md_brief_xlsx_lists() {
 	$L = get_option( 'md_brief_lists' );
 	$marks = (array) get_option( 'md_brief_marks', array() );
-	$names = array( 'dropout' => '진료 중단', 'recall' => '리콜', 'noshow' => '노쇼' );
+	$names = array( 'confirm' => '오늘 확인 전화', 'dropout' => '진료 중단', 'recall' => '리콜', 'noshow' => '노쇼' );
 	$kinds = array( 'endo' => '신경치료 중단', 'crown' => '보철 안 함', 'imp' => '임플란트', 'sc' => '스케일링', 'yday' => '지난 진료일', 'repeat' => '자주 노쇼' );
 	$sheets = array();
 	foreach ( $names as $tab => $title ) {
@@ -514,3 +581,148 @@ function md_brief_handle_download() {
 	exit;
 }
 add_action( 'template_redirect', 'md_brief_handle_download', 2 );
+
+/* ============================================================
+ * v9.9 · 리콜 성과 — 「연락함」 누른 환자가 그 뒤 예약했거나 30일 안에 왔는지 (서버 PC 가 다음 브리핑 때 알려 줌)
+ * ============================================================ */
+function md_brief_mark_stats( $tab = '' ) {
+	$marks = (array) get_option( 'md_brief_marks', array() );
+	$res   = (array) get_option( 'md_brief_mark_res', array() );
+	$cut   = date( 'Y-m-d', current_time( 'timestamp' ) - 90 * DAY_IN_SECONDS );
+	$o = array( 'n' => 0, 'checked' => 0, 'ok' => 0, 'came' => 0, 'booked' => 0 );
+	foreach ( $marks as $k => $v ) {
+		$t = explode( '|', (string) $k )[0];
+		if ( ( $v['d'] ?? '' ) < $cut || ( '' !== $tab && $t !== $tab ) || 'confirm' === $t ) { continue; }
+		$o['n']++;
+		if ( ! isset( $res[ $k ] ) ) { continue; }
+		$o['checked']++;
+		$r = $res[ $k ];
+		if ( '' !== $r['came'] ) { $o['came']++; }
+		if ( '' !== $r['booked'] ) { $o['booked']++; }
+		if ( '' !== $r['came'] || '' !== $r['booked'] ) { $o['ok']++; }
+	}
+	return $o;
+}
+
+function md_brief_mark_stats_html( $tab ) {
+	if ( 'confirm' === $tab ) { return ''; }
+	$s = md_brief_mark_stats( $tab );
+	if ( ! $s['n'] ) { return '<p class="mds-hint" style="margin:0 0 10px">리콜 성과 — 「연락함」을 누르면, 다음 날 아침 브리핑부터 그 환자가 예약했는지 · 30일 안에 왔는지 여기에 모아 보여 드립니다.</p>'; }
+	$rate = $s['checked'] ? round( 100 * $s['ok'] / $s['checked'] ) : 0;
+	return '<div class="mdb-perf"><b>리콜 성과</b> 최근 90일 「연락함」 ' . (int) $s['n'] . '명'
+		. ( $s['checked'] ? ' → 예약 또는 내원 <b>' . (int) $s['ok'] . '명 (' . (int) $rate . '%)</b> <small>예약 있음 ' . (int) $s['booked'] . ' · 30일 안 내원 ' . (int) $s['came'] . '</small>' : '' )
+		. ( $s['n'] > $s['checked'] ? ' <small>· ' . (int) ( $s['n'] - $s['checked'] ) . '명은 다음 브리핑 때 확인</small>' : '' ) . '</div>';
+}
+
+/* ============================================================
+ * v9.9 · 추이 그래프 — 최근 8주 · 12개월 (총진료비 · 내원 · 신환). 한 그래프에 한 가지(축 하나), 막대 위에 마우스 = 값
+ * ============================================================ */
+function md_brief_bars_svg( $pts, $fmt, $title ) {
+	$n = count( $pts );
+	if ( ! $n ) { return ''; }
+	$max = 0; foreach ( $pts as $p ) { $max = max( $max, (float) $p['v'] ); }
+	if ( $max <= 0 ) { $max = 1; }
+	$W = 320; $H = 150; $top = 18; $bot = 22; $gap = 4;
+	$bw = ( $W - $gap * ( $n - 1 ) ) / $n; $ph = $H - $top - $bot;
+	$svg = '<svg viewBox="0 0 ' . $W . ' ' . $H . '" role="img" aria-label="' . esc_attr( $title ) . '" class="mdb-chart__svg">';
+	$svg .= '<line x1="0" y1="' . ( $H - $bot ) . '" x2="' . $W . '" y2="' . ( $H - $bot ) . '" stroke="#d9d9d9" stroke-width="1"/>';
+	foreach ( array_values( $pts ) as $i => $p ) {
+		$v = (float) $p['v']; $h = $v > 0 ? max( 2, $ph * $v / $max ) : 0;
+		$x = $i * ( $bw + $gap ); $y = $H - $bot - $h;
+		$fill = ! empty( $p['partial'] ) ? '#a8d5bf' : '#2e7d5b';
+		$r = min( 4, $bw / 2, $h );
+		/* 위쪽만 둥글게 · 바닥은 기준선에 붙임 */
+		$d = $h > 0 ? sprintf( 'M%.1f %.1f V%.1f Q%.1f %.1f %.1f %.1f H%.1f Q%.1f %.1f %.1f %.1f V%.1f Z', $x, $H - $bot, $y + $r, $x, $y, $x + $r, $y, $x + $bw - $r, $x + $bw, $y, $x + $bw, $y + $r, $H - $bot ) : '';
+		$svg .= '<g class="mdb-bar"><rect x="' . round( $x - $gap / 2, 1 ) . '" y="0" width="' . round( $bw + $gap, 1 ) . '" height="' . $H . '" fill="transparent"/>'
+			. ( $d ? '<path d="' . $d . '" fill="' . $fill . '"/>' : '' )
+			. '<title>' . esc_html( $p['label'] . ' · ' . $fmt( $v ) . ( ! empty( $p['partial'] ) ? ' (진행 중)' : '' ) . ( isset( $p['days'] ) ? ' · 진료 ' . (int) $p['days'] . '일' : '' ) ) . '</title></g>';
+		if ( 0 === $i || $n - 1 === $i || 0 === $i % max( 1, (int) ceil( $n / 4 ) ) ) {
+			$svg .= '<text x="' . round( $x + $bw / 2, 1 ) . '" y="' . ( $H - 6 ) . '" text-anchor="middle" font-size="10" fill="#888">' . esc_html( $p['tick'] ) . '</text>';
+		}
+	}
+	$last = end( $pts );
+	$svg .= '<text x="' . $W . '" y="11" text-anchor="end" font-size="11" fill="#333" font-weight="600">' . esc_html( ( ! empty( $last['partial'] ) ? '진행 중 ' : '최근 ' ) . $fmt( (float) $last['v'] ) ) . '</text>';
+	return $svg . '</svg>';
+}
+
+function md_brief_trend_html( $tr ) {
+	if ( ! is_array( $tr ) || ( empty( $tr['weeks'] ) && empty( $tr['months'] ) ) ) {
+		return '<p class="mds-hint" style="margin:18px 0 0">추이 그래프는 다음 아침 브리핑부터 나옵니다.</p>';
+	}
+	$won = function ( $v ) { return md_brief_won( $v ) . '원'; };
+	$cnt = function ( $v ) { return number_format( $v ) . '명'; };
+	$sets = array(
+		'최근 8주' => array_map( function ( $w ) { return array( 'label' => date( 'n/j', strtotime( $w['from'] ) ) . '~' . date( 'n/j', strtotime( $w['to'] ) ), 'tick' => date( 'n/j', strtotime( $w['from'] ) ), 'partial' => ! empty( $w['partial'] ), 'days' => $w['days'] ?? null, 'r' => $w ); }, (array) ( $tr['weeks'] ?? array() ) ),
+		'최근 12개월' => array_map( function ( $m ) { return array( 'label' => date( 'Y년 n월', strtotime( $m['month'] . '-01' ) ), 'tick' => date( 'n월', strtotime( $m['month'] . '-01' ) ), 'partial' => ! empty( $m['partial'] ), 'days' => $m['days'] ?? null, 'r' => $m ); }, array_slice( (array) ( $tr['months'] ?? array() ), -12 ) ),
+	);
+	$h = '<h3 style="font-size:16px;margin:22px 0 6px">추이</h3><p class="mds-hint" style="margin:0 0 8px">막대에 마우스를 올리거나 누르면 값이 나옵니다. 연한 막대 = 아직 끝나지 않은 주 · 달.</p>';
+	foreach ( $sets as $title => $pts ) {
+		if ( ! $pts ) { continue; }
+		$h .= '<h4 class="mdb-chart__h">' . esc_html( $title ) . '</h4><div class="mdb-charts">';
+		foreach ( array( array( 'total', '총진료비', $won ), array( 'visits', '내원', $cnt ), array( 'new', '신환', $cnt ) ) as $m ) {
+			$p2 = array_map( function ( $p ) use ( $m ) { return $p + array( 'v' => (float) ( $p['r'][ $m[0] ] ?? 0 ) ); }, $pts );
+			$h .= '<figure class="mdb-chart"><figcaption>' . esc_html( $m[1] ) . '</figcaption>' . md_brief_bars_svg( $p2, $m[2], $title . ' ' . $m[1] ) . '<div class="mdb-chart__tip" aria-live="polite"></div></figure>';
+		}
+		$h .= '</div>';
+	}
+	/* 막대 값 — 마우스를 올리거나(PC) 누르면(휴대폰) 그래프 아래에 */
+	$h .= '<script>(function(){function show(b){var f=b.closest(".mdb-chart");if(!f)return;f.querySelectorAll(".mdb-bar.is-on").forEach(function(x){x.classList.remove("is-on")});b.classList.add("is-on");var t=b.querySelector("title");f.querySelector(".mdb-chart__tip").textContent=t?t.textContent:"";}document.addEventListener("mouseover",function(e){var b=e.target.closest&&e.target.closest(".mdb-bar");if(b)show(b);});document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".mdb-bar");if(b)show(b);});})();</script>';
+	return $h;
+}
+
+/* ============================================================
+ * v9.9 · 주간(월요일) · 월간(1일) 요약 메일 — 매일 브리핑을 보낸 뒤 한 번씩
+ * ============================================================ */
+function md_brief_period_mails( $b ) {
+	$tr = $b['trend'] ?? null;
+	$run = (string) ( $b['today']['date'] ?? '' );
+	if ( ! is_array( $tr ) || ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $run ) ) { return; }
+	$to = md_brief_recipients();
+	if ( ! $to ) { return; }
+	$sent = (array) get_option( 'md_brief_period_sent', array() );
+	$send = function ( $kind, $subj, $html ) use ( $to, &$sent, $run ) {
+		$body = '<div style="font-family:-apple-system,\'Malgun Gothic\',sans-serif;max-width:640px;color:#222;line-height:1.5">' . $html
+			. '<p style="margin-top:24px"><a href="' . esc_url( md_brief_lounge_url() ) . '" style="display:inline-block;background:#2e7d5b;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">직원 라운지에서 추이 보기</a></p></div>';
+		foreach ( $to as $m ) { wp_mail( $m, $subj, $body, array( 'Content-Type: text/html; charset=UTF-8' ) ); }
+		$sent[ $kind ] = $run;
+	};
+	$row = function ( $label, $a, $p, $p2, $fmt, $l1, $l2 ) {
+		$td = 'style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap"';
+		return '<tr><td style="padding:6px 8px;border-bottom:1px solid #eee">' . esc_html( $label ) . '</td><td ' . $td . '><b>' . esc_html( $fmt( $a ) ) . '</b></td><td ' . $td . '>' . esc_html( $fmt( $p ) ) . ' ' . md_brief_delta( $a, $p ) . '</td><td ' . $td . '>' . esc_html( $fmt( $p2 ) ) . ' ' . md_brief_delta( $a, $p2 ) . '</td></tr>';
+	};
+	$table = function ( $cur, $c1, $c2, $h1, $h2, $h0 ) use ( $row ) {
+		$won = function ( $v ) { return md_brief_won( $v ); };
+		$cnt = function ( $v ) { return number_format( (float) $v ) . '명'; };
+		$th = 'style="padding:6px 8px;border-bottom:2px solid #ddd;text-align:right;font-weight:600;color:#555"';
+		$avg = function ( $a ) { return ! empty( $a['visits'] ) ? (float) $a['total'] / $a['visits'] : 0; };
+		return '<table style="border-collapse:collapse;width:100%"><tr><th style="padding:6px 8px;border-bottom:2px solid #ddd"></th><th ' . $th . '>' . esc_html( $h0 ) . '</th><th ' . $th . '>' . esc_html( $h1 ) . '</th><th ' . $th . '>' . esc_html( $h2 ) . '</th></tr>'
+			. $row( '총진료비', $cur['total'] ?? 0, $c1['total'] ?? 0, $c2['total'] ?? 0, $won, $h1, $h2 )
+			. $row( '비급여', $cur['bi'] ?? 0, $c1['bi'] ?? 0, $c2['bi'] ?? 0, $won, $h1, $h2 )
+			. $row( '수납', $cur['paid'] ?? 0, $c1['paid'] ?? 0, $c2['paid'] ?? 0, $won, $h1, $h2 )
+			. $row( '내원', $cur['visits'] ?? 0, $c1['visits'] ?? 0, $c2['visits'] ?? 0, $cnt, $h1, $h2 )
+			. $row( '신환', $cur['new'] ?? 0, $c1['new'] ?? 0, $c2['new'] ?? 0, $cnt, $h1, $h2 )
+			. $row( '환자당 진료비', $avg( $cur ), $avg( $c1 ), $avg( $c2 ), function ( $v ) { return number_format( round( $v / 1000 ) * 1000 ) . '원'; }, $h1, $h2 )
+			. '</table>';
+	};
+	/* 월요일 — 지난주 (월~일) */
+	$weeks = array_values( (array) ( $tr['weeks'] ?? array() ) );
+	if ( 1 === (int) date( 'N', strtotime( $run ) ) && ( $sent['week'] ?? '' ) !== $run && count( $weeks ) >= 6 ) {
+		$cur = $weeks[ count( $weeks ) - 1 ]; $prev = $weeks[ count( $weeks ) - 2 ];
+		$four = array( 'total' => 0, 'bi' => 0, 'paid' => 0, 'visits' => 0, 'new' => 0 );
+		foreach ( array_slice( $weeks, -5, 4 ) as $w ) { foreach ( $four as $k => $v ) { $four[ $k ] += (float) ( $w[ $k ] ?? 0 ) / 4; } }
+		$lab = date( 'n/j', strtotime( $cur['from'] ) ) . '~' . date( 'n/j', strtotime( $cur['to'] ) );
+		$send( 'week', '[문치과병원 주간 브리핑] ' . $lab . ' 진료비 ' . md_brief_won( $cur['total'] ?? 0 ) . ' · 내원 ' . (int) ( $cur['visits'] ?? 0 ) . '명',
+			'<h2 style="margin:0 0 4px;font-size:20px">지난주 (' . esc_html( $lab ) . ') 요약</h2><p style="margin:0 0 14px;color:#666">진료 ' . (int) ( $cur['days'] ?? 0 ) . '일 · 그 전 주와 최근 4주 평균 대비</p>'
+			. $table( $cur, $prev, $four, '그 전 주', '4주 평균', '지난주' ) );
+	}
+	/* 1일 — 지난달 */
+	$months = array_values( (array) ( $tr['months'] ?? array() ) );
+	if ( '01' === substr( $run, 8, 2 ) && ( $sent['month'] ?? '' ) !== $run && count( $months ) >= 14 ) {
+		$cur = $months[13]; $prev = $months[12]; $ly = $months[1];
+		$lab = date( 'Y년 n월', strtotime( $cur['month'] . '-01' ) );
+		$send( 'month', '[문치과병원 월간 브리핑] ' . $lab . ' 진료비 ' . md_brief_won( $cur['total'] ?? 0 ) . ' · 내원 ' . number_format( (float) ( $cur['visits'] ?? 0 ) ) . '명',
+			'<h2 style="margin:0 0 4px;font-size:20px">' . esc_html( $lab ) . ' 요약</h2><p style="margin:0 0 14px;color:#666">진료 ' . (int) ( $cur['days'] ?? 0 ) . '일 · 그 전 달과 작년 같은 달 대비</p>'
+			. $table( $cur, $prev, $ly, '그 전 달', '작년 같은 달', '지난달' ) );
+	}
+	update_option( 'md_brief_period_sent', $sent, false );
+}
