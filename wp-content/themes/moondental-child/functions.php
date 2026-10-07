@@ -35,6 +35,8 @@ if ( ! empty( $_GET['md_prof'] ) ) {
 		$o[] = 'qs=' . wp_json_encode( $GLOBALS['mdq'] ?? array() );
 		$g = array(); foreach ( get_included_files() as $f ) { $f = str_replace( chr( 92 ), '/', $f ); if ( preg_match( '#/(plugins|themes)/([^/]+)/#', $f, $m ) ) { $k = $m[2]; } elseif ( false !== strpos( $f, '/wp-includes/' ) ) { $k = 'core'; } else { $k = 'other'; } $g[ $k ] = ( $g[ $k ] ?? 0 ) + 1; } arsort( $g ); $o[] = 'byfile=' . wp_json_encode( $g );
 		$o[] = 'theme_q=' . $GLOBALS['mdp_theme_q'];
+		$o[] = 'ap=' . implode( ',', (array) get_option( 'active_plugins' ) );
+		$o[] = 'mu=' . implode( ',', array_map( 'basename', wp_get_mu_plugins() ) );
 		echo "\n<!-- mdp " . esc_html( implode( ' ', $o ) ) . " -->\n";
 	}, PHP_INT_MAX );
 }
