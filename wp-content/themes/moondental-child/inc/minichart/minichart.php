@@ -967,6 +967,57 @@ function md_mc_enqueue() {
 }
 add_action( 'wp_enqueue_scripts', 'md_mc_enqueue', 40 );
 
+/** v9.8 · 차트 화면 위 찾기 칸 — 차트번호 · 이름 · 초성으로 바로 찾기 (GET ?app=minichart&md_mc_find=검색어 · JSON, 12명까지) */
+function md_mc_find_json() {
+	if ( ! isset( $_GET['md_mc_find'] ) ) { return; }
+	if ( ! md_mc_can_use() ) { wp_send_json( array( 'ok' => false ), 403 ); }
+	global $wpdb;
+	$q = trim( sanitize_text_field( wp_unslash( $_GET['md_mc_find'] ) ) );
+	$k = preg_replace( '/\s+/u', '', $q );
+	if ( '' === $k ) { wp_send_json( array( 'ok' => true, 'rows' => array() ) ); }
+	$t    = md_mc_t();
+	$like = '%' . $wpdb->esc_like( $k ) . '%';
+	if ( md_mc_is_cho( $q ) ) {
+		$cond = $wpdb->prepare( 'cho LIKE %s', $like );
+	} else {
+		$cond = $wpdb->prepare( "(chart_no LIKE %s OR REPLACE(pname, ' ', '') LIKE %s OR cho LIKE %s)", $like, $like, '%' . $wpdb->esc_like( mb_strtolower( $k ) ) . '%' );
+	}
+	/* 차트번호가 딱 맞거나 이름이 그 글자로 시작하면 먼저 */
+	$rows = (array) $wpdb->get_results( $wpdb->prepare(
+		"SELECT id, chart_no, pname, pin, mhx, last_visit FROM $t WHERE kind = 'patient' AND deleted_at IS NULL AND $cond
+		 ORDER BY (chart_no = %s) DESC, (pname LIKE %s) DESC, pin DESC, COALESCE(viewed_at, updated_at) DESC, id DESC LIMIT 12",
+		$k, $wpdb->esc_like( $k ) . '%'
+	) );
+	$out = array();
+	foreach ( $rows as $r ) {
+		$al    = md_mc_alerts( $r->mhx );
+		$out[] = array(
+			'chart' => $r->chart_no,
+			'name'  => $r->pname,
+			'pin'   => (int) $r->pin,
+			'alert' => $al ? $al[0] : '',
+			'last'  => $r->last_visit ? md_mc_short_date( $r->last_visit ) : '',
+			'url'   => md_mc_url( array( 'mv' => 'p', 'mid' => $r->id ) ),
+		);
+	}
+	wp_send_json( array( 'ok' => true, 'rows' => $out ) );
+}
+add_action( 'template_redirect', 'md_mc_find_json', 2 );
+
+/** v9.8 · 차트를 보다가 다른 환자 찾기 — 글자를 치면 아래에 바로 뜨고, Enter 는 목록에서 찾기(내용까지) */
+function md_mc_render_jump() {
+	?>
+	<div class="mc-findbar mc-jump" data-mc-jump="<?php echo esc_url( md_mc_url() ); ?>">
+		<form method="get" class="mc-search" action="<?php echo esc_url( md_mc_url() ); ?>" role="search">
+			<?php md_sup_app_field(); ?>
+			<input type="search" name="mq" id="mc-q" placeholder="다른 환자 찾기 — 차트번호 · 이름 · 초성" autocomplete="off" enterkeyhint="search" aria-label="다른 환자 찾기" aria-controls="mc-jump-list" aria-autocomplete="list">
+			<button type="submit" class="mds-btn mc-search__btn" title="병력 · 치료이력 · 참고사항까지 찾기">내용까지</button>
+		</form>
+		<ul class="mc-jump__list" id="mc-jump-list" role="listbox" hidden></ul>
+	</div>
+	<?php
+}
+
 
 function md_mc_nonce_fields( $action, $id = 0 ) {
 	echo '<input type="hidden" name="md_mc_action" value="' . esc_attr( $action ) . '">';
@@ -1146,6 +1197,7 @@ function md_mc_render_patient( $id ) {
 	global $wpdb;
 	$wpdb->update( md_mc_t(), array( 'viewed_at' => current_time( 'mysql' ) ), array( 'id' => (int) $r->id ) );
 	do_action( 'md_mc_viewed', $r ); /* v8.0 · 열람 기록 (2년) */
+	md_mc_render_jump(); /* v9.8 · 차트 보면서 다른 환자 찾기 (원장 지시) */
 	if ( isset( $_GET['saved'] ) )    { echo '<div class="mds-notice mds-notice--ok">저장했습니다.</div>'; }
 	if ( isset( $_GET['reverted'] ) ) { echo '<div class="mds-notice mds-notice--ok">이전 내용으로 되돌렸습니다.</div>'; }
 	?>

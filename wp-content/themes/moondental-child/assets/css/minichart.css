@@ -340,3 +340,17 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
 .mc-toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: #2F2621; color: #fff; padding: 10px 18px; border-radius: 999px; font-size: .92rem; opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s; z-index: 9999; max-width: calc(100vw - 32px); }
 .mc-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
 .mc-toast.is-bad { background: #B3453A; }
+
+/* v9.8 · 차트 화면 위 「다른 환자 찾기」 — 치는 대로 아래에 뜨는 목록 */
+@media (min-width: 761px) { .mc-jump { position: relative; } } /* 휴대폰은 sticky 그대로 (목록이 그 아래로 붙음) */
+.mc-jump .mc-search { margin-bottom: 8px; }
+.mc-jump__list { position: absolute; left: 0; right: 0; top: calc(100% - 4px); z-index: 30; list-style: none; margin: 0; padding: 4px 0; max-height: 60vh; overflow-y: auto; background: var(--mc-bg); border: 1px solid var(--mc-line); border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.16); }
+.mc-jump__list[hidden] { display: none; }
+.mc-jump__a { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 11px 16px; color: var(--mc-ink); text-decoration: none; }
+.mc-jump__list li.is-sel .mc-jump__a, .mc-jump__a:hover { background: color-mix(in srgb, var(--mc-pri) 12%, transparent); }
+.mc-jump__nm { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mc-jump__nm .mc-warn { font-weight: 500; margin-left: 6px; }
+.mc-jump__no { font-variant-numeric: tabular-nums; color: var(--mc-sub); font-size: .92rem; }
+.mc-jump__upd { color: var(--mc-mute); font-size: .82rem; font-variant-numeric: tabular-nums; }
+.mc-jump__none { padding: 12px 16px; color: var(--mc-sub); }
+@media (max-width: 760px) { .mc-jump__list { left: 16px; right: 16px; top: calc(100% - 6px); } }

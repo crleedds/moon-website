@@ -351,3 +351,67 @@ document.addEventListener('click', function (e) {
     });
   }, true);
 })();
+
+/* v9.8 · 차트를 보다가 다른 환자 찾기 — 치는 대로 아래에 12명까지, ↑↓ 로 고르고 Enter 로 열기.
+   고른 게 없으면 Enter 는 목록에서 찾기(내용까지). Esc 는 닫기 */
+(function () {
+  'use strict';
+  var box = document.querySelector('[data-mc-jump]');
+  if (!box) return;
+  var input = box.querySelector('input[name=mq]');
+  var ul = box.querySelector('.mc-jump__list');
+  var base = box.getAttribute('data-mc-jump');
+  var timer = null, seq = 0, rows = [], sel = -1;
+  function esc(s) { return String(s || '').replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); }
+  function close() { ul.hidden = true; sel = -1; input.setAttribute('aria-expanded', 'false'); }
+  function mark() {
+    Array.prototype.forEach.call(ul.children, function (li, i) { li.classList.toggle('is-sel', i === sel); li.setAttribute('aria-selected', i === sel ? 'true' : 'false'); });
+  }
+  function draw(v) {
+    if (!rows.length) {
+      ul.innerHTML = '<li class="mc-jump__none">「' + esc(v) + '」 — 이름·차트번호로는 없습니다. Enter 를 누르면 내용까지 찾습니다.</li>';
+    } else {
+      ul.innerHTML = rows.map(function (r) {
+        return '<li role="option"><a class="mc-jump__a" href="' + esc(r.url) + '">'
+          + '<span class="mc-jump__no">' + esc(r.chart) + '</span>'
+          + '<span class="mc-jump__nm">' + (r.pin ? '📌 ' : '') + esc(r.name)
+          + (r.alert ? ' <span class="mc-warn">⚠ ' + esc(r.alert) + '</span>' : '') + '</span>'
+          + '<span class="mc-jump__upd" title="최근 내원">' + esc(r.last) + '</span></a></li>';
+      }).join('');
+    }
+    sel = rows.length === 1 ? 0 : -1;
+    mark();
+    ul.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+  }
+  function find() {
+    var v = input.value.trim();
+    if (!v) { rows = []; close(); return; }
+    var my = ++seq;
+    var u = new URL(base, location.href);
+    u.searchParams.set('md_mc_find', v);
+    fetch(u.toString(), { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+      .then(function (res) { return res.json(); })
+      .then(function (j) {
+        if (my !== seq || !j || !j.ok) return;
+        rows = j.rows || [];
+        draw(v);
+      })
+      .catch(function () {});
+  }
+  input.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(find, 150); });
+  input.addEventListener('focus', function () { if (input.value.trim() && ul.children.length) { ul.hidden = false; } });
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (!rows.length || ul.hidden) return;
+      e.preventDefault();
+      sel = e.key === 'ArrowDown' ? Math.min(rows.length - 1, sel + 1) : Math.max(-1, sel - 1);
+      mark();
+    } else if (e.key === 'Enter') {
+      if (sel >= 0 && rows[sel] && !ul.hidden) { e.preventDefault(); location.href = rows[sel].url; }
+    } else if (e.key === 'Escape') {
+      close();
+    }
+  });
+  document.addEventListener('click', function (e) { if (!box.contains(e.target)) close(); });
+})();
