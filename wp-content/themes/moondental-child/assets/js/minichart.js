@@ -239,3 +239,18 @@
     sync();
   });
 })();
+
+/* v8.6 · 치료계획 — 차트 화면에서 바로 고치고, 바뀌면 「저장 · 되돌리기」가 나타남 */
+(function () {
+  'use strict';
+  var ta = document.querySelector('textarea[data-mc-plan]');
+  if (!ta) return;
+  var bar = ta.form.querySelector('.mc-plan__bar'), orig = ta.value;
+  function grow() { ta.style.height = 'auto'; ta.style.height = Math.max(ta.scrollHeight, 44) + 'px'; }
+  ta.addEventListener('input', function () { bar.hidden = ta.value === orig; grow(); });
+  ta.form.querySelector('[data-mc-plan-undo]').addEventListener('click', function () { ta.value = orig; bar.hidden = true; grow(); });
+  ta.addEventListener('keydown', function (e) { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); ta.form.submit(); } });
+  window.addEventListener('beforeunload', function (e) { if (ta.value !== orig && !ta.form.dataset.sending) { e.preventDefault(); e.returnValue = ''; } });
+  ta.form.addEventListener('submit', function () { ta.form.dataset.sending = '1'; });
+  grow();
+})();

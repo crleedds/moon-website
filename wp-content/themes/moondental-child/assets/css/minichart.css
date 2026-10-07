@@ -307,3 +307,10 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
 .mc-dup { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .mc-dup[hidden] { display: none; }
 .mc-chip--pre { border-style: dashed; }
+
+/* v8.6 · 치료계획 바로 고치기 */
+.mc-plan textarea { width: 100%; border: 1px dashed transparent; background: transparent; font: inherit; font-size: 1rem; line-height: 1.6; padding: 6px 8px; border-radius: 8px; resize: none; color: inherit; min-height: 44px; }
+.mc-plan textarea:hover { border-color: var(--color-border, #E8DDD3); }
+.mc-plan textarea:focus { outline: none; border: 1px solid var(--color-primary, #D88062); background: #fff; }
+.mc-plan__bar { display: flex; gap: 8px; margin-top: 8px; }
+.mc-plan__bar[hidden] { display: none; }

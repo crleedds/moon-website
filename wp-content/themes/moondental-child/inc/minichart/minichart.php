@@ -798,6 +798,19 @@ function md_mc_handle_post() {
 			$back  = is_wp_error( $res ) ? $err( $res->get_error_message(), array( 'mv' => $view, 'mid' => $id ) ) : md_mc_url( array( 'mv' => $view, 'mid' => $id ) ) . '#f-' . $field;
 			break;
 
+		case 'plan': /* v8.6 · 차트 화면에서 치료계획만 바로 고치기 */
+			$cur = md_mc_get( $id );
+			if ( ! $cur || 'patient' !== $cur->kind ) { $back = md_mc_url(); break; }
+			if ( (int) ( $post['rev'] ?? 0 ) !== (int) $cur->rev ) { $back = $err( '그 사이 다른 분이 이 차트를 고쳤습니다. 최신 내용을 보고 다시 고쳐 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
+			$plan = sanitize_textarea_field( (string) ( $post['tx_plan'] ?? '' ) );
+			if ( $plan !== (string) $cur->tx_plan ) {
+				global $wpdb;
+				$ok = $wpdb->update( md_mc_t(), array( 'tx_plan' => $plan, 'rev' => (int) $cur->rev + 1, 'updated_at' => current_time( 'mysql' ), 'updated_by' => md_mc_me() ), array( 'id' => (int) $id, 'rev' => (int) $cur->rev ) );
+				if ( $ok ) { md_mc_log( $id, 'edit', $cur ); }
+			}
+			$back = md_mc_url( array( 'mv' => 'p', 'mid' => $id, 'saved' => 1 ) ) . '#f-tx_plan';
+			break;
+
 		case 'pin':
 			md_mc_set_pin( $id, ! empty( $post['on'] ) );
 			$rec  = md_mc_get( $id );
@@ -1140,7 +1153,13 @@ function md_mc_render_patient( $id ) {
 			md_mc_block( $f['referral'][0], md_mc_text( $r->referral ) );
 			?>
 		</div>
-		<?php md_mc_block( $f['tx_plan'][0], md_mc_text( $r->tx_plan ), 'mc-block--plan' ); ?>
+		<?php /* v8.6 · 치료계획은 차트 화면에서 바로 고친다 (원장 지시 — 수정 버튼 없이) */ ?>
+		<form method="post" class="mc-block mc-block--plan mc-plan" id="f-tx_plan" action="<?php echo esc_url( md_mc_url() ); ?>">
+			<?php md_mc_nonce_fields( 'plan', $r->id ); ?><input type="hidden" name="rev" value="<?php echo (int) $r->rev; ?>">
+			<h3 class="mc-block__h"><?php echo esc_html( $f['tx_plan'][0] ); ?> <small class="mc-sub">눌러서 바로 고치기</small></h3>
+			<textarea name="tx_plan" rows="2" data-grow data-mc-plan placeholder="치료계획을 적으세요"><?php echo esc_textarea( (string) $r->tx_plan ); ?></textarea>
+			<div class="mc-plan__bar" hidden><button type="submit" class="mds-btn mds-btn--fill">저장</button><button type="button" class="mds-btn mds-btn--ghost" data-mc-plan-undo>되돌리기</button></div>
+		</form>
 
 		<section class="mc-block mc-block--log" id="f-tx_hist">
 			<h3 class="mc-block__h">진료기록 <small class="mc-sub"><?php echo $d ? '덴트웹 치료내용 + ✎ 직접 적은 기록' : '✎ 직접 적은 기록'; ?></small></h3>
