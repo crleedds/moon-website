@@ -226,7 +226,7 @@ function md_sec_send_code() {
 	$hist[] = $now;
 	update_user_meta( $u->ID, 'md_sec_otp', array( 'hash' => wp_hash_password( $code ), 'exp' => $now + 10 * MINUTE_IN_SECONDS, 'tries' => 0, 'sent' => $now, 'hist' => $hist ) );
 	$ok = wp_mail( $u->user_email, '[문치과병원] 직원 라운지 인증 코드 ' . $code,
-		"직원 라운지 인증 코드: " . $code . "\n\n10분 안에 화면에 넣어 주세요.\n기기: " . md_sec_device_label() . ' · ' . md_sec_ip() . "\n\n본인이 요청하지 않았다면 이 메일은 무시하고 원장님께 알려 주세요.\n— 한아의료재단 문치과병원" );
+		"직원 라운지 인증 코드: " . $code . "\n\n10분 안에 화면에 넣어 주세요.\n기기: " . md_sec_device_label() . ' · ' . md_sec_ip() . "\n\n본인이 요청하지 않았다면 이 메일은 무시하고 라운지 관리자에게 알려 주세요.\n— 한아의료재단 문치과병원" );
 	return $ok ? true : new WP_Error( 'send', '메일을 보내지 못했습니다. 잠시 뒤에 다시 해 주세요.' );
 }
 
