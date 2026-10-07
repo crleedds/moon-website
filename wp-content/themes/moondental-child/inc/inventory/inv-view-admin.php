@@ -458,7 +458,7 @@ function md_inv_view_stock() {
 	<?php echo md_inv_cat_bar( $base, $c1, $c2, $c3, array( 'iv' => 'stock', 'iq' => $q, 'ist' => $st, 'ivd' => $vd ?: '' ) ); // phpcs:ignore ?>
 	<div class="iv-toolbar">
 		<span class="iv-muted" id="iv-catnav-n"><?php echo count( $here ); ?>개 품목<?php echo $admin ? ' · 재고 금액 ' . esc_html( md_inv_won( $value ) ) : ''; ?></span>
-		<?php if ( $admin ) : md_inv_dl_buttons( 'items', array(), '재고 현황 엑셀' ); ?><a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_dl_url( 'xlsx' ) ); ?>"><?php echo md_inv_icon( 'down', 16 ); // phpcs:ignore ?>최근 30일 보고서 엑셀</a><a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_all_url() ); ?>"><?php echo md_inv_icon( 'down', 16 ); // phpcs:ignore ?>전체 엑셀 (모든 기록)</a><?php endif; ?>
+		<?php if ( $admin ) : md_inv_dl_buttons( 'items', array(), '재고 현황 엑셀' ); ?><a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_all_url() ); ?>"><?php echo md_inv_icon( 'down', 16 ); // phpcs:ignore ?>전체 엑셀</a><?php endif; ?>
 	</div>
 
 	<?php
