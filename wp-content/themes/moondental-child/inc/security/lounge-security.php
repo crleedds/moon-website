@@ -405,7 +405,7 @@ function md_sec_render_otp( $app ) {
 			<div class="mds-notice mds-notice--warn">이 계정에는 이메일이 없어 병원 밖에서는 열 수 없습니다. <a href="<?php echo esc_url( md_sup_url( array( 'app' => 'me' ) ) ); ?>">내 정보</a>에서 이메일을 넣거나, 병원에서 열어 주세요.</div>
 		<?php else : ?>
 			<form method="post" class="mdsec-row"><?php md_sec_hidden( 'send' ); ?>
-				<span>받는 곳: <b><?php echo esc_html( md_sec_mask_email( $u->user_email ) ); ?></b></span>
+				<span>받는 곳: <b><?php echo esc_html( md_sec_is_shared_staff( $u ) ? $u->user_email : md_sec_mask_email( $u->user_email ) ); /* v10.1 · 공용 계정은 병원 주소라 다 보여 줌 */ ?></b></span>
 				<button type="submit" class="mds-btn<?php echo $sent ? '' : ' mds-btn--fill'; ?>"><?php echo $sent ? '코드 다시 보내기' : '코드 보내기'; ?></button>
 			</form>
 			<form method="post" class="mdsec-code"><?php md_sec_hidden( 'verify' ); ?>
@@ -638,3 +638,17 @@ add_action( 'init', function () {
 	if ( ! $other || (int) $other === (int) $u->ID ) { wp_update_user( array( 'ID' => $u->ID, 'user_email' => $mail ) ); }
 	update_option( 'md_sec_staffmail_v2', $other && (int) $other !== (int) $u->ID ? 'taken #' . $other : 'done', false );
 }, 30 );
+
+/* v10.1 · 직원공용 이메일은 늘 이 주소 (원장 지시) — 다른 계정(예: 홈페이지 관리자)이 같은 주소를 쓰고 있으면
+   워드프레스가 바꾸기를 거절해서 v8.8 이 건너뛰었다. 공용 계정만 DB 에 직접 넣는다 (로그인은 이름 「직원공용」이라 상관없음) */
+function md_sec_staff_mail() { return 'moondental1995@naver.com'; }
+add_action( 'init', function () {
+	if ( ! defined( 'MD_SUP_STAFF_LOGIN' ) ) { return; }
+	$u = get_user_by( 'login', MD_SUP_STAFF_LOGIN );
+	if ( ! $u || md_sec_staff_mail() === $u->user_email ) { return; }
+	global $wpdb;
+	$other = email_exists( md_sec_staff_mail() );
+	$wpdb->update( $wpdb->users, array( 'user_email' => md_sec_staff_mail() ), array( 'ID' => (int) $u->ID ) );
+	clean_user_cache( $u->ID );
+	update_option( 'md_sec_staffmail_v3', current_time( 'mysql' ) . ' · 전: ' . $u->user_email . ( $other && (int) $other !== (int) $u->ID ? ' · 같은 주소 계정 #' . $other : '' ), false );
+}, 31 );
