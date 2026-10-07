@@ -8,7 +8,7 @@
  * @package moondental-child
  */
 $u = function ( $k ) { return esc_url( md_pres_sub_url( $k ) ); };
-$pages = md_pres_sub_pages();
+$md_pres_all = md_pres_sub_pages();
 ?>
 <div class="v5-impl">
 
@@ -22,7 +22,7 @@ $pages = md_pres_sub_pages();
 			</div>
 		</div>
 		<ol class="v5-impl__flow v5-impl__flow--5">
-			<?php foreach ( $pages as $k => $p ) : ?>
+			<?php foreach ( $md_pres_all as $k => $p ) : ?>
 				<li><a href="<?php echo $u( $k ); ?>"><b><?php echo esc_html( $p['menu'] ); ?></b><span><?php echo esc_html( $p['card'] ); ?></span></a></li>
 			<?php endforeach; ?>
 		</ol>
