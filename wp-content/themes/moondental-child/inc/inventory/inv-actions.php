@@ -484,11 +484,17 @@ function md_inv_act_import() {
  * 내려받기 (GET) — 엑셀 · 백업 파일
  * ============================================================ */
 
+/** v9.6 · 전체 엑셀(금액 · 선납 · 통장 포함)은 라운지 관리자 · 총괄만 */
+function md_inv_can_all_xlsx() {
+	return function_exists( 'md_sup_can_manage' ) ? md_sup_can_manage() : md_inv_is_admin();
+}
+
 function md_inv_handle_download() {
 	if ( empty( $_GET['md_inv_dl'] ) ) { return; }
 	if ( ! is_user_logged_in() || ! md_inv_can_use() ) { wp_die( '권한이 없습니다.', '', array( 'response' => 403 ) ); }
-	/* v6.8 · 전체 엑셀은 즐겨찾기 주소로 쓰게 표식 없이도 받는다 (읽기만 하는 내려받기) · v9.5 직원도 받는다 (원장 지시) */
+	/* v6.8 · 전체 엑셀은 즐겨찾기 주소로 쓰게 표식 없이도 받는다 (읽기만 하는 내려받기) · v9.6 라운지 관리자 이상만 (원장 지시) */
 	$is_all = 'all' === sanitize_key( wp_unslash( $_GET['md_inv_dl'] ) );
+	if ( $is_all && ! md_inv_can_all_xlsx() ) { wp_die( '전체 엑셀은 라운지 관리자만 받을 수 있습니다.', '', array( 'response' => 403 ) ); }
 	if ( ! $is_all && ( ! isset( $_GET['_mdinv'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_mdinv'] ) ), 'md_inv_dl' ) ) ) { wp_die( '링크가 오래되었습니다. 새로고침한 뒤 다시 눌러 주세요.' ); }
 	md_inv_migrate();
 	$what = sanitize_key( wp_unslash( $_GET['md_inv_dl'] ) );
@@ -499,7 +505,7 @@ function md_inv_handle_download() {
 	$staff_ok = array();
 	if ( md_inv_set( 'staff_stats' ) ) { $staff_ok[] = 'usage'; $staff_ok[] = 'monthly'; }
 	if ( md_inv_set( 'staff_see_all_teams' ) ) { $staff_ok[] = 'requests'; }
-	if ( ! md_inv_is_admin() && ! in_array( $what, array_merge( $staff_ok, array( 'xlsx', 'all' ) ), true ) ) { wp_die( '관리자만 내려받을 수 있습니다.', '', array( 'response' => 403 ) ); }
+	if ( ! md_inv_is_admin() && ! in_array( $what, array_merge( $staff_ok, array( 'xlsx' ) ), true ) ) { wp_die( '관리자만 내려받을 수 있습니다.', '', array( 'response' => 403 ) ); }
 
 	if ( 'xlsx' === $what ) {
 		md_inv_log( '엑셀 내려받기', $from . '~' . $to );

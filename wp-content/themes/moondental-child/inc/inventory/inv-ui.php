@@ -266,7 +266,7 @@ function md_inv_render() {
 			. md_inv_icon( $v['icon'], 18 ) . '<span>' . esc_html( $v['label'] ) . '</span>'
 			. ( $v['badge'] ? '<b class="iv-nav__badge">' . (int) $v['badge'] . '</b>' : '' ) . '</a>';
 	}
-	echo '<a class="iv-nav__a iv-nav__xl" href="' . esc_url( md_inv_all_url() ) . '" title="전체 엑셀 (처음부터 오늘까지 모든 표)">' . md_inv_icon( 'down', 18 ) . '<span>엑셀</span></a>'; /* v9.5 · 모두 전체 엑셀 하나 (원장 지시) */
+	if ( md_inv_can_all_xlsx() ) { echo '<a class="iv-nav__a iv-nav__xl" href="' . esc_url( md_inv_all_url() ) . '" title="전체 엑셀 (처음부터 오늘까지 모든 표)">' . md_inv_icon( 'down', 18 ) . '<span>엑셀</span></a>'; } /* v9.6 · 전체 엑셀은 라운지 관리자 이상만 (원장 지시) */
 	echo '</nav>';
 
 	/* 휴대폰 아래 메뉴: 앞 4개 + 더보기 */
@@ -290,8 +290,8 @@ function md_inv_render() {
 			$v = $items[ $k ];
 			echo '<a class="iv-more__a' . ( $on === $k ? ' is-on' : '' ) . '" href="' . esc_url( md_inv_url( array( 'iv' => $k ) ) ) . '">' . md_inv_icon( $v['icon'], 22 ) . '<span>' . esc_html( $v['label'] ) . '</span>' . ( $v['badge'] ? '<b class="iv-nav__badge">' . (int) $v['badge'] . '</b>' : '' ) . '</a>';
 		}
-		/* v9.5 · 최근 30일 엑셀은 없애고 모두 「전체 엑셀」 (원장 지시) */
-		if ( true ) { echo '<a class="iv-more__a" href="' . esc_url( md_inv_all_url() ) . '">' . md_inv_icon( 'down', 22 ) . '<span>전체 엑셀</span></a>'; }
+		/* v9.5 · 최근 30일 엑셀은 없앰 · v9.6 전체 엑셀은 라운지 관리자 이상만 (원장 지시) */
+		if ( md_inv_can_all_xlsx() ) { echo '<a class="iv-more__a" href="' . esc_url( md_inv_all_url() ) . '">' . md_inv_icon( 'down', 22 ) . '<span>전체 엑셀</span></a>'; }
 		echo '</div></dialog>';
 	}
 

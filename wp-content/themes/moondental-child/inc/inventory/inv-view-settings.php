@@ -436,14 +436,16 @@ function md_inv_settings_export() {
 	$df = md_inv_get_date( 'df', date( 'Y-m-d', current_time( 'timestamp' ) - 30 * DAY_IN_SECONDS ) );
 	$dt = md_inv_get_date( 'dt', current_time( 'Y-m-d' ) );
 	?>
+	<?php if ( md_inv_can_all_xlsx() ) : /* v9.6 · 라운지 관리자 이상만 */ ?>
 	<section class="iv-panel" id="iv-allxl">
 		<h3 class="iv-h3">전체 엑셀 (모든 기록)</h3>
-		<p class="iv-help">처음부터 오늘까지 재료실의 모든 내용을 엑셀 한 파일로 받습니다 — 재고 현황 · 부족 품목 · 입출고 기록 · 요청 · 주문 · 단가 변동 · 사용금액(팀별 · 월별) · 선납 현황 · 선납 입금 · 선납 거래 내역 · 환불 · 정정 · LOT · 업체 · 팀 · 분류 · 활동 기록, 시트 17개. 아래 주소를 즐겨찾기에 넣어 두면 언제든 바로 받을 수 있습니다 (관리자로 로그인한 상태에서).</p>
+		<p class="iv-help">처음부터 오늘까지 재료실의 모든 내용을 엑셀 한 파일로 받습니다 — 재고 현황 · 부족 품목 · 입출고 기록 · 요청 · 주문 · 단가 변동 · 사용금액(팀별 · 월별) · 선납 현황 · 선납 입금 · 선납 거래 내역 · 환불 · 정정 · LOT · 업체 · 팀 · 분류 · 활동 기록, 시트 17개. 아래 주소를 즐겨찾기에 넣어 두면 언제든 바로 받을 수 있습니다 (라운지 관리자로 로그인한 상태에서).</p>
 		<div class="iv-toolbar iv-toolbar--actions">
 			<a class="iv-btn iv-btn--primary" href="<?php echo esc_url( md_inv_all_url() ); ?>"><?php echo md_inv_icon( 'down', 16 ); // phpcs:ignore ?>전체 엑셀 받기</a>
 			<input class="iv-input iv-f--grow" readonly value="<?php echo esc_attr( md_inv_all_url() ); ?>" onfocus="this.select()" aria-label="전체 엑셀 주소">
 		</div>
 	</section>
+	<?php endif; ?>
 	<section class="iv-panel">
 		<h3 class="iv-h3">기간을 정해서 엑셀 한 파일로 (시트별)</h3>
 		<form method="get" class="iv-filter">
