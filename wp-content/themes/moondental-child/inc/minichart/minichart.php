@@ -46,8 +46,8 @@ function md_mc_fields() {
 		'chart_no' => array( '차트번호', true, '차트번호' ),
 		'pname'    => array( '성명 / 호칭 / 호명', true, '성명 / 호칭 / 호명' ),
 		'addr'     => array( '지역', true, '지역' ),
-		'mhx'      => array( '병력 (상세)', true, '병력' ),
-		'referral' => array( '내원경로 / 가족 / 협력기관', true, '내원경로 / 가족 / 협력기관' ),
+		'mhx'      => array( '병력 (상세)', false, '병력' ), /* v9.9 · 병력 · 내원경로는 필수 아님 (원장 지시) */
+		'referral' => array( '내원경로 / 가족 / 협력기관', false, '내원경로 / 가족 / 협력기관' ),
 		'dr'       => array( '담당의', true, '담당의' ),
 		'tx_plan'  => array( '치료계획', false, '치료계획' ),
 		'tx_hist'  => array( '주요치과치료이력', false, '주요치과치료이력' ),
@@ -1440,7 +1440,8 @@ function md_mc_render_edit( $id, $kind ) {
 			if ( ! $r ) { echo '<div class="mc-dw-prev" hidden aria-live="polite"></div>'; } /* v8.1 · 새 환자 — 덴트웹에서 가져온 것 미리 보기 */
 			foreach ( array( 'addr', 'mhx', 'referral' ) as $k ) {
 				$na = ! empty( $vals['na'][ $k ] ) || ( '' !== $v( $k ) && md_mc_is_na( $v( $k ) ) );
-				md_mc_field( $k, $f[ $k ][0], $v( $k ), array( 'req' => true, 'rows' => 'mhx' === $k ? 2 : 1, 'attrs' => 'required', 'na' => $na ) );
+				$req = $f[ $k ][1]; /* v9.9 · 별표는 md_mc_fields 대로 (지역만) */
+				md_mc_field( $k, $f[ $k ][0], $v( $k ), array( 'req' => $req, 'rows' => 'mhx' === $k ? 2 : 1, 'attrs' => $req ? 'required' : '', 'na' => $na ) );
 				if ( 'mhx' === $k ) { echo md_mc_mhx_chips(); } // phpcs:ignore
 				if ( 'referral' === $k ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「가족 …」 「협력기관 …」을 누르면 이름을 바로 이어 적습니다 (예: 가족: 홍길동 #12345)' ); } // phpcs:ignore
 				$latest( $k );
