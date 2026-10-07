@@ -15,32 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'MOONDENTAL_VERSION', '7.5.1' );
 
-/* 임시 · 속도 재기 (?md_prof=1 일 때만 단계별 ms 를 HTML 주석으로) — 재고 나면 지움 */
-if ( ! empty( $_GET['md_prof'] ) ) {
-	$GLOBALS['mdp'] = array( 'theme' => microtime( true ) ); $GLOBALS['mdp_theme_q'] = $GLOBALS['wpdb']->num_queries;
-	foreach ( array( 'after_setup_theme', 'init', 'wp_loaded', 'template_redirect', 'wp_head', 'wp_footer' ) as $mdp_h ) {
-		add_action( $mdp_h, function () use ( $mdp_h ) { global $wpdb; $GLOBALS['mdp'][ $mdp_h ] = microtime( true ); $GLOBALS['mdq'][ $mdp_h ] = $wpdb->num_queries; }, PHP_INT_MAX );
-	}
-	add_action( 'init', function () { $GLOBALS['mdp']['init_start'] = microtime( true ); }, -PHP_INT_MAX );
-	add_action( 'shutdown', function () {
-		global $wpdb;
-		$s = $_SERVER['REQUEST_TIME_FLOAT']; $o = array();
-		foreach ( $GLOBALS['mdp'] as $k => $t ) { $o[] = $k . '=' . round( ( $t - $s ) * 1000 ); }
-		$o[] = 'end=' . round( ( microtime( true ) - $s ) * 1000 );
-		$o[] = 'q=' . $wpdb->num_queries;
-		$o[] = 'plugins=' . count( (array) get_option( 'active_plugins' ) );
-		$o[] = 'opcache=' . ( function_exists( 'opcache_get_status' ) && @opcache_get_status( false ) ? 1 : 0 );
-		$o[] = 'objcache=' . ( wp_using_ext_object_cache() ? 1 : 0 );
-		$o[] = 'files=' . count( get_included_files() );
-		$o[] = 'qs=' . wp_json_encode( $GLOBALS['mdq'] ?? array() );
-		$g = array(); foreach ( get_included_files() as $f ) { $f = str_replace( chr( 92 ), '/', $f ); if ( preg_match( '#/(plugins|themes)/([^/]+)/#', $f, $m ) ) { $k = $m[2]; } elseif ( false !== strpos( $f, '/wp-includes/' ) ) { $k = 'core'; } else { $k = 'other'; } $g[ $k ] = ( $g[ $k ] ?? 0 ) + 1; } arsort( $g ); $o[] = 'byfile=' . wp_json_encode( $g );
-		$o[] = 'theme_q=' . $GLOBALS['mdp_theme_q'];
-		$o[] = 'ap=' . implode( ',', (array) get_option( 'active_plugins' ) );
-		$o[] = 'mu=' . implode( ',', array_map( 'basename', wp_get_mu_plugins() ) );
-		echo "\n<!-- mdp " . esc_html( implode( ' ', $o ) ) . " -->\n";
-	}, PHP_INT_MAX );
-}
-
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
  * 문제: Polylang이 영어 홈페이지를 '홈-english' 슬러그로 자동 생성 →
