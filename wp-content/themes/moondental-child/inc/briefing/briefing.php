@@ -320,6 +320,7 @@ function md_brief_render_day() {
 	?>
 	<div class="mds-card">
 		<form method="get" style="margin:0 0 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+			<a class="mds-btn mds-btn--ghost" style="margin-left:auto;order:9" href="<?php echo esc_url( md_brief_dl_url( 'day' ) ); ?>" data-mdb-xl title="모든 진료일 숫자 · 원장별 · 노쇼율 · 이번 달 누적">📥 엑셀로 받기</a>
 			<input type="hidden" name="app" value="brief"><input type="hidden" name="bt" value="day">
 			<label>진료일 <select name="bd" onchange="this.form.submit()"><?php foreach ( $dates as $o ) : ?><option value="<?php echo esc_attr( $o ); ?>" <?php selected( $o, $d ); ?>><?php echo esc_html( $o . ' (' . md_brief_dow( $o ) . ')' ); ?></option><?php endforeach; ?></select></label>
 			<small style="color:#888">만든 시각 <?php echo esc_html( $x['made_at'] ?? '' ); ?><?php echo ! empty( $x['_mailed_at'] ) ? ' · 메일 보냄 ' . esc_html( substr( $x['_mailed_at'], 11, 5 ) ) : ''; ?></small>
@@ -357,6 +358,7 @@ function md_brief_render_list( $tab ) {
 	<div class="mds-card">
 		<p class="mds-hint" style="margin-top:0"><?php echo esc_html( $intro[ $tab ] ); ?>
 			<?php if ( is_array( $L ) && ! empty( $L['at'] ) ) : ?><br><small>덴트웹에서 <?php echo esc_html( $L['at'] ); ?> 에 만든 명단 · 덴트웹에서 차트번호로 찾아 연락하고 「연락함」을 눌러 주세요(90일 동안 표시).</small><?php endif; ?></p>
+		<div style="display:flex;justify-content:flex-end;margin:0 0 8px"><a class="mds-btn mds-btn--ghost" href="<?php echo esc_url( md_brief_dl_url( 'lists' ) ); ?>" data-mdb-xl title="진료 중단 · 리콜 · 노쇼 명단과 연락함 표시를 한 파일로">📥 명단 엑셀로 받기</a></div>
 		<div class="mdb-filter"><?php foreach ( $filters[ $tab ] as $k => $label ) : ?><a class="<?php echo $k === $f ? 'is-on' : ''; ?>" href="<?php echo esc_url( md_brief_lounge_url( array( 'bt' => $tab, 'bf' => $k ) ) ); ?>"><?php echo esc_html( $label ); ?></a><?php endforeach; ?></div>
 		<?php if ( ! $rows ) : ?><div class="mds-empty">해당하는 환자가 없습니다.</div><?php else : ?>
 		<p style="margin:0 0 6px;color:#555"><?php echo count( $rows ); ?>명</p>
@@ -407,3 +409,108 @@ function md_brief_render_to() {
 	</div>
 	<?php
 }
+
+/* ============================================================
+ * v9.1 · 엑셀로 받기 (원장 지시 2026-10-07 「export 할 수 있는 것은 export」)
+ *   day   — 진료일별 숫자 · 원장별 · 이번 달 누적 · 노쇼율 (원장 계정만, 매출이 들어 있음)
+ *   lists — 진료 중단 · 리콜 · 노쇼 명단 + 연락함 (라운지 관리자도)
+ *   병원 밖에서는 이메일 인증을 먼저 (md_sec_guard 가 md_ 주소 값을 막음)
+ * ============================================================ */
+function md_brief_dl_url( $what ) {
+	return md_brief_lounge_url( array( 'md_brief_dl' => $what, '_n' => wp_create_nonce( 'md_brief_dl' ) ) );
+}
+
+function md_brief_xl_rows() {
+	global $wpdb;
+	return (array) $wpdb->get_results( 'SELECT d, data, made_at, mailed_at FROM ' . md_brief_table() . ' ORDER BY d ASC' );
+}
+
+function md_brief_xlsx_day() {
+	$num = function ( $v ) { return is_numeric( $v ) ? 0 + $v : $v; };
+	$days = array(); $docs = array(); $mtd = array(); $last = null;
+	foreach ( md_brief_xl_rows() as $row ) {
+		$x = json_decode( $row->data, true );
+		if ( ! is_array( $x ) ) { continue; }
+		$last = $x;
+		$d = $x['day'] ?? array(); $rv = $x['resv_day'] ?? array(); $c = $x['counts'] ?? array();
+		$days[] = array(
+			$row->d, md_brief_dow( $row->d ),
+			(int) ( $d['visits'] ?? 0 ), (int) ( $d['new'] ?? 0 ),
+			$num( $d['total'] ?? 0 ), $num( $d['gong'] ?? 0 ), $num( $d['bon'] ?? 0 ), $num( $d['bi'] ?? 0 ), $num( $d['paid'] ?? 0 ),
+			(int) ( $rv['total'] ?? 0 ), (int) ( $rv['came'] ?? 0 ), (int) ( $rv['cancel'] ?? 0 ), (int) ( $rv['noshow'] ?? 0 ),
+			! empty( $rv['total'] ) ? round( 100 * $rv['noshow'] / max( 1, $rv['total'] ), 1 ) : '',
+			(int) ( $c['dropout'] ?? 0 ), (int) ( $c['recall'] ?? 0 ), (int) ( $c['noshow'] ?? 0 ),
+			(string) $row->made_at, (string) $row->mailed_at,
+		);
+		foreach ( (array) ( $x['doctors'] ?? array() ) as $r ) {
+			$docs[] = array( $row->d, md_brief_dow( $row->d ), (string) ( $r['name'] ?? '' ), (int) ( $r['visits'] ?? 0 ), $num( $r['total'] ?? 0 ), $num( $r['bi'] ?? 0 ) );
+		}
+		$m = $x['mtd'] ?? array(); $mp = $x['mtd_prev'] ?? array(); $ly = $x['mtd_ly'] ?? array();
+		$mtd[] = array( $row->d, ( $m['from'] ?? '' ) . '~' . ( $m['to'] ?? '' ), (int) ( $m['days'] ?? 0 ),
+			$num( $m['total'] ?? 0 ), $num( $mp['total'] ?? 0 ), $num( $ly['total'] ?? 0 ),
+			$num( $m['bi'] ?? 0 ), $num( $mp['bi'] ?? 0 ), $num( $ly['bi'] ?? 0 ),
+			(int) ( $m['visits'] ?? 0 ), (int) ( $mp['visits'] ?? 0 ), (int) ( $ly['visits'] ?? 0 ),
+			(int) ( $m['new'] ?? 0 ), (int) ( $mp['new'] ?? 0 ), (int) ( $ly['new'] ?? 0 ) );
+	}
+	$ns = array();
+	if ( $last && ! empty( $last['noshow'] ) ) {
+		$n = $last['noshow'];
+		foreach ( array( 'by_doctor' => '원장', 'by_dow' => '요일', 'by_hour' => '시간' ) as $k => $label ) {
+			foreach ( (array) ( $n[ $k ] ?? array() ) as $r ) {
+				$ns[] = array( $label, 'by_hour' === $k ? (int) $r['key'] . '시' : (string) $r['key'], isset( $r['rate'] ) ? 0 + $r['rate'] : '', isset( $r['noshow'] ) ? (int) $r['noshow'] : '', isset( $r['total'] ) ? (int) $r['total'] : '' );
+			}
+		}
+	}
+	$won = 'won';
+	return md_inv_xlsx( array(
+		array( 'title' => '진료일별', 'head' => array( '진료일', '요일', '내원', '신환', '총진료비', '공단부담', '본인부담', '비급여', '수납', '예약', '예약 내원', '취소/변경', '노쇼', '노쇼율(%)', '진료 중단 명단', '리콜 명단', '노쇼 명단', '만든 시각', '메일 보낸 시각' ),
+			'rows' => $days, 'num' => array( 2 => 1, 3 => 1, 4 => $won, 5 => $won, 6 => $won, 7 => $won, 8 => $won, 9 => 1, 10 => 1, 11 => 1, 12 => 1 ),
+			'width' => array( 11, 4, 6, 6, 13, 13, 13, 13, 13, 6, 8, 8, 6, 9, 10, 8, 8, 17, 17 ) ),
+		array( 'title' => '원장별', 'head' => array( '진료일', '요일', '원장', '환자', '총진료비', '비급여' ), 'rows' => $docs, 'num' => array( 3 => 1, 4 => $won, 5 => $won ), 'width' => array( 11, 4, 10, 6, 13, 13 ) ),
+		array( 'title' => '이번 달 누적', 'head' => array( '기준 진료일', '기간', '진료일수', '총진료비', '총진료비(지난달 같은 기간)', '총진료비(작년 같은 기간)', '비급여', '비급여(지난달)', '비급여(작년)', '내원', '내원(지난달)', '내원(작년)', '신환', '신환(지난달)', '신환(작년)' ),
+			'rows' => $mtd, 'num' => array( 3 => $won, 4 => $won, 5 => $won, 6 => $won, 7 => $won, 8 => $won, 9 => 1, 10 => 1, 11 => 1, 12 => 1, 13 => 1, 14 => 1 ),
+			'width' => array( 11, 22, 8, 13, 16, 16, 13, 13, 13, 7, 9, 9, 7, 9, 9 ) ),
+		array( 'title' => '노쇼율 (최근)', 'head' => array( '구분', '항목', '노쇼율(%)', '노쇼', '예약' ), 'rows' => $ns, 'num' => array( 3 => 1, 4 => 1 ), 'width' => array( 6, 12, 9, 6, 6 ) ),
+	) );
+}
+
+function md_brief_xlsx_lists() {
+	$L = get_option( 'md_brief_lists' );
+	$marks = (array) get_option( 'md_brief_marks', array() );
+	$names = array( 'dropout' => '진료 중단', 'recall' => '리콜', 'noshow' => '노쇼' );
+	$kinds = array( 'endo' => '신경치료 중단', 'crown' => '보철 안 함', 'imp' => '임플란트', 'sc' => '스케일링', 'yday' => '지난 진료일', 'repeat' => '자주 노쇼' );
+	$sheets = array();
+	foreach ( $names as $tab => $title ) {
+		$rows = array();
+		foreach ( is_array( $L ) ? (array) ( $L[ $tab ] ?? array() ) : array() as $r ) {
+			$k  = $tab . '|' . $r['chart'] . '|' . $r['kinds'];
+			$mk = $marks[ $k ] ?? null;
+			$kk = array();
+			foreach ( explode( ',', (string) $r['kinds'] ) as $x ) { if ( '' !== $x ) { $kk[] = $kinds[ $x ] ?? $x; } }
+			$rows[] = array( $r['chart'], $r['name'], $r['doc'], implode( ' · ', $kk ), $r['why'], $r['date'], $r['last'], $mk ? (string) $mk['d'] : '', $mk ? (string) $mk['by'] : '' );
+		}
+		$sheets[] = array( 'title' => $title, 'head' => array( '차트번호', '이름', '담당', '분류', '사유', '기준일', '마지막 내원', '연락한 날', '연락한 사람' ), 'rows' => $rows, 'width' => array( 9, 9, 8, 14, 40, 11, 11, 10, 9 ) );
+	}
+	return md_inv_xlsx( $sheets );
+}
+
+function md_brief_handle_download() {
+	if ( empty( $_GET['md_brief_dl'] ) ) { return; }
+	$what = sanitize_key( wp_unslash( $_GET['md_brief_dl'] ) );
+	if ( ! isset( $_GET['_n'] ) || ! wp_verify_nonce( wp_unslash( $_GET['_n'] ), 'md_brief_dl' ) ) { wp_die( '링크가 만료되었습니다. 화면을 새로고침한 뒤 다시 눌러 주세요.' ); }
+	if ( 'day' === $what ? ! md_brief_can_money() : ! md_brief_can_lists() ) { wp_die( 'day' === $what ? '원장 계정만 받을 수 있습니다.' : '라운지 관리자만 받을 수 있습니다.', '권한 없음', array( 'response' => 403 ) ); }
+	if ( ! function_exists( 'md_inv_xlsx' ) ) { wp_die( '엑셀 모듈(재료실)이 꺼져 있습니다.' ); }
+	if ( 'day' === $what ) {
+		$bin = md_brief_xlsx_day();  $name = '경영브리핑_' . current_time( 'Ymd' ) . '.xlsx';
+	} else {
+		$bin = md_brief_xlsx_lists(); $name = '연락할환자명단_' . current_time( 'Ymd' ) . '.xlsx';
+	}
+	while ( ob_get_level() ) { ob_end_clean(); }
+	nocache_headers();
+	header( 'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' );
+	header( 'Content-Disposition: attachment; filename="moondental-brief.xlsx"; filename*=UTF-8\'\'' . rawurlencode( $name ) );
+	header( 'Content-Length: ' . strlen( $bin ) );
+	echo $bin; // phpcs:ignore
+	exit;
+}
+add_action( 'template_redirect', 'md_brief_handle_download', 2 );
