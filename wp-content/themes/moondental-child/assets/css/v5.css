@@ -1194,3 +1194,7 @@ body.md-look .v5-hero__photo img { border-radius: 14px; }
 #whitening .v5-impl__flow { margin-bottom: 64px !important; }
 #whitening .v5-impl__twocol { margin-bottom: 40px; }
 @media (max-width: 700px) { #whitening .v5-impl__flow { margin-bottom: 44px !important; } }
+
+/* v8 · 자연치아보존센터 세부 페이지 — 이동 막대에서 지금 페이지 표시 */
+body.md-v5 .md-preservation-nav a.is-current { color: var(--v5-ink) !important; border-bottom-color: var(--v5-bronze) !important; font-weight: 600 !important; }
+body.md-v5 .md-preservation-nav a > span[aria-hidden]:empty { display: none; }

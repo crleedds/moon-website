@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MOONDENTAL_VERSION', '7.5.3' );
+define( 'MOONDENTAL_VERSION', '7.6.0' );
 
 /* v3.43.2 · 다국어 URL 접두어 · Polylang 리다이렉트 루프 회피
  *
@@ -2124,6 +2124,7 @@ if ( file_exists( MOONDENTAL_DIR . '/inc/fees/fees.php' ) ) { require_once MOOND
 if ( file_exists( MOONDENTAL_DIR . '/inc/encyclopedia-boost.php' ) ) { require_once MOONDENTAL_DIR . '/inc/encyclopedia-boost.php'; } // v4.20 · 백과사전 보강
 if ( file_exists( MOONDENTAL_DIR . '/inc/design-v5.php' ) ) { require_once MOONDENTAL_DIR . '/inc/design-v5.php'; } // v5.0 · 새 디자인
 if ( file_exists( MOONDENTAL_DIR . '/inc/rename-esthetic.php' ) ) { require_once MOONDENTAL_DIR . '/inc/rename-esthetic.php'; } // v4.23 · 심미치료센터 이름·주소
+if ( file_exists( MOONDENTAL_DIR . '/inc/pres-pages.php' ) ) { require_once MOONDENTAL_DIR . '/inc/pres-pages.php'; } // v8 · 자연치아보존센터 세부 페이지
 if ( file_exists( MOONDENTAL_DIR . '/inc/staff/staff.php' ) ) { require_once MOONDENTAL_DIR . '/inc/staff/staff.php'; } // v4.18 · 직원 정보
 if ( file_exists( MOONDENTAL_DIR . '/inc/calendar/calendar.php' ) ) { require_once MOONDENTAL_DIR . '/inc/calendar/calendar.php'; } // v4.17 · 달력
 if ( file_exists( MOONDENTAL_DIR . '/inc/survey/survey.php' ) ) { require_once MOONDENTAL_DIR . '/inc/survey/survey.php'; } // v4.10 · 환자 만족도 조사 (/만족도/ + 직원 전용 관리)
@@ -4614,7 +4615,7 @@ function moondental_recategorize_posts() {
  */
 function moondental_primary_menu_data() {
 	$home = home_url( '/' );
-	return array(
+	$menu = array(
 		array( 'label' => '임플란트센터',     'url' => $home . '임플란트-센터/',     'children' => array() ),
 		array( 'label' => '교정센터',         'url' => $home . '투명교정-센터/',     'children' => array(
 			array( 'label' => '슈어스마일 투명교정', 'url' => $home . '슈어스마일-투명교정/' ),
@@ -4629,6 +4630,7 @@ function moondental_primary_menu_data() {
 			array( 'label' => '잇몸치료',                'url' => $home . '자연치아-살리기/#perio' ),
 			array( 'label' => '덴탈SPA',                 'url' => $home . '자연치아-살리기/#spa' ),
 		) ),
+		/* v8 · 한국어 새 디자인에서는 진료별 세부 페이지로 (아래에서 바꿔 끼움 · inc/pres-pages.php) */
 		array( 'label' => '진료과',           'url' => '#',           'children' => array(
 			array( 'label' => '턱관절클리닉',    'url' => $home . '턱관절-클리닉/' ),
 			array( 'label' => '이갈이·이악물기','url' => $home . '턱관절-클리닉/' ),
@@ -4647,6 +4649,14 @@ function moondental_primary_menu_data() {
 			array( 'label' => '상시채용',          'url' => $home . '상시채용/' ),
 		) ),
 	);
+	if ( function_exists( 'md_pres_sub_on' ) && md_pres_sub_on() ) {
+		foreach ( $menu as $_i => $_m ) {
+			if ( '자연치아보존센터' !== $_m['label'] ) { continue; }
+			$menu[ $_i ]['children'] = array();
+			foreach ( md_pres_sub_pages() as $_k => $_p ) { $menu[ $_i ]['children'][] = array( 'label' => $_p['menu'], 'url' => md_pres_sub_url( $_k ) ); }
+		}
+	}
+	return $menu;
 }
 
 /**

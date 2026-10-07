@@ -63,6 +63,11 @@ $parse_nav = function( $text ) {
 };
 
 $nav_items          = $parse_nav( md_content( 'preservation_nav_items', '' ) );
+/* v8 · 한국어 새 디자인 — 진료별 세부 페이지로 (inc/pres-pages.php) */
+if ( function_exists( 'md_pres_sub_on' ) && md_pres_sub_on() ) {
+	$nav_items = array();
+	foreach ( md_pres_sub_pages() as $_k => $_p ) { $nav_items[] = array( 'icon' => '', 'label' => $_p['menu'], 'anchor' => md_pres_sub_url( $_k ) ); }
+}
 $cavity_cards       = $parse_cards( md_content( 'preservation_cavity_cards', '' ) );
 $pulpcap_when_list  = md_parse_lines( md_content( 'preservation_pulpcap_when_list', '' ) );
 $pulpcap_strength_pair = $parse_pair( md_content( 'preservation_pulpcap_strength_cards', '' ) );
