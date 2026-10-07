@@ -7,6 +7,7 @@
  *
  *   파일은 uploads/md-forms/ 에 무작위 이름으로 두고(.htaccess 로 바로 열기 막음),
  *   이 화면의 주소(?app=forms&md_form=번호)로만 로그인한 직원에게 내준다.
+ *   v9.0 · 파일 대신 링크(구글 시트 · 문서 등)도 올린다 — ext='link', url 칸. 「열기」는 이 화면을 거쳐(로그인 확인 · 횟수) 그 주소로 보냄.
  *   표 wp_md_forms. 주소 파라미터 fv(화면) · fc(분류) · fid. POST 칸은 f_ 로 시작(WP 질의 변수와 안 겹치게).
  *
  * @package moondental-child
@@ -14,7 +15,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_FORMS_SCHEMA', 1 );
+define( 'MD_FORMS_SCHEMA', 2 ); /* v9.0 · 2 = 링크 (url) */
 
 function md_forms_t() { global $wpdb; return $wpdb->prefix . 'md_forms'; }
 function md_forms_can_use()    { return function_exists( 'md_sup_can_use' ) && md_sup_can_use(); }
@@ -38,6 +39,7 @@ function md_forms_install() {
 		orig VARCHAR(255) NOT NULL DEFAULT '',
 		ext VARCHAR(10) NOT NULL DEFAULT '',
 		size BIGINT UNSIGNED NOT NULL DEFAULT 0,
+		url VARCHAR(1000) NOT NULL DEFAULT '',
 		dl_n INT UNSIGNED NOT NULL DEFAULT 0,
 		created_at DATETIME NULL DEFAULT NULL,
 		created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
@@ -72,6 +74,29 @@ function md_forms_types() {
 		'txt' => 'text/plain', 'zip' => 'application/zip',
 	);
 }
+/** v9.0 · 링크 — http(s) 주소만. 잘못이면 '' */
+function md_forms_clean_url( $u ) {
+	$u = trim( (string) $u );
+	if ( '' !== $u && ! preg_match( '#^https?://#i', $u ) ) { $u = 'https://' . $u; }
+	$u = esc_url_raw( $u, array( 'http', 'https' ) );
+	return preg_match( '#^https?://[^/\s?\#]+\.[^/\s?\#]+#i', (string) $u ) ? mb_substr( $u, 0, 1000 ) : '';
+}
+/** 링크 종류 — 아이콘 · 안내 글자 */
+function md_forms_link_kind( $u ) {
+	$h = strtolower( (string) wp_parse_url( $u, PHP_URL_HOST ) );
+	$p = (string) wp_parse_url( $u, PHP_URL_PATH );
+	if ( 'docs.google.com' === $h ) {
+		if ( 0 === strpos( $p, '/spreadsheets' ) ) { return array( 'sheet', '시트', '구글 시트' ); }
+		if ( 0 === strpos( $p, '/document' ) )     { return array( 'gdoc', '문서', '구글 문서' ); }
+		if ( 0 === strpos( $p, '/presentation' ) ) { return array( 'slide', '슬라이드', '구글 슬라이드' ); }
+		if ( 0 === strpos( $p, '/forms' ) )        { return array( 'gform', '설문', '구글 설문지' ); }
+	}
+	if ( 'forms.gle' === $h ) { return array( 'gform', '설문', '구글 설문지' ); }
+	if ( 'drive.google.com' === $h ) { return array( 'drive', '드라이브', '구글 드라이브' ); }
+	return array( 'link', '링크', $h ? preg_replace( '/^www\./', '', $h ) : '링크' );
+}
+function md_forms_is_link( $f ) { return 'link' === $f->ext; }
+
 /** 브라우저에서 바로 열리는 것 (열어서 인쇄) */
 function md_forms_inline( $ext ) { return in_array( $ext, array( 'pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'txt' ), true ); }
 
@@ -136,6 +161,15 @@ function md_forms_handle_file() {
 	if ( ! md_forms_can_use() ) { wp_die( '직원 라운지에 로그인한 뒤 열 수 있습니다.', '권한 없음', array( 'response' => 403 ) ); }
 	$f = md_forms_get( (int) $_GET['md_form'] );
 	if ( ! $f || ( $f->deleted_at && ! md_forms_can_manage() ) ) { wp_die( '양식을 찾을 수 없습니다.', '', array( 'response' => 404 ) ); }
+	if ( md_forms_is_link( $f ) ) {
+		if ( '' === $f->url ) { wp_die( '링크가 없습니다.', '', array( 'response' => 404 ) ); }
+		global $wpdb;
+		$wpdb->query( $wpdb->prepare( 'UPDATE ' . md_forms_t() . ' SET dl_n = dl_n + 1 WHERE id = %d', (int) $f->id ) );
+		nocache_headers();
+		header( 'Referrer-Policy: no-referrer' );
+		wp_redirect( $f->url, 302 ); // phpcs:ignore WordPress.Security.SafeRedirect — 관리자가 올린 바깥 주소
+		exit;
+	}
 	$path = md_forms_dir() . '/' . basename( $f->file );
 	if ( '' === $f->file || ! is_readable( $path ) ) { wp_die( '파일이 없습니다.', '', array( 'response' => 404 ) ); }
 	$dl = ! empty( $_GET['dl'] ) || ! md_forms_inline( $f->ext );
@@ -200,13 +234,28 @@ function md_forms_handle_post() {
 			$back = md_forms_url( array_filter( array( 'fok' => $ok ? $ok . '개 양식을 올렸습니다.' : '', 'ferr' => implode( ' / ', $errs ), 'fc' => $ok ? $cat : '' ) ) );
 			break;
 
+		case 'link': /* v9.0 · 링크 올리기 */
+			$url   = md_forms_clean_url( isset( $_POST['f_url'] ) ? wp_unslash( $_POST['f_url'] ) : '' );
+			$title = $txt( 'f_title', 200 );
+			if ( '' === $url ) { $back = md_forms_url( array( 'ferr' => '링크 주소가 올바르지 않습니다. https:// 로 시작하는 주소를 붙여 넣어 주세요.' ) ); break; }
+			if ( '' === $title ) { $k = md_forms_link_kind( $url ); $title = $k[2]; }
+			$wpdb->insert( $t, array(
+				'title' => $title, 'cat' => $cat, 'note' => $txt( 'f_note', 500 ), 'file' => '', 'orig' => '', 'ext' => 'link', 'size' => 0, 'url' => $url,
+				'created_at' => $now, 'created_by' => get_current_user_id(), 'updated_at' => $now,
+			) );
+			$back = md_forms_url( array( 'fok' => '「' . $title . '」 링크를 올렸습니다.', 'fc' => $cat ) );
+			break;
+
 		case 'edit':
 			$f = md_forms_get( $id );
 			if ( ! $f ) { break; }
 			$u = array( 'title' => $txt( 'f_title', 200 ), 'cat' => $cat, 'note' => $txt( 'f_note', 500 ), 'updated_at' => $now );
 			if ( '' === $u['title'] ) { $u['title'] = $f->title; }
 			$err = '';
-			if ( ! empty( $_FILES['f_file']['name'] ) ) {
+			if ( md_forms_is_link( $f ) ) {
+				$url = md_forms_clean_url( isset( $_POST['f_url'] ) ? wp_unslash( $_POST['f_url'] ) : '' );
+				if ( '' === $url ) { $err = '링크 주소가 올바르지 않아 주소는 그대로 두었습니다.'; } else { $u['url'] = $url; }
+			} elseif ( ! empty( $_FILES['f_file']['name'] ) ) {
 				$st = md_forms_store( $_FILES['f_file'] );
 				if ( is_wp_error( $st ) ) { $err = $st->get_error_message(); }
 				else {
@@ -231,7 +280,7 @@ function md_forms_handle_post() {
 		case 'purge':
 			$f = md_forms_get( $id );
 			if ( $f && $f->deleted_at ) {
-				@unlink( md_forms_dir() . '/' . basename( $f->file ) );
+				if ( '' !== $f->file ) { @unlink( md_forms_dir() . '/' . basename( $f->file ) ); }
 				$wpdb->delete( $t, array( 'id' => $id ) );
 			}
 			$back = md_forms_url( array( 'fv' => 'trash', 'fok' => '완전히 지웠습니다.' ) );
@@ -274,7 +323,8 @@ function md_forms_cat_fields( $cur = '' ) {
 	echo '<label class="mds-field"><span>새 분류 (목록에 없으면)</span><input name="f_cat_new" maxlength="60" placeholder="예: 교정 상담"></label>';
 }
 
-function md_forms_icon( $ext ) {
+function md_forms_icon( $ext, $url = '' ) {
+	if ( 'link' === $ext ) { $k = md_forms_link_kind( $url ); return '<span class="mdf-ico mdf-ico--' . esc_attr( $k[0] ) . '" aria-hidden="true">' . esc_html( $k[1] ) . '</span>'; }
 	$m = array( 'pdf' => 'PDF', 'hwp' => 'HWP', 'hwpx' => 'HWP', 'doc' => 'DOC', 'docx' => 'DOC', 'xls' => 'XLS', 'xlsx' => 'XLS', 'ppt' => 'PPT', 'pptx' => 'PPT', 'zip' => 'ZIP', 'txt' => 'TXT' );
 	$k = isset( $m[ $ext ] ) ? $m[ $ext ] : 'IMG';
 	return '<span class="mdf-ico mdf-ico--' . esc_attr( strtolower( $k ) ) . '" aria-hidden="true">' . esc_html( $k ) . '</span>';
@@ -298,11 +348,12 @@ function md_forms_render() {
 	?>
 	<div class="mds-card mdf-head">
 		<div>
-			<p class="mds-hint">상담용지 · 동의서 · 안내문 같은 병원 양식입니다. 「열기」로 바로 인쇄하거나 「받기」로 내려받으세요.<?php echo $admin ? '' : ' 새 양식이나 고칠 것은 경영지원실에 알려 주세요.'; ?></p>
+			<p class="mds-hint">상담용지 · 동의서 · 안내문 같은 병원 양식입니다. 「열기」로 바로 인쇄하거나 「받기」로 내려받으세요. 구글 시트 같은 링크는 「열기」를 누르면 새 창에서 열립니다.<?php echo $admin ? '' : ' 새 양식이나 고칠 것은 경영지원실에 알려 주세요.'; ?></p>
 		</div>
 		<?php if ( $admin ) : ?>
 		<div class="mdf-head__act">
 			<button type="button" class="mds-btn mds-btn--fill" data-mdf-open="mdf-up">＋ 양식 올리기</button>
+			<button type="button" class="mds-btn mds-btn--ghost" data-mdf-open="mdf-link">＋ 링크 올리기</button>
 			<?php $nt = count( md_forms_list( true ) ); if ( $nt ) : ?><a class="mds-btn mds-btn--ghost" href="<?php echo esc_url( md_forms_url( array( 'fv' => 'trash' ) ) ); ?>">지운 양식 <?php echo (int) $nt; ?></a><?php endif; ?>
 		</div>
 		<?php endif; ?>
@@ -322,11 +373,25 @@ function md_forms_render() {
 		</div>
 		<label class="mds-field"><span>메모 (선택)</span><input name="f_note" maxlength="500" placeholder="예: 2026년 10월 개정판 · 양면 인쇄"></label>
 		<div class="mdf-up__btns"><button class="mds-btn mds-btn--fill">올리기</button><?php if ( $list ) : ?><button type="button" class="mds-btn mds-btn--ghost" data-mdf-close="mdf-up">닫기</button><?php endif; ?></div>
+		<?php if ( ! $list ) : ?><p class="mds-hint">파일 대신 구글 시트 같은 링크를 올리려면 위 「＋ 링크 올리기」를 누르세요.</p><?php endif; ?>
+	</form>
+
+	<form class="mds-card mdf-up" id="mdf-link" method="post" hidden>
+		<?php md_forms_hidden( 'link' ); ?>
+		<h3>링크 올리기 <small class="mds-hint">구글 시트 · 문서 · 설문지 · 드라이브 등</small></h3>
+		<label class="mds-field"><span>링크 주소</span><input type="url" name="f_url" required maxlength="1000" inputmode="url" placeholder="https://docs.google.com/spreadsheets/d/…"></label>
+		<div class="mdf-grid">
+			<label class="mds-field mds-field--grow"><span>이름</span><input name="f_title" maxlength="200" placeholder="예: 임플란트 재고 시트"></label>
+			<?php md_forms_cat_fields(); ?>
+		</div>
+		<label class="mds-field"><span>메모 (선택)</span><input name="f_note" maxlength="500" placeholder="예: 병원 계정으로 로그인해야 열림"></label>
+		<p class="mds-hint">구글 문서는 직원들이 열 수 있도록 공유 설정(링크가 있는 사용자 또는 병원 계정)을 확인해 주세요.</p>
+		<div class="mdf-up__btns"><button class="mds-btn mds-btn--fill">올리기</button><button type="button" class="mds-btn mds-btn--ghost" data-mdf-close="mdf-link">닫기</button></div>
 	</form>
 	<?php endif; ?>
 
 	<?php if ( ! $list ) : ?>
-		<div class="mds-card mdf-empty">아직 올린 양식이 없습니다.<?php echo $admin ? ' 위에서 파일을 골라 올려 주세요.' : ''; ?></div>
+		<div class="mds-card mdf-empty">아직 올린 양식이 없습니다.<?php echo $admin ? ' 위에서 파일이나 링크를 올려 주세요.' : ''; ?></div>
 	<?php else : ?>
 	<div class="mdf-bar">
 		<input class="mdf-q" type="search" placeholder="양식 찾기" aria-label="양식 찾기" data-mdf-q>
@@ -342,16 +407,20 @@ function md_forms_render() {
 			$c = '' === $f->cat ? '기타' : $f->cat;
 			$hide = '' !== $fc && $fc !== $c;
 			if ( $c !== $prev ) { echo '<h3 class="mdf-cat" data-mdf-head="' . esc_attr( $c ) . '"' . ( $hide ? ' hidden' : '' ) . '>' . esc_html( $c ) . '</h3>'; $prev = $c; } ?>
-		<article class="mds-card mdf-item" id="form-<?php echo (int) $f->id; ?>" data-mdf-item data-cat="<?php echo esc_attr( $c ); ?>" data-text="<?php echo esc_attr( mb_strtolower( $f->title . ' ' . $f->note . ' ' . $f->orig . ' ' . $c ) ); ?>"<?php echo $hide ? ' hidden' : ''; ?>>
-			<?php echo md_forms_icon( $f->ext ); // phpcs:ignore ?>
+		<?php $lnk = md_forms_is_link( $f ); $lk = $lnk ? md_forms_link_kind( $f->url ) : null; ?>
+		<article class="mds-card mdf-item<?php echo $lnk ? ' mdf-item--link' : ''; ?>" id="form-<?php echo (int) $f->id; ?>" data-mdf-item data-cat="<?php echo esc_attr( $c ); ?>" data-text="<?php echo esc_attr( mb_strtolower( $f->title . ' ' . $f->note . ' ' . $f->orig . ' ' . $c . ( $lnk ? ' ' . $lk[2] . ' 링크' : '' ) ) ); ?>"<?php echo $hide ? ' hidden' : ''; ?>>
+			<?php echo md_forms_icon( $f->ext, $f->url ); // phpcs:ignore ?>
 			<div class="mdf-item__body">
 				<b class="mdf-item__title"><?php echo esc_html( $f->title ); ?></b>
-				<span class="mdf-item__meta"><?php echo esc_html( strtoupper( $f->ext ) . ' · ' . md_forms_size( $f->size ) . ' · ' . mysql2date( 'Y.n.j', $f->updated_at ? $f->updated_at : $f->created_at ) . ( $admin && $f->dl_n ? ' · 받은 횟수 ' . (int) $f->dl_n : '' ) ); ?></span>
+				<span class="mdf-item__meta"><?php echo esc_html( ( $lnk ? $lk[2] . ' 링크' : strtoupper( $f->ext ) . ' · ' . md_forms_size( $f->size ) ) . ' · ' . mysql2date( 'Y.n.j', $f->updated_at ? $f->updated_at : $f->created_at ) . ( $admin && $f->dl_n ? ( $lnk ? ' · 연 횟수 ' : ' · 받은 횟수 ' ) . (int) $f->dl_n : '' ) ); ?></span>
 				<?php if ( '' !== $f->note ) : ?><span class="mdf-item__note"><?php echo esc_html( $f->note ); ?></span><?php endif; ?>
 			</div>
 			<div class="mdf-item__act">
+				<?php if ( $lnk ) : ?><a class="mds-btn mds-btn--fill" href="<?php echo esc_url( add_query_arg( 'md_form', (int) $f->id, md_forms_url() ) ); ?>" target="_blank" rel="noopener noreferrer">열기 ↗</a>
+				<?php else : ?>
 				<?php if ( md_forms_inline( $f->ext ) ) : ?><a class="mds-btn mds-btn--fill" href="<?php echo esc_url( add_query_arg( 'md_form', (int) $f->id, md_forms_url() ) ); ?>" target="_blank" rel="noopener">열기 · 인쇄</a><?php endif; ?>
 				<a class="mds-btn mds-btn--ghost" href="<?php echo esc_url( add_query_arg( array( 'md_form' => (int) $f->id, 'dl' => 1 ), md_forms_url() ) ); ?>">받기</a>
+				<?php endif; ?>
 				<?php if ( $admin ) : ?><button type="button" class="mds-btn mds-btn--ghost" data-mdf-open="mdf-edit-<?php echo (int) $f->id; ?>">고치기</button><?php endif; ?>
 			</div>
 			<?php if ( $admin ) : ?>
@@ -363,7 +432,11 @@ function md_forms_render() {
 						<?php md_forms_cat_fields( $f->cat ); ?>
 					</div>
 					<label class="mds-field"><span>메모</span><input name="f_note" maxlength="500" value="<?php echo esc_attr( $f->note ); ?>"></label>
+					<?php if ( $lnk ) : ?>
+					<label class="mds-field"><span>링크 주소</span><input type="url" name="f_url" required maxlength="1000" value="<?php echo esc_attr( $f->url ); ?>"></label>
+					<?php else : ?>
 					<label class="mds-field"><span>파일 바꾸기 (새 판으로 · 선택) — 지금: <?php echo esc_html( $f->orig ); ?></span><input type="file" name="f_file" accept=".pdf,.hwp,.hwpx,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip"></label>
+					<?php endif; ?>
 					<div class="mdf-up__btns"><button class="mds-btn mds-btn--fill">저장</button><button type="button" class="mds-btn mds-btn--ghost" data-mdf-close="mdf-edit-<?php echo (int) $f->id; ?>">닫기</button></div>
 				</form>
 				<form method="post" class="mdf-del" data-mdf-confirm="「<?php echo esc_attr( $f->title ); ?>」을 지울까요? 휴지통에서 되살릴 수 있습니다.">
@@ -392,7 +465,7 @@ function md_forms_render_trash() {
 	<div class="mdf-list">
 	<?php foreach ( $list as $f ) : ?>
 		<article class="mds-card mdf-item">
-			<?php echo md_forms_icon( $f->ext ); // phpcs:ignore ?>
+			<?php echo md_forms_icon( $f->ext, $f->url ); // phpcs:ignore ?>
 			<div class="mdf-item__body"><b class="mdf-item__title"><?php echo esc_html( $f->title ); ?></b><span class="mdf-item__meta"><?php echo esc_html( ( '' === $f->cat ? '기타' : $f->cat ) . ' · 지운 날 ' . mysql2date( 'Y.n.j', $f->deleted_at ) ); ?></span></div>
 			<div class="mdf-item__act">
 				<form method="post"><?php md_forms_hidden( 'restore' ); ?><input type="hidden" name="fid" value="<?php echo (int) $f->id; ?>"><button class="mds-btn mds-btn--fill">되살리기</button></form>

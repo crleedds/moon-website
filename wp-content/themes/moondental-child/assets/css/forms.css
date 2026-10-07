@@ -43,3 +43,10 @@
   .mdf-item__act form .mds-btn { width: 100%; }
   .mdf-head__act, .mdf-head__act .mds-btn { width: 100%; }
 }
+
+/* v9.0 · 링크 (구글 시트 · 문서 등) */
+.mdf-ico--sheet { background: #1E8E4E; } .mdf-ico--gdoc { background: #3B78E7; } .mdf-ico--slide { background: #E2A400; }
+.mdf-ico--gform { background: #7248B9; } .mdf-ico--drive { background: #4A8AF4; } .mdf-ico--link { background: #6E8C9E; }
+.mdf-ico--sheet, .mdf-ico--gdoc, .mdf-ico--slide, .mdf-ico--gform, .mdf-ico--drive, .mdf-ico--link { font-size: .66rem; }
+.mdf-up h3 small { font-weight: 400; margin-left: 6px; }
+.mdf-up input[type=url] { font-size: 16px; }
