@@ -288,6 +288,11 @@ function md_mc_dw_timeline( $r, $d ) {
 	$undated = array(); $cur = null;
 	foreach ( preg_split( '/\r\n|\r|\n/', (string) $r->tx_hist ) as $ln ) {
 		if ( '' === trim( $ln ) ) { continue; }
+		/* v9.13 · 「000000:」처럼 날짜 자리가 있지만 날짜가 아닌 줄(AppSheet 때 날짜 모름)은 「날짜 없는 기록」으로 — 바로 위 날짜 줄에 딸려 들어가지 않게 (원장 지적: 오늘 줄을 넣자 옛 기록이 오늘로 보임) */
+		if ( preg_match( '/^\s*(\d{6})\s*:\s*(.*)$/u', $ln, $m0 ) && ! checkdate( (int) substr( $m0[1], 2, 2 ), (int) substr( $m0[1], 4, 2 ), 2000 + (int) substr( $m0[1], 0, 2 ) ) ) {
+			$undated[] = '' !== trim( $m0[2] ) ? trim( $m0[2] ) : trim( $ln );
+			continue;
+		}
 		if ( preg_match( '/^\s*(\d{2})(\d{2})(\d{2})\s*:\s*(.*)$/u', $ln, $m ) && checkdate( (int) $m[2], (int) $m[3], 2000 + (int) $m[1] ) ) {
 			$cur = sprintf( '20%s-%s-%s', $m[1], $m[2], $m[3] );
 			if ( ! isset( $rows[ $cur ] ) ) { $rows[ $cur ] = array( 'dr' => '', 'dw' => '', 'own' => array() ); }
