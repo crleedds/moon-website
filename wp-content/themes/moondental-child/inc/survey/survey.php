@@ -275,7 +275,14 @@ function md_survey_person_photo( $name, $kind = 'staff' ) {
 function md_survey_doctor_title( $name ) {
 	$n = trim( preg_replace( '/\s*(대표\s*)?(병원장|원장)(님)?\s*$/u', '', (string) $name ) );
 	if ( '' === $n ) { return ''; }
-	return $n . ' 원장님'; /* v4.21.32 · 문은수도 「원장」 (원장 지시 — 병원장 호칭 철회) */
+	/* v4.22.1 · 문은수는 「병원장」, 나머지 원장님은 「원장」 (원장 지시 2026-10-09). 직원 정보의 직책에 「병원장」이 있으면 그걸 따른다 */
+	$key = md_survey_name_key( $n );
+	if ( function_exists( 'md_staff_all' ) ) {
+		foreach ( md_staff_all( true ) as $r ) {
+			if ( '의료진' === $r->dept && md_survey_name_key( $r->name ) === $key ) { return $n . ( false !== mb_strpos( (string) $r->position, '병원장' ) ? ' 병원장님' : ' 원장님' ); }
+		}
+	}
+	return $n . ( '문은수' === $key ? ' 병원장님' : ' 원장님' );
 }
 
 /** 담당직원 표시 — 직원 정보(라운지)의 직책을 이름 옆에 (예: 홍길동 → 홍길동 실장 · 원장 지시) */
