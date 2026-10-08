@@ -827,13 +827,13 @@ function md_mc_handle_post() {
 		case 'field': /* v9.19 · 차트 화면에서 칸 하나(병력 · 지역 · 담당의 · 내원경로)만 바로 고치기 */
 			$cur = md_mc_get( $id );
 			$fld = sanitize_key( (string) ( $post['field'] ?? '' ) );
-			if ( ! $cur || 'patient' !== $cur->kind || ! in_array( $fld, array( 'mhx', 'addr', 'referral', 'dr' ), true ) ) { $back = md_mc_url(); break; }
+			if ( ! $cur || 'patient' !== $cur->kind || ! in_array( $fld, array( 'mhx', 'addr', 'referral', 'dr', 'memo' ), true ) ) { $back = md_mc_url(); break; }
 			if ( (int) ( $post['rev'] ?? 0 ) !== (int) $cur->rev ) { $back = $err( '그 사이 다른 분이 이 차트를 고쳤습니다. 최신 내용을 보고 다시 고쳐 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
 			if ( 'dr' === $fld ) {
 				$val = md_mc_dr_compose( $post['dr_main'] ?? '', $post['dr_dept'] ?? array(), $post['dr_doc'] ?? array(), $post['dr_extra'] ?? '', $post['dr_main_dept'] ?? '' );
 				if ( '' === trim( (string) $val ) ) { $back = $err( '담당의를 한 분 이상 골라 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
 			} else {
-				$val = ! empty( $post['na'][ $fld ] ) ? MD_MC_NA : sanitize_textarea_field( (string) ( $post[ $fld ] ?? '' ) );
+				$val = ! empty( $post['na'][ $fld ] ) ? MD_MC_NA : ( 'memo' === $fld ? trim( sanitize_textarea_field( (string) ( $post['memo'] ?? '' ) ) ) : sanitize_textarea_field( (string) ( $post[ $fld ] ?? '' ) ) );
 				if ( 'addr' === $fld && '' === trim( $val ) ) { $back = $err( '지역을 적어 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
 			}
 			if ( (string) $val !== (string) $cur->$fld ) {
@@ -974,6 +974,7 @@ function md_mc_fast_reply( $action, $id, $back ) {
 	} elseif ( 'add' === $action && in_array( $field, array_keys( md_mc_fields() ), true ) ) {
 		$out['target'] = $field;
 		$out['html'] = md_mc_text( $r->$field );
+		$out['value'] = (string) $r->$field; /* v9.20 · 같은 칸의 「눌러서 고치기」 폼도 최신으로 */
 	} elseif ( 'add' === $action ) {
 		/* 이미 저장됐다 — 화면은 그 주소로 옮겨 가기만 한다 (다시 보내면 두 번 저장됨) */
 		wp_send_json( array( 'ok' => true, 'redirect' => $back ) );
@@ -1313,16 +1314,20 @@ function md_mc_inline_view( $r, $d, $field ) {
 }
 
 /** v9.19 · 눌러서 바로 고치는 칸 — 보기(누르면 열림) + 고치기 폼(저장 · 취소). 저장은 빠른 저장(md_fast) 으로 그 자리만 바뀐다 */
-function md_mc_inline_block( $r, $d, $field ) {
+function md_mc_inline_block( $r, $d, $field, $bare = false ) {
 	$v = md_mc_inline_view( $r, $d, $field );
 	$f = md_mc_fields();
 	?>
-	<form method="post" class="mc-block mc-edit <?php echo esc_attr( $v['cls'] ); ?>" id="f-<?php echo esc_attr( $field ); ?>" action="<?php echo esc_url( md_mc_url() ); ?>" data-mc-fast="field" data-mc-field="<?php echo esc_attr( $field ); ?>">
+	<form method="post" class="<?php echo $bare ? 'mc-edit mc-edit--bare' : 'mc-block mc-edit ' . esc_attr( $v['cls'] ); ?>"<?php echo $bare ? '' : ' id="f-' . esc_attr( $field ) . '"'; ?> action="<?php echo esc_url( md_mc_url() ); ?>" data-mc-fast="field" data-mc-field="<?php echo esc_attr( $field ); ?>">
 		<?php md_mc_nonce_fields( 'field', $r->id ); ?><input type="hidden" name="field" value="<?php echo esc_attr( $field ); ?>"><input type="hidden" name="rev" value="<?php echo (int) $r->rev; ?>">
+		<?php if ( $bare ) : ?><p class="mc-edit__hint mc-sub">아래 내용을 누르면 예전 것까지 바로 고칠 수 있습니다</p><?php else : ?>
 		<h3 class="mc-block__h"><span class="mc-edit__head"><?php echo esc_html( $v['head'] ); ?></span> <small class="mc-sub">눌러서 바로 고치기</small></h3>
+		<?php endif; ?>
 		<div class="mc-block__b mc-edit__view" data-mc-edit-open title="눌러서 고치기"><?php echo $v['html']; // phpcs:ignore -- 안에서 이스케이프 ?></div>
 		<div class="mc-edit__form" hidden>
-			<?php if ( 'dr' === $field ) : ?>
+			<?php if ( 'memo' === $field ) : ?>
+				<textarea name="memo" rows="5" data-grow aria-label="참고사항 전체"><?php echo esc_textarea( (string) $r->memo ); ?></textarea>
+			<?php elseif ( 'dr' === $field ) : ?>
 				<?php md_mc_dr_field( array( 'dr' => (string) $r->dr ) ); ?>
 			<?php else :
 				$na  = '' !== (string) $r->$field && md_mc_is_na( $r->$field );
@@ -1407,7 +1412,7 @@ function md_mc_render_patient( $id ) {
 
 		<div class="mc-grid">
 			<?php
-			if ( $d && '' !== (string) ( $d['phone'] ?? '' ) ) { md_mc_block( '연락처', '<a href="tel:' . esc_attr( preg_replace( '/\D/', '', $d['phone'] ) ) . '">' . esc_html( $d['phone'] ) . '</a>' ); }
+			/* v9.20 · 연락처는 미니차트에 두지 않는다 (원장 지시 — 덴트웹에서 보면 된다) */
 			md_mc_inline_block( $r, $d, 'addr' );
 			md_mc_inline_block( $r, $d, 'dr' );
 			md_mc_inline_block( $r, $d, 'referral' );
@@ -1430,7 +1435,7 @@ function md_mc_render_patient( $id ) {
 		<details class="mc-block mc-block--log mc-memo" id="f-memo"<?php echo isset( $_GET['memo'] ) ? ' open' : ''; ?>>
 			<summary class="mc-block__h"><?php echo esc_html( $f['memo'][0] ); ?> <small class="mc-sub"><?php echo $mn ? $mn . '줄 · ' : ''; ?>눌러서 보기</small></summary>
 			<?php md_mc_addform( $r, 'memo', '참고사항입력 (날짜없이)' ); ?>
-			<div class="mc-block__b"><?php echo md_mc_text( $r->memo ); // phpcs:ignore ?></div>
+			<?php md_mc_inline_block( $r, $d, 'memo', true ); /* v9.20 · 예전 참고사항도 눌러서 고치기 (원장 지시) */ ?>
 		</details>
 		<?php if ( $d ) : ?><p class="mc-chart__meta mc-dwnote">덴트웹 자료 <?php echo esc_html( md_mc_short_date( $d['_synced'] ) . ' ' . date( 'H:i', strtotime( $d['_synced'] ) ) ); ?> 기준 (30분마다 새로 받음)</p><?php endif; ?>
 

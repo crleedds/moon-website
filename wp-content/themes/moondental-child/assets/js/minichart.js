@@ -195,7 +195,7 @@ window.mcInits.push(function () {
     hint.hidden = false;
     if (prev) {
       var age = (d.age !== '' && d.age != null) ? ' ' + d.age + '세' : '';
-      var rows = [['성명', d.name], ['성별 · 나이', (d.sex === 'M' ? '남' : d.sex === 'F' ? '여' : '') + age], ['연락처', d.phone], ['주소', d.addr], ['담당의', d.doctor], ['첫 등록', d.first], ['최근 내원', d.last]];
+      var rows = [['성명', d.name], ['성별 · 나이', (d.sex === 'M' ? '남' : d.sex === 'F' ? '여' : '') + age], ['주소', d.addr], ['담당의', d.doctor], ['첫 등록', d.first], ['최근 내원', d.last]];
       prev.innerHTML = '<b class="mc-dw-prev__h">덴트웹에서 가져온 정보</b><dl>' + rows.filter(function (r) { return r[1] && String(r[1]).trim(); }).map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>'; }).join('') + '</dl>';
       prev.hidden = false;
     }
@@ -397,6 +397,10 @@ document.addEventListener('click', function (e) {
       if (res.reload) { recover(''); return; }
       if (!res.ok) { toast(res.msg || '저장하지 못했습니다.', true); if (kind === 'plan') { Array.prototype.forEach.call(btns, function (b) { b.disabled = false; }); } return; }
       apply(res);
+      if (kind === 'add' && res.target && res.value != null) { /* v9.20 · 같은 칸의 「눌러서 고치기」 폼 값도 최신으로 */
+        var sec = document.getElementById('f-' + res.target), ef = sec && sec.querySelector('form.mc-edit textarea[name=' + res.target + ']');
+        if (ef) { ef.value = res.value; ef.defaultValue = res.value; }
+      }
       if (kind === 'field') {
         /* v9.19 · 보기 부분 · 머리말 · 칸 값을 맞추고 고치기 폼을 닫는다 */
         var head = form.querySelector('.mc-edit__head'); if (head && res.head != null) head.textContent = res.head;

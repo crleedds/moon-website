@@ -125,7 +125,7 @@ function md_mc_dw_clean( $p ) {
 		'sex'    => in_array( $p['sex'] ?? '', array( 'M', 'F' ), true ) ? $p['sex'] : '',
 		'birth'  => md_mc_dw_date( $p['birth'] ?? '' ),
 		'region' => md_mc_dw_region( $p['region'] ?? '' ),
-		'phone'  => preg_replace( '/[^0-9\-]/', '', md_mc_dw_txt( $p['phone'] ?? '', 20 ) ), /* v8.1 · 원장 지시 — 연락처 · 주소도 */
+		'phone'  => '', /* v9.20 · 연락처는 받아도 두지 않는다 (원장 지시 2026-10-08 — 미니차트에서 없앰) */
 		'addr'   => md_mc_addr_short( md_mc_dw_txt( $p['addr'] ?? '', 150 ) ), /* v9.8 · 세부 주소는 받지도 두지도 않는다 */
 		'doctor' => md_mc_dw_txt( $p['doctor'] ?? '', 30 ),
 		'first'  => md_mc_dw_date( $p['first'] ?? '' ),
@@ -256,7 +256,7 @@ function md_mc_dw_lookup() {
 	/* 기본 정보만 있으면(진료기록 없음) 지금 진료기록도 받아 오게 줄 세움 — 저장하면 바로 보이도록 */
 	if ( ! $dup && empty( $d['visits'] ) ) { md_mc_dw_enqueue( $c ); }
 	wp_send_json( array( 'ok' => true, 'dup' => $dup, 'visits' => count( (array) $d['visits'] ), 'name' => $d['name'], 'region' => md_mc_dw_region( $d['region'] ), 'doctor' => $d['doctor'], 'age' => md_mc_dw_age( $d['birth'] ), 'sex' => $d['sex'],
-		'phone' => $d['phone'] ?? '', 'addr' => md_mc_addr_short( $d['addr'] ?? '' ), 'first' => $d['first'], 'last' => $d['last'] ) );
+		'addr' => md_mc_addr_short( $d['addr'] ?? '' ), 'first' => $d['first'], 'last' => $d['last'] ) );
 }
 add_action( 'template_redirect', 'md_mc_dw_lookup', 2 );
 

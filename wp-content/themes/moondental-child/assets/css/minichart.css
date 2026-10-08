@@ -388,3 +388,5 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-edit__form textarea:disabled { background: var(--color-surface, #FBF2E8); color: var(--color-text-mute, #A89685); }
 .mc-edit__bar { display: flex; gap: 8px; }
 .mc-edit .mc-dr { padding: 0; border: 0; margin: 0; }
+.mc-edit--bare { display: block; padding: 0; border: 0; margin: 0; background: none; }
+.mc-edit__hint { margin: 0 0 4px; font-size: .8rem; }
