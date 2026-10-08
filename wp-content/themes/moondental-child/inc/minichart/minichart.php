@@ -1079,7 +1079,7 @@ function md_mc_find_deep_json( $q, $k ) {
 			$v = (string) $r->$c;
 			if ( '' === $v || false === mb_stripos( $v, $q ) ) { continue; }
 			$line = '';
-			foreach ( preg_split( '/
+			foreach ( preg_split( '/
 ||
 /', $v ) as $ln ) { if ( false !== mb_stripos( $ln, $q ) ) { $line = trim( $ln ); break; } }
 			$pos = mb_stripos( $line, $q );
@@ -1411,7 +1411,7 @@ function md_mc_render_patient( $id ) {
 				<?php if ( $r->pin ) : ?><span class="mc-tag mc-tag--pin">📌 상단고정</span><?php endif; ?>
 			</div>
 			<div class="mc-chart__acts">
-				<a class="mds-btn mds-btn--fill" href="<?php echo esc_url( md_mc_url( array( 'mv' => 'edit', 'mid' => $r->id ) ) ); ?>">수정</a>
+				<?php /* v9.23 · 맨 위 「수정」 버튼 없앰 — 칸마다 눌러서 고치므로. 이름 · 차트번호는 맨 아래 링크 (원장 지시) */ ?>
 				<form method="post" class="mc-inline" action="<?php echo esc_url( md_mc_url() ); ?>">
 					<?php md_mc_nonce_fields( 'pin', $r->id ); ?><input type="hidden" name="on" value="<?php echo $r->pin ? '' : '1'; ?>">
 					<button type="submit" class="mds-btn"><?php echo $r->pin ? '상단고정 해제' : '📌 상단고정'; ?></button>
@@ -1461,6 +1461,7 @@ function md_mc_render_patient( $id ) {
 
 		<div class="mc-chart__foot">
 			<a href="<?php echo esc_url( md_mc_url() ); ?>">← 환자 목록</a>
+			<a href="<?php echo esc_url( md_mc_url( array( 'mv' => 'edit', 'mid' => $r->id ) ) ); ?>">✏️ 이름 · 차트번호 고치기</a>
 			<?php if ( md_mc_can_manage() ) : ?>
 			<form method="post" class="mc-inline" action="<?php echo esc_url( md_mc_url() ); ?>" onsubmit="return confirm('<?php echo esc_js( $r->pname . ' (' . $r->chart_no . ')' ); ?> 차트를 휴지통으로 옮길까요? 휴지통에서 되살릴 수 있습니다.');">
 				<?php md_mc_nonce_fields( 'delete', $r->id ); ?>
