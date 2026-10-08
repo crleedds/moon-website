@@ -241,7 +241,8 @@ window.mcInits.push(function () {
   'use strict';
   Array.prototype.forEach.call(document.querySelectorAll('[data-mc-chips]'), function (box) {
     var name = box.getAttribute('data-mc-chips');
-    var ta = document.querySelector('form.mc-form [name=' + name + ']');
+    var own = box.closest('form'), ta = own ? own.querySelector('[name=' + name + ']') : null;
+    if (!ta) ta = document.querySelector('form.mc-form [name=' + name + ']');
     if (!ta) return;
     function parts() { return ta.value.split(/\s*[,，\n]\s*/).map(function (x) { return x.trim(); }).filter(Boolean); }
     function sync() {
@@ -341,6 +342,19 @@ document.addEventListener('click', function (e) {
   /* v9.10 · 서버가 저장했는지 알 수 없을 때는 폼을 다시 보내지 않는다(두 번 저장 방지) — 화면을 새로 불러와 실제 상태를 보여 준다 */
   function recover(msg) { toast(msg || '저장 결과를 확인합니다…', true); setTimeout(function () { location.reload(); }, 900); }
   var busy = false;
+  /* v9.19 · 눌러서 바로 고치기 — 보기 부분을 누르면 고치기 폼이 열리고, 취소하면 원래대로 */
+  function closeEdit(form) { var box = form.querySelector('.mc-edit__form'); if (box) { box.hidden = true; } form.classList.remove('is-editing'); }
+  document.addEventListener('click', function (e) {
+    var c = e.target.closest && e.target.closest('[data-mc-edit-cancel]');
+    if (c) { var f0 = c.closest('form'); f0.reset(); Array.prototype.forEach.call(f0.querySelectorAll('[data-na-for]'), function (k) { var t = document.getElementById(k.getAttribute('data-na-for')); if (t) t.disabled = k.checked; }); closeEdit(f0); return; }
+    var v = e.target.closest && e.target.closest('[data-mc-edit-open]');
+    if (!v || e.target.closest('a, button')) return;
+    var form = v.closest('form.mc-edit'), box = form && form.querySelector('.mc-edit__form');
+    if (!box) return;
+    box.hidden = false; form.classList.add('is-editing');
+    var t = box.querySelector('textarea:not([disabled]), select'); if (t) { t.focus(); if (t.setSelectionRange && t.value) { try { t.setSelectionRange(t.value.length, t.value.length); } catch (er) {} } }
+    Array.prototype.forEach.call(box.querySelectorAll('textarea[data-grow]'), function (x) { x.style.height = 'auto'; x.style.height = (x.scrollHeight + 4) + 'px'; });
+  });
 
   document.addEventListener('submit', function (e) {
     var form = e.target;
@@ -350,6 +364,7 @@ document.addEventListener('click', function (e) {
     act = act ? act.value : '';
     if (!kind && !(act === 'add' && form.classList.contains('mc-add')) && act !== 'plan') return;
     if (!kind) kind = act;
+    var fieldName = kind === 'field' ? form.getAttribute('data-mc-field') : '';
     var sub = e.submitter, extra = null;
     if (kind === 'dwhide' && !window.confirm('이 덴트웹 진료기록을 미니차트에서 지울까요? (덴트웹 원본은 그대로)')) { e.preventDefault(); return; }
     if (kind === 'dwunhide') {
@@ -378,15 +393,25 @@ document.addEventListener('click', function (e) {
     var addText = kind === 'add' ? form.querySelector('textarea[name=text]') : null;
     send(form, extra).then(function (res) {
       if (res.redirect) { form.dataset.sending = '1'; location.href = res.redirect; return; }
+      if (res.reload && kind === 'field' && res.ok) { toast('저장했습니다'); form.dataset.sending = '1'; setTimeout(function () { location.reload(); }, 400); return; }
       if (res.reload) { recover(''); return; }
       if (!res.ok) { toast(res.msg || '저장하지 못했습니다.', true); if (kind === 'plan') { Array.prototype.forEach.call(btns, function (b) { b.disabled = false; }); } return; }
       apply(res);
+      if (kind === 'field') {
+        /* v9.19 · 보기 부분 · 머리말 · 칸 값을 맞추고 고치기 폼을 닫는다 */
+        var head = form.querySelector('.mc-edit__head'); if (head && res.head != null) head.textContent = res.head;
+        form.classList.toggle('mc-block--alert', res.cls === 'mc-block--alert');
+        var ta2 = form.querySelector('textarea[name=' + fieldName + '], input[name=' + fieldName + ']');
+        if (ta2 && res.value != null) { ta2.value = res.value; ta2.defaultValue = res.value; ta2.disabled = !!res.na; }
+        var na = form.querySelector('input[name="na[' + fieldName + ']"]'); if (na) { na.checked = !!res.na; na.defaultChecked = !!res.na; }
+        closeEdit(form);
+      }
       if (kind === 'add' && addText) { addText.value = ''; addText.style.height = ''; }
       if (kind === 'plan') {
         var ta = form.querySelector('textarea[data-mc-plan]'); if (ta) ta.defaultValue = ta.value;
         form.dispatchEvent(new CustomEvent('mc:plan-saved'));
       }
-      toast({ dwhide: '지웠습니다', dwedit: '고쳤습니다', dwunhide: '다시 보이게 했습니다', add: '추가했습니다', plan: '저장했습니다' }[kind] || '저장했습니다');
+      toast({ dwhide: '지웠습니다', dwedit: '고쳤습니다', dwunhide: '다시 보이게 했습니다', add: '추가했습니다', plan: '저장했습니다', field: '저장했습니다' }[kind] || '저장했습니다');
     }).catch(function () {
       recover('저장 결과를 확인합니다…');
     }).then(function () {
@@ -514,7 +539,7 @@ window.mcInits.push(function () {
   function dirty() {
     var ta = document.querySelector('textarea[data-mc-plan]');
     if (ta && ta.mcDirty && ta.mcDirty()) return true;
-    return Array.prototype.some.call(document.querySelectorAll('.mc .mc-add__text, .mc .mc-tl__edit:not([hidden]) textarea'), function (t) { return t.value.trim() !== '' && t.value !== t.defaultValue; });
+    return Array.prototype.some.call(document.querySelectorAll('.mc .mc-add__text, .mc .mc-tl__edit:not([hidden]) textarea, .mc .mc-edit__form:not([hidden]) textarea'), function (t) { return t.value.trim() !== '' && t.value !== t.defaultValue; });
   }
   function load(x) {
     var k = key(x);

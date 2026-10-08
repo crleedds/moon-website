@@ -376,3 +376,15 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-row__hit { color: var(--color-primary-dark, #B86347); }
 
 .mc-tl__wait { color: var(--color-text-mute, #A89685); font-size: .85rem; }
+
+/* v9.19 · 눌러서 바로 고치기 (병력 · 지역 · 담당의 · 내원경로) */
+.mc-edit__view { cursor: pointer; border-radius: 8px; margin: -4px -6px; padding: 4px 6px; border: 1px dashed transparent; transition: border-color .12s, background .12s; }
+.mc-edit__view:hover { border-color: var(--color-border, #E8DDD3); background: var(--color-surface, #FBF2E8); }
+.mc-edit.is-editing .mc-edit__view { display: none; }
+.mc-edit__form { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.mc-edit__form[hidden] { display: none; }
+.mc-edit__form .mc-field__l { font-size: .85rem; color: var(--color-text-sub, #7A6B5F); }
+.mc-edit__form textarea, .mc-edit__form input[type="text"] { width: 100%; font: inherit; font-size: 1rem; line-height: 1.6; padding: 6px 8px; border: 1px solid var(--color-primary, #D88062); border-radius: 8px; background: #fff; }
+.mc-edit__form textarea:disabled { background: var(--color-surface, #FBF2E8); color: var(--color-text-mute, #A89685); }
+.mc-edit__bar { display: flex; gap: 8px; }
+.mc-edit .mc-dr { padding: 0; border: 0; margin: 0; }

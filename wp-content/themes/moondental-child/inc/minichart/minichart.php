@@ -752,7 +752,7 @@ function md_mc_handle_post() {
 	$err  = function ( $msg, $args ) { return md_mc_url( array_merge( $args, array( 'mcerr' => $msg ) ) ); };
 
 	/* v9.2 · 빠른 저장 — 화면이 fetch 로 보내면(md_fast) 페이지를 다시 그리지 않고 바뀐 부분만 돌려준다 (원장 지시: 라운지 속도) */
-	$fast = ! empty( $_POST['md_fast'] ) && in_array( $action, array( 'dwhide', 'dwedit', 'dwunhide', 'plan', 'add' ), true );
+	$fast = ! empty( $_POST['md_fast'] ) && in_array( $action, array( 'dwhide', 'dwedit', 'dwunhide', 'plan', 'add', 'field' ), true );
 
 	switch ( $action ) {
 		case 'save':
@@ -822,6 +822,26 @@ function md_mc_handle_post() {
 				md_mc_add_line( $id, 'tx_hist', $post['text'], substr( $key, 0, 10 ) );
 			}
 			$back = md_mc_url( array( 'mv' => 'p', 'mid' => $id ) ) . '#f-tx_hist';
+			break;
+
+		case 'field': /* v9.19 · 차트 화면에서 칸 하나(병력 · 지역 · 담당의 · 내원경로)만 바로 고치기 */
+			$cur = md_mc_get( $id );
+			$fld = sanitize_key( (string) ( $post['field'] ?? '' ) );
+			if ( ! $cur || 'patient' !== $cur->kind || ! in_array( $fld, array( 'mhx', 'addr', 'referral', 'dr' ), true ) ) { $back = md_mc_url(); break; }
+			if ( (int) ( $post['rev'] ?? 0 ) !== (int) $cur->rev ) { $back = $err( '그 사이 다른 분이 이 차트를 고쳤습니다. 최신 내용을 보고 다시 고쳐 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
+			if ( 'dr' === $fld ) {
+				$val = md_mc_dr_compose( $post['dr_main'] ?? '', $post['dr_dept'] ?? array(), $post['dr_doc'] ?? array(), $post['dr_extra'] ?? '', $post['dr_main_dept'] ?? '' );
+				if ( '' === trim( (string) $val ) ) { $back = $err( '담당의를 한 분 이상 골라 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
+			} else {
+				$val = ! empty( $post['na'][ $fld ] ) ? MD_MC_NA : sanitize_textarea_field( (string) ( $post[ $fld ] ?? '' ) );
+				if ( 'addr' === $fld && '' === trim( $val ) ) { $back = $err( '지역을 적어 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
+			}
+			if ( (string) $val !== (string) $cur->$fld ) {
+				global $wpdb;
+				$ok = $wpdb->update( md_mc_t(), array( $fld => $val, 'rev' => (int) $cur->rev + 1, 'updated_at' => current_time( 'mysql' ), 'updated_by' => md_mc_me() ), array( 'id' => (int) $id, 'rev' => (int) $cur->rev ) );
+				if ( $ok ) { md_mc_log( $id, 'edit', $cur ); }
+			}
+			$back = md_mc_url( array( 'mv' => 'p', 'mid' => $id, 'saved' => 1 ) ) . '#f-' . $fld;
 			break;
 
 		case 'plan': /* v8.6 · 차트 화면에서 치료계획만 바로 고치기 */
@@ -935,7 +955,14 @@ function md_mc_fast_reply( $action, $id, $back ) {
 	$r = md_mc_get( $id );
 	if ( ! $r ) { wp_send_json( array( 'ok' => false, 'msg' => '차트를 찾을 수 없습니다.' ) ); }
 	$out = array( 'ok' => true, 'rev' => (int) $r->rev );
-	$field = 'add' === $action ? sanitize_key( wp_unslash( $_POST['field'] ?? '' ) ) : '';
+	$field = in_array( $action, array( 'add', 'field' ), true ) ? sanitize_key( wp_unslash( $_POST['field'] ?? '' ) ) : '';
+	if ( 'field' === $action ) {
+		/* v9.19 · 그 칸의 보기 부분만 — 담당의는 고르는 칸을 다시 그려야 해서 화면이 새로 불러온다 */
+		$d  = function_exists( 'md_mc_dw_get' ) ? md_mc_dw_get( $r->chart_no ) : null;
+		$vw = md_mc_inline_view( $r, $d, $field );
+		$out += array( 'target' => $field, 'html' => $vw['html'], 'head' => $vw['head'], 'cls' => $vw['cls'], 'value' => md_mc_is_na( $r->$field ) ? '' : (string) $r->$field, 'na' => md_mc_is_na( $r->$field ), 'reload' => 'dr' === $field );
+		wp_send_json( $out );
+	}
 	if ( in_array( $action, array( 'dwhide', 'dwedit', 'dwunhide' ), true ) || 'tx_hist' === $field ) {
 		$d = 'patient' === $r->kind && function_exists( 'md_mc_dw_get' ) ? md_mc_dw_get( $r->chart_no ) : null;
 		$out['target'] = 'tx_hist';
@@ -1261,6 +1288,55 @@ function md_mc_block( $label, $html, $cls = '', $id = '' ) {
 	echo '<section class="mc-block ' . esc_attr( $cls ) . '"' . ( $id ? ' id="' . esc_attr( $id ) . '"' : '' ) . '><h3 class="mc-block__h">' . esc_html( $label ) . '</h3><div class="mc-block__b">' . $html . '</div></section>'; // phpcs:ignore
 }
 
+/** v9.19 · 보기 부분 — 머리말과 본문 HTML (빠른 저장 뒤 그 자리만 바꾼다) */
+function md_mc_inline_view( $r, $d, $field ) {
+	$f = md_mc_fields();
+	if ( 'mhx' === $field ) {
+		$alrt = md_mc_alerts( $r->mhx );
+		return array( 'head' => $f['mhx'][2] . ( $alrt ? ' — 주의: ' . implode( ', ', $alrt ) : '' ), 'html' => md_mc_mark_alerts( md_mc_text( $r->mhx ), $alrt ), 'cls' => md_mc_mhx_real( $r->mhx ) ? 'mc-block--alert' : '' );
+	}
+	if ( 'addr' === $field ) {
+		/* 주소 — 덴트웹 주소가 있으면 그것, 미니차트 「지역」이 그 안에 이미 들어 있으면 한 번만 */
+		$addr = $d && function_exists( 'md_mc_addr_short' ) ? md_mc_addr_short( (string) ( $d['addr'] ?? '' ) ) : ''; /* v9.8 · 동 · 읍 · 면까지만 */
+		if ( '' === $addr && $d && function_exists( 'md_mc_dw_region' ) ) { $addr = md_mc_dw_region( (string) ( $d['region'] ?? '' ) ); }
+		$reg  = trim( function_exists( 'md_mc_addr_memo' ) ? md_mc_addr_memo( (string) $r->addr ) : (string) $r->addr );
+		if ( '' !== $addr ) {
+			$dup = md_mc_blank( $reg ) || false !== mb_strpos( preg_replace( '/\s+/u', '', $addr ), preg_replace( '/\s+/u', '', $reg ) ) || ( $d && preg_replace( '/\s+/u', '', $reg ) === preg_replace( '/\s+/u', '', (string) $d['region'] ) );
+			return array( 'head' => '주소', 'html' => esc_html( $addr ) . ( $dup ? '' : '<br><small class="mc-sub">지역 메모: ' . md_mc_text( $reg ) . '</small>' ), 'cls' => '' );
+		}
+		return array( 'head' => $f['addr'][0], 'html' => md_mc_text( $reg ), 'cls' => '' );
+	}
+	if ( 'dr' === $field ) {
+		return array( 'head' => $f['dr'][0], 'html' => function_exists( 'md_mc_dw_dr_html' ) ? md_mc_dw_dr_html( $r, $d ) : md_mc_dr_html( $r->dr ), 'cls' => '' );
+	}
+	return array( 'head' => $f[ $field ][0], 'html' => md_mc_text( $r->$field ), 'cls' => '' );
+}
+
+/** v9.19 · 눌러서 바로 고치는 칸 — 보기(누르면 열림) + 고치기 폼(저장 · 취소). 저장은 빠른 저장(md_fast) 으로 그 자리만 바뀐다 */
+function md_mc_inline_block( $r, $d, $field ) {
+	$v = md_mc_inline_view( $r, $d, $field );
+	$f = md_mc_fields();
+	?>
+	<form method="post" class="mc-block mc-edit <?php echo esc_attr( $v['cls'] ); ?>" id="f-<?php echo esc_attr( $field ); ?>" action="<?php echo esc_url( md_mc_url() ); ?>" data-mc-fast="field" data-mc-field="<?php echo esc_attr( $field ); ?>">
+		<?php md_mc_nonce_fields( 'field', $r->id ); ?><input type="hidden" name="field" value="<?php echo esc_attr( $field ); ?>"><input type="hidden" name="rev" value="<?php echo (int) $r->rev; ?>">
+		<h3 class="mc-block__h"><span class="mc-edit__head"><?php echo esc_html( $v['head'] ); ?></span> <small class="mc-sub">눌러서 바로 고치기</small></h3>
+		<div class="mc-block__b mc-edit__view" data-mc-edit-open title="눌러서 고치기"><?php echo $v['html']; // phpcs:ignore -- 안에서 이스케이프 ?></div>
+		<div class="mc-edit__form" hidden>
+			<?php if ( 'dr' === $field ) : ?>
+				<?php md_mc_dr_field( array( 'dr' => (string) $r->dr ) ); ?>
+			<?php else :
+				$na  = '' !== (string) $r->$field && md_mc_is_na( $r->$field );
+				$lab = 'addr' === $field ? '지역 메모' : $f[ $field ][0];
+				md_mc_field( $field, $lab, $na ? '' : (string) $r->$field, array( 'rows' => 'mhx' === $field ? 2 : 1, 'na' => $na, 'attrs' => 'autocomplete="off"' ) );
+				if ( 'mhx' === $field ) { echo md_mc_mhx_chips(); } // phpcs:ignore
+				if ( 'referral' === $field ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「가족 …」 「협력기관 …」을 누르면 이름을 바로 이어 적습니다' ); } // phpcs:ignore
+			endif; ?>
+			<div class="mc-edit__bar"><button type="submit" class="mds-btn mds-btn--fill">저장</button><button type="button" class="mds-btn mds-btn--ghost" data-mc-edit-cancel>취소</button></div>
+		</div>
+	</form>
+	<?php
+}
+
 /** 한 줄 추가 폼 — 날짜(오늘) + 내용 */
 function md_mc_addform( $r, $field, $label, $from = '' ) {
 	?>
@@ -1327,23 +1403,14 @@ function md_mc_render_patient( $id ) {
 			<?php endif; ?>
 		</header>
 
-		<?php md_mc_block( $f['mhx'][2] . ( $alrt ? ' — 주의: ' . implode( ', ', $alrt ) : '' ), md_mc_mark_alerts( md_mc_text( $r->mhx ), $alrt ), md_mc_mhx_real( $r->mhx ) ? 'mc-block--alert' : '' ); ?>
+		<?php /* v9.19 · 병력 · 주소(지역 메모) · 담당의 · 내원경로도 눌러서 바로 고친다 (원장 지시) */ md_mc_inline_block( $r, $d, 'mhx' ); ?>
 
 		<div class="mc-grid">
 			<?php
 			if ( $d && '' !== (string) ( $d['phone'] ?? '' ) ) { md_mc_block( '연락처', '<a href="tel:' . esc_attr( preg_replace( '/\D/', '', $d['phone'] ) ) . '">' . esc_html( $d['phone'] ) . '</a>' ); }
-			/* 주소 — 덴트웹 주소가 있으면 그것, 미니차트 「지역」이 그 안에 이미 들어 있으면 한 번만 */
-			$addr = $d && function_exists( 'md_mc_addr_short' ) ? md_mc_addr_short( (string) ( $d['addr'] ?? '' ) ) : ''; /* v9.8 · 동 · 읍 · 면까지만 */
-			if ( '' === $addr && $d && function_exists( 'md_mc_dw_region' ) ) { $addr = md_mc_dw_region( (string) ( $d['region'] ?? '' ) ); }
-			$reg  = trim( function_exists( 'md_mc_addr_memo' ) ? md_mc_addr_memo( (string) $r->addr ) : (string) $r->addr );
-			if ( '' !== $addr ) {
-				$dup = md_mc_blank( $reg ) || false !== mb_strpos( preg_replace( '/\s+/u', '', $addr ), preg_replace( '/\s+/u', '', $reg ) ) || ( $d && preg_replace( '/\s+/u', '', $reg ) === preg_replace( '/\s+/u', '', (string) $d['region'] ) );
-				md_mc_block( '주소', esc_html( $addr ) . ( $dup ? '' : '<br><small class="mc-sub">지역 메모: ' . md_mc_text( $reg ) . '</small>' ) );
-			} else {
-				md_mc_block( $f['addr'][0], md_mc_text( $reg ) );
-			}
-			md_mc_block( $f['dr'][0], function_exists( 'md_mc_dw_dr_html' ) ? md_mc_dw_dr_html( $r, $d ) : md_mc_dr_html( $r->dr ) );
-			md_mc_block( $f['referral'][0], md_mc_text( $r->referral ) );
+			md_mc_inline_block( $r, $d, 'addr' );
+			md_mc_inline_block( $r, $d, 'dr' );
+			md_mc_inline_block( $r, $d, 'referral' );
 			?>
 		</div>
 		<?php /* v8.6 · 치료계획은 차트 화면에서 바로 고친다 (원장 지시 — 수정 버튼 없이) */ ?>
