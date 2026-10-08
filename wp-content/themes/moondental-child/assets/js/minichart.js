@@ -280,7 +280,7 @@ window.mcInits.push(function () {
   var ta = document.querySelector('textarea[data-mc-plan]');
   if (!ta) return;
   var bar = ta.form.querySelector('.mc-plan__bar'), orig = ta.value;
-  function grow() { ta.style.height = 'auto'; ta.style.height = Math.max(ta.scrollHeight, 44) + 'px'; }
+  function grow() { ta.style.height = 'auto'; ta.style.height = Math.max(ta.scrollHeight, 36) + 'px'; }
   ta.addEventListener('input', function () { bar.hidden = ta.value === orig; grow(); });
   ta.form.querySelector('[data-mc-plan-undo]').addEventListener('click', function () { ta.value = orig; bar.hidden = true; grow(); });
   ta.addEventListener('keydown', function (e) { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); if (ta.form.requestSubmit) ta.form.requestSubmit(); else ta.form.submit(); } });

@@ -390,3 +390,41 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-edit .mc-dr { padding: 0; border: 0; margin: 0; }
 .mc-edit--bare { display: block; padding: 0; border: 0; margin: 0; background: none; }
 .mc-edit__hint { margin: 0 0 4px; font-size: .8rem; }
+
+/* v9.21 · 차트 화면을 더 촘촘하게 (원장 지시 — 스크롤 많이 안 해도 진료기록 · 참고사항이 보이게). 휴대폰은 그대로 */
+@media (min-width: 761px) {
+  .mc-nav { margin-bottom: 10px; }
+  .mc-jump .mc-search { margin-bottom: 6px; }
+  .mc-jump .mc-search input[type="search"] { min-height: 38px; padding: 6px 12px; font-size: .95rem; }
+  .mc-jump .mc-search__btn { min-height: 38px; }
+  .mc-chart__head { padding: 10px 16px 10px; margin-bottom: 8px; display: grid; grid-template-columns: 1fr auto; grid-template-areas: "id acts" "next next" "meta meta" "warn warn"; align-items: center; gap: 2px 12px; }
+  .mc-chart__id { grid-area: id; }
+  .mc-chart__acts { grid-area: acts; margin-top: 0; }
+  .mc-chart__acts .mds-btn { min-height: 34px; padding: 0 12px; font-size: .9rem; }
+  .mc-chart__name { font-size: 1.3rem; }
+  .mc-next { grid-area: next; margin: 4px 0 0; padding: 5px 10px; font-size: .88rem; }
+  .mc-chart__meta { grid-area: meta; margin: 2px 0 0; font-size: .8rem; }
+  .mc-chart__head > .mds-notice { grid-area: warn; margin: 6px 0 0; }
+  .mc-block { padding: 8px 12px 9px; margin-bottom: 8px; }
+  .mc-block__h { margin: 0 0 3px; font-size: .78rem; }
+  .mc-block__b { font-size: .93rem; line-height: 1.45; }
+  .mc-grid { gap: 8px; margin-bottom: 8px; }
+  .mc-grid--info { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .mc-grid--info .mc-block--alert { grid-column: 1 / -1; } /* 주의 병력은 눈에 띄게 한 줄 전체 */
+  .mc-edit__view { margin: -3px -5px; padding: 3px 5px; }
+  .mc-plan textarea { font-size: .95rem; line-height: 1.45; padding: 4px 6px; min-height: 36px; }
+  .mc-plan__bar { margin-top: 4px; }
+  .mc-add { gap: 6px; margin: 0 0 6px; padding-bottom: 6px; }
+  .mc-add__day, .mc-add__text { min-height: 36px; padding: 5px 10px; font-size: .93rem; }
+  .mc-add__day { width: 8.5em; }
+  .mc-add__btn { min-height: 36px; padding: 0 14px; }
+  .mc-tl li { padding: 3px 0; font-size: .88rem; line-height: 1.4; grid-template-columns: 64px 60px 1fr; gap: 6px; }
+  .mc-tl__more summary { margin: 4px 0; }
+  .mc-memo[open] > summary { margin-bottom: 4px; }
+  .mc-chart__foot { margin: 10px 0 6px; }
+  .mc-dwnote { margin: 2px 0 0; font-size: .78rem; }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .mc-block__b { font-size: .95rem; }
+  .mc-grid--info { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

@@ -1408,11 +1408,11 @@ function md_mc_render_patient( $id ) {
 			<?php endif; ?>
 		</header>
 
-		<?php /* v9.19 · 병력 · 주소(지역 메모) · 담당의 · 내원경로도 눌러서 바로 고친다 (원장 지시) */ md_mc_inline_block( $r, $d, 'mhx' ); ?>
-
-		<div class="mc-grid">
+		<div class="mc-grid mc-grid--info">
 			<?php
-			/* v9.20 · 연락처는 미니차트에 두지 않는다 (원장 지시 — 덴트웹에서 보면 된다) */
+			/* v9.19 · 병력 · 주소(지역 메모) · 담당의 · 내원경로도 눌러서 바로 고친다 (원장 지시) · v9.21 · 넓은 화면에서는 네 칸이 한 줄 (원장 「한 화면에 더 많이」)
+			 * v9.20 · 연락처는 미니차트에 두지 않는다 (원장 지시 — 덴트웹에서 보면 된다) */
+			md_mc_inline_block( $r, $d, 'mhx' );
 			md_mc_inline_block( $r, $d, 'addr' );
 			md_mc_inline_block( $r, $d, 'dr' );
 			md_mc_inline_block( $r, $d, 'referral' );
