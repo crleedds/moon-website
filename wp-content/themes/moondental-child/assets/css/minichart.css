@@ -439,3 +439,15 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-tl__undated > b { display: block; margin-bottom: 2px; color: var(--color-text-sub, #7A6B5F); }
 .mc-tl__ownw--undated { padding: 2px 0; border-bottom: 1px dashed var(--color-border, #E8DDD3); }
 .mc-tl__ownw--undated .mc-tl__own { color: inherit; }
+
+/* v9.24 · 호칭 · 호명 */
+.mc-salute { display: inline-block; vertical-align: middle; }
+.mc-salute .mc-edit__view { margin: 0; padding: 2px 8px; font-size: .9rem; border-radius: 999px; }
+.mc-salute__v { color: var(--color-primary-dark, #B86347); font-weight: 600; }
+.mc-salute__none { color: var(--color-text-mute, #A89685); font-size: .85rem; }
+.mc-salute .mc-edit__form { flex-direction: row; align-items: center; gap: 6px; margin: 0; }
+.mc-salute .mc-edit__form input[type="text"] { width: 14em; min-height: 34px; padding: 4px 8px; font-size: .95rem; }
+.mc-salute .mc-edit__bar { gap: 4px; }
+.mc-salute .mc-edit__bar .mds-btn { min-height: 34px; padding: 0 10px; font-size: .88rem; }
+.mc-row__salute { margin-left: 6px; font-size: .82rem; color: var(--color-primary-dark, #B86347); font-weight: 500; }
+@media (max-width: 760px) { .mc-salute .mc-edit__form { flex-wrap: wrap; } .mc-row__salute { display: block; margin: 0; } }

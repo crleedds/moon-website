@@ -26,7 +26,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_MC_SCHEMA', 4 ); /* v6.4 · 2 = 팀 노트 고정 해제 · v6.5 · 3 = 최근 본 시각 · 최근 내원일 열 · v8.7 · 4 = 덴트웹 진료기록 숨김 · 고침 (dw_hide) */
+define( 'MD_MC_SCHEMA', 5 ); /* v9.24 · 5 = 호칭 · 호명 (salute) */ // /* v6.4 · 2 = 팀 노트 고정 해제 · v6.5 · 3 = 최근 본 시각 · 최근 내원일 열 · v8.7 · 4 = 덴트웹 진료기록 숨김 · 고침 (dw_hide) */
 
 /* ============================================================
  * 테이블
@@ -44,7 +44,8 @@ function md_mc_t( $k = 'rec' ) {
 function md_mc_fields() {
 	return array(
 		'chart_no' => array( '차트번호', true, '차트번호' ),
-		'pname'    => array( '성명 / 호칭 / 호명', true, '성명 / 호칭 / 호명' ),
+		'pname'    => array( '성명', true, '성명' ),
+		'salute'   => array( '호칭 · 호명', false, '호칭 · 호명' ), /* v9.24 · AppSheet 때처럼 부르는 말을 따로 (원장 지시) */
 		'addr'     => array( '지역', true, '지역' ),
 		'mhx'      => array( '병력 (상세)', false, '병력' ), /* v9.9 · 병력 · 내원경로는 필수 아님 (원장 지시) */
 		'referral' => array( '내원경로 / 가족 / 협력기관', false, '내원경로 / 가족 / 협력기관' ),
@@ -96,6 +97,7 @@ function md_mc_maybe_install() {
 		kind VARCHAR(10) NOT NULL DEFAULT 'patient',
 		chart_no VARCHAR(60) NOT NULL DEFAULT '',
 		pname VARCHAR(255) NOT NULL DEFAULT '',
+		salute VARCHAR(120) NOT NULL DEFAULT '',
 		cho VARCHAR(255) NOT NULL DEFAULT '',
 		addr TEXT NULL,
 		mhx TEXT NULL,
@@ -401,12 +403,13 @@ function md_mc_save( $id, $kind, $data, $rev = 0 ) {
 	} else {
 		foreach ( md_mc_fields() as $k => $f ) {
 			$v = (string) ( $data[ $k ] ?? '' );
-			$row[ $k ] = in_array( $k, array( 'chart_no', 'pname' ), true )
+			$row[ $k ] = in_array( $k, array( 'chart_no', 'pname', 'salute' ), true )
 				? trim( sanitize_text_field( $v ) )
 				: rtrim( sanitize_textarea_field( $v ) );
 		}
 		$row['chart_no'] = mb_substr( preg_replace( '/\s+/u', '', $row['chart_no'] ), 0, 60 );
 		$row['pname']    = mb_substr( $row['pname'], 0, 250 );
+		$row['salute']   = mb_substr( $row['salute'], 0, 120 );
 		/* v6.5 · 별표항목은 모두 채워야 저장된다 (AppSheet 와 같이 · 원장 지시). 해당 없으면 마침표 */
 		foreach ( md_mc_fields() as $k => $fd ) {
 			if ( $fd[1] && '' === trim( (string) $row[ $k ] ) ) {
@@ -516,7 +519,7 @@ function md_mc_revert( $log_id ) {
 	$snap = json_decode( $lg->snap, true );
 	$cur  = md_mc_get( $lg->rec_id, true );
 	if ( ! is_array( $snap ) || ! $cur ) { return new WP_Error( 'mc', '되돌릴 수 없습니다.' ); }
-	$keep = array( 'chart_no', 'pname', 'cho', 'addr', 'mhx', 'referral', 'dr', 'tx_plan', 'tx_hist', 'memo', 'title', 'body', 'pin' );
+	$keep = array( 'chart_no', 'pname', 'salute', 'cho', 'addr', 'mhx', 'referral', 'dr', 'tx_plan', 'tx_hist', 'memo', 'title', 'body', 'pin' );
 	$upd  = array_intersect_key( $snap, array_flip( $keep ) );
 	$upd['rev']        = (int) $cur->rev + 1;
 	$upd['updated_at'] = current_time( 'mysql' );
@@ -546,7 +549,7 @@ function md_mc_patients( $q = '', $filter = '', $doc = '', $sort = '' ) {
 			$args[]  = '%' . $wpdb->esc_like( preg_replace( '/\s+/u', '', $q ) ) . '%';
 		} else {
 			$like = '%' . $wpdb->esc_like( $q ) . '%';
-			$cols = array( 'chart_no', 'pname', 'addr', 'mhx', 'referral', 'dr', 'tx_plan', 'tx_hist', 'memo' );
+			$cols = array( 'chart_no', 'pname', 'salute', 'addr', 'mhx', 'referral', 'dr', 'tx_plan', 'tx_hist', 'memo' );
 			$where[] = '(' . implode( ' OR ', array_map( function ( $c ) { return "$c LIKE %s"; }, $cols ) ) . ')';
 			$args = array_merge( $args, array_fill( 0, count( $cols ), $like ) );
 		}
@@ -559,7 +562,7 @@ function md_mc_patients( $q = '', $filter = '', $doc = '', $sort = '' ) {
 		'name'   => 'pname ASC, (chart_no + 0) ASC',
 	);
 	$order = 'pin DESC, ' . ( $orders[ $sort ] ?? $orders['viewed'] );
-	$sql = "SELECT id, chart_no, pname, cho, pin, updated_at, updated_by, viewed_at, last_visit, addr, mhx, referral, dr, tx_hist FROM $t WHERE " . implode( ' AND ', $where ) . " ORDER BY $order";
+	$sql = "SELECT id, chart_no, pname, salute, cho, pin, updated_at, updated_by, viewed_at, last_visit, addr, mhx, referral, dr, tx_hist FROM $t WHERE " . implode( ' AND ', $where ) . " ORDER BY $order";
 	$rows = (array) $wpdb->get_results( $args ? $wpdb->prepare( $sql, $args ) : $sql );
 	if ( 'name' === $sort ) {
 		/* 이름순은 가나다 먼저, 외국 이름은 그 뒤 ABC (DB 정렬은 영문이 앞에 온다) */
@@ -699,14 +702,14 @@ function md_mc_export_xlsx() {
 	global $wpdb;
 	$rows = $wpdb->get_results( 'SELECT * FROM ' . md_mc_t() . " WHERE deleted_at IS NULL ORDER BY kind DESC, pin DESC, updated_at DESC, id ASC" );
 	$f    = md_mc_fields();
-	$head = array( '구분', '차트번호 · 노트 제목', '성명' );
+	$head = array( '구분', '차트번호 · 노트 제목', '성명', '호칭 · 호명' );
 	foreach ( array( 'addr', 'mhx', 'referral', 'dr', 'tx_plan', 'tx_hist', 'memo' ) as $k ) { $head[] = $f[ $k ][0]; }
 	array_push( $head, '노트 본문', '상단고정', '마지막 수정', '수정한 사람', 'AppSheet id' );
 	$data = array();
 	foreach ( $rows as $r ) {
 		$note   = 'note' === $r->kind;
 		$data[] = array(
-			$note ? '노트' : '환자', $note ? $r->title : $r->chart_no, $r->pname,
+			$note ? '노트' : '환자', $note ? $r->title : $r->chart_no, $r->pname, (string) $r->salute,
 			(string) $r->addr, (string) $r->mhx, (string) $r->referral, (string) $r->dr, (string) $r->tx_plan, (string) $r->tx_hist, (string) $r->memo,
 			(string) $r->body, $r->pin ? '📌' : '', (string) $r->updated_at, (string) $r->updated_by, (string) $r->uid,
 		);
@@ -715,7 +718,7 @@ function md_mc_export_xlsx() {
 		'title' => '미니차트',
 		'head'  => $head,
 		'rows'  => $data,
-		'width' => array( 6, 14, 12, 20, 30, 24, 18, 30, 50, 50, 50, 6, 18, 12, 10 ),
+		'width' => array( 6, 14, 12, 14, 20, 30, 24, 18, 30, 50, 50, 50, 6, 18, 12, 10 ),
 	) ) );
 }
 
@@ -847,13 +850,13 @@ function md_mc_handle_post() {
 		case 'field': /* v9.19 · 차트 화면에서 칸 하나(병력 · 지역 · 담당의 · 내원경로)만 바로 고치기 */
 			$cur = md_mc_get( $id );
 			$fld = sanitize_key( (string) ( $post['field'] ?? '' ) );
-			if ( ! $cur || 'patient' !== $cur->kind || ! in_array( $fld, array( 'mhx', 'addr', 'referral', 'dr', 'memo' ), true ) ) { $back = md_mc_url(); break; }
+			if ( ! $cur || 'patient' !== $cur->kind || ! in_array( $fld, array( 'mhx', 'addr', 'referral', 'dr', 'memo', 'salute' ), true ) ) { $back = md_mc_url(); break; }
 			if ( (int) ( $post['rev'] ?? 0 ) !== (int) $cur->rev ) { $back = $err( '그 사이 다른 분이 이 차트를 고쳤습니다. 최신 내용을 보고 다시 고쳐 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
 			if ( 'dr' === $fld ) {
 				$val = md_mc_dr_compose( $post['dr_main'] ?? '', $post['dr_dept'] ?? array(), $post['dr_doc'] ?? array(), $post['dr_extra'] ?? '', $post['dr_main_dept'] ?? '' );
 				if ( '' === trim( (string) $val ) ) { $back = $err( '담당의를 한 분 이상 골라 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
 			} else {
-				$val = ! empty( $post['na'][ $fld ] ) ? MD_MC_NA : ( 'memo' === $fld ? trim( sanitize_textarea_field( (string) ( $post['memo'] ?? '' ) ) ) : sanitize_textarea_field( (string) ( $post[ $fld ] ?? '' ) ) );
+				$val = ! empty( $post['na'][ $fld ] ) ? MD_MC_NA : ( 'memo' === $fld ? trim( sanitize_textarea_field( (string) ( $post['memo'] ?? '' ) ) ) : ( 'salute' === $fld ? mb_substr( trim( sanitize_text_field( (string) ( $post['salute'] ?? '' ) ) ), 0, 120 ) : sanitize_textarea_field( (string) ( $post[ $fld ] ?? '' ) ) ) );
 				if ( 'addr' === $fld && '' === trim( $val ) ) { $back = $err( '지역을 적어 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
 			}
 			if ( (string) $val !== (string) $cur->$fld ) {
@@ -1034,7 +1037,7 @@ function md_mc_find_json() {
 	if ( md_mc_is_cho( $q ) ) {
 		$cond = $wpdb->prepare( 'cho LIKE %s', $like );
 	} else {
-		$cond = $wpdb->prepare( "(chart_no LIKE %s OR REPLACE(pname, ' ', '') LIKE %s OR cho LIKE %s)", $like, $like, '%' . $wpdb->esc_like( mb_strtolower( $k ) ) . '%' );
+		$cond = $wpdb->prepare( "(chart_no LIKE %s OR REPLACE(pname, ' ', '') LIKE %s OR cho LIKE %s OR REPLACE(salute, ' ', '') LIKE %s)", $like, $like, '%' . $wpdb->esc_like( mb_strtolower( $k ) ) . '%', $like );
 	}
 	/* 차트번호가 딱 맞거나 이름이 그 글자로 시작하면 먼저 */
 	$rows = (array) $wpdb->get_results( $wpdb->prepare(
@@ -1063,7 +1066,7 @@ add_action( 'template_redirect', 'md_mc_find_json', 2 );
 function md_mc_find_deep_json( $q, $k ) {
 	global $wpdb;
 	$t    = md_mc_t();
-	$cols = array( 'tx_hist' => '진료기록', 'memo' => '참고사항', 'tx_plan' => '치료계획', 'mhx' => '병력', 'referral' => '내원경로', 'addr' => '지역', 'dr' => '담당의' );
+	$cols = array( 'salute' => '호칭', 'tx_hist' => '진료기록', 'memo' => '참고사항', 'tx_plan' => '치료계획', 'mhx' => '병력', 'referral' => '내원경로', 'addr' => '지역', 'dr' => '담당의' );
 	$likeQ = '%' . $wpdb->esc_like( $q ) . '%';
 	$likeK = '%' . $wpdb->esc_like( $k ) . '%';
 	$or   = array(); $args = array();
@@ -1285,12 +1288,12 @@ function md_mc_render_list() {
 			<?php foreach ( $rows as $r ) :
 				$alrt = md_mc_alerts( $r->mhx );
 				$last = md_mc_last_line( $r->tx_hist );
-				$key  = $r->chart_no . ' ' . preg_replace( '/\s+/u', '', $r->pname ) . ' ' . $r->cho;
+				$key  = $r->chart_no . ' ' . preg_replace( '/\s+/u', '', $r->pname ) . ' ' . $r->cho . ( '' !== (string) $r->salute ? ' ' . preg_replace( '/\s+/u', '', $r->salute ) : '' );
 				?>
 				<li data-k="<?php echo esc_attr( mb_strtolower( $key ) ); ?>">
 					<a class="mc-row" href="<?php echo esc_url( md_mc_url( array( 'mv' => 'p', 'mid' => $r->id ) ) ); ?>">
 						<span class="mc-row__no"><?php echo esc_html( $r->chart_no ); ?></span>
-						<span class="mc-row__name"><?php echo $r->pin ? '<span class="mc-row__pin" title="Follow-up">📌</span>' : ''; ?><span class="mc-row__nm"><?php echo esc_html( $r->pname ); ?></span><?php if ( $alrt ) : ?><span class="mc-warn" title="병력 주의: <?php echo esc_attr( implode( ', ', $alrt ) ); ?>">⚠ <?php echo esc_html( $alrt[0] ); ?></span><?php endif; ?></span>
+						<span class="mc-row__name"><?php echo $r->pin ? '<span class="mc-row__pin" title="Follow-up">📌</span>' : ''; ?><span class="mc-row__nm"><?php echo esc_html( $r->pname ); ?></span><?php if ( '' !== (string) $r->salute ) : ?><small class="mc-row__salute">🗣 <?php echo esc_html( $r->salute ); ?></small><?php endif; ?><?php if ( $alrt ) : ?><span class="mc-warn" title="병력 주의: <?php echo esc_attr( implode( ', ', $alrt ) ); ?>">⚠ <?php echo esc_html( $alrt[0] ); ?></span><?php endif; ?></span>
 						<span class="mc-row__last"><?php echo esc_html( $last ); ?></span>
 						<span class="mc-row__upd" title="최근 내원"><?php echo esc_html( $r->last_visit ? md_mc_short_date( $r->last_visit ) : '' ); ?></span>
 					</a>
@@ -1330,6 +1333,10 @@ function md_mc_inline_view( $r, $d, $field ) {
 	if ( 'dr' === $field ) {
 		return array( 'head' => $f['dr'][0], 'html' => function_exists( 'md_mc_dw_dr_html' ) ? md_mc_dw_dr_html( $r, $d ) : md_mc_dr_html( $r->dr ), 'cls' => '' );
 	}
+	if ( 'salute' === $field ) {
+		$sv = trim( (string) $r->salute );
+		return array( 'head' => $f['salute'][0], 'html' => '' !== $sv ? '<span class="mc-salute__v">🗣 ' . esc_html( $sv ) . '</span>' : '<span class="mc-salute__none">＋ 호칭 · 호명</span>', 'cls' => '' );
+	}
 	return array( 'head' => $f[ $field ][0], 'html' => md_mc_text( $r->$field ), 'cls' => '' );
 }
 
@@ -1338,15 +1345,17 @@ function md_mc_inline_block( $r, $d, $field, $bare = false ) {
 	$v = md_mc_inline_view( $r, $d, $field );
 	$f = md_mc_fields();
 	?>
-	<form method="post" class="<?php echo $bare ? 'mc-edit mc-edit--bare' : 'mc-block mc-edit ' . esc_attr( $v['cls'] ); ?>"<?php echo $bare ? '' : ' id="f-' . esc_attr( $field ) . '"'; ?> action="<?php echo esc_url( md_mc_url() ); ?>" data-mc-fast="field" data-mc-field="<?php echo esc_attr( $field ); ?>">
+	<form method="post" class="<?php echo $bare ? 'mc-edit mc-edit--bare' . ( 'salute' === $field ? ' mc-salute' : '' ) : 'mc-block mc-edit ' . esc_attr( $v['cls'] ); ?>"<?php echo $bare ? '' : ' id="f-' . esc_attr( $field ) . '"'; ?> action="<?php echo esc_url( md_mc_url() ); ?>" data-mc-fast="field" data-mc-field="<?php echo esc_attr( $field ); ?>">
 		<?php md_mc_nonce_fields( 'field', $r->id ); ?><input type="hidden" name="field" value="<?php echo esc_attr( $field ); ?>"><input type="hidden" name="rev" value="<?php echo (int) $r->rev; ?>">
-		<?php if ( $bare ) : ?><p class="mc-edit__hint mc-sub">아래 내용을 누르면 예전 것까지 바로 고칠 수 있습니다</p><?php else : ?>
+		<?php if ( $bare && 'salute' !== $field ) : ?><p class="mc-edit__hint mc-sub">아래 내용을 누르면 예전 것까지 바로 고칠 수 있습니다</p><?php elseif ( ! $bare ) : ?>
 		<h3 class="mc-block__h"><span class="mc-edit__head"><?php echo esc_html( $v['head'] ); ?></span> <small class="mc-sub">눌러서 바로 고치기</small></h3>
 		<?php endif; ?>
 		<div class="mc-block__b mc-edit__view" data-mc-edit-open title="눌러서 고치기"><?php echo $v['html']; // phpcs:ignore -- 안에서 이스케이프 ?></div>
 		<div class="mc-edit__form" hidden>
 			<?php if ( 'memo' === $field ) : ?>
 				<textarea name="memo" rows="5" data-grow aria-label="참고사항 전체"><?php echo esc_textarea( (string) $r->memo ); ?></textarea>
+			<?php elseif ( 'salute' === $field ) : ?>
+				<input type="text" name="salute" value="<?php echo esc_attr( (string) $r->salute ); ?>" maxlength="120" autocomplete="off" placeholder="예: 김 사장님 · ○○ 어머님" aria-label="호칭 · 호명">
 			<?php elseif ( 'dr' === $field ) : ?>
 				<?php md_mc_dr_field( array( 'dr' => (string) $r->dr ) ); ?>
 			<?php else :
@@ -1407,6 +1416,7 @@ function md_mc_render_patient( $id ) {
 			<div class="mc-chart__id">
 				<button type="button" class="mc-copy" data-copy="<?php echo esc_attr( $r->chart_no ); ?>" title="차트번호 복사"><?php echo esc_html( $r->chart_no ); ?></button>
 				<h2 class="mc-chart__name"><?php echo esc_html( $r->pname ); ?></h2>
+				<?php md_mc_inline_block( $r, $d, 'salute', true ); /* v9.24 · 호칭 · 호명 — 눌러서 바로 고치기 */ ?>
 				<?php if ( $sex || '' !== $age ) : ?><span class="mc-tag"><?php echo esc_html( trim( $sex . ( '' !== $age ? ' ' . $age . '세' : '' ) ) ); ?></span><?php endif; ?>
 				<?php if ( $r->pin ) : ?><span class="mc-tag mc-tag--pin">📌 상단고정</span><?php endif; ?>
 			</div>
@@ -1622,6 +1632,7 @@ function md_mc_render_edit( $id, $kind ) {
 			<?php
 			md_mc_field( 'chart_no', $f['chart_no'][0], $v( 'chart_no' ), array( 'req' => true, 'input' => true, 'attrs' => 'required inputmode="numeric" maxlength="60" autocomplete="off"' . ( $r ? '' : ' autofocus' ) ) );
 			md_mc_field( 'pname', $f['pname'][0], $v( 'pname' ), array( 'req' => true, 'input' => true, 'attrs' => 'required maxlength="250" autocomplete="off"' ) );
+			md_mc_field( 'salute', $f['salute'][0], $v( 'salute' ), array( 'input' => true, 'hint' => '부를 때 쓰는 말 (예: 김 사장님 · ○○ 어머님)', 'attrs' => 'maxlength="120" autocomplete="off" placeholder="예: 김 사장님"' ) ); /* v9.24 */
 			if ( ! $r ) { echo '<div class="mc-dw-prev" hidden aria-live="polite"></div>'; } /* v8.1 · 새 환자 — 덴트웹에서 가져온 것 미리 보기 */
 			foreach ( array( 'addr', 'mhx', 'referral' ) as $k ) {
 				$na = ! empty( $vals['na'][ $k ] ) || ( '' !== $v( $k ) && md_mc_is_na( $v( $k ) ) );

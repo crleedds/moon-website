@@ -310,7 +310,8 @@ document.addEventListener('click', function (e) {
   if (!window.fetch || !window.FormData) return;
   function box(name) {
     if (name === 'body') return document.querySelector('.mc-note__body'); /* 팀 노트 본문 */
-    var s = document.getElementById('f-' + name); return s && s.querySelector('.mc-block__b');
+    var s = document.getElementById('f-' + name); if (s) return s.querySelector('.mc-block__b');
+    var f = document.querySelector('form.mc-edit[data-mc-field="' + name + '"]'); return f && f.querySelector('.mc-edit__view'); /* v9.24 · 머리의 호칭처럼 id 없는 칸 */
   }
   function toast(msg, bad) {
     var t = document.querySelector('.mc-toast');
@@ -352,7 +353,7 @@ document.addEventListener('click', function (e) {
     var form = v.closest('form.mc-edit'), box = form && form.querySelector('.mc-edit__form');
     if (!box) return;
     box.hidden = false; form.classList.add('is-editing');
-    var t = box.querySelector('textarea:not([disabled]), select'); if (t) { t.focus(); if (t.setSelectionRange && t.value) { try { t.setSelectionRange(t.value.length, t.value.length); } catch (er) {} } }
+    var t = box.querySelector('textarea:not([disabled]), input[type=text], select'); if (t) { t.focus(); if (t.setSelectionRange && t.value) { try { t.setSelectionRange(t.value.length, t.value.length); } catch (er) {} } }
     Array.prototype.forEach.call(box.querySelectorAll('textarea[data-grow]'), function (x) { x.style.height = 'auto'; x.style.height = (x.scrollHeight + 4) + 'px'; });
   });
 
