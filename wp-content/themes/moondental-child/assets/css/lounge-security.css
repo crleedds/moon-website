@@ -24,3 +24,6 @@
 .mdsec-cell input { width: 20px; height: 20px; }
 .mdsec-cell.is-lock { opacity: .35; }
 .mdsec-devtable td, .mdsec-devtable th { font-size: .85rem; vertical-align: top; }
+
+/* v9.17 이메일 인증 탭 고르기 */
+.mdsec-sens { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 14px; margin: 8px 0 12px; }

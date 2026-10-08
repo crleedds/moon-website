@@ -29,8 +29,13 @@ function md_sec_settings() {
 	return is_array( $o ) ? array_merge( $d, $o ) : $d;
 }
 
-/** 이메일 인증이 필요한 화면 */
-function md_sec_sensitive() { return array( 'minichart', 'survey_result', 'brief', 'survey' ); }
+/** 이메일 인증이 필요한 화면 — v9.17 · 총괄 관리자가 직원 정보 › 병원 인터넷에서 고른다 (원장 지시). 안 골랐으면 기본값 */
+function md_sec_sensitive_default() { return array( 'minichart', 'survey_result', 'brief', 'survey' ); }
+function md_sec_sensitive() {
+	$o = get_option( 'md_sec_settings', array() );
+	if ( is_array( $o ) && isset( $o['sensitive_tabs'] ) && is_array( $o['sensitive_tabs'] ) ) { return array_values( array_map( 'sanitize_key', $o['sensitive_tabs'] ) ); }
+	return md_sec_sensitive_default();
+}
 
 function md_sec_ip() {
 	if ( function_exists( 'md_acc_ip' ) ) { return md_acc_ip(); }
@@ -359,6 +364,18 @@ function md_sec_handle_post() {
 			update_option( 'md_sec_settings', $S, false );
 			$go( '병원 인터넷 주소를 저장했습니다.', true );
 			break;
+		case 'sensitive': /* v9.17 · 🔒 이메일 인증 탭 고르기 (총괄 관리자) */
+			if ( ! md_sec_is_owner() ) { $go( '총괄 관리자만 할 수 있습니다.' ); }
+			$S = md_sec_settings();
+			$ok = array_keys( md_sec_raw_apps() );
+			$pick = array();
+			foreach ( (array) ( $_POST['sens'] ?? array() ) as $k ) { $k = sanitize_key( wp_unslash( $k ) ); if ( in_array( $k, $ok, true ) ) { $pick[] = $k; } }
+			if ( in_array( 'survey_result', $pick, true ) || in_array( 'survey', $pick, true ) ) { $pick[] = 'survey'; } /* 접수수납목록(숨김)은 만족도 결과와 같이 */
+			$S['sensitive_tabs'] = array_values( array_unique( $pick ) );
+			update_option( 'md_sec_settings', $S, false );
+			if ( function_exists( 'md_acc_log' ) ) { md_acc_log( '보안 설정', '이메일 인증 탭: ' . ( $pick ? implode( ', ', $pick ) : '없음' ) ); }
+			$go( '이메일 인증이 필요한 탭을 저장했습니다' . ( $pick ? '.' : ' — 이제 병원 밖에서도 인증 없이 열립니다.' ), true );
+			break;
 	}
 	$go( '알 수 없는 요청입니다.' );
 }
@@ -596,6 +613,17 @@ function md_sec_render_access( $tab ) {
 			<label class="mds-field"><span>병원 인터넷 주소 (한 줄에 하나)</span><textarea name="ips" rows="4"><?php echo esc_textarea( implode( "\n", (array) $S['hospital_ips'] ) ); ?></textarea></label>
 			<label class="mdsec-keep"><input type="checkbox" name="add_mine" value="1"> 지금 접속한 주소(<?php echo esc_html( $me ); ?>)도 추가 — 병원에서 접속했을 때만</label>
 			<button class="mds-btn mds-btn--fill">저장</button>
+		</form>
+		<?php /* v9.17 · 🔒 이메일 인증이 필요한 탭 고르기 (원장 지시) */ $sens = md_sec_sensitive(); ?>
+		<form method="post" class="mds-card mdsec-card"><?php md_sec_hidden( 'sensitive' ); ?>
+			<h3 class="mda-h3">🔒 병원 밖에서 열 때 이메일 인증이 필요한 탭</h3>
+			<p class="mds-hint">체크한 탭은 병원 인터넷 밖에서 열 때 이메일로 받은 코드를 한 번 더 넣어야 합니다(기기마다 <?php echo (int) $S['keep_days']; ?>일 기억). 환자 정보 · 매출이 있는 탭에 켜 두세요. 저장하면 바로 적용됩니다.</p>
+			<div class="mdsec-sens">
+			<?php foreach ( md_sec_tab_list() as $k => $a ) : ?>
+				<label class="mdsec-keep"><input type="checkbox" name="sens[]" value="<?php echo esc_attr( $k ); ?>"<?php checked( in_array( $k, $sens, true ) ); ?>> <?php echo esc_html( ( $a['icon'] ?? '' ) . ' ' . str_replace( ' 🔒', '', (string) ( $a['label'] ?? $k ) ) ); ?></label>
+			<?php endforeach; ?>
+			</div>
+			<button class="mds-btn mds-btn--fill"<?php echo md_sec_is_owner() ? '' : ' disabled'; ?>>저장</button><?php echo md_sec_is_owner() ? '' : ' <span class="mds-hint">총괄 관리자만 바꿀 수 있습니다.</span>'; ?>
 		</form>
 		<?php
 	} else {
