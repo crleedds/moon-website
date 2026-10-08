@@ -330,6 +330,18 @@ function md_inv_cat_name( $id ) {
 }
 
 /** 한 단계의 분류 (상위로 좁히기) */
+/** v9.30.1 · 「선납차감품목」 분류(1단계) id — legacy C5, 없으면 이름으로. 결제 방식은 이것 아니면 건별결제품목 둘뿐 */
+function md_inv_prepaid_cat1_id() {
+	static $id = null;
+	if ( null === $id ) {
+		global $wpdb;
+		$t  = md_inv_t( 'cat' );
+		$id = (int) $wpdb->get_var( "SELECT id FROM $t WHERE level = 1 AND legacy = 'C5' LIMIT 1" );
+		if ( ! $id ) { $id = (int) $wpdb->get_var( "SELECT id FROM $t WHERE level = 1 AND name LIKE '%선납%' ORDER BY id LIMIT 1" ); }
+	}
+	return $id;
+}
+
 function md_inv_cats_of( $level, $parent = null, $only_active = true ) {
 	$out = array();
 	foreach ( md_inv_cats( $only_active ) as $c ) {

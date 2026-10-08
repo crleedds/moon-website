@@ -277,20 +277,21 @@ function md_inv_view_todo() {
 		<?php if ( ! $reqs ) : md_inv_empty( '기다리는 요청이 없습니다.' ); else : ?>
 			<?php
 			/* v9.29 · 재료실 직원 요청 — 위에서 걸러 보기(선납품 · 출고 가능 · 주문 필요 · 팀 · 요청자) · 「선택한 것 주문」 */
-			$tf_teams = array(); $tf_who = array(); $tf_c1 = array();
+			$tf_teams = array(); $tf_who = array(); $tf_pre = 0;
+			/* v9.30.1 · 결제 방식은 둘뿐 — 선납차감품목이 아니면 모두 건별결제품목 (원장 지시, 「분류 없음」은 없음) */
+			$tf_pre_id = md_inv_prepaid_cat1_id();
 			foreach ( $reqs as $r ) {
 				$tf_teams[ (int) $r->team_id ] = md_inv_team_name( $r->team_id );
 				if ( '' !== trim( (string) $r->requester ) ) { $tf_who[ $r->requester ] = 1; }
-				$c1k = (int) ( $r->cat1 ?? 0 ); $tf_c1[ $c1k ] = ( $tf_c1[ $c1k ] ?? 0 ) + 1;
+				if ( $tf_pre_id && (int) ( $r->cat1 ?? 0 ) === $tf_pre_id ) { $tf_pre++; }
 			}
 			asort( $tf_teams ); ksort( $tf_who );
 			?>
 			<div class="iv-todo-filter" data-todo-filter>
 				<div class="iv-tfs">
 					<button type="button" class="iv-tf is-on" data-tf="all">전체 <b><?php echo count( $reqs ); ?></b></button>
-					<?php /* v9.30 · 결제 방식(건별결제품목 · 선납차감품목)으로 (원장 지시) */ foreach ( md_inv_cats_of( 1 ) as $c1 ) : if ( empty( $tf_c1[ (int) $c1->id ] ) ) { continue; } ?>
-						<button type="button" class="iv-tf" data-tf="c1:<?php echo (int) $c1->id; ?>"><?php echo esc_html( $c1->name ); ?> <b><?php echo (int) $tf_c1[ (int) $c1->id ]; ?></b></button>
-					<?php endforeach; if ( ! empty( $tf_c1[0] ) ) : ?><button type="button" class="iv-tf" data-tf="c1:0">분류 없음 <b><?php echo (int) $tf_c1[0]; ?></b></button><?php endif; ?>
+					<button type="button" class="iv-tf" data-tf="pay">건별결제품목 <b><?php echo count( $reqs ) - $tf_pre; ?></b></button>
+					<button type="button" class="iv-tf" data-tf="pre">선납차감품목 <b><?php echo (int) $tf_pre; ?></b></button>
 				</div>
 				<label class="iv-f"><span>팀</span><select class="iv-input" data-tf-team><option value="">전체</option><?php foreach ( $tf_teams as $tid => $tn ) : ?><option value="<?php echo (int) $tid; ?>"><?php echo esc_html( $tn ); ?></option><?php endforeach; ?></select></label>
 				<label class="iv-f"><span>요청자</span><select class="iv-input" data-tf-who><option value="">전체</option><?php foreach ( array_keys( $tf_who ) as $w ) : ?><option value="<?php echo esc_attr( $w ); ?>"><?php echo esc_html( $w ); ?></option><?php endforeach; ?></select></label>
@@ -316,7 +317,7 @@ function md_inv_view_todo() {
 						$short = $r->item_id && $r->stock < $r->qty;
 						?>
 						<?php $can = $r->item_id && ( $r->stock >= $r->qty || md_inv_set( 'out_allow_negative' ) ); $needo = $r->item_id && $r->stock < $r->qty && ! (int) $r->ord_id; ?>
-						<article class="iv-card iv-card--todo<?php echo $r->urgent ? ' is-urgent' : ''; ?>" data-team="<?php echo (int) $r->team_id; ?>" data-who="<?php echo esc_attr( $r->requester ); ?>" data-c1="<?php echo (int) ( $r->cat1 ?? 0 ); ?>" data-can="<?php echo $can ? 1 : 0; ?>" data-need="<?php echo $needo ? 1 : 0; ?>">
+						<article class="iv-card iv-card--todo<?php echo $r->urgent ? ' is-urgent' : ''; ?>" data-team="<?php echo (int) $r->team_id; ?>" data-who="<?php echo esc_attr( $r->requester ); ?>" data-pm="<?php echo $tf_pre_id && (int) ( $r->cat1 ?? 0 ) === $tf_pre_id ? 'pre' : 'pay'; ?>" data-can="<?php echo $can ? 1 : 0; ?>" data-need="<?php echo $needo ? 1 : 0; ?>">
 							<?php if ( $can ) : ?>
 								<label class="iv-card__chk"><input type="checkbox" name="ids[]" value="<?php echo (int) $r->id; ?>" form="iv-bulk-release" aria-label="출고 선택"></label>
 							<?php elseif ( $needo ) : ?>

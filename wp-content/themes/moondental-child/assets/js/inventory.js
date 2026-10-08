@@ -1473,7 +1473,7 @@
     var n = 0;
     Array.prototype.forEach.call(document.querySelectorAll('#iv-sec-req .iv-card--todo'), function (c) {
       var ok = true;
-      if (kind.indexOf('c1:') === 0) ok = c.getAttribute('data-c1') === kind.slice(3); /* v9.30 · 결제 방식(분류 1단계) */
+      if (kind === 'pay' || kind === 'pre') ok = c.getAttribute('data-pm') === kind; /* v9.30.1 · 결제 방식 — 선납차감품목 아니면 건별결제품목 */
       if (ok && team && team.value) ok = c.getAttribute('data-team') === team.value;
       if (ok && who && who.value) ok = c.getAttribute('data-who') === who.value;
       c.hidden = !ok;
