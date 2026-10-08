@@ -2,7 +2,7 @@
 /**
  * v7.7 · 직원 라운지 · 경영 브리핑 (덴트웹 연동)
  *
- *  서버 PC 의 brief.ps1 이 매일 아침(07:30 뒤, 진료하는 날만) 덴트웹을 읽어
+ *  서버 PC 의 brief.ps1 이 매일 아침(07:00 뒤 — v9.31 원장 지시, 휴진일 포함) 덴트웹을 읽어
  *  POST /wp-json/md-brief/v1/daily (헤더 X-MD-Survey-Key — 만족도 연동 키) 로 보낸다.
  *  여기서는 저장하고, 받는 사람에게 브리핑 메일을 보낸다(숫자 · 인원수만, 환자 이름은 메일에 넣지 않음).
  *
@@ -455,7 +455,7 @@ function md_brief_render_to() {
 	?>
 	<div class="mds-card">
 		<h2 class="mdst-title" style="margin-top:0">브리핑 메일 받는 사람</h2>
-		<p class="mds-hint">매일 아침 7시 30분쯤(휴진일 포함), 가장 최근 진료일 브리핑을 아래 주소로 보냅니다. 메일에는 숫자와 인원수만 들어갑니다(환자 이름 없음).</p>
+		<p class="mds-hint">매일 아침 7시쯤(휴진일 포함 · 서버 PC 가 켜져 있을 때), 가장 최근 진료일 브리핑을 아래 주소로 보냅니다. 메일에는 숫자와 인원수만 들어갑니다(환자 이름 없음).</p>
 		<?php if ( ! $to ) : ?><div class="mds-empty">받는 사람이 없습니다 — 메일을 보내지 않습니다.</div><?php endif; ?>
 		<?php foreach ( $to as $m ) : ?>
 			<form method="post" class="mdb-to" onsubmit="return confirm('<?php echo esc_js( $m ); ?> 을(를) 뺄까요?');">
