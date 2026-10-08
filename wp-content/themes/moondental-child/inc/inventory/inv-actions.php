@@ -289,6 +289,41 @@ function md_inv_act_ord_create() {
 	md_inv_ord_done( md_inv_ord_create( (int) md_inv_p( 'item_id' ), (int) md_inv_p( 'qty' ), array( 'price' => md_inv_p( 'price' ), 'total' => md_inv_ord_total_p(), 'free_qty' => md_inv_p( 'free_qty' ), 'note' => md_inv_p( 'note' ) ) ), '주문을 넣었습니다.' );
 }
 
+/** v9.29 · 출고 대기 요청 여러 건을 한꺼번에 주문 — 각 요청의 부족한 수량만큼, 요청에 연결해서 (재료실 직원 요청) */
+function md_inv_act_req_order_many() {
+	$ids = array_filter( array_map( 'intval', (array) md_inv_p( 'oids', array() ) ) );
+	if ( ! $ids ) { md_inv_go( 'err', '주문할 요청을 골라 주세요.' ); }
+	$ok = 0; $fail = array();
+	foreach ( $ids as $id ) {
+		$req = md_inv_req( $id );
+		if ( ! $req || 'pending' !== $req->status ) { continue; }
+		if ( ! $req->item_id ) { $fail[] = $req->name . ': 품목 등록 먼저'; continue; }
+		if ( (int) $req->ord_id ) { $fail[] = $req->name . ': 이미 주문 중'; continue; }
+		$need = max( 1, (int) $req->qty - max( 0, (int) $req->stock ) );
+		$r = md_inv_ord_create( $req->item_id, $need, array( 'req_id' => (int) $req->id ) );
+		if ( is_wp_error( $r ) ) { $fail[] = $req->name . ': ' . $r->get_error_message(); } else { $ok++; }
+	}
+	if ( $fail ) { md_inv_go( $ok ? 'warn' : 'err', $ok . '건 주문 · 못 한 것: ' . implode( ' / ', array_slice( $fail, 0, 3 ) ) ); }
+	md_inv_go( 'ok', $ok . '건을 주문했습니다. 들어오면 「할 일 › 입고 대기」에서 입고를 누르세요.' );
+}
+
+/** v9.29 · 입고 대기 주문 여러 건을 한꺼번에 입고 — 남은 수량 그대로, 주문 단가로 (재료실 직원 요청) */
+function md_inv_act_ord_receive_many() {
+	$ids = array_filter( array_map( 'intval', (array) md_inv_p( 'rids', array() ) ) );
+	if ( ! $ids ) { md_inv_go( 'err', '입고할 주문을 골라 주세요.' ); }
+	$ok = 0; $fail = array();
+	foreach ( $ids as $id ) {
+		$o = md_inv_ord( $id );
+		if ( ! $o || 'ordered' !== $o->status ) { continue; }
+		$left = (int) $o->qty - (int) $o->recv_qty;
+		if ( $left < 1 ) { continue; }
+		$r = md_inv_ord_receive( $id, $left, array( 'close' => 1, 'free_qty' => (int) $o->recv_qty ? '' : (int) $o->free_qty, 'note' => '한꺼번에 입고' ) );
+		if ( is_wp_error( $r ) ) { $fail[] = $o->item_name . ': ' . $r->get_error_message(); } else { $ok++; }
+	}
+	if ( $fail ) { md_inv_go( $ok ? 'warn' : 'err', $ok . '건 입고 · 못 한 것: ' . implode( ' / ', array_slice( $fail, 0, 3 ) ) ); }
+	md_inv_go( 'ok', $ok . '건을 입고했습니다. 재고에 더했습니다.' );
+}
+
 /** 주문 필요 품목 한꺼번에 주문 */
 function md_inv_act_ord_many() {
 	$ids  = array_filter( array_map( 'intval', (array) md_inv_p( 'ids', array() ) ) );

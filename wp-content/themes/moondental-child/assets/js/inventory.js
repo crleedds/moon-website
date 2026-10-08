@@ -206,12 +206,12 @@
 
   document.addEventListener('change', function (e) {
     var t = e.target;
-    if (t.matches('[data-checkall]')) {
+    if (t.matches && t.matches('[data-checkall]')) {
       var sec = t.closest('.iv-sec') || document;
       $$('input[type=checkbox][name="' + t.dataset.checkall + '"]', sec).forEach(function (c) { c.checked = t.checked; });
       needCheck();
     }
-    if (t.matches('input[type=checkbox][name="ids[]"]')) needCheck();
+    if (t.matches && t.matches('input[type=checkbox][name$="ids[]"]')) needCheck(); /* v9.29 · ids[] · oids[] · rids[] */
     if (t.form && t.form.hasAttribute('data-autosubmit') && t.tagName === 'SELECT') {
       if (t.matches('[data-toggle-custom]')) {
         var cus = t.value === 'c';
@@ -1460,4 +1460,47 @@
   });
   try { history.replaceState({ ivp: P, iall: iall }, ''); } catch (e) {}
   render();
+})();
+
+/* v9.29 · 할 일 › 출고 대기 — 위에서 걸러 보기 (선납품 · 출고 가능 · 주문 필요 · 팀 · 요청자). 페이지는 그대로, 숨기기만 */
+(function () {
+  'use strict';
+  var bar = document.querySelector('[data-todo-filter]');
+  if (!bar) return;
+  var kind = 'all';
+  var team = bar.querySelector('[data-tf-team]'), who = bar.querySelector('[data-tf-who]'), cnt = bar.querySelector('[data-tf-count]');
+  function apply() {
+    var n = 0;
+    Array.prototype.forEach.call(document.querySelectorAll('#iv-sec-req .iv-card--todo'), function (c) {
+      var ok = true;
+      if (kind === 'prepaid') ok = c.getAttribute('data-prepaid') === '1';
+      else if (kind === 'can') ok = c.getAttribute('data-can') === '1';
+      else if (kind === 'need') ok = c.getAttribute('data-need') === '1';
+      if (ok && team && team.value) ok = c.getAttribute('data-team') === team.value;
+      if (ok && who && who.value) ok = c.getAttribute('data-who') === who.value;
+      c.hidden = !ok;
+      if (!ok) { var ch = c.querySelector('input[type=checkbox]'); if (ch) ch.checked = false; }
+      if (ok) n++;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('#iv-sec-req .iv-group'), function (g) {
+      g.hidden = !g.querySelector('.iv-card--todo:not([hidden])');
+    });
+    if (cnt) cnt.textContent = (kind === 'all' && !(team && team.value) && !(who && who.value)) ? '' : n + '건 보임';
+    var any = document.querySelector('#iv-sec-req input[type=checkbox][name$="ids[]"]');
+    if (any) any.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  bar.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tf]'); if (!b) return;
+    kind = b.getAttribute('data-tf');
+    Array.prototype.forEach.call(bar.querySelectorAll('[data-tf]'), function (x) { x.classList.toggle('is-on', x === b); });
+    apply();
+  });
+  if (team) team.addEventListener('change', apply);
+  if (who) who.addEventListener('change', apply);
+  /* 「모두 고르기」는 보이는 카드만 */
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (!t.matches || !t.matches('#iv-sec-req [data-checkall]')) return;
+    Array.prototype.forEach.call(document.querySelectorAll('#iv-sec-req .iv-card--todo[hidden] input[type=checkbox]'), function (c) { c.checked = false; });
+  }, true);
 })();

@@ -275,10 +275,34 @@ function md_inv_view_todo() {
 	<section id="iv-sec-req" class="iv-sec">
 		<h2 class="iv-h2">출고 대기 <span class="iv-n"><?php echo count( $reqs ); ?></span><?php if ( $reqs ) : ?> <a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'pick' ) ) ); ?>">출고 준비 목록 · 인쇄</a><?php endif; ?></h2>
 		<?php if ( ! $reqs ) : md_inv_empty( '기다리는 요청이 없습니다.' ); else : ?>
-			<form method="post" id="iv-bulk-release" data-confirm="선택한 요청을 요청 수량대로 모두 출고할까요?">
-				<?php md_inv_hidden( 'req_release_many' ); ?>
-				<div class="iv-bulkbar"><label class="iv-check"><input type="checkbox" data-checkall="ids[]"> 모두 고르기</label><button class="iv-btn iv-btn--primary iv-btn--sm" data-needcheck="ids[]">선택한 것 출고</button></div>
-			</form>
+			<?php
+			/* v9.29 · 재료실 직원 요청 — 위에서 걸러 보기(선납품 · 출고 가능 · 주문 필요 · 팀 · 요청자) · 「선택한 것 주문」 */
+			$tf_teams = array(); $tf_who = array(); $tf_pre = 0;
+			foreach ( $reqs as $r ) {
+				$tf_teams[ (int) $r->team_id ] = md_inv_team_name( $r->team_id );
+				if ( '' !== trim( (string) $r->requester ) ) { $tf_who[ $r->requester ] = 1; }
+				if ( $r->item_id && md_inv_is_prepaid_vendor( $r->vendor_id ) ) { $tf_pre++; }
+			}
+			asort( $tf_teams ); ksort( $tf_who );
+			?>
+			<div class="iv-todo-filter" data-todo-filter>
+				<div class="iv-tfs">
+					<button type="button" class="iv-tf is-on" data-tf="all">전체 <b><?php echo count( $reqs ); ?></b></button>
+					<button type="button" class="iv-tf" data-tf="prepaid">선납품 <b><?php echo (int) $tf_pre; ?></b></button>
+					<button type="button" class="iv-tf" data-tf="can">출고 가능</button>
+					<button type="button" class="iv-tf" data-tf="need">주문 필요</button>
+				</div>
+				<label class="iv-f"><span>팀</span><select class="iv-input" data-tf-team><option value="">전체</option><?php foreach ( $tf_teams as $tid => $tn ) : ?><option value="<?php echo (int) $tid; ?>"><?php echo esc_html( $tn ); ?></option><?php endforeach; ?></select></label>
+				<label class="iv-f"><span>요청자</span><select class="iv-input" data-tf-who><option value="">전체</option><?php foreach ( array_keys( $tf_who ) as $w ) : ?><option value="<?php echo esc_attr( $w ); ?>"><?php echo esc_html( $w ); ?></option><?php endforeach; ?></select></label>
+				<span class="iv-muted" data-tf-count></span>
+			</div>
+			<form method="post" id="iv-bulk-release" data-confirm="선택한 요청을 요청 수량대로 모두 출고할까요?"><?php md_inv_hidden( 'req_release_many' ); ?></form>
+			<form method="post" id="iv-bulk-order" data-confirm="선택한 요청의 부족한 수량만큼 주문 목록에 넣을까요? (선납 업체는 잔액에서 잡힙니다)"><?php md_inv_hidden( 'req_order_many' ); ?></form>
+			<div class="iv-bulkbar">
+				<label class="iv-check"><input type="checkbox" data-checkall="ids[]"> 출고할 것 모두</label><button class="iv-btn iv-btn--primary iv-btn--sm" form="iv-bulk-release" data-needcheck="ids[]">선택한 것 출고</button>
+				<span class="iv-bulkbar__sep"></span>
+				<label class="iv-check"><input type="checkbox" data-checkall="oids[]"> 주문할 것 모두</label><button class="iv-btn iv-btn--ghost iv-btn--sm" form="iv-bulk-order" data-needcheck="oids[]">선택한 것 주문</button>
+			</div>
 			<div class="iv-cards">
 			<?php
 			$groups = array();
@@ -291,9 +315,12 @@ function md_inv_view_todo() {
 					<?php foreach ( $g as $r ) :
 						$short = $r->item_id && $r->stock < $r->qty;
 						?>
-						<article class="iv-card iv-card--todo<?php echo $r->urgent ? ' is-urgent' : ''; ?>">
-							<?php if ( $r->item_id && ( $r->stock >= $r->qty || md_inv_set( 'out_allow_negative' ) ) ) : ?>
-								<label class="iv-card__chk"><input type="checkbox" name="ids[]" value="<?php echo (int) $r->id; ?>" form="iv-bulk-release" aria-label="선택"></label>
+						<?php $can = $r->item_id && ( $r->stock >= $r->qty || md_inv_set( 'out_allow_negative' ) ); $needo = $r->item_id && $r->stock < $r->qty && ! (int) $r->ord_id; ?>
+						<article class="iv-card iv-card--todo<?php echo $r->urgent ? ' is-urgent' : ''; ?>" data-team="<?php echo (int) $r->team_id; ?>" data-who="<?php echo esc_attr( $r->requester ); ?>" data-prepaid="<?php echo $r->item_id && md_inv_is_prepaid_vendor( $r->vendor_id ) ? 1 : 0; ?>" data-can="<?php echo $can ? 1 : 0; ?>" data-need="<?php echo $needo ? 1 : 0; ?>">
+							<?php if ( $can ) : ?>
+								<label class="iv-card__chk"><input type="checkbox" name="ids[]" value="<?php echo (int) $r->id; ?>" form="iv-bulk-release" aria-label="출고 선택"></label>
+							<?php elseif ( $needo ) : ?>
+								<label class="iv-card__chk iv-card__chk--ord" title="주문할 것"><input type="checkbox" name="oids[]" value="<?php echo (int) $r->id; ?>" form="iv-bulk-order" aria-label="주문 선택"></label>
 							<?php else : ?><span class="iv-card__chk"></span><?php endif; ?>
 							<div class="iv-card__main">
 								<div class="iv-card__title">
@@ -323,7 +350,10 @@ function md_inv_view_todo() {
 
 	<section id="iv-sec-ord" class="iv-sec">
 		<h2 class="iv-h2">입고 대기 <span class="iv-n"><?php echo count( $ords ); ?></span> <a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'receive' ) ) ); ?>"><?php echo md_inv_icon( 'scan', 16 ); // phpcs:ignore ?>바코드로 입고</a> <a class="iv-link" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'orders' ) ) ); ?>">주문 전체 보기</a></h2>
-		<?php if ( ! $ords ) : md_inv_empty( '들어오기를 기다리는 주문이 없습니다.' ); else : md_inv_order_cards( $ords ); endif; ?>
+		<?php if ( ! $ords ) : md_inv_empty( '들어오기를 기다리는 주문이 없습니다.' ); else : ?>
+			<form method="post" id="iv-bulk-receive" data-confirm="선택한 주문을 남은 수량 그대로 모두 입고할까요? (단가는 주문 단가, LOT 없이)"><?php md_inv_hidden( 'ord_receive_many' ); ?></form>
+			<div class="iv-bulkbar"><label class="iv-check"><input type="checkbox" data-checkall="rids[]"> 모두 고르기</label><button class="iv-btn iv-btn--primary iv-btn--sm" form="iv-bulk-receive" data-needcheck="rids[]">선택한 것 입고</button><span class="iv-muted">— 수량 · 단가 · LOT 을 따로 적으려면 카드의 「입고」</span></div>
+			<?php md_inv_order_cards( $ords, 'iv-bulk-receive' ); endif; ?>
 	</section>
 
 	<section id="iv-sec-need" class="iv-sec">
@@ -361,7 +391,7 @@ function md_inv_view_todo() {
 }
 
 /** 주문 카드 목록 */
-function md_inv_order_cards( $ords ) {
+function md_inv_order_cards( $ords, $bulk_form = '' ) {
 	echo '<div class="iv-cards">';
 	$recvm = md_inv_ord_received_amounts( wp_list_pluck( (array) $ords, 'id' ) ); /* v6.5 · 주문마다 이미 받은 금액 */
 	foreach ( $ords as $o ) {
@@ -369,6 +399,7 @@ function md_inv_order_cards( $ords ) {
 		$what = $o->item_name . ' · ' . ( $v ? $v->name : '' ) . ' · 주문 ' . (int) $o->qty . $o->unit;
 		$left = (int) $o->qty - (int) $o->recv_qty;
 		echo '<article class="iv-card iv-card--ord is-' . esc_attr( $o->status ) . '">';
+		if ( $bulk_form && 'ordered' === $o->status ) { echo '<label class="iv-card__chk"><input type="checkbox" name="rids[]" value="' . (int) $o->id . '" form="' . esc_attr( $bulk_form ) . '" aria-label="입고 선택"></label>'; } /* v9.29 · 한꺼번에 입고 */
 		echo '<div class="iv-card__main"><div class="iv-card__title"><a href="' . esc_url( md_inv_url( array( 'iv' => 'item', 'id' => $o->item_id ) ) ) . '">' . esc_html( $o->item_name ) . '</a> ' . md_inv_ord_badge( $o ) . '</div>';
 		echo '<div class="iv-card__sub">' . esc_html( ( $v ? $v->name . ( $v->prepaid ? ' (선납)' : '' ) : '업체 없음' ) . ' · ' . md_inv_date( $o->created_at, 'n/j' ) . ' 주문 · ' . $o->person ) . '</div>';
 		$o_extra = (int) $o->amount - (int) $o->qty * (int) $o->price;

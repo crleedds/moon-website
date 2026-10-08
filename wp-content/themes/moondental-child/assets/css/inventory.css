@@ -753,3 +753,16 @@ tr.iv-grp.is-closed .iv-grp__arrow { transform: rotate(-90deg); }
 .iv-photos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .iv-photos img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; border: 1px solid var(--iv-line, #e5ddd5); display: block; }
 .iv-photos__gone { font-size: .78rem; color: var(--iv-mute, #998a7c); padding: 4px 8px; border: 1px dashed var(--iv-line, #e5ddd5); border-radius: 8px; }
+
+/* v9.29 · 할 일 거르기 줄 · 한꺼번에 주문 · 입고 */
+.iv-todo-filter { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 14px; margin: 0 0 10px; }
+.iv-tfs { display: flex; flex-wrap: wrap; gap: 6px; }
+.iv-tf { display: inline-flex; align-items: center; gap: 4px; min-height: 38px; padding: 0 14px; border: 1px solid var(--iv-line, #e5ddd5); border-radius: 999px; background: #fff; font: inherit; font-size: .9rem; font-weight: 700; color: var(--iv-text, #3D3029); cursor: pointer; }
+.iv-tf b { font-weight: 800; color: var(--iv-mute, #998a7c); }
+.iv-tf.is-on { background: #2F2621; border-color: #2F2621; color: #fff; }
+.iv-tf.is-on b { color: rgba(255,255,255,.75); }
+.iv-todo-filter .iv-f { min-width: 140px; }
+.iv-todo-filter .iv-f .iv-input { min-height: 38px; }
+.iv-bulkbar .iv-bulkbar__sep { width: 1px; height: 22px; background: var(--iv-line, #e5ddd5); margin: 0 4px; }
+.iv-card__chk--ord input { accent-color: #B86347; }
+.iv-group[hidden], .iv-card--todo[hidden] { display: none !important; }
