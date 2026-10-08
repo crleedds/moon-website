@@ -374,3 +374,5 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-deep { margin-top: 14px; }
 .mc-deep__h { margin: 0 0 6px; font-size: .9rem; color: var(--mc-sub, #7A6B5F); font-weight: 600; }
 .mc-row__hit { color: var(--color-primary-dark, #B86347); }
+
+.mc-tl__wait { color: var(--color-text-mute, #A89685); font-size: .85rem; }

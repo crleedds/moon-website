@@ -316,6 +316,8 @@ function md_mc_dw_timeline( $r, $d ) {
 				. '<form method="post" class="mc-tl__edit" action="' . esc_url( md_mc_url() ) . '" data-mc-fast="dwedit" hidden>' . $nf( 'dwedit' ) . '<input type="hidden" name="dwkey" value="' . esc_attr( $x['dwk'] ) . '"><textarea name="text" rows="2">' . esc_textarea( $x['dw'] ) . '</textarea><span><button class="mds-btn mds-btn--fill">저장</button> <button type="button" class="mds-btn mds-btn--ghost" data-mc-dwedit-cancel>취소</button></span></form>';
 		}
 		foreach ( $x['own'] as $o ) { $h .= '<span class="mc-tl__own" title="미니차트에 직접 적은 기록">✎ ' . esc_html( $o ) . '</span>'; }
+		/* v9.14 · 덴트웹에 내원은 잡혔는데 치료내용이 아직 비어 있는 날 (진료 중 · 입력 전) — 빈 줄 대신 안내 (원장 지적) */
+		if ( '' === $x['dw'] && ! $x['own'] && isset( $x['dwk'] ) ) { $h .= '<span class="mc-tl__wait">치료내용 아직 없음 — 덴트웹에 입력되면 30분 안에 들어옵니다</span>'; }
 		$h .= '</span></li>';
 		$i++;
 	}
