@@ -291,7 +291,7 @@ function md_sec_handle_post() {
 	switch ( $act ) {
 		case 'send':
 			$r = md_sec_send_code();
-			$go( is_wp_error( $r ) ? $r->get_error_message() : '코드를 보냈습니다. 메일함(스팸함 포함)을 확인해 주세요.', ! is_wp_error( $r ) );
+			$go( is_wp_error( $r ) ? $r->get_error_message() : '인증 코드를 메일로 보냈습니다. 메일이 안 보이면 스팸메일함도 확인해 주세요.', ! is_wp_error( $r ) );
 			break;
 		case 'verify':
 			$r = md_sec_check_code( wp_unslash( $_POST['code'] ?? '' ) );
@@ -410,6 +410,7 @@ function md_sec_render_otp( $app ) {
 			</form>
 			<form method="post" class="mdsec-code"><?php md_sec_hidden( 'verify' ); ?>
 				<label class="mds-field"><span>인증 코드 6자리</span><input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required<?php echo $sent ? ' autofocus' : ''; ?>></label>
+				<?php if ( $sent ) : ?><p class="mds-hint mdsec-spam">메일이 1~2분 안에 안 오면 <b>스팸메일함</b>도 확인해 주세요. 코드는 10분 동안 쓸 수 있습니다.</p><?php endif; /* v9.11 · 원장 지시 */ ?>
 				<label class="mdsec-keep"><input type="checkbox" name="keep" value="1"> 이 기기에서 로그인 상태 유지</label>
 				<button type="submit" class="mds-btn mds-btn--fill">확인</button>
 			</form>
