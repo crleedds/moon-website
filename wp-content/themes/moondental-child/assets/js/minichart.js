@@ -236,42 +236,52 @@ window.mcInits.push(function () {
   if (chart.value.trim()) look();
 })();
 
-/* v8.1 · 병력 칩 — 누르면 넣고 다시 누르면 뺀다 · 「해당없음」 체크는 풀림 */
+/* v8.1 · 병력 칩 — 누르면 넣고 다시 누르면 뺀다 · 「해당없음」 체크는 풀림
+   v9.27 · 문서에 한 번만 거는 방식으로 — 목록에서 차트로 (페이지를 다시 불러오지 않고) 넘어온 뒤에도 칩이 눌리게 (원장 지적) */
 (function () {
   'use strict';
-  Array.prototype.forEach.call(document.querySelectorAll('[data-mc-chips]'), function (box) {
+  function taFor(box) {
     var name = box.getAttribute('data-mc-chips');
     var own = box.closest('form'), ta = own ? own.querySelector('[name=' + name + ']') : null;
-    if (!ta) ta = document.querySelector('form.mc-form [name=' + name + ']');
-    if (!ta) return;
-    function parts() { return ta.value.split(/\s*[,，\n]\s*/).map(function (x) { return x.trim(); }).filter(Boolean); }
-    function sync() {
-      var ps = parts();
-      Array.prototype.forEach.call(box.querySelectorAll('[data-chip]'), function (b) {
-        var c = b.getAttribute('data-chip');
-        b.classList.toggle('is-on', ps.some(function (p) { return p.indexOf(c) === 0; }));
-      });
-    }
-    box.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-chip]');
-      if (!b) return;
-      var c = b.getAttribute('data-chip'), ps = parts();
-      var i = -1;
-      ps.forEach(function (p, k) { if (i < 0 && p.indexOf(c) === 0) i = k; });
-      var pre = c.slice(-1) === ':';
-      if (i > -1) ps.splice(i, 1); else ps.push(pre ? c + ' ' : c);
-      ps = ps.filter(function (p) { return p !== '해당없음' && p !== '.'; });
-      var na = document.querySelector('[name="na[' + name + ']"]');
-      if (na && na.checked) { na.click(); }
-      ta.value = ps.join(', ') + (pre && i < 0 ? ' ' : '');
-      ta.value = ta.value.replace(/: {2}$/, ': ');
-      ta.dispatchEvent(new Event('input', { bubbles: true }));
-      sync();
-      if (pre && i < 0) { ta.focus(); var n = ta.value.length; try { ta.setSelectionRange(n, n); } catch (x) {} }
+    return ta || document.querySelector('form.mc-form [name=' + name + ']');
+  }
+  function parts(ta) { return ta.value.split(/\s*[,，\n]\s*/).map(function (x) { return x.trim(); }).filter(Boolean); }
+  function sync(box, ta) {
+    var ps = parts(ta);
+    Array.prototype.forEach.call(box.querySelectorAll('[data-chip]'), function (b) {
+      var c = b.getAttribute('data-chip');
+      b.classList.toggle('is-on', ps.some(function (p) { return p.indexOf(c) === 0; }));
     });
-    ta.addEventListener('input', sync);
-    sync();
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-mc-chips] [data-chip]');
+    if (!b) return;
+    var box = b.closest('[data-mc-chips]'), ta = taFor(box);
+    if (!ta) return;
+    e.preventDefault();
+    var name = box.getAttribute('data-mc-chips'), c = b.getAttribute('data-chip'), ps = parts(ta);
+    var i = -1;
+    ps.forEach(function (p, k) { if (i < 0 && p.indexOf(c) === 0) i = k; });
+    var pre = c.slice(-1) === ':';
+    if (i > -1) ps.splice(i, 1); else ps.push(pre ? c + ' ' : c);
+    ps = ps.filter(function (p) { return p !== '해당없음' && p !== '.'; });
+    var na = (box.closest('form') || document).querySelector('[name="na[' + name + ']"]');
+    if (na && na.checked) { na.click(); }
+    ta.disabled = false;
+    ta.value = ps.join(', ') + (pre && i < 0 ? ' ' : '');
+    ta.value = ta.value.replace(/: {2}$/, ': ');
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    sync(box, ta);
+    if (pre && i < 0) { ta.focus(); var n = ta.value.length; try { ta.setSelectionRange(n, n); } catch (x) {} }
   });
+  document.addEventListener('input', function (e) {
+    var t = e.target;
+    if (!t || !t.name) return;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-mc-chips="' + t.name + '"]'), function (box) { if (taFor(box) === t) sync(box, t); });
+  });
+  function syncAll() { Array.prototype.forEach.call(document.querySelectorAll('[data-mc-chips]'), function (box) { var ta = taFor(box); if (ta) sync(box, ta); }); }
+  syncAll();
+  window.mcInits.push(syncAll);
 })();
 
 /* v8.6 · 치료계획 — 차트 화면에서 바로 고치고, 바뀌면 「저장 · 되돌리기」가 나타남 */
