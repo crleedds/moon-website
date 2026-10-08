@@ -937,7 +937,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-who b.staff{font-size:1.15rem;color:var(--primary-dk)}
 .sv-date{margin:12px 0 0 !important;font-size:.88rem;font-weight:700;color:var(--mute) !important}
 /* v4.21.3 · 상반신이 보이는 세로 사진 카드 */
-.sv-people{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:10px 0 6px}
+.sv-people{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 6px}
 .sv-person{margin:0;display:flex;flex-direction:column;gap:8px;text-align:center}
 .sv-person__ph{position:relative;display:block;aspect-ratio:3/4;border-radius:16px;overflow:hidden;background:var(--soft)}
 .sv-person__ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%}
@@ -945,7 +945,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-person__ph img~em{display:none}
 .sv-person__ph.is-noimg em{display:flex}
 .sv-person figcaption b{display:block;font-size:1.05rem;font-weight:800}
-.sv-person figcaption small{display:block;margin-top:2px;font-size:.8rem;color:var(--mute)}
+.sv-person figcaption small{display:block;margin-bottom:2px;font-size:.78rem;font-weight:800;letter-spacing:.06em;color:var(--mute)}
 .sv-fix{margin:6px 0 2px;padding:10px 14px;border-radius:12px;border:1px dashed var(--line);font-size:.92rem}
 .sv-fix summary{cursor:pointer;color:var(--sub);font-weight:700}
 .sv-fix p{margin:8px 0 10px;font-size:.85rem}
@@ -1080,8 +1080,22 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 
 		<div class="sv-who">
 			<span>진료일</span><b><?php echo esc_html( date_i18n( 'Y년 n월 j일 (D)', strtotime( $visit->visit_date ) ) ); ?></b>
-			<?php if ( $doc_titles ) : ?><span>담당의사</span><b><?php echo esc_html( preg_replace( '/님$/u', '', $doc_titles[0] ) ); /* v4.21.15 · 「○○○ 원장」 */ ?></b><?php endif; ?>
-			<?php if ( '' !== trim( (string) $staff ) ) : ?><span>담당직원</span><b><?php echo esc_html( md_survey_staff_title( $staff ) ); ?></b><?php endif; ?>
+		</div>
+		<?php
+		/* v4.22 · 담당의사 · 담당직원 사진 카드 (원장 지시 2026-10-09). 원장은 직원 정보 사진 → 홈페이지 의료진 사진, 직원은 직원 정보에 올린 사진.
+		 * 사진이 없으면 이름 첫 글자 자리. 이름이 비어 있어도 자리는 둔다. */
+		$people = array(
+			array( '담당의사', $doc_titles ? preg_replace( '/님$/u', '', $doc_titles[0] ) : '', $docs ? md_survey_person_photo( $docs[0], 'doctor' ) : '' ),
+			array( '담당직원', '' !== trim( (string) $staff ) ? md_survey_staff_title( $staff ) : '', '' !== trim( (string) $staff ) ? md_survey_person_photo( $staff, 'staff' ) : '' ),
+		);
+		?>
+		<div class="sv-people">
+			<?php foreach ( $people as $p ) : ?>
+				<figure class="sv-person">
+					<span class="sv-person__ph<?php echo $p[2] ? '' : ' is-noimg'; ?>"><?php if ( $p[2] ) : ?><img src="<?php echo esc_url( $p[2] ); ?>" alt="" loading="lazy"><?php endif; ?><em><?php echo esc_html( '' !== $p[1] ? mb_substr( $p[1], 0, 1 ) : '?' ); ?></em></span>
+					<figcaption><small><?php echo esc_html( $p[0] ); ?></small><b><?php echo esc_html( '' !== $p[1] ? $p[1] : '—' ); ?></b></figcaption>
+				</figure>
+			<?php endforeach; ?>
 		</div>
 
 		<?php $qn++; /* v4.21.18 · 담당의사가 엑셀에 없어도 문항은 항상 */ ?>
