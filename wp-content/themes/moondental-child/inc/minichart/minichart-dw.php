@@ -289,15 +289,16 @@ function md_mc_dw_timeline( $r, $d ) {
 	foreach ( preg_split( '/\r\n|\r|\n/', (string) $r->tx_hist ) as $li => $ln ) { /* v9.22 · 줄 번호($li)를 들고 가서 그 줄만 고치거나 지운다 */
 		if ( '' === trim( $ln ) ) { continue; }
 		/* v9.13 · 「000000:」처럼 날짜 자리가 있지만 날짜가 아닌 줄(AppSheet 때 날짜 모름)은 「날짜 없는 기록」으로 — 바로 위 날짜 줄에 딸려 들어가지 않게 (원장 지적: 오늘 줄을 넣자 옛 기록이 오늘로 보임) */
-		if ( preg_match( '/^\s*(\d{6})\s*:\s*(.*)$/u', $ln, $m0 ) && ! checkdate( (int) substr( $m0[1], 2, 2 ), (int) substr( $m0[1], 4, 2 ), 2000 + (int) substr( $m0[1], 0, 2 ) ) ) {
-			$undated[] = array( 't' => '' !== trim( $m0[2] ) ? trim( $m0[2] ) : trim( $ln ), 'i' => $li );
+		/* v9.28 · 앞머리는 「2026-04-22:」 또는 옛 「260422:」. 날짜가 아닌 것(000000:)은 날짜 없는 기록 */
+		if ( preg_match( '/^\s*' . MD_MC_DATE_RE . '\s*:\s*(.*)$/u', $ln, $m ) && null === md_mc_date_parse( $m[1] ) ) {
+			$undated[] = array( 't' => '' !== trim( $m[2] ) ? trim( $m[2] ) : trim( $ln ), 'i' => $li );
 			$cur = null; /* v9.22 · 그 아래 이어지는 줄도 날짜 없는 기록으로 */
 			continue;
 		}
-		if ( preg_match( '/^\s*(\d{2})(\d{2})(\d{2})\s*:\s*(.*)$/u', $ln, $m ) && checkdate( (int) $m[2], (int) $m[3], 2000 + (int) $m[1] ) ) {
-			$cur = sprintf( '20%s-%s-%s', $m[1], $m[2], $m[3] );
+		if ( preg_match( '/^\s*' . MD_MC_DATE_RE . '\s*:\s*(.*)$/u', $ln, $m ) && null !== md_mc_date_parse( $m[1] ) ) {
+			$cur = md_mc_date_parse( $m[1] );
 			if ( ! isset( $rows[ $cur ] ) ) { $rows[ $cur ] = array( 'dr' => '', 'dw' => '', 'own' => array() ); }
-			$t = trim( $m[4] );
+			$t = trim( $m[2] );
 			$same = '' !== $t && '' !== $rows[ $cur ]['dw'] && preg_replace( '/\s+/u', '', $t ) === preg_replace( '/\s+/u', '', $rows[ $cur ]['dw'] );
 			if ( '' !== $t && ! $same ) { $rows[ $cur ]['own'][] = array( 't' => $t, 'i' => $li ); }
 			continue;

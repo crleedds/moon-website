@@ -60,10 +60,10 @@ function md_mc_fields() {
 function md_mc_last_visit( $hist ) {
 	$best = '';
 	$max  = date( 'Y-m-d', current_time( 'timestamp' ) + DAY_IN_SECONDS );
-	if ( preg_match_all( '/^\s*(\d{2})(\d{2})(\d{2})\s*:/m', (string) $hist, $m, PREG_SET_ORDER ) ) {
+	if ( preg_match_all( '/^\s*' . MD_MC_DATE_RE . '\s*:/m', (string) $hist, $m, PREG_SET_ORDER ) ) {
 		foreach ( $m as $d ) {
-			if ( ! checkdate( (int) $d[2], (int) $d[3], 2000 + (int) $d[1] ) ) { continue; }
-			$ymd = sprintf( '20%s-%s-%s', $d[1], $d[2], $d[3] );
+			$ymd = md_mc_date_parse( $d[1] ); /* v9.28 · 2026-04-22 · 260422 둘 다 */
+			if ( null === $ymd ) { continue; }
 			if ( $ymd <= $max && $ymd > $best ) { $best = $ymd; }
 		}
 	}
@@ -213,10 +213,19 @@ function md_mc_url( $args = array() ) {
 	return md_sup_url( $args );
 }
 
-/** YYMMDD — 입력 칸 type=date 값(Y-m-d) → 260422 */
+/** v9.28 · 줄 앞 날짜는 2026-04-22 로 적는다 (원장 지시 — 전에는 260422). 입력 칸 type=date 값(Y-m-d)을 그대로, 없으면 오늘 */
 function md_mc_yymmdd( $ymd = '' ) {
 	$ts = $ymd ? strtotime( $ymd ) : false;
-	return $ts ? date( 'ymd', $ts ) : current_time( 'ymd' );
+	return $ts ? date( 'Y-m-d', $ts ) : current_time( 'Y-m-d' );
+}
+
+/** 줄 앞 날짜 — 「2026-04-22」 또는 옛 「260422」 → Y-m-d (날짜가 아니면 null, 예: 000000) */
+define( 'MD_MC_DATE_RE', '(\d{4}-\d{2}-\d{2}|\d{6})' );
+function md_mc_date_parse( $s ) {
+	$s = trim( (string) $s );
+	if ( preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $s, $m ) ) { return checkdate( (int) $m[2], (int) $m[3], (int) $m[1] ) ? $s : null; }
+	if ( preg_match( '/^(\d{2})(\d{2})(\d{2})$/', $s, $m ) ) { return checkdate( (int) $m[2], (int) $m[3], 2000 + (int) $m[1] ) ? sprintf( '20%s-%s-%s', $m[1], $m[2], $m[3] ) : null; }
+	return null;
 }
 
 /** 260422 / 2026-04-22 09:00 → 26.04.22 */
@@ -240,7 +249,7 @@ function md_mc_text( $s ) {
 			$label = mb_strlen( $u ) > 48 ? mb_substr( $u, 0, 46 ) . '…' : $u;
 			return '<a href="' . esc_url( $u ) . '" target="_blank" rel="noopener">' . esc_html( $label ) . '</a>';
 		}, $h );
-		$h = preg_replace( '/^(\s*)(\d{6})(\s*:)/u', '$1<b class="mc-date">$2</b>$3', $h );
+		$h = preg_replace_callback( '/^(\s*)' . MD_MC_DATE_RE . '(\s*:)/u', function ( $m ) { $p = md_mc_date_parse( $m[2] ); return $m[1] . '<b class="mc-date">' . ( $p ? $p : $m[2] ) . '</b>' . $m[3]; }, $h ); /* v9.28 · 옛 260422 도 2026-04-22 로 보여 준다 */
 		$h = preg_replace( '/^(\s*)(\[[^\]]{1,40}\])/u', '$1<b class="mc-h">$2</b>', $h );
 		$out[] = $h;
 	}
@@ -250,7 +259,7 @@ function md_mc_text( $s ) {
 /** 치료이력 맨 위 한 줄 (목록에 보이는 최근 진료) */
 function md_mc_last_line( $s ) {
 	foreach ( preg_split( '/\r\n|\r|\n/', (string) $s ) as $ln ) {
-		if ( preg_match( '/^\s*\d{6}\s*:/', $ln ) ) { return trim( $ln ); }
+		if ( preg_match( '/^\s*' . MD_MC_DATE_RE . '\s*:/', $ln, $m ) ) { $p = md_mc_date_parse( $m[1] ); return trim( $p ? preg_replace( '/^\s*' . MD_MC_DATE_RE . '/', $p, $ln, 1 ) : $ln ); }
 	}
 	return '';
 }
@@ -811,11 +820,11 @@ function md_mc_handle_post() {
 			if ( ! $cur || 'patient' !== $cur->kind ) { $back = md_mc_url(); break; }
 			$lines = preg_split( '/\r\n|\r|\n/', (string) $cur->tx_hist );
 			$oi    = (int) ( $post['oi'] ?? -1 );
-			$strip = function ( $ln ) { return trim( preg_replace( '/^\s*\d{6}\s*:\s*/u', '', (string) $ln ) ); };
+			$strip = function ( $ln ) { return trim( preg_replace( '/^\s*' . MD_MC_DATE_RE . '\s*:\s*/u', '', (string) $ln ) ); };
 			if ( ! isset( $lines[ $oi ] ) || $strip( $lines[ $oi ] ) !== trim( (string) ( $post['otext'] ?? '' ) ) ) {
 				$back = $err( '그 사이 기록이 바뀌었습니다. 화면을 새로고침한 뒤 다시 해 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break;
 			}
-			$prefix = preg_match( '/^(\s*\d{6}\s*:\s*)/u', $lines[ $oi ], $pm ) ? $pm[1] : '';
+			$prefix = preg_match( '/^(\s*' . MD_MC_DATE_RE . '\s*:\s*)/u', $lines[ $oi ], $pm ) ? $pm[1] : '';
 			$new    = 'owndel' === $action ? '' : trim( sanitize_textarea_field( (string) ( $post['text'] ?? '' ) ) );
 			if ( '' === $new ) { array_splice( $lines, $oi, 1 ); } else { $lines[ $oi ] = $prefix . str_replace( array( "\r", "\n" ), ' ', $new ); }
 			$tx = implode( "\n", $lines );
