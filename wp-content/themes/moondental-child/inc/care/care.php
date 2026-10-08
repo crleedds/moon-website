@@ -136,14 +136,14 @@ function md_care_render_topic( $slug ) {
 			<?php if ( $can_add ) : ?>
 			<label class="mdc-drop" data-care-drop="photo" hidden>
 				<input type="file" accept="image/jpeg,image/png,image/webp" multiple data-care-file="photo">
-				<span class="mdc-drop__icon">📷</span><span class="mdc-drop__text"><b>사진 추가</b> — 여기를 누르거나 파일을 끌어다 놓으세요 (JPG·PNG, 여러 장 가능)</span>
+				<span class="mdc-drop__icon">📷</span><span class="mdc-drop__text"><b>사진 추가</b> — 여기를 누르거나 파일을 끌어다 놓으세요 (JPG·PNG, 여러 장 가능)<?php if ( function_exists( 'md_care_keep_original' ) && md_care_keep_original( $slug ) ) : ?><br><small>원본 화질 그대로 저장합니다 · 한 장 최대 <?php echo esc_html( size_format( wp_max_upload_size() ) ); ?></small><?php endif; ?></span>
 				<span class="mdc-drop__prog" data-care-prog hidden></span>
 			</label>
 			<?php endif; ?>
 			<div class="mdc-grid" data-care-grid="photo">
-				<?php foreach ( $photos as $i => $p ) : $src = md_care_media_url( $p['src'] ); $cap = $p['caption'] ?? ''; $mine = $can_edit || ( function_exists( 'md_care_item_mine' ) && md_care_item_mine( $p ) ); ?>
+				<?php foreach ( $photos as $i => $p ) : $src = md_care_media_url( $p['src'] ); $disp = ! empty( $p['disp'] ) ? md_care_media_url( $p['disp'] ) : $src; /* v9.18 · 격자는 1600px 사본, 누르면 원본 */ $cap = $p['caption'] ?? ''; $mine = $can_edit || ( function_exists( 'md_care_item_mine' ) && md_care_item_mine( $p ) ); ?>
 					<figure class="mdc-card" data-care-item="photo" data-index="<?php echo (int) $i; ?>" data-src="<?php echo esc_url( $src ); ?>" data-caption="<?php echo esc_attr( $cap ); ?>"<?php echo $mine ? ' data-care-can' : ''; ?>>
-						<a href="<?php echo esc_url( $src ); ?>" data-care-zoom="<?php echo (int) $i; ?>"><img src="<?php echo esc_url( $src ); ?>" alt="<?php echo esc_attr( $cap ); ?>" loading="lazy"></a>
+						<a href="<?php echo esc_url( $src ); ?>" data-care-zoom="<?php echo (int) $i; ?>"><img src="<?php echo esc_url( $disp ); ?>" alt="<?php echo esc_attr( $cap ); ?>" loading="lazy"></a>
 						<figcaption data-care-caption><?php echo esc_html( $cap ); ?><?php if ( ! empty( $p['by_name'] ) ) : ?><small class="mdc-card__by"> · <?php echo esc_html( $p['by_name'] ); ?></small><?php endif; ?></figcaption>
 						<?php if ( $can_edit ) : ?><span class="mdc-card__tools"><button type="button" data-care-move="-1" title="앞으로">‹</button><button type="button" data-care-move="1" title="뒤로">›</button><button type="button" class="mdc-card__del" data-care-del title="삭제">✕</button></span>
 						<?php endif; ?>

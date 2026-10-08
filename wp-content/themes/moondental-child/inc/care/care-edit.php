@@ -21,6 +21,8 @@ function md_care_can_edit() {
 }
 
 /** v8.8 · Clinical Cases 는 직원 누구나 사진을 올린다 (원장 지시) — 제목은 내가 올린 것만, 삭제 · 순서 · 영상 · 되돌리기는 라운지 관리자 */
+/** v9.18 · 원본 화질을 그대로 두는 주제 (Clinical Cases — 화질이 중요, 원장 지시) */
+function md_care_keep_original( $slug ) { return in_array( $slug, array( 'cases' ), true ); }
 function md_care_open_slugs() { return array( 'cases' ); }
 function md_care_can_add( $slug ) {
 	if ( md_care_can_edit() ) { return true; }
@@ -106,9 +108,22 @@ function md_care_ajax_upload() {
 		$caption = preg_replace( '/\.[a-z0-9]+$/i', '', $orig );
 		if ( $kind === 'photo' ) {
 			$item = array( 'src' => $rel, 'caption' => $caption, 'by' => (int) $who->ID, 'by_name' => '' !== trim( $who->display_name ) ? $who->display_name : $who->user_login, 'at' => current_time( 'mysql' ) );
-			// 큰 사진은 1600px 로 줄인다
 			$ed = wp_get_image_editor( $r['file'] );
-			if ( ! is_wp_error( $ed ) ) { $s = $ed->get_size(); if ( max( $s['width'], $s['height'] ) > 1600 ) { $ed->resize( 1600, 1600, false ); $ed->save( $r['file'] ); } }
+			if ( md_care_keep_original( $slug ) ) {
+				/* v9.18 · Clinical Cases 는 원본 화질 그대로 (원장 지시) — 목록 · 격자에는 1600px 사본(-d)을 쓰고, 누르면 원본 */
+				if ( ! is_wp_error( $ed ) ) {
+					$s = $ed->get_size();
+					if ( max( $s['width'], $s['height'] ) > 1600 ) {
+						$ed->resize( 1600, 1600, false ); $ed->set_quality( 86 );
+						$dp = preg_replace( '/(\.[a-z0-9]+)$/i', '-d$1', $r['file'] );
+						$sv = $ed->save( $dp );
+						if ( ! is_wp_error( $sv ) && ! empty( $sv['path'] ) ) { $item['disp'] = $subdir . '/' . basename( $sv['path'] ); }
+					}
+				}
+			} elseif ( ! is_wp_error( $ed ) ) {
+				// 다른 주제의 큰 사진은 1600px 로 줄인다
+				$s = $ed->get_size(); if ( max( $s['width'], $s['height'] ) > 1600 ) { $ed->resize( 1600, 1600, false ); $ed->save( $r['file'] ); }
+			}
 			$items['photos'][] = $item;
 		} else {
 			$item = array( 'title' => $caption, 'file' => $rel, 'poster' => '' );
@@ -145,7 +160,7 @@ function md_care_ajax_delete() {
 	md_care_save_items( $slug, $items );
 	// 같은 파일을 다른 항목이 쓰지 않을 때만 지운다
 	$still = wp_json_encode( $items );
-	foreach ( array( $it['src'] ?? '', $it['file'] ?? '', $it['poster'] ?? '' ) as $rel ) {
+	foreach ( array( $it['src'] ?? '', $it['disp'] ?? '', $it['file'] ?? '', $it['poster'] ?? '' ) as $rel ) {
 		if ( $rel && strpos( $still, $rel ) === false ) md_care_unlink_rel( $rel );
 	}
 	wp_send_json_success( array( 'items' => $items ) );
