@@ -455,3 +455,35 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 /* v9.25 · 담당의 칸의 덴트웹 줄 ✎ ✕ */
 .mc-dr__dw .mc-tl__acts { opacity: .35; }
 .mc-dr__dw:hover .mc-tl__acts, .mc-dr__dw .mc-tl__acts:focus-within { opacity: 1; }
+
+/* v9.26 · 휴대폰 · 작은 태블릿(760px 이하)도 촘촘하게 (원장 「태블릿에서는 여전하네」) — 손가락 누를 곳은 40px 이상 유지 */
+@media (max-width: 760px) {
+  .mc-nav { margin-bottom: 8px; }
+  .mc-jump .mc-search { margin-bottom: 4px; }
+  .mc-jump .mc-search input[type="search"] { min-height: 40px; padding: 6px 12px; }
+  .mc .mc-jump .mc-search__btn { min-height: 40px; }
+  .mc-chart__head { padding: 10px 12px 9px; margin-bottom: 8px; }
+  .mc-chart__name { font-size: 1.2rem; }
+  .mc-chart__acts { margin-top: 8px; }
+  .mc-chart__acts .mds-btn, .mc-chart__acts form, .mc-chart__acts form .mds-btn { min-height: 40px; }
+  .mc-chart__meta { margin: 4px 0 0; font-size: .78rem; }
+  .mc-next { margin: 4px 0 0; padding: 5px 10px; font-size: .86rem; }
+  .mc-block { padding: 8px 12px 9px; margin-bottom: 8px; }
+  .mc-block__h { margin: 0 0 3px; font-size: .78rem; }
+  .mc-block__b { font-size: .95rem; line-height: 1.45; }
+  .mc-grid { gap: 8px; margin-bottom: 8px; }
+  .mc-edit__view { margin: -3px -5px; padding: 3px 5px; }
+  .mc-plan textarea { font-size: .95rem; line-height: 1.45; padding: 4px 6px; min-height: 36px; }
+  .mc-add { gap: 6px; margin: 0 0 6px; padding-bottom: 6px; }
+  .mc-add__day, .mc-add__text { min-height: 40px; padding: 6px 10px; }
+  .mc .mc-add__btn { min-height: 40px; }
+  .mc-tl li { padding: 3px 0; font-size: .88rem; line-height: 1.4; }
+  .mc-memo[open] > summary { margin-bottom: 4px; }
+  .mc-chart__foot { margin: 8px 0 6px; }
+  .mc-dwnote { margin: 2px 0 0; font-size: .78rem; }
+}
+/* 600~760px (작은 태블릿 · 폰 가로) — 기본 정보 두 칸씩 */
+@media (min-width: 600px) and (max-width: 760px) {
+  .mc-grid--info { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mc-grid--info .mc-block--alert { grid-column: 1 / -1; }
+}
