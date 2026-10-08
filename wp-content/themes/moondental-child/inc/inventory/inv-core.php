@@ -1022,7 +1022,7 @@ function md_inv_reqs( $a = array(), $count_only = false ) {
 	}
 	$order = 'old' === $a['order'] ? 'r.urgent DESC, r.created_at ASC, r.id ASC' : 'r.created_at DESC, r.id DESC';
 	$sql = "SELECT r.*, COALESCE(i.name,'') AS item_name, COALESCE(i.unit,'') AS unit, COALESCE(i.price,0) AS price, COALESCE(i.track_lot,0) AS track_lot,
-	               COALESCE(i.vendor_id,0) AS vendor_id, COALESCE(i.active,1) AS item_active,
+	               COALESCE(i.vendor_id,0) AS vendor_id, COALESCE(i.active,1) AS item_active, COALESCE(i.cat1,0) AS cat1,
 	               COALESCE(l.stock,0) AS stock,
 	               COALESCE(o.onord,0) AS onord, COALESCE(o.ord_id,0) AS ord_id
 	        FROM {$t['req']} r
@@ -1373,7 +1373,7 @@ function md_inv_ord_update( $id, $d ) {
  * 선납 (선불) 업체
  * ============================================================ */
 
-function md_inv_deposit_add( $vendor_id, $amount, $paid_on, $note = '', $credit = '', $kind = 'pay' ) {
+function md_inv_deposit_add( $vendor_id, $amount, $paid_on, $note = '', $credit = '', $kind = 'pay', $qty = 0 ) {
 	global $wpdb;
 	$v = md_inv_vendor( $vendor_id );
 	if ( ! $v || ! (int) $v->prepaid ) { return new WP_Error( 'vendor', '선납 업체를 골라 주세요.' ); }
@@ -1383,7 +1383,13 @@ function md_inv_deposit_add( $vendor_id, $amount, $paid_on, $note = '', $credit 
 		if ( is_wp_error( $e ) ) { return $e; }
 	}
 	$amount = md_inv_int( $amount );
-	if ( 'credit' === $kind ) {
+	if ( 'fail' === $kind ) {
+		/* v9.30 · 실패 반품 (F장부) — 업체에 돌려보낸 픽스처 개수만큼 선납금이 되돌아온다 (재료실 직원 요청 · 원장 확인). 돈은 안 오가고 쓸 수 있는 잔액만 늘어남 */
+		$cr = md_inv_int( $credit ); $qty = (int) $qty;
+		if ( $qty < 1 ) { return new WP_Error( 'qty', '반품한 개수를 적어 주세요.' ); }
+		if ( $cr <= 0 ) { return new WP_Error( 'credit', '되돌아오는 금액을 적어 주세요.' ); }
+		$amount = 0; $credit = (string) $cr;
+	} elseif ( 'credit' === $kind ) {
 		/* v6.3 · 업체 보상 · 리베이트 — 돈은 안 냈고 쓸 수 있는 잔액만 늘어남 */
 		$cr = md_inv_int( $credit );
 		if ( $cr <= 0 ) { return new WP_Error( 'credit', '업체가 넣어 준 금액(쓸 수 있는 금액)을 적어 주세요.' ); }
@@ -1393,9 +1399,9 @@ function md_inv_deposit_add( $vendor_id, $amount, $paid_on, $note = '', $credit 
 	/* v6.0 · 적립 — 비우면 업체 기본 적립률로 */
 	$credit = '' === trim( (string) $credit ) ? md_inv_credit_for( $v->id, $amount ) : md_inv_int( $credit );
 	if ( $amount > 0 && $credit < $amount ) { return new WP_Error( 'credit', '쓸 수 있는 금액은 입금액보다 적을 수 없습니다.' ); }
-	$kind = 'credit' === $kind ? 'credit' : 'pay';
+	$kind = in_array( $kind, array( 'credit', 'fail' ), true ) ? $kind : 'pay';
 	$wpdb->insert( md_inv_t( 'deposit' ), array(
-		'vendor_id' => (int) $v->id, 'paid_on' => $paid_on, 'amount' => $amount, 'credit' => $credit, 'kind' => $kind,
+		'vendor_id' => (int) $v->id, 'paid_on' => $paid_on, 'amount' => $amount, 'credit' => $credit, 'kind' => $kind, 'qty' => 'fail' === $kind ? (int) $qty : 0,
 		'note' => md_inv_txt( $note, 255 ), 'person' => md_inv_me(), 'user_id' => get_current_user_id(),
 		'created_at' => current_time( 'mysql' ),
 	) );
@@ -1430,15 +1436,16 @@ function md_inv_prepaid_summary() {
 	$out = array();
 	foreach ( md_inv_vendors( false ) as $v ) {
 		if ( ! (int) $v->prepaid ) { continue; }
-		$out[ (int) $v->id ] = (object) array( 'vendor' => $v, 'deposit' => 0, 'paid' => 0, 'bonus' => 0, 'adjust' => 0, 'spent' => 0, 'returned' => 0, 'refund' => 0, 'pending' => 0, 'last_in' => '', 'burn' => 0, 'months_left' => null, 'alert' => false );
+		$out[ (int) $v->id ] = (object) array( 'vendor' => $v, 'deposit' => 0, 'paid' => 0, 'bonus' => 0, 'adjust' => 0, 'fail' => 0, 'fail_qty' => 0, 'spent' => 0, 'returned' => 0, 'refund' => 0, 'pending' => 0, 'last_in' => '', 'burn' => 0, 'months_left' => null, 'alert' => false );
 	}
 	if ( ! $out ) { return array(); }
 	$in = implode( ',', array_keys( $out ) );
 	/* 입금(낸 돈) · 쓸 수 있는 금액(적립 포함) · 조정 */
-	foreach ( $wpdb->get_results( "SELECT vendor_id, kind, SUM(amount) AS a, SUM(credit) AS c FROM {$t['deposit']} WHERE vendor_id IN ($in) AND voided = 0 GROUP BY vendor_id, kind" ) as $r ) {
+	foreach ( $wpdb->get_results( "SELECT vendor_id, kind, SUM(amount) AS a, SUM(credit) AS c, SUM(qty) AS q FROM {$t['deposit']} WHERE vendor_id IN ($in) AND voided = 0 GROUP BY vendor_id, kind" ) as $r ) {
 		$o = $out[ (int) $r->vendor_id ];
 		$o->deposit += (int) $r->c;
 		if ( 'adjust' === $r->kind ) { $o->adjust += (int) $r->c; }
+		elseif ( 'fail' === $r->kind ) { $o->fail += (int) $r->c; $o->fail_qty += (int) $r->q; } /* v9.30 · 실패 반품 환원 */
 		else { $o->paid += (int) $r->a; $o->bonus += (int) $r->c - (int) $r->a; }
 	}
 	/* 최근 90일 차감(입고 − 반품) → 한 달 평균 */

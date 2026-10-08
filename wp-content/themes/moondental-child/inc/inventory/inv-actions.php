@@ -361,6 +361,12 @@ function md_inv_act_ord_update() {
  * 선납
  * ============================================================ */
 
+/** v9.30 · 실패 반품 (F장부) — 개수 · 되돌아오는 금액 */
+function md_inv_act_dep_fail_add() {
+	$qty = (int) md_inv_p( 'qty' );
+	md_inv_done( md_inv_deposit_add( (int) md_inv_p( 'vendor_id' ), 0, (string) md_inv_p( 'paid_on' ), (string) md_inv_p( 'note' ), (string) md_inv_p( 'credit' ), 'fail', $qty ), '실패 반품 ' . $qty . '개를 적었습니다. 선납 잔액에 되돌아왔습니다.' );
+}
+
 function md_inv_act_dep_add() {
 	md_inv_done( md_inv_deposit_add( (int) md_inv_p( 'vendor_id' ), md_inv_p( 'amount' ), (string) md_inv_p( 'paid_on' ), (string) md_inv_p( 'note' ), (string) md_inv_p( 'credit' ), 'credit' === md_inv_p( 'dkind' ) ? 'credit' : 'pay' ), 'credit' === md_inv_p( 'dkind' ) ? '업체 보상 · 리베이트를 기록했습니다 (쓸 수 있는 잔액만 늘어남).' : '입금을 기록했습니다.' );
 }

@@ -194,7 +194,7 @@ function md_inv_dataset( $key, $a = array() ) {
 			$out['num']   = array( 3 => 'won', 4 => 'won' );
 			$out['width'] = array( 11, 18, 8, 14, 16, 30, 10, 16 );
 			foreach ( md_inv_deposits() as $d ) {
-				$out['rows'][] = array( $d->paid_on, md_inv_vendor_name( $d->vendor_id ), 'adjust' === $d->kind ? '조정' : ( 'credit' === $d->kind ? '보상 · 리베이트' : ( (int) $d->amount < 0 ? '돌려받음' : '입금' ) ), (int) $d->amount, (int) $d->credit, $d->note, $d->person, substr( $d->created_at, 0, 16 ) );
+				$out['rows'][] = array( $d->paid_on, md_inv_vendor_name( $d->vendor_id ), 'adjust' === $d->kind ? '조정' : ( 'fail' === $d->kind ? '실패 반품 ' . (int) $d->qty . '개' : ( 'credit' === $d->kind ? '보상 · 리베이트' : ( (int) $d->amount < 0 ? '돌려받음' : '입금' ) ) ), (int) $d->amount, (int) $d->credit, $d->note, $d->person, substr( $d->created_at, 0, 16 ) );
 			}
 			break;
 

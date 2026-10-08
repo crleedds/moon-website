@@ -17,7 +17,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_INV_SCHEMA', 6 ); /* v9.3 · 6 = 신청에 사진 (req.photos) */ // /* v6.5 · 5 = 입고 · 주문 금액을 그대로 (amount · extra · free_qty), 입금 기록 지우지 않고 취소 */
+define( 'MD_INV_SCHEMA', 7 ); /* v9.30 · 7 = 실패 반품 개수 (deposit.qty) */ /* v9.3 · 6 = 신청에 사진 (req.photos) */ // /* v6.5 · 5 = 입고 · 주문 금액을 그대로 (amount · extra · free_qty), 입금 기록 지우지 않고 취소 */
 
 /** 테이블 이름 */
 function md_inv_t( $key = '' ) {
@@ -63,6 +63,7 @@ function md_inv_migrate() {
 	if ( $cur < 4 ) { md_inv_schema_4(); }
 	if ( $cur < 5 ) { md_inv_schema_5(); }
 	if ( $cur < 6 ) { md_inv_schema_6(); }
+	if ( $cur < 7 ) { md_inv_schema_7(); }
 
 	update_option( 'md_inv_schema', MD_INV_SCHEMA );
 	delete_transient( 'md_inv_migrating' );
@@ -420,4 +421,9 @@ function md_inv_seed_defaults() {
 /** v9.3 · 신청에 붙인 사진 이름들 (JSON) */
 function md_inv_schema_6() {
 	md_inv_add_col( md_inv_t( 'req' ), 'photos', "VARCHAR(500) NOT NULL DEFAULT ''" );
+}
+
+/** v9.30 · 실패 반품(F장부) 개수 */
+function md_inv_schema_7() {
+	md_inv_add_col( md_inv_t( 'deposit' ), 'qty', 'INT NOT NULL DEFAULT 0' );
 }

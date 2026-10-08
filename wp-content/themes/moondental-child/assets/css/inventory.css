@@ -766,3 +766,7 @@ tr.iv-grp.is-closed .iv-grp__arrow { transform: rotate(-90deg); }
 .iv-bulkbar .iv-bulkbar__sep { width: 1px; height: 22px; background: var(--iv-line, #e5ddd5); margin: 0 4px; }
 .iv-card__chk--ord input { accent-color: #B86347; }
 .iv-group[hidden], .iv-card--todo[hidden] { display: none !important; }
+
+/* v9.30 · F장부 */
+.iv-fail-form { align-items: flex-end; }
+.iv-table--fail .iv-row--sum td { border-top: 2px solid var(--iv-line, #e5ddd5); }

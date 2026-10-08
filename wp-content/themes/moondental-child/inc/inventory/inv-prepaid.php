@@ -71,11 +71,11 @@ function md_inv_passbook( $vendor_id, $from = '', $to = '' ) {
 	$ev  = array();
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$t['deposit']} WHERE vendor_id = %d AND voided = 0", $vid ) ) as $d ) { /* v6.5 · 취소한 입금은 뺀다 */
 		$adj   = 'adjust' === $d->kind;
-		$bonus = ! $adj && 'credit' !== $d->kind && (int) $d->credit !== (int) $d->amount ? (int) $d->credit - (int) $d->amount : 0;
+		$bonus = ! $adj && ! in_array( $d->kind, array( 'credit', 'fail' ), true ) && (int) $d->credit !== (int) $d->amount ? (int) $d->credit - (int) $d->amount : 0;
 		$ev[]  = (object) array(
 			'at' => $d->paid_on . ' ' . substr( (string) $d->created_at, 11, 8 ), 'date' => $d->paid_on,
 			'kind' => $adj ? 'adjust' : ( (int) $d->amount < 0 ? 'refund' : 'deposit' ),
-			'label' => $adj ? '잔액 조정' : ( 'credit' === $d->kind ? '보상 · 리베이트' : ( (int) $d->amount < 0 ? '돌려받음' : '입금' ) ),
+			'label' => $adj ? '잔액 조정' : ( 'fail' === $d->kind ? '실패 반품 환원 (' . (int) $d->qty . '개)' : ( 'credit' === $d->kind ? '보상 · 리베이트' : ( (int) $d->amount < 0 ? '돌려받음' : '입금' ) ) ),
 			'item' => '', 'qty' => 0, 'lot' => '',
 			'delta' => (int) $d->credit,
 			'note' => trim( ( $bonus ? '입금 ' . md_inv_num( $d->amount ) . ' + 적립 ' . md_inv_num( $bonus ) . ' · ' : '' ) . (string) $d->note, ' ·' ),

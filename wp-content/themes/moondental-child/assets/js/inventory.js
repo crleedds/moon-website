@@ -1473,9 +1473,7 @@
     var n = 0;
     Array.prototype.forEach.call(document.querySelectorAll('#iv-sec-req .iv-card--todo'), function (c) {
       var ok = true;
-      if (kind === 'prepaid') ok = c.getAttribute('data-prepaid') === '1';
-      else if (kind === 'can') ok = c.getAttribute('data-can') === '1';
-      else if (kind === 'need') ok = c.getAttribute('data-need') === '1';
+      if (kind.indexOf('c1:') === 0) ok = c.getAttribute('data-c1') === kind.slice(3); /* v9.30 · 결제 방식(분류 1단계) */
       if (ok && team && team.value) ok = c.getAttribute('data-team') === team.value;
       if (ok && who && who.value) ok = c.getAttribute('data-who') === who.value;
       c.hidden = !ok;
@@ -1503,4 +1501,16 @@
     if (!t.matches || !t.matches('#iv-sec-req [data-checkall]')) return;
     Array.prototype.forEach.call(document.querySelectorAll('#iv-sec-req .iv-card--todo[hidden] input[type=checkbox]'), function (c) { c.checked = false; });
   }, true);
+})();
+
+/* v9.30 · F장부 — 개수를 적으면 최근 입고 단가로 금액을 채운다 (비어 있거나 자동으로 채운 값일 때만) */
+(function () {
+  'use strict';
+  var f = document.querySelector('.iv-fail-form');
+  if (!f) return;
+  var price = parseInt(f.getAttribute('data-fail-price'), 10) || 0, q = f.querySelector('[data-fail-qty]'), c = f.querySelector('[data-fail-credit]');
+  if (!price || !q || !c) return;
+  var auto = true;
+  c.addEventListener('input', function () { auto = c.value.trim() === ''; });
+  q.addEventListener('input', function () { if (auto) { var n = parseInt(q.value, 10) || 0; c.value = n > 0 ? String(n * price) : ''; } });
 })();

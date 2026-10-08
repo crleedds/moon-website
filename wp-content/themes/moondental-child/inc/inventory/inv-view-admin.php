@@ -277,20 +277,20 @@ function md_inv_view_todo() {
 		<?php if ( ! $reqs ) : md_inv_empty( '기다리는 요청이 없습니다.' ); else : ?>
 			<?php
 			/* v9.29 · 재료실 직원 요청 — 위에서 걸러 보기(선납품 · 출고 가능 · 주문 필요 · 팀 · 요청자) · 「선택한 것 주문」 */
-			$tf_teams = array(); $tf_who = array(); $tf_pre = 0;
+			$tf_teams = array(); $tf_who = array(); $tf_c1 = array();
 			foreach ( $reqs as $r ) {
 				$tf_teams[ (int) $r->team_id ] = md_inv_team_name( $r->team_id );
 				if ( '' !== trim( (string) $r->requester ) ) { $tf_who[ $r->requester ] = 1; }
-				if ( $r->item_id && md_inv_is_prepaid_vendor( $r->vendor_id ) ) { $tf_pre++; }
+				$c1k = (int) ( $r->cat1 ?? 0 ); $tf_c1[ $c1k ] = ( $tf_c1[ $c1k ] ?? 0 ) + 1;
 			}
 			asort( $tf_teams ); ksort( $tf_who );
 			?>
 			<div class="iv-todo-filter" data-todo-filter>
 				<div class="iv-tfs">
 					<button type="button" class="iv-tf is-on" data-tf="all">전체 <b><?php echo count( $reqs ); ?></b></button>
-					<button type="button" class="iv-tf" data-tf="prepaid">선납품 <b><?php echo (int) $tf_pre; ?></b></button>
-					<button type="button" class="iv-tf" data-tf="can">출고 가능</button>
-					<button type="button" class="iv-tf" data-tf="need">주문 필요</button>
+					<?php /* v9.30 · 결제 방식(건별결제품목 · 선납차감품목)으로 (원장 지시) */ foreach ( md_inv_cats_of( 1 ) as $c1 ) : if ( empty( $tf_c1[ (int) $c1->id ] ) ) { continue; } ?>
+						<button type="button" class="iv-tf" data-tf="c1:<?php echo (int) $c1->id; ?>"><?php echo esc_html( $c1->name ); ?> <b><?php echo (int) $tf_c1[ (int) $c1->id ]; ?></b></button>
+					<?php endforeach; if ( ! empty( $tf_c1[0] ) ) : ?><button type="button" class="iv-tf" data-tf="c1:0">분류 없음 <b><?php echo (int) $tf_c1[0]; ?></b></button><?php endif; ?>
 				</div>
 				<label class="iv-f"><span>팀</span><select class="iv-input" data-tf-team><option value="">전체</option><?php foreach ( $tf_teams as $tid => $tn ) : ?><option value="<?php echo (int) $tid; ?>"><?php echo esc_html( $tn ); ?></option><?php endforeach; ?></select></label>
 				<label class="iv-f"><span>요청자</span><select class="iv-input" data-tf-who><option value="">전체</option><?php foreach ( array_keys( $tf_who ) as $w ) : ?><option value="<?php echo esc_attr( $w ); ?>"><?php echo esc_html( $w ); ?></option><?php endforeach; ?></select></label>
@@ -316,7 +316,7 @@ function md_inv_view_todo() {
 						$short = $r->item_id && $r->stock < $r->qty;
 						?>
 						<?php $can = $r->item_id && ( $r->stock >= $r->qty || md_inv_set( 'out_allow_negative' ) ); $needo = $r->item_id && $r->stock < $r->qty && ! (int) $r->ord_id; ?>
-						<article class="iv-card iv-card--todo<?php echo $r->urgent ? ' is-urgent' : ''; ?>" data-team="<?php echo (int) $r->team_id; ?>" data-who="<?php echo esc_attr( $r->requester ); ?>" data-prepaid="<?php echo $r->item_id && md_inv_is_prepaid_vendor( $r->vendor_id ) ? 1 : 0; ?>" data-can="<?php echo $can ? 1 : 0; ?>" data-need="<?php echo $needo ? 1 : 0; ?>">
+						<article class="iv-card iv-card--todo<?php echo $r->urgent ? ' is-urgent' : ''; ?>" data-team="<?php echo (int) $r->team_id; ?>" data-who="<?php echo esc_attr( $r->requester ); ?>" data-c1="<?php echo (int) ( $r->cat1 ?? 0 ); ?>" data-can="<?php echo $can ? 1 : 0; ?>" data-need="<?php echo $needo ? 1 : 0; ?>">
 							<?php if ( $can ) : ?>
 								<label class="iv-card__chk"><input type="checkbox" name="ids[]" value="<?php echo (int) $r->id; ?>" form="iv-bulk-release" aria-label="출고 선택"></label>
 							<?php elseif ( $needo ) : ?>
@@ -391,6 +391,38 @@ function md_inv_view_todo() {
 }
 
 /** 주문 카드 목록 */
+/** v9.30 · F장부 (실패 반품 장부) — 업체별로 돌려보낸 픽스처 개수와 되돌아온 선납금, 달마다 합계 (재료실 직원 요청 · 원장 확인) */
+function md_inv_prepaid_fail_section( $vid, $deps ) {
+	global $wpdb;
+	$t = md_inv_t();
+	$price = (int) $wpdb->get_var( $wpdb->prepare( "SELECT price FROM {$t['ledger']} WHERE vendor_id = %d AND type = 'in' AND voided = 0 AND price > 0 ORDER BY id DESC LIMIT 1", $vid ) );
+	$fails = array_values( array_filter( (array) $deps, function ( $d ) { return 'fail' === $d->kind && empty( $d->voided ); } ) );
+	$months = array();
+	foreach ( $fails as $d ) { $m = substr( (string) $d->paid_on, 0, 7 ); if ( ! isset( $months[ $m ] ) ) { $months[ $m ] = array( 'qty' => 0, 'amt' => 0, 'n' => 0 ); } $months[ $m ]['qty'] += (int) $d->qty; $months[ $m ]['amt'] += (int) $d->credit; $months[ $m ]['n']++; }
+	krsort( $months );
+	?>
+	<section class="iv-panel" id="iv-fail">
+		<h3 class="iv-h3">F장부 — 실패 반품</h3>
+		<p class="iv-help">실패한 픽스처를 업체에 돌려보낼 때 사이즈가 아니라 <b>개수</b>로 적습니다. 적은 금액만큼 이 업체 선납 잔액이 되돌아옵니다(위 「실패 반품」 줄). 입력한 줄은 「입금 내역」에도 「실패 반품」 표시로 남고, 잘못 적었으면 거기서 삭제합니다.</p>
+		<form method="post" class="iv-filter iv-fail-form" data-fail-price="<?php echo (int) $price; ?>">
+			<?php md_inv_hidden( 'dep_fail_add' ); ?><input type="hidden" name="vendor_id" value="<?php echo (int) $vid; ?>">
+			<label class="iv-f"><span>반품일</span><input class="iv-input" type="date" name="paid_on" value="<?php echo esc_attr( current_time( 'Y-m-d' ) ); ?>" required></label>
+			<label class="iv-f"><span>개수</span><input class="iv-input" type="number" name="qty" min="1" step="1" inputmode="numeric" required placeholder="예: 3" data-fail-qty></label>
+			<label class="iv-f"><span>되돌아오는 금액 (원)</span><input class="iv-input" name="credit" inputmode="numeric" required placeholder="<?php echo $price ? esc_attr( '개수 × ' . number_format( $price ) . '원' ) : '금액'; ?>" data-fail-credit></label>
+			<label class="iv-f iv-f--grow"><span>메모 (선택)</span><input class="iv-input" name="note" maxlength="255" placeholder="예: 10월분 실패 반품 · 택배 발송"></label>
+			<button class="iv-btn iv-btn--primary">적기</button>
+			<?php if ( $price ) : ?><span class="iv-muted iv-f">개수를 적으면 최근 입고 단가 <?php echo esc_html( number_format( $price ) ); ?>원으로 금액을 채웁니다 — 다르면 고쳐 적으세요.</span><?php endif; ?>
+		</form>
+		<?php if ( ! $months ) : md_inv_empty( '아직 적은 실패 반품이 없습니다.' ); else : ?>
+		<div class="iv-table-wrap"><table class="iv-table iv-table--fail"><thead><tr><th>달</th><th class="r">반품 개수</th><th class="r">되돌아온 금액</th><th class="r">건수</th></tr></thead><tbody>
+			<?php foreach ( $months as $m => $x ) : ?><tr><td data-l="달"><b><?php echo esc_html( str_replace( '-', '년 ', $m ) . '월' ); ?></b></td><td data-l="반품 개수" class="r"><b><?php echo (int) $x['qty']; ?>개</b></td><td data-l="되돌아온 금액" class="r"><?php echo esc_html( md_inv_num( $x['amt'] ) . '원' ); ?></td><td data-l="건수" class="r"><?php echo (int) $x['n']; ?></td></tr><?php endforeach; ?>
+			<tr class="iv-row--sum"><td data-l="달"><b>합계</b></td><td data-l="반품 개수" class="r"><b><?php echo (int) array_sum( array_column( $months, 'qty' ) ); ?>개</b></td><td data-l="되돌아온 금액" class="r"><b><?php echo esc_html( md_inv_num( array_sum( array_column( $months, 'amt' ) ) ) . '원' ); ?></b></td><td data-l="건수" class="r"><?php echo (int) array_sum( array_column( $months, 'n' ) ); ?></td></tr>
+		</tbody></table></div>
+		<?php endif; ?>
+	</section>
+	<?php
+}
+
 function md_inv_order_cards( $ords, $bulk_form = '' ) {
 	echo '<div class="iv-cards">';
 	$recvm = md_inv_ord_received_amounts( wp_list_pluck( (array) $ords, 'id' ) ); /* v6.5 · 주문마다 이미 받은 금액 */
@@ -766,6 +798,7 @@ function md_inv_view_prepaid() {
 					<?php if ( $p->adjust ) : ?><div><dt>조정</dt><dd><?php echo esc_html( ( $p->adjust > 0 ? '+' : '' ) . md_inv_num( $p->adjust ) ); ?></dd></div><?php endif; ?>
 					<div><dt>입고 차감</dt><dd><?php echo esc_html( ( $p->spent ? '−' : '' ) . md_inv_num( $p->spent ) ); ?></dd></div>
 					<div><dt>반품 환원</dt><dd><?php echo esc_html( ( $p->returned ? '+' : '' ) . md_inv_num( $p->returned ) ); ?></dd></div>
+					<?php if ( $p->fail ) : ?><div><dt>실패 반품</dt><dd><?php echo esc_html( '+' . md_inv_num( $p->fail ) . ' (' . (int) $p->fail_qty . '개)' ); ?></dd></div><?php endif; ?>
 					<?php if ( $p->refund ) : ?><div><dt>환불 · 정정</dt><dd><?php echo esc_html( ( $p->refund > 0 ? '+' : '' ) . md_inv_num( $p->refund ) ); ?></dd></div><?php endif; ?>
 					<div><dt>잔액</dt><dd><?php echo esc_html( md_inv_num( $p->balance ) ); ?></dd></div>
 					<div><dt>주문 중</dt><dd><?php echo esc_html( ( $p->pending ? '−' : '' ) . md_inv_num( $p->pending ) ); ?></dd></div>
@@ -784,18 +817,19 @@ function md_inv_view_prepaid() {
 		<h2 class="iv-h2"><?php echo esc_html( $p->vendor->name ); ?></h2>
 		<div class="iv-toolbar iv-toolbar--actions">
 			<button type="button" class="iv-btn iv-btn--primary" data-dlg="dlg-dep" data-set="<?php echo esc_attr( wp_json_encode( array( 'vendor_id' => $vid, 'what' => $p->vendor->name, 'bhint' => (float) $p->vendor->pp_bonus > 0 ? '이 업체 기본 적립률 ' . rtrim( rtrim( number_format( (float) $p->vendor->pp_bonus, 2 ), '0' ), '.' ) . '% — 비우면 입금액 × ' . ( 1 + (float) $p->vendor->pp_bonus / 100 ) . '로 계산합니다.' : '적립이 없으면 비워 두세요 (= 입금액). 기본 적립률은 설정 › 업체에서 정합니다.' ) ) ); ?>">입금 기록</button>
-			<a class="iv-btn iv-btn--ghost" href="#iv-passbook">통장식 내역</a><a class="iv-btn iv-btn--ghost" href="#iv-recon">잔액 대조</a><a class="iv-btn iv-btn--ghost" href="#iv-stmt">명세서 대조</a><a class="iv-btn iv-btn--ghost" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'pricelist', 'ivd' => $vid ) ) ); ?>">단가표 올리기</a>
+			<a class="iv-btn iv-btn--ghost" href="#iv-fail">F장부 (실패 반품)</a><a class="iv-btn iv-btn--ghost" href="#iv-passbook">통장식 내역</a><a class="iv-btn iv-btn--ghost" href="#iv-recon">잔액 대조</a><a class="iv-btn iv-btn--ghost" href="#iv-stmt">명세서 대조</a><a class="iv-btn iv-btn--ghost" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'pricelist', 'ivd' => $vid ) ) ); ?>">단가표 올리기</a>
 		</div>
 		<?php $zero = md_inv_prepaid_zero_items( $vid ); if ( $zero ) : ?><p class="iv-help iv-danger">단가 0원 품목 <?php echo count( $zero ); ?>개: <?php echo esc_html( implode( ', ', array_map( function ( $z ) { return $z->name; }, $zero ) ) ); ?></p><?php endif; ?>
 		<h3 class="iv-h3">입금 내역</h3>
 		<?php if ( ! $deps ) : md_inv_empty( '입금 기록이 없습니다.' ); else : ?>
 		<div class="iv-table-wrap"><table class="iv-table"><thead><tr><th>입금일</th><th class="r">입금액</th><th class="r">쓸 수 있는 금액</th><th>메모</th><th>입력</th><th></th></tr></thead><tbody>
 			<?php foreach ( $deps as $d ) : ?>
-				<tr<?php echo 'adjust' === $d->kind ? ' class="iv-dep--adj"' : ''; ?>><td data-l="입금일"><?php echo esc_html( $d->paid_on ); ?><?php echo 'adjust' === $d->kind ? ' <span class="iv-tag">조정</span>' : ( 'credit' === $d->kind ? ' <span class="iv-tag">보상</span>' : '' ); ?></td><td data-l="입금액" class="r"><b><?php echo in_array( $d->kind, array( 'adjust', 'credit' ), true ) ? '—' : esc_html( md_inv_num( $d->amount ) ); ?></b></td><td data-l="쓸 수 있는 금액" class="r"><?php echo esc_html( md_inv_num( $d->credit ) ); ?><?php echo 'pay' === $d->kind && (int) $d->credit !== (int) $d->amount ? ' <small>(적립 ' . esc_html( md_inv_num( $d->credit - $d->amount ) ) . ')</small>' : ''; ?></td><td data-l="메모"><?php echo esc_html( $d->note ); ?></td><td data-l="입력"><?php echo esc_html( $d->person ); ?></td>
+				<tr<?php echo 'adjust' === $d->kind ? ' class="iv-dep--adj"' : ''; ?>><td data-l="입금일"><?php echo esc_html( $d->paid_on ); ?><?php echo 'adjust' === $d->kind ? ' <span class="iv-tag">조정</span>' : ( 'credit' === $d->kind ? ' <span class="iv-tag">보상</span>' : ( 'fail' === $d->kind ? ' <span class="iv-tag iv-tag--hot">실패 반품 ' . (int) $d->qty . '개</span>' : '' ) ); ?></td><td data-l="입금액" class="r"><b><?php echo in_array( $d->kind, array( 'adjust', 'credit', 'fail' ), true ) ? '—' : esc_html( md_inv_num( $d->amount ) ); ?></b></td><td data-l="쓸 수 있는 금액" class="r"><?php echo esc_html( md_inv_num( $d->credit ) ); ?><?php echo 'pay' === $d->kind && (int) $d->credit !== (int) $d->amount ? ' <small>(적립 ' . esc_html( md_inv_num( $d->credit - $d->amount ) ) . ')</small>' : ''; ?></td><td data-l="메모"><?php echo esc_html( $d->note ); ?></td><td data-l="입력"><?php echo esc_html( $d->person ); ?></td>
 				<td class="iv-td-act"><form method="post" data-confirm="이 입금 기록을 지울까요? 잔액이 바뀝니다."><?php md_inv_hidden( 'dep_delete' ); ?><input type="hidden" name="id" value="<?php echo (int) $d->id; ?>"><button class="iv-btn iv-btn--ghost iv-btn--xs">삭제</button></form></td></tr>
 			<?php endforeach; ?>
 		</tbody></table></div>
 		<?php endif; ?>
+		<?php md_inv_prepaid_fail_section( $vid, $deps ); /* v9.30 · F장부 */ ?>
 		<?php if ( $ords ) : ?><h3 class="iv-h3">주문 중</h3><?php md_inv_order_cards( $ords ); endif; ?>
 		<?php md_inv_prepaid_passbook_section( $vid ); ?>
 		<?php md_inv_prepaid_recon_section( $vid ); ?>
