@@ -397,14 +397,15 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
   .mc-jump .mc-search { margin-bottom: 6px; }
   .mc-jump .mc-search input[type="search"] { min-height: 38px; padding: 6px 12px; font-size: .95rem; }
   .mc-jump .mc-search__btn { min-height: 38px; }
-  .mc-chart__head { padding: 10px 16px 10px; margin-bottom: 8px; display: grid; grid-template-columns: 1fr auto; grid-template-areas: "id acts" "next next" "meta meta" "warn warn"; align-items: center; gap: 2px 12px; }
-  .mc-chart__id { grid-area: id; }
-  .mc-chart__acts { grid-area: acts; margin-top: 0; }
+  .mc-chart__head { padding: 10px 16px 10px; margin-bottom: 8px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 12px; }
+  .mc-chart__head > * { grid-column: 1 / -1; } /* 머리 줄만 두 칸(이름 · 버튼), 나머지(다음 예약 · 메타 · 알림)는 한 줄씩 */
+  .mc-chart__id { grid-column: 1; grid-row: 1; }
+  .mc-chart__acts { grid-column: 2; grid-row: 1; margin-top: 0; }
   .mc-chart__acts .mds-btn { min-height: 34px; padding: 0 12px; font-size: .9rem; }
   .mc-chart__name { font-size: 1.3rem; }
-  .mc-next { grid-area: next; margin: 4px 0 0; padding: 5px 10px; font-size: .88rem; }
-  .mc-chart__meta { grid-area: meta; margin: 2px 0 0; font-size: .8rem; }
-  .mc-chart__head > .mds-notice { grid-area: warn; margin: 6px 0 0; }
+  .mc-next { margin: 4px 0 0; padding: 5px 10px; font-size: .88rem; }
+  .mc-chart__meta { margin: 2px 0 0; font-size: .8rem; }
+  .mc-chart__head > .mds-notice { margin: 6px 0 0; }
   .mc-block { padding: 8px 12px 9px; margin-bottom: 8px; }
   .mc-block__h { margin: 0 0 3px; font-size: .78rem; }
   .mc-block__b { font-size: .93rem; line-height: 1.45; }
