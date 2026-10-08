@@ -945,10 +945,10 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-date{margin:12px 0 0 !important;font-size:.88rem;font-weight:700;color:var(--mute) !important}
 /* v4.21.3 · 상반신이 보이는 세로 사진 카드 */
 .sv-people{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 6px}
-.sv-person{margin:0;display:flex;flex-direction:column;gap:8px;text-align:center}
-.sv-person__ph{position:relative;display:block;aspect-ratio:3/4;border-radius:16px;overflow:hidden;background:var(--soft)}
+.sv-person{margin:0;display:flex;flex-direction:column;gap:6px;text-align:center}
+.sv-person__ph{position:relative;display:block;width:104px;max-width:100%;margin:0 auto;aspect-ratio:3/4;border-radius:14px;overflow:hidden;background:var(--soft)} /* v4.22.2 · 사진은 작게 (원장 지시) */
 .sv-person__ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%}
-.sv-person__ph em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:2.6rem;font-weight:800;color:var(--mute)}
+.sv-person__ph em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:2rem;font-weight:800;color:var(--mute)}
 .sv-person__ph img~em{display:none}
 .sv-person__ph.is-noimg em{display:flex}
 .sv-person figcaption b{display:block;font-size:1.05rem;font-weight:800}
