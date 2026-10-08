@@ -940,11 +940,16 @@ function md_mc_fast_reply( $action, $id, $back ) {
 		$d = 'patient' === $r->kind && function_exists( 'md_mc_dw_get' ) ? md_mc_dw_get( $r->chart_no ) : null;
 		$out['target'] = 'tx_hist';
 		$out['html'] = function_exists( 'md_mc_dw_timeline' ) && 'patient' === $r->kind ? md_mc_dw_timeline( $r, $d ) : md_mc_text( $r->tx_hist );
+	} elseif ( 'add' === $action && 'note' === $r->kind ) {
+		/* v9.10 · 팀 노트(팀 피드 등)에 한 줄 추가 — 본문을 바로 돌려준다. (전에는 reload 로 답해 화면이 폼을 다시 보내 두 번 들어갔다) */
+		$out['target'] = 'body';
+		$out['html'] = md_mc_text( $r->body );
 	} elseif ( 'add' === $action && in_array( $field, array_keys( md_mc_fields() ), true ) ) {
 		$out['target'] = $field;
 		$out['html'] = md_mc_text( $r->$field );
 	} elseif ( 'add' === $action ) {
-		wp_send_json( array( 'ok' => false, 'reload' => true ) );
+		/* 이미 저장됐다 — 화면은 그 주소로 옮겨 가기만 한다 (다시 보내면 두 번 저장됨) */
+		wp_send_json( array( 'ok' => true, 'redirect' => $back ) );
 	}
 	wp_send_json( $out );
 }
@@ -977,6 +982,7 @@ function md_mc_find_json() {
 	if ( '' === $k ) { wp_send_json( array( 'ok' => true, 'rows' => array() ) ); }
 	$t    = md_mc_t();
 	$like = '%' . $wpdb->esc_like( $k ) . '%';
+	if ( ! empty( $_GET['deep'] ) && ! md_mc_is_cho( $q ) && mb_strlen( $k ) >= 2 ) { md_mc_find_deep_json( $q, $k ); }
 	if ( md_mc_is_cho( $q ) ) {
 		$cond = $wpdb->prepare( 'cho LIKE %s', $like );
 	} else {
@@ -1003,6 +1009,41 @@ function md_mc_find_json() {
 	wp_send_json( array( 'ok' => true, 'rows' => $out ) );
 }
 add_action( 'template_redirect', 'md_mc_find_json', 2 );
+
+/** v9.10 · 목록에서 글자를 치면 내용까지 같이 찾는다 (원장 지시 — 「점액낭종」을 치면 진료기록에 있는 환자도).
+ *  차트번호 · 이름으로 이미 맞는 환자는 화면이 바로 보여 주므로 빼고, 내용에서만 맞는 환자를 맞은 줄과 함께 30명까지 */
+function md_mc_find_deep_json( $q, $k ) {
+	global $wpdb;
+	$t    = md_mc_t();
+	$cols = array( 'tx_hist' => '진료기록', 'memo' => '참고사항', 'tx_plan' => '치료계획', 'mhx' => '병력', 'referral' => '내원경로', 'addr' => '지역', 'dr' => '담당의' );
+	$likeQ = '%' . $wpdb->esc_like( $q ) . '%';
+	$likeK = '%' . $wpdb->esc_like( $k ) . '%';
+	$or   = array(); $args = array();
+	foreach ( array_keys( $cols ) as $c ) { $or[] = "$c LIKE %s"; $args[] = $likeQ; }
+	$sql  = "SELECT id, chart_no, pname, pin, last_visit, " . implode( ', ', array_keys( $cols ) ) . " FROM $t WHERE kind = 'patient' AND deleted_at IS NULL AND (" . implode( ' OR ', $or ) . ")
+		 AND NOT (chart_no LIKE %s OR REPLACE(pname, ' ', '') LIKE %s) ORDER BY pin DESC, COALESCE(viewed_at, updated_at) DESC, id DESC LIMIT 30";
+	$args[] = $likeK; $args[] = $likeK;
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( $sql, $args ) );
+	$out  = array();
+	foreach ( $rows as $r ) {
+		$hit = '';
+		foreach ( $cols as $c => $label ) {
+			$v = (string) $r->$c;
+			if ( '' === $v || false === mb_stripos( $v, $q ) ) { continue; }
+			$line = '';
+			foreach ( preg_split( '/
+||
+/', $v ) as $ln ) { if ( false !== mb_stripos( $ln, $q ) ) { $line = trim( $ln ); break; } }
+			$pos = mb_stripos( $line, $q );
+			if ( false !== $pos && $pos > 24 ) { $line = '…' . mb_substr( $line, $pos - 20 ); }
+			if ( mb_strlen( $line ) > 70 ) { $line = mb_substr( $line, 0, 68 ) . '…'; }
+			$hit = $label . ' · ' . $line;
+			break;
+		}
+		$out[] = array( 'chart' => $r->chart_no, 'name' => $r->pname, 'pin' => (int) $r->pin, 'hit' => $hit, 'last' => $r->last_visit ? md_mc_short_date( $r->last_visit ) : '', 'url' => md_mc_url( array( 'mv' => 'p', 'mid' => $r->id ) ) );
+	}
+	wp_send_json( array( 'ok' => true, 'rows' => $out, 'q' => $q ) );
+}
 
 /* v10.0 · 휴대폰 홈 화면에 「미니차트」 아이콘 (재료실과 같은 방식 · 원장 지시) */
 function md_mc_manifest() {
@@ -1209,7 +1250,8 @@ function md_mc_render_list() {
 			<?php endforeach; ?>
 		</ul>
 		<p class="mc-more-wrap" hidden><button type="button" class="mds-btn mc-more">더 보기</button></p>
-		<p class="mc-nohit mds-hint" hidden>이름·차트번호로는 없습니다. 「내용까지」를 눌러 병력·치료이력·참고사항에서 찾아보세요.</p>
+		<p class="mc-nohit mds-hint" hidden>이름·차트번호로는 없습니다.</p>
+		<section class="mc-deep" id="mc-deep" hidden><h3 class="mc-deep__h"></h3><ul class="mc-list mc-list--deep"></ul></section>
 	<?php endif; ?>
 	<?php
 }

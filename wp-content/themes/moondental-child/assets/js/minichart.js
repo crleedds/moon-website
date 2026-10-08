@@ -33,6 +33,32 @@ window.mcInits.push(function () {
       });
       if (moreWrap) { moreWrap.hidden = !!v || items.length <= shown; }
       if (nohit) { nohit.hidden = !v || hits > 0; }
+      deepFind(q ? q.value.trim() : '', v);
+    };
+    /* v9.10 · 글자를 치면 내용(병력 · 치료계획 · 진료기록 · 참고사항 …)에서도 같이 찾아 아래에 붙인다 (원장 지시) */
+    var deep = document.getElementById('mc-deep'), deepT = null, deepLast = '', deepSeq = 0;
+    var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var deepFind = function (raw, v) {
+      if (!deep) { return; }
+      clearTimeout(deepT);
+      var cho = /^[\u3131-\u314E\s]+$/.test(raw);
+      if (!v || v.length < 2 || cho || (serverQ && v === norm(serverQ))) { deep.hidden = true; deepLast = ''; return; }
+      if (raw === deepLast) { return; }
+      deepT = setTimeout(function () {
+        var seq = ++deepSeq, u = new URL(location.href);
+        u.search = ''; u.searchParams.set('app', 'minichart'); u.searchParams.set('md_mc_find', raw); u.searchParams.set('deep', '1');
+        fetch(u.toString(), { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (res) {
+          if (seq !== deepSeq || !res || !res.ok) { return; }
+          deepLast = raw;
+          var rows = res.rows || [];
+          deep.hidden = !rows.length;
+          if (nohit && rows.length) { nohit.hidden = true; }
+          deep.querySelector('.mc-deep__h').textContent = '내용에서 찾음 ' + rows.length + '명' + (rows.length >= 30 ? ' (30명까지)' : '');
+          deep.querySelector('ul').innerHTML = rows.map(function (r) {
+            return '<li><a class="mc-row" href="' + esc(r.url) + '"><span class="mc-row__no">' + esc(r.chart) + '</span><span class="mc-row__name">' + (r.pin ? '<span class="mc-row__pin">📌</span>' : '') + '<span class="mc-row__nm">' + esc(r.name) + '</span></span><span class="mc-row__last mc-row__hit">' + esc(r.hit) + '</span><span class="mc-row__upd">' + esc(r.last) + '</span></a></li>';
+          }).join('');
+        }).catch(function () {});
+      }, 280);
     };
     if (q) {
       q.addEventListener('input', apply);
@@ -67,7 +93,7 @@ window.mcInits.push(function () {
   /* 한 줄 추가 칸: Ctrl/⌘+Enter 로 바로 추가 */
   document.querySelectorAll('.mc-add__text').forEach(function (t) {
     t.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && t.value.trim()) { e.preventDefault(); t.form.submit(); }
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && t.value.trim()) { e.preventDefault(); if (t.form.requestSubmit) { t.form.requestSubmit(); } else { t.form.submit(); } }
     });
   });
 
@@ -281,7 +307,10 @@ document.addEventListener('click', function (e) {
 (function () {
   'use strict';
   if (!window.fetch || !window.FormData) return;
-  function box(name) { var s = document.getElementById('f-' + name); return s && s.querySelector('.mc-block__b'); }
+  function box(name) {
+    if (name === 'body') return document.querySelector('.mc-note__body'); /* 팀 노트 본문 */
+    var s = document.getElementById('f-' + name); return s && s.querySelector('.mc-block__b');
+  }
   function toast(msg, bad) {
     var t = document.querySelector('.mc-toast');
     if (!t) { t = document.createElement('div'); t.className = 'mc-toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
@@ -309,7 +338,9 @@ document.addEventListener('click', function (e) {
     }
     syncRev(res.rev);
   }
-  function fallback(form) { form.removeAttribute('data-mc-fast'); form.dataset.mcSlow = '1'; form.dataset.sending = '1'; HTMLFormElement.prototype.submit.call(form); }
+  /* v9.10 · 서버가 저장했는지 알 수 없을 때는 폼을 다시 보내지 않는다(두 번 저장 방지) — 화면을 새로 불러와 실제 상태를 보여 준다 */
+  function recover(msg) { toast(msg || '저장 결과를 확인합니다…', true); setTimeout(function () { location.reload(); }, 900); }
+  var busy = false;
 
   document.addEventListener('submit', function (e) {
     var form = e.target;
@@ -326,6 +357,8 @@ document.addEventListener('click', function (e) {
       else if (!form.querySelector('input[name="dwkeys[]"]:checked')) { e.preventDefault(); toast('다시 보이게 할 기록을 골라 주세요.', true); return; }
     }
     e.preventDefault();
+    if (busy) { return; } /* 더블클릭 · Enter 연타로 두 번 보내지 않게 */
+    busy = true;
     var li = form.closest('li');
     /* 먼저 화면에서 바로 */
     if (kind === 'dwhide' && li) {
@@ -344,7 +377,8 @@ document.addEventListener('click', function (e) {
     Array.prototype.forEach.call(btns, function (b) { b.disabled = true; });
     var addText = kind === 'add' ? form.querySelector('textarea[name=text]') : null;
     send(form, extra).then(function (res) {
-      if (res.reload) { fallback(form); return; }
+      if (res.redirect) { form.dataset.sending = '1'; location.href = res.redirect; return; }
+      if (res.reload) { recover(''); return; }
       if (!res.ok) { toast(res.msg || '저장하지 못했습니다.', true); if (kind === 'plan') { Array.prototype.forEach.call(btns, function (b) { b.disabled = false; }); } return; }
       apply(res);
       if (kind === 'add' && addText) { addText.value = ''; addText.style.height = ''; }
@@ -354,8 +388,9 @@ document.addEventListener('click', function (e) {
       }
       toast({ dwhide: '지웠습니다', dwedit: '고쳤습니다', dwunhide: '다시 보이게 했습니다', add: '추가했습니다', plan: '저장했습니다' }[kind] || '저장했습니다');
     }).catch(function () {
-      fallback(form);
+      recover('저장 결과를 확인합니다…');
     }).then(function () {
+      busy = false;
       Array.prototype.forEach.call(btns, function (b) { b.disabled = false; });
     });
   }, true);

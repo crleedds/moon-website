@@ -2109,19 +2109,40 @@ add_action( 'after_setup_theme', function() {
  */
 add_filter( 'moondental_naver_live_enabled', '__return_false' );
 
+/* v9.10 · 직원 라운지 요청(/직원/ · md_ ajax · /wp-json/md-*)에서는 홈페이지 전용 모듈(백과사전 · 안내서 · SEO · 색인)을 올리지 않는다.
+ * 라운지 화면은 문서를 스스로 짜고(page-supply.php) 이 모듈들의 훅을 어차피 떼어 내므로, 2.5MB 넘는 PHP 를 매번 읽을 이유가 없다 (원장 지시 — 라운지 속도).
+ * 배포 직후 첫 요청(md_cache_version 이 아직 옛 판)은 rewrite 규칙을 다시 만들므로 전부 올린다. 라운지 요청 중에 혹시 규칙이 다시 만들어져도 저장하지 않는다. */
+function md_lounge_lite() {
+	static $lite = null;
+	if ( null !== $lite ) { return $lite; }
+	$lite = false;
+	if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) || ( defined( 'WP_INSTALLING' ) && WP_INSTALLING ) ) { return false; }
+	if ( get_option( 'md_cache_version' ) !== MOONDENTAL_VERSION ) { return false; }
+	$path = rawurldecode( (string) parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ) );
+	if ( is_admin() ) {
+		$lite = ( defined( 'DOING_AJAX' ) && DOING_AJAX ) && 0 === strpos( (string) ( $_REQUEST['action'] ?? '' ), 'md_' );
+	} elseif ( 0 === strpos( $path, '/직원' ) || 0 === strpos( $path, '/wp-json/md-' ) ) {
+		$lite = true;
+	}
+	if ( $lite ) { add_filter( 'pre_update_option_rewrite_rules', function ( $new, $old ) { return $old; }, 10, 2 ); }
+	return $lite;
+}
+
 require_once MOONDENTAL_DIR . '/inc/content-defaults.php';
-require_once MOONDENTAL_DIR . '/inc/naver-importer.php';
+if ( ! md_lounge_lite() ) { require_once MOONDENTAL_DIR . '/inc/naver-importer.php'; }
 require_once MOONDENTAL_DIR . '/inc/reservation.php';
 require_once MOONDENTAL_DIR . '/inc/enhancements.php';
-require_once MOONDENTAL_DIR . '/inc/seo-boost.php';
-require_once MOONDENTAL_DIR . '/inc/seo-encyclopedia.php'; // v3.94 · 백과사전 검색 노출
-require_once MOONDENTAL_DIR . '/inc/indexnow.php';         // v3.94 · IndexNow (Bing·Naver)
-require_once MOONDENTAL_DIR . '/inc/encyclopedia-redirects.php'; // v3.97.2 · 옛 주소 301/410
+if ( ! md_lounge_lite() ) {
+	require_once MOONDENTAL_DIR . '/inc/seo-boost.php';
+	require_once MOONDENTAL_DIR . '/inc/seo-encyclopedia.php'; // v3.94 · 백과사전 검색 노출
+	require_once MOONDENTAL_DIR . '/inc/indexnow.php';         // v3.94 · IndexNow (Bing·Naver)
+	require_once MOONDENTAL_DIR . '/inc/encyclopedia-redirects.php'; // v3.97.2 · 옛 주소 301/410
+}
 require_once MOONDENTAL_DIR . '/inc/care/care.php';           // v4.0 · Moon Dental Care (직원 전용 환자 설명 자료)
 if ( file_exists( MOONDENTAL_DIR . '/inc/support/support.php' ) ) { require_once MOONDENTAL_DIR . '/inc/support/support.php'; } // v4.3 · 지원 요청 (직원 전용)
 if ( file_exists( MOONDENTAL_DIR . '/inc/equipment/equipment.php' ) ) { require_once MOONDENTAL_DIR . '/inc/equipment/equipment.php'; } // v4.8 · 기구/장비 대장 (직원 전용)
 if ( file_exists( MOONDENTAL_DIR . '/inc/fees/fees.php' ) ) { require_once MOONDENTAL_DIR . '/inc/fees/fees.php'; } // v4.13 · 진료비
-if ( file_exists( MOONDENTAL_DIR . '/inc/encyclopedia-boost.php' ) ) { require_once MOONDENTAL_DIR . '/inc/encyclopedia-boost.php'; } // v4.20 · 백과사전 보강
+if ( ! md_lounge_lite() && file_exists( MOONDENTAL_DIR . '/inc/encyclopedia-boost.php' ) ) { require_once MOONDENTAL_DIR . '/inc/encyclopedia-boost.php'; } // v4.20 · 백과사전 보강
 if ( file_exists( MOONDENTAL_DIR . '/inc/design-v5.php' ) ) { require_once MOONDENTAL_DIR . '/inc/design-v5.php'; } // v5.0 · 새 디자인
 if ( file_exists( MOONDENTAL_DIR . '/inc/rename-esthetic.php' ) ) { require_once MOONDENTAL_DIR . '/inc/rename-esthetic.php'; } // v4.23 · 심미치료센터 이름·주소
 if ( file_exists( MOONDENTAL_DIR . '/inc/pres-pages.php' ) ) { require_once MOONDENTAL_DIR . '/inc/pres-pages.php'; } // v8 · 자연치아보존센터 세부 페이지
@@ -2137,13 +2158,15 @@ require_once MOONDENTAL_DIR . '/inc/strengths.php';
 require_once MOONDENTAL_DIR . '/inc/regions.php';
 require_once MOONDENTAL_DIR . '/inc/icons.php';
 require_once MOONDENTAL_DIR . '/inc/admin-dashboard.php';
-require_once MOONDENTAL_DIR . '/inc/encyclopedia.php';
-require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed.php';
-require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3352.php';
-require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3353.php';
-require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3354.php';
-require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3355.php';
-require_once MOONDENTAL_DIR . '/inc/guides/guides.php'; // v3.44.175 · 종합 안내서 (임플란트·투명교정·라미네이트)
+if ( ! md_lounge_lite() ) { /* v9.10 · 라운지 요청에서는 건너뜀 */
+	require_once MOONDENTAL_DIR . '/inc/encyclopedia.php';
+	require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed.php';
+	require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3352.php';
+	require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3353.php';
+	require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3354.php';
+	require_once MOONDENTAL_DIR . '/inc/encyclopedia-seed-v3355.php';
+	require_once MOONDENTAL_DIR . '/inc/guides/guides.php'; // v3.44.175 · 종합 안내서 (임플란트·투명교정·라미네이트)
+}
 
 /* v3.50 · 직원 전용 재고관리.
  * file_exists 로 감싸는 이유 — FTP 미러링이 중간에 끊겨 한 파일만 빠져도

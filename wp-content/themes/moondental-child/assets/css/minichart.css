@@ -367,3 +367,8 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
 html.mc-loading { cursor: progress; }
 html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top: 0; left: 0; height: 3px; width: 100%; background: linear-gradient(90deg, transparent, var(--color-primary, #D88062), transparent); background-size: 50% 100%; background-repeat: no-repeat; animation: mc-load 0.9s linear infinite; }
 @keyframes mc-load { from { background-position: -50% 0; } to { background-position: 150% 0; } }
+
+/* v9.10 · 내용에서 찾음 */
+.mc-deep { margin-top: 14px; }
+.mc-deep__h { margin: 0 0 6px; font-size: .9rem; color: var(--mc-sub, #7A6B5F); font-weight: 600; }
+.mc-row__hit { color: var(--color-primary-dark, #B86347); }
