@@ -93,7 +93,7 @@ function md_sec_raw_apps() {
 function md_sec_tab_list() {
 	$out = array();
 	foreach ( md_sec_raw_apps() as $k => $a ) {
-		if ( in_array( $k, array( 'me', 'access' ), true ) ) { continue; }
+		if ( in_array( $k, array( 'me', 'access', 'survey' ), true ) ) { continue; } /* v9.16 · 접수수납목록은 타일을 없앴으니(v7.9) 권한 표에서도 뺌 — 관리자 비상용 주소만 (원장 지적) */
 		$out[ $k ] = $a;
 	}
 	return $out;
