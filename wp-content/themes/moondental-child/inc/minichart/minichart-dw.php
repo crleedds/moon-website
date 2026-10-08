@@ -286,11 +286,12 @@ function md_mc_dw_timeline( $r, $d ) {
 		}
 	}
 	$undated = array(); $cur = null;
-	foreach ( preg_split( '/\r\n|\r|\n/', (string) $r->tx_hist ) as $ln ) {
+	foreach ( preg_split( '/\r\n|\r|\n/', (string) $r->tx_hist ) as $li => $ln ) { /* v9.22 · 줄 번호($li)를 들고 가서 그 줄만 고치거나 지운다 */
 		if ( '' === trim( $ln ) ) { continue; }
 		/* v9.13 · 「000000:」처럼 날짜 자리가 있지만 날짜가 아닌 줄(AppSheet 때 날짜 모름)은 「날짜 없는 기록」으로 — 바로 위 날짜 줄에 딸려 들어가지 않게 (원장 지적: 오늘 줄을 넣자 옛 기록이 오늘로 보임) */
 		if ( preg_match( '/^\s*(\d{6})\s*:\s*(.*)$/u', $ln, $m0 ) && ! checkdate( (int) substr( $m0[1], 2, 2 ), (int) substr( $m0[1], 4, 2 ), 2000 + (int) substr( $m0[1], 0, 2 ) ) ) {
-			$undated[] = '' !== trim( $m0[2] ) ? trim( $m0[2] ) : trim( $ln );
+			$undated[] = array( 't' => '' !== trim( $m0[2] ) ? trim( $m0[2] ) : trim( $ln ), 'i' => $li );
+			$cur = null; /* v9.22 · 그 아래 이어지는 줄도 날짜 없는 기록으로 */
 			continue;
 		}
 		if ( preg_match( '/^\s*(\d{2})(\d{2})(\d{2})\s*:\s*(.*)$/u', $ln, $m ) && checkdate( (int) $m[2], (int) $m[3], 2000 + (int) $m[1] ) ) {
@@ -298,10 +299,10 @@ function md_mc_dw_timeline( $r, $d ) {
 			if ( ! isset( $rows[ $cur ] ) ) { $rows[ $cur ] = array( 'dr' => '', 'dw' => '', 'own' => array() ); }
 			$t = trim( $m[4] );
 			$same = '' !== $t && '' !== $rows[ $cur ]['dw'] && preg_replace( '/\s+/u', '', $t ) === preg_replace( '/\s+/u', '', $rows[ $cur ]['dw'] );
-			if ( '' !== $t && ! $same ) { $rows[ $cur ]['own'][] = $t; }
+			if ( '' !== $t && ! $same ) { $rows[ $cur ]['own'][] = array( 't' => $t, 'i' => $li ); }
 			continue;
 		}
-		if ( null !== $cur ) { $rows[ $cur ]['own'][] = trim( $ln ); } else { $undated[] = trim( $ln ); }
+		if ( null !== $cur ) { $rows[ $cur ]['own'][] = array( 't' => trim( $ln ), 'i' => $li ); } else { $undated[] = array( 't' => trim( $ln ), 'i' => $li ); }
 	}
 	krsort( $rows );
 	$h = '<ol class="mc-tl">'; $i = 0; $n = count( $rows );
@@ -315,7 +316,7 @@ function md_mc_dw_timeline( $r, $d ) {
 				. '<form method="post" class="mc-inline" action="' . esc_url( md_mc_url() ) . '" data-mc-fast="dwhide">' . $nf( 'dwhide' ) . '<input type="hidden" name="dwkey" value="' . esc_attr( $x['dwk'] ) . '"><button class="mc-tl__btn" title="이 줄 지우기">✕</button></form></span></span>'
 				. '<form method="post" class="mc-tl__edit" action="' . esc_url( md_mc_url() ) . '" data-mc-fast="dwedit" hidden>' . $nf( 'dwedit' ) . '<input type="hidden" name="dwkey" value="' . esc_attr( $x['dwk'] ) . '"><textarea name="text" rows="2">' . esc_textarea( $x['dw'] ) . '</textarea><span><button class="mds-btn mds-btn--fill">저장</button> <button type="button" class="mds-btn mds-btn--ghost" data-mc-dwedit-cancel>취소</button></span></form>';
 		}
-		foreach ( $x['own'] as $o ) { $h .= '<span class="mc-tl__own" title="미니차트에 직접 적은 기록">✎ ' . esc_html( $o ) . '</span>'; }
+		foreach ( $x['own'] as $o ) { $h .= md_mc_own_line_html( $r, $o ); }
 		/* v9.14 · 덴트웹에 내원은 잡혔는데 치료내용이 아직 비어 있는 날 (진료 중 · 입력 전) — 빈 줄 대신 안내 (원장 지적) */
 		if ( '' === $x['dw'] && ! $x['own'] && isset( $x['dwk'] ) ) { $h .= '<span class="mc-tl__wait">치료내용 아직 없음 — 덴트웹에 입력되면 30분 안에 들어옵니다</span>'; }
 		$h .= '</span></li>';
@@ -332,9 +333,25 @@ function md_mc_dw_timeline( $r, $d ) {
 		}
 		$h .= '</ul><p class="mc-tl__hbtns"><button class="mds-btn mds-btn--fill" name="pick" value="1" data-mc-need-pick>고른 것 다시 보이기</button> <button class="mds-btn mds-btn--ghost" name="all" value="1">모두 다시 보이기</button></p></form></details>';
 	}
-	if ( $undated ) { $h .= '<p class="mc-tl__undated"><b>날짜 없는 기록</b><br>' . implode( '<br>', array_map( 'esc_html', $undated ) ) . '</p>'; }
+	if ( $undated ) {
+		$h .= '<div class="mc-tl__undated"><b>날짜 없는 기록</b>';
+		foreach ( $undated as $o ) { $h .= md_mc_own_line_html( $r, $o, true ); }
+		$h .= '</div>';
+	}
 	if ( ! $n && ! $undated ) { $h = '<p class="mc-none">아직 진료기록이 없습니다.</p>'; }
 	return $h;
+}
+
+/** v9.22 · 직접 적은 진료기록 한 줄 — ✎ 고치기 · ✕ 지우기 (원장 지시 「날짜 없는 기록도 바로 수정」). $o = ['t' => 글, 'i' => tx_hist 줄 번호] */
+function md_mc_own_line_html( $r, $o, $undated = false ) {
+	$nf = function ( $act ) use ( $r, $o ) {
+		return '<input type="hidden" name="md_mc_action" value="' . $act . '"><input type="hidden" name="md_mc_nonce" value="' . esc_attr( wp_create_nonce( 'md_mc_' . $act ) ) . '"><input type="hidden" name="mid" value="' . (int) $r->id . '">'
+			. '<input type="hidden" name="oi" value="' . (int) $o['i'] . '"><input type="hidden" name="otext" value="' . esc_attr( $o['t'] ) . '">';
+	};
+	return '<span class="mc-tl__ownw' . ( $undated ? ' mc-tl__ownw--undated' : '' ) . '"><span class="mc-tl__own" title="미니차트에 직접 적은 기록">' . ( $undated ? '' : '✎ ' ) . esc_html( $o['t'] )
+		. ' <span class="mc-tl__acts"><button type="button" class="mc-tl__btn" data-mc-dwedit title="이 줄 고치기">✎</button>'
+		. '<form method="post" class="mc-inline" action="' . esc_url( md_mc_url() ) . '" data-mc-fast="owndel">' . $nf( 'owndel' ) . '<button class="mc-tl__btn" title="이 줄 지우기">✕</button></form></span></span>'
+		. '<form method="post" class="mc-tl__edit" action="' . esc_url( md_mc_url() ) . '" data-mc-fast="ownedit" hidden>' . $nf( 'ownedit' ) . '<textarea name="text" rows="2">' . esc_textarea( $o['t'] ) . '</textarea><span><button class="mds-btn mds-btn--fill">저장</button> <button type="button" class="mds-btn mds-btn--ghost" data-mc-dwedit-cancel>취소</button></span></form></span>';
 }
 
 /** v8.1 · 담당의 — 미니차트 기본 담당의가 비었으면 덴트웹 담당의, 다르면 둘 다 */

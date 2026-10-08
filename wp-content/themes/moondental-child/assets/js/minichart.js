@@ -295,7 +295,7 @@ window.mcInits.push(function () {
 document.addEventListener('click', function (e) {
   var b = e.target.closest && e.target.closest('[data-mc-dwedit]');
   if (b) {
-    var li = b.closest('li'), f = li && li.querySelector('.mc-tl__edit');
+    var li = b.closest('.mc-tl__ownw') || b.closest('li'), f = li && li.querySelector('.mc-tl__edit'); /* v9.22 · 직접 적은 줄은 제 칸 안의 폼 */
     if (f) { f.hidden = false; var t = f.querySelector('textarea'); t.focus(); t.setSelectionRange(t.value.length, t.value.length); }
     return;
   }
@@ -367,6 +367,7 @@ document.addEventListener('click', function (e) {
     var fieldName = kind === 'field' ? form.getAttribute('data-mc-field') : '';
     var sub = e.submitter, extra = null;
     if (kind === 'dwhide' && !window.confirm('이 덴트웹 진료기록을 미니차트에서 지울까요? (덴트웹 원본은 그대로)')) { e.preventDefault(); return; }
+    if (kind === 'owndel' && !window.confirm('이 기록 한 줄을 지울까요?')) { e.preventDefault(); return; }
     if (kind === 'dwunhide') {
       if (sub && sub.name === 'all') extra = { all: '1' };
       else if (!form.querySelector('input[name="dwkeys[]"]:checked')) { e.preventDefault(); toast('다시 보이게 할 기록을 골라 주세요.', true); return; }
@@ -387,6 +388,11 @@ document.addEventListener('click', function (e) {
       if (t) { var o = document.createElement('span'); o.className = 'mc-tl__own is-pending'; o.textContent = '✎ ' + t; li.querySelector('.mc-tl__tx').appendChild(o); }
     } else if (kind === 'dwunhide') {
       Array.prototype.forEach.call(form.querySelectorAll(extra ? 'li' : 'input[name="dwkeys[]"]:checked'), function (x) { (x.closest('li') || x).classList.add('is-gone'); });
+    } else if (kind === 'owndel' || kind === 'ownedit') {
+      /* v9.22 · 직접 적은 줄 — 지우면 바로 사라지고, 고치면 바로 바뀐다 (서버 대답이 오면 전체를 다시 맞춘다) */
+      var w = form.closest('.mc-tl__ownw');
+      if (w && kind === 'owndel') { w.classList.add('is-gone'); }
+      else if (w) { var nt = form.querySelector('textarea').value.trim(); var sp = w.querySelector('.mc-tl__own'); form.hidden = true; if (sp) { sp.classList.add('is-pending'); sp.childNodes[0].nodeValue = (sp.childNodes[0].nodeValue.indexOf('✎') === 0 ? '✎ ' : '') + nt + ' '; } }
     }
     var btns = form.querySelectorAll('button[type=submit], button:not([type])');
     Array.prototype.forEach.call(btns, function (b) { b.disabled = true; });
@@ -415,7 +421,7 @@ document.addEventListener('click', function (e) {
         var ta = form.querySelector('textarea[data-mc-plan]'); if (ta) ta.defaultValue = ta.value;
         form.dispatchEvent(new CustomEvent('mc:plan-saved'));
       }
-      toast({ dwhide: '지웠습니다', dwedit: '고쳤습니다', dwunhide: '다시 보이게 했습니다', add: '추가했습니다', plan: '저장했습니다', field: '저장했습니다' }[kind] || '저장했습니다');
+      toast({ dwhide: '지웠습니다', dwedit: '고쳤습니다', dwunhide: '다시 보이게 했습니다', add: '추가했습니다', plan: '저장했습니다', field: '저장했습니다', ownedit: '고쳤습니다', owndel: '지웠습니다' }[kind] || '저장했습니다');
     }).catch(function () {
       recover('저장 결과를 확인합니다…');
     }).then(function () {

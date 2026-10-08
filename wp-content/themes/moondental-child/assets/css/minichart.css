@@ -429,3 +429,13 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
   .mc-block__b { font-size: .95rem; }
   .mc-grid--info { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* v9.22 · 직접 적은 진료기록 한 줄 고치기 · 지우기 (날짜 없는 기록 포함) */
+.mc-tl__ownw { display: block; }
+.mc-tl__ownw.is-gone { display: none; }
+.mc-tl__ownw .mc-tl__acts { opacity: .35; }
+.mc-tl__ownw:hover .mc-tl__acts, .mc-tl__ownw .mc-tl__acts:focus-within { opacity: 1; }
+.mc-tl__undated { font-size: .88rem; }
+.mc-tl__undated > b { display: block; margin-bottom: 2px; color: var(--color-text-sub, #7A6B5F); }
+.mc-tl__ownw--undated { padding: 2px 0; border-bottom: 1px dashed var(--color-border, #E8DDD3); }
+.mc-tl__ownw--undated .mc-tl__own { color: inherit; }

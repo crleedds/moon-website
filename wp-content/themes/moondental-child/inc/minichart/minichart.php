@@ -752,7 +752,7 @@ function md_mc_handle_post() {
 	$err  = function ( $msg, $args ) { return md_mc_url( array_merge( $args, array( 'mcerr' => $msg ) ) ); };
 
 	/* v9.2 · 빠른 저장 — 화면이 fetch 로 보내면(md_fast) 페이지를 다시 그리지 않고 바뀐 부분만 돌려준다 (원장 지시: 라운지 속도) */
-	$fast = ! empty( $_POST['md_fast'] ) && in_array( $action, array( 'dwhide', 'dwedit', 'dwunhide', 'plan', 'add', 'field' ), true );
+	$fast = ! empty( $_POST['md_fast'] ) && in_array( $action, array( 'dwhide', 'dwedit', 'dwunhide', 'plan', 'add', 'field', 'ownedit', 'owndel' ), true );
 
 	switch ( $action ) {
 		case 'save':
@@ -800,6 +800,26 @@ function md_mc_handle_post() {
 			$rec   = md_mc_get( $id );
 			$view  = $rec && 'note' === $rec->kind ? 'note' : 'p';
 			$back  = is_wp_error( $res ) ? $err( $res->get_error_message(), array( 'mv' => $view, 'mid' => $id ) ) : md_mc_url( array( 'mv' => $view, 'mid' => $id ) ) . '#f-' . $field;
+			break;
+
+		case 'ownedit': /* v9.22 · 직접 적은 진료기록 한 줄 고치기 · 지우기 (날짜 없는 기록 포함 — 원장 지시) */
+		case 'owndel':
+			$cur = md_mc_get( $id );
+			if ( ! $cur || 'patient' !== $cur->kind ) { $back = md_mc_url(); break; }
+			$lines = preg_split( '/\r\n|\r|\n/', (string) $cur->tx_hist );
+			$oi    = (int) ( $post['oi'] ?? -1 );
+			$strip = function ( $ln ) { return trim( preg_replace( '/^\s*\d{6}\s*:\s*/u', '', (string) $ln ) ); };
+			if ( ! isset( $lines[ $oi ] ) || $strip( $lines[ $oi ] ) !== trim( (string) ( $post['otext'] ?? '' ) ) ) {
+				$back = $err( '그 사이 기록이 바뀌었습니다. 화면을 새로고침한 뒤 다시 해 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break;
+			}
+			$prefix = preg_match( '/^(\s*\d{6}\s*:\s*)/u', $lines[ $oi ], $pm ) ? $pm[1] : '';
+			$new    = 'owndel' === $action ? '' : trim( sanitize_textarea_field( (string) ( $post['text'] ?? '' ) ) );
+			if ( '' === $new ) { array_splice( $lines, $oi, 1 ); } else { $lines[ $oi ] = $prefix . str_replace( array( "\r", "\n" ), ' ', $new ); }
+			$tx = implode( "\n", $lines );
+			global $wpdb;
+			$wpdb->update( md_mc_t(), array( 'tx_hist' => $tx, 'last_visit' => md_mc_last_visit( $tx ), 'rev' => (int) $cur->rev + 1, 'updated_at' => current_time( 'mysql' ), 'updated_by' => md_mc_me() ), array( 'id' => (int) $id ) );
+			md_mc_log( $id, 'edit', $cur );
+			$back = md_mc_url( array( 'mv' => 'p', 'mid' => $id ) ) . '#f-tx_hist';
 			break;
 
 		case 'dwhide':   /* v8.7 · 덴트웹에서 온 진료기록 한 줄 — 미니차트에서만 지움(숨김) */
@@ -963,7 +983,7 @@ function md_mc_fast_reply( $action, $id, $back ) {
 		$out += array( 'target' => $field, 'html' => $vw['html'], 'head' => $vw['head'], 'cls' => $vw['cls'], 'value' => md_mc_is_na( $r->$field ) ? '' : (string) $r->$field, 'na' => md_mc_is_na( $r->$field ), 'reload' => 'dr' === $field );
 		wp_send_json( $out );
 	}
-	if ( in_array( $action, array( 'dwhide', 'dwedit', 'dwunhide' ), true ) || 'tx_hist' === $field ) {
+	if ( in_array( $action, array( 'dwhide', 'dwedit', 'dwunhide', 'ownedit', 'owndel' ), true ) || 'tx_hist' === $field ) {
 		$d = 'patient' === $r->kind && function_exists( 'md_mc_dw_get' ) ? md_mc_dw_get( $r->chart_no ) : null;
 		$out['target'] = 'tx_hist';
 		$out['html'] = function_exists( 'md_mc_dw_timeline' ) && 'patient' === $r->kind ? md_mc_dw_timeline( $r, $d ) : md_mc_text( $r->tx_hist );
