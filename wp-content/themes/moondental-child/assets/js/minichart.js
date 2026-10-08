@@ -343,13 +343,26 @@ document.addEventListener('click', function (e) {
   /* v9.10 · 서버가 저장했는지 알 수 없을 때는 폼을 다시 보내지 않는다(두 번 저장 방지) — 화면을 새로 불러와 실제 상태를 보여 준다 */
   function recover(msg) { toast(msg || '저장 결과를 확인합니다…', true); setTimeout(function () { location.reload(); }, 900); }
   var busy = false;
+  /* v9.25 · 담당의 칸의 「덴트웹 ○○○」 ✕ — 단추만 있고(칸이 폼이라 폼을 겹칠 수 없음) 여기서 바로 보낸다 */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-mc-dwhidedr]');
+    if (!b) return;
+    if (!window.confirm('덴트웹 담당의 표시를 이 차트에서 지울까요? (덴트웹 원본은 그대로)')) return;
+    var line = b.closest('.mc-dr__dw'); if (line) line.remove();
+    var fd = new FormData(); fd.append('md_mc_action', 'dwhidedr'); fd.append('md_mc_nonce', b.getAttribute('data-mc-dwhidedr')); fd.append('mid', b.getAttribute('data-mid')); fd.append('md_fast', '1');
+    fetch(b.getAttribute('data-url') || location.href, { method: 'POST', body: fd, credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } })
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .then(function (res) { if (!res.ok) { toast(res.msg || '지우지 못했습니다.', true); return; } apply(res); toast('지웠습니다'); })
+      .catch(function () { recover('저장 결과를 확인합니다…'); });
+  });
   /* v9.19 · 눌러서 바로 고치기 — 보기 부분을 누르면 고치기 폼이 열리고, 취소하면 원래대로 */
   function closeEdit(form) { var box = form.querySelector('.mc-edit__form'); if (box) { box.hidden = true; } form.classList.remove('is-editing'); }
   document.addEventListener('click', function (e) {
     var c = e.target.closest && e.target.closest('[data-mc-edit-cancel]');
     if (c) { var f0 = c.closest('form'); f0.reset(); Array.prototype.forEach.call(f0.querySelectorAll('[data-na-for]'), function (k) { var t = document.getElementById(k.getAttribute('data-na-for')); if (t) t.disabled = k.checked; }); closeEdit(f0); return; }
-    var v = e.target.closest && e.target.closest('[data-mc-edit-open]');
-    if (!v || e.target.closest('a, button')) return;
+    var od = e.target.closest && e.target.closest('[data-mc-open-dr]');
+    var v = od ? document.querySelector('#f-dr [data-mc-edit-open]') : (e.target.closest && e.target.closest('[data-mc-edit-open]'));
+    if (!v || (!od && e.target.closest('a, button'))) return;
     var form = v.closest('form.mc-edit'), box = form && form.querySelector('.mc-edit__form');
     if (!box) return;
     box.hidden = false; form.classList.add('is-editing');
@@ -422,7 +435,7 @@ document.addEventListener('click', function (e) {
         var ta = form.querySelector('textarea[data-mc-plan]'); if (ta) ta.defaultValue = ta.value;
         form.dispatchEvent(new CustomEvent('mc:plan-saved'));
       }
-      toast({ dwhide: '지웠습니다', dwedit: '고쳤습니다', dwunhide: '다시 보이게 했습니다', add: '추가했습니다', plan: '저장했습니다', field: '저장했습니다', ownedit: '고쳤습니다', owndel: '지웠습니다' }[kind] || '저장했습니다');
+      toast({ dwhide: '지웠습니다', dwedit: '고쳤습니다', dwunhide: '다시 보이게 했습니다', add: '추가했습니다', plan: '저장했습니다', field: '저장했습니다', ownedit: '고쳤습니다', owndel: '지웠습니다', dwhidedr: '지웠습니다' }[kind] || '저장했습니다');
     }).catch(function () {
       recover('저장 결과를 확인합니다…');
     }).then(function () {

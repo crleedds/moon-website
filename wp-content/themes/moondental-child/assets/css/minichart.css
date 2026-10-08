@@ -451,3 +451,7 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-salute .mc-edit__bar .mds-btn { min-height: 34px; padding: 0 10px; font-size: .88rem; }
 .mc-row__salute { margin-left: 6px; font-size: .82rem; color: var(--color-primary-dark, #B86347); font-weight: 500; }
 @media (max-width: 760px) { .mc-salute .mc-edit__form { flex-wrap: wrap; } .mc-row__salute { display: block; margin: 0; } }
+
+/* v9.25 · 담당의 칸의 덴트웹 줄 ✎ ✕ */
+.mc-dr__dw .mc-tl__acts { opacity: .35; }
+.mc-dr__dw:hover .mc-tl__acts, .mc-dr__dw .mc-tl__acts:focus-within { opacity: 1; }
