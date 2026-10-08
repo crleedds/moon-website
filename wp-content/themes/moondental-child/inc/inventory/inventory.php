@@ -34,6 +34,7 @@ foreach ( $md_inv_files as $md_inv_f ) {
 if ( $md_inv_ok ) {
 	foreach ( $md_inv_files as $md_inv_f ) { require_once MD_INV_DIR . '/' . $md_inv_f . '.php'; }
 }
+if ( $md_inv_ok && is_readable( MD_INV_DIR . '/inv-prepaid-once.php' ) ) { require_once MD_INV_DIR . '/inv-prepaid-once.php'; } // 1회용 · 선납 품목군 정리 (2026-10-08) — 뒤에 지움
 unset( $md_inv_f, $md_inv_files );
 if ( ! $md_inv_ok ) { unset( $md_inv_ok ); return; }
 unset( $md_inv_ok );
