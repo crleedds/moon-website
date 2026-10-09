@@ -30,7 +30,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_SURVEY_SCHEMA', 10 ); /* v4.21.33 · ip (응답한 인터넷 주소 — 대리 작성 식별용) — 9: dev_hash · flags */
+define( 'MD_SURVEY_SCHEMA', 11 ); /* v4.23 · desk · q_desk (데스크 담당 — 덴트웹 체어 칸을 데스크 직원 이름으로 씀) — 10: ip · 9: dev_hash · flags */
 
 /* ============================================================
  * 테이블 · 설치
@@ -64,6 +64,7 @@ function md_survey_maybe_install() {
 		phone_hash CHAR(64) NOT NULL DEFAULT '',
 		doctor VARCHAR(120) NOT NULL DEFAULT '',
 		staff VARCHAR(40) NOT NULL DEFAULT '',
+		desk VARCHAR(40) NOT NULL DEFAULT '',
 		token CHAR(24) NOT NULL,
 		source VARCHAR(12) NOT NULL DEFAULT 'manual',
 		responded_at DATETIME NULL,
@@ -85,6 +86,8 @@ function md_survey_maybe_install() {
 		staff VARCHAR(40) NOT NULL DEFAULT '',
 		staff_orig VARCHAR(40) NOT NULL DEFAULT '',
 		staff_changed TINYINT UNSIGNED NOT NULL DEFAULT 0,
+		desk VARCHAR(40) NOT NULL DEFAULT '',
+		q_desk TINYINT UNSIGNED NOT NULL DEFAULT 0,
 		q_doctor TINYINT UNSIGNED NOT NULL DEFAULT 0,
 		want_call TINYINT UNSIGNED NOT NULL DEFAULT 0,
 		dev_hash CHAR(32) NOT NULL DEFAULT '',
@@ -435,6 +438,7 @@ function md_survey_visit_upsert( $d, $source = 'manual' ) {
 	$birth6 = md_survey_norm_birth6( isset( $d['birth'] ) ? $d['birth'] : '' );
 	$doctor = mb_substr( trim( sanitize_text_field( isset( $d['doctor'] ) ? $d['doctor'] : '' ) ), 0, 120 );
 	$staff  = mb_substr( trim( sanitize_text_field( isset( $d['staff'] ) ? $d['staff'] : '' ) ), 0, 40 );
+	$desk   = mb_substr( trim( sanitize_text_field( isset( $d['desk'] ) ? $d['desk'] : '' ) ), 0, 40 ); /* v4.23 · 데스크 담당 (덴트웹 체어 칸) */
 
 	if ( '' === $chart )  { return new WP_Error( 'md_survey', '차트번호가 없습니다.' ); }
 	if ( '' === $name )   { return new WP_Error( 'md_survey', '이름이 없습니다.' ); }
@@ -450,7 +454,7 @@ function md_survey_visit_upsert( $d, $source = 'manual' ) {
 		'source'       => $source,
 	);
 	if ( $row ) {
-		if ( ! $row->responded_at ) { $data['doctor'] = $doctor; $data['staff'] = $staff; }
+		if ( ! $row->responded_at ) { $data['doctor'] = $doctor; $data['staff'] = $staff; $data['desk'] = $desk; }
 		$wpdb->update( $t, $data, array( 'id' => (int) $row->id ) );
 		return array( 'id' => (int) $row->id, 'updated' => true );
 	}
@@ -458,6 +462,7 @@ function md_survey_visit_upsert( $d, $source = 'manual' ) {
 	$data['chart_no']   = $chart;
 	$data['doctor']     = $doctor;
 	$data['staff']      = $staff;
+	$data['desk']       = $desk;
 	$data['token']      = wp_generate_password( 24, false );
 	$data['created_at'] = current_time( 'mysql' );
 	if ( ! $wpdb->insert( $t, $data ) ) { return new WP_Error( 'md_survey', '저장하지 못했습니다.' ); }
@@ -636,14 +641,15 @@ function md_survey_response_by_visit( $visit_id ) {
  * @param string $staff   실제로 평가받는 직원 (환자가 바로잡았으면 그 이름, 모르면 '')
  * @param int    $changed 0 명단 그대로 · 1 환자가 다른 직원으로 바꿈 · 2 모르겠다
  */
-function md_survey_response_insert( $visit, $q1, $q2, $q3, $comment, $staff = null, $changed = 0, $qd = 0, $call = 0 ) {
+function md_survey_response_insert( $visit, $q1, $q2, $q3, $comment, $staff = null, $changed = 0, $qd = 0, $call = 0, $qk = 0 ) {
 	global $wpdb;
 	$tr = md_survey_table_response();
 	if ( null === $staff ) { $staff = $visit->staff; }
+	$desk = isset( $visit->desk ) ? (string) $visit->desk : ''; /* v4.23 · 데스크 담당 */
 	$ok = $wpdb->query( $wpdb->prepare(
-		"INSERT IGNORE INTO $tr (visit_id, visit_date, chart_no, patient_name, doctor, staff, staff_orig, staff_changed, q_doctor, q_service, q_explain, q_recommend, comment, want_call, dev_hash, flags, ip, ip_hash, created_at)
-		 VALUES (%d, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %s, %d, %s, %s, %s, %s, %s)",
-		(int) $visit->id, $visit->visit_date, $visit->chart_no, $visit->patient_name, $visit->doctor, $staff, $visit->staff, (int) $changed,
+		"INSERT IGNORE INTO $tr (visit_id, visit_date, chart_no, patient_name, doctor, staff, staff_orig, staff_changed, desk, q_desk, q_doctor, q_service, q_explain, q_recommend, comment, want_call, dev_hash, flags, ip, ip_hash, created_at)
+		 VALUES (%d, %s, %s, %s, %s, %s, %s, %d, %s, %d, %d, %d, %d, %d, %s, %d, %s, %s, %s, %s, %s)",
+		(int) $visit->id, $visit->visit_date, $visit->chart_no, $visit->patient_name, $visit->doctor, $staff, $visit->staff, (int) $changed, $desk, (int) $qk,
 		(int) $qd, (int) $q1, (int) $q2, (int) $q3, $comment, (int) $call, md_survey_dev_hash(), md_survey_flags_for( $visit->chart_no ), substr( (string) ( isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : '' ), 0, 45 ), md_survey_ip_hash(), current_time( 'mysql' )
 	) );
 	if ( ! $ok ) { return false; } /* 0 = 이미 있음 (UNIQUE visit) */
@@ -663,7 +669,8 @@ function md_survey_notify_new( $rid ) {
 	$r = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . md_survey_table_response() . ' WHERE id = %d', (int) $rid ) );
 	if ( ! $r ) { return; }
 	$sc  = function ( $v ) { return (int) $v > 0 ? (int) $v . '점' : '기억나지 않음'; };
-	$low = ( (int) $r->q_doctor >= 1 && (int) $r->q_doctor <= 2 ) || ( (int) $r->q_service >= 1 && (int) $r->q_service <= 2 ) || ( (int) $r->q_recommend >= 1 && (int) $r->q_recommend <= 2 );
+	$qk  = isset( $r->q_desk ) ? (int) $r->q_desk : 0;
+	$low = ( (int) $r->q_doctor >= 1 && (int) $r->q_doctor <= 2 ) || ( (int) $r->q_service >= 1 && (int) $r->q_service <= 2 ) || ( $qk >= 1 && $qk <= 2 ) || ( (int) $r->q_recommend >= 1 && (int) $r->q_recommend <= 2 );
 	$tag = ( $low ? '[낮은 점수] ' : '' ) . ( ! empty( $r->want_call ) ? '[연락 원함] ' : '' );
 	$subject = '[문치과병원 만족도] ' . $tag . $r->patient_name . ' · 병원 ' . $sc( $r->q_recommend );
 	$body  = "새 만족도 응답이 들어왔습니다.\n\n";
@@ -671,6 +678,7 @@ function md_survey_notify_new( $rid ) {
 	$body .= '환자: ' . $r->patient_name . ' (차트 ' . $r->chart_no . ")\n";
 	$body .= '담당의사: ' . ( '' !== $r->doctor ? $r->doctor : '-' ) . ' — ' . $sc( $r->q_doctor ) . "\n";
 	$body .= '담당직원: ' . ( '' !== $r->staff ? $r->staff : '-' ) . ' — ' . $sc( $r->q_service ) . "\n";
+	$body .= '데스크: ' . ( ! empty( $r->desk ) ? $r->desk : '-' ) . ' — ' . $sc( $qk ) . "\n";
 	$body .= '병원: ' . $sc( $r->q_recommend ) . "\n";
 	$body .= '연락: ' . ( ! empty( $r->want_call ) ? '연락드려도 괜찮다고 함' : '-' ) . "\n";
 	if ( '' !== trim( (string) $r->comment ) ) { $body .= "\n의견:\n" . $r->comment . "\n"; }
@@ -697,12 +705,13 @@ add_action( 'init', function () {
 	foreach ( (array) $ids as $id ) { md_survey_response_delete( (int) $id ); }
 }, 40 );
 
-function md_survey_responses( $from, $to, $staff = '', $doctor = '' ) {
+function md_survey_responses( $from, $to, $staff = '', $doctor = '', $desk = '' ) {
 	global $wpdb;
 	$tr  = md_survey_table_response();
 	$sql = "SELECT * FROM $tr WHERE visit_date BETWEEN %s AND %s";
 	$args = array( $from, $to );
 	if ( '' !== $staff ) { $sql .= ' AND staff = %s'; $args[] = $staff; }
+	if ( '' !== $desk )  { $sql .= ' AND desk = %s';  $args[] = $desk; } /* v4.23 · 데스크 담당으로 보기 */
 	if ( '' !== $doctor ) { $sql .= ' AND ( doctor = %s OR doctor LIKE %s )'; $args[] = $doctor; $args[] = '%' . $wpdb->esc_like( $doctor ) . '%'; } /* v4.21.30 · 담당의사로 보기 */
 	$sql .= ' ORDER BY created_at DESC, id DESC LIMIT 2000';
 	return $wpdb->get_results( $wpdb->prepare( $sql, $args ) );
@@ -721,6 +730,15 @@ function md_survey_stats( $from, $to ) {
 			SUM(comment IS NOT NULL AND comment <> '') AS comment_n,
 			SUM(staff_changed = 1) AS changed_n
 		 FROM $tr WHERE visit_date BETWEEN %s AND %s AND staff <> '' AND q_service > 0 GROUP BY staff ORDER BY n DESC, avg_service DESC", $from, $to ) );
+}
+
+/** v4.23 · 데스크 담당별 집계 — 응답 수 · 평균 · 5점 · 낮은 점수 */
+function md_survey_stats_desk( $from, $to ) {
+	global $wpdb;
+	$tr = md_survey_table_response();
+	return $wpdb->get_results( $wpdb->prepare(
+		"SELECT desk, SUM(q_desk > 0) AS n, AVG(NULLIF(q_desk,0)) AS avg_desk, SUM(q_desk = 5) AS top_n, SUM(q_desk BETWEEN 1 AND 2) AS low_n
+		 FROM $tr WHERE visit_date BETWEEN %s AND %s AND desk <> '' AND q_desk > 0 GROUP BY desk ORDER BY n DESC, avg_desk DESC", $from, $to ) );
 }
 
 /** 응답에 나온 담당의사 이름 목록 (보기 필터용) */
@@ -819,6 +837,7 @@ function md_survey_public_render() {
 			'patient_name' => '홍길동',
 			'doctor'       => isset( $_GET['doc'] ) ? sanitize_text_field( wp_unslash( $_GET['doc'] ) ) : '○○○', /* v4.21.12 · 예시 화면은 이름 대신 ○○○ */
 			'staff'        => isset( $_GET['staff'] ) ? sanitize_text_field( wp_unslash( $_GET['staff'] ) ) : '○○○',
+			'desk'         => isset( $_GET['desk'] ) ? sanitize_text_field( wp_unslash( $_GET['desk'] ) ) : '○○○', /* v4.23 */
 		);
 		$step = 'form';
 		$err  = '미리보기 화면입니다. 제출해도 저장되지 않습니다.';
@@ -892,6 +911,7 @@ function md_survey_public_render() {
 				$clip = function ( $k ) { $x = isset( $_POST[ $k ] ) ? (int) $_POST[ $k ] : 0; return ( $x >= 1 && $x <= 5 ) ? $x : 0; };
 				$qd = $clip( 'q_doctor' );
 				$q1 = $clip( 'q_staff' );
+				$qk = $clip( 'q_desk' ); /* v4.23 · 데스크 담당 (선택) */
 				$q2 = 0;
 				$q3 = isset( $_POST['q_hospital'] ) ? (int) $_POST['q_hospital'] : 0;
 				$has_doc = '' !== trim( (string) $v->doctor );
@@ -903,7 +923,7 @@ function md_survey_public_render() {
 					$step = 'form';
 					$err  = '「오늘 하루는 어떠셨나요?」 문항을 골라 주세요.';
 				} else {
-					$step = md_survey_response_insert( $v, $q1, $q2, $q3, $cm, $v->staff, 0, $qd, $call ) ? 'done' : 'already';
+					$step = md_survey_response_insert( $v, $q1, $q2, $q3, $cm, $v->staff, 0, $qd, $call, $qk ) ? 'done' : 'already';
 				}
 			}
 		}
@@ -944,7 +964,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 .sv-who b.staff{font-size:1.15rem;color:var(--primary-dk)}
 .sv-date{margin:12px 0 0 !important;font-size:.88rem;font-weight:700;color:var(--mute) !important}
 /* v4.21.3 · 상반신이 보이는 세로 사진 카드 */
-.sv-people{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 6px}
+.sv-people{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0 6px} /* v4.23 · 담당의사 · 담당직원 · 데스크 */
 .sv-person{margin:0;display:flex;flex-direction:column;gap:6px;text-align:center}
 .sv-person__ph{position:relative;display:block;width:104px;max-width:100%;margin:0 auto;aspect-ratio:3/4;border-radius:14px;overflow:hidden;background:var(--soft)} /* v4.22.2 · 사진은 작게 (원장 지시) */
 .sv-person__ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%}
@@ -1060,6 +1080,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 <?php elseif ( 'form' === $step && $visit ) :
 	$tok   = md_survey_sign( $visit->id, time() + 2 * HOUR_IN_SECONDS );
 	$staff = $visit->staff;
+	$desk  = isset( $visit->desk ) ? (string) $visit->desk : '';
 	?>
 	<?php /* v4.21.4 · 원장·선생님·병원 각 1문항(1~5) + 주관식. 사진은 아직 쓰지 않는다. 문항은 평가보다 「환자의 경험」을 묻는 말투로 (원장 지시) */
 	$docs   = '' !== $visit->doctor ? array_slice( array_values( array_filter( array_map( 'trim', explode( '·', $visit->doctor ) ) ) ), 0, 1 ) : array(); /* v4.21.5 · 담당의사는 한 명 */
@@ -1094,6 +1115,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		$people = array(
 			array( '담당의사', $doc_titles ? preg_replace( '/님$/u', '', $doc_titles[0] ) : '', $docs ? md_survey_person_photo( $docs[0], 'doctor' ) : '' ),
 			array( '담당직원', '' !== trim( (string) $staff ) ? md_survey_staff_title( $staff ) : '', '' !== trim( (string) $staff ) ? md_survey_person_photo( $staff, 'staff' ) : '' ),
+			array( '데스크 담당', '' !== trim( (string) $desk ) ? md_survey_staff_title( $desk ) : '', '' !== trim( (string) $desk ) ? md_survey_person_photo( $desk, 'staff' ) : '' ), /* v4.23 · 접수 · 수납 (덴트웹 체어 칸) */
 		);
 		?>
 		<div class="sv-people">
@@ -1115,6 +1137,12 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		<div class="sv-q">
 			<h2><?php echo $qn; ?>. 곁에서 도와드린 담당직원 덕분에 진료가 수월하셨나요? <small class="sv-opt">선택</small></h2>
 			<?php $scale( 'q_staff', '담당직원', '조금 아쉬웠어요', '아주 든든했어요', false, true ); ?>
+		</div>
+
+		<?php $qn++; /* v4.23 · 데스크 담당 문항 — 접수 · 수납 (원장 지시 2026-10-09) */ ?>
+		<div class="sv-q">
+			<h2><?php echo $qn; ?>. 접수와 수납을 도와드린 데스크 담당자는 친절했나요? <small class="sv-opt">선택</small></h2>
+			<?php $scale( 'q_desk', '데스크 담당', '조금 아쉬웠어요', '아주 친절했어요', false, true ); ?>
 		</div>
 
 		<?php $qn++; ?>
@@ -1374,7 +1402,8 @@ function md_survey_handle_post() {
 				isset( $_POST['from'] ) ? sanitize_text_field( wp_unslash( $_POST['from'] ) ) : '',
 				isset( $_POST['to'] ) ? sanitize_text_field( wp_unslash( $_POST['to'] ) ) : '',
 				isset( $_POST['staff'] ) ? sanitize_text_field( wp_unslash( $_POST['staff'] ) ) : '',
-				isset( $_POST['doctor'] ) ? sanitize_text_field( wp_unslash( $_POST['doctor'] ) ) : ''
+				isset( $_POST['doctor'] ) ? sanitize_text_field( wp_unslash( $_POST['doctor'] ) ) : '',
+				isset( $_POST['desk'] ) ? sanitize_text_field( wp_unslash( $_POST['desk'] ) ) : ''
 			);
 			exit;
 	}
@@ -1384,17 +1413,17 @@ function md_survey_handle_post() {
 }
 add_action( 'template_redirect', 'md_survey_handle_post', 1 );
 
-function md_survey_export_csv( $from, $to, $staff, $doctor = '' ) {
+function md_survey_export_csv( $from, $to, $staff, $doctor = '', $desk = '' ) {
 	list( $from, $to ) = md_survey_range( $from, $to );
-	$rows = md_survey_responses( $from, $to, $staff, $doctor );
+	$rows = md_survey_responses( $from, $to, $staff, $doctor, $desk );
 	nocache_headers();
 	header( 'Content-Type: text/csv; charset=utf-8' );
 	header( 'Content-Disposition: attachment; filename="만족도조사_' . $from . '_' . $to . '.csv"' );
 	echo "\xEF\xBB\xBF"; /* 엑셀이 한글을 제대로 읽도록 BOM */
 	$out = fopen( 'php://output', 'w' );
-	fputcsv( $out, array( '진료일', '차트번호', '이름', '담당의사', '담당직원', '명단상 담당직원', '담당의사 점수', '담당직원 점수', '병원 점수', '의견', '작성시각', 'IP' ) );
+	fputcsv( $out, array( '진료일', '차트번호', '이름', '담당의사', '담당직원', '명단상 담당직원', '데스크', '담당의사 점수', '담당직원 점수', '데스크 점수', '병원 점수', '의견', '작성시각', 'IP' ) );
 	foreach ( $rows as $r ) {
-		fputcsv( $out, array( $r->visit_date, $r->chart_no, $r->patient_name, $r->doctor, $r->staff, isset( $r->staff_orig ) ? $r->staff_orig : '', isset( $r->q_doctor ) ? $r->q_doctor : '', $r->q_service, $r->q_recommend, (string) $r->comment, $r->created_at, isset( $r->ip ) ? $r->ip : '' ) );
+		fputcsv( $out, array( $r->visit_date, $r->chart_no, $r->patient_name, $r->doctor, $r->staff, isset( $r->staff_orig ) ? $r->staff_orig : '', isset( $r->desk ) ? $r->desk : '', isset( $r->q_doctor ) ? $r->q_doctor : '', $r->q_service, isset( $r->q_desk ) ? $r->q_desk : '', $r->q_recommend, (string) $r->comment, $r->created_at, isset( $r->ip ) ? $r->ip : '' ) );
 	}
 	fclose( $out );
 }
@@ -1641,9 +1670,11 @@ function md_survey_render_responses() {
 	list( $from, $to ) = md_survey_range( isset( $_GET['from'] ) ? wp_unslash( $_GET['from'] ) : '', isset( $_GET['to'] ) ? wp_unslash( $_GET['to'] ) : '' );
 	$staff = isset( $_GET['staff'] ) ? sanitize_text_field( wp_unslash( $_GET['staff'] ) ) : '';
 	$doctor = isset( $_GET['doctor'] ) ? sanitize_text_field( wp_unslash( $_GET['doctor'] ) ) : '';
-	$rows  = md_survey_responses( $from, $to, $staff, $doctor );
+	$desk   = isset( $_GET['desk'] ) ? sanitize_text_field( wp_unslash( $_GET['desk'] ) ) : ''; /* v4.23 */
+	$rows  = md_survey_responses( $from, $to, $staff, $doctor, $desk );
 	global $wpdb;
 	$staffs = $wpdb->get_col( 'SELECT DISTINCT staff FROM ' . md_survey_table_response() . ' ORDER BY staff' );
+	$desks  = $wpdb->get_col( 'SELECT DISTINCT desk FROM ' . md_survey_table_response() . " WHERE desk <> '' ORDER BY desk" );
 	?>
 	<div class="mdsv-bar">
 		<form method="get" class="mdsv-range" action="<?php echo esc_url( md_survey_admin_url() ); ?>">
@@ -1651,34 +1682,37 @@ function md_survey_render_responses() {
 			<input type="date" name="from" value="<?php echo esc_attr( $from ); ?>"> ~ <input type="date" name="to" value="<?php echo esc_attr( $to ); ?>">
 			<select name="doctor"><option value="">모든 담당의사</option><?php foreach ( md_survey_doctor_names() as $s ) : ?><option value="<?php echo esc_attr( $s ); ?>" <?php selected( $s, $doctor ); ?>><?php echo esc_html( $s ); ?></option><?php endforeach; ?></select>
 			<select name="staff"><option value="">모든 담당직원</option><?php foreach ( $staffs as $s ) : if ( '' === (string) $s ) { continue; } ?><option value="<?php echo esc_attr( $s ); ?>" <?php selected( $s, $staff ); ?>><?php echo esc_html( $s ); ?></option><?php endforeach; ?></select>
+			<?php if ( $desks ) : ?><select name="desk"><option value="">모든 데스크</option><?php foreach ( $desks as $s ) : ?><option value="<?php echo esc_attr( $s ); ?>" <?php selected( $s, $desk ); ?>><?php echo esc_html( $s ); ?></option><?php endforeach; ?></select><?php endif; ?>
 			<button type="submit" class="mds-btn mds-btn--ghost">보기</button>
 		</form>
 		<form method="post" class="mds-inline">
 			<input type="hidden" name="md_survey_action" value="export"><input type="hidden" name="md_survey_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_survey_export' ) ); ?>">
-			<input type="hidden" name="from" value="<?php echo esc_attr( $from ); ?>"><input type="hidden" name="to" value="<?php echo esc_attr( $to ); ?>"><input type="hidden" name="staff" value="<?php echo esc_attr( $staff ); ?>"><input type="hidden" name="doctor" value="<?php echo esc_attr( $doctor ); ?>">
+			<input type="hidden" name="from" value="<?php echo esc_attr( $from ); ?>"><input type="hidden" name="to" value="<?php echo esc_attr( $to ); ?>"><input type="hidden" name="staff" value="<?php echo esc_attr( $staff ); ?>"><input type="hidden" name="doctor" value="<?php echo esc_attr( $doctor ); ?>"><input type="hidden" name="desk" value="<?php echo esc_attr( $desk ); ?>">
 			<button type="submit" class="mds-btn mds-btn--ghost">CSV 내려받기</button>
 		</form>
 	</div>
-	<?php if ( '' !== $staff || '' !== $doctor ) : /* v4.21.30 · 집계에서 이름을 눌러 들어온 경우 */ ?>
-		<p class="mdsv-filterbar"><b><?php echo esc_html( trim( $doctor . ( $doctor && $staff ? ' · ' : '' ) . $staff ) ); ?></b> 응답 <?php echo count( $rows ); ?>건 · <a href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'responses', 'from' => $from, 'to' => $to ) ) ); ?>">전체 보기</a> · <a href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'stats', 'from' => $from, 'to' => $to ) ) ); ?>">집계로 돌아가기</a></p>
+	<?php if ( '' !== $staff || '' !== $doctor || '' !== $desk ) : /* v4.21.30 · 집계에서 이름을 눌러 들어온 경우 */ ?>
+		<p class="mdsv-filterbar"><b><?php echo esc_html( implode( ' · ', array_filter( array( $doctor, $staff, '' !== $desk ? $desk . ' (데스크)' : '' ) ) ) ); ?></b> 응답 <?php echo count( $rows ); ?>건 · <a href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'responses', 'from' => $from, 'to' => $to ) ) ); ?>">전체 보기</a> · <a href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'stats', 'from' => $from, 'to' => $to ) ) ); ?>">집계로 돌아가기</a></p>
 	<?php endif; ?>
 	<?php if ( empty( $rows ) ) : ?>
 		<div class="mds-card"><div class="mds-empty">이 기간에 응답이 없습니다.</div></div>
 	<?php else : ?>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>진료일</th><th>환자</th><th>담당의사</th><th>담당직원</th><th class="num">담당의사</th><th class="num">담당직원</th><th class="num">병원</th><th>의견</th><th>작성</th><th>IP</th><th></th></tr></thead>
+				<thead><tr><th>진료일</th><th>환자</th><th>담당의사</th><th>담당직원</th><th>데스크</th><th class="num">담당의사</th><th class="num">담당직원</th><th class="num">데스크</th><th class="num">병원</th><th>의견</th><th>작성</th><th>IP</th><th></th></tr></thead>
 				<tbody>
 				<?php $ipcount = array(); foreach ( $rows as $x ) { if ( ! empty( $x->ip ) ) { $ipcount[ $x->ip ] = ( isset( $ipcount[ $x->ip ] ) ? $ipcount[ $x->ip ] : 0 ) + 1; } } /* v4.21.33 · 같은 IP 응답 수 */
 				$lowf = function ( $v ) { return ( (int) $v >= 1 && (int) $v <= 2 ) ? 'is-low' : ''; };
-				foreach ( $rows as $r ) : $qd = isset( $r->q_doctor ) ? (int) $r->q_doctor : 0; $low = $lowf( $qd ) || $lowf( $r->q_service ) || $lowf( $r->q_recommend ); ?>
+				foreach ( $rows as $r ) : $qd = isset( $r->q_doctor ) ? (int) $r->q_doctor : 0; $qk = isset( $r->q_desk ) ? (int) $r->q_desk : 0; $low = $lowf( $qd ) || $lowf( $r->q_service ) || $lowf( $qk ) || $lowf( $r->q_recommend ); ?>
 					<tr class="<?php echo $low ? 'is-lowrow' : ''; ?>">
 						<td><?php echo esc_html( date_i18n( 'm.d', strtotime( $r->visit_date ) ) ); ?></td>
 						<td><b><?php echo esc_html( $r->patient_name ); ?></b><span class="mds-item__meta"><?php echo esc_html( $r->chart_no ); ?></span></td>
 						<td><?php echo esc_html( $r->doctor ); ?></td>
 						<td><b><?php echo esc_html( '' !== $r->staff ? $r->staff : '(모름)' ); ?></b><?php if ( ! empty( $r->staff_changed ) && '' !== (string) $r->staff_orig ) : ?><span class="mds-item__meta">명단: <?php echo esc_html( $r->staff_orig ); ?> → 환자가 바로잡음</span><?php endif; ?></td>
+						<td><?php echo esc_html( ! empty( $r->desk ) ? $r->desk : '–' ); ?></td>
 						<td class="num <?php echo $lowf( $qd ); ?>"><?php echo $qd ? $qd : '–'; ?></td>
 						<td class="num <?php echo $lowf( $r->q_service ); ?>"><?php echo $r->q_service ? (int) $r->q_service : '–'; ?></td>
+						<td class="num <?php echo $lowf( $qk ); ?>"><?php echo $qk ? $qk : '–'; ?></td>
 						<td class="num <?php echo $lowf( $r->q_recommend ); ?>"><?php echo (int) $r->q_recommend; ?></td>
 						<td class="mdsv-comment"><?php echo nl2br( esc_html( (string) $r->comment ) ); ?><?php if ( ! empty( $r->want_call ) ) : ?><span class="mds-flag">📞 연락 원함</span><?php endif; ?></td>
 						<td class="mds-last"><?php echo esc_html( date_i18n( 'm.d H:i', strtotime( $r->created_at ) ) ); ?></td>
@@ -1750,6 +1784,22 @@ function md_survey_render_stats() {
 				</tbody>
 			</table>
 		</div>
+		<?php $desks = md_survey_stats_desk( $from, $to ); if ( $desks ) : /* v4.23 · 데스크 담당별 (덴트웹 체어 칸) */ ?>
+		<h2 class="mdsv-h" style="margin-top:22px">데스크별</h2>
+		<div class="mds-tablewrap">
+			<table class="mds-table mdsv-table">
+				<thead><tr><th>데스크 담당</th><th class="num">평균</th></tr></thead>
+				<tbody>
+				<?php foreach ( $desks as $r ) : ?>
+					<tr>
+						<td><a class="mdsv-name" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'responses', 'from' => $from, 'to' => $to, 'desk' => $r->desk ) ) ); ?>"><b><?php echo esc_html( $r->desk ); ?></b></a></td>
+						<td class="num"><b><?php echo number_format( (float) $r->avg_desk, 2 ); ?></b></td>
+					</tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+		<?php endif; ?>
 		<p class="mds-hint">이름을 누르면 그 사람의 응답을 모두 볼 수 있습니다. 평균은 1~5점입니다.</p>
 	<?php endif; ?>
 	<?php
