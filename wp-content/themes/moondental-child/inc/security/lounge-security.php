@@ -683,3 +683,23 @@ add_action( 'init', function () {
 	clean_user_cache( $u->ID );
 	update_option( 'md_sec_staffmail_v3', current_time( 'mysql' ) . ' · 전: ' . $u->user_email . ( $other && (int) $other !== (int) $u->ID ? ' · 같은 주소 계정 #' . $other : '' ), false );
 }, 31 );
+
+/* v9.41 · 「문치과병원」 계정(예전 공용 계정 moondentalhospital · 이름이 「문치과병원」인 계정)의 이메일도 moondental1995@naver.com (원장 지시 2026-10-09).
+   직원공용과 같은 주소라 워드프레스가 바꾸기를 거절하므로 DB 에 직접 넣는다. 홈페이지 관리자(manage_options) 계정은 건드리지 않는다. 전 주소는 옵션에 남김 */
+add_action( 'init', function () {
+	if ( get_option( 'md_sec_hospmail_v1' ) ) { return; }
+	global $wpdb;
+	$ids = array();
+	if ( $u = get_user_by( 'login', 'moondentalhospital' ) ) { $ids[] = (int) $u->ID; }
+	foreach ( (array) $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->users} WHERE display_name = %s", '문치과병원' ) ) as $id ) { $ids[] = (int) $id; }
+	$log = array();
+	foreach ( array_unique( $ids ) as $id ) {
+		$u = get_userdata( $id );
+		if ( ! $u || user_can( $u, 'manage_options' ) ) { if ( $u ) { $log[] = '#' . $id . ' ' . $u->user_login . ' (홈페이지 관리자라 그대로)'; } continue; }
+		if ( md_sec_staff_mail() === $u->user_email ) { $log[] = '#' . $id . ' ' . $u->user_login . ' (이미 같음)'; continue; }
+		$wpdb->update( $wpdb->users, array( 'user_email' => md_sec_staff_mail() ), array( 'ID' => $id ) );
+		clean_user_cache( $id );
+		$log[] = '#' . $id . ' ' . $u->user_login . ' · 전: ' . $u->user_email;
+	}
+	update_option( 'md_sec_hospmail_v1', current_time( 'mysql' ) . ' · ' . ( $log ? implode( ' / ', $log ) : '해당 계정 없음' ), false );
+}, 32 );
