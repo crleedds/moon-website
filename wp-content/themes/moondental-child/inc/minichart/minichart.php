@@ -1589,7 +1589,7 @@ function md_mc_render_patient( $id ) {
 		</div>
 		<?php /* v9.33 · 치료계획은 한 줄에 하나씩 따로 적고, 한 줄을 누르면 날짜를 골라 진료기록으로 옮긴다 (원장 지시). 한꺼번에 고치기(v8.6 자동 저장 칸)는 접어 둠 */ ?>
 		<section class="mc-block mc-block--plan mc-plan" id="f-tx_plan">
-			<h3 class="mc-block__h"><?php echo esc_html( $f['tx_plan'][0] ); ?> <small class="mc-sub">한 줄에 하나 · ▲▼ 순서 · ✎ 고치기 · 날짜 골라 진료기록으로</small></h3>
+			<h3 class="mc-block__h"><?php echo esc_html( $f['tx_plan'][0] ); ?></h3>
 			<form method="post" class="mc-add mc-add--plan" data-mc-fast="plan_add" action="<?php echo esc_url( md_mc_url() ); ?>">
 				<?php md_mc_nonce_fields( 'plan_add', $r->id ); ?>
 				<textarea name="text" rows="1" required placeholder="치료계획 한 줄 추가 (예: #36 크라운)" class="mc-add__text mc-plan__addtext" enterkeyhint="done"></textarea>
