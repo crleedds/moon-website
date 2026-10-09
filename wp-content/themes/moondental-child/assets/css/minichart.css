@@ -488,27 +488,22 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
   .mc-grid--info .mc-block--alert { grid-column: 1 / -1; }
 }
 
-/* v9.33 · 치료계획 — 한 줄에 하나, 누르면 진료기록으로 */
+/* v9.33 · 치료계획 — 한 줄에 하나 · v9.34 번호 없이, 줄마다 ▲▼ 순서 · 날짜 · 「진료기록으로」 단추 (원장 지시) */
 .mc-add--plan { grid-template-columns: 1fr auto; }
 .mc-plan__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
-.mc-plan__item { border: 1px solid var(--mc-line, #E8DDD3); border-radius: 10px; background: var(--mc-bg, #fff); }
-.mc-plan__item.is-open { border-color: var(--color-primary, #D88062); }
-.mc-plan__it { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 6px 10px; border: 0; background: transparent; font: inherit; font-size: 1rem; text-align: left; color: inherit; cursor: pointer; border-radius: 10px; }
-.mc-plan__it:hover, .mc-plan__it:focus-visible { background: var(--color-primary-soft, #FBF1EC); outline: none; }
-.mc-plan__no { flex: 0 0 auto; min-width: 1.6em; height: 1.6em; border-radius: 999px; background: var(--color-primary, #D88062); color: #fff; font-size: .78rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
-.mc-plan__tx { flex: 1 1 auto; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
-.mc-plan__go { flex: 0 0 auto; font-size: .78rem; color: var(--mc-sub); opacity: .55; white-space: nowrap; }
-.mc-plan__it:hover .mc-plan__go, .mc-plan__item.is-open .mc-plan__go { opacity: 1; }
-.mc-plan__move { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 6px 10px 10px; border-top: 1px dashed var(--mc-line, #E8DDD3); }
-.mc-plan__move[hidden] { display: none; }
-.mc-plan__when { display: inline-flex; align-items: center; gap: 6px; font-size: .86rem; color: var(--mc-sub); }
-.mc-plan__when .mc-add__day { min-height: 40px; }
+.mc-plan__item { display: flex; align-items: center; gap: 8px; padding: 4px 6px 4px 10px; border: 1px solid var(--mc-line, #E8DDD3); border-radius: 10px; background: var(--mc-bg, #fff); }
+.mc-plan__tx { flex: 1 1 160px; min-width: 0; line-height: 1.45; white-space: pre-wrap; word-break: break-word; font-size: 1rem; }
+.mc-plan__order { flex: 0 0 auto; display: inline-flex; gap: 2px; }
+.mc-plan__order form { margin: 0; }
+.mc-plan__ud { width: 30px; height: 30px; border: 1px solid var(--mc-line, #E8DDD3); border-radius: 8px; background: transparent; color: var(--mc-sub); font-size: .7rem; cursor: pointer; line-height: 1; padding: 0; }
+.mc-plan__ud:hover:not([disabled]) { background: var(--color-primary-soft, #FBF1EC); color: inherit; }
+.mc-plan__ud[disabled] { opacity: .25; cursor: default; }
+.mc-plan__move { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; margin: 0; }
+.mc-plan__day { min-height: 36px; width: 8.6em; padding: 4px 8px; font-size: .9rem; }
+.mc-plan__go { white-space: nowrap; }
 .mc-plan__none { margin: 0; color: var(--mc-sub); font-size: .92rem; }
-.mc-plan__all { margin-top: 8px; }
-.mc-plan__all > summary { cursor: pointer; font-size: .82rem; color: var(--mc-sub); }
-.mc-plan__all textarea { margin-top: 6px; border-color: var(--mc-line, #E8DDD3); }
 @media (max-width: 640px) {
-  .mc-plan__it { min-height: 40px; font-size: .95rem; }
-  .mc-plan__go { display: none; }
-  .mc-plan__item.is-open .mc-plan__go { display: inline; }
+  .mc-plan__item { flex-wrap: wrap; row-gap: 6px; }
+  .mc-plan__tx { flex: 1 1 100%; font-size: .95rem; }
+  .mc-plan__move { margin-left: auto; }
 }

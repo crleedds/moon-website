@@ -426,7 +426,7 @@ document.addEventListener('click', function (e) {
       if (res.redirect) { form.dataset.sending = '1'; location.href = res.redirect; return; }
       if (res.reload && kind === 'field' && res.ok) { toast('저장했습니다'); form.dataset.sending = '1'; setTimeout(function () { location.reload(); }, 400); return; }
       if (res.reload) { recover(''); return; }
-      if (!res.ok) { toast(res.msg || '저장하지 못했습니다.', true); if (kind === 'plan') { Array.prototype.forEach.call(btns, function (b) { b.disabled = false; }); } if (kind === 'plan_done') { recover(res.msg || '그 사이 치료계획이 바뀌었습니다.'); } return; }
+      if (!res.ok) { toast(res.msg || '저장하지 못했습니다.', true); if (kind === 'plan') { Array.prototype.forEach.call(btns, function (b) { b.disabled = false; }); } if (kind === 'plan_done' || kind === 'plan_move') { recover(res.msg || '그 사이 치료계획이 바뀌었습니다.'); } return; }
       apply(res);
       if (kind === 'add' && res.target && res.value != null) { /* v9.20 · 같은 칸의 「눌러서 고치기」 폼 값도 최신으로 */
         var sec = document.getElementById('f-' + res.target), ef = sec && sec.querySelector('form.mc-edit textarea[name=' + res.target + ']');
@@ -442,7 +442,7 @@ document.addEventListener('click', function (e) {
         closeEdit(form);
       }
       if (kind === 'add' && addText) { addText.value = ''; addText.style.height = ''; }
-      if (kind === 'plan_add' || kind === 'plan_done') {
+      if (kind === 'plan_add' || kind === 'plan_done' || kind === 'plan_move') {
         /* v9.33 · 「한꺼번에 고치기」 칸도 최신 계획으로 · 추가 칸 비우기 */
         var pta = document.querySelector('textarea[data-mc-plan]');
         if (pta && res.value != null) { pta.value = res.value; pta.defaultValue = res.value; pta.form.dispatchEvent(new CustomEvent('mc:plan-saved')); }
@@ -452,7 +452,7 @@ document.addEventListener('click', function (e) {
         var ta = form.querySelector('textarea[data-mc-plan]'); if (ta) ta.defaultValue = ta.value;
         form.dispatchEvent(new CustomEvent('mc:plan-saved'));
       }
-      toast({ dwhide: '지웠습니다', dwedit: '고쳤습니다', dwunhide: '다시 보이게 했습니다', add: '추가했습니다', plan: '저장했습니다', plan_add: '치료계획에 넣었습니다', plan_done: '진료기록으로 옮겼습니다', field: '저장했습니다', ownedit: '고쳤습니다', owndel: '지웠습니다', dwhidedr: '지웠습니다' }[kind] || '저장했습니다');
+      toast({ dwhide: '지웠습니다', dwedit: '고쳤습니다', dwunhide: '다시 보이게 했습니다', add: '추가했습니다', plan: '저장했습니다', plan_add: '치료계획에 넣었습니다', plan_done: '진료기록으로 옮겼습니다', plan_move: '순서를 바꿨습니다', field: '저장했습니다', ownedit: '고쳤습니다', owndel: '지웠습니다', dwhidedr: '지웠습니다' }[kind] || '저장했습니다');
     }).catch(function () {
       recover('저장 결과를 확인합니다…');
     }).then(function () {
@@ -672,18 +672,3 @@ window.mcInits.push(function () {
   });
 })();
 
-/* v9.33 · 치료계획 한 줄을 누르면 그 아래 날짜 고르는 칸이 열리고, 「진료기록으로 옮기기」는 빠른 저장(plan_done)으로 간다 — 문서에 한 번만 걸어 차트를 바꿔도 동작 */
-(function () {
-  'use strict';
-  document.addEventListener('click', function (e) {
-    var x = e.target.closest && e.target.closest('[data-mc-plan-x]');
-    if (x) { x.closest('form').hidden = true; x.closest('.mc-plan__item').classList.remove('is-open'); return; }
-    var b = e.target.closest && e.target.closest('[data-mc-plan-it]');
-    if (!b) return;
-    var li = b.closest('.mc-plan__item'), f = li && li.querySelector('.mc-plan__move');
-    if (!f) return;
-    Array.prototype.forEach.call(document.querySelectorAll('.mc-plan__move:not([hidden])'), function (o) { if (o !== f) { o.hidden = true; o.closest('.mc-plan__item').classList.remove('is-open'); } });
-    f.hidden = !f.hidden; li.classList.toggle('is-open', !f.hidden);
-    if (!f.hidden) { var d = f.querySelector('input[type=date]'); if (d) { try { d.focus(); } catch (er) {} } }
-  });
-})();
