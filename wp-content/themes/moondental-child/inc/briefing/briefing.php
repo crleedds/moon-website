@@ -7,8 +7,8 @@
  *  여기서는 저장하고, 받는 사람에게 브리핑 메일을 보낸다(숫자 · 인원수만, 환자 이름은 메일에 넣지 않음).
  *
  *  화면 (app=brief)
- *   - 브리핑 · 받는 사람 · 명단 : 라운지 관리자 모두 (v9.38 · 2026-10-09 원장 지시 — 전엔 매출은 총괄 관리자만)
- *   - 타일 「리콜」(app=recall) : 확인 전화 · 진료 중단 · 리콜 · 노쇼 명단만(매출 없음) — 누가 보는지는 직원별 탭 권한(직원 정보 › 권한), 연락하고 「연락함」 표시
+ *   - 📊 브리핑 · ✉️ 받는 사람 : 라운지 관리자 (v9.40 · 명단은 리콜 타일로 분리 — 원장 지시 2026-10-09)
+ *   - 타일 「리콜」(app=recall) : 확인 전화 · 진료 중단 · 리콜 · 노쇼 명단과 「연락함」 표시 — 누가 보는지는 직원별 탭 권한(직원 정보 › 권한)
  *
  *  저장: wp_md_brief (진료일별 숫자 JSON), 옵션 md_brief_lists (가장 최근 명단 — 매일 바뀜),
  *        md_brief_to (받는 사람), md_brief_marks (연락함 표시, 90일 보관)
@@ -394,23 +394,18 @@ function md_brief_render_recall() {
 }
 
 function md_brief_render() {
-	if ( ! md_brief_can_lists() ) { echo '<div class="mds-card"><div class="mds-empty">관리자만 볼 수 있습니다.</div></div>'; return; }
-	$money = md_brief_can_money();
-	$tabs  = array();
-	if ( $money ) { $tabs['day'] = '📊 브리핑'; }
-	$tabs += array( 'confirm' => '📞 확인 전화', 'dropout' => '🦷 진료 중단', 'recall' => '🔔 리콜', 'noshow' => '🚫 노쇼' );
-	if ( $money ) { $tabs['to'] = '✉️ 받는 사람'; }
-	$tab = isset( $_GET['bt'] ) ? sanitize_key( wp_unslash( $_GET['bt'] ) ) : '';
-	if ( ! isset( $tabs[ $tab ] ) ) { $tab = array_key_first( $tabs ); }
+	if ( ! md_brief_can_money() ) { echo '<div class="mds-card"><div class="mds-empty">관리자만 볼 수 있습니다.</div></div>'; return; }
+	$tabs = array( 'day' => '📊 브리핑', 'to' => '✉️ 받는 사람' );
+	$tab  = isset( $_GET['bt'] ) ? sanitize_key( wp_unslash( $_GET['bt'] ) ) : '';
+	if ( ! isset( $tabs[ $tab ] ) ) { $tab = 'day'; }
 	md_brief_styles();
 	md_brief_flash();
 	echo '<nav class="mdb-tabs">';
 	foreach ( $tabs as $k => $label ) { echo '<a class="' . ( $k === $tab ? 'is-on' : '' ) . '" href="' . esc_url( md_brief_lounge_url( array( 'bt' => $k ) ) ) . '">' . esc_html( $label ) . '</a>'; }
 	echo '</nav>';
 
-	if ( 'day' === $tab ) { md_brief_render_day(); }
-	elseif ( 'to' === $tab ) { md_brief_render_to(); }
-	else { md_brief_render_list( $tab ); }
+	if ( 'to' === $tab ) { md_brief_render_to(); }
+	else { md_brief_render_day(); }
 }
 
 function md_brief_render_day() {
