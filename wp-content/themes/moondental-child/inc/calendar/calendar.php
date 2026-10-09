@@ -108,15 +108,38 @@ function md_cal_between( $from, $to ) {
 		}
 	}
 
-	/* 1-2) 덴트웹 개인별 휴무 (inc/staff · 병원 PC sync.ps1 이 한 시간마다) — 명단과 이어진 재직자만 */
+	/* 1-2) 덴트웹 개인별 휴무 (inc/staff · 병원 PC sync.ps1 이 한 시간마다) — 명단과 이어진 재직자만.
+	 *      같은 날 같은 시간대의 휴무는 한 줄로 합친다(의료진끼리 · 직원끼리, 원장 지시 2026-10-09): 「🌴 문은수 병원장님 · 김세일 원장님 휴무」 */
 	if ( function_exists( 'md_staff_dw_dayoffs' ) ) {
+		$days = array();
 		foreach ( md_staff_dw_dayoffs() as $i => $h ) {
 			if ( $h['d1'] > $to || $h['d2'] < $from ) { continue; }
 			$who = md_staff_dw_who( $h['sid'] );
 			if ( ! $who ) { continue; }
-			$time = '' !== $h['t1'] && '' !== $h['t2'] ? ' ' . substr( $h['t1'], 0, 2 ) . ':' . substr( $h['t1'], 2 ) . '~' . substr( $h['t2'], 0, 2 ) . ':' . substr( $h['t2'], 2 ) : '';
+			$time = '' !== $h['t1'] && '' !== $h['t2'] ? substr( $h['t1'], 0, 2 ) . ':' . substr( $h['t1'], 2 ) . '~' . substr( $h['t2'], 0, 2 ) . ':' . substr( $h['t2'], 2 ) : '';
+			$grp  = ( $who['doctor'] ? 'd' : 's' ) . $time;
+			$h['i'] = $i;
 			for ( $d = max( $h['d1'], $from ); $d <= min( $h['d2'], $to ); $d = date( 'Y-m-d', strtotime( $d . ' +1 day' ) ) ) {
-				$out[ $d ][] = (object) array( 'id' => 's' . $who['sid'] . 'h' . $i, 'type' => 'dayoff', 'title' => $who['name'] . ( $time ? $time : ' 휴무' ), 'memo' => $h['memo'], 'occurs' => $d, 'years' => 0, 'yearly' => 0, 'auto' => true, 'date_start' => $h['d1'], 'date_end' => $h['d2'] );
+				$days[ $d ][ $grp ]['time'] = $time;
+				$days[ $d ][ $grp ]['who'][ $who['sid'] ] = $who;
+				$days[ $d ][ $grp ]['h'][] = $h;
+			}
+		}
+		foreach ( $days as $d => $groups ) {
+			foreach ( $groups as $grp => $g ) {
+				$who = $g['who'];
+				uasort( $who, function ( $a, $b ) { return strcmp( $a['order'], $b['order'] ); } );
+				$sids = array_keys( $who ); sort( $sids );
+				$memo = array_values( array_unique( array_filter( array_map( function ( $h ) { return trim( (string) $h['memo'] ); }, $g['h'] ) ) ) );
+				if ( 1 === count( $who ) ) {
+					$h0 = $g['h'][0]; $id = 's' . $sids[0] . 'h' . $h0['i']; $ds = $h0['d1']; $de = $h0['d2'];
+				} else { /* 여러 명 — 같은 구성이 이어지는 날짜 범위(모두 겹치는 기간) */
+					$id = 'g' . substr( md5( $grp . ':' . implode( ',', $sids ) ), 0, 10 );
+					$ds = max( array_map( function ( $h ) { return $h['d1']; }, $g['h'] ) );
+					$de = min( array_map( function ( $h ) { return $h['d2']; }, $g['h'] ) );
+				}
+				$names = implode( ' · ', array_map( function ( $w ) { return $w['name']; }, $who ) );
+				$out[ $d ][] = (object) array( 'id' => $id, 'type' => 'dayoff', 'title' => $names . ( $g['time'] ? ' ' . $g['time'] : ' 휴무' ), 'memo' => mb_substr( implode( ' · ', $memo ), 0, 200 ), 'occurs' => $d, 'years' => 0, 'yearly' => 0, 'auto' => true, 'date_start' => $ds, 'date_end' => $de );
 			}
 		}
 	}

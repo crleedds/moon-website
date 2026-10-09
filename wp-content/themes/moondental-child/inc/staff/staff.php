@@ -398,15 +398,25 @@ function md_staff_dw_dayoff_at() {
 	return is_array( $o ) ? (string) ( $o['at'] ?? '' ) : '';
 }
 
-/** 덴트웹 직원 번호 → 달력에 쓸 이름(의료진은 「이름 원장님」 · 원장 지시) · 라운지 직원 id. 재직 중이고 명단과 이어진 사람만(퇴사자 · 가상 의사 · 공용 계정 제외) */
+/**
+ * 덴트웹 직원 번호 → 달력에 쓸 이름 · 라운지 직원 id · 정렬 순서. 재직 중이고 명단과 이어진 사람만(퇴사자 · 가상 의사 · 공용 계정 제외)
+ *  의료진 이름은 직책에 따라 「이름 병원장님」 · 「이름 원장님」(원장 지시 2026-10-09), 그 밖의 직책은 그대로 붙인다. 직원은 이름만.
+ */
 function md_staff_dw_who( $dw ) {
 	static $map = null;
 	if ( null === $map ) {
 		global $wpdb; $map = array();
-		foreach ( (array) $wpdb->get_results( 'SELECT id, name, dept, position, dw_id FROM ' . md_staff_table() . ' WHERE dw_id > 0 AND active = 1' ) as $r ) {
+		foreach ( (array) $wpdb->get_results( 'SELECT id, name, dept, position, dw_id, sort FROM ' . md_staff_table() . ' WHERE dw_id > 0 AND active = 1' ) as $r ) {
 			if ( md_staff_is_shared( $r ) ) { continue; }
-			$pos = trim( (string) $r->position );
-			$map[ (int) $r->dw_id ] = array( 'sid' => (int) $r->id, 'name' => '의료진' === $r->dept ? trim( $r->name . ' ' . ( '' === $pos || false !== mb_strpos( $pos, '원장' ) ? '원장님' : $pos ) ) : $r->name );
+			$pos    = trim( (string) $r->position );
+			$doctor = '의료진' === $r->dept;
+			$rank   = 3; $name = $r->name;
+			if ( $doctor ) {
+				if ( false !== mb_strpos( $pos, '병원장' ) )          { $rank = 0; $name .= ' 병원장님'; }
+				elseif ( '' === $pos || false !== mb_strpos( $pos, '원장' ) ) { $rank = 1; $name .= ' 원장님'; }
+				else                                                  { $rank = 2; $name .= ' ' . $pos; }
+			}
+			$map[ (int) $r->dw_id ] = array( 'sid' => (int) $r->id, 'name' => $name, 'doctor' => $doctor, 'order' => sprintf( '%d-%06d-%s', $rank, (int) $r->sort, $r->name ) );
 		}
 	}
 	return $map[ (int) $dw ] ?? null;
