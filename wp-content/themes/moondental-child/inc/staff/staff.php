@@ -72,6 +72,20 @@ function md_staff_is_shared( $r ) {
 	return preg_replace( '/\s+/u', '', (string) $r->name ) === preg_replace( '/\s+/u', '', $n );
 }
 
+/* v9.43 · 공용 줄 이름(예: 「문치과병원」)을 공용 로그인 계정 이름에 한 번 맞춘다 — v9.42 전에 줄 이름만 바꿔 둔 경우 (원장 「직원공용을 없애줘」) */
+add_action( 'init', function () {
+	if ( get_option( 'md_staff_sharedname_v1' ) || ! defined( 'MD_SUP_STAFF_LOGIN' ) || ! md_staff_shared_sid() ) { return; }
+	global $wpdb;
+	$name = (string) $wpdb->get_var( $wpdb->prepare( 'SELECT name FROM ' . md_staff_table() . ' WHERE id = %d', md_staff_shared_sid() ) );
+	$su   = get_user_by( 'login', MD_SUP_STAFF_LOGIN );
+	if ( '' !== trim( $name ) && $su && $su->display_name !== $name ) {
+		$wpdb->update( $wpdb->users, array( 'display_name' => $name ), array( 'ID' => (int) $su->ID ) );
+		update_user_meta( $su->ID, 'nickname', $name );
+		clean_user_cache( $su->ID );
+	}
+	update_option( 'md_staff_sharedname_v1', current_time( 'mysql' ) . ' · ' . ( $su ? $su->display_name . ' → ' . $name : '계정 없음' ), false );
+}, 40 );
+
 function md_staff_shared_sid() {
 	return preg_match( '/^sid (\d+)$/', (string) get_option( 'md_staff_shared_v1', '' ), $m ) ? (int) $m[1] : 0;
 }
