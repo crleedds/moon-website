@@ -95,21 +95,21 @@ function md_cal_between( $from, $to ) {
 			if ( function_exists( 'md_staff_is_shared' ) && md_staff_is_shared( $s ) ) { continue; } /* v10.0 · 공용 계정 */
 			if ( $s->birthday ) {
 				foreach ( md_cal_yearly_dates( substr( $s->birthday, 5 ), $from, $to ) as $d ) {
-					$out[ $d ][] = (object) array( 'id' => 's' . $s->id . 'b', 'type' => 'birthday', 'title' => trim( $s->name . ' ' . $s->position ) . '님', 'memo' => $s->dept, 'occurs' => $d, 'years' => 0, 'yearly' => 1, 'auto' => true, 'date_start' => $d, 'date_end' => null );
+					$out[ $d ][] = (object) array( 'id' => 's' . $s->id . 'b', 'type' => 'birthday', 'title' => trim( $s->name . ' ' . $s->position ), 'memo' => $s->dept, 'occurs' => $d, 'years' => 0, 'yearly' => 1, 'auto' => true, 'date_start' => $d, 'date_end' => null );
 				}
 			}
 			if ( $s->hired ) {
 				foreach ( md_cal_yearly_dates( substr( $s->hired, 5 ), $from, $to ) as $d ) {
 					$yrs = (int) substr( $d, 0, 4 ) - (int) substr( $s->hired, 0, 4 );
 					if ( $yrs < 1 ) { continue; } /* 입사한 해에는 표시하지 않는다 */
-					$out[ $d ][] = (object) array( 'id' => 's' . $s->id . 'a', 'type' => 'anniv', 'title' => trim( $s->name . ' ' . $s->position ) . '님', 'memo' => $s->dept, 'occurs' => $d, 'years' => $yrs, 'yearly' => 1, 'auto' => true, 'date_start' => $d, 'date_end' => null );
+					$out[ $d ][] = (object) array( 'id' => 's' . $s->id . 'a', 'type' => 'anniv', 'title' => trim( $s->name . ' ' . $s->position ), 'memo' => $s->dept, 'occurs' => $d, 'years' => $yrs, 'yearly' => 1, 'auto' => true, 'date_start' => $d, 'date_end' => null );
 				}
 			}
 		}
 	}
 
 	/* 1-2) 덴트웹 개인별 휴무 (inc/staff · 병원 PC sync.ps1 이 1분마다 확인, 바뀌면 올림) — 명단과 이어진 재직자만.
-	 *      같은 날 같은 시간대의 휴무는 한 줄로 합친다(의료진끼리 · 직원끼리, 원장 지시 2026-10-09): 「🌴 문은수 병원장님 · 김세일 원장님 휴무」 */
+	 *      같은 날 같은 시간대의 휴무는 한 줄로 합친다(의료진끼리 · 직원끼리, 원장 지시 2026-10-09): 「🌴 문은수 병원장 · 김세일 원장 휴무」 */
 	if ( function_exists( 'md_staff_dw_dayoffs' ) ) {
 		$days = array();
 		foreach ( md_staff_dw_dayoffs() as $i => $h ) {
