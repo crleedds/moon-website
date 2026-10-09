@@ -770,3 +770,20 @@ tr.iv-grp.is-closed .iv-grp__arrow { transform: rotate(-90deg); }
 /* v9.30 · F장부 */
 .iv-fail-form { align-items: flex-end; }
 .iv-table--fail .iv-row--sum td { border-top: 2px solid var(--iv-line, #e5ddd5); }
+
+/* v9.36 · 한꺼번에 입고 */
+.iv-table--inmany .iv-input--num { width: 84px; }
+.iv-table--inmany .iv-input--won { width: 104px; }
+.iv-table--inmany td:first-child input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--iv-pri); }
+.iv-table--inmany tr.is-picked td { background: color-mix(in srgb, var(--iv-pri) 7%, transparent); }
+.iv-table--inmany .iv-td-name small { display: block; font-weight: 500; }
+.iv-table--inmany-new input[list] { min-width: 260px; }
+.iv-inmany .iv-bulkbar .iv-f--inline { display: inline-flex; align-items: center; gap: 6px; margin: 0; }
+.iv-inmany .iv-bulkbar .iv-f--inline span { font-size: .86rem; color: var(--iv-sub); }
+.iv-inmany__foot { justify-content: space-between; }
+@media (max-width: 760px) {
+  .iv-table--inmany .iv-input--num { width: 110px; }
+  .iv-table--inmany .iv-input--won { width: 130px; }
+  .iv-table--inmany-new input[list] { min-width: 0; width: 100%; }
+  .iv-table--inmany td.iv-td-name { padding-left: 0; }
+}

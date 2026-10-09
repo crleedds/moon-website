@@ -350,10 +350,10 @@ function md_inv_view_todo() {
 	</section>
 
 	<section id="iv-sec-ord" class="iv-sec">
-		<h2 class="iv-h2">입고 대기 <span class="iv-n"><?php echo count( $ords ); ?></span> <a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'receive' ) ) ); ?>"><?php echo md_inv_icon( 'scan', 16 ); // phpcs:ignore ?>바코드로 입고</a> <a class="iv-link" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'orders' ) ) ); ?>">주문 전체 보기</a></h2>
+		<h2 class="iv-h2">입고 대기 <span class="iv-n"><?php echo count( $ords ); ?></span> <a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'receive' ) ) ); ?>"><?php echo md_inv_icon( 'scan', 16 ); // phpcs:ignore ?>바코드로 입고</a> <a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'inmany' ) ) ); ?>">한꺼번에 입고 (수량 따로)</a> <a class="iv-link" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'orders' ) ) ); ?>">주문 전체 보기</a></h2>
 		<?php if ( ! $ords ) : md_inv_empty( '들어오기를 기다리는 주문이 없습니다.' ); else : ?>
 			<form method="post" id="iv-bulk-receive" data-confirm="선택한 주문을 남은 수량 그대로 모두 입고할까요? (단가는 주문 단가, LOT 없이)"><?php md_inv_hidden( 'ord_receive_many' ); ?></form>
-			<div class="iv-bulkbar"><label class="iv-check"><input type="checkbox" data-checkall="rids[]"> 모두 고르기</label><button class="iv-btn iv-btn--primary iv-btn--sm" form="iv-bulk-receive" data-needcheck="rids[]">선택한 것 입고</button><span class="iv-muted">— 수량 · 단가 · LOT 을 따로 적으려면 카드의 「입고」</span></div>
+			<div class="iv-bulkbar"><label class="iv-check"><input type="checkbox" data-checkall="rids[]"> 모두 고르기</label><button class="iv-btn iv-btn--primary iv-btn--sm" form="iv-bulk-receive" data-needcheck="rids[]">선택한 것 입고</button><span class="iv-muted">— 남은 수량 그대로 · 일부만 왔거나 수량 · 단가를 따로 적으려면 <a class="iv-link" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'inmany' ) ) ); ?>">한꺼번에 입고</a> 또는 카드의 「입고」</span></div>
 			<?php md_inv_order_cards( $ords, 'iv-bulk-receive' ); endif; ?>
 	</section>
 
@@ -490,6 +490,7 @@ function md_inv_view_stock() {
 	<div class="iv-toolbar iv-toolbar--actions">
 		<button type="button" class="iv-btn iv-btn--primary" data-dlg="dlg-item" data-set='{"title":"품목 등록","id":""}'><?php echo md_inv_icon( 'plus', 18 ); // phpcs:ignore ?>품목 등록</button>
 		<button type="button" class="iv-btn iv-btn--ghost" data-dlg="dlg-in">입고</button>
+		<a class="iv-btn iv-btn--ghost" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'inmany' ) ) ); ?>">여러 품목 입고</a>
 		<button type="button" class="iv-btn iv-btn--ghost" data-dlg="dlg-out">바로 출고</button>
 		<button type="button" class="iv-btn iv-btn--ghost" data-dlg="dlg-adjust">실사 한 품목</button>
 		<a class="iv-btn iv-btn--ghost" data-catnav-link href="<?php echo esc_url( md_inv_url( array( 'iv' => 'count', 'ic1' => $c1, 'ic2' => $c2, 'ic3' => $c3, 'ivd' => $vd ?: '' ) ) ); ?>">실사 모드 (여러 품목)</a>

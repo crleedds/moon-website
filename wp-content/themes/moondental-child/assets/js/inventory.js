@@ -1514,3 +1514,74 @@
   c.addEventListener('input', function () { auto = c.value.trim() === ''; });
   q.addEventListener('input', function () { if (auto) { var n = parseInt(q.value, 10) || 0; c.value = n > 0 ? String(n * price) : ''; } });
 })();
+
+/* v9.36 · 한꺼번에 입고 — 수량 칸을 고치면 그 줄을 고름 · 업체로 거르기 · 보이는 줄 모두 고르기 · 줄 더 추가 · 고른 줄 수 · 빈 채로 보내기 막기 */
+(function () {
+  'use strict';
+  var f = document.querySelector('form[data-inmany]');
+  if (!f) return;
+  var all = f.querySelector('[data-inmany-all]'), vend = f.querySelector('[data-inmany-vendor]'), sum = f.querySelector('[data-inmany-sum]');
+  var rows = function () { return Array.prototype.slice.call(f.querySelectorAll('tr[data-row]')); };
+  var newRows = function () { return Array.prototype.slice.call(f.querySelectorAll('tr[data-new-row]')); };
+  var newFilled = function (tr) { var p = tr.querySelector('input[list]'), q = tr.querySelector('input[name^="nq["]'); return (p && p.value.trim() !== '') || (q && q.value.trim() !== ''); };
+  var count = function () {
+    var n = rows().filter(function (tr) { var c = tr.querySelector('[data-row-check]'); return c && c.checked; }).length;
+    var m = newRows().filter(newFilled).length;
+    if (sum) sum.textContent = '고른 주문 ' + n + '건' + (m ? ' · 주문 없이 ' + m + '줄' : '');
+    rows().forEach(function (tr) { var c = tr.querySelector('[data-row-check]'); tr.classList.toggle('is-picked', !!(c && c.checked)); });
+  };
+  var filter = function () {
+    var v = vend ? vend.value : '';
+    rows().forEach(function (tr) {
+      var show = !v || tr.getAttribute('data-v') === v;
+      tr.hidden = !show;
+      if (!show) { var c = tr.querySelector('[data-row-check]'); if (c) c.checked = false; }
+    });
+    if (all) all.checked = false;
+    count();
+  };
+  if (vend) vend.addEventListener('change', filter);
+  if (all) all.addEventListener('change', function () {
+    rows().forEach(function (tr) { if (!tr.hidden) { var c = tr.querySelector('[data-row-check]'); if (c) c.checked = all.checked; } });
+    count();
+  });
+  f.addEventListener('input', function (e) {
+    var tr = e.target.closest('tr[data-row]');
+    if (tr && !e.target.matches('[data-row-check]')) { var c = tr.querySelector('[data-row-check]'); if (c && !c.checked) c.checked = true; }
+    count();
+  });
+  f.addEventListener('change', function (e) {
+    var tr = e.target.closest('tr[data-row]');
+    if (tr && e.target.matches('input[type=checkbox]') && !e.target.matches('[data-row-check]')) { var c = tr.querySelector('[data-row-check]'); if (c && !c.checked) c.checked = true; }
+    count();
+  });
+  /* 줄 더 추가 — template 의 __N__ 을 다음 번호로 */
+  var add = f.querySelector('[data-inmany-add]'), tpl = document.getElementById('iv-inmany-tpl'), body = f.querySelector('[data-inmany-rows]');
+  if (add && tpl && body) add.addEventListener('click', function () {
+    var n = newRows().length + 1;
+    if (n > 40) return;
+    var html = tpl.innerHTML.replace(/__N__/g, String(n));
+    var tb = document.createElement('tbody'); tb.innerHTML = html;
+    var tr = tb.querySelector('tr'); body.appendChild(tr);
+    var p = tr.querySelector('input[list]'); if (p) p.focus();
+  });
+  /* 품목 칸에서 「… #12」 를 고르면 숨은 번호 칸을 채운다 (서버도 같은 일을 하지만 화면에서 먼저) */
+  f.addEventListener('change', function (e) {
+    var t = e.target; if (!t.matches || !t.matches('input[list="iv-items-dl"][data-pick]')) return;
+    var h = f.querySelector('input[type=hidden][name="' + t.dataset.pick + '"]');
+    var m = /#(\d+)\s*$/.exec(t.value); if (h) h.value = m ? m[1] : '0';
+  });
+  /* 빈 채로 보내기 막기 · 주문보다 많이 적은 줄은 미리 알리기 (서버는 그 줄만 건너뛴다) */
+  f.addEventListener('submit', function (e) {
+    var picked = rows().filter(function (tr) { var c = tr.querySelector('[data-row-check]'); return c && c.checked; });
+    var filled = newRows().filter(newFilled);
+    if (!picked.length && !filled.length) { e.preventDefault(); e.stopImmediatePropagation(); window.alert('입고할 주문을 고르거나, 주문 없이 들어온 품목을 적어 주세요.'); return; }
+    var over = picked.filter(function (tr) {
+      var q = tr.querySelector('input[name^="rq["]'), fr = tr.querySelector('input[name^="rf["]');
+      var qty = Number(q && q.value) || 0, free = Math.min(qty, Math.max(0, Number(fr && fr.value) || 0));
+      return qty - free > (Number(q && q.getAttribute('data-left')) || 0);
+    });
+    if (over.length && !window.confirm('주문보다 많이 적은 줄이 ' + over.length + '개 있습니다. 그 줄은 여기서 입고되지 않고 건너뜁니다 — 그래도 보낼까요? (많이 들어온 주문은 할 일의 「입고」 단추로)')) { e.preventDefault(); e.stopImmediatePropagation(); }
+  }, true);
+  filter(); count();
+})();

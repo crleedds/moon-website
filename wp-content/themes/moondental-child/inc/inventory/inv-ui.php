@@ -34,6 +34,7 @@ function md_inv_views() {
 		'pick'     => array( 'label' => '출고 준비 목록', 'icon' => 'list', 'admin' => true, 'hidden' => true ),
 		'po'       => array( 'label' => '업체별 발주서', 'icon' => 'truck', 'admin' => true, 'hidden' => true ),
 		'receive'  => array( 'label' => '바코드 입고', 'icon' => 'scan', 'admin' => true, 'hidden' => true ),
+		'inmany'   => array( 'label' => '한꺼번에 입고', 'icon' => 'truck', 'admin' => true, 'hidden' => true ), /* v9.36 */
 		'settle'   => array( 'label' => '월말 업체 정산', 'icon' => 'list', 'admin' => true, 'hidden' => true ),
 	);
 }
@@ -258,7 +259,7 @@ function md_inv_render() {
 		if ( 'orders' === $k ) { $badge = $c['ordered']; }
 		$items[ $k ] = array( 'label' => $v['label'], 'icon' => $v['icon'], 'badge' => $badge );
 	}
-	$parent = array( 'item' => 'stock', 'count' => 'stock', 'qcount' => 'stock', 'barcode' => 'stock', 'fix' => 'stock', 'pick' => 'todo', 'po' => 'orders', 'receive' => 'todo', 'settle' => 'orders', 'lot' => 'prepaid', 'pricelist' => 'prepaid', 'catsort' => 'stock' );
+	$parent = array( 'item' => 'stock', 'count' => 'stock', 'qcount' => 'stock', 'barcode' => 'stock', 'fix' => 'stock', 'pick' => 'todo', 'po' => 'orders', 'receive' => 'todo', 'inmany' => 'todo', 'settle' => 'orders', 'lot' => 'prepaid', 'pricelist' => 'prepaid', 'catsort' => 'stock' );
 	$on = isset( $parent[ $view ] ) ? $parent[ $view ] : $view;
 	echo '<nav class="iv-nav" aria-label="재료실 메뉴">';
 	foreach ( $items as $k => $v ) {
@@ -317,6 +318,7 @@ function md_inv_render() {
 		case 'pick':     md_inv_view_pick(); break;
 		case 'po':       md_inv_view_po(); break;
 		case 'receive':  md_inv_view_receive(); break;
+		case 'inmany':   md_inv_view_inmany(); break; /* v9.36 */
 		case 'settle':   md_inv_view_settle(); break;
 		case 'orders':   md_inv_view_orders(); break;
 		case 'prepaid':  md_inv_view_prepaid(); break;
