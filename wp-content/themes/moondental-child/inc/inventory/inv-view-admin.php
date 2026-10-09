@@ -296,6 +296,7 @@ function md_inv_view_todo() {
 				<label class="iv-f"><span>팀</span><select class="iv-input" data-tf-team><option value="">전체</option><?php foreach ( $tf_teams as $tid => $tn ) : ?><option value="<?php echo (int) $tid; ?>"><?php echo esc_html( $tn ); ?></option><?php endforeach; ?></select></label>
 				<label class="iv-f"><span>요청자</span><select class="iv-input" data-tf-who><option value="">전체</option><?php foreach ( array_keys( $tf_who ) as $w ) : ?><option value="<?php echo esc_attr( $w ); ?>"><?php echo esc_html( $w ); ?></option><?php endforeach; ?></select></label>
 				<span class="iv-muted" data-tf-count></span>
+				<div class="iv-tfs iv-tfs--sort" data-tf-sort title="정렬 — 이 기기에 기억됩니다"><button type="button" class="iv-tf is-on" data-sort="old">오래된 순</button><button type="button" class="iv-tf" data-sort="new">최근 순</button></div><?php /* v9.37 · 원장 지시 — 전환은 JS 가 묶음을 다시 늘어놓는다 (기본 오래된 순 · 급함은 언제나 위) */ ?>
 			</div>
 			<form method="post" id="iv-bulk-release" data-confirm="선택한 요청을 요청 수량대로 모두 출고할까요?"><?php md_inv_hidden( 'req_release_many' ); ?></form>
 			<form method="post" id="iv-bulk-order" data-confirm="선택한 요청의 부족한 수량만큼 주문 목록에 넣을까요? (선납 업체는 잔액에서 잡힙니다)"><?php md_inv_hidden( 'req_order_many' ); ?></form>
@@ -311,7 +312,7 @@ function md_inv_view_todo() {
 			foreach ( $groups as $g ) :
 				$r0 = $g[0];
 				?>
-				<div class="iv-group">
+				<div class="iv-group" data-ts="<?php echo (int) strtotime( $r0->created_at ); ?>" data-urgent="<?php echo array_sum( array_map( function ( $x ) { return (int) $x->urgent; }, $g ) ) ? 1 : 0; ?>">
 					<div class="iv-group__head"><b><?php echo esc_html( md_inv_team_name( $r0->team_id ) ); ?></b> · <?php echo esc_html( $r0->requester ); ?><?php echo md_inv_req_by_account( $r0 ) ? ' <span class="iv-tag iv-tag--acc" title="본인 계정으로 로그인해 보낸 신청">본인 계정</span>' : ''; ?> <span class="iv-muted"><?php echo esc_html( md_inv_ago( $r0->created_at ) ); ?></span></div>
 					<?php foreach ( $g as $r ) :
 						$short = $r->item_id && $r->stock < $r->qty;

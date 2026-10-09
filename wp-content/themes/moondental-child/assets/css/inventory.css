@@ -761,6 +761,8 @@ tr.iv-grp.is-closed .iv-grp__arrow { transform: rotate(-90deg); }
 .iv-tf b { font-weight: 800; color: var(--iv-mute, #998a7c); }
 .iv-tf.is-on { background: #2F2621; border-color: #2F2621; color: #fff; }
 .iv-tf.is-on b { color: rgba(255,255,255,.75); }
+.iv-tfs--sort { margin-left: auto; } /* v9.37 · 정렬 전환 */
+.iv-tfs--sort .iv-tf { min-height: 34px; padding: 0 12px; font-size: .84rem; }
 .iv-todo-filter .iv-f { min-width: 140px; }
 .iv-todo-filter .iv-f .iv-input { min-height: 38px; }
 .iv-bulkbar .iv-bulkbar__sep { width: 1px; height: 22px; background: var(--iv-line, #e5ddd5); margin: 0 4px; }

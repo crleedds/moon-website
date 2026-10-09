@@ -1495,6 +1495,30 @@
   });
   if (team) team.addEventListener('change', apply);
   if (who) who.addEventListener('change', apply);
+  /* v9.37 · 오래된 순 / 최근 순 — 묶음(.iv-group)을 다시 늘어놓는다. 급한 묶음은 언제나 위. 선택은 이 기기에 기억 */
+  var sortBar = bar.querySelector('[data-tf-sort]'), SORT_KEY = 'md_inv_todo_sort_v1';
+  function sortGroups(mode) {
+    var wrap = document.querySelector('#iv-sec-req .iv-cards'); if (!wrap) return;
+    var gs = Array.prototype.slice.call(wrap.querySelectorAll(':scope > .iv-group'));
+    gs.sort(function (a, b) {
+      var ua = a.getAttribute('data-urgent') === '1' ? 1 : 0, ub = b.getAttribute('data-urgent') === '1' ? 1 : 0;
+      if (ua !== ub) return ub - ua;
+      var ta = Number(a.getAttribute('data-ts')) || 0, tb = Number(b.getAttribute('data-ts')) || 0;
+      return mode === 'new' ? tb - ta : ta - tb;
+    });
+    gs.forEach(function (g) { wrap.appendChild(g); });
+    if (sortBar) Array.prototype.forEach.call(sortBar.querySelectorAll('[data-sort]'), function (x) { x.classList.toggle('is-on', x.getAttribute('data-sort') === mode); });
+  }
+  if (sortBar) {
+    var saved = 'old'; try { saved = window.localStorage.getItem(SORT_KEY) === 'new' ? 'new' : 'old'; } catch (e) {}
+    if (saved === 'new') sortGroups('new');
+    sortBar.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-sort]'); if (!b) return;
+      var mode = b.getAttribute('data-sort') === 'new' ? 'new' : 'old';
+      try { window.localStorage.setItem(SORT_KEY, mode); } catch (x) {}
+      sortGroups(mode);
+    });
+  }
   /* 「모두 고르기」는 보이는 카드만 */
   document.addEventListener('change', function (e) {
     var t = e.target;
