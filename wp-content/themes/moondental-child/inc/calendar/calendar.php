@@ -1,6 +1,6 @@
 <?php
 /**
- * v4.18 · 직원 라운지 · 달력 — 생일 · 입사 기념일 · 병원 행사
+ * v4.18 · 직원 라운지 · 달력 — 생일 · 입사 기념일 · 병원 행사 · 휴무(덴트웹, v9.37)
  *
  *  라운지 첫 화면에 바로 월 달력이 보인다. 생일(🎂)과 입사 기념일(🎉 N주년)은 「직원 정보」 표에서
  *  자동으로 읽고, 병원 행사 · 교육 · 기타는 누구나 달력에서 넣고 고치고 지운다.
@@ -21,6 +21,7 @@ function md_cal_types() {
 	return array(
 		'birthday' => array( 'label' => '생일',       'icon' => '🎂', 'class' => 'is-birthday', 'yearly' => true,  'auto' => true ),
 		'anniv'    => array( 'label' => '입사 기념일', 'icon' => '🎉', 'class' => 'is-anniv',    'yearly' => true,  'auto' => true ),
+		'dayoff'   => array( 'label' => '휴무 (덴트웹)', 'icon' => '🌴', 'class' => 'is-dayoff',   'yearly' => false, 'auto' => true ), /* v9.37 · 덴트웹 개인별 휴무 */
 		'event'    => array( 'label' => '병원 행사',   'icon' => '📌', 'class' => 'is-event',    'yearly' => false, 'auto' => false ),
 		'edu'      => array( 'label' => '교육 · 세미나', 'icon' => '📚', 'class' => 'is-edu',    'yearly' => false, 'auto' => false ),
 		'other'    => array( 'label' => '기타',       'icon' => '📎', 'class' => 'is-other',    'yearly' => false, 'auto' => false ),
@@ -103,6 +104,19 @@ function md_cal_between( $from, $to ) {
 					if ( $yrs < 1 ) { continue; } /* 입사한 해에는 표시하지 않는다 */
 					$out[ $d ][] = (object) array( 'id' => 's' . $s->id . 'a', 'type' => 'anniv', 'title' => trim( $s->name . ' ' . $s->position ) . '님', 'memo' => $s->dept, 'occurs' => $d, 'years' => $yrs, 'yearly' => 1, 'auto' => true, 'date_start' => $d, 'date_end' => null );
 				}
+			}
+		}
+	}
+
+	/* 1-2) 덴트웹 개인별 휴무 (inc/staff · 병원 PC sync.ps1 이 한 시간마다) — 명단과 이어진 재직자만 */
+	if ( function_exists( 'md_staff_dw_dayoffs' ) ) {
+		foreach ( md_staff_dw_dayoffs() as $i => $h ) {
+			if ( $h['d1'] > $to || $h['d2'] < $from ) { continue; }
+			$who = md_staff_dw_who( $h['sid'] );
+			if ( ! $who ) { continue; }
+			$time = '' !== $h['t1'] && '' !== $h['t2'] ? ' ' . substr( $h['t1'], 0, 2 ) . ':' . substr( $h['t1'], 2 ) . '~' . substr( $h['t2'], 0, 2 ) . ':' . substr( $h['t2'], 2 ) : '';
+			for ( $d = max( $h['d1'], $from ); $d <= min( $h['d2'], $to ); $d = date( 'Y-m-d', strtotime( $d . ' +1 day' ) ) ) {
+				$out[ $d ][] = (object) array( 'id' => 's' . $who['sid'] . 'h' . $i, 'type' => 'dayoff', 'title' => $who['name'] . ( $time ? $time : ' 휴무' ), 'memo' => $h['memo'], 'occurs' => $d, 'years' => 0, 'yearly' => 0, 'auto' => true, 'date_start' => $h['d1'], 'date_end' => $h['d2'] );
 			}
 		}
 	}
@@ -259,6 +273,7 @@ function md_cal_render_grid( $m, $nav_app = 'calendar' ) {
 	$cur   = current_time( 'Y-m' );
 	$nav   = function ( $month ) use ( $nav_app ) { return md_sup_url( array( 'app' => $nav_app, 'cm' => $month ) ); };
 	$link  = function ( $r, $d ) use ( $nav_app ) {
+		if ( 'dayoff' === $r->type ) { return md_sup_url( array( 'app' => 'calendar', 'cm' => substr( $d, 0, 7 ) ) ) . '#a' . $r->id; }
 		if ( ! empty( $r->auto ) ) { return md_sup_url( array( 'app' => 'staff' ) ) . '#s' . (int) substr( $r->id, 1 ); }
 		return md_sup_url( array( 'app' => 'calendar', 'cm' => substr( $d, 0, 7 ) ) ) . '#e' . (int) $r->id;
 	};
@@ -329,7 +344,7 @@ function md_cal_render_form( $r = null, $month = '' ) {
 		<input type="hidden" name="md_cal_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_cal_' . $act ) ); ?>">
 		<input type="hidden" name="cm" value="<?php echo esc_attr( $month ); ?>">
 		<?php if ( $edit ) : ?><input type="hidden" name="eid" value="<?php echo (int) $r->id; ?>"><?php endif; ?>
-		<?php if ( ! $edit ) : ?><h2 class="mdcal-form__title">일정 추가 <small>생일 · 입사일은 <a href="<?php echo esc_url( md_sup_url( array( 'app' => 'staff' ) ) ); ?>">직원 정보</a>에서 넣으면 자동으로 표시됩니다</small></h2><?php endif; ?>
+		<?php if ( ! $edit ) : ?><h2 class="mdcal-form__title">일정 추가 <small>생일 · 입사일은 <a href="<?php echo esc_url( md_sup_url( array( 'app' => 'staff' ) ) ); ?>">직원 정보</a>에서, 휴무는 덴트웹 「개인별 휴무」에 넣으면 자동으로 표시됩니다</small></h2><?php endif; ?>
 		<div class="mdcal-form__row">
 			<label class="mds-field"><span>종류</span>
 				<select name="type">
@@ -373,7 +388,9 @@ function md_cal_render() {
 						<span class="mdcal-row__title"><?php echo esc_html( md_cal_label( $r ) ); ?></span>
 						<?php if ( ! empty( $r->yearly ) ) : ?><span class="mds-status is-pending">매년</span><?php endif; ?>
 						<?php if ( ! empty( $r->memo ) ) : ?><span class="mdcal-row__memo"><?php echo esc_html( $r->memo ); ?></span><?php endif; ?>
-						<?php if ( ! empty( $r->auto ) ) : ?>
+						<?php if ( 'dayoff' === $r->type ) : ?>
+							<span class="mdcal-row__memo">덴트웹 「개인별 휴무」에서 고치면 한 시간 안에 반영</span>
+						<?php elseif ( ! empty( $r->auto ) ) : ?>
 							<a class="mdcal-btn mdcal-row__staff" href="<?php echo esc_url( md_sup_url( array( 'app' => 'staff' ) ) . '#s' . (int) substr( $r->id, 1 ) ); ?>">직원 정보에서 고치기</a>
 						<?php else : ?>
 							<form method="post" class="mdcal-row__del" onsubmit="return confirm('이 일정을 지울까요?');">

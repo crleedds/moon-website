@@ -381,8 +381,57 @@ function md_staff_dw_sync( $list ) {
 	return $out;
 }
 
-/* 덴트웹 개인별 휴무는 달력에 표시하지 않기로 함(원장 지시) — 예전에 받아 둔 자료를 지운다 */
-add_action( 'init', function () { if ( false !== get_option( 'md_staff_dw_dayoff' ) ) { delete_option( 'md_staff_dw_dayoff' ); } } );
+/**
+ * 덴트웹 개인별 휴무일(TB_개인별휴무일) → 라운지 달력 🌴 (v9.37 · 2026-10-09 원장 지시로 다시 켬 — 10/6 에 한 번 뺐던 것)
+ *  병원 PC 의 sync.ps1 이 걸러서(종일 · 2시간 이상, 점심 · 외출 · 상시 일정 · 예약 막기 제외) 오늘 -1달 ~ +1년 치를
+ *  한 시간마다 통째로 보낸다. 옵션 md_staff_dw_dayoff 에 두고, 달력(inc/calendar)이 직원 명단(dw_id)과 맞춰 표시.
+ *   항목: { sid: 덴트웹 직원 번호, d1, d2: 'Y-m-d', t1, t2: 'HHmm'(종일이면 ''), memo }
+ */
+function md_staff_dw_dayoffs() {
+	$o = get_option( 'md_staff_dw_dayoff' );
+	return is_array( $o ) && isset( $o['items'] ) ? (array) $o['items'] : array();
+}
+
+/** 휴무 자료를 마지막으로 받은 시각 (없으면 '') */
+function md_staff_dw_dayoff_at() {
+	$o = get_option( 'md_staff_dw_dayoff' );
+	return is_array( $o ) ? (string) ( $o['at'] ?? '' ) : '';
+}
+
+/** 덴트웹 직원 번호 → 달력에 쓸 이름 · 라운지 직원 id. 재직 중이고 명단과 이어진 사람만(퇴사자 · 가상 의사 · 공용 계정 제외) */
+function md_staff_dw_who( $dw ) {
+	static $map = null;
+	if ( null === $map ) {
+		global $wpdb; $map = array();
+		foreach ( (array) $wpdb->get_results( 'SELECT id, name, dept, position, dw_id FROM ' . md_staff_table() . ' WHERE dw_id > 0 AND active = 1' ) as $r ) {
+			if ( md_staff_is_shared( $r ) ) { continue; }
+			$pos = trim( (string) $r->position );
+			$map[ (int) $r->dw_id ] = array( 'sid' => (int) $r->id, 'name' => '의료진' === $r->dept ? trim( $r->name . ' ' . ( '' === $pos || false !== mb_strpos( $pos, '원장' ) ? '원장' : $pos ) ) : $r->name );
+		}
+	}
+	return $map[ (int) $dw ] ?? null;
+}
+
+add_action( 'rest_api_init', function () {
+	register_rest_route( 'md-staff/v1', '/dayoff', array(
+		'methods'             => 'POST',
+		'callback'            => function ( $request ) {
+			$body  = $request->get_json_params();
+			$items = array();
+			foreach ( (array) ( $body['items'] ?? array() ) as $it ) {
+				if ( ! is_array( $it ) ) { continue; }
+				$d1 = md_staff_norm_date( $it['d1'] ?? '' ); $d2 = md_staff_norm_date( $it['d2'] ?? '' ) ?: $d1;
+				if ( ! $d1 || $d2 < $d1 ) { continue; }
+				$tm = function ( $v ) { $v = preg_replace( '/[^0-9]+/', '', (string) $v ); return 4 === strlen( $v ) ? $v : ''; };
+				$items[] = array( 'sid' => (int) ( $it['sid'] ?? 0 ), 'd1' => $d1, 'd2' => $d2, 't1' => $tm( $it['t1'] ?? '' ), 't2' => $tm( $it['t2'] ?? '' ), 'memo' => mb_substr( sanitize_text_field( (string) ( $it['memo'] ?? '' ) ), 0, 120 ) );
+				if ( count( $items ) >= 3000 ) { break; }
+			}
+			update_option( 'md_staff_dw_dayoff', array( 'at' => current_time( 'mysql' ), 'items' => $items ), false );
+			return rest_ensure_response( array( 'saved' => count( $items ) ) );
+		},
+		'permission_callback' => 'md_staff_dw_permission',
+	) );
+} );
 
 function md_staff_dw_permission( $request ) {
 	$key  = (string) $request->get_header( 'x-md-survey-key' );

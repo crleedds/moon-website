@@ -6,6 +6,7 @@
 /* 종류별 색 */
 .is-birthday { --cal: #D88062; --cal-bg: rgba(216, 128, 98, .16); }
 .is-anniv    { --cal: #6B8F72; --cal-bg: rgba(107, 143, 114, .16); }
+.is-dayoff   { --cal: #2E8C8C; --cal-bg: rgba(46, 140, 140, .14); } /* 휴무 (덴트웹) */
 .is-event    { --cal: #4A7BD0; --cal-bg: rgba(74, 123, 208, .14); }
 .is-closed   { --cal: #8F7F6E; --cal-bg: rgba(143, 127, 110, .16); }
 .is-edu      { --cal: #8A6D0B; --cal-bg: rgba(201, 162, 39, .16); }
