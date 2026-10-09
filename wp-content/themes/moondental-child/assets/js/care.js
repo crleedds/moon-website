@@ -117,11 +117,12 @@
     topic.classList.toggle('is-editing', on);
     if (toggle) { toggle.setAttribute('aria-pressed', on ? 'true' : 'false'); toggle.textContent = on ? '✓ 끝' : (toggle.getAttribute('data-label') || '✏️ 편집'); }
     if (bar) bar.hidden = !on;
-    topic.querySelectorAll('[data-care-drop]').forEach(function (d) { d.hidden = !on; });
+    topic.querySelectorAll('[data-care-drop]').forEach(function (d) { d.hidden = !on && !d.hasAttribute('data-care-open'); }); /* v9.44 · Clinical Cases 는 늘 보임 */
     /* v8.8 · 제목은 고칠 수 있는 카드(관리자 · 내가 올린 사진)만 */
     topic.querySelectorAll('[data-care-caption]').forEach(function (c) { var card = c.closest('[data-care-item]'); c.contentEditable = on && (!card || card.hasAttribute('data-care-can') || card.getAttribute('data-care-item') === 'video') ? 'true' : 'false'; });
   }
   if (toggle) toggle.addEventListener('click', function () { setEditing(!editing); });
+  if (!toggle && topic.querySelector('[data-care-open]')) setEditing(true); /* v9.44 · Clinical Cases — 단추 없이 늘 올리기 · 내 사진 제목 고치기 */
 
   function post(action, data, onProgress) {
     return new Promise(function (resolve, reject) {
@@ -196,6 +197,11 @@
   function upload(kind, files) {
     var drop = topic.querySelector('[data-care-drop="' + kind + '"]'); var prog = drop.querySelector('[data-care-prog]');
     var list = Array.prototype.slice.call(files); if (!list.length) return;
+    /* v9.44 · 사진 한 장 30MB 넘으면 올리기 전에 알려 주고 뺀다 */
+    if (kind === 'photo') {
+      var big = list.filter(function (f) { return f.size > 30 * 1024 * 1024; });
+      if (big.length) { alert('사진 한 장은 30MB까지 올릴 수 있습니다.\n' + big.map(function (f) { return f.name + ' (' + Math.round(f.size / 1048576) + 'MB)'; }).join('\n')); list = list.filter(function (f) { return f.size <= 30 * 1024 * 1024; }); if (!list.length) return; }
+    }
     prog.hidden = false; prog.textContent = '준비 중…'; drop.classList.add('is-busy');
     var chain = Promise.resolve();
     list.forEach(function (file, i) {

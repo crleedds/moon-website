@@ -96,6 +96,9 @@ function md_care_render_topic( $slug ) {
 	$can_edit = md_care_can_edit(); $max_up = size_format( wp_max_upload_size() );
 	$can_add  = function_exists( 'md_care_can_add' ) ? md_care_can_add( $slug ) : $can_edit; /* v8.8 · Clinical Cases 는 누구나 사진 추가 */
 	$has_text = ! empty( $t['summary'] ) || ! empty( $t['text'] ) || ! empty( $t['steps'] ) || ! empty( $t['faq'] ) || ! empty( $t['caution'] ) || ! empty( $t['compare'] );
+	$simple   = function_exists( 'md_care_simple' ) && md_care_simple( $slug ); /* v9.44 · Clinical Cases */
+	if ( $simple ) { $has_text = false; $t['links'] = array(); }
+	$add_open = $simple && $can_add && ! $can_edit; /* 사진 추가 단추 없이 올리는 칸을 늘 보여 줌 (관리자는 「편집」 단추 그대로) */
 	$first = $photos ? 'photos' : ( $videos ? 'videos' : ( $embeds ? 'embeds' : 'text' ) );
 	?>
 	<article class="mdc-topic" data-care-topic data-slug="<?php echo esc_attr( $slug ); ?>"<?php if ( $can_add ) : ?> data-care-ajax="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" data-care-nonce="<?php echo esc_attr( wp_create_nonce( 'md_care_edit' ) ); ?>"<?php endif; ?>>
@@ -108,9 +111,11 @@ function md_care_render_topic( $slug ) {
 					<?php if ( ! empty( $t['tagline'] ) ) : ?><p class="mdc-topic__tag"><?php echo esc_html( $t['tagline'] ); ?></p><?php endif; ?>
 				</div>
 				<div class="mdc-topic__tools">
+					<?php if ( ! $simple ) : ?>
 					<?php if ( $photos || $videos ) : ?><button type="button" class="mdc-btn mdc-btn--primary" data-care-present>▶ 설명 모드</button><?php endif; ?>
 					<button type="button" class="mdc-btn" onclick="window.print()">🖨 인쇄</button>
-					<?php if ( $can_add ) : ?><button type="button" class="mdc-btn mdc-btn--edit" data-care-edit-toggle aria-pressed="false" data-label="<?php echo $can_edit ? '✏️ 편집' : '＋ 사진 추가'; ?>"><?php echo $can_edit ? '✏️ 편집' : '＋ 사진 추가'; ?></button><?php endif; ?>
+					<?php endif; ?>
+					<?php if ( $can_add && ! $add_open ) : ?><button type="button" class="mdc-btn mdc-btn--edit" data-care-edit-toggle aria-pressed="false" data-label="<?php echo $can_edit ? '✏️ 편집' : '＋ 사진 추가'; ?>"><?php echo $can_edit ? '✏️ 편집' : '＋ 사진 추가'; ?></button><?php endif; ?>
 				</div>
 			</div>
 			<?php if ( $can_edit ) : ?>
@@ -118,7 +123,7 @@ function md_care_render_topic( $slug ) {
 				<span>편집 중 — 카드의 <b>✕</b>로 삭제, <b>‹ ›</b>로 순서, 제목을 눌러 고칩니다. 파일 하나 최대 <b><?php echo esc_html( $max_up ); ?></b></span>
 				<button type="button" class="mdc-btn mdc-btn--ghost" data-care-reset>원래 목록으로 되돌리기</button>
 			</div>
-			<?php elseif ( $can_add ) : ?>
+			<?php elseif ( $can_add && ! $simple ) : ?>
 			<div class="mdc-editbar" data-care-editbar hidden>
 				<span>사진을 올려 주세요 — 내가 올린 사진은 제목을 눌러 고칠 수 있습니다. 지우기는 라운지 관리자에게 말씀해 주세요. 파일 하나 최대 <b><?php echo esc_html( $max_up ); ?></b> · 환자 얼굴 · 이름이 보이는 사진은 올리지 마세요</span>
 			</div>
@@ -134,9 +139,9 @@ function md_care_render_topic( $slug ) {
 		<?php if ( $photos || $can_add ) : ?>
 		<section class="mdc-pane" data-care-pane="photos">
 			<?php if ( $can_add ) : ?>
-			<label class="mdc-drop" data-care-drop="photo" hidden>
+			<label class="mdc-drop" data-care-drop="photo"<?php echo $add_open ? ' data-care-open' : ' hidden'; ?>>
 				<input type="file" accept="image/jpeg,image/png,image/webp" multiple data-care-file="photo">
-				<span class="mdc-drop__icon">📷</span><span class="mdc-drop__text"><b>사진 추가</b> — 여기를 누르거나 파일을 끌어다 놓으세요 (JPG·PNG, 여러 장 가능)<?php if ( function_exists( 'md_care_keep_original' ) && md_care_keep_original( $slug ) ) : ?><br><small>원본 화질 그대로 저장합니다 · 한 장 최대 <?php echo esc_html( size_format( wp_max_upload_size() ) ); ?></small><?php endif; ?></span>
+				<span class="mdc-drop__icon">📷</span><span class="mdc-drop__text"><b>사진 추가</b> — 여기를 누르거나 파일을 끌어다 놓으세요 (JPG·PNG, 여러 장 가능)<?php if ( function_exists( 'md_care_keep_original' ) && md_care_keep_original( $slug ) ) : ?><br><small>원본 화질 그대로 저장합니다 · 한 장 최대 <?php echo esc_html( size_format( function_exists( 'md_care_photo_max' ) ? min( md_care_photo_max(), wp_max_upload_size() ) : wp_max_upload_size() ) ); ?></small><?php endif; ?></span>
 				<span class="mdc-drop__prog" data-care-prog hidden></span>
 			</label>
 			<?php endif; ?>

@@ -23,6 +23,10 @@ function md_care_can_edit() {
 /** v8.8 · Clinical Cases 는 직원 누구나 사진을 올린다 (원장 지시) — 제목은 내가 올린 것만, 삭제 · 순서 · 영상 · 되돌리기는 라운지 관리자 */
 /** v9.18 · 원본 화질을 그대로 두는 주제 (Clinical Cases — 화질이 중요, 원장 지시) */
 function md_care_keep_original( $slug ) { return in_array( $slug, array( 'cases' ), true ); }
+/** v9.44 · 사진 한 장 최대 크기 — 30MB (원장 「100MB 는 너무 크다」). 휴대폰 · 카메라 원본 JPG 는 대개 3~20MB */
+function md_care_photo_max() { return 30 * MB_IN_BYTES; }
+/** v9.44 · Clinical Cases 는 사진만 간단히 — 설명 모드 · 인쇄 · 설명 탭 · 링크 · 안내 문구 없이, 사진 올리는 칸은 늘 보임 (원장 지시) */
+function md_care_simple( $slug ) { return 'cases' === $slug; }
 function md_care_open_slugs() { return array( 'cases' ); }
 function md_care_can_add( $slug ) {
 	if ( md_care_can_edit() ) { return true; }
@@ -102,6 +106,7 @@ function md_care_ajax_upload() {
 	for ( $i = 0; $i < $n; $i++ ) {
 		$f = is_array( $files['name'] ) ? array( 'name' => $files['name'][ $i ], 'type' => $files['type'][ $i ], 'tmp_name' => $files['tmp_name'][ $i ], 'error' => $files['error'][ $i ], 'size' => $files['size'][ $i ] ) : $files;
 		$orig = $f['name'];
+		if ( 'photo' === $kind && (int) $f['size'] > md_care_photo_max() ) { $errors[] = $orig . ': 사진 한 장은 ' . size_format( md_care_photo_max() ) . '까지 올릴 수 있습니다.'; continue; }
 		$r = wp_handle_upload( $f, array( 'test_form' => false, 'mimes' => $mimes ) );
 		if ( isset( $r['error'] ) ) { $errors[] = $orig . ': ' . $r['error']; continue; }
 		$rel = $subdir . '/' . basename( $r['file'] );
