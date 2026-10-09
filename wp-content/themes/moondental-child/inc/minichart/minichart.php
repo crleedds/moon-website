@@ -512,7 +512,7 @@ function md_mc_plan_lines( $plan ) {
 	return array_values( array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', (string) $plan ) ), 'strlen' ) );
 }
 
-/** v9.33 · 치료계획 목록 — 한 줄에 하나. 줄마다 ▲▼(순서) · 날짜 · 「진료기록으로」 단추 (v9.34 원장 지시: 번호 없이, 단추 하나씩) */
+/** v9.33 · 치료계획 목록 — 한 줄에 하나. 줄마다 ▲▼(순서) · ✎ 고치기 · 날짜 · 「진료기록으로」 (v9.34 번호 없이 · v9.35 고치기 · 촘촘하게, 원장 지시) */
 function md_mc_plan_list_html( $r ) {
 	$lines = md_mc_plan_lines( $r->tx_plan );
 	$today = current_time( 'Y-m-d' );
@@ -522,17 +522,24 @@ function md_mc_plan_list_html( $r ) {
 	else {
 		echo '<ul class="mc-plan__list">';
 		foreach ( $lines as $i => $ln ) {
+			$hid = '<input type="hidden" name="pi" value="' . (int) $i . '"><input type="hidden" name="ptext" value="' . esc_attr( $ln ) . '">';
 			?>
 			<li class="mc-plan__item">
 				<span class="mc-plan__tx"><?php echo esc_html( $ln ); ?></span>
 				<span class="mc-plan__order">
-					<form method="post" data-mc-fast="plan_move" action="<?php echo esc_url( md_mc_url() ); ?>"><?php md_mc_nonce_fields( 'plan_move', $r->id ); ?><input type="hidden" name="pi" value="<?php echo (int) $i; ?>"><input type="hidden" name="ptext" value="<?php echo esc_attr( $ln ); ?>"><input type="hidden" name="dir" value="up"><button type="submit" class="mc-plan__ud" aria-label="위로"<?php echo 0 === $i ? ' disabled' : ''; ?>>▲</button></form>
-					<form method="post" data-mc-fast="plan_move" action="<?php echo esc_url( md_mc_url() ); ?>"><?php md_mc_nonce_fields( 'plan_move', $r->id ); ?><input type="hidden" name="pi" value="<?php echo (int) $i; ?>"><input type="hidden" name="ptext" value="<?php echo esc_attr( $ln ); ?>"><input type="hidden" name="dir" value="down"><button type="submit" class="mc-plan__ud" aria-label="아래로"<?php echo $i === $n - 1 ? ' disabled' : ''; ?>>▼</button></form>
+					<form method="post" data-mc-fast="plan_move" action="<?php echo esc_url( md_mc_url() ); ?>"><?php md_mc_nonce_fields( 'plan_move', $r->id ); echo $hid; // phpcs:ignore ?><input type="hidden" name="dir" value="up"><button type="submit" class="mc-plan__ud" aria-label="위로"<?php echo 0 === $i ? ' disabled' : ''; ?>>▲</button></form>
+					<form method="post" data-mc-fast="plan_move" action="<?php echo esc_url( md_mc_url() ); ?>"><?php md_mc_nonce_fields( 'plan_move', $r->id ); echo $hid; // phpcs:ignore ?><input type="hidden" name="dir" value="down"><button type="submit" class="mc-plan__ud" aria-label="아래로"<?php echo $i === $n - 1 ? ' disabled' : ''; ?>>▼</button></form>
 				</span>
+				<button type="button" class="mc-plan__ud mc-plan__pen" data-mc-plan-edit aria-label="고치기" title="고치기">✎</button>
 				<form method="post" class="mc-plan__move" data-mc-fast="plan_done" action="<?php echo esc_url( md_mc_url() ); ?>">
-					<?php md_mc_nonce_fields( 'plan_done', $r->id ); ?><input type="hidden" name="pi" value="<?php echo (int) $i; ?>"><input type="hidden" name="ptext" value="<?php echo esc_attr( $ln ); ?>">
+					<?php md_mc_nonce_fields( 'plan_done', $r->id ); echo $hid; // phpcs:ignore ?>
 					<input type="date" name="mcday" value="<?php echo esc_attr( $today ); ?>" class="mc-add__day mc-plan__day" aria-label="진료기록에 넣을 날짜 (기본 오늘)" required>
 					<button type="submit" class="mds-btn mds-btn--fill mds-btn--sm mc-plan__go">진료기록으로</button>
+				</form>
+				<form method="post" class="mc-plan__edit" data-mc-fast="plan_edit" action="<?php echo esc_url( md_mc_url() ); ?>" hidden>
+					<?php md_mc_nonce_fields( 'plan_edit', $r->id ); echo $hid; // phpcs:ignore ?>
+					<textarea name="text" rows="1" class="mc-plan__ta" aria-label="치료계획 고치기"><?php echo esc_textarea( $ln ); ?></textarea>
+					<span class="mc-plan__editbtns"><button type="submit" class="mds-btn mds-btn--fill mds-btn--sm">저장</button><button type="button" class="mds-btn mds-btn--ghost mds-btn--sm" data-mc-plan-edit-x>취소</button><button type="submit" name="del" value="1" class="mds-btn mds-btn--ghost mds-btn--sm mc-plan__del">지우기</button></span>
 				</form>
 			</li>
 			<?php
@@ -815,7 +822,7 @@ function md_mc_handle_post() {
 	$err  = function ( $msg, $args ) { return md_mc_url( array_merge( $args, array( 'mcerr' => $msg ) ) ); };
 
 	/* v9.2 · 빠른 저장 — 화면이 fetch 로 보내면(md_fast) 페이지를 다시 그리지 않고 바뀐 부분만 돌려준다 (원장 지시: 라운지 속도) */
-	$fast = ! empty( $_POST['md_fast'] ) && in_array( $action, array( 'dwhide', 'dwedit', 'dwunhide', 'dwhidedr', 'plan', 'plan_add', 'plan_done', 'plan_move', 'add', 'field', 'ownedit', 'owndel' ), true );
+	$fast = ! empty( $_POST['md_fast'] ) && in_array( $action, array( 'dwhide', 'dwedit', 'dwunhide', 'dwhidedr', 'plan', 'plan_add', 'plan_done', 'plan_move', 'plan_edit', 'add', 'field', 'ownedit', 'owndel' ), true );
 
 	switch ( $action ) {
 		case 'save':
@@ -969,6 +976,18 @@ function md_mc_handle_post() {
 			$back = is_wp_error( $res ) ? $err( $res->get_error_message(), array( 'mv' => 'p', 'mid' => $id ) ) : md_mc_url( array( 'mv' => 'p', 'mid' => $id ) ) . '#f-tx_hist';
 			break;
 
+		case 'plan_edit': /* v9.35 · 치료계획 한 줄 고치기 · 지우기 (원장 지시) — 빈 내용이나 「지우기」면 그 줄을 뺀다 */
+			$pi  = (int) ( $post['pi'] ?? -1 );
+			$pt  = trim( (string) ( $post['ptext'] ?? '' ) );
+			$new = ! empty( $post['del'] ) ? '' : trim( str_replace( array( "\r", "\n" ), ' ', sanitize_textarea_field( (string) ( $post['text'] ?? '' ) ) ) );
+			$res = md_mc_plan_update( $id, function ( $lines ) use ( $pi, $pt, $new ) {
+				if ( ! isset( $lines[ $pi ] ) || trim( $lines[ $pi ] ) !== $pt ) { return new WP_Error( 'mc', '그 사이 치료계획이 바뀌었습니다. 화면을 새로고침한 뒤 다시 해 주세요.' ); }
+				if ( '' === $new ) { array_splice( $lines, $pi, 1 ); } else { $lines[ $pi ] = $new; }
+				return $lines;
+			} );
+			$back = is_wp_error( $res ) ? $err( $res->get_error_message(), array( 'mv' => 'p', 'mid' => $id ) ) : md_mc_url( array( 'mv' => 'p', 'mid' => $id ) ) . '#f-tx_plan';
+			break;
+
 		case 'plan_move': /* v9.34 · 치료계획 순서 위아래 (원장 지시) */
 			$pi  = (int) ( $post['pi'] ?? -1 );
 			$pt  = trim( (string) ( $post['ptext'] ?? '' ) );
@@ -1094,7 +1113,7 @@ function md_mc_fast_reply( $action, $id, $back ) {
 		$vw = md_mc_inline_view( $r, $d, 'dr' );
 		wp_send_json( $out + array( 'target' => 'dr', 'html' => $vw['html'] ) );
 	}
-	if ( in_array( $action, array( 'plan', 'plan_add', 'plan_done', 'plan_move' ), true ) ) {
+	if ( in_array( $action, array( 'plan', 'plan_add', 'plan_done', 'plan_move', 'plan_edit' ), true ) ) {
 		/* v9.33 · 치료계획 목록을 다시 그리고, 옮겼으면 진료기록도 — 두 칸을 한 번에 (targets) */
 		$out['targets'] = array( 'tx_plan' => md_mc_plan_list_html( $r ) );
 		$out['value']   = (string) $r->tx_plan;
@@ -1568,10 +1587,10 @@ function md_mc_render_patient( $id ) {
 		</div>
 		<?php /* v9.33 · 치료계획은 한 줄에 하나씩 따로 적고, 한 줄을 누르면 날짜를 골라 진료기록으로 옮긴다 (원장 지시). 한꺼번에 고치기(v8.6 자동 저장 칸)는 접어 둠 */ ?>
 		<section class="mc-block mc-block--plan mc-plan" id="f-tx_plan">
-			<h3 class="mc-block__h"><?php echo esc_html( $f['tx_plan'][0] ); ?> <small class="mc-sub">한 줄에 하나 · ▲▼ 순서 · 날짜 골라 진료기록으로</small></h3>
+			<h3 class="mc-block__h"><?php echo esc_html( $f['tx_plan'][0] ); ?> <small class="mc-sub">한 줄에 하나 · ▲▼ 순서 · ✎ 고치기 · 날짜 골라 진료기록으로</small></h3>
 			<form method="post" class="mc-add mc-add--plan" data-mc-fast="plan_add" action="<?php echo esc_url( md_mc_url() ); ?>">
 				<?php md_mc_nonce_fields( 'plan_add', $r->id ); ?>
-				<textarea name="text" rows="1" required placeholder="치료계획 한 줄 추가 (예: #36 크라운)" class="mc-add__text" enterkeyhint="done"></textarea>
+				<textarea name="text" rows="1" required placeholder="치료계획 한 줄 추가 (예: #36 크라운)" class="mc-add__text mc-plan__addtext" enterkeyhint="done"></textarea>
 				<button type="submit" class="mds-btn mds-btn--fill mc-add__btn">추가</button>
 			</form>
 			<div class="mc-block__b"><?php echo md_mc_plan_list_html( $r ); // phpcs:ignore ?></div>

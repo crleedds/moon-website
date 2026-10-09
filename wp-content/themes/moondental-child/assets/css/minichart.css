@@ -488,22 +488,34 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
   .mc-grid--info .mc-block--alert { grid-column: 1 / -1; }
 }
 
-/* v9.33 · 치료계획 — 한 줄에 하나 · v9.34 번호 없이, 줄마다 ▲▼ 순서 · 날짜 · 「진료기록으로」 단추 (원장 지시) */
-.mc-add--plan { grid-template-columns: 1fr auto; }
-.mc-plan__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
-.mc-plan__item { display: flex; align-items: center; gap: 8px; padding: 4px 6px 4px 10px; border: 1px solid var(--mc-line, #E8DDD3); border-radius: 10px; background: var(--mc-bg, #fff); }
-.mc-plan__tx { flex: 1 1 160px; min-width: 0; line-height: 1.45; white-space: pre-wrap; word-break: break-word; font-size: 1rem; }
-.mc-plan__order { flex: 0 0 auto; display: inline-flex; gap: 2px; }
+/* v9.33 · 치료계획 — 한 줄에 하나 · v9.34 번호 없이, ▲▼ 순서 · 날짜 · 「진료기록으로」 · v9.35 ✎ 고치기, 글씨 · 칸을 줄여 한 화면에 많이 (원장 지시) */
+.mc-add--plan { grid-template-columns: 1fr auto; gap: 6px; margin: 0 0 6px; padding-bottom: 6px; }
+.mc-add--plan .mc-plan__addtext, .mc-add--plan .mc-add__btn { min-height: 34px; font-size: .88rem; padding: 5px 10px; }
+.mc-add--plan .mc-add__btn { padding: 0 14px; }
+.mc-plan__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.mc-plan__item { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; padding: 1px 4px 1px 8px; border: 1px solid var(--mc-line, #E8DDD3); border-radius: 8px; background: var(--mc-bg, #fff); }
+.mc-plan__item.is-editing { border-color: var(--color-primary, #D88062); }
+.mc-plan__tx { flex: 1 1 140px; min-width: 0; line-height: 1.35; white-space: pre-wrap; word-break: break-word; font-size: .88rem; padding: 3px 0; }
+.mc-plan__item.is-editing .mc-plan__tx, .mc-plan__item.is-editing .mc-plan__order, .mc-plan__item.is-editing .mc-plan__pen, .mc-plan__item.is-editing .mc-plan__move { display: none; }
+.mc-plan__order { flex: 0 0 auto; display: inline-flex; gap: 1px; }
 .mc-plan__order form { margin: 0; }
-.mc-plan__ud { width: 30px; height: 30px; border: 1px solid var(--mc-line, #E8DDD3); border-radius: 8px; background: transparent; color: var(--mc-sub); font-size: .7rem; cursor: pointer; line-height: 1; padding: 0; }
+.mc-plan__ud { width: 24px; height: 24px; border: 1px solid var(--mc-line, #E8DDD3); border-radius: 6px; background: transparent; color: var(--mc-sub); font-size: .6rem; cursor: pointer; line-height: 1; padding: 0; }
+.mc-plan__pen { font-size: .8rem; }
 .mc-plan__ud:hover:not([disabled]) { background: var(--color-primary-soft, #FBF1EC); color: inherit; }
 .mc-plan__ud[disabled] { opacity: .25; cursor: default; }
-.mc-plan__move { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; margin: 0; }
-.mc-plan__day { min-height: 36px; width: 8.6em; padding: 4px 8px; font-size: .9rem; }
-.mc-plan__go { white-space: nowrap; }
-.mc-plan__none { margin: 0; color: var(--mc-sub); font-size: .92rem; }
+.mc-plan__move { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px; margin: 0; }
+.mc-plan__day { min-height: 28px; width: 9.4em; padding: 2px 6px; font-size: .8rem; border-radius: 7px; }
+.mc-plan__go { white-space: nowrap; min-height: 28px; padding: 2px 10px; font-size: .8rem; }
+.mc-plan__edit { flex: 1 1 100%; display: flex; align-items: flex-start; gap: 6px; margin: 0; padding: 3px 0; }
+.mc-plan__edit[hidden] { display: none; }
+.mc-plan__ta { flex: 1 1 auto; min-width: 0; font: inherit; font-size: .88rem; line-height: 1.35; padding: 4px 8px; border: 1px solid var(--color-primary, #D88062); border-radius: 7px; resize: none; min-height: 30px; }
+.mc-plan__editbtns { flex: 0 0 auto; display: inline-flex; gap: 4px; }
+.mc-plan__editbtns .mds-btn { min-height: 30px; padding: 2px 10px; font-size: .8rem; }
+.mc-plan__del { color: var(--mc-alert, #B3261E); }
+.mc-plan__none { margin: 0; color: var(--mc-sub); font-size: .85rem; }
 @media (max-width: 640px) {
-  .mc-plan__item { flex-wrap: wrap; row-gap: 6px; }
-  .mc-plan__tx { flex: 1 1 100%; font-size: .95rem; }
+  .mc-plan__tx { flex: 1 1 100%; font-size: .9rem; }
   .mc-plan__move { margin-left: auto; }
+  .mc-plan__edit { flex-wrap: wrap; }
+  .mc-plan__ta { flex: 1 1 100%; }
 }

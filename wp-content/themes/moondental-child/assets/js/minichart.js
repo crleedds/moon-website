@@ -393,6 +393,10 @@ document.addEventListener('click', function (e) {
     var sub = e.submitter, extra = null;
     if (kind === 'dwhide' && !window.confirm('이 덴트웹 진료기록을 미니차트에서 지울까요? (덴트웹 원본은 그대로)')) { e.preventDefault(); return; }
     if (kind === 'owndel' && !window.confirm('이 기록 한 줄을 지울까요?')) { e.preventDefault(); return; }
+    if (kind === 'plan_edit' && sub && sub.name === 'del') { /* v9.35 · 치료계획 한 줄 지우기 */
+      if (!window.confirm('이 치료계획 한 줄을 지울까요?')) { e.preventDefault(); return; }
+      extra = { del: '1' };
+    }
     if (kind === 'dwunhide') {
       if (sub && sub.name === 'all') extra = { all: '1' };
       else if (!form.querySelector('input[name="dwkeys[]"]:checked')) { e.preventDefault(); toast('다시 보이게 할 기록을 골라 주세요.', true); return; }
@@ -426,7 +430,7 @@ document.addEventListener('click', function (e) {
       if (res.redirect) { form.dataset.sending = '1'; location.href = res.redirect; return; }
       if (res.reload && kind === 'field' && res.ok) { toast('저장했습니다'); form.dataset.sending = '1'; setTimeout(function () { location.reload(); }, 400); return; }
       if (res.reload) { recover(''); return; }
-      if (!res.ok) { toast(res.msg || '저장하지 못했습니다.', true); if (kind === 'plan') { Array.prototype.forEach.call(btns, function (b) { b.disabled = false; }); } if (kind === 'plan_done' || kind === 'plan_move') { recover(res.msg || '그 사이 치료계획이 바뀌었습니다.'); } return; }
+      if (!res.ok) { toast(res.msg || '저장하지 못했습니다.', true); if (kind === 'plan') { Array.prototype.forEach.call(btns, function (b) { b.disabled = false; }); } if (kind === 'plan_done' || kind === 'plan_move' || kind === 'plan_edit') { recover(res.msg || '그 사이 치료계획이 바뀌었습니다.'); } return; }
       apply(res);
       if (kind === 'add' && res.target && res.value != null) { /* v9.20 · 같은 칸의 「눌러서 고치기」 폼 값도 최신으로 */
         var sec = document.getElementById('f-' + res.target), ef = sec && sec.querySelector('form.mc-edit textarea[name=' + res.target + ']');
@@ -442,7 +446,7 @@ document.addEventListener('click', function (e) {
         closeEdit(form);
       }
       if (kind === 'add' && addText) { addText.value = ''; addText.style.height = ''; }
-      if (kind === 'plan_add' || kind === 'plan_done' || kind === 'plan_move') {
+      if (kind === 'plan_add' || kind === 'plan_done' || kind === 'plan_move' || kind === 'plan_edit') {
         /* v9.33 · 「한꺼번에 고치기」 칸도 최신 계획으로 · 추가 칸 비우기 */
         var pta = document.querySelector('textarea[data-mc-plan]');
         if (pta && res.value != null) { pta.value = res.value; pta.defaultValue = res.value; pta.form.dispatchEvent(new CustomEvent('mc:plan-saved')); }
@@ -452,7 +456,7 @@ document.addEventListener('click', function (e) {
         var ta = form.querySelector('textarea[data-mc-plan]'); if (ta) ta.defaultValue = ta.value;
         form.dispatchEvent(new CustomEvent('mc:plan-saved'));
       }
-      toast({ dwhide: '지웠습니다', dwedit: '고쳤습니다', dwunhide: '다시 보이게 했습니다', add: '추가했습니다', plan: '저장했습니다', plan_add: '치료계획에 넣었습니다', plan_done: '진료기록으로 옮겼습니다', plan_move: '순서를 바꿨습니다', field: '저장했습니다', ownedit: '고쳤습니다', owndel: '지웠습니다', dwhidedr: '지웠습니다' }[kind] || '저장했습니다');
+      toast({ dwhide: '지웠습니다', dwedit: '고쳤습니다', dwunhide: '다시 보이게 했습니다', add: '추가했습니다', plan: '저장했습니다', plan_add: '치료계획에 넣었습니다', plan_done: '진료기록으로 옮겼습니다', plan_move: '순서를 바꿨습니다', plan_edit: extra && extra.del ? '지웠습니다' : '고쳤습니다', field: '저장했습니다', ownedit: '고쳤습니다', owndel: '지웠습니다', dwhidedr: '지웠습니다' }[kind] || '저장했습니다');
     }).catch(function () {
       recover('저장 결과를 확인합니다…');
     }).then(function () {
@@ -672,3 +676,26 @@ window.mcInits.push(function () {
   });
 })();
 
+/* v9.35 · 치료계획 ✎ — 그 줄이 고치기 칸으로 바뀌고(저장 · 취소 · 지우기), 취소하면 원래대로. 문서에 한 번만 걸어 차트를 바꿔도 동작 */
+(function () {
+  'use strict';
+  function open(li, on) {
+    var f = li.querySelector('.mc-plan__edit'); if (!f) return;
+    f.hidden = !on; li.classList.toggle('is-editing', on);
+    if (on) { var t = f.querySelector('textarea'); if (t) { t.style.height = 'auto'; t.style.height = (t.scrollHeight + 2) + 'px'; try { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } catch (er) {} } }
+  }
+  document.addEventListener('click', function (e) {
+    var x = e.target.closest && e.target.closest('[data-mc-plan-edit-x]');
+    if (x) { var li0 = x.closest('.mc-plan__item'); li0.querySelector('.mc-plan__edit').reset(); open(li0, false); return; }
+    var b = e.target.closest && e.target.closest('[data-mc-plan-edit]');
+    if (!b) return;
+    Array.prototype.forEach.call(document.querySelectorAll('.mc-plan__item.is-editing'), function (o) { if (!o.contains(b)) { o.querySelector('.mc-plan__edit').reset(); open(o, false); } });
+    var li = b.closest('.mc-plan__item'); open(li, li.querySelector('.mc-plan__edit').hidden);
+  });
+  document.addEventListener('keydown', function (e) {
+    var t = e.target;
+    if (!t || !t.classList || !t.classList.contains('mc-plan__ta')) return;
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); var f = t.form; if (f.requestSubmit) f.requestSubmit(); else f.submit(); }
+    if (e.key === 'Escape') { var li = t.closest('.mc-plan__item'); li.querySelector('.mc-plan__edit').reset(); open(li, false); }
+  });
+})();
