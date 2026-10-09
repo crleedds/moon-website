@@ -1575,6 +1575,8 @@ function md_mc_render_patient( $id ) {
 			<?php endif; ?>
 		</header>
 
+		<?php /* v9.36 · 태블릿 가로에서는 두 단(왼쪽: 병력 · 기본 정보 · 치료계획 / 오른쪽: 진료기록 · 참고사항). 다른 화면에서는 이 묶음이 없는 것처럼(display: contents) */ ?>
+		<div class="mc-cols"><div class="mc-col mc-col--a">
 		<div class="mc-grid mc-grid--info">
 			<?php
 			/* v9.19 · 병력 · 주소(지역 메모) · 담당의 · 내원경로도 눌러서 바로 고친다 (원장 지시) · v9.21 · 넓은 화면에서는 네 칸이 한 줄 (원장 「한 화면에 더 많이」)
@@ -1596,6 +1598,7 @@ function md_mc_render_patient( $id ) {
 			<div class="mc-block__b"><?php echo md_mc_plan_list_html( $r ); // phpcs:ignore ?></div>
 			<?php /* v9.34 · 「한꺼번에 고치기」 칸은 없앰 (원장 지시) — 줄마다 ▲▼ 순서 · 「진료기록으로」 단추 */ ?>
 		</section>
+		</div><div class="mc-col mc-col--b">
 
 		<section class="mc-block mc-block--log" id="f-tx_hist">
 			<h3 class="mc-block__h">진료기록 <small class="mc-sub"><?php echo $d ? '덴트웹 치료내용 + ✎ 직접 적은 기록' : '✎ 직접 적은 기록'; ?></small></h3>
@@ -1609,6 +1612,7 @@ function md_mc_render_patient( $id ) {
 			<?php md_mc_inline_block( $r, $d, 'memo', true ); /* v9.20 · 예전 참고사항도 눌러서 고치기 (원장 지시) */ ?>
 		</details>
 		<?php if ( $d ) : ?><p class="mc-chart__meta mc-dwnote">덴트웹 자료 <?php echo esc_html( md_mc_short_date( $d['_synced'] ) . ' ' . date( 'H:i', strtotime( $d['_synced'] ) ) ); ?> 기준 (30분마다 새로 받음)</p><?php endif; ?>
+		</div></div><?php /* /.mc-cols */ ?>
 
 		<div class="mc-chart__foot">
 			<a href="<?php echo esc_url( md_mc_url() ); ?>">← 환자 목록</a>

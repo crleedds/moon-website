@@ -519,3 +519,64 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
   .mc-plan__edit { flex-wrap: wrap; }
   .mc-plan__ta { flex: 1 1 100%; }
 }
+
+/* v9.36 · 태블릿 (원장 「태블릿을 가로 · 세로로 놓아도 한눈에, 스크롤 적게」) — 큰 데스크탑 · 휴대폰은 그대로.
+   태블릿 = 600~1100px, 또는 가로로 놓아 폭 1101~1400px 인데 높이가 900px 이하인 화면(iPad Air · Pro 가로) */
+.mc-cols, .mc-col { display: contents; }
+@media (min-width: 600px) and (max-width: 1100px), (min-width: 1101px) and (max-width: 1400px) and (max-height: 900px) {
+  .mds-wrap:has(.mc) .mds-head { margin-bottom: 6px; }
+  .mds-wrap:has(.mc) .mds-head h1 { font-size: 1.15rem; }
+  .mc-nav { margin-bottom: 6px; }
+  .mc-nav__a { min-height: 34px; padding: 3px 12px; font-size: .88rem; }
+  .mc-nav__new { min-height: 34px; }
+  .mc-jump .mc-search { margin-bottom: 4px; }
+  .mc-jump .mc-search input[type="search"] { min-height: 36px; padding: 5px 12px; font-size: .92rem; }
+  .mc .mc-jump .mc-search__btn { min-height: 36px; padding: 0 12px; }
+  .mc-chart__head { padding: 8px 14px 8px; margin-bottom: 6px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 10px; }
+  .mc-chart__head > * { grid-column: 1 / -1; }
+  .mc-chart__id { grid-column: 1; grid-row: 1; }
+  .mc-chart__acts { grid-column: 2; grid-row: 1; margin-top: 0; display: flex; }
+  .mc-chart__acts .mds-btn, .mc-chart__acts form, .mc-chart__acts form .mds-btn { width: auto; min-height: 34px; padding: 0 12px; font-size: .88rem; }
+  .mc-chart__name { font-size: 1.2rem; }
+  .mc-chart__meta { margin: 1px 0 0; font-size: .78rem; }
+  .mc-next { margin: 3px 0 0; padding: 4px 10px; font-size: .86rem; }
+  .mc-block { padding: 7px 11px 8px; margin-bottom: 6px; }
+  .mc-block__h { margin: 0 0 2px; font-size: .76rem; }
+  .mc-block__b { font-size: .92rem; line-height: 1.4; }
+  .mc-grid { gap: 6px; margin-bottom: 6px; }
+  .mc-grid--info { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mc-grid--info .mc-block--alert { grid-column: 1 / -1; }
+  .mc-add:not(.mc-add--plan) { grid-template-columns: 1fr auto auto; }
+  .mc-add { gap: 6px; margin: 0 0 6px; padding-bottom: 6px; }
+  .mc-add__text { grid-column: auto; }
+  .mc-add__day:not(.mc-plan__day), .mc-add__text:not(.mc-plan__addtext) { min-height: 36px; padding: 5px 10px; font-size: .92rem; }
+  .mc-add__day:not(.mc-plan__day) { width: 8.6em; }
+  .mc .mc-add__btn { min-height: 36px; padding: 0 14px; width: auto; }
+  .mc .mc-add--plan .mc-add__btn { min-height: 34px; }
+  .mc-tl li { padding: 2px 0; font-size: .88rem; line-height: 1.4; grid-template-columns: 64px 60px 1fr; gap: 6px; }
+  .mc-memo[open] > summary { margin-bottom: 4px; }
+  .mc-chart__foot { margin: 8px 0 6px; }
+  .mc-dwnote { margin: 2px 0 0; font-size: .76rem; }
+}
+/* 세로로 놓은 태블릿(700~1100px): 왼쪽 병력 · 기본 정보(한 줄씩), 오른쪽 치료계획 — 그 아래 진료기록이 더 위로 올라온다 */
+@media (min-width: 700px) and (max-width: 1100px) and (orientation: portrait) {
+  .mc-col--a { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 6px; align-items: start; margin-bottom: 6px; }
+  .mc-col--a .mc-grid--info { grid-template-columns: minmax(0, 1fr); margin-bottom: 0; }
+  .mc-col--a .mc-grid--info .mc-block--alert { grid-column: auto; }
+  .mc-col--a > .mc-block { margin-bottom: 0; }
+  .mc-col--b { display: block; }
+  .mc-plan__tx { flex-basis: 100px; }
+  .mc-plan__go { padding: 2px 8px; }
+  .mc-plan__day { width: 8.6em; }
+}
+/* 가로로 놓은 태블릿(900~1400px, 높이 900px 이하): 두 단 — 왼쪽은 병력 · 기본 정보 · 치료계획(스크롤해도 붙어 있음), 오른쪽은 진료기록 · 참고사항 */
+@media (min-width: 900px) and (max-width: 1400px) and (max-height: 900px) and (orientation: landscape) {
+  .mc-cols { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 0 8px; align-items: start; }
+  .mc-col { display: block; min-width: 0; }
+  .mc-col--a { position: sticky; top: 6px; }
+  .mc-col--a .mc-grid--info { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mc-col--a .mc-grid--info .mc-block--alert { grid-column: 1 / -1; }
+  .mc-plan__tx { flex-basis: 100px; }
+  .mc-plan__go { padding: 2px 8px; }
+  .mc-plan__day { width: 8.6em; }
+}
