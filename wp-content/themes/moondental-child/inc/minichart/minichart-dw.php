@@ -277,11 +277,10 @@ function md_mc_dw_timeline( $r, $d ) {
 	$rows = array();
 	$hide = json_decode( (string) ( $r->dw_hide ?? '' ), true );
 	$hide = is_array( $hide ) ? $hide : array();
-	$nhid = 0; $hidden = array();
 	if ( $d && ! empty( $d['visits'] ) ) {
 		foreach ( $d['visits'] as $v ) {
-			$k = $v['d'] . ':' . substr( md5( (string) $v['tx'] ), 0, 8 ); /* v8.7 · 미니차트에서 지우거나 고친 덴트웹 줄은 숨김 */
-			if ( isset( $hide[ $k ] ) ) { $nhid++; $hidden[] = array( 'k' => $k, 'd' => $v['d'], 'dr' => $v['dr'], 'tx' => $v['tx'] ); continue; }
+			$k = $v['d'] . ':' . substr( md5( (string) $v['tx'] ), 0, 8 ); /* v8.7 · 미니차트에서 지우거나 고친 덴트웹 줄 — v9.43 부터는 그냥 지운 것으로 다룬다(숨긴 기록 칸 없음). 덴트웹 원본은 읽기 전용이라 이 표식으로 다시 들어오지 않게 한다 */
+			if ( isset( $hide[ $k ] ) ) { continue; }
 			$rows[ $v['d'] ] = array( 'dr' => $v['dr'], 'dw' => $v['tx'], 'dwk' => $k, 'own' => array() );
 		}
 	}
@@ -324,16 +323,7 @@ function md_mc_dw_timeline( $r, $d ) {
 		$i++;
 	}
 	$h .= '</ol>' . ( $n > 10 ? '</details>' : '' );
-	if ( $nhid ) {
-		/* v9.2 · 숨긴 덴트웹 기록 — 눌러서 펼쳐 보고, 골라서 다시 보이기 (원장 지시) */
-		usort( $hidden, function ( $a, $b ) { return strcmp( $b['d'], $a['d'] ); } );
-		$h .= '<details class="mc-tl__hidden"><summary>숨긴 덴트웹 기록 ' . $nhid . '건 <small>눌러서 보기</small></summary>'
-			. '<form method="post" action="' . esc_url( md_mc_url() ) . '" data-mc-fast="dwunhide"><input type="hidden" name="md_mc_action" value="dwunhide"><input type="hidden" name="md_mc_nonce" value="' . esc_attr( wp_create_nonce( 'md_mc_dwunhide' ) ) . '"><input type="hidden" name="mid" value="' . (int) $r->id . '"><ul class="mc-tl__hlist">';
-		foreach ( $hidden as $x ) {
-			$h .= '<li><label><input type="checkbox" name="dwkeys[]" value="' . esc_attr( $x['k'] ) . '"> <span class="mc-tl__d">' . esc_html( substr( str_replace( '-', '.', $x['d'] ), 2 ) ) . '</span> <span class="mc-tl__dr">' . esc_html( $x['dr'] ) . '</span> <span class="mc-tl__htx">' . esc_html( $x['tx'] ) . '</span></label></li>';
-		}
-		$h .= '</ul><p class="mc-tl__hbtns"><button class="mds-btn mds-btn--fill" name="pick" value="1" data-mc-need-pick>고른 것 다시 보이기</button> <button class="mds-btn mds-btn--ghost" name="all" value="1">모두 다시 보이기</button></p></form></details>';
-	}
+	/* v9.43 · 「숨긴 덴트웹 기록」 칸 없앰 (원장 지시 — ✕ 로 지우면 그냥 지워진 것) */
 	if ( $undated ) {
 		$h .= '<div class="mc-tl__undated"><b>날짜 없는 기록</b>';
 		foreach ( $undated as $o ) { $h .= md_mc_own_line_html( $r, $o, true ); }

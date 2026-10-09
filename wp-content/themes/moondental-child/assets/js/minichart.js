@@ -391,7 +391,7 @@ document.addEventListener('click', function (e) {
     if (!kind) kind = act;
     var fieldName = kind === 'field' ? form.getAttribute('data-mc-field') : '';
     var sub = e.submitter, extra = null;
-    if (kind === 'dwhide' && !window.confirm('이 덴트웹 진료기록을 미니차트에서 지울까요? (덴트웹 원본은 그대로)')) { e.preventDefault(); return; }
+    if (kind === 'dwhide' && !window.confirm('이 진료기록 한 줄을 지울까요?')) { e.preventDefault(); return; }
     if (kind === 'owndel' && !window.confirm('이 기록 한 줄을 지울까요?')) { e.preventDefault(); return; }
     if (kind === 'plan_edit' && sub && sub.name === 'del') { /* v9.35 · 치료계획 한 줄 지우기 */
       if (!window.confirm('이 치료계획 한 줄을 지울까요?')) { e.preventDefault(); return; }
