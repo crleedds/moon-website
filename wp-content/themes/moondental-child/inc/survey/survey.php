@@ -1115,7 +1115,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 		$people = array(
 			array( '담당의사', $doc_titles ? preg_replace( '/님$/u', '', $doc_titles[0] ) : '', $docs ? md_survey_person_photo( $docs[0], 'doctor' ) : '' ),
 			array( '담당직원', '' !== trim( (string) $staff ) ? md_survey_staff_title( $staff ) : '', '' !== trim( (string) $staff ) ? md_survey_person_photo( $staff, 'staff' ) : '' ),
-			array( '데스크 담당', '' !== trim( (string) $desk ) ? md_survey_staff_title( $desk ) : '', '' !== trim( (string) $desk ) ? md_survey_person_photo( $desk, 'staff' ) : '' ), /* v4.23 · 접수 · 수납 (덴트웹 체어 칸) */
+			array( '수납 담당', '' !== trim( (string) $desk ) ? md_survey_staff_title( $desk ) : '', '' !== trim( (string) $desk ) ? md_survey_person_photo( $desk, 'staff' ) : '' ), /* v4.23 · 접수 · 수납 (덴트웹 체어 칸) */
 		);
 		?>
 		<div class="sv-people">
@@ -1141,8 +1141,8 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 
 		<?php $qn++; /* v4.23 · 데스크 담당 문항 — 접수 · 수납 (원장 지시 2026-10-09) */ ?>
 		<div class="sv-q">
-			<h2><?php echo $qn; ?>. 접수와 수납을 도와드린 데스크 담당자는 친절했나요? <small class="sv-opt">선택</small></h2>
-			<?php $scale( 'q_desk', '데스크 담당', '조금 아쉬웠어요', '아주 친절했어요', false, true ); ?>
+			<h2><?php echo $qn; ?>. 수납을 도와드린 담당자 덕분에 마무리까지 편안하셨나요? <small class="sv-opt">선택</small></h2>
+			<?php $scale( 'q_desk', '수납 담당', '조금 아쉬웠어요', '아주 편안했어요', false, true ); ?>
 		</div>
 
 		<?php $qn++; ?>
