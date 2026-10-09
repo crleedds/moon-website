@@ -1609,3 +1609,47 @@
   }, true);
   filter(); count();
 })();
+
+/* v9.38 · 분류 정리 도우미 — 옮길 곳 · 합칠 곳 고르기, 품목 고르기 · 찾기 · 한꺼번에 옮기기 */
+(function () {
+  'use strict';
+  var data = document.getElementById('iv-cat-opts');
+  if (!data) return;
+  var opts = []; try { opts = JSON.parse(data.textContent || '[]'); } catch (e) { opts = []; }
+  /* 대화상자가 열리기 전에(capture) 고를 수 있는 분류를 채운다: 옮기기 = 한 단계 위 분류(지금 위 분류 빼고) · 합치기 = 같은 단계(자기 빼고) */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-catfill]'); if (!b) return;
+    var set = {}; try { set = JSON.parse(b.getAttribute('data-set') || '{}'); } catch (x) {}
+    var mode = b.getAttribute('data-catfill');
+    var sel = document.querySelector('select[data-catpick="' + mode + '"]'); if (!sel) return;
+    var lv = Number(set.lv) || 0, cur = Number(set.cur) || 0;
+    var list = opts.filter(function (o) { return mode === 'move' ? (o.l === lv - 1 && o.id !== cur) : (o.l === lv && o.id !== cur); });
+    sel.innerHTML = '<option value="">— 고르세요 —</option>' + list.map(function (o) { return '<option value="' + o.id + '">' + String(o.n).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }) + '</option>'; }).join('');
+  }, true);
+
+  var f = document.querySelector('form[data-recat]');
+  if (!f) return;
+  var all = f.querySelector('[data-recat-all]'), q = f.querySelector('[data-recat-q]'), sum = f.querySelector('[data-recat-sum]'), go = f.querySelector('[data-recat-go]');
+  var rows = function () { return Array.prototype.slice.call(f.querySelectorAll('tbody tr')); };
+  var count = function () {
+    var n = f.querySelectorAll('input[name="iids[]"]:checked').length;
+    if (sum) sum.textContent = '고른 품목 ' + n + '개';
+    if (go) go.disabled = n === 0;
+  };
+  if (q) q.addEventListener('input', function () {
+    var s = q.value.trim().toLowerCase();
+    rows().forEach(function (tr) {
+      var show = !s || (tr.getAttribute('data-n') || '').indexOf(s) >= 0;
+      tr.hidden = !show;
+      if (!show) { var c = tr.querySelector('input[type=checkbox]'); if (c) c.checked = false; }
+    });
+    if (all) all.checked = false;
+    count();
+  });
+  if (all) all.addEventListener('change', function () {
+    rows().forEach(function (tr) { if (!tr.hidden) { var c = tr.querySelector('input[type=checkbox]'); if (c) c.checked = all.checked; } });
+    count();
+  });
+  f.addEventListener('change', count);
+  count();
+})();

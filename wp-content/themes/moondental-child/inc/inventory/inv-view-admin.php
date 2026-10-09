@@ -506,7 +506,7 @@ function md_inv_view_stock() {
 		<a class="iv-tool" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'receive' ) ) ); ?>"><?php echo md_inv_icon( 'scan', 22 ); // phpcs:ignore ?><b>바코드 입고</b><small>찍고 들어온 수량만</small></a>
 		<a class="iv-tool" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'fix', 'ik' => 'minsug' ) ) ); ?>"><?php echo md_inv_icon( 'chart', 22 ); // phpcs:ignore ?><b>안전재고 제안</b><small>최근 사용량으로 계산</small></a>
 		<?php $nc3 = 0; foreach ( md_inv_items() as $ci ) { if ( (int) $ci->cat2 && ! (int) $ci->cat3 ) { $nc3++; } } ?>
-		<a class="iv-tool<?php echo $nc3 > 30 ? ' is-hot' : ''; ?>" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'catsort' ) ) ); ?>"><?php echo md_inv_icon( 'list', 22 ); // phpcs:ignore ?><b>분류 정리 도우미</b><small><?php echo esc_html( $S['label_cat3'] ); ?> 없는 품목 <?php echo (int) $nc3; ?>개</small></a>
+		<a class="iv-tool" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'catsort' ) ) ); ?>"><?php echo md_inv_icon( 'list', 22 ); // phpcs:ignore ?><b>분류 정리 도우미</b><small>분류 추가 · 고치기 · 옮기기 · 합치기 · 삭제</small></a>
 	</div>
 	<?php endif; ?>
 

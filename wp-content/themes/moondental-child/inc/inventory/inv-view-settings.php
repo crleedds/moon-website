@@ -229,6 +229,7 @@ function md_inv_settings_cats() {
 	<div class="iv-toolbar iv-toolbar--actions">
 		<button type="button" class="iv-btn iv-btn--primary" data-dlg="dlg-cat" data-set="<?php echo esc_attr( wp_json_encode( array( 'id' => '', 'level' => 1, 'parent_id' => 0, 'title' => $L['label_cat1'] . ' 추가', 'active' => 1 ) ) ); ?>"><?php echo md_inv_icon( 'plus', 18 ); // phpcs:ignore ?><?php echo esc_html( $L['label_cat1'] ); ?> 추가</button>
 		<?php md_inv_dl_buttons( 'cats' ); ?>
+		<a class="iv-btn iv-btn--ghost iv-btn--sm" href="<?php echo esc_url( md_inv_url( array( 'iv' => 'catsort' ) ) ); ?>">분류 정리 도우미 (옮기기 · 합치기 · 품목 옮기기)</a><?php /* v9.38 */ ?>
 	</div>
 	<p class="iv-help"><?php echo esc_html( $L['label_cat1'] . ' › ' . $L['label_cat2'] . ' › ' . $L['label_cat3'] ); ?> 세 단계입니다. 각 단계 이름은 운영 설정에서 바꿀 수 있습니다. 분류를 지우면 그 아래 분류도 함께 지워지고, 그 분류를 쓰던 품목은 분류 칸이 비워집니다.</p>
 	<div class="iv-tree">
