@@ -140,3 +140,11 @@
 .mda-ret { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px dashed var(--color-border, #E8DDD3); }
 .mda-ret__who small { color: var(--color-text-sub, #7A6B5F); }
 .mdsp-me { background: var(--color-surface, #FBF2E8) !important; font-weight: 700; }
+
+/* v9.46 · 비밀유지 서약 · 로그인 안내 */
+.mda-secret { margin-top: 10px; }
+.mda-secret__body ol { margin: 8px 0; padding-left: 1.3em; }
+.mda-secret__body li { margin: 0 0 8px; line-height: 1.6; }
+.mda-secret__body small { color: var(--color-text-mute, #A89685); }
+.mda-secret__body p { margin: 8px 0 0; }
+.mda-login-note { margin: 16px 0 14px; padding: 12px 14px; border-radius: 12px; background: var(--color-surface, #FBF2E8); color: var(--color-text-sub, #7A6B5F); font-size: .85rem; line-height: 1.65; text-align: center; }

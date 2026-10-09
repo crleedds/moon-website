@@ -298,6 +298,28 @@ function md_acc_login_links( $html ) {
 	return $html . '<div class="mda-login-links">'
 		. '<a class="mda-join-btn" href="' . esc_url( md_acc_lounge_url( array( 'md_join' => 1 ) ) ) . '">처음이신가요? <b>회원가입 신청</b></a>'
 		. '<a class="mda-lost" href="' . esc_url( wp_lostpassword_url( md_acc_lounge_url() ) ) . '">비밀번호를 잊으셨나요?</a>'
+		. '</div>'
+		/* v9.46 · 매번 보는 안내는 부드럽게 (원장 지시) */
+		. '<p class="mda-login-note">이곳에는 환자분들의 소중한 정보와 병원 내부 자료가 담겨 있습니다.<br>우리끼리만 보고, 밖으로는 나누지 않기로 해요. 🙏</p>';
+}
+
+/* ============================================================
+ * v9.46 · 비밀유지 서약 (회원가입 필수 동의, 원장 지시)
+ *  문구를 고치면 MD_ACC_SECRET_VER 를 올린다 — 누가 어느 판에 동의했는지 md_acc_secret 사용자 메타에 남는다
+ * ============================================================ */
+define( 'MD_ACC_SECRET_VER', '2026-10-10' );
+function md_acc_secret_text() {
+	return '<div class="mda-secret__body">'
+		. '<p>저는 문치과병원 직원 라운지를 쓰면서 아래 내용을 지키겠습니다.</p>'
+		. '<ol>'
+		. '<li><b>환자 정보</b> — 업무를 하며 알게 된 환자의 이름 · 연락처 · 진료 내용 · 사진 등 모든 정보를 업무 밖에서 쓰거나 다른 사람에게 알리지 않습니다.<br><small>의료법 제19조(정보 누설 금지): 의료기관 종사자는 업무를 하면서 알게 된 다른 사람의 정보를 누설하거나 발표하지 못합니다. 어기면 같은 법 제88조에 따라 처벌받을 수 있습니다.</small></li>'
+		. '<li><b>개인정보</b> — 업무상 알게 된 개인정보를 누설하거나, 권한 없이 다른 사람이 이용하게 하지 않습니다.<br><small>개인정보 보호법 제59조(금지행위) — 어기면 같은 법 제71조에 따라 처벌받을 수 있습니다.</small></li>'
+		. '<li><b>병원 내부 자료</b> — 경영 · 매출 · 재고 · 진료비 · 양식 · 임상 자료 등 라운지의 내용은 병원의 영업비밀입니다. 외부에 알리거나 사용하지 않습니다.<br><small>부정경쟁방지 및 영업비밀보호에 관한 법률 — 영업비밀을 누설하면 형사처벌 및 손해배상 책임을 질 수 있습니다.</small></li>'
+		. '<li><b>반출 금지</b> — 화면 캡처 · 사진 촬영 · 파일 내려받기 · 인쇄물 · 메신저 · SNS 등 어떤 방법으로도 업무 목적 밖으로 옮기거나 공유하지 않습니다.</li>'
+		. '<li><b>계정 관리</b> — 내 계정과 비밀번호를 다른 사람과 나눠 쓰지 않고, 공용 기기에서는 쓰고 나면 로그아웃합니다.</li>'
+		. '<li><b>퇴사 후에도</b> — 이 약속은 퇴사한 뒤에도 지키며, 가지고 있던 병원 자료는 돌려주거나 지웁니다.</li>'
+		. '</ol>'
+		. '<p>이를 어겨 병원이나 환자에게 손해가 생기면 관련 법에 따른 민 · 형사상 책임을 질 수 있음을 알고 있습니다.</p>'
 		. '</div>';
 }
 add_filter( 'login_form_bottom', 'md_acc_login_links', 20 );
@@ -346,6 +368,7 @@ function md_acc_join_submit() {
 	if ( $pe ) { $err['pass'] = $pe; }
 	elseif ( $pass !== $pass2 ) { $err['pass2'] = '비밀번호 확인이 다릅니다.'; }
 	if ( empty( $_POST['agree'] ) ) { $err['agree'] = '개인정보 수집 · 이용에 동의해 주세요.'; }
+	if ( empty( $_POST['secret'] ) ) { $err['secret'] = '비밀유지 서약에 동의해 주세요.'; } /* v9.46 · 원장 지시 */
 	$dept = '';
 	if ( '' !== $f['dept'] && function_exists( 'md_staff_depts' ) && in_array( $f['dept'], md_staff_depts(), true ) ) { $dept = $f['dept']; }
 
@@ -364,6 +387,8 @@ function md_acc_join_submit() {
 	) );
 	if ( is_wp_error( $uid ) ) { return array( 'errors' => array( '_' => '신청을 저장하지 못했습니다: ' . $uid->get_error_message() ), 'f' => $f ); }
 	update_user_meta( $uid, 'md_acc_app', array( 'birthday' => $bd, 'hired' => $hired, 'phone' => $phone, 'dept' => $dept, 'at' => current_time( 'mysql' ) ) );
+	/* v9.46 · 비밀유지 서약 동의 기록 — 시각 · 문구 판 · 접속 IP (나중에 근거) */
+	update_user_meta( $uid, 'md_acc_secret', array( 'at' => current_time( 'mysql' ), 'ver' => MD_ACC_SECRET_VER, 'ip' => sanitize_text_field( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ) ) );
 	set_transient( $rk, $hits + 1, HOUR_IN_SECONDS );
 	md_acc_log( '회원가입 신청', $name . ' (' . $login . ')' );
 
@@ -424,6 +449,10 @@ function md_acc_render_join() {
 				<p><b>수집 항목</b> 이름 · 이메일 · 휴대전화 — 생일 · 입사일은 병원 전산(덴트웹) 직원정보에서 가져옵니다<br><b>목적</b> 직원 라운지 계정 관리 · 직원 명단 · 라운지 달력의 생일 · 입사 기념일 표시 · 업무 연락<br><b>보관</b> 재직 기간 동안 (퇴사하면 지웁니다)<br>동의하지 않으면 계정을 만들 수 없고, 병원 공용 계정으로 이용할 수 있습니다.</p>
 			</details>
 			<label class="mda-agree mds-check"><input type="checkbox" name="agree" value="1" required <?php checked( ! empty( $_POST['agree'] ) ); ?>> 개인정보 수집 · 이용에 동의합니다 <b>*</b></label><?php echo $er( 'agree' ); // phpcs:ignore ?>
+
+			<?php /* v9.46 · 비밀유지 서약 (원장 지시) */ ?>
+			<details class="mda-privacy mda-secret"><summary>비밀유지 서약 (꼭 읽어 주세요)</summary><?php echo md_acc_secret_text(); // phpcs:ignore -- 고정 문구 ?></details>
+			<label class="mda-agree mds-check"><input type="checkbox" name="secret" value="1" required <?php checked( ! empty( $_POST['secret'] ) ); ?>> 위 비밀유지 서약을 읽었고, 재직 중은 물론 퇴사 후에도 지키겠습니다 <b>*</b></label><?php echo $er( 'secret' ); // phpcs:ignore ?>
 
 			<button type="submit" class="mds-btn mds-btn--fill mda-wide">신청하기</button>
 			<a class="mda-back" href="<?php echo esc_url( md_acc_lounge_url() ); ?>">← 로그인 화면으로</a>
@@ -894,6 +923,7 @@ function md_acc_render_staff_panel() {
 					<dt>전화</dt><dd><?php echo esc_html( ( $app['phone'] ?? '' ) ?: '—' ); ?></dd>
 					<dt>이메일</dt><dd><?php echo esc_html( $u->user_email ); ?></dd>
 					<dt>부서</dt><dd><?php echo esc_html( ( $app['dept'] ?? '' ) ?: '—' ); ?></dd>
+					<?php $sc = get_user_meta( $u->ID, 'md_acc_secret', true ); /* v9.46 */ ?><dt>비밀유지 서약</dt><dd><?php echo is_array( $sc ) && ! empty( $sc['at'] ) ? esc_html( '동의 ' . substr( $sc['at'], 0, 16 ) ) : '— (서약 전 가입)'; ?></dd>
 				</dl>
 				<form method="post" class="mda-approve">
 					<?php md_acc_hidden( 'approve' ); ?><input type="hidden" name="uid" value="<?php echo (int) $u->ID; ?>">
