@@ -738,7 +738,7 @@ function md_inv_ledger_row( $id ) {
 function md_inv_ledger( $a = array(), $count_only = false ) {
 	global $wpdb;
 	$t = md_inv_t();
-	$a = wp_parse_args( $a, array( 'item_id' => 0, 'team_id' => 0, 'vendor_id' => 0, 'type' => '', 'from' => '', 'to' => '', 'search' => '', 'limit' => 100, 'offset' => 0, 'with_void' => 1, 'ord_id' => 0, 'req_id' => 0 ) );
+	$a = wp_parse_args( $a, array( 'item_id' => 0, 'team_id' => 0, 'vendor_id' => 0, 'type' => '', 'from' => '', 'to' => '', 'search' => '', 'limit' => 100, 'offset' => 0, 'with_void' => 1, 'ord_id' => 0, 'req_id' => 0, 'pm' => '' ) );
 	$w = array( '1=1' );
 	$p = array();
 	if ( ! $a['with_void'] ) { $w[] = 'l.voided = 0'; }
@@ -748,6 +748,12 @@ function md_inv_ledger( $a = array(), $count_only = false ) {
 	if ( '' !== $a['type'] ) {
 		$types = array_intersect( explode( ',', $a['type'] ), array( 'open', 'in', 'out', 'return', 'adjust' ) );
 		if ( $types ) { $w[] = "l.type IN ('" . implode( "','", $types ) . "')"; }
+	}
+	/* v9.37 · 결제 방식 — pre = 선납차감품목, pay = 그 밖의 모두(건별결제품목) (원장 지시) */
+	if ( in_array( $a['pm'], array( 'pre', 'pay' ), true ) ) {
+		$pc = function_exists( 'md_inv_prepaid_cat1_id' ) ? md_inv_prepaid_cat1_id() : 0;
+		if ( 'pre' === $a['pm'] ) { $w[] = 'COALESCE(i.cat1,0) = %d'; } else { $w[] = 'COALESCE(i.cat1,0) <> %d'; }
+		$p[] = $pc;
 	}
 	if ( '' !== $a['from'] ) { $w[] = 'l.created_at >= %s'; $p[] = $a['from'] . ' 00:00:00'; }
 	if ( '' !== $a['to'] )   { $w[] = 'l.created_at <= %s'; $p[] = $a['to'] . ' 23:59:59'; }
@@ -761,7 +767,7 @@ function md_inv_ledger( $a = array(), $count_only = false ) {
 		$sql = "SELECT COUNT(*) FROM {$t['ledger']} l LEFT JOIN {$t['item']} i ON i.id = l.item_id WHERE $where";
 		return (int) $wpdb->get_var( $p ? $wpdb->prepare( $sql, $p ) : $sql );
 	}
-	$sql = "SELECT l.*, COALESCE(i.name,'') AS item_name, COALESCE(i.unit,'') AS unit, COALESCE(i.code,'') AS item_code
+	$sql = "SELECT l.*, COALESCE(i.name,'') AS item_name, COALESCE(i.unit,'') AS unit, COALESCE(i.code,'') AS item_code, COALESCE(i.cat1,0) AS cat1
 	        FROM {$t['ledger']} l LEFT JOIN {$t['item']} i ON i.id = l.item_id
 	        WHERE $where ORDER BY l.created_at DESC, l.id DESC";
 	if ( (int) $a['limit'] > 0 ) { $sql .= ' LIMIT ' . (int) $a['limit'] . ' OFFSET ' . max( 0, (int) $a['offset'] ); }

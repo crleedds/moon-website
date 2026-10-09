@@ -789,3 +789,9 @@ tr.iv-grp.is-closed .iv-grp__arrow { transform: rotate(-90deg); }
   .iv-table--inmany-new input[list] { min-width: 0; width: 100%; }
   .iv-table--inmany td.iv-td-name { padding-left: 0; }
 }
+
+/* v9.37 · 입출고 결제 방식 칩 */
+.iv-pm { margin: 0 0 10px; }
+a.iv-tf { text-decoration: none; color: inherit; }
+a.iv-tf.is-on { color: #fff; }
+a.iv-tf.is-on b { color: #fff; }

@@ -67,14 +67,15 @@ function md_inv_dataset( $key, $a = array() ) {
 
 		case 'ledger':
 			/* v6.5 · 금액 = 입고는 실제로 낸 금액(배송비 포함), 반품은 돌려받은 금액(−), 출고 · 실사는 수량 × 단가(참고) */
-			$out['head']  = array( '일시', '구분', '코드', '품목', '수량', '단위', '단가', '금액', '팀', '업체', '무상 수량', '처리자', '비고', '요청 번호', '주문 번호', '실사 수량', '취소됨', '받은 사람', 'LOT', '차트번호', '배송비 등' );
+			$out['head']  = array( '일시', '구분', '코드', '품목', '수량', '단위', '단가', '금액', '팀', '업체', '무상 수량', '처리자', '비고', '요청 번호', '주문 번호', '실사 수량', '취소됨', '받은 사람', 'LOT', '차트번호', '배송비 등', '결제 방식' );
+			$pcat = function_exists( 'md_inv_prepaid_cat1_id' ) ? md_inv_prepaid_cat1_id() : 0; /* v9.37 */
 			$out['num']   = array( 4 => 'n', 6 => 'won', 7 => 'won', 10 => 'n', 15 => 'n', 20 => 'won' );
 			$out['width'] = array( 16, 6, 9, 36, 7, 6, 10, 12, 14, 14, 8, 10, 30, 8, 8, 8, 14, 10, 14, 10, 10 );
 			foreach ( md_inv_ledger( array( 'from' => $a['from'], 'to' => $a['to'], 'limit' => 0 ) ) as $l ) {
 				$amt = 'in' === $l->type ? (int) $l->amount : ( 'return' === $l->type ? -(int) $l->amount : (int) $l->qty * (int) $l->price );
 				$out['rows'][] = array( substr( $l->created_at, 0, 16 ), md_inv_type_label( $l->type ), $l->item_code, $l->item_name, (int) $l->qty, $l->unit, (int) $l->price, $amt,
 					md_inv_team_name( $l->team_id ), md_inv_vendor_name( $l->vendor_id ), 'in' === $l->type && (int) $l->free_qty ? (int) $l->free_qty : '', $l->person, $l->note,
-					$l->req_id ? $l->req_id : '', $l->ord_id ? $l->ord_id : '', null === $l->counted ? '' : (int) $l->counted, $l->voided ? '취소 · ' . $l->void_note : '', (string) $l->receiver, (string) $l->lot, (string) $l->chart, 'in' === $l->type && (int) $l->extra ? (int) $l->extra : '' );
+					$l->req_id ? $l->req_id : '', $l->ord_id ? $l->ord_id : '', null === $l->counted ? '' : (int) $l->counted, $l->voided ? '취소 · ' . $l->void_note : '', (string) $l->receiver, (string) $l->lot, (string) $l->chart, 'in' === $l->type && (int) $l->extra ? (int) $l->extra : '', $pcat && (int) $l->cat1 === $pcat ? '선납차감품목' : '건별결제품목' );
 			}
 			break;
 

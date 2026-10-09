@@ -873,16 +873,28 @@ function md_inv_view_ledger() {
 	$tm = (int) md_inv_get( 'it', 0 );
 	$vd = (int) md_inv_get( 'ivd', 0 );
 	$q  = md_inv_get( 'iq' );
+	$pm = md_inv_get( 'ipm' );
+	$pm = in_array( $pm, array( 'pre', 'pay' ), true ) ? $pm : '';
 	$df = md_inv_get_date( 'df', date( 'Y-m-d', current_time( 'timestamp' ) - 30 * DAY_IN_SECONDS ) );
 	$dt = md_inv_get_date( 'dt', current_time( 'Y-m-d' ) );
 	$pg = max( 1, (int) md_inv_get( 'pg', 1 ) );
 	$per = 100;
-	$args = array( 'type' => $ty, 'team_id' => $tm, 'vendor_id' => $vd, 'search' => $q, 'from' => $df, 'to' => $dt, 'limit' => $per, 'offset' => ( $pg - 1 ) * $per );
+	$args = array( 'type' => $ty, 'team_id' => $tm, 'vendor_id' => $vd, 'search' => $q, 'from' => $df, 'to' => $dt, 'limit' => $per, 'offset' => ( $pg - 1 ) * $per, 'pm' => $pm );
 	$rows = md_inv_ledger( $args );
 	$n    = md_inv_ledger( $args, true );
+	/* v9.37 · 결제 방식으로 나눠 보기 — 건별결제품목 · 선납차감품목 (원장 지시). 다른 거르기는 그대로 두고 칩마다 건수 */
+	$cnt  = array( '' => md_inv_ledger( array_merge( $args, array( 'pm' => '' ) ), true ) );
+	$cnt['pre'] = md_inv_ledger( array_merge( $args, array( 'pm' => 'pre' ) ), true );
+	$cnt['pay'] = $cnt[''] - $cnt['pre'];
+	$base = array_filter( array( 'app' => 'stock', 'iv' => 'ledger', 'ity' => $ty, 'it' => $tm ?: '', 'ivd' => $vd ?: '', 'iq' => $q, 'df' => $df, 'dt' => $dt ), 'strlen' );
 	?>
+	<nav class="iv-tfs iv-pm" aria-label="결제 방식">
+		<?php foreach ( array( '' => '전체', 'pay' => '건별결제품목', 'pre' => '선납차감품목' ) as $k => $lb ) : ?>
+			<a class="iv-tf<?php echo $pm === $k ? ' is-on' : ''; ?>" data-pm="<?php echo esc_attr( $k ?: 'all' ); ?>" href="<?php echo esc_url( md_sup_url( array_merge( $base, $k ? array( 'ipm' => $k ) : array() ) ) ); ?>"><?php echo esc_html( $lb ); ?> <b><?php echo (int) $cnt[ $k ]; ?></b></a>
+		<?php endforeach; ?>
+	</nav>
 	<form class="iv-filter" method="get" data-autosubmit>
-		<input type="hidden" name="app" value="stock"><input type="hidden" name="iv" value="ledger">
+		<input type="hidden" name="app" value="stock"><input type="hidden" name="iv" value="ledger"><?php if ( $pm ) : ?><input type="hidden" name="ipm" value="<?php echo esc_attr( $pm ); ?>"><?php endif; ?>
 		<label class="iv-f"><span>구분</span><select class="iv-input" name="ity"><option value="">전체</option><?php foreach ( array( 'in', 'out', 'return', 'adjust', 'open' ) as $k ) : ?><option value="<?php echo esc_attr( $k ); ?>"<?php selected( $ty, $k ); ?>><?php echo esc_html( md_inv_type_label( $k ) ); ?></option><?php endforeach; ?></select></label>
 		<label class="iv-f"><span>팀</span><?php md_inv_team_select( 'it', $tm, false, '전체', true ); ?></label>
 		<label class="iv-f"><span>업체</span><?php md_inv_vendor_select( 'ivd', $vd, false, '전체' ); ?></label>
