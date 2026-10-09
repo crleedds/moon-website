@@ -311,7 +311,17 @@ function md_brief_handle() {
 		$cut   = date( 'Y-m-d', strtotime( current_time( 'Y-m-d' ) . ' -90 days' ) );
 		foreach ( $marks as $kk => $v ) { if ( ( $v['d'] ?? '' ) < $cut ) { unset( $marks[ $kk ] ); } }
 		if ( isset( $marks[ $k ] ) ) { unset( $marks[ $k ] ); }
-		else { $marks[ $k ] = array( 'd' => current_time( 'Y-m-d' ), 'by' => function_exists( 'md_acc_me_name' ) ? md_acc_me_name() : wp_get_current_user()->display_name ); }
+		else {
+			/* v9.38 · 연락한 날 · 연락한 사람 + 그때 명단의 이름 · 담당 · 사유 (명단에서 빠져도 엑셀 「연락 기록」에 남게 — 원장 지시) */
+			$who = function_exists( 'md_acc_me_name' ) ? md_acc_me_name() : '';
+			if ( '' === trim( (string) $who ) ) { $who = wp_get_current_user()->display_name; }
+			$marks[ $k ] = array( 'd' => current_time( 'Y-m-d' ), 't' => current_time( 'H:i' ), 'by' => $who );
+			$pp = explode( '|', $k );
+			$LL = get_option( 'md_brief_lists' );
+			foreach ( is_array( $LL ) ? (array) ( $LL[ $pp[0] ] ?? array() ) : array() as $r ) {
+				if ( $pp[0] . '|' . $r['chart'] . '|' . $r['kinds'] === $k ) { $marks[ $k ] += array( 'name' => (string) $r['name'], 'doc' => (string) $r['doc'], 'why' => (string) $r['why'] ); break; }
+			}
+		}
 		update_option( 'md_brief_marks', $marks, false );
 		$back .= '#b' . md5( $k );
 	}
@@ -344,7 +354,8 @@ function md_brief_render() {
 		.mdb-table th{color:#666;font-weight:600;white-space:nowrap}
 		.mdb-table tr.is-done td{color:#999;background:#fafafa}
 		.mdb-mark{border:1px solid #ccc;background:#fff;border-radius:6px;padding:4px 8px;cursor:pointer;white-space:nowrap;font-size:13px}
-		.mdb-mark.is-on{background:#e8f5ee;border-color:#2e7d5b;color:#2e7d5b}
+		.mdb-mark.is-on{background:#e8f5ee;border-color:#2e7d5b;color:#2e7d5b;line-height:1.25;text-align:left}
+		.mdb-mark__by{display:block;font-size:12px;font-weight:700}
 		.mdb-filter{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
 		.mdb-filter a{font-size:13px;padding:4px 10px;border:1px solid #ddd;border-radius:999px;text-decoration:none;color:#444}
 		.mdb-filter a.is-on{border-color:#2e7d5b;color:#2e7d5b;font-weight:600}
@@ -440,8 +451,8 @@ function md_brief_render_list( $tab ) {
 					<td><?php echo esc_html( $r['why'] ); ?></td>
 					<td style="white-space:nowrap"><?php echo esc_html( $r['date'] ); ?></td>
 					<td style="white-space:nowrap"><?php echo esc_html( $r['last'] ); ?></td>
-					<td><form method="post" style="margin:0"><input type="hidden" name="md_brief" value="mark"><input type="hidden" name="tab" value="<?php echo esc_attr( $tab ); ?>"><input type="hidden" name="k" value="<?php echo esc_attr( $k ); ?>"><?php wp_nonce_field( 'md_brief_mark', 'md_brief_nonce' ); ?>
-						<button type="submit" class="mdb-mark<?php echo $mk ? ' is-on' : ''; ?>" title="<?php echo $mk ? esc_attr( $mk['by'] . ' · 다시 누르면 지움' ) : '연락했으면 누르기'; ?>"><?php echo $mk ? '✓ 연락함 ' . esc_html( date( 'n/j', strtotime( $mk['d'] ) ) ) : '연락함'; ?></button></form></td>
+					<td><form method="post" style="margin:0"<?php echo $mk ? ' onsubmit="return confirm(\'연락함 표시를 지울까요?\')"' : ''; ?>><input type="hidden" name="md_brief" value="mark"><input type="hidden" name="tab" value="<?php echo esc_attr( $tab ); ?>"><input type="hidden" name="k" value="<?php echo esc_attr( $k ); ?>"><?php wp_nonce_field( 'md_brief_mark', 'md_brief_nonce' ); ?>
+						<button type="submit" class="mdb-mark<?php echo $mk ? ' is-on' : ''; ?>" title="<?php echo $mk ? '다시 누르면 지움' : '연락했으면 누르기'; ?>"><?php if ( $mk ) : ?>✓ <?php echo esc_html( $mk['d'] ); ?><span class="mdb-mark__by"><?php echo esc_html( $mk['by'] ); ?></span><?php else : ?>연락함<?php endif; ?></button></form></td>
 				</tr>
 			<?php endforeach; ?>
 		</table></div>
@@ -558,6 +569,22 @@ function md_brief_xlsx_lists() {
 		}
 		$sheets[] = array( 'title' => $title, 'head' => array( '차트번호', '이름', '담당', '분류', '사유', '기준일', '마지막 내원', '연락한 날', '연락한 사람' ), 'rows' => $rows, 'width' => array( 9, 9, 8, 14, 40, 11, 11, 10, 9 ) );
 	}
+	/* v9.38 · 연락 기록 — 최근 90일 「연락함」 전부(명단에서 빠진 환자도), 최근 것부터. 결과는 서버 PC 가 다음 브리핑 때 알려 준 예약 · 내원 */
+	$res  = (array) get_option( 'md_brief_mark_res', array() );
+	$byid = array();
+	foreach ( $names as $tab => $title ) { foreach ( is_array( $L ) ? (array) ( $L[ $tab ] ?? array() ) : array() as $r ) { $byid[ $tab . '|' . $r['chart'] . '|' . $r['kinds'] ] = $r; } }
+	$log = array();
+	foreach ( $marks as $k => $v ) {
+		$pp = explode( '|', (string) $k );
+		$r  = $byid[ $k ] ?? array();
+		$kk = array();
+		foreach ( explode( ',', (string) ( $pp[2] ?? '' ) ) as $x ) { if ( '' !== $x ) { $kk[] = $kinds[ $x ] ?? $x; } }
+		$rs = $res[ $k ] ?? null;
+		$log[] = array( (string) ( $v['d'] ?? '' ), (string) ( $v['t'] ?? '' ), (string) ( $v['by'] ?? '' ), $names[ $pp[0] ] ?? $pp[0], (string) ( $pp[1] ?? '' ), (string) ( $r['name'] ?? ( $v['name'] ?? '' ) ), (string) ( $r['doc'] ?? ( $v['doc'] ?? '' ) ), implode( ' · ', $kk ), (string) ( $r['why'] ?? ( $v['why'] ?? '' ) ),
+			$rs ? (string) $rs['booked'] : '', $rs ? (string) $rs['came'] : '', $rs ? '' : '다음 브리핑 때 확인' );
+	}
+	usort( $log, function ( $a, $b ) { return strcmp( $b[0] . $b[1], $a[0] . $a[1] ); } );
+	$sheets[] = array( 'title' => '연락 기록', 'head' => array( '연락한 날', '시각', '연락한 사람', '명단', '차트번호', '이름', '담당', '분류', '사유', '예약일', '내원일', '비고' ), 'rows' => $log, 'width' => array( 11, 6, 10, 12, 9, 9, 8, 14, 40, 11, 11, 16 ) );
 	return md_inv_xlsx( $sheets );
 }
 
