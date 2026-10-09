@@ -678,7 +678,7 @@ function md_survey_notify_new( $rid ) {
 	$body .= '환자: ' . $r->patient_name . ' (차트 ' . $r->chart_no . ")\n";
 	$body .= '담당의사: ' . ( '' !== $r->doctor ? $r->doctor : '-' ) . ' — ' . $sc( $r->q_doctor ) . "\n";
 	$body .= '담당직원: ' . ( '' !== $r->staff ? $r->staff : '-' ) . ' — ' . $sc( $r->q_service ) . "\n";
-	$body .= '데스크: ' . ( ! empty( $r->desk ) ? $r->desk : '-' ) . ' — ' . $sc( $qk ) . "\n";
+	$body .= '수납: ' . ( ! empty( $r->desk ) ? $r->desk : '-' ) . ' — ' . $sc( $qk ) . "\n";
 	$body .= '병원: ' . $sc( $r->q_recommend ) . "\n";
 	$body .= '연락: ' . ( ! empty( $r->want_call ) ? '연락드려도 괜찮다고 함' : '-' ) . "\n";
 	if ( '' !== trim( (string) $r->comment ) ) { $body .= "\n의견:\n" . $r->comment . "\n"; }
@@ -1421,7 +1421,7 @@ function md_survey_export_csv( $from, $to, $staff, $doctor = '', $desk = '' ) {
 	header( 'Content-Disposition: attachment; filename="만족도조사_' . $from . '_' . $to . '.csv"' );
 	echo "\xEF\xBB\xBF"; /* 엑셀이 한글을 제대로 읽도록 BOM */
 	$out = fopen( 'php://output', 'w' );
-	fputcsv( $out, array( '진료일', '차트번호', '이름', '담당의사', '담당직원', '명단상 담당직원', '데스크', '담당의사 점수', '담당직원 점수', '데스크 점수', '병원 점수', '의견', '작성시각', 'IP' ) );
+	fputcsv( $out, array( '진료일', '차트번호', '이름', '담당의사', '담당직원', '명단상 담당직원', '수납 담당', '담당의사 점수', '담당직원 점수', '수납 점수', '병원 점수', '의견', '작성시각', 'IP' ) );
 	foreach ( $rows as $r ) {
 		fputcsv( $out, array( $r->visit_date, $r->chart_no, $r->patient_name, $r->doctor, $r->staff, isset( $r->staff_orig ) ? $r->staff_orig : '', isset( $r->desk ) ? $r->desk : '', isset( $r->q_doctor ) ? $r->q_doctor : '', $r->q_service, isset( $r->q_desk ) ? $r->q_desk : '', $r->q_recommend, (string) $r->comment, $r->created_at, isset( $r->ip ) ? $r->ip : '' ) );
 	}
@@ -1682,7 +1682,7 @@ function md_survey_render_responses() {
 			<input type="date" name="from" value="<?php echo esc_attr( $from ); ?>"> ~ <input type="date" name="to" value="<?php echo esc_attr( $to ); ?>">
 			<select name="doctor"><option value="">모든 담당의사</option><?php foreach ( md_survey_doctor_names() as $s ) : ?><option value="<?php echo esc_attr( $s ); ?>" <?php selected( $s, $doctor ); ?>><?php echo esc_html( $s ); ?></option><?php endforeach; ?></select>
 			<select name="staff"><option value="">모든 담당직원</option><?php foreach ( $staffs as $s ) : if ( '' === (string) $s ) { continue; } ?><option value="<?php echo esc_attr( $s ); ?>" <?php selected( $s, $staff ); ?>><?php echo esc_html( $s ); ?></option><?php endforeach; ?></select>
-			<?php if ( $desks ) : ?><select name="desk"><option value="">모든 데스크</option><?php foreach ( $desks as $s ) : ?><option value="<?php echo esc_attr( $s ); ?>" <?php selected( $s, $desk ); ?>><?php echo esc_html( $s ); ?></option><?php endforeach; ?></select><?php endif; ?>
+			<?php if ( $desks ) : ?><select name="desk"><option value="">모든 수납 담당</option><?php foreach ( $desks as $s ) : ?><option value="<?php echo esc_attr( $s ); ?>" <?php selected( $s, $desk ); ?>><?php echo esc_html( $s ); ?></option><?php endforeach; ?></select><?php endif; ?>
 			<button type="submit" class="mds-btn mds-btn--ghost">보기</button>
 		</form>
 		<form method="post" class="mds-inline">
@@ -1692,14 +1692,14 @@ function md_survey_render_responses() {
 		</form>
 	</div>
 	<?php if ( '' !== $staff || '' !== $doctor || '' !== $desk ) : /* v4.21.30 · 집계에서 이름을 눌러 들어온 경우 */ ?>
-		<p class="mdsv-filterbar"><b><?php echo esc_html( implode( ' · ', array_filter( array( $doctor, $staff, '' !== $desk ? $desk . ' (데스크)' : '' ) ) ) ); ?></b> 응답 <?php echo count( $rows ); ?>건 · <a href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'responses', 'from' => $from, 'to' => $to ) ) ); ?>">전체 보기</a> · <a href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'stats', 'from' => $from, 'to' => $to ) ) ); ?>">집계로 돌아가기</a></p>
+		<p class="mdsv-filterbar"><b><?php echo esc_html( implode( ' · ', array_filter( array( $doctor, $staff, '' !== $desk ? $desk . ' (수납)' : '' ) ) ) ); ?></b> 응답 <?php echo count( $rows ); ?>건 · <a href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'responses', 'from' => $from, 'to' => $to ) ) ); ?>">전체 보기</a> · <a href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'stats', 'from' => $from, 'to' => $to ) ) ); ?>">집계로 돌아가기</a></p>
 	<?php endif; ?>
 	<?php if ( empty( $rows ) ) : ?>
 		<div class="mds-card"><div class="mds-empty">이 기간에 응답이 없습니다.</div></div>
 	<?php else : ?>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>진료일</th><th>환자</th><th>담당의사</th><th>담당직원</th><th>데스크</th><th class="num">담당의사</th><th class="num">담당직원</th><th class="num">데스크</th><th class="num">병원</th><th>의견</th><th>작성</th><th>IP</th><th></th></tr></thead>
+				<thead><tr><th>진료일</th><th>환자</th><th>담당의사</th><th>담당직원</th><th>수납 담당</th><th class="num">담당의사</th><th class="num">담당직원</th><th class="num">수납</th><th class="num">병원</th><th>의견</th><th>작성</th><th>IP</th><th></th></tr></thead>
 				<tbody>
 				<?php $ipcount = array(); foreach ( $rows as $x ) { if ( ! empty( $x->ip ) ) { $ipcount[ $x->ip ] = ( isset( $ipcount[ $x->ip ] ) ? $ipcount[ $x->ip ] : 0 ) + 1; } } /* v4.21.33 · 같은 IP 응답 수 */
 				$lowf = function ( $v ) { return ( (int) $v >= 1 && (int) $v <= 2 ) ? 'is-low' : ''; };
@@ -1785,10 +1785,10 @@ function md_survey_render_stats() {
 			</table>
 		</div>
 		<?php $desks = md_survey_stats_desk( $from, $to ); if ( $desks ) : /* v4.23 · 데스크 담당별 (덴트웹 체어 칸) */ ?>
-		<h2 class="mdsv-h" style="margin-top:22px">데스크별</h2>
+		<h2 class="mdsv-h" style="margin-top:22px">수납 담당별</h2>
 		<div class="mds-tablewrap">
 			<table class="mds-table mdsv-table">
-				<thead><tr><th>데스크 담당</th><th class="num">평균</th></tr></thead>
+				<thead><tr><th>수납 담당</th><th class="num">평균</th></tr></thead>
 				<tbody>
 				<?php foreach ( $desks as $r ) : ?>
 					<tr>
