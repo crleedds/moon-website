@@ -417,7 +417,7 @@ function md_staff_dw_dayoff_at() {
 
 /**
  * 덴트웹 직원 번호 → 달력에 쓸 이름 · 라운지 직원 id · 정렬 순서. 재직 중이고 명단과 이어진 사람만(퇴사자 · 가상 의사 · 공용 계정 제외)
- *  의료진 이름은 직책에 따라 「이름 병원장님」 · 「이름 원장님」(원장 지시 2026-10-09), 그 밖의 직책은 그대로 붙인다. 직원은 이름만.
+ *  의료진 이름은 직책에 따라 「이름 병원장」 · 「이름 원장」(원장 지시 2026-10-09), 그 밖의 직책은 그대로 붙인다. 직원은 이름만.
  */
 function md_staff_dw_who( $dw ) {
 	static $map = null;
@@ -429,8 +429,8 @@ function md_staff_dw_who( $dw ) {
 			$doctor = '의료진' === $r->dept;
 			$rank   = 3; $name = $r->name;
 			if ( $doctor ) {
-				if ( false !== mb_strpos( $pos, '병원장' ) )          { $rank = 0; $name .= ' 병원장님'; }
-				elseif ( '' === $pos || false !== mb_strpos( $pos, '원장' ) ) { $rank = 1; $name .= ' 원장님'; }
+				if ( false !== mb_strpos( $pos, '병원장' ) )          { $rank = 0; $name .= ' 병원장'; }
+				elseif ( '' === $pos || false !== mb_strpos( $pos, '원장' ) ) { $rank = 1; $name .= ' 원장'; }
 				else                                                  { $rank = 2; $name .= ' ' . $pos; }
 			}
 			$map[ (int) $r->dw_id ] = array( 'sid' => (int) $r->id, 'name' => $name, 'doctor' => $doctor, 'order' => sprintf( '%d-%06d-%s', $rank, (int) $r->sort, $r->name ) );
