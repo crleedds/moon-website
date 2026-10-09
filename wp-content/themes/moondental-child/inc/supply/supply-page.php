@@ -986,7 +986,7 @@ function md_sup_render_header( $app, $tab ) {
 			</div>
 			<div class="mds-head__me">
 				<?php $md_personal = function_exists( 'md_acc_is_personal_user' ) && md_acc_is_personal_user( $user ); ?>
-				<a class="mds-head__name" href="<?php echo esc_url( md_sup_url( array( 'app' => 'me' ) ) ); ?>" title="내 정보"><?php echo esc_html( $md_personal && '' !== trim( $user->display_name ) ? $user->display_name : $user->user_login ); /* v4.21.1 · 공용 계정은 로그인 아이디 · v5.8 · 누르면 내 정보 · v7.3 · 개인 계정은 이름 (아이디는 자동이라) */ ?></a>
+				<a class="mds-head__name" href="<?php echo esc_url( md_sup_url( array( 'app' => 'me' ) ) ); ?>" title="내 정보"><?php echo esc_html( '' !== trim( $user->display_name ) ? $user->display_name : $user->user_login ); /* v4.21.1 · 항상 이름 — 공용 계정도 (원장 지시) */ ?></a>
 				<a class="mds-head__out" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">로그아웃</a>
 			</div>
 		</div>
