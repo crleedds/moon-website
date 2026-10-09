@@ -384,7 +384,7 @@ function md_staff_dw_sync( $list ) {
 /**
  * 덴트웹 개인별 휴무일(TB_개인별휴무일) → 라운지 달력 🌴 (v9.37 · 2026-10-09 원장 지시로 다시 켬 — 10/6 에 한 번 뺐던 것)
  *  병원 PC 의 sync.ps1 이 걸러서(종일 · 2시간 이상, 점심 · 외출 · 상시 일정 · 예약 막기 제외) 오늘 -1달 ~ +1년 치를
- *  한 시간마다 통째로 보낸다. 옵션 md_staff_dw_dayoff 에 두고, 달력(inc/calendar)이 직원 명단(dw_id)과 맞춰 표시.
+ *  1분마다 확인해 바뀌었을 때(와 한 시간에 한 번) 통째로 보낸다. 옵션 md_staff_dw_dayoff 에 두고, 달력(inc/calendar)이 직원 명단(dw_id)과 맞춰 표시.
  *   항목: { sid: 덴트웹 직원 번호, d1, d2: 'Y-m-d', t1, t2: 'HHmm'(종일이면 ''), memo }
  */
 function md_staff_dw_dayoffs() {

@@ -108,7 +108,7 @@ function md_cal_between( $from, $to ) {
 		}
 	}
 
-	/* 1-2) 덴트웹 개인별 휴무 (inc/staff · 병원 PC sync.ps1 이 한 시간마다) — 명단과 이어진 재직자만.
+	/* 1-2) 덴트웹 개인별 휴무 (inc/staff · 병원 PC sync.ps1 이 1분마다 확인, 바뀌면 올림) — 명단과 이어진 재직자만.
 	 *      같은 날 같은 시간대의 휴무는 한 줄로 합친다(의료진끼리 · 직원끼리, 원장 지시 2026-10-09): 「🌴 문은수 병원장님 · 김세일 원장님 휴무」 */
 	if ( function_exists( 'md_staff_dw_dayoffs' ) ) {
 		$days = array();
@@ -412,7 +412,7 @@ function md_cal_render() {
 						<?php if ( ! empty( $r->yearly ) ) : ?><span class="mds-status is-pending">매년</span><?php endif; ?>
 						<?php if ( ! empty( $r->memo ) ) : ?><span class="mdcal-row__memo"><?php echo esc_html( $r->memo ); ?></span><?php endif; ?>
 						<?php if ( 'dayoff' === $r->type ) : ?>
-							<span class="mdcal-row__memo">덴트웹 「개인별 휴무」에서 고치면 한 시간 안에 반영</span>
+							<span class="mdcal-row__memo">덴트웹 「개인별 휴무」에서 고치면 1~2분 안에 반영</span>
 						<?php elseif ( ! empty( $r->auto ) ) : ?>
 							<a class="mdcal-btn mdcal-row__staff" href="<?php echo esc_url( md_sup_url( array( 'app' => 'staff' ) ) . '#s' . (int) substr( $r->id, 1 ) ); ?>">직원 정보에서 고치기</a>
 						<?php else : ?>
