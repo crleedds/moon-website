@@ -183,6 +183,13 @@ function md_acc_users_by_name( $name, $exclude = 0 ) {
 function md_acc_name_login( &$username, &$password ) {
 	$n = trim( (string) $username );
 	if ( '' === $n || is_email( $n ) || username_exists( $n ) ) { return; }
+	/* v9.42 · 공용 계정은 지금 이름(예: 「문치과병원」)이나 「직원공용」으로 — 같은 이름의 다른 계정(예전 moondentalhospital 등)보다 먼저 (원장 지시) */
+	if ( defined( 'MD_SUP_STAFF_LOGIN' ) && ( $su = get_user_by( 'login', MD_SUP_STAFF_LOGIN ) ) ) {
+		$k = md_acc_name_key( $n );
+		global $wpdb;
+		$rn = function_exists( 'md_staff_shared_sid' ) && md_staff_shared_sid() ? (string) $wpdb->get_var( $wpdb->prepare( 'SELECT name FROM ' . md_staff_table() . ' WHERE id = %d', md_staff_shared_sid() ) ) : ''; /* 직원 명단에서 공용 줄 이름만 바꾼 경우도 */
+		if ( $k === md_acc_name_key( $su->display_name ) || ( defined( 'MD_SUP_STAFF_NAME' ) && $k === md_acc_name_key( MD_SUP_STAFF_NAME ) ) || ( '' !== $rn && $k === md_acc_name_key( $rn ) ) ) { $username = MD_SUP_STAFF_LOGIN; return; }
+	}
 	$us = md_acc_users_by_name( $n );
 	if ( 1 === count( $us ) ) { $username = $us[0]->user_login; return; }
 	/* v8.2 · 직원 공용 계정은 이름 「직원공용」으로 */

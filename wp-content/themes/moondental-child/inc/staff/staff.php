@@ -64,8 +64,16 @@ add_action( 'init', 'md_staff_maybe_install', 21 );
 define( 'MD_STAFF_SHARED_MAIL', 'moondental1995@naver.com' );
 
 function md_staff_is_shared( $r ) {
+	if ( ! $r ) { return false; }
+	/* v9.42 · 이름을 바꿔도(예: 「문치과병원」) 공용 계정 줄로 알아본다 — 처음 만든 줄 번호(md_staff_shared_v1 = 'sid N') 기준 (원장 지시) */
+	$sid = md_staff_shared_sid();
+	if ( $sid && ! empty( $r->id ) ) { return (int) $r->id === $sid; }
 	$n = defined( 'MD_SUP_STAFF_NAME' ) ? MD_SUP_STAFF_NAME : '직원공용';
-	return $r && preg_replace( '/\s+/u', '', (string) $r->name ) === preg_replace( '/\s+/u', '', $n );
+	return preg_replace( '/\s+/u', '', (string) $r->name ) === preg_replace( '/\s+/u', '', $n );
+}
+
+function md_staff_shared_sid() {
+	return preg_match( '/^sid (\d+)$/', (string) get_option( 'md_staff_shared_v1', '' ), $m ) ? (int) $m[1] : 0;
 }
 
 function md_staff_add_shared_once() {
@@ -194,7 +202,16 @@ function md_staff_save( $data, $id = 0 ) {
 		'email'      => ( '' !== trim( (string) ( $data['email'] ?? '' ) ) && is_email( trim( $data['email'] ) ) ) ? sanitize_email( trim( $data['email'] ) ) : '',
 		'updated_at' => current_time( 'mysql' ),
 	);
-	if ( $id ) { $wpdb->update( md_staff_table(), $row, array( 'id' => (int) $id ) ); return (int) $id; }
+	if ( $id ) {
+		$wpdb->update( md_staff_table(), $row, array( 'id' => (int) $id ) );
+		/* v9.42 · 공용 계정 줄의 이름을 바꾸면 공용 로그인 계정의 이름도 같이 — 로그인 칸에 새 이름(예: 「문치과병원」)을 쓰면 공용 계정으로 들어간다 */
+		if ( (int) $id === md_staff_shared_sid() && defined( 'MD_SUP_STAFF_LOGIN' ) && ( $su = get_user_by( 'login', MD_SUP_STAFF_LOGIN ) ) && $su->display_name !== $name ) {
+			$wpdb->update( $wpdb->users, array( 'display_name' => $name ), array( 'ID' => (int) $su->ID ) );
+			update_user_meta( $su->ID, 'nickname', $name );
+			clean_user_cache( $su->ID );
+		}
+		return (int) $id;
+	}
 	$row['sort']       = (int) $wpdb->get_var( 'SELECT COALESCE(MAX(sort),0) FROM ' . md_staff_table() ) + 1;
 	$row['created_at'] = current_time( 'mysql' );
 	$ok = $wpdb->insert( md_staff_table(), $row );
