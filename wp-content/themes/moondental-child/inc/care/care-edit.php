@@ -46,16 +46,16 @@ function md_care_items( $slug, $t = null ) {
 	$file = md_care_store_path( $slug );
 	if ( is_file( $file ) ) {
 		$saved = json_decode( (string) file_get_contents( $file ), true );
-		if ( is_array( $saved ) && isset( $saved['photos'], $saved['videos'] ) ) return $saved;
+		if ( is_array( $saved ) && isset( $saved['photos'], $saved['videos'] ) ) return $saved + array( 'files' => array() );
 	}
 	$saved = get_option( 'md_care_items_' . $slug, null );
-	if ( is_array( $saved ) && isset( $saved['photos'], $saved['videos'] ) ) return $saved;
+	if ( is_array( $saved ) && isset( $saved['photos'], $saved['videos'] ) ) return $saved + array( 'files' => array() );
 	if ( $t === null ) { $topics = md_care_topics(); $t = $topics[ $slug ] ?? array(); }
-	return array( 'photos' => array_values( (array) ( $t['photos'] ?? array() ) ), 'videos' => array_values( (array) ( $t['videos'] ?? array() ) ) );
+	return array( 'photos' => array_values( (array) ( $t['photos'] ?? array() ) ), 'videos' => array_values( (array) ( $t['videos'] ?? array() ) ), 'files' => array() );
 }
 
 function md_care_save_items( $slug, $items ) {
-	$data = array( 'photos' => array_values( $items['photos'] ), 'videos' => array_values( $items['videos'] ), 'updated' => current_time( 'mysql' ) );
+	$data = array( 'photos' => array_values( $items['photos'] ), 'videos' => array_values( $items['videos'] ), 'files' => array_values( (array) ( $items['files'] ?? array() ) ), 'updated' => current_time( 'mysql' ) );
 	$ok_file = (bool) file_put_contents( md_care_store_path( $slug ), wp_json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ) );
 	$ok_opt  = update_option( 'md_care_items_' . $slug, $data, 'no' );
 	return array( 'file' => $ok_file, 'option' => (bool) $ok_opt );
@@ -83,6 +83,7 @@ function md_care_ajax_guard( $need = 'edit' ) {
 /** 업로드 · 사진(jpg/png/webp, 여러 장) 또는 영상(mp4/webm, 포스터 선택) */
 function md_care_ajax_upload() {
 	list( $slug, $t ) = md_care_ajax_guard( 'add' );
+	if ( 'file' === ( $_POST['kind'] ?? '' ) ) { md_care_file_upload( $slug, $t ); }
 	$kind  = ( $_POST['kind'] ?? 'photo' ) === 'video' ? 'video' : 'photo';
 	if ( 'video' === $kind && ! md_care_can_edit() ) wp_send_json_error( array( 'message' => '영상은 관리자가 올립니다.' ), 403 );
 	$who = wp_get_current_user();
@@ -153,6 +154,83 @@ function md_care_ajax_upload() {
 }
 add_action( 'wp_ajax_md_care_upload', 'md_care_ajax_upload' );
 
+/* ============================================================
+ * v9.45 · 「자료」 — 아무 파일이나 올리기 (PDF · PPT · 한글 · 엑셀 · 압축 등, 원장 지시)
+ *  - 저장: uploads/care/_files/{slug}/ (웹에서 바로 못 열게 막고, 라운지에 로그인한 직원만 받기)
+ *  - 올리기: 사진과 같은 사람(Clinical Cases 는 직원 누구나) · 지우기: 라운지 관리자
+ * ============================================================ */
+function md_care_file_dir( $slug ) {
+	$up  = wp_upload_dir(); $dir = rtrim( $up['basedir'], '/' ) . '/care/_files/' . sanitize_key( $slug );
+	if ( ! is_dir( $dir ) ) { wp_mkdir_p( $dir ); }
+	$root = dirname( $dir );
+	if ( ! is_file( $root . '/.htaccess' ) ) { @file_put_contents( $root . '/.htaccess', "Require all denied\n<IfModule !mod_authz_core.c>\nDeny from all\n</IfModule>\n" ); } /* 양식(md-forms)과 같은 방식 — 운영에서 403 확인 */
+	if ( ! is_file( $root . '/index.php' ) ) { @file_put_contents( $root . '/index.php', "<?php // silence" ); }
+	return $dir;
+}
+function md_care_file_exts() { return array( 'pdf', 'ppt', 'pptx', 'key', 'doc', 'docx', 'hwp', 'hwpx', 'xls', 'xlsx', 'csv', 'txt', 'zip', 'jpg', 'jpeg', 'png', 'webp', 'heic', 'mp4', 'mov', 'stl', 'dcm' ); }
+function md_care_file_max() { return min( 200 * MB_IN_BYTES, wp_max_upload_size() ); }
+
+function md_care_file_upload( $slug, $t ) {
+	if ( empty( $_FILES['file'] ) ) { wp_send_json_error( array( 'message' => '파일이 없습니다.' ), 400 ); }
+	$f = $_FILES['file'];
+	if ( is_array( $f['name'] ) ) { $f = array( 'name' => $f['name'][0], 'tmp_name' => $f['tmp_name'][0], 'error' => $f['error'][0], 'size' => $f['size'][0] ); }
+	$orig = sanitize_file_name( wp_basename( (string) $f['name'] ) );
+	$ext  = strtolower( pathinfo( $orig, PATHINFO_EXTENSION ) );
+	if ( (int) $f['error'] !== UPLOAD_ERR_OK || ! is_uploaded_file( $f['tmp_name'] ) ) { wp_send_json_error( array( 'message' => $orig . ': 올리지 못했습니다 (한 파일 최대 ' . size_format( md_care_file_max() ) . ').' ), 400 ); }
+	if ( ! in_array( $ext, md_care_file_exts(), true ) ) { wp_send_json_error( array( 'message' => $orig . ': 이 종류의 파일은 올릴 수 없습니다 (' . implode( ' · ', md_care_file_exts() ) . ').' ), 400 ); }
+	if ( (int) $f['size'] > md_care_file_max() ) { wp_send_json_error( array( 'message' => $orig . ': 한 파일 최대 ' . size_format( md_care_file_max() ) . '입니다.' ), 400 ); }
+	$name = gmdate( 'Ymd' ) . '-' . wp_generate_password( 20, false, false ) . '.' . $ext;
+	$dest = md_care_file_dir( $slug ) . '/' . $name;
+	if ( ! @move_uploaded_file( $f['tmp_name'], $dest ) ) { wp_send_json_error( array( 'message' => $orig . ': 저장하지 못했습니다.' ), 500 ); }
+	$who   = wp_get_current_user();
+	$items = md_care_items( $slug, $t );
+	$items['files'][] = array( 'file' => '_files/' . sanitize_key( $slug ) . '/' . $name, 'name' => '' !== trim( sanitize_text_field( wp_unslash( (string) $f['name'] ) ) ) ? sanitize_text_field( wp_unslash( (string) $f['name'] ) ) : $orig, 'size' => (int) $f['size'], 'by' => (int) $who->ID, 'by_name' => '' !== trim( $who->display_name ) ? $who->display_name : $who->user_login, 'at' => current_time( 'mysql' ) );
+	md_care_save_items( $slug, $items );
+	wp_send_json_success( array( 'added' => 1, 'errors' => array() ) );
+}
+
+/** 지우기 — 라운지 관리자 */
+function md_care_ajax_file_delete() {
+	list( $slug, $t ) = md_care_ajax_guard();
+	$i = (int) ( $_POST['index'] ?? -1 );
+	$items = md_care_items( $slug, $t );
+	if ( ! isset( $items['files'][ $i ] ) ) { wp_send_json_error( array( 'message' => '파일이 없습니다.' ), 400 ); }
+	$it = $items['files'][ $i ];
+	array_splice( $items['files'], $i, 1 );
+	md_care_save_items( $slug, $items );
+	md_care_unlink_rel( $it['file'] ?? '' );
+	wp_send_json_success( array() );
+}
+add_action( 'wp_ajax_md_care_file_delete', 'md_care_ajax_file_delete' );
+
+/** 받기 — 라운지에 로그인한 직원만 (PDF · 사진 · 영상은 브라우저에서 바로 열림) */
+function md_care_file_url( $slug, $i ) {
+	return add_query_arg( array( 'action' => 'md_care_file', 'slug' => $slug, 'i' => (int) $i, '_n' => wp_create_nonce( 'md_care_file' ) ), admin_url( 'admin-ajax.php' ) );
+}
+function md_care_ajax_file_get() {
+	if ( ! isset( $_GET['_n'] ) || ! wp_verify_nonce( wp_unslash( $_GET['_n'] ), 'md_care_file' ) ) { wp_die( '링크가 만료되었습니다. 화면을 새로고침한 뒤 다시 눌러 주세요.', '', array( 'response' => 403 ) ); }
+	if ( ! ( function_exists( 'md_sup_can_use' ) && md_sup_can_use() ) && ! md_care_can_edit() ) { wp_die( '라운지 직원만 받을 수 있습니다.', '', array( 'response' => 403 ) ); }
+	$slug = sanitize_key( wp_unslash( $_GET['slug'] ?? '' ) );
+	$topics = md_care_topics();
+	if ( ! isset( $topics[ $slug ] ) ) { wp_die( '주제가 없습니다.', '', array( 'response' => 404 ) ); }
+	$items = md_care_items( $slug, $topics[ $slug ] );
+	$it = $items['files'][ (int) ( $_GET['i'] ?? -1 ) ] ?? null;
+	$up = wp_upload_dir(); $path = $it ? rtrim( $up['basedir'], '/' ) . '/care/' . ltrim( str_replace( '..', '', (string) $it['file'] ), '/' ) : '';
+	if ( ! $it || ! is_file( $path ) ) { wp_die( '파일을 찾을 수 없습니다.', '', array( 'response' => 404 ) ); }
+	$ext  = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
+	$type = array( 'pdf' => 'application/pdf', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp', 'mp4' => 'video/mp4', 'txt' => 'text/plain; charset=utf-8' );
+	$inline = isset( $type[ $ext ] );
+	while ( ob_get_level() ) { ob_end_clean(); }
+	nocache_headers();
+	header( 'Content-Type: ' . ( $type[ $ext ] ?? 'application/octet-stream' ) );
+	header( 'X-Content-Type-Options: nosniff' );
+	header( 'Content-Disposition: ' . ( $inline ? 'inline' : 'attachment' ) . '; filename="file.' . $ext . '"; filename*=UTF-8\'\'' . rawurlencode( (string) $it['name'] ) );
+	header( 'Content-Length: ' . filesize( $path ) );
+	readfile( $path );
+	exit;
+}
+add_action( 'wp_ajax_md_care_file', 'md_care_ajax_file_get' );
+
 /** 삭제 · 목록에서 빼고 파일도 지운다 */
 function md_care_ajax_delete() {
 	list( $slug, $t ) = md_care_ajax_guard(); /* v8.8.1 · 삭제는 라운지 관리자(총괄 포함)만 (원장 지시) */
@@ -202,8 +280,10 @@ add_action( 'wp_ajax_md_care_move', 'md_care_ajax_move' );
 /** 편집본 초기화 · data 파일 목록으로 되돌린다 (올린 파일은 지우지 않음) */
 function md_care_ajax_reset() {
 	list( $slug, $t ) = md_care_ajax_guard();
+	$keep = (array) ( md_care_items( $slug, $t )['files'] ?? array() ); /* v9.45 · 올린 자료 파일 목록은 되돌리기에서도 남긴다 */
 	delete_option( 'md_care_items_' . $slug );
 	$f = md_care_store_path( $slug ); if ( is_file( $f ) ) @unlink( $f );
+	if ( $keep ) { $it = md_care_items( $slug, $t ); $it['files'] = $keep; md_care_save_items( $slug, $it ); }
 	wp_send_json_success( array( 'items' => md_care_items( $slug, $t ) ) );
 }
 add_action( 'wp_ajax_md_care_reset', 'md_care_ajax_reset' );

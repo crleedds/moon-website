@@ -99,6 +99,7 @@ function md_care_render_topic( $slug ) {
 	$simple   = function_exists( 'md_care_simple' ) && md_care_simple( $slug ); /* v9.44 · Clinical Cases */
 	if ( $simple ) { $has_text = false; $t['links'] = array(); }
 	$add_open = $simple && $can_add && ! $can_edit; /* 사진 추가 단추 없이 올리는 칸을 늘 보여 줌 (관리자는 「편집」 단추 그대로) */
+	$files = (array) ( $it['files'] ?? array() );
 	$first = $photos ? 'photos' : ( $videos ? 'videos' : ( $embeds ? 'embeds' : 'text' ) );
 	?>
 	<article class="mdc-topic" data-care-topic data-slug="<?php echo esc_attr( $slug ); ?>"<?php if ( $can_add ) : ?> data-care-ajax="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" data-care-nonce="<?php echo esc_attr( wp_create_nonce( 'md_care_edit' ) ); ?>"<?php endif; ?>>
@@ -132,6 +133,7 @@ function md_care_render_topic( $slug ) {
 				<?php if ( $photos || $can_add ) : ?><button type="button" class="mdc-tab" data-care-tab="photos">📷 사진 <b data-care-count="photo"><?php echo count( $photos ); ?></b></button><?php endif; ?>
 				<?php if ( $videos || $can_edit ) : ?><button type="button" class="mdc-tab" data-care-tab="videos">🎬 영상 <b data-care-count="video"><?php echo count( $videos ); ?></b></button><?php endif; ?>
 				<?php if ( $embeds ) : ?><button type="button" class="mdc-tab" data-care-tab="embeds">📊 자료 <b><?php echo count( $embeds ); ?></b></button><?php endif; ?>
+				<?php if ( $simple ) : ?><button type="button" class="mdc-tab" data-care-tab="files">📁 자료 <b><?php echo count( $files ); ?></b></button><?php endif; ?>
 				<?php if ( $has_text ) : ?><button type="button" class="mdc-tab" data-care-tab="text">📝 설명</button><?php endif; ?>
 			</nav>
 		</header>
@@ -176,6 +178,30 @@ function md_care_render_topic( $slug ) {
 					</figure>
 				<?php endforeach; ?>
 			</div>
+		</section>
+		<?php endif; ?>
+
+		<?php if ( $simple ) : /* v9.45 · 자료 — 파일 올리기 · 받기 (원장 지시) */ ?>
+		<section class="mdc-pane" data-care-pane="files">
+			<?php if ( $can_add ) : ?>
+			<label class="mdc-drop" data-care-drop="file" data-care-open>
+				<input type="file" multiple data-care-file="file">
+				<span class="mdc-drop__icon">📁</span><span class="mdc-drop__text"><b>자료 올리기</b> — 여기를 누르거나 파일을 끌어다 놓으세요 (PDF · PPT · 한글 · 엑셀 · 압축 등, 여러 개 가능)<br><small>한 파일 최대 <?php echo esc_html( size_format( md_care_file_max() ) ); ?> · 라운지에 로그인한 직원만 받을 수 있습니다</small></span>
+				<span class="mdc-drop__prog" data-care-prog hidden></span>
+			</label>
+			<?php endif; ?>
+			<?php if ( ! $files ) : ?><p class="mdc-files__none">아직 올린 자료가 없습니다.</p><?php else : ?>
+			<ul class="mdc-files">
+				<?php foreach ( array_reverse( $files, true ) as $fi => $f ) : $ext = strtoupper( pathinfo( (string) $f['file'], PATHINFO_EXTENSION ) ); ?>
+				<li class="mdc-file" data-care-fileitem="<?php echo (int) $fi; ?>">
+					<span class="mdc-file__ext"><?php echo esc_html( $ext ); ?></span>
+					<a class="mdc-file__name" href="<?php echo esc_url( md_care_file_url( $slug, $fi ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $f['name'] ); ?></a>
+					<small class="mdc-file__meta"><?php echo esc_html( size_format( (int) $f['size'] ) . ' · ' . ( $f['by_name'] ?? '' ) . ' · ' . substr( (string) ( $f['at'] ?? '' ), 0, 10 ) ); ?></small>
+					<?php if ( $can_edit ) : ?><button type="button" class="mdc-file__del" data-care-filedel="<?php echo (int) $fi; ?>" title="지우기">✕</button><?php endif; ?>
+				</li>
+				<?php endforeach; ?>
+			</ul>
+			<?php endif; ?>
 		</section>
 		<?php endif; ?>
 

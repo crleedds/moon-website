@@ -8,7 +8,7 @@ return array(
 	'group' => '임상 자료',
 	'icon' => '📷',
 	'title' => 'Clinical Cases',
-	'tagline' => '치료 전후 임상 사진 슬라이드',
+	'tagline' => '', /* v9.45 · 문구 없앰 (원장 지시) */
 	'center' => '공통',
 	'keywords' => '임상 케이스 전후 사진',
 	'updated' => '2026.09',
@@ -19,8 +19,7 @@ return array(
 	),
 	'videos' => array(
 	),
-	'embeds' => array(
-		array( 'title' => '임상 케이스 슬라이드', 'src' => 'https://docs.google.com/presentation/d/1ZUBVA5PAX2WPIzccIBfVWCHdTtAOLGbS1UgUP70yF_4/embed' ),
+	'embeds' => array( /* v9.45 · 구글 슬라이드 끼워 넣기 없앰 — 「자료」에는 파일을 올린다 (원장 지시) */
 	),
 	'links' => array(
 		array( 'label' => '임상 케이스 페이지', 'url' => '/임상-케이스/' ),

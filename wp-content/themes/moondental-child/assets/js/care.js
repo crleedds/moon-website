@@ -206,14 +206,14 @@
     var chain = Promise.resolve();
     list.forEach(function (file, i) {
       chain = chain.then(function () {
-        var fd = new FormData(); fd.append('kind', kind); fd.append('file', file, file.name);
+        var fd = new FormData(); fd.append('kind', kind); fd.append('file', file, file.name); /* v9.45 · kind=file 은 자료 */
         var p = kind === 'video' ? posterFromVideo(file).then(function (b) { if (b) fd.append('poster', b, 'poster.jpg'); }) : Promise.resolve();
         return p.then(function () {
           return post('md_care_upload', fd, function (pct) { prog.textContent = (i + 1) + '/' + list.length + ' · ' + file.name + ' · ' + pct + '%'; });
         }).then(function (d) { if (d.errors && d.errors.length) alert(d.errors.join('\n')); });
       });
     });
-    chain.then(function () { prog.textContent = '완료 — 화면을 새로 고칩니다'; reload(kind === 'video' ? 'videos' : 'photos'); }, function (m) { alert(m); prog.hidden = true; drop.classList.remove('is-busy'); });
+    chain.then(function () { prog.textContent = '완료 — 화면을 새로 고칩니다'; reload(kind === 'video' ? 'videos' : (kind === 'file' ? 'files' : 'photos')); }, function (m) { alert(m); prog.hidden = true; drop.classList.remove('is-busy'); });
   }
   topic.querySelectorAll('[data-care-file]').forEach(function (inp) {
     inp.addEventListener('change', function () { upload(inp.getAttribute('data-care-file'), inp.files); inp.value = ''; });
@@ -222,6 +222,14 @@
     ['dragenter', 'dragover'].forEach(function (ev) { d.addEventListener(ev, function (e) { e.preventDefault(); d.classList.add('is-over'); }); });
     ['dragleave', 'drop'].forEach(function (ev) { d.addEventListener(ev, function (e) { e.preventDefault(); d.classList.remove('is-over'); }); });
     d.addEventListener('drop', function (e) { upload(d.getAttribute('data-care-drop'), e.dataTransfer.files); });
+  });
+  /* v9.45 · 자료 파일 지우기 (라운지 관리자) — 편집 중이 아니어도 */
+  topic.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-care-filedel]');
+    if (!b) return;
+    var li = b.closest('[data-care-fileitem]'), name = li ? li.querySelector('.mdc-file__name').textContent : '';
+    if (!confirm('「' + name + '」 파일을 지울까요?')) return;
+    post('md_care_file_delete', { index: b.getAttribute('data-care-filedel') }).then(function () { reload('files'); }, function (m) { alert(m); });
   });
   var reset = topic.querySelector('[data-care-reset]');
   if (reset) reset.addEventListener('click', function () {

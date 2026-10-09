@@ -138,3 +138,13 @@
 
 /* v8.8 · 올린 사람 표시 */
 .mdc-card__by { color: var(--color-text-mute, #A89685); font-weight: 500; font-size: .8em; }
+
+/* v9.45 · Clinical Cases 자료 파일 */
+.mdc-files { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.mdc-file { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--color-border, #E8DDD3); border-radius: 10px; background: #fff; }
+.mdc-file__ext { flex: 0 0 auto; min-width: 3.2em; padding: 3px 6px; border-radius: 6px; background: var(--color-primary-soft, #FBF1EC); color: var(--color-primary-dark, #B86347); font-size: .72rem; font-weight: 800; text-align: center; }
+.mdc-file__name { flex: 1 1 auto; min-width: 0; font-weight: 600; color: inherit; word-break: break-all; }
+.mdc-file__meta { flex: 0 0 auto; color: var(--color-text-mute, #A89685); white-space: nowrap; }
+.mdc-file__del { flex: 0 0 auto; border: 1px solid var(--color-border, #E8DDD3); background: #fff; border-radius: 8px; width: 30px; height: 30px; cursor: pointer; color: #B3261E; }
+.mdc-files__none { color: var(--color-text-mute, #A89685); }
+@media (max-width: 640px) { .mdc-file { flex-wrap: wrap; } .mdc-file__meta { flex-basis: 100%; white-space: normal; } }
