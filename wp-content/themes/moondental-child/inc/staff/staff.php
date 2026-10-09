@@ -398,7 +398,7 @@ function md_staff_dw_dayoff_at() {
 	return is_array( $o ) ? (string) ( $o['at'] ?? '' ) : '';
 }
 
-/** 덴트웹 직원 번호 → 달력에 쓸 이름 · 라운지 직원 id. 재직 중이고 명단과 이어진 사람만(퇴사자 · 가상 의사 · 공용 계정 제외) */
+/** 덴트웹 직원 번호 → 달력에 쓸 이름(의료진은 「이름 원장님」 · 원장 지시) · 라운지 직원 id. 재직 중이고 명단과 이어진 사람만(퇴사자 · 가상 의사 · 공용 계정 제외) */
 function md_staff_dw_who( $dw ) {
 	static $map = null;
 	if ( null === $map ) {
@@ -406,7 +406,7 @@ function md_staff_dw_who( $dw ) {
 		foreach ( (array) $wpdb->get_results( 'SELECT id, name, dept, position, dw_id FROM ' . md_staff_table() . ' WHERE dw_id > 0 AND active = 1' ) as $r ) {
 			if ( md_staff_is_shared( $r ) ) { continue; }
 			$pos = trim( (string) $r->position );
-			$map[ (int) $r->dw_id ] = array( 'sid' => (int) $r->id, 'name' => '의료진' === $r->dept ? trim( $r->name . ' ' . ( '' === $pos || false !== mb_strpos( $pos, '원장' ) ? '원장' : $pos ) ) : $r->name );
+			$map[ (int) $r->dw_id ] = array( 'sid' => (int) $r->id, 'name' => '의료진' === $r->dept ? trim( $r->name . ' ' . ( '' === $pos || false !== mb_strpos( $pos, '원장' ) ? '원장님' : $pos ) ) : $r->name );
 		}
 	}
 	return $map[ (int) $dw ] ?? null;
