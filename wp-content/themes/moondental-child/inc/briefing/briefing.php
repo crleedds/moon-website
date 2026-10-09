@@ -215,7 +215,7 @@ function md_brief_html( $x, $mail = false ) {
 		array( '　공단부담', $day['gong'] ?? 0, $lw['gong'] ?? 0, 'won' ),
 		array( '　본인부담', $day['bon'] ?? 0, $lw['bon'] ?? 0, 'won' ),
 		array( '　비급여', $day['bi'] ?? 0, $lw['bi'] ?? 0, 'won' ),
-		array( '수납 (카드 · 현금 · 통장)', $day['paid'] ?? 0, $lw['paid'] ?? 0, 'won' ),
+		array( '수납', $day['paid'] ?? 0, $lw['paid'] ?? 0, 'won' ),
 	);
 	foreach ( $rows as $r ) {
 		$f = 'won' === $r[3] ? 'md_brief_won' : function ( $v ) use ( $r ) { return number_format( (float) $v ) . $r[3]; };
@@ -230,7 +230,7 @@ function md_brief_html( $x, $mail = false ) {
 	}
 
 	$h .= '<h3 style="font-size:16px;margin:22px 0 6px">이번 달 누적 (' . esc_html( date( 'n/j', strtotime( $m['from'] ?? $x['date'] ) ) . '~' . date( 'n/j', strtotime( $m['to'] ?? $x['date'] ) ) ) . ' · 진료 ' . (int) ( $m['days'] ?? 0 ) . '일)</h3>';
-	$h .= '<table style="border-collapse:collapse;width:100%"><tr><th ' . $th . '></th><th ' . $thr . '>이번 달</th><th ' . $thr . '>지난달 같은 기간</th><th ' . $thr . '>작년 같은 기간</th></tr>';
+	$h .= '<table style="border-collapse:collapse;width:100%"><tr><th ' . $th . '></th><th ' . $thr . '>이번 달</th><th ' . $thr . '>지난달</th><th ' . $thr . '>작년</th></tr>';
 	foreach ( array( array( '총진료비', 'total', true ), array( '비급여', 'bi', true ), array( '내원', 'visits', false ), array( '신환', 'new', false ) ) as $r ) {
 		$f = $r[2] ? 'md_brief_won' : function ( $v ) { return number_format( (float) $v ) . '명'; };
 		$h .= '<tr><td ' . $td . '>' . esc_html( $r[0] ) . '</td><td ' . $tdr . '><b>' . esc_html( $f( $m[ $r[1] ] ?? 0 ) ) . '</b></td><td ' . $tdr . '>' . esc_html( $f( $mp[ $r[1] ] ?? 0 ) ) . ' ' . md_brief_delta( $m[ $r[1] ] ?? 0, $mp[ $r[1] ] ?? 0 ) . '</td><td ' . $tdr . '>' . esc_html( $f( $ly[ $r[1] ] ?? 0 ) ) . ' ' . md_brief_delta( $m[ $r[1] ] ?? 0, $ly[ $r[1] ] ?? 0 ) . '</td></tr>';
@@ -255,7 +255,7 @@ function md_brief_html( $x, $mail = false ) {
 	/* v9.9 · 원장별 지표 — 이번 달 (지난달 같은 기간 · 작년 같은 기간 대비) */
 	if ( ! empty( $x['doc_cmp'] ) ) {
 		$tdr = 'style="padding:6px 6px;border-bottom:1px solid #eee;text-align:right;vertical-align:top"'; /* 좁은 화면에서 줄바꿈 */
-		$h .= '<h3 style="font-size:16px;margin:22px 0 6px">원장별 이번 달</h3><table style="border-collapse:collapse;width:100%"><tr><th ' . $th . '>원장</th><th ' . $thr . '>내원</th><th ' . $thr . '>환자당 진료비</th><th ' . $thr . '>비급여 비율</th><th ' . $thr . '>신환</th></tr>';
+		$h .= '<h3 style="font-size:16px;margin:22px 0 6px">원장별 이번 달</h3><table style="border-collapse:collapse;width:100%"><tr><th ' . $th . '>원장</th><th ' . $thr . '>내원</th><th ' . $thr . '>인당</th><th ' . $thr . '>비급여</th><th ' . $thr . '>신환</th></tr>';
 		foreach ( $x['doc_cmp'] as $r ) {
 			$c0 = (array) ( $r['cur'] ?? array() ); $cp = (array) ( $r['prev'] ?? array() ); $cl = (array) ( $r['ly'] ?? array() );
 			$avg = function ( $a ) { return ! empty( $a['visits'] ) ? (float) $a['total'] / (float) $a['visits'] : 0; };
@@ -346,6 +346,8 @@ function md_brief_styles() {
 		.mdb-tabs a{padding:8px 14px;border-radius:999px;background:#f1f3f2;color:#333;text-decoration:none;font-weight:600;font-size:14px}
 		.mdb-tabs a.is-on{background:#2e7d5b;color:#fff}
 		.mdb-wrap{overflow-x:auto}
+		.mdb-wrap table td,.mdb-wrap table th{white-space:normal!important}
+		@media(max-width:600px){.mdb-wrap table td,.mdb-wrap table th{padding:4px 3px!important;font-size:13px}}
 		.mdb-table{border-collapse:collapse;width:100%;font-size:14px}
 		.mdb-table th,.mdb-table td{padding:7px 8px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}
 		.mdb-table th{color:#666;font-weight:600;white-space:nowrap}
