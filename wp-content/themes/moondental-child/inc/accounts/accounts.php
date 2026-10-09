@@ -387,7 +387,6 @@ function md_acc_render_join() {
 	$v   = function ( $k ) use ( $f ) { return isset( $f[ $k ] ) ? $f[ $k ] : ''; };
 	$er  = function ( $k ) use ( $e ) { return isset( $e[ $k ] ) ? '<em class="mda-err" role="alert">' . esc_html( $e[ $k ] ) . '</em>' : ''; };
 	$t   = time();
-	$depts = function_exists( 'md_staff_depts' ) ? md_staff_depts() : array();
 	?>
 	<div class="mds-gate"><div class="mds-gate__box mda-join">
 		<span class="mds-gate__eyebrow">한아의료재단 문치과병원 · 직원 라운지</span>
@@ -403,9 +402,7 @@ function md_acc_render_join() {
 
 			<fieldset class="mda-set"><legend>내 정보</legend>
 				<label class="mda-f"><span>이름 <b>*</b></span><input type="text" name="jname" required maxlength="20" autocomplete="name" value="<?php echo esc_attr( $v( 'jname' ) ); ?>" placeholder="홍길동"><?php echo $er( 'name' ); // phpcs:ignore ?></label>
-				<?php if ( $depts ) : ?>
-				<label class="mda-f"><span>부서 <small>선택</small></span><select name="dept"><option value="">모르겠어요 / 나중에</option><?php foreach ( $depts as $d ) : if ( '의료진' === $d ) continue; ?><option value="<?php echo esc_attr( $d ); ?>" <?php selected( $d, $v( 'dept' ) ); ?>><?php echo esc_html( $d ); ?></option><?php endforeach; ?></select></label>
-				<?php endif; ?>
+				<?php /* v9.32 · 가입 때 부서는 묻지 않는다 (원장 지시) — 승인할 때 직원 명단과 맞추면서 관리자가 정한다 */ ?>
 				<label class="mda-f"><span>이메일 <b>*</b></span><input type="email" name="email" required maxlength="120" autocomplete="email" inputmode="email" value="<?php echo esc_attr( $v( 'email' ) ); ?>" placeholder="name@example.com"><?php echo $er( 'email' ); // phpcs:ignore ?></label>
 				<label class="mda-f"><span>휴대전화 <b>*</b></span><input type="tel" name="phone" required maxlength="20" autocomplete="tel" inputmode="numeric" value="<?php echo esc_attr( $v( 'phone' ) ); ?>" placeholder="010-1234-5678" data-mda-phone><?php echo $er( 'phone' ); // phpcs:ignore ?></label>
 			</fieldset>
@@ -1007,17 +1004,7 @@ function md_acc_render_row( $r ) {
 			</form>
 		</details>
 	<?php }
-	if ( (int) $r->active && ! ( $u && (int) $u->ID === get_current_user_id() ) ) {
-		$cmsg = $r->name . ' 님을 퇴사 처리할까요? 홈페이지 명단 · 달력 · 만족도 담당자 목록에서 빠지고' . ( $u ? ', 계정은 사용 중지됩니다.' : '니다.' ); ?>
-		<details class="mda-manage mda-retire"><summary>퇴사 처리</summary>
-			<form method="post" class="mda-inline" data-mda-confirm="<?php echo esc_attr( $cmsg ); ?>">
-				<?php md_acc_hidden( 'retire' ); ?><input type="hidden" name="sid" value="<?php echo (int) $r->id; ?>">
-				<label class="mda-f mda-f--inline"><span>퇴사일</span><input type="date" name="left_on" value="<?php echo esc_attr( current_time( 'Y-m-d' ) ); ?>"></label>
-				<button type="submit" class="mds-btn mda-btn-danger">퇴사 처리</button>
-			</form>
-			<p class="mda-note">홈페이지 의료진 페이지 명단 · 라운지 달력(생일 · 입사 기념일) · 만족도 조사 담당자 목록에서 한 번에 빠지고<?php echo $u ? ', 계정은 사용 중지되어 로그인돼 있던 기기에서도 바로 나가집니다' : ''; ?>. 복직하면 그대로 돌아옵니다.</p>
-		</details>
-	<?php }
+	/* v9.32 · 「퇴사 처리」 접이식은 없앰 (원장: 명단의 휴지통이면 충분) — 휴지통으로 지우면 라운지 계정도 같이 중지 (inc/staff delete). 덴트웹 퇴사일 연동 · 「퇴사한 직원」 복직 · 완전 삭제는 그대로 */
 	echo '</div>';
 }
 

@@ -433,8 +433,17 @@ function md_staff_handle_post() {
 			$back .= '#s' . $sid;
 			break;
 		case 'delete':
+			/* v9.32 · 「퇴사 처리」 단추를 없앰 (원장: 휴지통이면 충분) — 지울 때 라운지 계정이 있으면 같이 사용 중지, 보호 규칙은 퇴사 처리 때와 같게 */
+			global $wpdb;
+			$acc = null;
+			if ( function_exists( 'md_acc_staff_user_map' ) ) { $um = md_acc_staff_user_map(); $acc = isset( $um[ $id ] ) ? $um[ $id ] : null; }
+			if ( $acc && (int) $acc->ID === get_current_user_id() ) { $back = add_query_arg( 'err', '내 줄은 다른 관리자가 지워야 합니다.', $back ); break; }
+			if ( $acc && user_can( $acc, 'md_supply_manage' ) && function_exists( 'md_acc_can_grant_admin' ) && ! md_acc_can_grant_admin() ) { $back = add_query_arg( 'err', '라운지 관리자 계정이 있는 직원은 원장님만 지울 수 있습니다.', $back ); break; }
+			$nm = (string) $wpdb->get_var( $wpdb->prepare( 'SELECT name FROM ' . md_staff_table() . ' WHERE id = %d', $id ) );
+			if ( $acc && function_exists( 'md_acc_turn_off' ) && 'active' === md_acc_status( $acc ) ) { md_acc_turn_off( $acc ); }
 			md_staff_delete( $id );
 			md_staff_sync_site();
+			if ( function_exists( 'md_acc_log' ) ) { md_acc_log( '명단에서 삭제', $nm . ( $acc ? ' · 계정 사용 중지' : '' ) ); }
 			break;
 	}
 	wp_safe_redirect( $back );
@@ -476,7 +485,7 @@ function md_staff_render_row_form( $r, $depts ) {
 		<button type="submit" class="mds-btn mds-btn--fill mdst-save"><?php echo $edit ? '저장' : '추가'; ?></button>
 	</form>
 	<?php if ( $edit ) : ?>
-	<form method="post" class="mdst-del" onsubmit="return confirm('<?php echo esc_js( $r->name ); ?> 님을 명단에서 지울까요? 홈페이지 의료진 페이지와 달력에서도 함께 빠집니다.');">
+	<form method="post" class="mdst-del" onsubmit="return confirm('<?php echo esc_js( $r->name ); ?> 님을 명단에서 지울까요? 홈페이지 의료진 페이지와 달력에서도 함께 빠지고, 라운지 계정이 있으면 사용 중지됩니다.');">
 		<input type="hidden" name="md_staff_action" value="delete"><input type="hidden" name="md_staff_nonce" value="<?php echo esc_attr( wp_create_nonce( 'md_staff_delete' ) ); ?>"><input type="hidden" name="sid" value="<?php echo (int) $r->id; ?>">
 		<button type="submit" class="mdst-delbtn" title="명단에서 삭제">🗑</button>
 	</form>
