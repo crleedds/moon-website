@@ -30,11 +30,12 @@ function md_sec_settings() {
 }
 
 /** 이메일 인증이 필요한 화면 — v9.17 · 총괄 관리자가 직원 정보 › 병원 인터넷에서 고른다 (원장 지시). 안 골랐으면 기본값 */
-function md_sec_sensitive_default() { return array( 'minichart', 'survey_result', 'brief', 'survey' ); }
+function md_sec_sensitive_default() { return array( 'minichart', 'survey_result', 'brief', 'survey', 'recall' ); }
 function md_sec_sensitive() {
 	$o = get_option( 'md_sec_settings', array() );
-	if ( is_array( $o ) && isset( $o['sensitive_tabs'] ) && is_array( $o['sensitive_tabs'] ) ) { return array_values( array_map( 'sanitize_key', $o['sensitive_tabs'] ) ); }
-	return md_sec_sensitive_default();
+	$t = is_array( $o ) && isset( $o['sensitive_tabs'] ) && is_array( $o['sensitive_tabs'] ) ? array_values( array_map( 'sanitize_key', $o['sensitive_tabs'] ) ) : md_sec_sensitive_default();
+	if ( in_array( 'brief', $t, true ) && ! in_array( 'recall', $t, true ) ) { $t[] = 'recall'; } /* v9.38 · 리콜 명단(환자 이름)은 경영 브리핑과 같이 */
+	return $t;
 }
 
 function md_sec_ip() {
@@ -113,9 +114,10 @@ function md_sec_user_tabs( $u ) {
 	foreach ( md_sec_tab_list() as $k => $a ) {
 		/* 관리 전용 탭(직원 정보 · 만족도 결과 · 경영 브리핑)은 라운지 관리자만 가질 수 있다 */
 		if ( ! empty( $a['manage'] ) && ! $mgr ) { continue; }
+		if ( 'recall' === $k && $mgr ) { $out[] = $k; continue; } /* v9.38 · 리콜 명단은 라운지 관리자에게 늘 열림(경영 브리핑에도 있으니) */
 		if ( is_array( $set ) ) { if ( in_array( $k, $set, true ) ) { $out[] = $k; } continue; }
-		/* 정하지 않았으면 예전 그대로 — 미니차트는 라운지 관리자만 */
-		if ( 'minichart' === $k && ! $mgr ) { continue; }
+		/* 정하지 않았으면 예전 그대로 — 미니차트 · 리콜은 직원에게 정해 줘야 열린다 */
+		if ( in_array( $k, array( 'minichart', 'recall' ), true ) && ! $mgr ) { continue; }
 		$out[] = $k;
 	}
 	return $out;

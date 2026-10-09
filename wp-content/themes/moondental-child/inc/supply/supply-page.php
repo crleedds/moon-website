@@ -133,6 +133,12 @@ function md_sup_apps() {
 			'desc'   => '어제 진료 · 매출 · 예약 · 진료 중단 · 리콜 · 노쇼 환자',
 			'manage' => true,
 		),
+		// v9.38 · 리콜 (inc/briefing) — 확인 전화 · 진료 중단 · 리콜 · 노쇼 명단만. 누가 보는지는 직원별 탭 권한 (원장 지시 2026-10-09)
+		'recall' => array(
+			'label' => '리콜',
+			'icon'  => '🔔',
+			'desc'  => '확인 전화 · 진료 중단 · 리콜 · 노쇼 — 연락할 환자 명단과 「연락함」 표시',
+		),
 		// v5.8 · 내 정보 (inc/accounts) — 머리의 아이디를 누르면 들어온다
 		'me' => array(
 			'label'  => '내 정보 · 비밀번호',
@@ -1085,6 +1091,8 @@ function md_sup_render_page() {
 		md_survey_render_result(); // v4.19.7 · 만족도 응답·집계·설정 (관리자)
 	} elseif ( 'brief' === $app && function_exists( 'md_brief_render' ) && md_sup_can_manage() ) {
 		md_brief_render(); // v7.7 · 경영 브리핑
+	} elseif ( 'recall' === $app && function_exists( 'md_brief_render_recall' ) ) {
+		md_brief_render_recall(); // v9.38 · 리콜 명단 (권한은 inc/security 탭 권한 + md_brief_can_recall)
 	} elseif ( 'me' === $app && function_exists( 'md_acc_render_me' ) ) {
 		md_acc_render_me(); // v5.8 · 내 정보
 	} elseif ( 'forms' === $app && function_exists( 'md_forms_render' ) ) {

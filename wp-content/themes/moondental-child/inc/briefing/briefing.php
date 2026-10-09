@@ -7,8 +7,8 @@
  *  여기서는 저장하고, 받는 사람에게 브리핑 메일을 보낸다(숫자 · 인원수만, 환자 이름은 메일에 넣지 않음).
  *
  *  화면 (app=brief)
- *   - 브리핑 · 받는 사람  : 원장 계정만 (매출)
- *   - 진료 중단 · 리콜 · 노쇼 : 라운지 관리자도 (데스크가 연락하고 「연락함」 표시)
+ *   - 브리핑 · 받는 사람 · 명단 : 라운지 관리자 모두 (v9.38 · 2026-10-09 원장 지시 — 전엔 매출은 총괄 관리자만)
+ *   - 타일 「리콜」(app=recall) : 확인 전화 · 진료 중단 · 리콜 · 노쇼 명단만(매출 없음) — 누가 보는지는 직원별 탭 권한(직원 정보 › 권한), 연락하고 「연락함」 표시
  *
  *  저장: wp_md_brief (진료일별 숫자 JSON), 옵션 md_brief_lists (가장 최근 명단 — 매일 바뀜),
  *        md_brief_to (받는 사람), md_brief_marks (연락함 표시, 90일 보관)
@@ -39,8 +39,12 @@ function md_brief_maybe_install() {
 }
 add_action( 'init', 'md_brief_maybe_install', 22 );
 
-function md_brief_can_money() { return function_exists( 'md_sup_is_owner' ) && md_sup_is_owner(); }
+function md_brief_can_money() { return function_exists( 'md_sup_can_manage' ) && md_sup_can_manage(); } /* v9.38 · 라운지 관리자 모두 (원장 지시 — 전엔 총괄만) */
 function md_brief_can_lists() { return function_exists( 'md_sup_can_manage' ) && md_sup_can_manage(); }
+/** 「리콜」 타일(명단만) — 라운지 관리자, 또는 탭 권한으로 리콜을 받은 직원 */
+function md_brief_can_recall() { return md_brief_can_lists() || ( function_exists( 'md_sec_can_tab' ) && md_sec_can_tab( 'recall' ) ); }
+/** 지금 그리는 화면이 brief 인지 recall 인지 — 링크 · 되돌아갈 주소에 쓴다 */
+function md_brief_app( $set = null ) { static $app = 'brief'; if ( null !== $set ) { $app = 'recall' === $set ? 'recall' : 'brief'; } return $app; }
 
 /* ============================================================
  * 데이터
@@ -190,7 +194,7 @@ function md_brief_send( $d, $to = null ) {
 
 function md_brief_lounge_url( $args = array() ) {
 	$u = home_url( '/직원/' );
-	return add_query_arg( array( 'app' => 'brief' ) + $args, $u );
+	return add_query_arg( array( 'app' => md_brief_app() ) + $args, $u );
 }
 
 /** 브리핑 본문 — 메일과 화면이 같이 쓴다 ($mail 이면 명단은 인원수만) */
@@ -284,11 +288,12 @@ function md_brief_handle() {
 	$act = sanitize_key( wp_unslash( $_POST['md_brief'] ) );
 	if ( ! isset( $_POST['md_brief_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['md_brief_nonce'] ), 'md_brief_' . $act ) ) { wp_die( '요청이 만료되었습니다. 뒤로 가서 다시 시도해 주세요.' ); }
 	$tab  = isset( $_POST['tab'] ) ? sanitize_key( wp_unslash( $_POST['tab'] ) ) : '';
+	md_brief_app( isset( $_POST['ap'] ) ? sanitize_key( wp_unslash( $_POST['ap'] ) ) : 'brief' ); /* v9.38 · 리콜 타일에서 눌렀으면 거기로 돌아간다 */
 	$back = md_brief_lounge_url( $tab ? array( 'bt' => $tab ) : array() );
 	$msg  = '';
 
 	if ( in_array( $act, array( 'add_to', 'del_to', 'test_mail' ), true ) ) {
-		if ( ! md_brief_can_money() ) { wp_die( '원장 계정만 할 수 있습니다.' ); }
+		if ( ! md_brief_can_money() ) { wp_die( '라운지 관리자만 할 수 있습니다.' ); }
 		$list = md_brief_recipients();
 		if ( 'add_to' === $act ) {
 			$m = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
@@ -305,7 +310,7 @@ function md_brief_handle() {
 			$msg = $n ? 'o:가장 최근 브리핑(' . $d[0] . ')을 ' . $n . '명에게 보냈습니다.' : 'e:보내지 못했습니다' . ( $d ? ' (받는 사람을 확인해 주세요).' : ' — 아직 받은 브리핑이 없습니다.' );
 		}
 	} elseif ( 'mark' === $act ) {
-		if ( ! md_brief_can_lists() ) { wp_die( '라운지 관리자만 할 수 있습니다.' ); }
+		if ( ! md_brief_can_recall() ) { wp_die( '이 명단을 쓸 권한이 없습니다.' ); }
 		$k = sanitize_text_field( wp_unslash( $_POST['k'] ?? '' ) );
 		$marks = (array) get_option( 'md_brief_marks', array() );
 		$cut   = date( 'Y-m-d', strtotime( current_time( 'Y-m-d' ) . ' -90 days' ) );
@@ -334,15 +339,7 @@ add_action( 'template_redirect', 'md_brief_handle', 1 );
 /* ============================================================
  * 화면 (app=brief)
  * ============================================================ */
-function md_brief_render() {
-	if ( ! md_brief_can_lists() ) { echo '<div class="mds-card"><div class="mds-empty">관리자만 볼 수 있습니다.</div></div>'; return; }
-	$money = md_brief_can_money();
-	$tabs  = array();
-	if ( $money ) { $tabs['day'] = '📊 브리핑'; }
-	$tabs += array( 'confirm' => '📞 확인 전화', 'dropout' => '🦷 진료 중단', 'recall' => '🔔 리콜', 'noshow' => '🚫 노쇼' );
-	if ( $money ) { $tabs['to'] = '✉️ 받는 사람'; }
-	$tab = isset( $_GET['bt'] ) ? sanitize_key( wp_unslash( $_GET['bt'] ) ) : '';
-	if ( ! isset( $tabs[ $tab ] ) ) { $tab = array_key_first( $tabs ); }
+function md_brief_styles() {
 	?>
 	<style>
 		.mdb-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
@@ -372,10 +369,41 @@ function md_brief_render() {
 		.mdb-perf small{color:#6b7c74}
 	</style>
 	<?php
+}
+
+function md_brief_flash() {
 	if ( isset( $_GET['bm'] ) ) {
 		$m = (string) wp_unslash( $_GET['bm'] );
 		echo '<div class="mds-notice' . ( 0 === strpos( $m, 'e:' ) ? ' mds-notice--warn' : '' ) . '">' . esc_html( substr( $m, 2 ) ) . '</div>';
 	}
+}
+
+/** v9.38 · 타일 「리콜」(app=recall) — 확인 전화 · 진료 중단 · 리콜 · 노쇼 명단만(매출 없음). 누가 보는지는 직원 정보 › 권한의 탭 표 (원장 지시 2026-10-09) */
+function md_brief_render_recall() {
+	md_brief_app( 'recall' );
+	if ( ! md_brief_can_recall() ) { echo '<div class="mds-card"><div class="mds-empty">이 화면을 볼 권한이 없습니다. 원장님께 말씀해 주세요.</div></div>'; return; }
+	$tabs = array( 'confirm' => '📞 확인 전화', 'dropout' => '🦷 진료 중단', 'recall' => '🔔 리콜', 'noshow' => '🚫 노쇼' );
+	$tab  = isset( $_GET['bt'] ) ? sanitize_key( wp_unslash( $_GET['bt'] ) ) : '';
+	if ( ! isset( $tabs[ $tab ] ) ) { $tab = 'confirm'; }
+	md_brief_styles();
+	md_brief_flash();
+	echo '<nav class="mdb-tabs">';
+	foreach ( $tabs as $k => $label ) { echo '<a class="' . ( $k === $tab ? 'is-on' : '' ) . '" href="' . esc_url( md_brief_lounge_url( array( 'bt' => $k ) ) ) . '">' . esc_html( $label ) . '</a>'; }
+	echo '</nav>';
+	md_brief_render_list( $tab );
+}
+
+function md_brief_render() {
+	if ( ! md_brief_can_lists() ) { echo '<div class="mds-card"><div class="mds-empty">관리자만 볼 수 있습니다.</div></div>'; return; }
+	$money = md_brief_can_money();
+	$tabs  = array();
+	if ( $money ) { $tabs['day'] = '📊 브리핑'; }
+	$tabs += array( 'confirm' => '📞 확인 전화', 'dropout' => '🦷 진료 중단', 'recall' => '🔔 리콜', 'noshow' => '🚫 노쇼' );
+	if ( $money ) { $tabs['to'] = '✉️ 받는 사람'; }
+	$tab = isset( $_GET['bt'] ) ? sanitize_key( wp_unslash( $_GET['bt'] ) ) : '';
+	if ( ! isset( $tabs[ $tab ] ) ) { $tab = array_key_first( $tabs ); }
+	md_brief_styles();
+	md_brief_flash();
 	echo '<nav class="mdb-tabs">';
 	foreach ( $tabs as $k => $label ) { echo '<a class="' . ( $k === $tab ? 'is-on' : '' ) . '" href="' . esc_url( md_brief_lounge_url( array( 'bt' => $k ) ) ) . '">' . esc_html( $label ) . '</a>'; }
 	echo '</nav>';
@@ -451,7 +479,7 @@ function md_brief_render_list( $tab ) {
 					<td><?php echo esc_html( $r['why'] ); ?></td>
 					<td style="white-space:nowrap"><?php echo esc_html( $r['date'] ); ?></td>
 					<td style="white-space:nowrap"><?php echo esc_html( $r['last'] ); ?></td>
-					<td><form method="post" style="margin:0"<?php echo $mk ? ' onsubmit="return confirm(\'연락함 표시를 지울까요?\')"' : ''; ?>><input type="hidden" name="md_brief" value="mark"><input type="hidden" name="tab" value="<?php echo esc_attr( $tab ); ?>"><input type="hidden" name="k" value="<?php echo esc_attr( $k ); ?>"><?php wp_nonce_field( 'md_brief_mark', 'md_brief_nonce' ); ?>
+					<td><form method="post" style="margin:0"<?php echo $mk ? ' onsubmit="return confirm(\'연락함 표시를 지울까요?\')"' : ''; ?>><input type="hidden" name="md_brief" value="mark"><input type="hidden" name="tab" value="<?php echo esc_attr( $tab ); ?>"><input type="hidden" name="k" value="<?php echo esc_attr( $k ); ?>"><input type="hidden" name="ap" value="<?php echo esc_attr( md_brief_app() ); ?>"><?php wp_nonce_field( 'md_brief_mark', 'md_brief_nonce' ); ?>
 						<button type="submit" class="mdb-mark<?php echo $mk ? ' is-on' : ''; ?>" title="<?php echo $mk ? '다시 누르면 지움' : '연락했으면 누르기'; ?>"><?php if ( $mk ) : ?>✓ <?php echo esc_html( $mk['d'] ); ?><span class="mdb-mark__by"><?php echo esc_html( $mk['by'] ); ?></span><?php else : ?>연락함<?php endif; ?></button></form></td>
 				</tr>
 			<?php endforeach; ?>
@@ -592,7 +620,7 @@ function md_brief_handle_download() {
 	if ( empty( $_GET['md_brief_dl'] ) ) { return; }
 	$what = sanitize_key( wp_unslash( $_GET['md_brief_dl'] ) );
 	if ( ! isset( $_GET['_n'] ) || ! wp_verify_nonce( wp_unslash( $_GET['_n'] ), 'md_brief_dl' ) ) { wp_die( '링크가 만료되었습니다. 화면을 새로고침한 뒤 다시 눌러 주세요.' ); }
-	if ( 'day' === $what ? ! md_brief_can_money() : ! md_brief_can_lists() ) { wp_die( 'day' === $what ? '원장 계정만 받을 수 있습니다.' : '라운지 관리자만 받을 수 있습니다.', '권한 없음', array( 'response' => 403 ) ); }
+	if ( 'day' === $what ? ! md_brief_can_money() : ! md_brief_can_recall() ) { wp_die( 'day' === $what ? '라운지 관리자만 받을 수 있습니다.' : '이 명단을 받을 권한이 없습니다.', '권한 없음', array( 'response' => 403 ) ); }
 	if ( ! function_exists( 'md_inv_xlsx' ) ) { wp_die( '엑셀 모듈(재료실)이 꺼져 있습니다.' ); }
 	if ( 'day' === $what ) {
 		$bin = md_brief_xlsx_day();  $name = '경영브리핑_' . current_time( 'Ymd' ) . '.xlsx';
