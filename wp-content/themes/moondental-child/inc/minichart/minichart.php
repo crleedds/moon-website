@@ -1485,7 +1485,7 @@ function md_mc_inline_block( $r, $d, $field, $bare = false ) {
 	<form method="post" class="<?php echo $bare ? 'mc-edit mc-edit--bare' . ( 'salute' === $field ? ' mc-salute' : '' ) : 'mc-block mc-edit ' . esc_attr( $v['cls'] ); ?>"<?php echo $bare ? '' : ' id="f-' . esc_attr( $field ) . '"'; ?> action="<?php echo esc_url( md_mc_url() ); ?>" data-mc-fast="field" data-mc-field="<?php echo esc_attr( $field ); ?>">
 		<?php md_mc_nonce_fields( 'field', $r->id ); ?><input type="hidden" name="field" value="<?php echo esc_attr( $field ); ?>"><input type="hidden" name="rev" value="<?php echo (int) $r->rev; ?>">
 		<?php if ( $bare && 'salute' !== $field ) : ?><p class="mc-edit__hint mc-sub">아래 내용을 누르면 예전 것까지 바로 고칠 수 있습니다</p><?php elseif ( ! $bare ) : ?>
-		<h3 class="mc-block__h"><span class="mc-edit__head"><?php echo esc_html( $v['head'] ); ?></span> <small class="mc-sub">눌러서 바로 고치기</small></h3>
+		<h3 class="mc-block__h"><span class="mc-edit__head"><?php echo esc_html( $v['head'] ); ?></span></h3>
 		<?php endif; ?>
 		<div class="mc-block__b mc-edit__view" data-mc-edit-open title="눌러서 고치기"><?php echo $v['html']; // phpcs:ignore -- 안에서 이스케이프 ?></div>
 		<div class="mc-edit__form" hidden>
