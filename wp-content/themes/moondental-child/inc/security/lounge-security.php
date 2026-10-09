@@ -3,7 +3,7 @@
  * v8.0 · 직원 라운지 보안 — 탭별 접근 권한 · 환자 정보 화면 이메일 인증 · 기기 관리 · 미니차트 열람 기록
  * (원장 지시 2026-10-06)
  *
- *  1) 탭 권한: 계정마다 라운지 탭(앱)을 켜고 끈다. 총괄 관리자(md_supply_owner · v8.2)는 늘 전부. 직원 정보 › 권한 탭.
+ *  1) 탭 권한: 계정마다 라운지 탭(앱)을 켜고 끈다. 홈페이지 관리자(md_supply_owner · v8.2)는 늘 전부. 직원 정보 › 권한 탭.
  *     설정은 「접근 권한 · 보안」 탭(원장만) — 사용자 메타 md_lounge_tabs. 정하지 않은 계정은 예전 그대로
  *     (관리 전용 탭은 라운지 관리자, 미니차트는 라운지 관리자만).
  *  2) 환자 정보 화면(미니차트 · 만족도 결과 · 경영 브리핑 · 접수수납목록)은 병원 밖에서 열 때 이메일 코드 6자리.
@@ -29,7 +29,7 @@ function md_sec_settings() {
 	return is_array( $o ) ? array_merge( $d, $o ) : $d;
 }
 
-/** 이메일 인증이 필요한 화면 — v9.17 · 총괄 관리자가 직원 정보 › 병원 인터넷에서 고른다 (원장 지시). 안 골랐으면 기본값 */
+/** 이메일 인증이 필요한 화면 — v9.17 · 홈페이지 관리자가 직원 정보 › 병원 인터넷에서 고른다 (원장 지시). 안 골랐으면 기본값 */
 function md_sec_sensitive_default() { return array( 'minichart', 'survey_result', 'brief', 'survey', 'recall' ); }
 function md_sec_sensitive() {
 	$o = get_option( 'md_sec_settings', array() );
@@ -62,14 +62,14 @@ function md_sec_device_label() {
 	return mb_substr( (string) ( $_SERVER['HTTP_USER_AGENT'] ?? '' ), 0, 60 );
 }
 
-/** 총괄 관리자 (v8.2 · md_supply_owner — 늘 모든 탭 · 관리자 등급 정하기 · 모든 기기 끊기). 홈페이지 관리자도 같은 대우 */
+/** 홈페이지 관리자 (v8.2 · md_supply_owner — 늘 모든 탭 · 관리자 등급 정하기 · 모든 기기 끊기). 홈페이지 관리자도 같은 대우 */
 function md_sec_is_owner_user( $u ) {
 	if ( ! $u || ! $u->exists() ) { return false; }
 	return user_can( $u, 'md_supply_owner' ) || user_can( $u, 'manage_options' );
 }
 function md_sec_is_mgr_user( $u ) { return $u && $u->exists() && ( user_can( $u, 'md_supply_manage' ) || md_sec_is_owner_user( $u ) ); }
 function md_sec_grade( $u ) { return user_can( $u, 'md_supply_owner' ) ? 'owner' : ( user_can( $u, 'md_supply_manage' ) ? 'mgr' : 'staff' ); }
-function md_sec_grade_label( $g ) { return array( 'owner' => '총괄 관리자', 'mgr' => '라운지 관리자', 'staff' => '직원' )[ $g ]; }
+function md_sec_grade_label( $g ) { return array( 'owner' => '홈페이지 관리자', 'mgr' => '라운지 관리자', 'staff' => '직원' )[ $g ]; }
 function md_sec_is_shared_staff( $u ) { return $u && defined( 'MD_SUP_STAFF_LOGIN' ) && MD_SUP_STAFF_LOGIN === $u->user_login; }
 
 /** 지금 사람이 그 계정의 권한을 바꿀 수 있나 — 총괄: 다른 총괄 빼고 다 / 라운지 관리자: 일반 직원만 / 내 계정은 못 바꿈 */
@@ -262,7 +262,7 @@ function md_sec_guard() {
 	$app = md_sec_req_app();
 	$is_post = 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' );
 	/* v8.2 · moondentalmanager 는 홈페이지 관리 전용 — 라운지에서는 쓰지 않는다 (원장 지시) */
-	if ( defined( 'MD_SUP_MANAGER_LOGIN' ) && wp_get_current_user()->user_login === MD_SUP_MANAGER_LOGIN && ! get_option( 'md_sec_allow_manager_lounge' ) && get_users( array( 'capability' => 'md_supply_owner', 'number' => 1, 'fields' => 'ID' ) ) ) { /* 로컬 시험 환경만 옵션으로 허용 · 총괄 관리자가 한 명도 없으면 막지 않는다(잠김 방지) */
+	if ( defined( 'MD_SUP_MANAGER_LOGIN' ) && wp_get_current_user()->user_login === MD_SUP_MANAGER_LOGIN && ! get_option( 'md_sec_allow_manager_lounge' ) && get_users( array( 'capability' => 'md_supply_owner', 'number' => 1, 'fields' => 'ID' ) ) ) { /* 로컬 시험 환경만 옵션으로 허용 · 홈페이지 관리자가 한 명도 없으면 막지 않는다(잠김 방지) */
 		wp_die( '<p>이 계정(moondentalmanager)은 홈페이지 관리 전용이라 직원 라운지에서는 쓰지 않습니다.</p><p>본인 계정으로 로그인해 주세요. <a href="' . esc_url( wp_logout_url( home_url( '/직원/' ) ) ) . '">로그아웃</a></p>', '직원 라운지', array( 'response' => 403 ) );
 	}
 	if ( 'access' === $app ) { wp_safe_redirect( md_sup_url( array( 'app' => 'staff', 'tab' => 'perm' ) ) ); exit; }
@@ -358,7 +358,7 @@ function md_sec_handle_post() {
 			$go( '권한을 저장했습니다.', true );
 			break;
 		case 'ips':
-			if ( ! md_sec_is_owner() ) { $go( '총괄 관리자만 할 수 있습니다.' ); }
+			if ( ! md_sec_is_owner() ) { $go( '홈페이지 관리자만 할 수 있습니다.' ); }
 			$S = md_sec_settings();
 			$list = preg_split( '/[\s,]+/', (string) wp_unslash( $_POST['ips'] ?? '' ) );
 			if ( ! empty( $_POST['add_mine'] ) ) { $list[] = md_sec_ip(); }
@@ -366,8 +366,8 @@ function md_sec_handle_post() {
 			update_option( 'md_sec_settings', $S, false );
 			$go( '병원 인터넷 주소를 저장했습니다.', true );
 			break;
-		case 'sensitive': /* v9.17 · 🔒 이메일 인증 탭 고르기 (총괄 관리자) */
-			if ( ! md_sec_is_owner() ) { $go( '총괄 관리자만 할 수 있습니다.' ); }
+		case 'sensitive': /* v9.17 · 🔒 이메일 인증 탭 고르기 (홈페이지 관리자) */
+			if ( ! md_sec_is_owner() ) { $go( '홈페이지 관리자만 할 수 있습니다.' ); }
 			$S = md_sec_settings();
 			$ok = array_keys( md_sec_raw_apps() );
 			$pick = array();
@@ -556,7 +556,7 @@ function md_sec_render_staff_nav( $tab ) {
 
 function md_sec_render_access( $tab ) {
 	global $wpdb;
-	if ( in_array( $tab, array( 'net', 'views' ), true ) && ! md_sec_is_owner() ) { echo '<div class="mds-notice mds-notice--warn">총괄 관리자만 볼 수 있습니다.</div>'; return; }
+	if ( in_array( $tab, array( 'net', 'views' ), true ) && ! md_sec_is_owner() ) { echo '<div class="mds-notice mds-notice--warn">홈페이지 관리자만 볼 수 있습니다.</div>'; return; }
 	$S = md_sec_settings();
 	echo '<div class="mdsec">';
 	md_sec_flash();
@@ -566,7 +566,7 @@ function md_sec_render_access( $tab ) {
 		$owner = md_sec_is_owner();
 		?>
 		<form method="post" class="mds-card mdsec-card"><?php md_sec_hidden( 'perms' ); ?>
-			<p class="mds-hint"><b>등급</b> — 총괄 관리자(한 명): 라운지의 모든 것 · 라운지 관리자를 주고 뺌 / 라운지 관리자: 직원 정보 · 계정 승인 · 관리 화면 (일반 직원의 권한만 바꿈) / 직원. 등급은 총괄 관리자만 바꿉니다. 총괄 관리자는 다른 계정에 줄 수 없습니다.<br><b>재료실 관리</b> — 출고 · 입고 · 주문 · 품목 · 재료실 설정. <b>탭</b> — 열 수 있는 라운지 탭 (🔒 = 병원 밖에서 열 때 이메일 인증). 회색 칸은 라운지 관리자 이상만.</p>
+			<p class="mds-hint"><b>등급</b> — 홈페이지 관리자(한 명): 라운지의 모든 것 · 라운지 관리자를 주고 뺌 / 라운지 관리자: 직원 정보 · 계정 승인 · 관리 화면 (일반 직원의 권한만 바꿈) / 직원. 등급은 홈페이지 관리자만 바꿉니다. 홈페이지 관리자는 다른 계정에 줄 수 없습니다.<br><b>재료실 관리</b> — 출고 · 입고 · 주문 · 품목 · 재료실 설정. <b>탭</b> — 열 수 있는 라운지 탭 (🔒 = 병원 밖에서 열 때 이메일 인증). 회색 칸은 라운지 관리자 이상만.</p>
 			<div class="mdsec-matrix-wrap"><table class="mds-table mdsec-matrix">
 				<thead><tr><th>계정</th><th>등급</th><th>재료실<br>관리</th><?php foreach ( $tabs as $k => $a ) : ?><th><?php echo esc_html( ( $a['icon'] ?? '' ) . ' ' . preg_replace( '/\s*·\s*권한$/u', '', $a['label'] ) . ( in_array( $k, md_sec_sensitive(), true ) ? ' 🔒' : '' ) ); ?></th><?php endforeach; ?></tr></thead>
 				<tbody>
@@ -575,7 +575,7 @@ function md_sec_render_access( $tab ) {
 					$have = md_sec_is_owner_user( $u ) ? array_keys( $tabs ) : (array) md_sec_user_tabs( $u ); $mgr = md_sec_is_mgr_user( $u ); ?>
 					<tr class="<?php echo $edit ? '' : 'is-lock'; ?>"><th><?php if ( $edit ) : ?><input type="hidden" name="uids[]" value="<?php echo (int) $u->ID; ?>"><?php endif; ?><?php echo esc_html( '' !== trim( $u->display_name ) ? $u->display_name : $u->user_login ); ?><?php echo (int) $u->ID === get_current_user_id() ? ' <small>(나)</small>' : ''; ?><?php echo $shared ? ' <small>공용 계정</small>' : ''; ?></th>
 						<td><?php if ( $edit && $owner ) : /* v8.3 · 직원공용도 등급을 고를 수 있다 (원장 지시) */ ?>
-							<select name="grade[<?php echo (int) $u->ID; ?>]"><?php foreach ( array( 'staff', 'mgr' ) as $o ) : /* v8.3 · 총괄 관리자는 한 명뿐 — 다른 직원은 지정할 수 없다 */ ?><option value="<?php echo esc_attr( $o ); ?>"<?php selected( $g, $o ); ?>><?php echo esc_html( md_sec_grade_label( $o ) ); ?></option><?php endforeach; ?></select>
+							<select name="grade[<?php echo (int) $u->ID; ?>]"><?php foreach ( array( 'staff', 'mgr' ) as $o ) : /* v8.3 · 홈페이지 관리자는 한 명뿐 — 다른 직원은 지정할 수 없다 */ ?><option value="<?php echo esc_attr( $o ); ?>"<?php selected( $g, $o ); ?>><?php echo esc_html( md_sec_grade_label( $o ) ); ?></option><?php endforeach; ?></select>
 						<?php else : ?><span class="mdsec-grade mdsec-grade--<?php echo esc_attr( $g ); ?>"><?php echo esc_html( md_sec_grade_label( $g ) ); ?></span><?php endif; ?></td>
 						<td><label class="mdsec-cell"><input type="checkbox" name="inv[<?php echo (int) $u->ID; ?>]" value="1"<?php checked( user_can( $u, 'md_inv_manage' ) || md_sec_is_owner_user( $u ) ); disabled( ! $edit || md_sec_is_owner_user( $u ) ); ?>></label></td>
 						<?php foreach ( $tabs as $k => $a ) : $lock = ! $edit || ( ! empty( $a['manage'] ) && ! $mgr ) || md_sec_is_owner_user( $u ); ?>
@@ -589,7 +589,7 @@ function md_sec_render_access( $tab ) {
 		<?php
 	} elseif ( 'devices' === $tab ) {
 		$any = false;
-		echo '<section class="mds-card mdsec-card"><p class="mds-hint">계정마다 로그인 중인 기기와 이메일 인증한 기기입니다. 「모두 끊기」를 누르면 그 사람은 모든 기기에서 로그아웃되고 다음에 다시 인증합니다. 사용 중지 · 퇴사 처리하면 자동으로 끊깁니다. 총괄 관리자는 다른 총괄 관리자 말고 모두, 라운지 관리자는 일반 직원만 끊을 수 있습니다.</p><table class="mds-table mdsec-devtable"><thead><tr><th>계정</th><th>로그인 기기</th><th>인증 기기</th><th></th></tr></thead><tbody>';
+		echo '<section class="mds-card mdsec-card"><p class="mds-hint">계정마다 로그인 중인 기기와 이메일 인증한 기기입니다. 「모두 끊기」를 누르면 그 사람은 모든 기기에서 로그아웃되고 다음에 다시 인증합니다. 사용 중지 · 퇴사 처리하면 자동으로 끊깁니다. 홈페이지 관리자는 다른 홈페이지 관리자 말고 모두, 라운지 관리자는 일반 직원만 끊을 수 있습니다.</p><table class="mds-table mdsec-devtable"><thead><tr><th>계정</th><th>로그인 기기</th><th>인증 기기</th><th></th></tr></thead><tbody>';
 		foreach ( md_sec_accounts() as $u ) {
 			$sess = array_filter( (array) get_user_meta( $u->ID, 'session_tokens', true ), function ( $x ) { return is_array( $x ) && ( $x['expiration'] ?? 0 ) > time(); } );
 			$devs = array_filter( md_sec_devices( $u->ID ), function ( $d ) { return $d['expires'] > time(); } );
@@ -625,7 +625,7 @@ function md_sec_render_access( $tab ) {
 				<label class="mdsec-keep"><input type="checkbox" name="sens[]" value="<?php echo esc_attr( $k ); ?>"<?php checked( in_array( $k, $sens, true ) ); ?>> <?php echo esc_html( ( $a['icon'] ?? '' ) . ' ' . str_replace( ' 🔒', '', (string) ( $a['label'] ?? $k ) ) ); ?></label>
 			<?php endforeach; ?>
 			</div>
-			<button class="mds-btn mds-btn--fill"<?php echo md_sec_is_owner() ? '' : ' disabled'; ?>>저장</button><?php echo md_sec_is_owner() ? '' : ' <span class="mds-hint">총괄 관리자만 바꿀 수 있습니다.</span>'; ?>
+			<button class="mds-btn mds-btn--fill"<?php echo md_sec_is_owner() ? '' : ' disabled'; ?>>저장</button><?php echo md_sec_is_owner() ? '' : ' <span class="mds-hint">홈페이지 관리자만 바꿀 수 있습니다.</span>'; ?>
 		</form>
 		<?php
 	} else {

@@ -30,7 +30,7 @@ function md_sup_can_manage() {
  *  원장 계정만: 미니차트 Import/Export · 휴지통 비우기, 재료실 가져오기 · 백업 복원, 라운지 관리자 지정
  */
 function md_sup_is_owner() {
-	/* v8.2 · 「총괄 관리자」(md_supply_owner) = 라운지의 모든 것 (원장 지시 — moondentalmanager 는 홈페이지 관리 전용) */
+	/* v8.2 · 「홈페이지 관리자」(md_supply_owner) = 라운지의 모든 것 (원장 지시 — moondentalmanager 는 홈페이지 관리 전용) */
 	if ( ! is_user_logged_in() ) { return false; }
 	return current_user_can( 'md_supply_owner' ) || current_user_can( 'manage_options' );
 }

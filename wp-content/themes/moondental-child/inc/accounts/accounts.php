@@ -42,7 +42,7 @@ function md_acc_can_manage() {
 
 /** 「라운지 관리자」 권한을 주고 뺄 수 있는 사람 — 원장(워드프레스 관리자)만 */
 function md_acc_can_grant_admin() {
-	return current_user_can( 'md_supply_owner' ) || current_user_can( 'manage_options' ); /* v8.2 · 총괄 관리자 */
+	return current_user_can( 'md_supply_owner' ) || current_user_can( 'manage_options' ); /* v8.2 · 홈페이지 관리자 */
 }
 
 /** 여기서 다룰 수 있는 개인 계정인가 */
@@ -79,7 +79,7 @@ function md_acc_perm_label( $u ) {
 	if ( 'pending' === md_acc_status( $u ) ) { return '승인 대기'; }
 	if ( 'off' === md_acc_status( $u ) ) { return '사용 중지'; }
 	$p = md_acc_user_perms( $u );
-	if ( user_can( $u, 'md_supply_owner' ) ) { return '총괄 관리자'; } /* v8.2 */
+	if ( user_can( $u, 'md_supply_owner' ) ) { return '홈페이지 관리자'; } /* v8.2 */
 	if ( in_array( 'md_supply_manage', $p, true ) ) { return '라운지 관리자'; }
 	if ( in_array( 'md_inv_manage', $p, true ) ) { return '직원 + 재료실 관리'; }
 	return '직원';
@@ -481,11 +481,11 @@ function md_acc_handle() {
 	if ( $self && in_array( $act, array( 'perms', 'off', 'delete', 'reject' ), true ) ) {
 		md_acc_flash( 'err', '내 계정의 권한 · 사용 중지 · 삭제는 다른 관리자가 해야 합니다.' ); wp_safe_redirect( $back ); exit;
 	}
-	/* v8.2 · 총괄 관리자 계정은 홈페이지 관리자만 손댄다 */
+	/* v8.2 · 홈페이지 관리자 계정은 홈페이지 관리자만 손댄다 */
 	if ( $u && ! $self && user_can( $u, 'md_supply_owner' ) && ! current_user_can( 'manage_options' ) && in_array( $act, array( 'perms', 'reset', 'off', 'delete' ), true ) ) {
-		md_acc_flash( 'err', '총괄 관리자 계정은 바꿀 수 없습니다.' ); wp_safe_redirect( $back ); exit;
+		md_acc_flash( 'err', '홈페이지 관리자 계정은 바꿀 수 없습니다.' ); wp_safe_redirect( $back ); exit;
 	}
-	/* 라운지 관리자 계정은 총괄 관리자만 손댄다 */
+	/* 라운지 관리자 계정은 홈페이지 관리자만 손댄다 */
 	if ( $u && user_can( $u, 'md_supply_manage' ) && ! md_acc_can_grant_admin() && in_array( $act, array( 'perms', 'reset', 'off', 'delete' ), true ) ) {
 		md_acc_flash( 'err', '라운지 관리자 계정은 원장님만 바꿀 수 있습니다.' ); wp_safe_redirect( $back ); exit;
 	}
@@ -1020,7 +1020,7 @@ function md_acc_render_manage( $u ) {
 	$self  = (int) $u->ID === get_current_user_id();
 	$lock  = user_can( $u, 'md_supply_manage' ) && ! md_acc_can_grant_admin();
 	$st    = md_acc_status( $u );
-	if ( $lock ) { echo '<p class="mda-note">관리자 계정은 총괄 관리자만 바꿀 수 있습니다.</p>'; return; }
+	if ( $lock ) { echo '<p class="mda-note">관리자 계정은 홈페이지 관리자만 바꿀 수 있습니다.</p>'; return; }
 	?>
 	<details class="mda-manage"><summary>계정 관리</summary>
 		<p class="mda-note">권한(등급 · 재료실 관리 · 탭)은 위 「권한」 탭에서 정합니다.</p>

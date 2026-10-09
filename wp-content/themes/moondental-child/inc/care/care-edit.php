@@ -15,7 +15,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 function md_care_can_edit() {
-	/* v8.8 · 총괄 관리자 · 라운지 관리자도 (moondentalmanager 는 라운지에서 쓰지 않음) */
+	/* v8.8 · 홈페이지 관리자 · 라운지 관리자도 (moondentalmanager 는 라운지에서 쓰지 않음) */
 	if ( ! is_user_logged_in() ) { return false; }
 	return current_user_can( 'manage_options' ) || ( function_exists( 'md_sup_is_owner' ) && md_sup_is_owner() ) || ( function_exists( 'md_sup_can_manage' ) && md_sup_can_manage() );
 }
