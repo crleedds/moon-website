@@ -58,7 +58,7 @@ function md_staff_maybe_install() {
 add_action( 'init', 'md_staff_maybe_install', 21 );
 
 /* ============================================================
- * v10.0 · 직원 공용 계정(직원공용)도 명단에 한 줄 (원장 지시)
+ * v10.0 · 직원 공용 계정(문치과병원)도 명단에 한 줄 (원장 지시)
  *  홈페이지 의료진 페이지 · 만족도 담당자 · 가입 승인 「명단과 연결」에는 넣지 않는다.
  * ============================================================ */
 define( 'MD_STAFF_SHARED_MAIL', 'moondental1995@naver.com' );
@@ -68,7 +68,7 @@ function md_staff_is_shared( $r ) {
 	/* v9.42 · 이름을 바꿔도(예: 「문치과병원」) 공용 계정 줄로 알아본다 — 처음 만든 줄 번호(md_staff_shared_v1 = 'sid N') 기준 (원장 지시) */
 	$sid = md_staff_shared_sid();
 	if ( $sid && ! empty( $r->id ) ) { return (int) $r->id === $sid; }
-	$n = defined( 'MD_SUP_STAFF_NAME' ) ? MD_SUP_STAFF_NAME : '직원공용';
+	$n = defined( 'MD_SUP_STAFF_NAME' ) ? MD_SUP_STAFF_NAME : '문치과병원';
 	return preg_replace( '/\s+/u', '', (string) $r->name ) === preg_replace( '/\s+/u', '', $n );
 }
 
@@ -84,7 +84,7 @@ function md_staff_add_shared_once() {
 	foreach ( md_staff_all() as $r ) { if ( md_staff_is_shared( $r ) ) { $have = (int) $r->id; break; } }
 	if ( ! $have ) {
 		$wpdb->insert( $t, array(
-			'name'       => defined( 'MD_SUP_STAFF_NAME' ) ? MD_SUP_STAFF_NAME : '직원공용',
+			'name'       => defined( 'MD_SUP_STAFF_NAME' ) ? MD_SUP_STAFF_NAME : '문치과병원',
 			'dept'       => '기타',
 			'position'   => '공용 계정',
 			'email'      => MD_STAFF_SHARED_MAIL,
