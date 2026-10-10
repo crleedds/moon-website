@@ -282,6 +282,7 @@ window.mcInits.push(function () {
     var box = b.closest('[data-mc-chips]'), ta = taFor(box);
     if (!ta) return;
     e.preventDefault();
+    Array.prototype.forEach.call(document.querySelectorAll('.mc-chips__pick'), function (x) { x.remove(); }); /* v9.55.1 · 다른 칩을 누르면 열려 있던 고르는 칸은 닫힘 (원장 지시) */
     var c0 = b.getAttribute('data-chip');
     if (b.hasAttribute('data-opts') && !parts(ta).some(function (p) { return p.indexOf(c0) === 0; })) {
       openPick(box, b, function (val) { put(box, ta, b, val); });
