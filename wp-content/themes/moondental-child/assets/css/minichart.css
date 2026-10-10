@@ -661,12 +661,25 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-lab { display: inline-flex; align-items: baseline; gap: 4px; padding: 3px 10px; border: 1px solid var(--mc-line); border-radius: 999px; background: #fff; font-size: .86rem; line-height: 1.5; }
 .mc-lab small { color: var(--mc-sub); font-weight: 700; font-size: .76rem; }
 .mc-lab time { color: var(--mc-mute); font-size: .76rem; }
-.mc-labs-in { margin: 10px 0 14px; }
-.mc-labs-in .mc-field__l small { font-weight: 500; color: var(--mc-mute); margin-left: 4px; }
-.mc-labs-in__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; }
-.mc-labs-in__row { display: grid; grid-template-columns: 4.2em minmax(0, 1fr) 9.5em; align-items: center; gap: 6px; }
-.mc-labs-in__row span { font-size: .84rem; font-weight: 700; color: var(--mc-sub); }
-.mc-labs-in__row input { min-width: 0; min-height: 38px; padding: 6px 8px; border: 1px solid var(--mc-line); border-radius: 8px; font: inherit; font-size: 15px; background: #fff; }
-@media (max-width: 760px) { .mc-labs-in__grid { grid-template-columns: 1fr; } .mc-labs-in__row { grid-template-columns: 4.2em minmax(0, 1fr) 8.6em; } }
+/* v9.68 · 검사 수치 입력 — 칸 너비(컨테이너)에 맞춰: 좁으면 세로, 보통이면 한 줄, 넓으면 두 수치씩 (원장 지시) */
+.mc-labs-in { container-type: inline-size; margin: 12px 0 14px; padding: 10px 12px 12px; border: 1px solid var(--mc-line); border-radius: 12px; background: rgba(255,255,255,.7); }
+.mc-labs-in > .mc-field__l { display: block; margin: 0 0 8px; }
+.mc-labs-in .mc-field__l small { display: block; margin: 2px 0 0; font-weight: 500; color: var(--mc-mute); }
+.mc-labs-in__grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+/* 좁은 칸(기본): 이름 위 · 값 · 날짜 아래로 */
+.mc-labs-in__row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 0 0 8px; border-bottom: 1px dashed var(--mc-line); }
+.mc-labs-in__row:last-child { padding-bottom: 0; border-bottom: 0; }
+.mc-labs-in__row span { font-size: .8rem; font-weight: 800; color: var(--mc-sub); }
+.mc-labs-in__row input { box-sizing: border-box; width: 100%; min-width: 0; min-height: 36px; padding: 5px 8px; border: 1px solid var(--mc-line); border-radius: 8px; font: inherit; font-size: 15px; background: #fff; }
+.mc-labs-in__row input[type=date] { color: var(--mc-sub); }
+/* 보통 칸: 한 줄에 이름 · 값 · 날짜 */
+@container (min-width: 290px) {
+  .mc-labs-in__row { grid-template-columns: 3.9em minmax(0, 1fr) 8.6em; align-items: center; gap: 8px; }
+}
+/* 넓은 칸: 두 수치씩 */
+@container (min-width: 660px) {
+  .mc-labs-in__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; }
+  .mc-labs-in__row:nth-last-child(2) { padding-bottom: 0; border-bottom: 0; }
+}
 .mc-note-row .mc-note-pin { margin-right: 4px; }
 .mc-note__head .mc-pinbtn { margin-left: auto; }
