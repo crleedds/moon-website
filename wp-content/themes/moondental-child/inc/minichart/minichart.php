@@ -1250,7 +1250,7 @@ function md_mc_handle_post() {
 				$clean = function ( $txt ) {
 					$out = array();
 					foreach ( preg_split( '/\r\n|\r|\n|,/', (string) $txt ) as $v ) {
-						$v = mb_substr( trim( sanitize_text_field( $v ) ), 0, 30 );
+						$v = mb_substr( trim( sanitize_text_field( $v ) ), 0, 120 ); /* v9.78 · 30자에서 늘림 — 「고객소개@{가족|친척|…}」 처럼 긴 칩이 잘려 깨지던 것 */
 						if ( '' !== $v && ! in_array( $v, $out, true ) ) { $out[] = $v; }
 					}
 					return $out;
@@ -1952,7 +1952,22 @@ function md_mc_dr_field( $vals ) {
 function md_mc_chip_list( $kind ) {
 	$st = md_mc_settings();
 	$k  = 'mhx' === $kind ? 'mhx_chips' : 'ref_chips';
-	if ( ! empty( $st[ $k ] ) && is_array( $st[ $k ] ) ) { return $st[ $k ]; }
+	if ( ! empty( $st[ $k ] ) && is_array( $st[ $k ] ) ) {
+		/* v9.78 · 설정 저장 때 30자로 잘려 「{」만 남은 칩(예: 「고객소개@{가족|…|교회」)은 기본 목록의 온전한 것으로 되살림 — 없으면 고르기 부분만 뺌 */
+		$def = md_mc_chip_default( 'mhx' === $kind ? 'mhx' : 'ref' ); $fixed = false; $out = array();
+		foreach ( $st[ $k ] as $c ) {
+			$c = (string) $c;
+			if ( substr_count( $c, '{' ) > substr_count( $c, '}' ) ) {
+				$hit = '';
+				foreach ( $def as $d ) { if ( 0 === strpos( $d, $c ) ) { $hit = $d; break; } }
+				$c = '' !== $hit ? $hit : trim( mb_substr( $c, 0, mb_strrpos( $c, '{' ) ) );
+				$fixed = true;
+			}
+			if ( '' !== $c ) { $out[] = $c; }
+		}
+		if ( $fixed ) { $st[ $k ] = $out; update_option( 'md_mc_settings', $st, false ); }
+		return $out;
+	}
 	return 'mhx' === $kind ? md_mc_chip_default( 'mhx' ) : md_mc_chip_default( 'ref' );
 }
 

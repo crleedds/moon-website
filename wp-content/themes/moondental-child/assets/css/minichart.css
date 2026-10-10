@@ -771,3 +771,4 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-chips__foundbtn small { color: var(--mc-sub, #7A6B5F); font-variant-numeric: tabular-nums; }
 .mc-chips__none { color: var(--mc-mute, #A89685); font-size: .82rem; }
 .mc-chips__dwtag { font-style: normal; font-size: .7rem; font-weight: 700; color: #22598f; background: rgba(52,120,200,.12); border-radius: 999px; padding: 1px 6px; } /* v9.75 · 미니차트에 없는 덴트웹 환자 */
+.mc .mc-infocard .mc-edit__form .mc-field__top > .mc-field__l { display: none; } /* v9.78 · 고칠 때 「내원경로」 이름표가 두 번 나오던 것 (위 이름표만) */
