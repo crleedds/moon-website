@@ -602,3 +602,4 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-chips__pickbar { display: inline-flex; gap: 6px; margin-left: auto; }
 .mc-chip--sm { min-height: 32px; padding: 2px 12px; font-size: .88rem; }
 .mc-chips:has(.mc-chips__pick) { flex-wrap: wrap; overflow: visible; }
+.mc-chips__picktxt { min-width: 10em; flex: 1 1 12em; min-height: 32px; padding: 4px 10px; border: 1px solid var(--mc-line, #E8DDD3); border-radius: 8px; font: inherit; font-size: 16px; } /* v9.55.2 · 16px — 아이폰 확대 방지 */

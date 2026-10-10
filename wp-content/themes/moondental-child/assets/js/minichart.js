@@ -257,21 +257,39 @@ window.mcInits.push(function () {
   function closePick(box) { var pk = box.querySelector('.mc-chips__pick'); if (pk) pk.remove(); }
   function openPick(box, b, done) {
     closePick(box);
-    var groups = JSON.parse(b.getAttribute('data-opts') || '[]'), sel = groups.map(function () { return ''; });
+    var groups = JSON.parse(b.getAttribute('data-opts') || '[]'), sel = groups.map(function () { return ''; }), fill = groups.map(function () { return null; });
     var pk = document.createElement('div'); pk.className = 'mc-chips__pick';
     var title = document.createElement('b'); title.textContent = b.getAttribute('data-chip'); pk.appendChild(title);
     var ok = document.createElement('button'); ok.type = 'button'; ok.className = 'mds-btn mds-btn--fill mds-btn--sm'; ok.textContent = '넣기'; ok.disabled = true;
     groups.forEach(function (g, gi) {
       var row = document.createElement('span'); row.className = 'mc-chips__pickrow';
+      var txt = null; /* v9.55.2 · 끝이 「:」인 항목(예: 모름/기타:)은 고르면 적는 칸이 열림 */
       g.forEach(function (o) {
-        var x = document.createElement('button'); x.type = 'button'; x.className = 'mc-chip mc-chip--sm'; x.textContent = o;
-        x.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); sel[gi] = o; Array.prototype.forEach.call(row.children, function (y) { y.classList.toggle('is-on', y === x); }); ok.disabled = sel.some(function (s) { return !s; }); });
+        var wr = o.slice(-1) === ':', lab = wr ? o.slice(0, -1) : o;
+        var x = document.createElement('button'); x.type = 'button'; x.className = 'mc-chip mc-chip--sm'; x.textContent = lab;
+        x.addEventListener('click', function (ev) {
+          ev.preventDefault(); ev.stopPropagation(); sel[gi] = lab;
+          Array.prototype.forEach.call(row.querySelectorAll('.mc-chip'), function (y) { y.classList.toggle('is-on', y === x); });
+          if (txt) { txt.remove(); txt = null; } fill[gi] = null;
+          if (wr) {
+            txt = document.createElement('input'); txt.type = 'text'; txt.className = 'mc-chips__picktxt'; txt.placeholder = lab + ' — 적어 주세요 (선택)'; txt.maxLength = 60;
+            txt.addEventListener('click', function (e2) { e2.stopPropagation(); });
+            txt.addEventListener('keydown', function (e2) { if (e2.key === 'Enter') { e2.preventDefault(); ok.click(); } });
+            fill[gi] = txt; row.appendChild(txt); txt.focus();
+          }
+          ok.disabled = sel.some(function (s) { return !s; });
+        });
         row.appendChild(x);
       });
       pk.appendChild(row);
     });
     var no = document.createElement('button'); no.type = 'button'; no.className = 'mds-btn mds-btn--ghost mds-btn--sm'; no.textContent = '취소';
-    ok.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); closePick(box); done(b.getAttribute('data-chip') + '(' + sel.join(' · ') + ')'); });
+    ok.addEventListener('click', function (ev) {
+      ev.preventDefault(); ev.stopPropagation();
+      if (ok.disabled) return;
+      var out = sel.map(function (s0, k) { var t = fill[k] ? fill[k].value.replace(/[,，()]/g, ' ').trim() : ''; return t ? s0 + ': ' + t : s0; });
+      closePick(box); done(b.getAttribute('data-chip') + '(' + out.join(' · ') + ')');
+    });
     no.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); closePick(box); });
     var bar = document.createElement('span'); bar.className = 'mc-chips__pickbar'; bar.appendChild(ok); bar.appendChild(no); pk.appendChild(bar);
     box.appendChild(pk);
