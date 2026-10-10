@@ -703,3 +703,43 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
   .mc-labs-in__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; }
   .mc-labs-in__row:nth-child(2) { border-top: 0; }
 }
+
+/* ============================================================
+ * v9.72 · 왼쪽 단 다듬기 (원장 지시 다섯 가지)
+ *  ① 지역 · 담당의사 · 내원경로를 「기본 정보」 한 장에 이름표: 내용 줄로  ② 순서 병력 → 다음 예약 → 치료계획 → 기본 정보
+ *  ③ 고칠 때는 그 칸이 단 전체 너비, 다른 칸은 안 늘어남  ④ 검사 수치 입력은 넓어진 칸에서 두 칸씩(컨테이너 쿼리)  ⑤ 진료기록 칸이 왼쪽 단 높이까지
+ * ============================================================ */
+.mc .mc-grid--info.mc-grid--mhx, .mc .mc-col--a .mc-grid--info.mc-grid--mhx { display: block; grid-template-columns: none; }
+.mc .mc-grid--mhx > .mc-block { margin-bottom: 8px; }
+.mc .mc-grid--info.mc-infocard, .mc .mc-col--a .mc-grid--info.mc-infocard { display: block; grid-template-columns: none; padding: 2px 12px; margin: 0 0 8px; border: 1px solid var(--mc-line); border-radius: 14px; background: var(--mc-bg); }
+.mc .mc-infocard > .mc-block { display: grid; grid-template-columns: 6.8em minmax(0, 1fr); align-items: baseline; gap: 2px 10px; margin: 0; padding: 7px 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.mc .mc-infocard > .mc-block + .mc-block { border-top: 1px dashed var(--mc-line); }
+.mc .mc-infocard > .mc-block > .mc-block__h { grid-column: 1; margin: 0; line-height: 1.35; word-break: keep-all; }
+.mc .mc-infocard > .mc-block > .mc-edit__view { grid-column: 2; margin: 0; }
+.mc .mc-infocard > .mc-block > .mc-edit__form, .mc .mc-infocard > .mc-block > p { grid-column: 1 / -1; }
+.mc .mc-infocard > .mc-block.is-editing > .mc-edit__view { display: none; }
+.mc .mc-infocard > .mc-block.is-editing > .mc-block__h { grid-column: 1 / -1; }
+/* 고치는 칸의 칩은 작게 · 여러 개가 한 줄에 */
+.mc .mc-edit .mc-chips { flex-wrap: wrap; overflow: visible; gap: 5px; }
+.mc .mc-edit .mc-chips .mc-chip { min-height: 30px; padding: 2px 10px; font-size: .84rem; }
+/* 두 단일 때: 진료기록 칸이 왼쪽 단 높이까지 (빈 바탕 없이) */
+@media (min-width: 1100px), (min-width: 900px) and (max-height: 900px) and (orientation: landscape) {
+  .mc-cols { align-items: stretch; }
+  .mc-col--b { display: flex; flex-direction: column; min-width: 0; }
+  .mc-col--b > #f-tx_hist { flex: 1 1 auto; }
+  .mc-col--a { align-self: start; }
+}
+/* 세로 태블릿: 왼쪽 병력 · 기본 정보, 오른쪽 다음 예약 · 치료계획 */
+@media (min-width: 700px) and (max-width: 1099px) and (orientation: portrait) {
+  .mc-col--a > .mc-grid--mhx { grid-column: 1; grid-row: 1; }
+  .mc-col--a > .mc-infocard { grid-column: 1; grid-row: 2; }
+  .mc-col--a > #f-next { grid-column: 2; grid-row: 1; }
+  .mc-col--a > #f-tx_plan { grid-column: 2; grid-row: 2; }
+  .mc-col--a > .mc-grid--mhx > .mc-block { margin-bottom: 0; }
+  .mc-col--a:not(:has(> #f-next)) > #f-tx_plan { grid-row: 1 / span 2; }
+}
+/* 휴대폰: 기본 정보 이름표 칸 좁게 */
+@media (max-width: 599px) {
+  .mc .mc-infocard > .mc-block { grid-template-columns: 5.6em minmax(0, 1fr); }
+}
+.mc .mc-infocard .mc-edit__form > .mc-field > .mc-field__l { display: none; } /* 이름표가 위에 이미 있으므로 */

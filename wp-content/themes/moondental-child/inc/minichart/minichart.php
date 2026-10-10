@@ -1804,16 +1804,19 @@ function md_mc_render_patient( $id ) {
 
 		<?php /* v9.36 · 태블릿 가로에서는 두 단(왼쪽: 병력 · 기본 정보 · 치료계획 / 오른쪽: 진료기록 · 참고사항). 다른 화면에서는 이 묶음이 없는 것처럼(display: contents) */ ?>
 		<div class="mc-cols"><div class="mc-col mc-col--a">
-		<div class="mc-grid mc-grid--info">
+		<?php /* v9.72 · 왼쪽 단 순서: 병력 → 다음 예약 → 치료계획 → 기본 정보(지역 · 담당의사 · 내원경로 한 장) (원장 지시) */ ?>
+		<div class="mc-grid mc-grid--info mc-grid--mhx"><?php md_mc_inline_block( $r, $d, 'mhx' ); ?></div>
+		<?php ob_start(); ?>
+		<div class="mc-grid mc-grid--info mc-infocard">
 			<?php
 			/* v9.19 · 병력 · 주소(지역 메모) · 담당의사 · 내원경로도 눌러서 바로 고친다 (원장 지시) · v9.21 · 넓은 화면에서는 네 칸이 한 줄 (원장 「한 화면에 더 많이」)
 			 * v9.20 · 연락처는 미니차트에 두지 않는다 (원장 지시 — 덴트웹에서 보면 된다) */
-			md_mc_inline_block( $r, $d, 'mhx' );
 			md_mc_inline_block( $r, $d, 'addr' );
 			md_mc_inline_block( $r, $d, 'dr' );
 			md_mc_inline_block( $r, $d, 'referral' );
 			?>
 		</div>
+		<?php $md_mc_infocard = ob_get_clean(); /* 치료계획 뒤에 찍는다 */ ?>
 		<?php /* v9.33 · 치료계획은 한 줄에 하나씩 따로 적고, 한 줄을 누르면 날짜를 골라 진료기록으로 옮긴다 (원장 지시). 한꺼번에 고치기(v8.6 자동 저장 칸)는 접어 둠 */ ?>
 		<?php echo function_exists( 'md_mc_dw_next_list_html' ) ? md_mc_dw_next_list_html( $d ) : ''; // phpcs:ignore -- v9.52 · 치료계획 위 「다음 예약」 칸 ?>
 		<section class="mc-block mc-block--plan mc-plan" id="f-tx_plan">
@@ -1826,6 +1829,7 @@ function md_mc_render_patient( $id ) {
 			<div class="mc-block__b"><?php echo md_mc_plan_list_html( $r ); // phpcs:ignore ?></div>
 			<?php /* v9.34 · 「한꺼번에 고치기」 칸은 없앰 (원장 지시) — 줄마다 ▲▼ 순서 · 「진료기록으로」 단추 */ ?>
 		</section>
+		<?php echo $md_mc_infocard; // phpcs:ignore -- 위에서 만든 기본 정보 ?>
 		</div><div class="mc-col mc-col--b">
 
 		<section class="mc-block mc-block--log" id="f-tx_hist">
