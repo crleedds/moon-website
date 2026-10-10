@@ -97,6 +97,138 @@ function md_fees_handle_post() {
 }
 add_action( 'template_redirect', 'md_fees_handle_post', 5 );
 
+/**
+ * v9.57 · 진료비 한눈에 (원장 지시 — 「진료비가 한눈에 잘 안 보인다」)
+ *  예전 표는 넓은 화면에서 진료비 칸이 오른쪽 밖으로 밀려 금액이 안 보였고, 휴대폰은 한 줄이 카드 한 장(대분류 · 중분류 … 반복)이었다.
+ *  → 대분류로 묶고(위에 분류 단추), 한 항목 = 한 줄: 왼쪽 이름(중분류 › 소분류 · 세부설명), 오른쪽 금액 크게, 보험/비급여 표시, 단위 · 비고는 작게.
+ *  머리 이름(대분류 · 중분류 · 소분류 · 세부설명 · 보험/비급여 · 단위 · 진료비 · 비고)을 못 찾으면 예전 표 그대로.
+ */
+function md_fees_cols( $head ) {
+	$want = array( 'c1' => '/대분류/u', 'c2' => '/중분류/u', 'c3' => '/소분류/u', 'desc' => '/세부|설명/u', 'ins' => '/보험|급여/u', 'unit' => '/단위/u', 'won' => '/진료비|금액|KRW/u', 'note' => '/비고/u' );
+	$map  = array();
+	foreach ( $want as $k => $re ) {
+		foreach ( $head as $i => $h ) { if ( ! in_array( $i, $map, true ) && preg_match( $re, (string) $h ) ) { $map[ $k ] = $i; break; } }
+	}
+	return isset( $map['c1'], $map['won'] ) ? $map : null;
+}
+
+function md_fees_render_list( $rows, $head, $d ) {
+	$m = md_fees_cols( $head );
+	if ( ! $m ) { return false; }
+	$g = function ( $r, $k ) use ( $m ) { return isset( $m[ $k ], $r[ $m[ $k ] ] ) ? trim( (string) $r[ $m[ $k ] ] ) : ''; };
+	$groups = array(); $last = array( 'c1' => '', 'c2' => '' );
+	foreach ( $rows as $r ) {
+		foreach ( array( 'c1', 'c2' ) as $k ) { $v = $g( $r, $k ); if ( '' === $v ) { $v = $last[ $k ]; } $last[ $k ] = $v; } /* 시트에서 칸을 합쳐 둔 곳은 위 값 */
+		$groups[ '' !== $last['c1'] ? $last['c1'] : '기타' ][] = array( 'c2' => $last['c2'], 'c3' => $g( $r, 'c3' ), 'desc' => $g( $r, 'desc' ), 'ins' => $g( $r, 'ins' ), 'unit' => $g( $r, 'unit' ), 'won' => $g( $r, 'won' ), 'note' => $g( $r, 'note' ) );
+	}
+	$kind = function ( $ins ) { $s = preg_replace( '/\s+/u', '', $ins ); if ( '' === $s ) { return ''; } if ( preg_match( '/비급여|비보험/u', $s ) ) { return 'non'; } if ( false !== mb_strpos( $s, '보험' ) ) { return 'ins'; } return 'etc'; };
+	$n = 0; foreach ( $groups as $items ) { $n += count( $items ); }
+	?>
+	<div class="mds-card mdfee mdfee--list" data-mdfee>
+		<div class="mdfee__bar">
+			<input type="search" class="mdfee__q" placeholder="찾기 — 예: 크라운, 스케일링, 임플란트" aria-label="진료비 찾기" data-mdfee-q>
+			<span class="mds-hint mdfee__n"><b data-mdfee-n><?php echo (int) $n; ?></b>개<?php echo ! empty( $d['at'] ) ? ' · ' . esc_html( $d['at'] ) . ' 기준' : ''; ?></span>
+		</div>
+		<div class="mdfee__cats" role="group" aria-label="분류">
+			<button type="button" class="mdfee__cat is-on" data-mdfee-cat="">전체</button>
+			<?php foreach ( $groups as $c => $items ) : ?><button type="button" class="mdfee__cat" data-mdfee-cat="<?php echo esc_attr( $c ); ?>"><?php echo esc_html( $c ); ?> <small><?php echo count( $items ); ?></small></button><?php endforeach; ?>
+			<span class="mdfee__sep"></span>
+			<button type="button" class="mdfee__cat mdfee__cat--k" data-mdfee-kind="ins">보험</button><button type="button" class="mdfee__cat mdfee__cat--k" data-mdfee-kind="non">비급여</button>
+		</div>
+		<div class="mdfee__groups">
+		<?php foreach ( $groups as $c => $items ) : ?>
+			<section class="mdfee__g" data-cat="<?php echo esc_attr( $c ); ?>">
+				<h3 class="mdfee__gh"><?php echo esc_html( $c ); ?> <small data-mdfee-gn><?php echo count( $items ); ?></small></h3>
+				<ul class="mdfee__ul">
+				<?php foreach ( $items as $it ) :
+					$k    = $kind( $it['ins'] );
+					$name = trim( $it['c2'] . ( '' !== $it['c3'] ? ' › ' . $it['c3'] : '' ) );
+					$sub  = array_values( array_filter( array( $it['desc'], '' !== $it['unit'] ? '단위 ' . $it['unit'] : '' ) ) ); ?>
+					<li class="mdfee__it" data-kind="<?php echo esc_attr( $k ); ?>" data-q="<?php echo esc_attr( mb_strtolower( preg_replace( '/\s+/u', '', $c . $name . $it['desc'] . $it['ins'] . $it['unit'] . $it['won'] . $it['note'] ) ) ); ?>">
+						<div class="mdfee__name">
+							<b><?php echo esc_html( '' !== $name ? $name : $c ); ?></b>
+							<?php if ( '' !== $it['ins'] ) : ?><span class="mdfee__ins mdfee__ins--<?php echo esc_attr( $k ? $k : 'etc' ); ?>"><?php echo esc_html( $it['ins'] ); ?></span><?php endif; ?>
+							<?php if ( $sub ) : ?><small class="mdfee__sub"><?php echo nl2br( esc_html( implode( ' · ', $sub ) ) ); // phpcs:ignore ?></small><?php endif; ?>
+							<?php if ( '' !== $it['note'] ) : ?><small class="mdfee__note"><?php echo nl2br( esc_html( $it['note'] ) ); // phpcs:ignore ?></small><?php endif; ?>
+						</div>
+						<div class="mdfee__won<?php echo mb_strlen( $it['won'] ) > 24 || false !== strpos( $it['won'], "\n" ) ? ' is-long' : ''; ?>"><?php echo '' !== $it['won'] ? nl2br( esc_html( $it['won'] ) ) : '<span class="mdfee__none">—</span>'; // phpcs:ignore ?></div>
+					</li>
+				<?php endforeach; ?>
+				</ul>
+			</section>
+		<?php endforeach; ?>
+		</div>
+		<p class="mds-hint mdfee__nohit" hidden data-mdfee-nohit>찾는 항목이 없습니다.</p>
+	</div>
+	<style>
+		.mdfee__bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+		.mdfee__q{flex:1 1 240px;min-height:42px;padding:6px 12px;border:1px solid var(--color-border,#E8DDD3);border-radius:10px;font:inherit;font-size:16px}
+		.mdfee__cats{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;padding:0;border:0;outline:0;background:none}
+		.mdfee__cat{min-height:34px;padding:0 12px;border:1px solid var(--color-border,#E8DDD3);border-radius:999px;background:#fff;font:inherit;font-size:.86rem;font-weight:700;color:var(--color-text,#3D3029);cursor:pointer}
+		.mdfee__cat small{font-weight:600;color:var(--color-text-mute,#A89685);margin-left:2px}
+		.mdfee__cat.is-on{background:#2F2621;border-color:#2F2621;color:#fff}.mdfee__cat.is-on small{color:rgba(255,255,255,.75)}
+		.mdfee__sep{flex:0 0 1px;align-self:stretch;background:var(--color-border,#E8DDD3);margin:0 4px}
+		.mdfee__g{margin:0 0 18px}
+		.mdfee__gh{position:sticky;top:0;z-index:2;margin:0;padding:8px 2px;background:var(--color-bg-card,#fff);font-size:1.02rem;font-weight:800;border-bottom:2px solid #2F2621}
+		.mdfee__gh small{font-weight:600;color:var(--color-text-mute,#A89685);font-size:.8rem}
+		.mdfee__ul{list-style:none;margin:0;padding:0}
+		.mdfee__it{display:flex;align-items:flex-start;gap:14px;padding:9px 2px;border-bottom:1px solid var(--color-border,#EFE6DD)}
+		.mdfee__it[hidden],.mdfee__g[hidden]{display:none}
+		.mdfee__name{flex:1 1 auto;min-width:0;line-height:1.45}
+		.mdfee__name b{font-size:.96rem;color:var(--color-text,#3D3029)}
+		.mdfee__ins{display:inline-block;margin-left:6px;padding:0 7px;border-radius:999px;font-size:.72rem;font-weight:800;vertical-align:2px;white-space:nowrap}
+		.mdfee__ins--ins{background:#E3F0E5;color:#3E7A4A}.mdfee__ins--non{background:#F6E6DC;color:#9A5634}.mdfee__ins--etc{background:#EEE9E4;color:#7A6B5F}
+		.mdfee__sub,.mdfee__note{display:block;font-size:.8rem;color:var(--color-text-sub,#7A6B5F);margin-top:2px}
+		.mdfee__note{color:var(--color-text-mute,#A89685)}
+		.mdfee__won{flex:0 0 auto;max-width:46%;text-align:right;font-size:1.08rem;font-weight:800;color:#2F2621;font-variant-numeric:tabular-nums;line-height:1.4;white-space:nowrap}
+		.mdfee__won.is-long{white-space:normal;font-size:.86rem;font-weight:700;text-align:left;max-width:52%}
+		.mdfee__none{color:var(--color-text-mute,#A89685);font-weight:500}
+		.mdfee mark{background:#FFE9A8;padding:0}
+		.mdfee--list .mdfee__cats{border:0!important;padding:0!important;background:none!important;box-shadow:none!important}
+		.mdfee--list .mdfee__cat{background:#fff!important;color:var(--color-text,#3D3029)!important;border:1px solid var(--color-border,#E8DDD3)!important}
+		.mdfee--list .mdfee__cat.is-on{background:#2F2621!important;border-color:#2F2621!important;color:#fff!important}
+		@media (min-width:1000px){.mdfee__groups{column-count:2;column-gap:44px}.mdfee__g{break-inside:auto}.mdfee__gh{position:static;break-after:avoid}.mdfee__it{break-inside:avoid}}
+		@media (max-width:640px){
+			.mdfee__cats{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -14px 12px;padding:0 14px}
+			.mdfee__cats::-webkit-scrollbar{display:none}
+			.mdfee__cat{flex:none}
+			.mdfee__it{gap:10px;padding:10px 0}
+			.mdfee__won{max-width:44%;font-size:1rem}
+			.mdfee__won.is-long{flex-basis:100%;max-width:none;margin-top:4px;padding:6px 8px;background:#FBF7F3;border-radius:8px}
+			.mdfee__it:has(.mdfee__won.is-long){flex-wrap:wrap}
+		}
+	</style>
+	<script>
+	(function(){
+		var box=document.querySelector('[data-mdfee]');if(!box)return;
+		var q=box.querySelector('[data-mdfee-q]'),n=box.querySelector('[data-mdfee-n]'),no=box.querySelector('[data-mdfee-nohit]');
+		var items=[].slice.call(box.querySelectorAll('.mdfee__it')),groups=[].slice.call(box.querySelectorAll('.mdfee__g'));
+		var cat='',kind='';
+		function apply(){
+			var t=(q.value||'').trim().toLowerCase().replace(/\s+/g,''),c=0;
+			groups.forEach(function(g){
+				var gc=0,inCat=!cat||g.getAttribute('data-cat')===cat;
+				[].forEach.call(g.querySelectorAll('.mdfee__it'),function(it){
+					var ok=inCat&&(!t||it.getAttribute('data-q').indexOf(t)>=0)&&(!kind||it.getAttribute('data-kind')===kind);
+					it.hidden=!ok;if(ok){gc++;c++;}
+				});
+				g.hidden=!gc;var gn=g.querySelector('[data-mdfee-gn]');if(gn)gn.textContent=gc;
+			});
+			n.textContent=c;no.hidden=c>0;
+		}
+		q.addEventListener('input',apply);
+		box.addEventListener('click',function(e){
+			var b=e.target.closest('[data-mdfee-cat]');
+			if(b){cat=b.getAttribute('data-mdfee-cat');[].forEach.call(box.querySelectorAll('[data-mdfee-cat]'),function(x){x.classList.toggle('is-on',x===b);});apply();return;}
+			var k=e.target.closest('[data-mdfee-kind]');
+			if(k){var v=k.getAttribute('data-mdfee-kind');kind=kind===v?'':v;[].forEach.call(box.querySelectorAll('[data-mdfee-kind]'),function(x){x.classList.toggle('is-on',x.getAttribute('data-mdfee-kind')===kind);});apply();}
+		});
+	})();
+	</script>
+	<?php
+	return true;
+}
+
 /** 일반 직원 화면 — 서버가 그린 표 (시트 주소 · 다운로드 없음) */
 function md_fees_render_table() {
 	$d    = md_fees_rows();
@@ -104,6 +236,7 @@ function md_fees_render_table() {
 	if ( ! $rows ) { echo '<div class="mds-card"><div class="mds-empty">진료비 표를 불러오지 못했습니다. 경영지원실에 알려 주세요.</div></div>'; return; }
 	$head = array_shift( $rows );
 	$n    = count( $head );
+	if ( md_fees_render_list( $rows, $head, $d ) ) { return; } /* v9.57 · 한눈에 */
 	?>
 	<div class="mds-card mdfee">
 		<div class="mdfee__bar">
@@ -146,7 +279,7 @@ function md_fees_render() {
 			<div class="mds-card mdeq__head">
 				<div class="mdeq__title">
 					<h2>진료비</h2>
-					<p class="mds-hint">대분류 · 중분류 · 세부설명 · 보험/비급여 · 단위 · 진료비 · 비고. 환자 안내 때 이 표를 기준으로 합니다. 열람만 됩니다. 금액이 달라졌으면 경영지원실에 알려 주세요.</p>
+					<p class="mds-hint">환자 안내 때 이 표를 기준으로 합니다. 위 분류 단추나 찾기로 바로 찾으세요. 금액이 달라졌으면 경영지원실에 알려 주세요.</p>
 				</div>
 			</div>
 			<?php md_fees_render_table(); ?>
