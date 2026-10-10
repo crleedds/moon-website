@@ -594,3 +594,11 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-nextlist__d { flex: 0 0 auto; min-width: 5.6em; font-weight: 700; font-variant-numeric: tabular-nums; }
 .mc-nextlist__tx { flex: 1 1 auto; min-width: 0; }
 .mc-nextlist small { color: var(--color-text-mute, #A89685); }
+
+/* v9.55 · 종류를 고르는 칩 (혈압 · 간염) */
+.mc-chip--opt::after { content: '▾'; margin-left: 4px; font-size: .75em; opacity: .6; }
+.mc-chips__pick { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 4px; padding: 8px 10px; border: 1px solid var(--mc-pri, #D88062); border-radius: 12px; background: var(--mc-bg, #fff); }
+.mc-chips__pickrow { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.mc-chips__pickbar { display: inline-flex; gap: 6px; margin-left: auto; }
+.mc-chip--sm { min-height: 32px; padding: 2px 12px; font-size: .88rem; }
+.mc-chips:has(.mc-chips__pick) { flex-wrap: wrap; overflow: visible; }

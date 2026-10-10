@@ -253,17 +253,48 @@ window.mcInits.push(function () {
       b.classList.toggle('is-on', ps.some(function (p) { return p.indexOf(c) === 0; }));
     });
   }
+  /* v9.55 · 「혈압」 「간염」처럼 종류를 고르는 칩 — 누르면 칩 아래에 고르는 칸, 다 고르면 「혈압(고혈압 · 아스피린 복용)」으로 넣는다 */
+  function closePick(box) { var pk = box.querySelector('.mc-chips__pick'); if (pk) pk.remove(); }
+  function openPick(box, b, done) {
+    closePick(box);
+    var groups = JSON.parse(b.getAttribute('data-opts') || '[]'), sel = groups.map(function () { return ''; });
+    var pk = document.createElement('div'); pk.className = 'mc-chips__pick';
+    var title = document.createElement('b'); title.textContent = b.getAttribute('data-chip'); pk.appendChild(title);
+    var ok = document.createElement('button'); ok.type = 'button'; ok.className = 'mds-btn mds-btn--fill mds-btn--sm'; ok.textContent = '넣기'; ok.disabled = true;
+    groups.forEach(function (g, gi) {
+      var row = document.createElement('span'); row.className = 'mc-chips__pickrow';
+      g.forEach(function (o) {
+        var x = document.createElement('button'); x.type = 'button'; x.className = 'mc-chip mc-chip--sm'; x.textContent = o;
+        x.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); sel[gi] = o; Array.prototype.forEach.call(row.children, function (y) { y.classList.toggle('is-on', y === x); }); ok.disabled = sel.some(function (s) { return !s; }); });
+        row.appendChild(x);
+      });
+      pk.appendChild(row);
+    });
+    var no = document.createElement('button'); no.type = 'button'; no.className = 'mds-btn mds-btn--ghost mds-btn--sm'; no.textContent = '취소';
+    ok.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); closePick(box); done(b.getAttribute('data-chip') + '(' + sel.join(' · ') + ')'); });
+    no.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); closePick(box); });
+    var bar = document.createElement('span'); bar.className = 'mc-chips__pickbar'; bar.appendChild(ok); bar.appendChild(no); pk.appendChild(bar);
+    box.appendChild(pk);
+  }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-mc-chips] [data-chip]');
-    if (!b) return;
+    if (!b || b.closest('.mc-chips__pick')) return;
     var box = b.closest('[data-mc-chips]'), ta = taFor(box);
     if (!ta) return;
     e.preventDefault();
+    var c0 = b.getAttribute('data-chip');
+    if (b.hasAttribute('data-opts') && !parts(ta).some(function (p) { return p.indexOf(c0) === 0; })) {
+      openPick(box, b, function (val) { put(box, ta, b, val); });
+      return;
+    }
+    put(box, ta, b, null);
+  });
+  function put(box, ta, b, val) {
     var name = box.getAttribute('data-mc-chips'), c = b.getAttribute('data-chip'), ps = parts(ta);
     var i = -1;
     ps.forEach(function (p, k) { if (i < 0 && p.indexOf(c) === 0) i = k; });
     var pre = c.slice(-1) === ':';
-    if (i > -1) ps.splice(i, 1); else ps.push(pre ? c + ' ' : c);
+    if (i > -1) ps.splice(i, 1); else ps.push(val ? val : (pre ? c + ' ' : c));
     ps = ps.filter(function (p) { return p !== '해당없음' && p !== '.'; });
     var na = (box.closest('form') || document).querySelector('[name="na[' + name + ']"]');
     if (na && na.checked) { na.click(); }
@@ -273,7 +304,7 @@ window.mcInits.push(function () {
     ta.dispatchEvent(new Event('input', { bubbles: true }));
     sync(box, ta);
     if (pre && i < 0) { ta.focus(); var n = ta.value.length; try { ta.setSelectionRange(n, n); } catch (x) {} }
-  });
+  }
   document.addEventListener('input', function (e) {
     var t = e.target;
     if (!t || !t.name) return;

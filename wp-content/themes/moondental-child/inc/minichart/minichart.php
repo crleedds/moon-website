@@ -274,7 +274,7 @@ function md_mc_alert_words_default() {
 	return array(
 		'항혈전', '항응고', '아스피린', '와파린', '쿠마딘', '플라빅스', '클로피도그렐', '엘리퀴스', '자렐토', '프라닥사', '릭시아나', '헤파린',
 		'골흡수억제', '비스포스포네이트', 'BP제제', '포사맥스', '프롤리아', '본비바', '악토넬', '졸레드론', '데노수맙', '골다공증 주사', '골다공증주사',
-		'알러지', '알레르기', '페니실린',
+		'알러지', '알레르기', '페니실린', '혈전용해제', '출혈성', '예방적항생제', '약처방주의', /* v9.55 */
 		'임신', '수유',
 		'투석', '스텐트', '인공판막', '판막',
 		'항암', '방사선',
@@ -1542,9 +1542,9 @@ function md_mc_inline_block( $r, $d, $field, $bare = false ) {
 			<?php else :
 				$na  = '' !== (string) $r->$field && md_mc_is_na( $r->$field );
 				$lab = 'addr' === $field ? '' : $f[ $field ][0]; /* v9.54 · 지역 고치기 칸에 「지역 메모」 글자 없음 */
-				md_mc_field( $field, $lab, $na ? '' : (string) $r->$field, array( 'rows' => 'mhx' === $field ? 2 : 1, 'na' => 'addr' === $field ? null : $na, 'attrs' => 'autocomplete="off"' ) ); /* v9.47 · 지역은 「해당없음」 체크 없음 */
+				md_mc_field( $field, $lab, ( $na && 'referral' !== $field ) ? '' : (string) $r->$field, array( 'rows' => 'mhx' === $field ? 2 : 1, 'na' => in_array( $field, array( 'addr', 'referral' ), true ) ? null : $na, 'attrs' => 'autocomplete="off"' ) ); /* v9.47 · 지역 · v9.55 내원경로는 「해당없음」 체크 없음 (원장 지시) */
 				if ( 'mhx' === $field ) { echo md_mc_mhx_chips(); } // phpcs:ignore
-				if ( 'referral' === $field ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「가족 …」 「협력기관 …」을 누르면 이름을 바로 이어 적습니다' ); } // phpcs:ignore
+				if ( 'referral' === $field ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「…」 붙은 것은 누르면 이름을 이어 적습니다' ); } // phpcs:ignore
 			endif; ?>
 			<div class="mc-edit__bar"><button type="submit" class="mds-btn mds-btn--fill">저장</button><button type="button" class="mds-btn mds-btn--ghost" data-mc-edit-cancel>취소</button></div>
 		</div>
@@ -1767,21 +1767,40 @@ function md_mc_chip_list( $kind ) {
 	$st = md_mc_settings();
 	$k  = 'mhx' === $kind ? 'mhx_chips' : 'ref_chips';
 	if ( ! empty( $st[ $k ] ) && is_array( $st[ $k ] ) ) { return $st[ $k ]; }
-	return 'mhx' === $kind
-		? array( '고혈압', '당뇨', '심장질환', '부정맥', '뇌졸중', '갑상선', '간질환', '신장질환 · 투석', '골다공증 약', '항응고제 · 아스피린', '스텐트', '항암 · 방사선', '알레르기', '임신', '흡연', '천식', 'B형간염' )
-		: array( '인터넷 검색', '네이버 지도 · 플레이스', '블로그 · 카페', '인스타그램 · 유튜브', '지인 소개', '간판 · 지나가다', '광고 · 이벤트', '이전 내원', '가족:', '소개자:', '협력기관:' );
+	return 'mhx' === $kind ? md_mc_chip_default( 'mhx' ) : md_mc_chip_default( 'ref' );
 }
+
+/** v9.55 · 기본 목록 (원장 지시 2026-10-10) — 「이름{선택|선택}」 은 눌렀을 때 고르는 칸, 「이름:」 은 뒤에 이어 적기 */
+function md_mc_chip_default( $kind ) {
+	return 'mhx' === $kind ? array( '혈압{저혈압|고혈압}{아스피린 복용|아스피린 안 먹음}', '당뇨', '고지혈증', '골다공증', '혈전용해제 복용중', '갑상선', '위장 장애', '알러지', '인공관절', '간염{B|D}', '결핵', '임신 · 임신가능성', '수유중', '흡연', '약처방주의', '신장 투석', '만성 심장판막 질환', '만성 신부전', '만성 간경화', '예방적항생제 투여 필요', '심장질환', '스텐트시술', '출혈성질환', '기타:' ) : array( '직원 소개:', '고객소개:', '협력업체:', '소문', '간판', '인터넷', 'AI', '홈페이지', '근거리', '퇴사직원 소개:', '타병원 추천:', '의료비지원', '기타:' );
+}
+
+/* v9.55 · 설정에 저장된 예전 목록을 새 목록으로 한 번 바꾼다 (원장이 정해 준 목록) · 새 주의 단어도 더함 */
+add_action( 'init', function () {
+	if ( get_option( 'md_mc_chips_v955' ) ) { return; }
+	$s = md_mc_settings();
+	$s['mhx_chips'] = md_mc_chip_default( 'mhx' ); $s['ref_chips'] = md_mc_chip_default( 'ref' );
+	if ( isset( $s['alert_words'] ) && is_array( $s['alert_words'] ) ) { foreach ( array( '혈전용해제', '출혈성', '예방적항생제', '약처방주의' ) as $w ) { if ( ! in_array( $w, $s['alert_words'], true ) ) { $s['alert_words'][] = $w; } } }
+	update_option( 'md_mc_settings', $s, false );
+	update_option( 'md_mc_chips_v955', current_time( 'mysql' ), false );
+}, 30 );
 
 /** v8.1 · 병력 / v8.4 · 내원경로 — 눌러서 넣는 칸 (다시 누르면 빠짐) + 직접 더 적기 */
 function md_mc_chips( $field, $kind, $hint ) {
 	$h = '<div class="mc-chips" data-mc-chips="' . esc_attr( $field ) . '" aria-label="눌러서 넣기">';
 	foreach ( md_mc_chip_list( $kind ) as $c ) {
+		/* v9.55 · 「혈압{저혈압|고혈압}{아스피린 복용|아스피린 안 먹음}」 — 누르면 고르는 칸 */
+		$opts = array();
+		if ( preg_match_all( '/\{([^}]*)\}/u', $c, $om ) ) {
+			foreach ( $om[1] as $g ) { $opts[] = array_values( array_filter( array_map( 'trim', explode( '|', $g ) ), 'strlen' ) ); }
+			$c = trim( preg_replace( '/\{[^}]*\}/u', '', $c ) );
+		}
 		$pre = ':' === mb_substr( $c, -1 );
-		$h  .= '<button type="button" class="mc-chip' . ( $pre ? ' mc-chip--pre' : '' ) . '" data-chip="' . esc_attr( $pre ? rtrim( $c, ':' ) . ':' : $c ) . '">' . esc_html( $pre ? rtrim( $c, ':' ) . ' …' : $c ) . '</button>';
+		$h  .= '<button type="button" class="mc-chip' . ( $pre ? ' mc-chip--pre' : '' ) . ( $opts ? ' mc-chip--opt' : '' ) . '" data-chip="' . esc_attr( $pre ? rtrim( $c, ':' ) . ':' : $c ) . '"' . ( $opts ? ' data-opts="' . esc_attr( wp_json_encode( $opts, JSON_UNESCAPED_UNICODE ) ) . '"' : '' ) . '>' . esc_html( $pre ? rtrim( $c, ':' ) . ' …' : $c ) . '</button>';
 	}
 	return $h . '<span class="mc-chips__hint">' . esc_html( $hint ) . '</span></div>';
 }
-function md_mc_mhx_chips() { return md_mc_chips( 'mhx', 'mhx', '눌러서 넣고, 위 칸에 더 적어도 됩니다 (예: 당뇨 — 인슐린, 공복 혈당 140)' ); }
+function md_mc_mhx_chips() { return md_mc_chips( 'mhx', 'mhx', '눌러서 넣고, 위 칸에 더 적어도 됩니다 · 혈압 · 간염은 눌러서 종류를 고릅니다 · 「기타 …」는 이어 적기' ); }
 
 /** 수정 · 새로 만들기 — 칸 순서와 이름은 AppSheet 폼 그대로 */
 function md_mc_render_edit( $id, $kind ) {
@@ -1834,9 +1853,9 @@ function md_mc_render_edit( $id, $kind ) {
 				$na = ! empty( $vals['na'][ $k ] ) || ( '' !== $v( $k ) && md_mc_is_na( $v( $k ) ) );
 				$req = $f[ $k ][1]; /* v9.9 · 별표는 md_mc_fields 대로 (지역만) */
 				if ( 'addr' === $k ) { md_mc_field( $k, $f[ $k ][0], md_mc_is_na( $v( $k ) ) ? '' : $v( $k ), array( 'req' => $req, 'rows' => 1, 'attrs' => $req ? 'required' : '' ) ); continue; } /* v9.47 · 지역은 「해당없음」 체크 없음 (원장 지시) */
-				md_mc_field( $k, $f[ $k ][0], $v( $k ), array( 'req' => $req, 'rows' => 'mhx' === $k ? 2 : 1, 'attrs' => $req ? 'required' : '', 'na' => $na ) );
+				md_mc_field( $k, $f[ $k ][0], $v( $k ), array( 'req' => $req, 'rows' => 'mhx' === $k ? 2 : 1, 'attrs' => $req ? 'required' : '', 'na' => 'referral' === $k ? null : $na ) ); /* v9.55 · 내원경로는 「해당없음」 없음 */
 				if ( 'mhx' === $k ) { echo md_mc_mhx_chips(); } // phpcs:ignore
-				if ( 'referral' === $k ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「가족 …」 「협력기관 …」을 누르면 이름을 바로 이어 적습니다 (예: 가족: 홍길동 #12345)' ); } // phpcs:ignore
+				if ( 'referral' === $k ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「…」 붙은 것은 누르면 이름을 이어 적습니다 (예: 직원 소개: 민종기)' ); } // phpcs:ignore
 				$latest( $k );
 			}
 			md_mc_dr_field( $vals );
