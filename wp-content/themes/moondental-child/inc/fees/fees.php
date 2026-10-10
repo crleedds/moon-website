@@ -76,7 +76,7 @@ function md_fees_rows( $fresh = false ) {
 	}
 	fclose( $fh );
 	$out = array( 'rows' => $rows, 'at' => current_time( 'Y-m-d H:i' ) );
-	set_transient( $key, $out, 10 * MINUTE_IN_SECONDS );
+	set_transient( $key, $out, MINUTE_IN_SECONDS ); /* v9.62 · 시트를 고치면 1분 안에 직원 화면에 (원장 지시) */
 	update_option( 'md_fees_rows_last', $out, false );
 	return $out;
 }
@@ -287,8 +287,8 @@ function md_fees_render() {
 		<?php
 		return;
 	}
+	delete_transient( 'md_fees_rows_' . md5( md_fees_csv_url() ) ); /* v9.62 */
 	$src = md_fees_url( 'edit' );
-	$csv = (string) get_option( 'md_fees_csv_url', '' );
 	?>
 	<div class="mdeq mdeq--fees">
 		<div class="mds-card mdeq__head">
@@ -297,7 +297,7 @@ function md_fees_render() {
 				<p class="mds-hint">
 					대분류 · 중분류 · 세부설명 · 보험/비급여 · 단위 · 진료비 · 비고. 환자 안내 때 이 표를 기준으로 합니다.
 					관리자는 칸을 눌러 바로 고칠 수 있습니다(브라우저의 구글 계정이 시트 편집자여야 합니다).
-					<b>일반 직원에게는 시트가 아니라 표로만 보여 엑셀로 받을 수 없습니다</b>(고친 내용은 10분 안에 반영 · 아래 「직원 화면 지금 새로 읽기」로 바로).
+					<b>일반 직원에게는 시트가 아니라 표로만 보여 엑셀로 받을 수 없습니다</b> — 여기서 시트를 고치면 직원 화면에도 1분 안에 바뀝니다.
 				</p>
 			</div>
 			<div class="mdeq__actions">
@@ -312,16 +312,6 @@ function md_fees_render() {
 				referrerpolicy="no-referrer-when-downgrade"
 				allow="clipboard-write"></iframe>
 		</div>
-		<details class="mds-card mdfee-admin" style="margin-top:12px"<?php echo isset( $_GET['fr'] ) ? ' open' : ''; ?>>
-			<summary style="cursor:pointer;font-weight:700">직원 화면 (엑셀 막기) 설정</summary>
-			<?php if ( isset( $_GET['fr'] ) ) : $dd = md_fees_rows(); ?><p class="mds-notice" style="margin:8px 0">직원 화면을 새로 읽었습니다 — <?php echo (int) max( 0, count( $dd['rows'] ?? array() ) - 1 ); ?>줄<?php echo ! empty( $dd['_stale'] ) || ! empty( $dd['_err'] ) ? ' (지금은 시트를 읽지 못해 마지막으로 읽은 표를 보여 줍니다 — CSV 주소와 공유를 확인해 주세요)' : ''; ?>.</p><?php endif; ?>
-			<p class="mds-hint">시트 주소를 아는 사람은 공유가 「링크가 있는 모든 사용자」인 동안 엑셀로 받을 수 있습니다. 완전히 막으려면 구글 시트에서 ① 공유 › 일반 액세스를 <b>「제한됨」</b>(편집자만)으로 ② 파일 › 공유 › <b>웹에 게시</b> › 「시트1」 · 「쉼표로 구분된 값(.csv)」 › 게시 ③ 나온 주소를 아래에 넣고 저장. 비워 두면 지금처럼 시트 주소로 읽습니다.</p>
-			<form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-				<?php wp_nonce_field( 'md_fees', 'md_fees_nonce' ); ?><input type="hidden" name="md_fees_act" value="csv">
-				<input type="url" name="csv_url" value="<?php echo esc_attr( $csv ); ?>" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?output=csv" style="flex:1 1 360px;min-height:38px;padding:6px 10px">
-				<button class="mds-btn mds-btn--fill">저장 · 직원 화면 지금 새로 읽기</button>
-			</form>
-		</details>
 	</div>
 	<?php
 }
