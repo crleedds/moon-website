@@ -852,6 +852,15 @@ function md_mc_handle_post() {
 	}
 	$id   = isset( $_POST['mid'] ) ? (int) $_POST['mid'] : 0;
 	$post = wp_unslash( $_POST );
+	if ( 'seen' === $action ) { /* v9.48 · 미리 받은 차트를 실제로 열었다 — 열람 기록 · 최근 본 시각 */
+		$r = md_mc_get( $id );
+		if ( $r && 'patient' === $r->kind && empty( $r->deleted_at ) ) {
+			global $wpdb;
+			$wpdb->update( md_mc_t(), array( 'viewed_at' => current_time( 'mysql' ) ), array( 'id' => (int) $r->id ) );
+			do_action( 'md_mc_viewed', $r );
+		}
+		wp_send_json( array( 'ok' => true ) );
+	}
 	$err  = function ( $msg, $args ) { return md_mc_url( array_merge( $args, array( 'mcerr' => $msg ) ) ); };
 
 	/* v9.2 · 빠른 저장 — 화면이 fetch 로 보내면(md_fast) 페이지를 다시 그리지 않고 바뀐 부분만 돌려준다 (원장 지시: 라운지 속도) */
@@ -1193,6 +1202,13 @@ function md_mc_enqueue() {
 }
 add_action( 'wp_enqueue_scripts', 'md_mc_enqueue', 40 );
 
+/** v9.48 · 미니차트 화면에서는 구글 장식 글꼴 CSS 가 첫 화면을 막지 않게 (처음 열 때 0.3초쯤 빨라짐 · 글꼴은 받아지면 그대로 바뀜) */
+add_filter( 'style_loader_tag', function ( $tag, $handle ) {
+	if ( 'moondental-v5-fonts' !== $handle || is_admin() ) { return $tag; }
+	if ( ! function_exists( 'md_sup_is_page' ) || ! md_sup_is_page() || ! function_exists( 'md_sup_current_app' ) || 'minichart' !== md_sup_current_app() ) { return $tag; }
+	return str_replace( "media='all'", "media='print' onload=\"this.media='all'\"", $tag );
+}, 10, 2 );
+
 /** v9.8 · 차트 화면 위 찾기 칸 — 차트번호 · 이름 · 초성으로 바로 찾기 (GET ?app=minichart&md_mc_find=검색어 · JSON, 12명까지) */
 function md_mc_find_json() {
 	if ( ! isset( $_GET['md_mc_find'] ) ) { return; }
@@ -1437,12 +1453,7 @@ function md_mc_render_list() {
 			<span class="mc-chips__label">정렬</span>
 			<?php foreach ( $sorts as $k => $label ) { md_mc_chip( $label, md_mc_url( array( 'mf' => $filter, 'mq' => $q, 'md' => $doc, 'ms' => 'viewed' === $k ? '' : $k ) ), $sort === $k ); } ?>
 		</div>
-		<?php $docs = md_mc_doctors(); if ( $docs ) : ?>
-			<div class="mc-chips mc-chips--doc" aria-label="담당의사">
-				<span class="mc-chips__label">담당의사</span>
-				<?php foreach ( $docs as $dn ) { md_mc_chip( $dn, md_mc_url( array( 'mf' => $filter, 'mq' => $q, 'md' => $doc === $dn ? '' : $dn, 'ms' => $ms ) ), $doc === $dn ); } ?>
-			</div>
-		<?php endif; ?>
+		<?php /* v9.48 · 담당의사 버튼 줄 없앰 (원장 지시) */ ?>
 	</div>
 	<?php md_mc_install_help(); /* v10.0 · 홈 화면에 추가 */ ?>
 	<?php if ( '' !== $q || '' !== $doc ) : ?>
@@ -1566,8 +1577,13 @@ function md_mc_render_patient( $id ) {
 	$alrt = md_mc_alerts( $r->mhx );
 	/* v6.5 · 연 차트는 목록 맨 위로 (최근 본 순) — rev 는 바꾸지 않는다 */
 	global $wpdb;
-	$wpdb->update( md_mc_t(), array( 'viewed_at' => current_time( 'mysql' ) ), array( 'id' => (int) $r->id ) );
-	do_action( 'md_mc_viewed', $r ); /* v8.0 · 열람 기록 (2년) */
+	if ( empty( $_SERVER['HTTP_X_MD_MC_PREFETCH'] ) ) {
+		$wpdb->update( md_mc_t(), array( 'viewed_at' => current_time( 'mysql' ) ), array( 'id' => (int) $r->id ) );
+		do_action( 'md_mc_viewed', $r ); /* v8.0 · 열람 기록 (2년) */
+	} else {
+		/* v9.48 · 마우스를 올려 미리 받은 차트 — 실제로 화면에 띄울 때 이 표식으로 「열람」을 남긴다 */
+		echo '<span hidden data-mc-seen="' . esc_attr( wp_create_nonce( 'md_mc_seen' ) ) . '" data-mid="' . (int) $r->id . '"></span>';
+	}
 	md_mc_render_jump(); /* v9.8 · 차트 보면서 다른 환자 찾기 (원장 지시) */
 	if ( isset( $_GET['saved'] ) )    { echo '<div class="mds-notice mds-notice--ok">저장했습니다.</div>'; }
 	if ( isset( $_GET['reverted'] ) ) { echo '<div class="mds-notice mds-notice--ok">이전 내용으로 되돌렸습니다.</div>'; }

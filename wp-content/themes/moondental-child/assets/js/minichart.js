@@ -586,8 +586,37 @@ window.mcInits.push(function () {
     if (ta && ta.mcDirty && ta.mcDirty()) return true;
     return Array.prototype.some.call(document.querySelectorAll('.mc .mc-add__text, .mc .mc-tl__edit:not([hidden]) textarea, .mc .mc-edit__form:not([hidden]) textarea'), function (t) { return t.value.trim() !== '' && t.value !== t.defaultValue; });
   }
+  /* v9.48 · 마우스를 환자 줄에 잠깐 올려 두면 차트를 미리 받아 둔다 — 열람 기록은 실제로 열 때만 (data-mc-seen) */
+  var pre = {};
+  function prefetch(x) {
+    var k = key(x), now = Date.now();
+    if (pending[k] || (pre[k] && now - pre[k].t < 30000)) return;
+    pre[k] = { t: now, p: fetchMc(x, true) };
+    pre[k].p.catch(function () { delete pre[k]; });
+  }
+  function fetchMc(x, isPre) {
+    var h = { 'X-MD-MC-Nav': '1' }; if (isPre) h['X-MD-MC-Prefetch'] = '1';
+    return fetch(x.toString(), { credentials: 'same-origin', headers: h })
+      .then(function (r) { if (!r.ok || !ours(u(r.url))) throw new Error('nav'); return r.text(); })
+      .then(function (t) {
+        var d = new DOMParser().parseFromString(t, 'text/html');
+        var mc = d.querySelector('.mc');
+        if (!mc) throw new Error('nav');
+        return { mc: mc, title: d.title };
+      });
+  }
+  function seen(node) {
+    var s = node && node.querySelector && node.querySelector('[data-mc-seen]'); if (!s) return;
+    var fd = new FormData(); fd.append('md_mc_action', 'seen'); fd.append('md_mc_nonce', s.getAttribute('data-mc-seen')); fd.append('mid', s.getAttribute('data-mid'));
+    try { fetch(location.pathname + '?app=minichart', { method: 'POST', body: fd, credentials: 'same-origin', keepalive: true }); } catch (e) {}
+    s.remove();
+  }
   function load(x) {
     var k = key(x);
+    if (!pending[k] && pre[k] && Date.now() - pre[k].t < 30000) {
+      pending[k] = pre[k].p; delete pre[k];
+      pending[k].catch(function () {}).then(function () { setTimeout(function () { delete pending[k]; }, 3000); });
+    }
     if (!pending[k]) {
       pending[k] = fetch(x.toString(), { credentials: 'same-origin', headers: { 'X-MD-MC-Nav': '1' } })
         .then(function (r) { if (!r.ok || !ours(u(r.url))) throw new Error('nav'); return r.text(); })
@@ -640,6 +669,7 @@ window.mcInits.push(function () {
       busy(false);
       if (isChart(x)) lastMid = x.searchParams.get('mid');
       swap(document.importNode(res.mc, true), res.title, 0, x);
+      seen(document.querySelector('.mc'));
       if (push) history.pushState({ mc: 1 }, '', x.toString());
     }).catch(function () { if (my === seq) { busy(false); location.href = x.toString(); } });
   }
@@ -662,6 +692,13 @@ window.mcInits.push(function () {
   /* 휴대폰은 목록을 밀어 올리려고 닿기만 해도 pointerdown 이 오므로 마우스 · 펜만 */
   var early = function (e) { if (e.button > 0 || e.pointerType === 'touch') return; var x = linkOf(e); if (x && isChart(x)) load(x); };
   document.addEventListener('pointerdown', early, true);
+  var hoverT = null;
+  document.addEventListener('pointerover', function (e) {
+    if (e.pointerType !== 'mouse') return;
+    var x = linkOf(e); clearTimeout(hoverT);
+    if (x && isChart(x)) hoverT = setTimeout(function () { prefetch(x); }, 120);
+  }, true);
+  document.addEventListener('pointerout', function (e) { if (e.pointerType === 'mouse') clearTimeout(hoverT); }, true);
   document.addEventListener('click', function (e) {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     var x = linkOf(e);
