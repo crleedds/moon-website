@@ -954,6 +954,14 @@ function md_mc_handle_post() {
 		case 'save':
 			$kind = 'note' === ( $post['kind'] ?? '' ) ? 'note' : 'patient';
 			$data = $post;
+			/* v9.64 · 수정 화면에 없는 칸(치료계획 등)은 저장된 값 그대로 — 폼에서 뺀 칸이 비워지지 않게. 차트번호는 관리자만 바꾼다 */
+			if ( $id && 'patient' === $kind ) {
+				$cur0 = md_mc_get( $id );
+				if ( $cur0 && 'patient' === $cur0->kind ) {
+					foreach ( array_keys( md_mc_fields() ) as $fk ) { if ( ! array_key_exists( $fk, $post ) ) { $data[ $fk ] = (string) $cur0->$fk; } }
+					if ( ! md_mc_can_manage() ) { $data['chart_no'] = (string) $cur0->chart_no; }
+				}
+			}
 			$data['pin'] = ! empty( $post['pin'] );
 			/* v6.4 · 담당의사는 칸마다 고른 원장님 + 그 밖의 줄 */
 			if ( 'patient' === $kind && isset( $post['dr_main'] ) ) {
@@ -1931,7 +1939,7 @@ function md_mc_render_edit( $id, $kind ) {
 	};
 	$f = md_mc_fields();
 	?>
-	<form method="post" class="mds-card mc-form" action="<?php echo esc_url( md_mc_url() ); ?>"<?php echo ( ! $r && 'note' !== $kind && function_exists( 'md_mc_dw_get' ) ) ? ' data-dw="' . esc_url( md_mc_url() ) . '"' : ''; /* v7.0 · 새 환자 — 덴트웹으로 채우기 */ ?>>
+	<form method="post" class="mds-card mc-form<?php echo 'note' === $kind ? '' : ' mc-form--wide'; ?>" action="<?php echo esc_url( md_mc_url() ); ?>"<?php echo ( ! $r && 'note' !== $kind && function_exists( 'md_mc_dw_get' ) ) ? ' data-dw="' . esc_url( md_mc_url() ) . '"' : ''; /* v7.0 · 새 환자 — 덴트웹으로 채우기 */ ?>>
 		<?php md_mc_nonce_fields( 'save', $r ? $r->id : 0 ); ?>
 		<input type="hidden" name="kind" value="<?php echo esc_attr( $kind ); ?>">
 		<input type="hidden" name="rev" value="<?php echo $r ? (int) $r->rev : 0; ?>">
@@ -1943,36 +1951,57 @@ function md_mc_render_edit( $id, $kind ) {
 			<?php $latest( 'body' ); ?>
 		<?php else : ?>
 			<?php
-			md_mc_field( 'chart_no', $f['chart_no'][0], $v( 'chart_no' ), array( 'req' => true, 'input' => true, 'attrs' => 'required inputmode="numeric" maxlength="60" autocomplete="off"' . ( $r ? '' : ' autofocus' ) ) );
+			/* v9.64 · 수정 화면 정리 (원장 지시)
+			   - 넓은 화면은 두 단: 왼쪽 기본 정보 · 담당의사 · 고정 / 오른쪽 병력 · 내원경로 (· 새 환자는 치료계획 · 첫 기록)
+			   - 이미 있는 환자: 치료계획 · 진료기록/참고사항 한 줄 입력은 차트 화면에서 (여기서는 뺌), 진료기록 · 참고사항 전체 글은 접어 둠
+			   - 차트번호는 덴트웹 연동의 열쇠라 관리자만 고친다
+			   - 지역은 한 줄 칸 */
+			$lock_no = $r && ! md_mc_can_manage();
+			?>
+			<div class="mc-form__cols"><div class="mc-form__col">
+			<?php
+			md_mc_field( 'chart_no', $f['chart_no'][0], $v( 'chart_no' ), array( 'req' => true, 'input' => true, 'hint' => $lock_no ? '관리자만 바꿀 수 있습니다' : '', 'attrs' => 'required inputmode="numeric" maxlength="60" autocomplete="off"' . ( $r ? '' : ' autofocus' ) . ( $lock_no ? ' readonly' : '' ) ) );
 			md_mc_field( 'pname', $f['pname'][0], $v( 'pname' ), array( 'req' => true, 'input' => true, 'attrs' => 'required maxlength="250" autocomplete="off"' ) );
 			md_mc_field( 'salute', $f['salute'][0], $v( 'salute' ), array( 'input' => true, 'attrs' => 'maxlength="120" autocomplete="off" placeholder="예: 선교사님 · 외국인 호명"' ) ); /* v9.24 · v9.62.1 안내 문구 없이 빈 칸에 예시 (원장 지시) */
 			if ( ! $r ) { echo '<div class="mc-dw-prev" hidden aria-live="polite"></div>'; } /* v8.1 · 새 환자 — 덴트웹에서 가져온 것 미리 보기 */
-			foreach ( array( 'addr', 'mhx', 'referral' ) as $k ) {
+			md_mc_field( 'addr', $f['addr'][0], md_mc_is_na( $v( 'addr' ) ) ? '' : $v( 'addr' ), array( 'req' => $f['addr'][1], 'input' => true, 'attrs' => ( $f['addr'][1] ? 'required ' : '' ) . 'maxlength="250" autocomplete="off"' ) ); /* v9.47 · 해당없음 없음 · v9.64 한 줄 */
+			$latest( 'addr' );
+			md_mc_dr_field( $vals );
+			if ( $conflict ) { $latest( 'dr' ); }
+			?>
+			<div class="mc-field">
+				<span class="mc-field__l">Follow-up</span>
+				<label class="mc-check"><input type="checkbox" name="pin" value="1" <?php checked( (bool) ( $vals['pin'] ?? 0 ) ); ?>> 📌 고정 <small>(목록 맨 위에)</small></label>
+			</div>
+			</div><div class="mc-form__col">
+			<?php
+			foreach ( array( 'mhx', 'referral' ) as $k ) {
 				$na = ! empty( $vals['na'][ $k ] ) || ( '' !== $v( $k ) && md_mc_is_na( $v( $k ) ) );
-				$req = $f[ $k ][1]; /* v9.9 · 별표는 md_mc_fields 대로 (지역만) */
-				if ( 'addr' === $k ) { md_mc_field( $k, $f[ $k ][0], md_mc_is_na( $v( $k ) ) ? '' : $v( $k ), array( 'req' => $req, 'rows' => 1, 'attrs' => $req ? 'required' : '' ) ); continue; } /* v9.47 · 지역은 「해당없음」 체크 없음 (원장 지시) */
-				md_mc_field( $k, $f[ $k ][0], $v( $k ), array( 'req' => $req, 'rows' => 'mhx' === $k ? 2 : 1, 'attrs' => $req ? 'required' : '', 'na' => 'referral' === $k ? null : $na ) ); /* v9.55 · 내원경로는 「해당없음」 없음 */
+				md_mc_field( $k, $f[ $k ][0], $v( $k ), array( 'req' => $f[ $k ][1], 'rows' => 'mhx' === $k ? 2 : 1, 'attrs' => $f[ $k ][1] ? 'required' : '', 'na' => 'referral' === $k ? null : $na ) ); /* v9.55 · 내원경로는 「해당없음」 없음 */
 				if ( 'mhx' === $k ) { echo md_mc_mhx_chips(); } // phpcs:ignore
 				if ( 'referral' === $k ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「…」 붙은 것은 누르면 이름을 이어 적습니다 (예: 직원 소개: 민종기)' ); } // phpcs:ignore
 				$latest( $k );
 			}
-			md_mc_dr_field( $vals );
-			if ( $conflict ) { $latest( 'dr' ); }
-			md_mc_field( 'tx_plan', $f['tx_plan'][0], $v( 'tx_plan' ), array( 'rows' => 2 ) );
-			$latest( 'tx_plan' );
-			md_mc_field( 'tx_new', '진료기록 직접 입력 (날짜없이)', '', array( 'rows' => 1, 'hint' => '저장하면 오늘 날짜를 붙여 진료기록에 (덴트웹 치료내용은 자동으로 들어옵니다)' ) );
-			md_mc_field( 'tx_hist', '진료기록 — 직접 적은 것 전체', $v( 'tx_hist' ), array( 'rows' => 3 ) );
-			$latest( 'tx_hist' );
-			md_mc_field( 'memo_new', '참고사항입력 (날짜없이)', '', array( 'rows' => 1, 'hint' => '저장하면 오늘 날짜를 붙여 참고사항 맨 위에' ) );
+			if ( ! $r ) {
+				/* 새 환자 — 처음 적을 것들은 여기서 */
+				md_mc_field( 'tx_plan', $f['tx_plan'][0], $v( 'tx_plan' ), array( 'rows' => 2 ) );
+				md_mc_field( 'tx_new', '진료기록 직접 입력 (날짜없이)', '', array( 'rows' => 1, 'hint' => '저장하면 오늘 날짜를 붙여 진료기록에 (덴트웹 치료내용은 자동으로 들어옵니다)' ) );
+				md_mc_field( 'memo_new', '참고사항입력 (날짜없이)', '', array( 'rows' => 1, 'hint' => '저장하면 오늘 날짜를 붙여 참고사항 맨 위에' ) );
+			} else {
+				?>
+				<p class="mc-form__tip">치료계획 · 진료기록 · 참고사항 한 줄 추가와 줄별 고치기는 차트 화면에서 바로 합니다.</p>
+				<details class="mc-more-field"<?php echo $conflict ? ' open' : ''; ?>>
+					<summary>진료기록 전체 고치기 (직접 적은 것)</summary>
+					<?php md_mc_field( 'tx_hist', '진료기록 — 직접 적은 것 전체', $v( 'tx_hist' ), array( 'rows' => 4, 'hint' => '맨 앞의 날짜(예: 2026-10-10:)는 지우지 마세요' ) ); $latest( 'tx_hist' ); ?>
+				</details>
+				<details class="mc-more-field"<?php echo $conflict ? ' open' : ''; ?>>
+					<summary>참고사항 전체 고치기</summary>
+					<?php md_mc_field( 'memo', $f['memo'][0], $v( 'memo' ), array( 'rows' => 3 ) ); $latest( 'memo' ); ?>
+				</details>
+				<?php
+			}
 			?>
-			<details class="mc-more-field"<?php echo $conflict ? ' open' : ''; ?>>
-				<summary>참고사항 전체 고치기</summary>
-				<?php md_mc_field( 'memo', $f['memo'][0], $v( 'memo' ), array( 'rows' => 3 ) ); $latest( 'memo' ); ?>
-			</details>
-			<div class="mc-field">
-				<span class="mc-field__l">Follow-up</span>
-				<label class="mc-check"><input type="checkbox" name="pin" value="1" <?php checked( (bool) ( $vals['pin'] ?? 0 ) ); ?>> 📌 상단고정</label>
-			</div>
+			</div></div>
 		<?php endif; ?>
 
 		<div class="mc-form__foot">

@@ -646,3 +646,12 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-chart__facts .mc-tag:not(.mc-tag--ins):not(.mc-tag--pin) { background: var(--mc-alt, #F3ECE6); color: var(--mc-ink, #3D2F26); }
 .mc-fact { background: transparent; border: 1px solid var(--mc-line, #E8DDD3); color: var(--mc-sub, #7A6B5F); font-weight: 500; }
 .mc-fact b { margin-left: 4px; color: var(--mc-ink, #3D2F26); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* v9.64 · 수정 화면 — 넓은 화면은 두 단, 차트 화면 안내 */
+.mc-form__tip { margin: 2px 0 10px; padding: 10px 12px; border-radius: 10px; background: var(--mc-soft, #F7F3EE); color: var(--mc-sub); font-size: .86rem; line-height: 1.5; }
+.mc-form input[readonly] { background: var(--mc-soft, #F7F3EE); color: var(--mc-sub); }
+.mc-check small { color: var(--mc-mute); font-weight: 500; }
+@media (min-width: 1100px) {
+  .mc-form--wide { max-width: 1180px; }
+  .mc-form__cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 36px; align-items: start; }
+}
