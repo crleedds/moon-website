@@ -256,6 +256,32 @@ function md_mc_text( $s ) {
 	return implode( '<br>', $out );
 }
 
+/**
+ * v9.79 · 팀 노트 본문 — 줄 모양에 따라 소제목 · 번호 목록 · 날짜 줄 · 문단 (원장 「디자인적으로」)
+ *   [소제목] · ★ 소제목 ★ → 작은 제목, 1. / 1) / - / • → 들여쓰기 목록, 2026-10-10: … → 날짜 줄, 빈 줄 → 문단 사이
+ */
+function md_mc_note_html( $body ) {
+	$body = (string) $body;
+	if ( '' === trim( $body ) ) { return '<p class="mc-none">아직 내용이 없습니다.</p>'; }
+	$out = array(); $gap = false;
+	foreach ( preg_split( '/\r\n|\r|\n/', $body ) as $ln ) {
+		$t = trim( $ln );
+		if ( '' === $t ) { $gap = true; continue; }
+		$cls = $gap && $out ? ' is-gap' : ''; $gap = false;
+		if ( preg_match( '/^\[([^\]]{1,60})\]$/u', $t, $m ) || preg_match( '/^[★☆■◆●▶]\s*(.{1,60}?)\s*[★☆■◆●]?$/u', $t, $m ) ) {
+			$out[] = '<h4 class="mc-note__h' . $cls . '">' . esc_html( trim( $m[1] ) ) . '</h4>';
+			continue;
+		}
+		if ( preg_match( '/^(\d{1,2}[.)]|[-•·▪])\s+(.*)$/u', $t, $m ) ) {
+			$lv = preg_match( '/^\d{1,2}\)$/', $m[1] ) ? ' mc-note__li--sub' : '';
+			$out[] = '<div class="mc-note__li' . $lv . $cls . '"><span class="mc-note__n">' . esc_html( $m[1] ) . '</span><span>' . md_mc_text( $m[2] ) . '</span></div>';
+			continue;
+		}
+		$out[] = '<p class="mc-note__p' . $cls . '">' . md_mc_text( $t ) . '</p>';
+	}
+	return implode( '', $out );
+}
+
 /** 치료이력 맨 위 한 줄 (목록에 보이는 최근 진료) */
 function md_mc_last_line( $s ) {
 	foreach ( preg_split( '/\r\n|\r|\n/', (string) $s ) as $ln ) {
@@ -2213,13 +2239,15 @@ function md_mc_render_note( $id ) {
 	?>
 	<article class="mds-card mc-note">
 		<header class="mc-note__head">
-			<h2><?php echo esc_html( $r->title ); ?></h2>
-			<form method="post" class="mc-inline" action="<?php echo esc_url( md_mc_url() ); ?>"><?php md_mc_nonce_fields( 'pin', $r->id ); ?><input type="hidden" name="on" value="<?php echo $r->pin ? '' : '1'; ?>"><button type="submit" class="mds-btn mc-pinbtn" title="<?php echo $r->pin ? '고정 풀기' : '팀 노트 맨 위에 고정'; ?>"><?php echo $r->pin ? '📌 고정 해제' : '📌 고정'; ?></button></form><?php /* v9.66 */ ?>
-			<a class="mds-btn mds-btn--fill" href="<?php echo esc_url( md_mc_url( array( 'mv' => 'edit', 'mid' => $r->id ) ) ); ?>">수정</a>
+			<h2><?php echo esc_html( $r->title ); ?><?php echo $r->pin ? ' <span class="mc-note__pinned">📌 고정됨</span>' : ''; /* v9.79 */ ?></h2>
+			<div class="mc-note__acts">
+				<form method="post" class="mc-inline" action="<?php echo esc_url( md_mc_url() ); ?>"><?php md_mc_nonce_fields( 'pin', $r->id ); ?><input type="hidden" name="on" value="<?php echo $r->pin ? '' : '1'; ?>"><button type="submit" class="mds-btn mc-pinbtn" title="<?php echo $r->pin ? '고정 풀기' : '팀 노트 맨 위에 고정'; ?>"><?php echo $r->pin ? '📌 고정 해제' : '📌 고정'; ?></button></form><?php /* v9.66 */ ?>
+				<a class="mds-btn mds-btn--fill" href="<?php echo esc_url( md_mc_url( array( 'mv' => 'edit', 'mid' => $r->id ) ) ); ?>">수정</a>
+			</div>
 		</header>
 		<p class="mc-chart__meta">마지막 수정 <?php echo esc_html( $r->updated_at ? md_mc_short_date( $r->updated_at ) . ' ' . date( 'H:i', strtotime( $r->updated_at ) ) : '—' ); ?><?php echo $r->updated_by ? ' · ' . esc_html( $r->updated_by ) : ''; ?> · <a href="<?php echo esc_url( md_mc_url( array( 'mv' => 'log', 'mid' => $r->id ) ) ); ?>">변경 기록</a></p>
-		<div id="f-body"><?php md_mc_addform( $r, 'body', '오늘 날짜로 맨 위에 추가' ); ?></div>
-		<div class="mc-note__body"><?php echo md_mc_text( $r->body ); // phpcs:ignore ?></div>
+		<div id="f-body"><?php md_mc_addform( $r, 'body', '한 줄 추가 — 날짜를 붙여 맨 위에' ); ?></div>
+		<div class="mc-note__body"><?php echo md_mc_note_html( $r->body ); // phpcs:ignore -- v9.79 ?></div>
 		<div class="mc-chart__foot">
 			<a href="<?php echo esc_url( md_mc_url( array( 'mv' => 'notes' ) ) ); ?>">← 팀 노트</a>
 			<?php if ( md_mc_can_manage() ) : ?>

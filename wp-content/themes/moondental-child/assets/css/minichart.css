@@ -772,3 +772,35 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-chips__none { color: var(--mc-mute, #A89685); font-size: .82rem; }
 .mc-chips__dwtag { font-style: normal; font-size: .7rem; font-weight: 700; color: #22598f; background: rgba(52,120,200,.12); border-radius: 999px; padding: 1px 6px; } /* v9.75 · 미니차트에 없는 덴트웹 환자 */
 .mc .mc-infocard .mc-edit__form .mc-field__top > .mc-field__l { display: none; } /* v9.78 · 고칠 때 「내원경로」 이름표가 두 번 나오던 것 (위 이름표만) */
+
+/* v9.79 · 팀 노트 화면 — 머리 단추 묶음 · 읽기 좋은 폭 · 소제목 · 목록 들여쓰기 · 가벼운 한 줄 추가 (원장 「디자인적으로」) */
+.mc-note { padding: 22px 26px 18px; }
+.mc-note__head { flex-wrap: nowrap; align-items: flex-start; gap: 14px; }
+.mc-note__head h2 { flex: 1 1 auto; min-width: 0; font-size: 1.35rem; line-height: 1.35; overflow-wrap: anywhere; }
+.mc-note__pinned { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: rgba(216, 128, 98, .12); color: var(--color-primary-dark, #B86347); font-size: .74rem; font-weight: 800; vertical-align: 4px; }
+.mc-note__acts { flex: none; display: flex; align-items: center; gap: 8px; }
+.mc-note__acts .mc-inline { margin: 0; }
+.mc-note__head .mc-note__acts .mds-btn { min-height: 40px; padding: 0 16px; }
+.mc-note__head .mc-pinbtn { margin-left: 0; background: transparent; }
+.mc-note .mc-chart__meta { margin: 6px 0 0; }
+.mc-note #f-body { margin-top: 16px; }
+.mc-note .mc-add { margin: 0 0 18px; padding: 8px; border: 1px solid var(--mc-line); border-bottom: 1px solid var(--mc-line); border-radius: 12px; background: var(--mc-alt, #FBF7F3); }
+.mc-note .mc-add__text, .mc-note .mc-add__day { min-height: 38px; padding: 6px 10px; border-color: transparent; background: #fff; }
+.mc-note .mc-add__btn { min-height: 38px; padding: 0 16px; }
+.mc-note__body { max-width: 46em; font-size: 1rem; line-height: 1.7; color: var(--mc-ink); }
+.mc-note__h { margin: 0 0 6px; padding: 0 0 4px; font-size: .98rem; font-weight: 800; color: var(--mc-ink); border-bottom: 1px solid var(--mc-line); }
+.mc-note__h.is-gap, .mc-note__body > .mc-note__h:not(:first-child) { margin-top: 22px; }
+.mc-note__p { margin: 0 0 2px; }
+.mc-note__p.is-gap, .mc-note__li.is-gap { margin-top: 14px; }
+.mc-note__li { display: grid; grid-template-columns: 1.9em minmax(0, 1fr); margin: 0 0 3px; }
+.mc-note__li--sub { margin-left: 1.4em; }
+.mc-note__n { color: var(--mc-sub); font-weight: 700; font-variant-numeric: tabular-nums; }
+.mc-note__body .mc-date { display: inline-block; margin-right: 2px; padding: 0 6px; border-radius: 6px; background: var(--mc-alt, #F7F1EB); color: var(--mc-sub); font-size: .84em; font-weight: 700; }
+@media (max-width: 760px) {
+  .mc-note { padding: 16px 14px; }
+  .mc-note__head { flex-wrap: wrap; }
+  .mc-note__acts { width: 100%; justify-content: flex-end; }
+  .mc-note .mc-note__acts .mds-btn { flex: none; width: auto; white-space: nowrap; }
+  .mc-note .mc-add { grid-template-columns: 1fr auto; }
+  .mc-note .mc-add__text { grid-column: 1 / -1; }
+}
