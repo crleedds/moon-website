@@ -255,12 +255,12 @@ window.mcInits.push(function () {
   }
   /* v9.55 · 「혈압」 「간염」처럼 종류를 고르는 칩 — 누르면 칩 아래에 고르는 칸, 다 고르면 「혈압(고혈압 · 아스피린 복용)」으로 넣는다 */
   function closePick(box) { var pk = box.querySelector('.mc-chips__pick'); if (pk) pk.remove(); }
-  function openPick(box, b, done, fmt, title0) { /* v9.74 · fmt: 고른 값들 → 넣을 글 (없으면 「이름(가 · 나)」), title0: 칸 제목 */
+  function openPick(box, b, done, fmt, title0, optional) { /* v9.74 · fmt: 고른 값들 → 넣을 글 (없으면 「이름(가 · 나)」), title0: 칸 제목 · v9.77 optional: 안 골라도 넣기 */
     closePick(box);
     var groups = JSON.parse(b.getAttribute('data-opts') || '[]'), sel = groups.map(function () { return ''; }), fill = groups.map(function () { return null; });
     var pk = document.createElement('div'); pk.className = 'mc-chips__pick';
     var title = document.createElement('b'); title.textContent = title0 || b.getAttribute('data-chip'); pk.appendChild(title);
-    var ok = document.createElement('button'); ok.type = 'button'; ok.className = 'mds-btn mds-btn--fill mds-btn--sm'; ok.textContent = '넣기'; ok.disabled = true;
+    var ok = document.createElement('button'); ok.type = 'button'; ok.className = 'mds-btn mds-btn--fill mds-btn--sm'; ok.textContent = '넣기'; ok.disabled = !optional;
     groups.forEach(function (g, gi) {
       var row = document.createElement('span'); row.className = 'mc-chips__pickrow';
       var txt = null; /* v9.55.2 · 끝이 「:」인 항목(예: 모름/기타:)은 고르면 적는 칸이 열림 */
@@ -277,7 +277,7 @@ window.mcInits.push(function () {
             txt.addEventListener('keydown', function (e2) { if (e2.key === 'Enter') { e2.preventDefault(); ok.click(); } });
             fill[gi] = txt; row.appendChild(txt); txt.focus();
           }
-          ok.disabled = sel.some(function (s) { return !s; });
+          ok.disabled = !optional && sel.some(function (s) { return !s; });
         });
         row.appendChild(x);
       });
@@ -287,13 +287,19 @@ window.mcInits.push(function () {
     ok.addEventListener('click', function (ev) {
       ev.preventDefault(); ev.stopPropagation();
       if (ok.disabled) return;
-      var out = sel.map(function (s0, k) { var t = fill[k] ? fill[k].value.replace(/[,，()]/g, ' ').trim() : ''; return t ? s0 + ': ' + t : s0; });
+      var out = sel.map(function (s0, k) { var t = fill[k] ? fill[k].value.replace(/[,，()]/g, ' ').trim() : ''; return t ? s0 + ': ' + t : s0; }).filter(function (s0) { return !!s0; });
       closePick(box); done(fmt ? fmt(out) : b.getAttribute('data-chip') + '(' + out.join(' · ') + ')');
     });
     no.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); closePick(box); });
     var bar = document.createElement('span'); bar.className = 'mc-chips__pickbar'; bar.appendChild(ok); bar.appendChild(no); pk.appendChild(bar);
+    if (optional) { pk.setAttribute('data-mc-pick-optional', '1'); pk._mcOk = ok; }
     box.appendChild(pk);
   }
+  /* v9.77 · 관계를 고르지 않고 저장해도 고른 환자는 넣고 저장 (원장 지시) */
+  document.addEventListener('submit', function (ev) {
+    var f = ev.target; if (!f || !f.querySelectorAll) return;
+    Array.prototype.forEach.call(f.querySelectorAll('.mc-chips__pick[data-mc-pick-optional]'), function (pk) { if (pk._mcOk) pk._mcOk.click(); });
+  }, true);
   /* v9.73 · 본원 환자 고르기 — 차트번호 · 이름 · 초성으로 찾아 누르면 「고객소개: 홍길동(#123456)」 */
   function openFind(box, b, done) {
     closePick(box);
@@ -309,7 +315,7 @@ window.mcInits.push(function () {
       closePick(box);
       var who = label + ' ' + name + (chart ? '(#' + chart + ')' : '');
       /* v9.74 · 가족이면 관계도 고르기 → 「가족(본원 환자): 이석구(#091003) · 배우자」 */
-      if (b.hasAttribute('data-opts')) { openPick(box, b, done, function (out) { return who + ' · ' + out.join(' · '); }, name + ' 님과의 관계'); return; }
+      if (b.hasAttribute('data-opts')) { openPick(box, b, done, function (out) { return out.length ? who + ' · ' + out.join(' · ') : who; }, name + ' 님과의 관계 (안 골라도 됩니다)', true); return; }
       done(who);
     }
     function find() {
