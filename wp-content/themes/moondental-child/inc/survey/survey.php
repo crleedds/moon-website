@@ -1625,7 +1625,10 @@ function md_survey_render_roster( $compact = true ) {
 		foreach ( $rows as $r ) {
 			$miss = array();
 			foreach ( $fill as $k => $v ) { if ( '' !== trim( (string) ( $r->$k ?? '' ) ) ) { $fill[ $k ][1]++; } else { $miss[] = $v[0]; } }
-			if ( $miss ) { $lack[] = array( $r->chart_no, $r->patient_name, implode( ' · ', $miss ), (bool) $r->response_id ); }
+			/* v4.25.1 · 들어간 것(담당의사 등)은 이름 옆에, 빠진 것은 뒤에 (원장 지시) */
+			$have = array();
+			foreach ( $fill as $k => $v ) { $val = trim( (string) ( $r->$k ?? '' ) ); if ( '' !== $val ) { $have[] = 'doctor' === $k ? $val : $v[0] . ' ' . $val; } }
+			if ( $miss ) { $lack[] = array( $r->chart_no, $r->patient_name, implode( ' · ', $miss ), (bool) $r->response_id, implode( ' · ', $have ) ); }
 		}
 		?>
 		<div class="mds-card mdsv-fill">
@@ -1644,7 +1647,7 @@ function md_survey_render_roster( $compact = true ) {
 					<summary>미입력 환자 <?php echo count( $lack ); ?>명 보기</summary>
 					<p class="mds-hint">덴트웹 <b>데스크</b> 화면에서 환자 줄을 더블클릭 → 담당의사 · 담당직원 · 체어(데스크 직원)를 고르면 1분 안에 반영됩니다. 이미 응답한 환자(✓)는 고쳐도 그 응답에는 반영되지 않습니다.</p>
 					<ul class="mdsv-fill__list">
-						<?php foreach ( $lack as $x ) : ?><li><b><?php echo esc_html( $x[1] ); ?></b> <small><?php echo esc_html( $x[0] ); ?></small> — <?php echo esc_html( $x[2] ); ?><?php echo $x[3] ? ' <span class="mdsv-fill__done">✓ 응답함</span>' : ''; ?></li><?php endforeach; ?>
+						<?php foreach ( $lack as $x ) : ?><li><b><?php echo esc_html( $x[1] ); ?></b> <small><?php echo esc_html( $x[0] ); ?></small><?php if ( '' !== $x[4] ) : ?> <span class="mdsv-fill__have"><?php echo esc_html( $x[4] ); ?></span><?php endif; ?> — <span class="mdsv-fill__miss">미입력: <?php echo esc_html( $x[2] ); ?></span><?php echo $x[3] ? ' <span class="mdsv-fill__done">✓ 응답함</span>' : ''; ?></li><?php endforeach; ?>
 					</ul>
 				</details>
 			<?php else : ?>

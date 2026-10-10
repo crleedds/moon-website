@@ -127,3 +127,5 @@
 .mdsv-fill__list small { color: var(--color-text-mute, #A89685); }
 .mdsv-fill__done { color: var(--color-text-mute, #A89685); font-size: .82rem; }
 @media (max-width: 560px) { .mdsv-fill__row { grid-template-columns: 76px 1fr; } .mdsv-fill__n { grid-column: 2; } .mdsv-fill__list { columns: 1; } }
+.mdsv-fill__have { color: var(--color-primary-dark, #B86347); font-weight: 600; }
+.mdsv-fill__miss { color: var(--color-text-sub, #7A6B5F); }
