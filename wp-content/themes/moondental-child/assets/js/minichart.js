@@ -315,7 +315,7 @@ window.mcInits.push(function () {
       closePick(box);
       var who = label + ' ' + name + (chart ? '(#' + chart + ')' : '');
       /* v9.74 · 가족이면 관계도 고르기 → 「가족(본원 환자): 이석구(#091003) · 배우자」 */
-      if (b.hasAttribute('data-opts')) { openPick(box, b, done, function (out) { return out.length ? who + ' · ' + out.join(' · ') : who; }, name + ' 님과의 관계 (안 골라도 됩니다)', true); return; }
+      if (b.hasAttribute('data-opts')) { openPick(box, b, done, function (out) { return out.length ? who + ' · ' + out.join(' · ') : who; }, name + ' 님과의 관계', true); return; }
       done(who);
     }
     function find() {
