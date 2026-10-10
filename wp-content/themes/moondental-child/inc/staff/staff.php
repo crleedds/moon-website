@@ -610,6 +610,7 @@ function md_staff_render() {
 
 		<section class="mds-card mdst-new">
 			<h2 class="mdst-title">직원 추가</h2>
+			<button type="button" class="mdst-sum mdst-sum--new" aria-expanded="false">＋ 새 직원 넣기<span class="mdst-sum__i" aria-hidden="true">›</span></button>
 			<?php md_staff_render_row_form( null, $depts ); ?>
 		</section>
 
@@ -625,7 +626,7 @@ function md_staff_render() {
 				<h2 class="mdst-title"><?php echo esc_html( $d ); ?> <small><?php echo count( $by[ $d ] ); ?>명<?php echo '의료진' === $d ? ' · 생일 · 입사일만 여기서' : ''; ?></small></h2>
 				<div class="mdst-rows">
 					<?php foreach ( $by[ $d ] as $r ) : ?>
-						<div class="mdst-item"><?php md_staff_render_row_form( $r, $depts ); if ( function_exists( 'md_acc_render_row' ) ) { md_acc_render_row( $r ); } /* v5.8 · 계정 칸 */ ?></div>
+						<div class="mdst-item"><button type="button" class="mdst-sum" aria-expanded="false"><b><?php echo esc_html( $r->name ); ?></b><?php echo '' !== trim( (string) $r->position ) ? ' <small>' . esc_html( $r->position ) . '</small>' : ''; ?><span class="mdst-sum__i" aria-hidden="true">›</span></button><?php /* v9.54 · 휴대폰에서 접힘 */ md_staff_render_row_form( $r, $depts ); if ( function_exists( 'md_acc_render_row' ) ) { md_acc_render_row( $r ); } /* v5.8 · 계정 칸 */ ?></div>
 					<?php endforeach; ?>
 				</div>
 			</section>

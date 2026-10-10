@@ -48,3 +48,22 @@
     if (f) { f.scrollIntoView({ block: 'center' }); try { f.focus({ preventScroll: true }); } catch (x) { f.focus(); } }
   }
 })();
+
+/* v9.54 · 직원 명단 — 휴대폰에서 한 사람을 누르면 고치기 칸이 열린다. 저장 뒤 돌아온 사람(#s123)은 열린 채로 */
+(function () {
+  'use strict';
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.mdst-sum');
+    if (!b) return;
+    var box = b.parentNode, on = !box.classList.contains('is-open');
+    box.classList.toggle('is-open', on);
+    b.setAttribute('aria-expanded', on ? 'true' : 'false');
+  });
+  var h = location.hash && document.getElementById(location.hash.slice(1));
+  var item = h && h.closest && h.closest('.mdst-item, .mdst-new');
+  if (item) { item.classList.add('is-open'); var s = item.querySelector('.mdst-sum'); if (s) s.setAttribute('aria-expanded', 'true'); }
+  /* 입력 오류가 난 칸이 접힌 사람 안에 있으면 연다 */
+  Array.prototype.forEach.call(document.querySelectorAll('.mdst-item, .mdst-new'), function (it) {
+    it.addEventListener('invalid', function () { it.classList.add('is-open'); }, true);
+  });
+})();

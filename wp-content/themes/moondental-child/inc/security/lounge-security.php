@@ -577,9 +577,9 @@ function md_sec_render_access( $tab ) {
 						<td><?php if ( $edit && $owner ) : /* v8.3 · 직원공용도 등급을 고를 수 있다 (원장 지시) */ ?>
 							<select name="grade[<?php echo (int) $u->ID; ?>]"><?php foreach ( array( 'staff', 'mgr' ) as $o ) : /* v8.3 · 홈페이지 관리자는 한 명뿐 — 다른 직원은 지정할 수 없다 */ ?><option value="<?php echo esc_attr( $o ); ?>"<?php selected( $g, $o ); ?>><?php echo esc_html( md_sec_grade_label( $o ) ); ?></option><?php endforeach; ?></select>
 						<?php else : ?><span class="mdsec-grade mdsec-grade--<?php echo esc_attr( $g ); ?>"><?php echo esc_html( md_sec_grade_label( $g ) ); ?></span><?php endif; ?></td>
-						<td><label class="mdsec-cell"><input type="checkbox" name="inv[<?php echo (int) $u->ID; ?>]" value="1"<?php checked( user_can( $u, 'md_inv_manage' ) || md_sec_is_owner_user( $u ) ); disabled( ! $edit || md_sec_is_owner_user( $u ) ); ?>></label></td>
+						<td data-l="재료실 관리"><label class="mdsec-cell"><input type="checkbox" name="inv[<?php echo (int) $u->ID; ?>]" value="1"<?php checked( user_can( $u, 'md_inv_manage' ) || md_sec_is_owner_user( $u ) ); disabled( ! $edit || md_sec_is_owner_user( $u ) ); ?>></label></td>
 						<?php foreach ( $tabs as $k => $a ) : $lock = ! $edit || ( ! empty( $a['manage'] ) && ! $mgr ) || md_sec_is_owner_user( $u ); ?>
-						<td><label class="mdsec-cell<?php echo ( ! empty( $a['manage'] ) && ! $mgr ) ? ' is-lock' : ''; ?>"><input type="checkbox" name="tabs[<?php echo (int) $u->ID; ?>][]" value="<?php echo esc_attr( $k ); ?>"<?php checked( in_array( $k, $have, true ) ); disabled( $lock ); ?> aria-label="<?php echo esc_attr( $u->display_name . ' ' . $a['label'] ); ?>"></label></td>
+						<td data-l="<?php echo esc_attr( ( $a['icon'] ?? '' ) . ' ' . preg_replace( '/\s*·\s*권한$/u', '', $a['label'] ) . ( in_array( $k, md_sec_sensitive(), true ) ? ' 🔒' : '' ) ); ?>"><label class="mdsec-cell<?php echo ( ! empty( $a['manage'] ) && ! $mgr ) ? ' is-lock' : ''; ?>"><input type="checkbox" name="tabs[<?php echo (int) $u->ID; ?>][]" value="<?php echo esc_attr( $k ); ?>"<?php checked( in_array( $k, $have, true ) ); disabled( $lock ); ?> aria-label="<?php echo esc_attr( $u->display_name . ' ' . $a['label'] ); ?>"></label></td>
 						<?php endforeach; ?></tr>
 				<?php endforeach; ?>
 				</tbody>
@@ -597,7 +597,7 @@ function md_sec_render_access( $tab ) {
 			$any = true;
 			$sl = implode( '<br>', array_map( function ( $x ) { return esc_html( md_sec_ua_label( $x['ua'] ?? '' ) . ' · ' . wp_date( 'n/j', (int) ( $x['login'] ?? 0 ) ) ); }, $sess ) );
 			$dl = implode( '<br>', array_map( function ( $d ) { return esc_html( $d['label'] . ' · ' . wp_date( 'n/j', (int) $d['last'] ) ); }, $devs ) );
-			echo '<tr><th>' . esc_html( $u->display_name ) . '</th><td>' . $sl . '</td><td>' . ( $dl ? $dl : '—' ) . '</td><td>'; // phpcs:ignore
+			echo '<tr><th>' . esc_html( $u->display_name ) . '</th><td data-l="로그인 기기">' . $sl . '</td><td data-l="인증 기기">' . ( $dl ? $dl : '—' ) . '</td><td class="mdsec-act">'; // phpcs:ignore
 			if ( md_sec_can_edit_user( $u ) ) {
 				echo '<form method="post" onsubmit="return confirm(\'' . esc_js( $u->display_name ) . ' 님의 모든 기기를 끊을까요?\');">';
 				md_sec_hidden( 'owner_drop' );
@@ -635,12 +635,12 @@ function md_sec_render_access( $tab ) {
 		$rows = $wpdb->get_results( "SELECT * FROM $t$w ORDER BY id DESC LIMIT 300" ); // phpcs:ignore
 		?>
 		<section class="mds-card mdsec-card">
-			<form method="get" class="mdsec-row"><input type="hidden" name="app" value="staff"><input type="hidden" name="tab" value="views">
+			<form method="get" class="mdsec-row mdsec-find"><input type="hidden" name="app" value="staff"><input type="hidden" name="tab" value="views">
 				<input name="vq" value="<?php echo esc_attr( $q ); ?>" placeholder="차트번호 · 환자 이름 · 본 사람"><button class="mds-btn">찾기</button></form>
 			<p class="mds-hint">누가 언제 어떤 미니차트를 열었는지 2년 동안 남깁니다 (최근 300건).</p>
-			<div class="mdsec-matrix-wrap"><table class="mds-table"><thead><tr><th>일시</th><th>본 사람</th><th>차트</th><th>기기 · 주소</th></tr></thead><tbody>
+			<div class="mdsec-matrix-wrap"><table class="mds-table mdsec-views"><thead><tr><th>일시</th><th>본 사람</th><th>차트</th><th>기기 · 주소</th></tr></thead><tbody>
 			<?php foreach ( $rows as $r ) : ?>
-				<tr><td><?php echo esc_html( mysql2date( 'y.n.j H:i', $r->at ) ); ?></td><td><?php echo esc_html( $r->who ); ?></td><td><?php echo esc_html( $r->chart_no . ' ' . $r->pname ); ?></td><td><small><?php echo esc_html( $r->device . ' · ' . $r->ip . ( md_sec_is_hospital( $r->ip ) ? ' (병원)' : '' ) ); ?></small></td></tr>
+				<tr><td data-l="일시"><?php echo esc_html( mysql2date( 'y.n.j H:i', $r->at ) ); ?></td><td data-l="본 사람"><?php echo esc_html( $r->who ); ?></td><td data-l="차트"><?php echo esc_html( $r->chart_no . ' ' . $r->pname ); ?></td><td data-l="기기"><small><?php echo esc_html( $r->device . ' · ' . $r->ip . ( md_sec_is_hospital( $r->ip ) ? ' (병원)' : '' ) ); ?></small></td></tr>
 			<?php endforeach; ?>
 			<?php if ( ! $rows ) : ?><tr><td colspan="4">기록이 없습니다.</td></tr><?php endif; ?>
 			</tbody></table></div>

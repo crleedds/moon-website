@@ -1507,7 +1507,7 @@ function md_mc_inline_view( $r, $d, $field ) {
 		$reg  = trim( function_exists( 'md_mc_addr_memo' ) ? md_mc_addr_memo( (string) $r->addr ) : (string) $r->addr );
 		if ( '' !== $addr ) {
 			$dup = md_mc_blank( $reg ) || false !== mb_strpos( preg_replace( '/\s+/u', '', $addr ), preg_replace( '/\s+/u', '', $reg ) ) || ( $d && preg_replace( '/\s+/u', '', $reg ) === preg_replace( '/\s+/u', '', (string) $d['region'] ) );
-			return array( 'head' => '주소', 'html' => esc_html( $addr ) . ( $dup ? '' : '<br><small class="mc-sub">지역 메모: ' . md_mc_text( $reg ) . '</small>' ), 'cls' => '' );
+			return array( 'head' => '지역', 'html' => esc_html( $addr ) . ( $dup ? '' : '<br><small class="mc-sub">' . md_mc_text( $reg ) . '</small>' ), 'cls' => '' ); /* v9.54 · 「주소」 → 「지역」, 「지역 메모」 글자 없앰 (원장 지시) */
 		}
 		return array( 'head' => $f['addr'][0], 'html' => md_mc_text( $reg ), 'cls' => '' );
 	}
@@ -1541,7 +1541,7 @@ function md_mc_inline_block( $r, $d, $field, $bare = false ) {
 				<?php md_mc_dr_field( array( 'dr' => (string) $r->dr ) ); ?>
 			<?php else :
 				$na  = '' !== (string) $r->$field && md_mc_is_na( $r->$field );
-				$lab = 'addr' === $field ? '지역 메모' : $f[ $field ][0];
+				$lab = 'addr' === $field ? '' : $f[ $field ][0]; /* v9.54 · 지역 고치기 칸에 「지역 메모」 글자 없음 */
 				md_mc_field( $field, $lab, $na ? '' : (string) $r->$field, array( 'rows' => 'mhx' === $field ? 2 : 1, 'na' => 'addr' === $field ? null : $na, 'attrs' => 'autocomplete="off"' ) ); /* v9.47 · 지역은 「해당없음」 체크 없음 */
 				if ( 'mhx' === $field ) { echo md_mc_mhx_chips(); } // phpcs:ignore
 				if ( 'referral' === $field ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「가족 …」 「협력기관 …」을 누르면 이름을 바로 이어 적습니다' ); } // phpcs:ignore
