@@ -580,3 +580,8 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
   .mc-plan__go { padding: 2px 8px; }
   .mc-plan__day { width: 8.6em; }
 }
+
+/* v9.50 · 그날 예약 (덴트웹) */
+.mc-tl__appt { display: block; color: var(--color-text-sub, #7A6B5F); font-size: .86em; line-height: 1.4; }
+.mc-tl__appt small { color: var(--color-text-mute, #A89685); }
+.mc-tl__appt.is-today { display: inline-block; margin: 0 0 2px; padding: 1px 8px; border-radius: 999px; background: #EAF3EC; color: #2e6b4a; font-weight: 600; }
