@@ -48,7 +48,7 @@ function md_mc_fields() {
 		'salute'   => array( '호칭 · 호명', false, '호칭 · 호명' ), /* v9.24 · AppSheet 때처럼 부르는 말을 따로 (원장 지시) */
 		'addr'     => array( '지역', true, '지역' ),
 		'mhx'      => array( '병력 (상세)', false, '병력' ), /* v9.9 · 병력 · 내원경로는 필수 아님 (원장 지시) */
-		'referral' => array( '내원경로 / 가족 / 협력기관', false, '내원경로 / 가족 / 협력기관' ),
+		'referral' => array( '내원경로', false, '내원경로' ), /* v9.73 · 이름 줄임 (원장 지시) */
 		'dr'       => array( '담당의사', true, '담당의사' ),
 		'tx_plan'  => array( '치료계획', false, '치료계획' ),
 		'tx_hist'  => array( '주요치과치료이력', false, '주요치과치료이력' ),
@@ -1718,7 +1718,7 @@ function md_mc_inline_block( $r, $d, $field, $bare = false ) {
 				$lab = 'addr' === $field ? '' : $f[ $field ][0]; /* v9.54 · 지역 고치기 칸에 「지역 메모」 글자 없음 */
 				md_mc_field( $field, $lab, ( $na && 'referral' !== $field ) ? '' : (string) $r->$field, array( 'rows' => 'mhx' === $field ? 2 : 1, 'na' => in_array( $field, array( 'addr', 'referral' ), true ) ? null : $na, 'attrs' => 'autocomplete="off"' ) ); /* v9.47 · 지역 · v9.55 내원경로는 「해당없음」 체크 없음 (원장 지시) */
 				if ( 'mhx' === $field ) { echo md_mc_mhx_chips(); md_mc_labs_fields( md_mc_labs_get( $r ) ); } // phpcs:ignore
-				if ( 'referral' === $field ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「…」 붙은 것은 누르면 이름을 이어 적습니다' ); } // phpcs:ignore
+				if ( 'referral' === $field ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「…」는 이어 적기 · 「🔍」는 본원 환자를 차트번호 · 이름으로 골라 넣기' ); } // phpcs:ignore
 			endif; ?>
 			<div class="mc-edit__bar"><button type="submit" class="mds-btn mds-btn--fill">저장</button><button type="button" class="mds-btn mds-btn--ghost" data-mc-edit-cancel>취소</button></div>
 		</div>
@@ -1805,10 +1805,10 @@ function md_mc_render_patient( $id ) {
 		<?php /* v9.36 · 태블릿 가로에서는 두 단(왼쪽: 병력 · 기본 정보 · 치료계획 / 오른쪽: 진료기록 · 참고사항). 다른 화면에서는 이 묶음이 없는 것처럼(display: contents) */ ?>
 		<div class="mc-cols"><div class="mc-col mc-col--a">
 		<?php /* v9.72 · 왼쪽 단 순서: 병력 → 다음 예약 → 치료계획 → 기본 정보(지역 · 담당의사 · 내원경로 한 장) (원장 지시) */ ?>
-		<div class="mc-grid mc-grid--info mc-grid--mhx"><?php md_mc_inline_block( $r, $d, 'mhx' ); ?></div>
-		<?php ob_start(); ?>
+		<?php /* v9.73 · 타일 둘 (원장 지시): ① 병력 · 지역 · 담당의사 · 내원경로 ② 다음 예약 + 치료계획 */ ?>
 		<div class="mc-grid mc-grid--info mc-infocard">
 			<?php
+			md_mc_inline_block( $r, $d, 'mhx' );
 			/* v9.19 · 병력 · 주소(지역 메모) · 담당의사 · 내원경로도 눌러서 바로 고친다 (원장 지시) · v9.21 · 넓은 화면에서는 네 칸이 한 줄 (원장 「한 화면에 더 많이」)
 			 * v9.20 · 연락처는 미니차트에 두지 않는다 (원장 지시 — 덴트웹에서 보면 된다) */
 			md_mc_inline_block( $r, $d, 'addr' );
@@ -1816,7 +1816,7 @@ function md_mc_render_patient( $id ) {
 			md_mc_inline_block( $r, $d, 'referral' );
 			?>
 		</div>
-		<?php $md_mc_infocard = ob_get_clean(); /* 치료계획 뒤에 찍는다 */ ?>
+		<div class="mc-plancard">
 		<?php /* v9.33 · 치료계획은 한 줄에 하나씩 따로 적고, 한 줄을 누르면 날짜를 골라 진료기록으로 옮긴다 (원장 지시). 한꺼번에 고치기(v8.6 자동 저장 칸)는 접어 둠 */ ?>
 		<?php echo function_exists( 'md_mc_dw_next_list_html' ) ? md_mc_dw_next_list_html( $d ) : ''; // phpcs:ignore -- v9.52 · 치료계획 위 「다음 예약」 칸 ?>
 		<section class="mc-block mc-block--plan mc-plan" id="f-tx_plan">
@@ -1829,7 +1829,7 @@ function md_mc_render_patient( $id ) {
 			<div class="mc-block__b"><?php echo md_mc_plan_list_html( $r ); // phpcs:ignore ?></div>
 			<?php /* v9.34 · 「한꺼번에 고치기」 칸은 없앰 (원장 지시) — 줄마다 ▲▼ 순서 · 「진료기록으로」 단추 */ ?>
 		</section>
-		<?php echo $md_mc_infocard; // phpcs:ignore -- 위에서 만든 기본 정보 ?>
+		</div><?php /* /.mc-plancard */ ?>
 		</div><div class="mc-col mc-col--b">
 
 		<section class="mc-block mc-block--log" id="f-tx_hist">
@@ -1953,8 +1953,26 @@ function md_mc_chip_list( $kind ) {
 
 /** v9.55 · 기본 목록 (원장 지시 2026-10-10) — 「이름{선택|선택}」 은 눌렀을 때 고르는 칸, 「이름:」 은 뒤에 이어 적기 */
 function md_mc_chip_default( $kind ) {
-	return 'mhx' === $kind ? array( '혈압{저혈압|고혈압}{아스피린 복용|아스피린 안 먹음}', '당뇨', '고지혈증', '골다공증', '혈전용해제 복용중', '갑상선', '위장 장애', '알러지', '인공관절', '간염{B|C|모름/기타:}', '결핵', '임신 · 임신가능성', '수유중', '흡연', '약처방주의', '신장 투석', '만성 심장판막 질환', '만성 신부전', '만성 간경화', '예방적항생제 투여 필요', '심장질환', '스텐트시술', '출혈성질환', '기타:' ) : array( '직원 소개:', '고객소개:', '협력업체:', '소문', '간판', '인터넷', 'AI', '홈페이지', '근거리', '타병원 추천:', '의료비지원:', '기타:' );
+	return 'mhx' === $kind ? array( '혈압{저혈압|고혈압}{아스피린 복용|아스피린 안 먹음}', '당뇨', '고지혈증', '골다공증', '혈전용해제 복용중', '갑상선', '위장 장애', '알러지', '인공관절', '간염{B|C|모름/기타:}', '결핵', '임신 · 임신가능성', '수유중', '흡연', '약처방주의', '신장 투석', '만성 심장판막 질환', '만성 신부전', '만성 간경화', '예방적항생제 투여 필요', '심장질환', '스텐트시술', '출혈성질환', '기타:' ) : array( '직원 소개:', '고객소개@', '가족(본원 환자)@', '협력업체:', '소문', '간판', '인터넷', 'AI', '홈페이지', '근거리', '타병원 추천:', '의료비지원:', '기타:' );
 }
+
+/* v9.73 · 「고객소개」 · 「가족(본원 환자)」은 차트번호 · 이름으로 본원 환자를 골라 넣기 (원장 지시) — 저장된 설정 목록도 한 번 바꿈. 목록 문법 「이름@」 = 환자 고르기 */
+add_action( 'init', function () {
+	if ( get_option( 'md_mc_chips_v973' ) ) { return; }
+	$s = md_mc_settings();
+	if ( ! empty( $s['ref_chips'] ) && is_array( $s['ref_chips'] ) ) {
+		$out = array();
+		foreach ( $s['ref_chips'] as $c ) {
+			$k = trim( (string) $c );
+			if ( in_array( $k, array( '고객소개:', '고객소개', '고객 소개:', '고객 소개' ), true ) ) { $out[] = '고객소개@'; if ( ! in_array( '가족(본원 환자)@', $s['ref_chips'], true ) ) { $out[] = '가족(본원 환자)@'; } continue; }
+			$out[] = $c;
+		}
+		if ( ! in_array( '가족(본원 환자)@', $out, true ) ) { $out[] = '가족(본원 환자)@'; }
+		$s['ref_chips'] = $out;
+		update_option( 'md_mc_settings', $s, false );
+	}
+	update_option( 'md_mc_chips_v973', current_time( 'mysql' ), false );
+}, 34 );
 
 /* v9.71 · 내원경로 칩 「의료비지원」도 누르면 이어 적기(「의료비지원:」) (원장 지시) — 저장된 설정 목록도 한 번 바꿈 */
 add_action( 'init', function () {
@@ -2009,8 +2027,10 @@ function md_mc_chips( $field, $kind, $hint ) {
 			foreach ( $om[1] as $g ) { $opts[] = array_values( array_filter( array_map( 'trim', explode( '|', $g ) ), 'strlen' ) ); }
 			$c = trim( preg_replace( '/\{[^}]*\}/u', '', $c ) );
 		}
+		$pick = '@' === mb_substr( $c, -1 ); /* v9.73 · 본원 환자 고르기 */
+		if ( $pick ) { $c = rtrim( $c, '@' ) . ':'; }
 		$pre = ':' === mb_substr( $c, -1 );
-		$h  .= '<button type="button" class="mc-chip' . ( $pre ? ' mc-chip--pre' : '' ) . ( $opts ? ' mc-chip--opt' : '' ) . '" data-chip="' . esc_attr( $pre ? rtrim( $c, ':' ) . ':' : $c ) . '"' . ( $opts ? ' data-opts="' . esc_attr( wp_json_encode( $opts, JSON_UNESCAPED_UNICODE ) ) . '"' : '' ) . '>' . esc_html( $pre ? rtrim( $c, ':' ) . ' …' : $c ) . '</button>';
+		$h  .= '<button type="button" class="mc-chip' . ( $pre ? ' mc-chip--pre' : '' ) . ( $opts ? ' mc-chip--opt' : '' ) . ( $pick ? ' mc-chip--pick' : '' ) . '" data-chip="' . esc_attr( $pre ? rtrim( $c, ':' ) . ':' : $c ) . '"' . ( $opts ? ' data-opts="' . esc_attr( wp_json_encode( $opts, JSON_UNESCAPED_UNICODE ) ) . '"' : '' ) . ( $pick ? ' data-pick="' . esc_url( md_mc_url() ) . '"' : '' ) . '>' . esc_html( $pre ? rtrim( $c, ':' ) . ( $pick ? ' 🔍' : ' …' ) : $c ) . '</button>';
 	}
 	return $h . ( '' !== $hint ? '<span class="mc-chips__hint">' . esc_html( $hint ) . '</span>' : '' ) . '</div>';
 }

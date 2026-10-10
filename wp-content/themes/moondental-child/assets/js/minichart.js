@@ -294,6 +294,42 @@ window.mcInits.push(function () {
     var bar = document.createElement('span'); bar.className = 'mc-chips__pickbar'; bar.appendChild(ok); bar.appendChild(no); pk.appendChild(bar);
     box.appendChild(pk);
   }
+  /* v9.73 · 본원 환자 고르기 — 차트번호 · 이름 · 초성으로 찾아 누르면 「고객소개: 홍길동(#123456)」 */
+  function openFind(box, b, done) {
+    closePick(box);
+    var pk = document.createElement('div'); pk.className = 'mc-chips__pick mc-chips__pick--find';
+    var title = document.createElement('b'); title.textContent = b.getAttribute('data-chip').replace(/:$/, ''); pk.appendChild(title);
+    var inp = document.createElement('input'); inp.type = 'search'; inp.className = 'mc-chips__picktxt'; inp.placeholder = '차트번호 · 이름 · 초성으로 찾기'; inp.autocomplete = 'off'; pk.appendChild(inp);
+    var ul = document.createElement('ul'); ul.className = 'mc-chips__found'; pk.appendChild(ul);
+    var no = document.createElement('button'); no.type = 'button'; no.className = 'mds-btn mds-btn--ghost mds-btn--sm'; no.textContent = '취소';
+    no.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); closePick(box); });
+    var bar = document.createElement('span'); bar.className = 'mc-chips__pickbar'; bar.appendChild(no); pk.appendChild(bar);
+    var seq = 0, timer = null, label = b.getAttribute('data-chip');
+    function pick(name, chart) { closePick(box); done(label + ' ' + name + (chart ? '(#' + chart + ')' : '')); }
+    function find() {
+      var v = inp.value.trim(); ul.innerHTML = ''; if (!v) return;
+      var my = ++seq, u = new URL(b.getAttribute('data-pick'), location.href);
+      u.searchParams.set('md_mc_find', v);
+      fetch(u.toString(), { credentials: 'same-origin', headers: { Accept: 'application/json' } }).then(function (r) { return r.json(); }).then(function (j) {
+        if (my !== seq || !j || !j.ok) return;
+        ul.innerHTML = '';
+        (j.rows || []).slice(0, 8).forEach(function (row) {
+          var li = document.createElement('li'), x = document.createElement('button'); x.type = 'button'; x.className = 'mc-chips__foundbtn';
+          x.innerHTML = '<b></b> <small></small>'; x.querySelector('b').textContent = row.name; x.querySelector('small').textContent = row.chart;
+          x.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); pick(row.name, row.chart); });
+          li.appendChild(x); ul.appendChild(li);
+        });
+        if (!ul.children.length) { var li0 = document.createElement('li'); li0.className = 'mc-chips__none'; li0.textContent = '미니차트에 없는 환자입니다 — Enter 로 적은 대로 넣기'; ul.appendChild(li0); }
+      }).catch(function () {});
+    }
+    inp.addEventListener('click', function (e2) { e2.stopPropagation(); });
+    inp.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(find, 150); });
+    inp.addEventListener('keydown', function (e2) {
+      if (e2.key === 'Enter') { e2.preventDefault(); var f = ul.querySelector('.mc-chips__foundbtn'); if (f) { f.click(); } else if (inp.value.trim()) { pick(inp.value.trim().replace(/[,，]/g, ' '), ''); } }
+      if (e2.key === 'Escape') { closePick(box); }
+    });
+    box.appendChild(pk); inp.focus();
+  }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-mc-chips] [data-chip]');
     if (!b || b.closest('.mc-chips__pick')) return;
@@ -302,6 +338,10 @@ window.mcInits.push(function () {
     e.preventDefault();
     Array.prototype.forEach.call(document.querySelectorAll('.mc-chips__pick'), function (x) { x.remove(); }); /* v9.55.1 · 다른 칩을 누르면 열려 있던 고르는 칸은 닫힘 (원장 지시) */
     var c0 = b.getAttribute('data-chip');
+    if (b.hasAttribute('data-pick') && !parts(ta).some(function (p) { return p.indexOf(c0) === 0; })) {
+      openFind(box, b, function (val) { put(box, ta, b, val); });
+      return;
+    }
     if (b.hasAttribute('data-opts') && !parts(ta).some(function (p) { return p.indexOf(c0) === 0; })) {
       openPick(box, b, function (val) { put(box, ta, b, val); });
       return;
@@ -318,11 +358,11 @@ window.mcInits.push(function () {
     var na = (box.closest('form') || document).querySelector('[name="na[' + name + ']"]');
     if (na && na.checked) { na.click(); }
     ta.disabled = false;
-    ta.value = ps.join(', ') + (pre && i < 0 ? ' ' : '');
+    ta.value = ps.join(', ') + (pre && i < 0 && !val ? ' ' : ''); /* v9.73 · 고른 값(val)은 뒤에 이어 적지 않음 */
     ta.value = ta.value.replace(/: {2}$/, ': ');
     ta.dispatchEvent(new Event('input', { bubbles: true }));
     sync(box, ta);
-    if (pre && i < 0) { ta.focus(); var n = ta.value.length; try { ta.setSelectionRange(n, n); } catch (x) {} }
+    if (pre && i < 0 && !val) { ta.focus(); var n = ta.value.length; try { ta.setSelectionRange(n, n); } catch (x) {} }
   }
   document.addEventListener('input', function (e) {
     var t = e.target;

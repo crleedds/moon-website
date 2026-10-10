@@ -743,3 +743,30 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
   .mc .mc-infocard > .mc-block { grid-template-columns: 5.6em minmax(0, 1fr); }
 }
 .mc .mc-infocard .mc-edit__form > .mc-field > .mc-field__l { display: none; } /* 이름표가 위에 이미 있으므로 */
+
+/* ============================================================
+ * v9.73 · 타일 둘 (원장 지시): ① 병력 · 지역 · 담당의사 · 내원경로 한 장 ② 다음 예약 + 치료계획 한 장 · 환자 고르기 칩
+ * ============================================================ */
+/* ① — 병력도 같은 장 안의 첫 줄 (주의 병력이면 그 줄만 붉게) */
+.mc .mc-infocard > .mc-block.mc-block--alert { margin: 0 -12px; padding: 7px 12px; background: var(--mc-alert-bg, #FBEDEA); border-radius: 12px 12px 0 0; }
+.mc .mc-infocard > .mc-block.mc-block--alert > .mc-block__h { color: var(--mc-alert, #B3261E); }
+.mc .mc-infocard > .mc-block.is-editing { grid-template-columns: minmax(0, 1fr); }
+/* ② — 다음 예약과 치료계획을 한 장으로 */
+.mc-plancard { margin: 0 0 8px; border: 1px solid var(--mc-line); border-radius: 14px; background: var(--mc-bg); overflow: hidden; }
+.mc .mc-plancard > .mc-block { margin: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+.mc .mc-plancard > .mc-block + .mc-block { border-top: 1px dashed var(--mc-line); }
+.mc .mc-plancard > #f-tx_plan { border-left: 0; }
+.mc .mc-plancard > #f-next { background: #F3F7FB; }
+/* 세로 태블릿: 왼쪽 ①, 오른쪽 ② */
+@media (min-width: 700px) and (max-width: 1099px) and (orientation: portrait) {
+  .mc-col--a > .mc-infocard { grid-column: 1; grid-row: 1; margin-bottom: 0; }
+  .mc-col--a > .mc-plancard { grid-column: 2; grid-row: 1; margin-bottom: 0; }
+}
+/* 환자 고르기 칩 */
+.mc-chip--pick { border-style: dashed; }
+.mc-chips__pick--find .mc-chips__picktxt { flex: 1 1 14em; }
+.mc-chips__found { list-style: none; margin: 0; padding: 0; flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 4px; }
+.mc-chips__foundbtn { display: inline-flex; align-items: baseline; gap: 6px; min-height: 32px; padding: 3px 10px; border: 1px solid var(--mc-line, #E8DDD3); border-radius: 999px; background: #fff; font: inherit; font-size: .88rem; cursor: pointer; }
+.mc-chips__foundbtn:hover, .mc-chips__foundbtn:focus-visible { border-color: var(--mc-pri, #D88062); outline: none; }
+.mc-chips__foundbtn small { color: var(--mc-sub, #7A6B5F); font-variant-numeric: tabular-nums; }
+.mc-chips__none { color: var(--mc-mute, #A89685); font-size: .82rem; }
