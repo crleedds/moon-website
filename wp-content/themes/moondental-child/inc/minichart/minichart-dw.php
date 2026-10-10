@@ -167,16 +167,34 @@ function md_mc_dw_clean( $p ) {
 }
 
 /** v9.50 · 예전에 받아 둔 예약 + 이번에 받은 예약 — appt_from 날부터는 이번 것으로 바꾸고(고침 · 취소 반영), 그 전 것은 그대로 둔다 */
+/** v9.51 · 치료계획 칸 아래 「다음 예약」 목록 — 내일부터의 덴트웹 예약 (원장 지시) */
+function md_mc_dw_next_list_html( $d ) {
+	$today = current_time( 'Y-m-d' ); $list = array();
+	foreach ( ( $d && ! empty( $d['appts'] ) ) ? (array) $d['appts'] : array() as $a ) { if ( is_array( $a ) && ( $a['d'] ?? '' ) > $today ) { $list[] = $a; } }
+	if ( ! $list ) { return ''; }
+	usort( $list, function ( $x, $y ) { return strcmp( $x['d'] . $x['t'], $y['d'] . $y['t'] ); } );
+	$wd = array( '일', '월', '화', '수', '목', '금', '토' );
+	$h = '<div class="mc-nextlist"><b class="mc-nextlist__h">📅 다음 예약</b><ul>';
+	foreach ( $list as $i => $a ) {
+		$ts = strtotime( $a['d'] );
+		$bits = array_filter( array( $a['t'], $a['dr'], $a['what'] ), 'strlen' );
+		$h .= '<li' . ( $i >= 5 ? ' class="mc-nextlist__more" hidden' : '' ) . '><span class="mc-nextlist__d">' . esc_html( date( 'n/j', $ts ) . '(' . $wd[ (int) date( 'w', $ts ) ] . ')' ) . '</span> ' . esc_html( implode( ' · ', $bits ) ) . ( '' !== $a['memo'] ? ' <small>(' . esc_html( $a['memo'] ) . ')</small>' : '' ) . '</li>';
+	}
+	$h .= '</ul>' . ( count( $list ) > 5 ? '<button type="button" class="mc-nextlist__btn" onclick="this.previousElementSibling.querySelectorAll(\'.mc-nextlist__more\').forEach(function(x){x.hidden=false});this.remove()">' . ( count( $list ) - 5 ) . '건 더 보기</button>' : '' ) . '</div>';
+	return $h;
+}
+
 function md_mc_dw_merge_appts( $old_json, $data ) {
 	$old  = json_decode( (string) $old_json, true );
 	$keep = is_array( $old ) && ! empty( $old['appts'] ) && is_array( $old['appts'] ) ? $old['appts'] : array();
 	$from = (string) ( $data['appt_from'] ?? '' );
 	if ( '' === $from ) { return $keep; } /* 예약을 보내지 않은 묶음 — 예전 것 그대로 */
-	$out = array();
-	foreach ( $keep as $a ) { if ( is_array( $a ) && ( $a['d'] ?? '' ) < $from ) { $out[] = $a; } }
-	foreach ( (array) $data['appts'] as $a ) { $out[] = $a; }
-	usort( $out, function ( $x, $y ) { return strcmp( $y['d'] . $y['t'], $x['d'] . $x['t'] ); } );
-	return array_slice( $out, 0, 300 );
+	$out = array(); $today = current_time( 'Y-m-d' );
+	/* v9.51 · 예약은 오늘 · 앞으로만 둔다 — 지난 예약은 오늘이 지나면 없어짐 (원장 지시) */
+	foreach ( $keep as $a ) { if ( is_array( $a ) && ( $a['d'] ?? '' ) < $from && ( $a['d'] ?? '' ) >= $today ) { $out[] = $a; } }
+	foreach ( (array) $data['appts'] as $a ) { if ( ( $a['d'] ?? '' ) >= $today ) { $out[] = $a; } }
+	usort( $out, function ( $x, $y ) { return strcmp( $x['d'] . $x['t'], $y['d'] . $y['t'] ); } );
+	return array_slice( $out, 0, 100 );
 }
 
 function md_mc_dw_rest_save( $request ) {
@@ -311,7 +329,7 @@ function md_mc_dw_timeline( $r, $d ) {
 	/* v9.50 · 그날 무슨 예약으로 왔는지 — 오늘과 지난날만 (앞으로의 예약은 머리의 「다음 예약」) */
 	$appts = array(); $today = current_time( 'Y-m-d' );
 	foreach ( ( $d && ! empty( $d['appts'] ) ) ? (array) $d['appts'] : array() as $a ) {
-		if ( ! is_array( $a ) || empty( $a['d'] ) || $a['d'] > $today ) { continue; }
+		if ( ! is_array( $a ) || empty( $a['d'] ) || $a['d'] !== $today ) { continue; } /* v9.51 · 진료기록에는 오늘 예약만 (원장 지시) */
 		$appts[ $a['d'] ][] = $a;
 		if ( ! isset( $rows[ $a['d'] ] ) ) { $rows[ $a['d'] ] = array( 'dr' => '', 'dw' => '', 'own' => array() ); }
 	}

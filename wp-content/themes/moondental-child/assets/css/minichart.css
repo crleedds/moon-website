@@ -585,3 +585,12 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-tl__appt { display: block; color: var(--color-text-sub, #7A6B5F); font-size: .86em; line-height: 1.4; }
 .mc-tl__appt small { color: var(--color-text-mute, #A89685); }
 .mc-tl__appt.is-today { display: inline-block; margin: 0 0 2px; padding: 1px 8px; border-radius: 999px; background: #EAF3EC; color: #2e6b4a; font-weight: 600; }
+
+/* v9.51 · 치료계획 칸 아래 다음 예약 목록 */
+.mc-nextlist { margin-top: 8px; padding: 6px 10px; border-radius: 8px; background: #EEF3F8; color: #2b4a66; font-size: .86rem; line-height: 1.45; }
+.mc-nextlist__h { display: block; margin-bottom: 2px; font-size: .8rem; }
+.mc-nextlist ul { list-style: none; margin: 0; padding: 0; }
+.mc-nextlist li { padding: 1px 0; }
+.mc-nextlist__d { display: inline-block; min-width: 5.2em; font-weight: 700; font-variant-numeric: tabular-nums; }
+.mc-nextlist small { color: #5f7a93; }
+.mc-nextlist__btn { margin-top: 2px; border: 0; background: none; color: #2b4a66; text-decoration: underline; cursor: pointer; font: inherit; font-size: .8rem; padding: 0; }

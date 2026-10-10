@@ -1645,6 +1645,7 @@ function md_mc_render_patient( $id ) {
 				<button type="submit" class="mds-btn mds-btn--fill mc-add__btn">추가</button>
 			</form>
 			<div class="mc-block__b"><?php echo md_mc_plan_list_html( $r ); // phpcs:ignore ?></div>
+			<?php echo function_exists( 'md_mc_dw_next_list_html' ) ? md_mc_dw_next_list_html( $d ) : ''; // phpcs:ignore -- v9.51 · 다음 예약 목록 (원장 지시) ?>
 			<?php /* v9.34 · 「한꺼번에 고치기」 칸은 없앰 (원장 지시) — 줄마다 ▲▼ 순서 · 「진료기록으로」 단추 */ ?>
 		</section>
 		</div><div class="mc-col mc-col--b">
