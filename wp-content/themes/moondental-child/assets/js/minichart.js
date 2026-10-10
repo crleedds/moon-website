@@ -85,7 +85,19 @@ window.mcInits.push(function () {
   }
 
   /* 글 칸은 내용만큼 늘어난다 */
-  var grow = function (t) { t.style.height = 'auto'; t.style.height = (t.scrollHeight + 4) + 'px'; };
+  /* v9.81 · 높이를 잠깐 auto 로 줄이면 문서가 짧아져 스크롤이 위로 튐 → 창 · 스크롤 칸 위치를 기억했다 되돌림 */
+  window.mcGrow = function (t, pad, min) {
+    var keep = [], p = t.parentElement, y = window.pageYOffset;
+    for (; p && p !== document.body; p = p.parentElement) { if (p.scrollHeight > p.clientHeight && p.scrollTop) keep.push([p, p.scrollTop]); }
+    var par = t.parentElement, pm = par ? par.style.minHeight : '';
+    if (par) par.style.minHeight = par.offsetHeight + 'px'; /* 부모 높이를 붙잡아 문서가 짧아지지 않게 */
+    t.style.height = 'auto';
+    t.style.height = Math.max(t.scrollHeight + (pad || 0), min || 0) + 'px';
+    if (par) par.style.minHeight = pm;
+    keep.forEach(function (k) { k[0].scrollTop = k[1]; });
+    if (window.pageYOffset !== y) { try { window.scrollTo({ left: window.pageXOffset, top: y, behavior: 'instant' }); } catch (er) { window.scrollTo(window.pageXOffset, y); } } /* 사이트가 scroll-behavior: smooth 라 instant */
+  };
+  var grow = function (t) { window.mcGrow(t, 4); };
   document.querySelectorAll('textarea[data-grow], .mc-add__text').forEach(function (t) {
     if (t.hasAttribute('data-grow')) { grow(t); }
     t.addEventListener('input', function () { grow(t); });
@@ -392,7 +404,7 @@ window.mcInits.push(function () {
   var ta = document.querySelector('textarea[data-mc-plan]');
   if (!ta) return;
   var bar = ta.form.querySelector('.mc-plan__bar'), orig = ta.value;
-  function grow() { ta.style.height = 'auto'; ta.style.height = Math.max(ta.scrollHeight, 36) + 'px'; }
+  function grow() { window.mcGrow(ta, 0, 36); } /* v9.81 */
   ta.addEventListener('input', function () { bar.hidden = ta.value === orig; grow(); });
   ta.form.querySelector('[data-mc-plan-undo]').addEventListener('click', function () { ta.value = orig; bar.hidden = true; grow(); });
   ta.addEventListener('keydown', function (e) { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); if (ta.form.requestSubmit) ta.form.requestSubmit(); else ta.form.submit(); } });
@@ -480,7 +492,7 @@ document.addEventListener('click', function (e) {
     if (!box) return;
     box.hidden = false; form.classList.add('is-editing');
     var t = box.querySelector('textarea:not([disabled]), input[type=text], select'); if (t) { t.focus(); if (t.setSelectionRange && t.value) { try { t.setSelectionRange(t.value.length, t.value.length); } catch (er) {} } }
-    Array.prototype.forEach.call(box.querySelectorAll('textarea[data-grow]'), function (x) { x.style.height = 'auto'; x.style.height = (x.scrollHeight + 4) + 'px'; });
+    Array.prototype.forEach.call(box.querySelectorAll('textarea[data-grow]'), function (x) { window.mcGrow(x, 4); }); /* v9.81 */
   });
 
   document.addEventListener('submit', function (e) {
