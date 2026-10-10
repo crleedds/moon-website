@@ -123,7 +123,7 @@ function md_sup_apps() {
 		'survey_result' => array(
 			'label'  => '환자 만족도 결과',
 			'icon'   => '⭐',
-			'desc'   => '응답 · 스탭별 집계 · 설정',
+			'desc'   => '입력 현황 · 응답 · 개별 집계 · 설정', /* v4.25 · 접수수납목록을 입력 현황 탭으로 합침 */
 			'manage' => true,
 		),
 		// v7.7 · 경영 브리핑 (inc/briefing · 덴트웹 연동) — 명단은 리콜 타일로 분리 (v9.40 원장 지시)

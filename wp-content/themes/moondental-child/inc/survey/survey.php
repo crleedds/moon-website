@@ -1267,7 +1267,7 @@ function md_survey_can_manage() { return function_exists( 'md_sup_can_manage' ) 
  */
 function md_survey_admin_url( $args = array() ) {
 	$sv  = isset( $args['sv'] ) ? $args['sv'] : '';
-	$app = in_array( $sv, array( 'responses', 'stats', 'settings' ), true ) ? 'survey_result' : 'survey';
+	$app = in_array( $sv, array( 'roster', 'responses', 'stats', 'settings' ), true ) ? 'survey_result' : 'survey'; /* v4.25 · roster 도 결과 화면의 탭 */
 	return md_sup_url( array_merge( array( 'app' => $app ), $args ) );
 }
 
@@ -1455,6 +1455,7 @@ add_action( 'wp_enqueue_scripts', 'md_survey_enqueue', 31 );
 /** 결과 도구(관리자)의 탭 — 접수수납목록 화면에는 탭이 없다 (v4.19.7) */
 function md_survey_tabs() {
 	return array(
+		'roster'    => array( 'label' => '입력 현황', 'icon' => '📋' ), /* v4.25 · 접수수납목록 페이지 대신 탭으로 (원장 지시 2026-10-10) — 날짜별 담당의사 · 담당직원 · 데스크 입력 수 */
 		'responses' => array( 'label' => '응답',        'icon' => '💬' ),
 		'stats'     => array( 'label' => '개별 집계', 'icon' => '📊' ),
 		'settings'  => array( 'label' => '설정',        'icon' => '⚙️' ),
@@ -1462,9 +1463,9 @@ function md_survey_tabs() {
 }
 
 function md_survey_current_tab() {
-	$t = isset( $_GET['sv'] ) ? sanitize_key( wp_unslash( $_GET['sv'] ) ) : 'responses';
+	$t = isset( $_GET['sv'] ) ? sanitize_key( wp_unslash( $_GET['sv'] ) ) : 'roster';
 	$tabs = md_survey_tabs();
-	return isset( $tabs[ $t ] ) ? $t : 'responses';
+	return isset( $tabs[ $t ] ) ? $t : 'roster';
 }
 
 function md_survey_notice() {
@@ -1493,8 +1494,9 @@ function md_survey_notice() {
 
 /** 접수수납목록 도구 — 파일 올리기 화면 하나뿐 (v4.19.7 · 탭 없음) */
 function md_survey_render() {
-	md_survey_notice();
-	md_survey_render_roster();
+	/* v4.25 · 옛 접수수납목록 페이지(app=survey)는 결과 화면의 「입력 현황」 탭으로 합쳤다 (원장 지시). 비상용 엑셀 올리기는 ?sv=upload 로만 */
+	if ( isset( $_GET['sv'] ) && 'upload' === $_GET['sv'] && md_survey_can_manage() ) { md_survey_notice(); md_survey_render_roster( false ); return; }
+	md_survey_render_result();
 }
 
 /** 만족도 결과 도구 — 관리자. 응답 · 스탭별 집계 · 설정 */
@@ -1512,9 +1514,10 @@ function md_survey_render_result() {
 	<?php
 	md_survey_notice();
 	switch ( $tab ) {
-		case 'stats':    md_survey_render_stats();     break;
-		case 'settings': md_survey_render_settings();  break;
-		default:         md_survey_render_responses(); break;
+		case 'stats':     md_survey_render_stats();     break;
+		case 'settings':  md_survey_render_settings();  break;
+		case 'responses': md_survey_render_responses(); break;
+		default:          md_survey_render_roster( true ); break; /* v4.25 · 입력 현황 (엑셀 올리기 없이) */
 	}
 }
 
@@ -1565,7 +1568,7 @@ function md_survey_day_counts( $from, $to ) {
  *   3. 그날 명단
  *   (한 명 넣기·붙여넣기 화면은 v4.18.6 에서 뺐다 — 원장 지시. 처리 함수는 REST·호환을 위해 남겨 둔다)
  */
-function md_survey_render_roster() {
+function md_survey_render_roster( $compact = true ) {
 	$today = current_time( 'Y-m-d' );
 	$date  = isset( $_GET['d'] ) ? sanitize_text_field( wp_unslash( $_GET['d'] ) ) : $today;
 	if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) { $date = $today; }
@@ -1591,8 +1594,8 @@ function md_survey_render_roster() {
 				if ( $c )                 { $cls = 'is-ok';     $label = '총 ' . (int) $c->total . '명'; $title = sprintf( '담당의사 %d · 담당직원 %d · 데스크 %d 입력 / 응답 %d명', (int) ( $c->n_doc ?? 0 ), (int) $c->n, (int) ( $c->n_desk ?? 0 ), (int) $c->a ); }
 
 				elseif ( $d > $today )    { $cls = 'is-future'; $label = '예정'; $title = '아직 오지 않은 날'; }
-				elseif ( $d === $today )  { $cls = 'is-today';  $label = '아직'; $title = '오늘 — 아직 올리지 않음'; }
-				else                      { $cls = 'is-none';   $label = '없음'; $title = '올리지 않음'; $missing[] = $d; }
+				elseif ( $d === $today )  { $cls = 'is-today';  $label = '아직'; $title = '오늘 — 아직 접수 없음'; }
+				else                      { $cls = 'is-none';   $label = '없음'; $title = '명단 없음 (휴진일)'; $missing[] = $d; }
 				?>
 				<a class="mdsv-day <?php echo esc_attr( $cls ); ?><?php echo $d === $date ? ' is-sel' : ''; ?><?php echo $d === $today ? ' is-now' : ''; ?>" href="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'roster', 'd' => $d ) ) ); ?>" title="<?php echo esc_attr( $title ); ?>">
 					<span class="mdsv-day__d"><?php echo esc_html( gmdate( 'n/j', $ts ) ); ?> <small><?php echo esc_html( $wd[ $w ] ); ?></small></span>
@@ -1606,9 +1609,9 @@ function md_survey_render_roster() {
 				<label>다른 날짜 <input type="date" name="d" value="<?php echo esc_attr( $date ); ?>" onchange="this.form.submit()"></label>
 			</form>
 			<?php if ( $missing ) : ?>
-				<span class="mdsv-missing">올리지 않은 날: <?php echo esc_html( implode( ' · ', array_map( function ( $x ) { return date_i18n( 'n/j', strtotime( $x ) ); }, $missing ) ) ); ?></span>
+				<span class="mdsv-missing">명단 없는 날(휴진): <?php echo esc_html( implode( ' · ', array_map( function ( $x ) { return date_i18n( 'n/j', strtotime( $x ) ); }, $missing ) ) ); ?></span>
 			<?php else : ?>
-				<span class="mdsv-missing is-clear">최근 열흘 모두 올렸습니다.</span>
+				<span class="mdsv-missing is-clear">최근 열흘 모두 명단이 있습니다.</span>
 			<?php endif; ?>
 		</div>
 	</div>
@@ -1648,6 +1651,11 @@ function md_survey_render_roster() {
 				<p class="mds-hint">모든 환자에게 담당의사 · 담당직원 · 데스크 직원이 들어가 있습니다.</p>
 			<?php endif; ?>
 		</div>
+	<?php endif; ?>
+
+	<?php if ( $compact ) : /* v4.25 · 덴트웹 자동 연동이라 엑셀 올리기 · 파일 카드는 비상용 화면(app=survey&sv=upload)에만 */ ?>
+		<p class="mds-hint" style="margin-top:10px">명단은 병원 서버 PC가 덴트웹 접수목록을 1분마다 읽어 자동으로 채웁니다. 담당직원 · 데스크 직원은 덴트웹 데스크 화면에서 그날 안에 넣어 주세요.</p>
+		<?php return; ?>
 	<?php endif; ?>
 
 	<?php $file = md_survey_file_get( $date ); ?>
