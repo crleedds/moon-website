@@ -570,7 +570,7 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
   .mc-plan__day { width: 8.6em; }
 }
 /* 가로로 놓은 태블릿(900~1400px, 높이 900px 이하): 두 단 — 왼쪽은 병력 · 기본 정보 · 치료계획(스크롤해도 붙어 있음), 오른쪽은 진료기록 · 참고사항 */
-@media (min-width: 900px) and (max-width: 1400px) and (max-height: 900px) and (orientation: landscape) {
+@media (min-width: 1100px), (min-width: 900px) and (max-height: 900px) and (orientation: landscape) { /* v9.56 · 넓은 화면(데스크탑)도 두 단 (원장 「한눈에」) */
   .mc-cols { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 0 8px; align-items: start; }
   .mc-col { display: block; min-width: 0; }
   .mc-col--a { position: sticky; top: 6px; }
@@ -603,3 +603,35 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-chip--sm { min-height: 32px; padding: 2px 12px; font-size: .88rem; }
 .mc-chips:has(.mc-chips__pick) { flex-wrap: wrap; overflow: visible; }
 .mc-chips__picktxt { min-width: 10em; flex: 1 1 12em; min-height: 32px; padding: 4px 10px; border: 1px solid var(--mc-line, #E8DDD3); border-radius: 8px; font: inherit; font-size: 16px; } /* v9.55.2 · 16px — 아이폰 확대 방지 */
+
+/* v9.56 · 한눈에 (원장 지시) */
+/* 두 단일 때 왼쪽 단이 화면보다 길면 그 안에서 스크롤 (붙어 있되 잘리지 않게) */
+@media (min-width: 1100px), (min-width: 900px) and (max-height: 900px) and (orientation: landscape) {
+  .mc-col--a { max-height: calc(100vh - 12px); overflow-y: auto; scrollbar-width: thin; }
+  .mc-col--a .mc-grid--info { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mc-col--a .mc-grid--info .mc-block--alert, .mc-col--a .mc-grid--info .mc-block--alert ~ .mc-block:last-child { grid-column: 1 / -1; } /* 주의 병력이 한 줄을 쓰면 남는 마지막 칸도 한 줄로 — 빈 자리 없게 */
+}
+/* 다음 예약: 날짜 칸 너비 고정 · 내용은 줄바꿈 */
+.mc-nextlist li { display: grid; grid-template-columns: 7.4em minmax(0, 1fr); gap: 8px; }
+.mc-nextlist__d { min-width: 0; white-space: nowrap; }
+/* 상단고정 단추 작게 */
+.mc .mc-pinbtn { min-height: 32px; padding: 0 10px; font-size: .85rem; }
+/* 휴대폰: 머리 — 이름 · 호칭 · 성별나이 한 줄, 고정 단추는 오른쪽 위 / 기본 정보 두 칸씩 */
+@media (max-width: 599px) {
+  .mc-chart__head { position: relative; padding-right: 76px; }
+  .mc-chart__acts { position: absolute; top: 10px; right: 10px; margin: 0; display: block; }
+  .mc-chart__acts .mds-btn, .mc-chart__acts form, .mc-chart__acts form .mds-btn { width: auto; min-height: 32px; padding: 0 8px; font-size: .8rem; }
+  .mc-chart__id { gap: 4px 8px; }
+  .mc-chart__name { font-size: 1.15rem; }
+  .mc-grid--info { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .mc-grid--info .mc-block--alert, .mc-grid--info .mc-block--alert ~ .mc-block:last-child { grid-column: 1 / -1; }
+  .mc-block { padding: 7px 10px 8px; }
+  .mc-nextlist li { grid-template-columns: 6.6em minmax(0, 1fr); font-size: .86rem; }
+}
+/* v9.56 · 세로 태블릿: 왼쪽 기본 정보(두 줄 차지) · 오른쪽 위 다음 예약 · 아래 치료계획 */
+@media (min-width: 700px) and (max-width: 1099px) and (orientation: portrait) {
+  .mc-col--a > .mc-grid--info { grid-column: 1; grid-row: 1 / span 2; }
+  .mc-col--a > #f-next { grid-column: 2; grid-row: 1; margin-bottom: 0; }
+  .mc-col--a > #f-tx_plan { grid-column: 2; grid-row: 2; }
+  .mc-col--a > #f-next ~ #f-tx_plan { margin-top: 0; }
+}

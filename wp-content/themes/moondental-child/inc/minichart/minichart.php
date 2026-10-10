@@ -1536,7 +1536,7 @@ function md_mc_inline_block( $r, $d, $field, $bare = false ) {
 			<?php if ( 'memo' === $field ) : ?>
 				<textarea name="memo" rows="5" data-grow aria-label="참고사항 전체"><?php echo esc_textarea( (string) $r->memo ); ?></textarea>
 			<?php elseif ( 'salute' === $field ) : ?>
-				<input type="text" name="salute" value="<?php echo esc_attr( (string) $r->salute ); ?>" maxlength="120" autocomplete="off" placeholder="예: 시장님 · 목사님" aria-label="호칭 · 호명">
+				<input type="text" name="salute" value="<?php echo esc_attr( (string) $r->salute ); ?>" maxlength="120" autocomplete="off" placeholder="예: 선교사님 · 외국인 호명" aria-label="호칭 · 호명">
 			<?php elseif ( 'dr' === $field ) : ?>
 				<?php md_mc_dr_field( array( 'dr' => (string) $r->dr ) ); ?>
 			<?php else :
@@ -1610,7 +1610,7 @@ function md_mc_render_patient( $id ) {
 				<?php /* v9.23 · 맨 위 「수정」 버튼 없앰 — 칸마다 눌러서 고치므로. 이름 · 차트번호는 맨 아래 링크 (원장 지시) */ ?>
 				<form method="post" class="mc-inline" action="<?php echo esc_url( md_mc_url() ); ?>">
 					<?php md_mc_nonce_fields( 'pin', $r->id ); ?><input type="hidden" name="on" value="<?php echo $r->pin ? '' : '1'; ?>">
-					<button type="submit" class="mds-btn"><?php echo $r->pin ? '상단고정 해제' : '📌 상단고정'; ?></button>
+					<button type="submit" class="mds-btn mc-pinbtn" title="<?php echo $r->pin ? '목록 맨 위 고정 풀기' : '목록 맨 위에 고정'; ?>"><?php echo $r->pin ? '📌 고정 해제' : '📌 고정'; ?></button>
 				</form>
 			</div>
 			<?php /* v9.52 · 이름 밑 「다음 예약」 한 줄은 없앰 — 치료계획 위 「다음 예약」 칸으로 (원장 지시) */ ?>
@@ -1809,9 +1809,9 @@ function md_mc_chips( $field, $kind, $hint ) {
 		$pre = ':' === mb_substr( $c, -1 );
 		$h  .= '<button type="button" class="mc-chip' . ( $pre ? ' mc-chip--pre' : '' ) . ( $opts ? ' mc-chip--opt' : '' ) . '" data-chip="' . esc_attr( $pre ? rtrim( $c, ':' ) . ':' : $c ) . '"' . ( $opts ? ' data-opts="' . esc_attr( wp_json_encode( $opts, JSON_UNESCAPED_UNICODE ) ) . '"' : '' ) . '>' . esc_html( $pre ? rtrim( $c, ':' ) . ' …' : $c ) . '</button>';
 	}
-	return $h . '<span class="mc-chips__hint">' . esc_html( $hint ) . '</span></div>';
+	return $h . ( '' !== $hint ? '<span class="mc-chips__hint">' . esc_html( $hint ) . '</span>' : '' ) . '</div>';
 }
-function md_mc_mhx_chips() { return md_mc_chips( 'mhx', 'mhx', '눌러서 넣고, 위 칸에 더 적어도 됩니다 · 혈압 · 간염은 눌러서 종류를 고릅니다 · 「기타 …」는 이어 적기' ); }
+function md_mc_mhx_chips() { return md_mc_chips( 'mhx', 'mhx', '' ); } /* v9.56 · 안내 문구 없앰 (원장 지시) */
 
 /** 수정 · 새로 만들기 — 칸 순서와 이름은 AppSheet 폼 그대로 */
 function md_mc_render_edit( $id, $kind ) {
@@ -1858,7 +1858,7 @@ function md_mc_render_edit( $id, $kind ) {
 			<?php
 			md_mc_field( 'chart_no', $f['chart_no'][0], $v( 'chart_no' ), array( 'req' => true, 'input' => true, 'attrs' => 'required inputmode="numeric" maxlength="60" autocomplete="off"' . ( $r ? '' : ' autofocus' ) ) );
 			md_mc_field( 'pname', $f['pname'][0], $v( 'pname' ), array( 'req' => true, 'input' => true, 'attrs' => 'required maxlength="250" autocomplete="off"' ) );
-			md_mc_field( 'salute', $f['salute'][0], $v( 'salute' ), array( 'input' => true, 'hint' => '부를 때 쓰는 말 (예: 시장님 · 목사님)', 'attrs' => 'maxlength="120" autocomplete="off" placeholder="예: 시장님"' ) ); /* v9.24 */
+			md_mc_field( 'salute', $f['salute'][0], $v( 'salute' ), array( 'input' => true, 'hint' => '부를 때 쓰는 말 (예: 선교사님 · 외국인 호명)', 'attrs' => 'maxlength="120" autocomplete="off" placeholder="예: 선교사님"' ) ); /* v9.24 */
 			if ( ! $r ) { echo '<div class="mc-dw-prev" hidden aria-live="polite"></div>'; } /* v8.1 · 새 환자 — 덴트웹에서 가져온 것 미리 보기 */
 			foreach ( array( 'addr', 'mhx', 'referral' ) as $k ) {
 				$na = ! empty( $vals['na'][ $k ] ) || ( '' !== $v( $k ) && md_mc_is_na( $v( $k ) ) );
