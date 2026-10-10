@@ -82,7 +82,7 @@ function md_fees_tabs( $fresh = false ) {
 	}
 	$tabs = array_values( $tabs );
 	if ( '' === $html ) { $last = get_option( 'md_fees_tabs_last' ); return is_array( $last ) ? $last : array(); }
-	set_transient( $key, $tabs, 10 * MINUTE_IN_SECONDS );
+	set_transient( $key, $tabs, MINUTE_IN_SECONDS ); /* v9.65 · 탭을 지우거나 더해도 1분 안에 (원장 지시) */
 	update_option( 'md_fees_tabs_last', $tabs, false );
 	return $tabs;
 }
@@ -167,6 +167,7 @@ function md_fees_render_table() {
 		<div class="mdfee__bar">
 			<input type="search" class="mdfee__q" placeholder="찾기 — 예: 크라운, 스케일링, 임플란트" aria-label="진료비 찾기" data-mdfee-q>
 			<span class="mds-hint mdfee__n"><b data-mdfee-n><?php echo count( $rows ); ?></b>줄<?php echo ! empty( $d['at'] ) ? ' · ' . esc_html( $d['at'] ) . ' 기준' : ''; ?></span>
+			<?php if ( ! empty( $d['_stale'] ) ) : /* v9.65 · 시트를 못 읽으면 옛 표라고 알림 */ ?><span class="mds-notice mds-notice--warn" style="flex-basis:100%;margin:0">구글 시트를 지금 읽지 못해 <?php echo esc_html( $d['at'] ); ?>에 읽어 둔 표입니다 — 금액이 바뀌었을 수 있으니 경영지원실에 확인해 주세요.</span><?php endif; ?>
 		</div>
 		<div class="mdfee__wrap"><table class="mdfee__t">
 			<thead><tr><?php foreach ( $head as $h ) : ?><th><?php echo esc_html( $h ); ?></th><?php endforeach; ?></tr></thead>
@@ -237,7 +238,8 @@ function md_fees_render() {
 		$pub  = md_fees_pub_base();
 		$tabs = '' !== $pub ? md_fees_tabs( true ) : array();
 		if ( '' !== $pub ) { foreach ( $tabs as $tb ) { delete_transient( 'md_fees_rows_' . md5( md_fees_tab_csv_url( $tb['gid'] ) ) ); } } ?>
-		<?php $ok = '' !== $pub && $tabs; ?>
+		<?php $ok = '' !== $pub && $tabs; $chk = md_fees_rows( true, $tabs ? $tabs[0]['gid'] : null ); /* v9.65 · 직원 화면이 시트를 읽고 있는지 */ ?>
+		<?php if ( ! empty( $chk['_stale'] ) || ! empty( $chk['_err'] ) ) : ?><div class="mds-notice mds-notice--warn"><b>직원 화면이 구글 시트를 읽지 못하고 있습니다</b><?php echo ! empty( $chk['at'] ) ? ' — ' . esc_html( $chk['at'] ) . '에 읽어 둔 표가 보입니다' : ''; ?>. 시트가 「제한됨」이면 아래에 「웹에 게시」 주소를 넣어 주세요.</div><?php endif; ?>
 		<div class="mds-card">
 			<?php if ( isset( $_GET['fr'] ) ) : ?><div class="mds-notice mds-notice--ok">저장하고 다시 읽었습니다.</div><?php endif; ?>
 			<details<?php echo $ok ? '' : ' open'; ?>>
