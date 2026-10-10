@@ -315,17 +315,17 @@ window.mcInits.push(function () {
     function find() {
       var v = inp.value.trim(); ul.innerHTML = ''; if (!v) return;
       var my = ++seq, u = new URL(b.getAttribute('data-pick'), location.href);
-      u.searchParams.set('md_mc_find', v);
+      u.searchParams.set('md_mc_find', v); u.searchParams.set('src', 'all'); /* v9.75 · 덴트웹 전체 환자도 */
       fetch(u.toString(), { credentials: 'same-origin', headers: { Accept: 'application/json' } }).then(function (r) { return r.json(); }).then(function (j) {
         if (my !== seq || !j || !j.ok) return;
         ul.innerHTML = '';
         (j.rows || []).slice(0, 8).forEach(function (row) {
           var li = document.createElement('li'), x = document.createElement('button'); x.type = 'button'; x.className = 'mc-chips__foundbtn';
-          x.innerHTML = '<b></b> <small></small>'; x.querySelector('b').textContent = row.name; x.querySelector('small').textContent = row.chart;
+          x.innerHTML = '<b></b> <small></small>' + (row.dw ? ' <em class="mc-chips__dwtag">덴트웹</em>' : ''); x.querySelector('b').textContent = row.name; x.querySelector('small').textContent = row.chart;
           x.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); pick(row.name, row.chart); });
           li.appendChild(x); ul.appendChild(li);
         });
-        if (!ul.children.length) { var li0 = document.createElement('li'); li0.className = 'mc-chips__none'; li0.textContent = '미니차트에 없는 환자입니다 — Enter 로 적은 대로 넣기'; ul.appendChild(li0); }
+        if (!ul.children.length) { var li0 = document.createElement('li'); li0.className = 'mc-chips__none'; li0.textContent = '찾는 환자가 없습니다 — Enter 로 적은 대로 넣기'; ul.appendChild(li0); }
       }).catch(function () {});
     }
     inp.addEventListener('click', function (e2) { e2.stopPropagation(); });

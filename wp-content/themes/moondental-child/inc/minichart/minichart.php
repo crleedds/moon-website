@@ -1417,6 +1417,11 @@ function md_mc_find_json() {
 			'url'   => md_mc_url( array( 'mv' => 'p', 'mid' => $r->id ) ),
 		);
 	}
+	/* v9.75 · src=all — 미니차트에 없는 덴트웹 환자도 (고객소개 · 가족 고르기) */
+	if ( ! empty( $_GET['src'] ) && 'all' === $_GET['src'] && function_exists( 'md_mc_pidx_find' ) && count( $out ) < 12 ) {
+		$skip = array(); foreach ( $out as $o ) { $skip[ md_mc_dw_key( $o['chart'] ) ] = 1; }
+		$out = array_merge( $out, md_mc_pidx_find( $q, 12 - count( $out ), $skip ) );
+	}
 	wp_send_json( array( 'ok' => true, 'rows' => $out ) );
 }
 add_action( 'template_redirect', 'md_mc_find_json', 2 );

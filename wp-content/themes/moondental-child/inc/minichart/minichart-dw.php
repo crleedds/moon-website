@@ -40,6 +40,65 @@ function md_mc_dw_install() {
 add_action( 'init', 'md_mc_dw_install', 21 );
 
 /** 차트번호 비교용 — 앞 0 · 공백 무시 */
+/* ============================================================
+ * v9.75 · 덴트웹 전체 환자 찾기 목록 (원장 지시 — 고객소개 · 가족을 미니차트에 없는 환자도 고르게)
+ *   병원 PC(mc-sync)가 하루 한 번 덴트웹 환자정보의 차트번호 · 이름만 올린다 (연락처 · 생일 · 주소 없음).
+ *   표 wp_md_mc_pidx. 라운지 미니차트 권한이 있어야 찾을 수 있다 (md_mc_find_json, src=all).
+ * ============================================================ */
+function md_mc_pidx_install() {
+	if ( (int) get_option( 'md_mc_pidx_schema', 0 ) >= 1 ) { return; }
+	global $wpdb;
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+	dbDelta( 'CREATE TABLE ' . md_mc_t( 'pidx' ) . " (
+		chart_key VARCHAR(60) NOT NULL DEFAULT '',
+		chart_no VARCHAR(60) NOT NULL DEFAULT '',
+		pname VARCHAR(100) NOT NULL DEFAULT '',
+		cho VARCHAR(100) NOT NULL DEFAULT '',
+		seen DATETIME NULL,
+		PRIMARY KEY  (chart_key),
+		KEY pname (pname),
+		KEY cho (cho)
+	) " . $wpdb->get_charset_collate() . ';' );
+	update_option( 'md_mc_pidx_schema', 1, false );
+}
+function md_mc_pidx_rest( $request ) {
+	global $wpdb;
+	md_mc_pidx_install();
+	$body = $request->get_json_params();
+	if ( isset( $body['b64'] ) && is_string( $body['b64'] ) ) { $dec = json_decode( (string) base64_decode( $body['b64'], true ), true ); $body = is_array( $dec ) ? $dec : array(); }
+	$t = md_mc_t( 'pidx' ); $now = current_time( 'mysql' );
+	if ( ! empty( $body['first'] ) ) { update_option( 'md_mc_pidx_run', $now, false ); }
+	$run = (string) get_option( 'md_mc_pidx_run', $now );
+	$n = 0; $vals = array();
+	foreach ( array_slice( (array) ( $body['rows'] ?? array() ), 0, 5000 ) as $r ) {
+		if ( ! is_array( $r ) ) { continue; }
+		$c = substr( preg_replace( '/[^0-9A-Za-z\-]/', '', (string) ( $r['c'] ?? '' ) ), 0, 60 );
+		$nm = mb_substr( trim( sanitize_text_field( (string) ( $r['n'] ?? '' ) ) ), 0, 100 );
+		if ( '' === $c || '' === $nm ) { continue; }
+		$vals[] = $wpdb->prepare( '(%s,%s,%s,%s,%s)', md_mc_dw_key( $c ), $c, $nm, function_exists( 'md_mc_cho' ) ? md_mc_cho( $nm ) : '', $now );
+		$n++;
+	}
+	foreach ( array_chunk( $vals, 500 ) as $ch ) {
+		$wpdb->query( "INSERT INTO $t (chart_key, chart_no, pname, cho, seen) VALUES " . implode( ',', $ch ) . ' ON DUPLICATE KEY UPDATE chart_no = VALUES(chart_no), pname = VALUES(pname), cho = VALUES(cho), seen = VALUES(seen)' );
+	}
+	$gone = 0;
+	if ( ! empty( $body['full'] ) && ! empty( $body['final'] ) ) { $gone = (int) $wpdb->query( $wpdb->prepare( "DELETE FROM $t WHERE seen < %s", $run ) ); }
+	if ( ! empty( $body['final'] ) ) { update_option( 'md_mc_pidx_last', array( 'at' => $now, 'n' => (int) $wpdb->get_var( "SELECT COUNT(*) FROM $t" ) ), false ); }
+	return rest_ensure_response( array( 'ok' => true, 'saved' => $n, 'gone' => $gone ) );
+}
+/** 찾기 — 차트번호 · 이름 · 초성 (미니차트에 없는 사람 고르기용) */
+function md_mc_pidx_find( $q, $limit, $skip_keys ) {
+	global $wpdb;
+	if ( (int) get_option( 'md_mc_pidx_schema', 0 ) < 1 ) { return array(); }
+	$k = preg_replace( '/\s+/u', '', $q ); if ( '' === $k ) { return array(); }
+	$t = md_mc_t( 'pidx' ); $like = '%' . $wpdb->esc_like( $k ) . '%';
+	$cond = ( function_exists( 'md_mc_is_cho' ) && md_mc_is_cho( $q ) ) ? $wpdb->prepare( 'cho LIKE %s', $like ) : $wpdb->prepare( '(chart_no LIKE %s OR REPLACE(pname, \' \', \'\') LIKE %s)', $like, $like );
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT chart_key, chart_no, pname FROM $t WHERE $cond ORDER BY (chart_key = %s) DESC, (pname LIKE %s) DESC, pname LIMIT %d", md_mc_dw_key( $k ), $wpdb->esc_like( $k ) . '%', $limit + count( $skip_keys ) ) );
+	$out = array();
+	foreach ( $rows as $r ) { if ( isset( $skip_keys[ $r->chart_key ] ) ) { continue; } $out[] = array( 'chart' => $r->chart_no, 'name' => $r->pname, 'dw' => 1 ); if ( count( $out ) >= $limit ) { break; } }
+	return $out;
+}
+
 function md_mc_dw_key( $c ) {
 	$c = preg_replace( '/\s+/', '', (string) $c );
 	$k = ltrim( $c, '0' );
@@ -289,6 +348,7 @@ add_action( 'rest_api_init', function () {
 	register_rest_route( 'md-mc/v1', '/requests', array( 'methods' => 'GET', 'callback' => 'md_mc_dw_rest_requests', 'permission_callback' => 'md_mc_dw_permission' ) );
 	register_rest_route( 'md-mc/v1', '/charts', array( 'methods' => 'GET', 'callback' => 'md_mc_dw_rest_charts', 'permission_callback' => 'md_mc_dw_permission' ) );
 	register_rest_route( 'md-mc/v1', '/dw', array( 'methods' => 'POST', 'callback' => 'md_mc_dw_rest_save', 'permission_callback' => 'md_mc_dw_permission' ) );
+	register_rest_route( 'md-mc/v1', '/pidx', array( 'methods' => 'POST', 'callback' => 'md_mc_pidx_rest', 'permission_callback' => 'md_mc_dw_permission' ) ); /* v9.75 */
 } );
 
 function md_mc_dw_enqueue( $chart ) {
