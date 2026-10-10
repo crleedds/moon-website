@@ -107,3 +107,23 @@
 /* v4.19.5 · 올리는 담당자 이름 칸 */
 .mdsv-upload__who { flex: 0 1 160px; font: inherit; font-size: .98rem; min-height: 46px; padding: 8px 12px; border: 1px solid var(--color-border, #EDDFD0); border-radius: 10px; background: var(--color-white, #fff); color: var(--color-text, #3D2F26); }
 .mdsv-upload__who:focus { outline: 2px solid var(--color-primary, #D88062); outline-offset: 0; border-color: var(--color-primary, #D88062); }
+
+/* v4.24 · 날짜별 입력 현황 (담당의사 · 담당직원 · 데스크) */
+.mdsv-fill { padding: 16px 20px 14px; margin-top: 12px; }
+.mdsv-fill .mdsv-h small { font-weight: 500; color: var(--color-text-mute, #A89685); margin-left: 6px; }
+.mdsv-fill__rows { display: grid; gap: 8px; margin-top: 8px; }
+.mdsv-fill__row { display: grid; grid-template-columns: 88px 1fr auto; align-items: center; gap: 10px; font-size: .92rem; }
+.mdsv-fill__l { font-weight: 700; }
+.mdsv-fill__bar { display: block; height: 10px; border-radius: 999px; background: var(--color-surface, #FBF2E8); overflow: hidden; }
+.mdsv-fill__bar i { display: block; height: 100%; background: var(--color-primary, #D88062); border-radius: 999px; }
+.mdsv-fill__row.is-lack .mdsv-fill__bar i { background: #e0a14a; }
+.mdsv-fill__n { white-space: nowrap; color: var(--color-text-sub, #7A6B5F); }
+.mdsv-fill__n b { color: var(--color-text, #3D2F26); }
+.mdsv-fill__n small { color: var(--color-text-mute, #A89685); }
+.mdsv-fill__lack { margin-top: 10px; }
+.mdsv-fill__lack summary { cursor: pointer; font-weight: 700; color: var(--color-primary-dark, #B86347); }
+.mdsv-fill__list { margin: 6px 0 0; padding: 0; list-style: none; columns: 2; column-gap: 24px; font-size: .9rem; }
+.mdsv-fill__list li { break-inside: avoid; padding: 3px 0; }
+.mdsv-fill__list small { color: var(--color-text-mute, #A89685); }
+.mdsv-fill__done { color: var(--color-text-mute, #A89685); font-size: .82rem; }
+@media (max-width: 560px) { .mdsv-fill__row { grid-template-columns: 76px 1fr; } .mdsv-fill__n { grid-column: 2; } .mdsv-fill__list { columns: 1; } }

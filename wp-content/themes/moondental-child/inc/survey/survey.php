@@ -1542,7 +1542,7 @@ function md_survey_day_counts( $from, $to ) {
 	$tv  = md_survey_table_visit();
 	$out = array();
 	$rows = $wpdb->get_results( $wpdb->prepare(
-		"SELECT visit_date, SUM(staff <> '') AS n, SUM(staff = '') AS miss, SUM(responded_at IS NOT NULL) AS a, MAX(created_at) AS last_at FROM $tv WHERE visit_date BETWEEN %s AND %s GROUP BY visit_date", $from, $to ) );
+		"SELECT visit_date, SUM(staff <> '') AS n, SUM(staff = '') AS miss, SUM(doctor <> '') AS n_doc, SUM(desk <> '') AS n_desk, SUM(responded_at IS NOT NULL) AS a, MAX(created_at) AS last_at FROM $tv WHERE visit_date BETWEEN %s AND %s GROUP BY visit_date", $from, $to ) ); /* v4.24 · 담당의사 · 데스크 입력 수도 */
 	foreach ( (array) $rows as $r ) { $r->skipped = (int) $r->miss; $r->total = (int) $r->n + (int) $r->miss; $out[ $r->visit_date ] = $r; }
 	/* v4.19.4 · 올린 파일의 「담당직원 없음」 수를 더해 총 접수 환자 수를 만든다 */
 	$files = $wpdb->get_results( $wpdb->prepare(
@@ -1588,7 +1588,7 @@ function md_survey_render_roster() {
 				$d   = gmdate( 'Y-m-d', $ts );
 				$w   = (int) gmdate( 'w', $ts );
 				$c   = isset( $counts[ $d ] ) ? $counts[ $d ] : null;
-				if ( $c )                 { $cls = 'is-ok';     $label = '총 ' . (int) $c->total . '명'; $title = sprintf( '입력 %d명 · 미입력 %d명', (int) $c->n, (int) $c->skipped ); }
+				if ( $c )                 { $cls = 'is-ok';     $label = '총 ' . (int) $c->total . '명'; $title = sprintf( '담당의사 %d · 담당직원 %d · 데스크 %d 입력 / 응답 %d명', (int) ( $c->n_doc ?? 0 ), (int) $c->n, (int) ( $c->n_desk ?? 0 ), (int) $c->a ); }
 
 				elseif ( $d > $today )    { $cls = 'is-future'; $label = '예정'; $title = '아직 오지 않은 날'; }
 				elseif ( $d === $today )  { $cls = 'is-today';  $label = '아직'; $title = '오늘 — 아직 올리지 않음'; }
@@ -1612,6 +1612,43 @@ function md_survey_render_roster() {
 			<?php endif; ?>
 		</div>
 	</div>
+
+	<?php
+	/* v4.24 · 고른 날짜의 입력 현황 — 담당의사 · 담당직원 · 데스크(체어)가 비면 설문에 이름이 안 나가므로 몇 명이 빠졌는지 바로 보이게 (원장 지시 2026-10-10) */
+	if ( $rows ) :
+		$tot = count( $rows );
+		$fill = array( 'doctor' => array( '담당의사', 0 ), 'staff' => array( '담당직원', 0 ), 'desk' => array( '데스크 직원', 0 ) );
+		$lack = array();
+		foreach ( $rows as $r ) {
+			$miss = array();
+			foreach ( $fill as $k => $v ) { if ( '' !== trim( (string) ( $r->$k ?? '' ) ) ) { $fill[ $k ][1]++; } else { $miss[] = $v[0]; } }
+			if ( $miss ) { $lack[] = array( $r->chart_no, $r->patient_name, implode( ' · ', $miss ), (bool) $r->response_id ); }
+		}
+		?>
+		<div class="mds-card mdsv-fill">
+			<h2 class="mdsv-h"><?php echo esc_html( date_i18n( 'n월 j일 (D)', strtotime( $date ) ) ); ?> 입력 현황 <small>접수 <?php echo (int) $tot; ?>명 · 응답 <?php echo (int) $answered; ?>명</small></h2>
+			<div class="mdsv-fill__rows">
+				<?php foreach ( $fill as $k => $v ) : $n = (int) $v[1]; $pct = $tot ? round( 100 * $n / $tot ) : 0; ?>
+					<div class="mdsv-fill__row<?php echo $n < $tot ? ' is-lack' : ''; ?>">
+						<span class="mdsv-fill__l"><?php echo esc_html( $v[0] ); ?></span>
+						<span class="mdsv-fill__bar"><i style="width:<?php echo (int) $pct; ?>%"></i></span>
+						<span class="mdsv-fill__n">입력 <b><?php echo $n; ?></b> · 미입력 <b><?php echo (int) ( $tot - $n ); ?></b> <small>(<?php echo (int) $pct; ?>%)</small></span>
+					</div>
+				<?php endforeach; ?>
+			</div>
+			<?php if ( $lack ) : ?>
+				<details class="mdsv-fill__lack">
+					<summary>미입력 환자 <?php echo count( $lack ); ?>명 보기</summary>
+					<p class="mds-hint">덴트웹 <b>데스크</b> 화면에서 환자 줄을 더블클릭 → 담당의사 · 담당직원 · 체어(데스크 직원)를 고르면 1분 안에 반영됩니다. 이미 응답한 환자(✓)는 고쳐도 그 응답에는 반영되지 않습니다.</p>
+					<ul class="mdsv-fill__list">
+						<?php foreach ( $lack as $x ) : ?><li><b><?php echo esc_html( $x[1] ); ?></b> <small><?php echo esc_html( $x[0] ); ?></small> — <?php echo esc_html( $x[2] ); ?><?php echo $x[3] ? ' <span class="mdsv-fill__done">✓ 응답함</span>' : ''; ?></li><?php endforeach; ?>
+					</ul>
+				</details>
+			<?php else : ?>
+				<p class="mds-hint">모든 환자에게 담당의사 · 담당직원 · 데스크 직원이 들어가 있습니다.</p>
+			<?php endif; ?>
+		</div>
+	<?php endif; ?>
 
 	<?php $file = md_survey_file_get( $date ); ?>
 	<form method="post" enctype="multipart/form-data" class="mds-card mdsv-upload" action="<?php echo esc_url( md_survey_admin_url( array( 'sv' => 'roster', 'd' => $date ) ) ); ?>">
