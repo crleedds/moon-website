@@ -1870,11 +1870,11 @@ function md_mc_render_patient( $id ) {
 		</section>
 		<?php $mn = count( array_filter( preg_split( '/\r\n|\r|\n/', (string) $r->memo ), 'strlen' ) ); /* v8.3 · 환자 보는 화면에서 바로 보이지 않게 — 눌러야 펼쳐짐 (원장 지시) */ ?>
 		<details class="mc-block mc-block--log mc-memo" id="f-memo"<?php echo isset( $_GET['memo'] ) ? ' open' : ''; ?>>
-			<summary class="mc-block__h"><?php echo esc_html( $f['memo'][0] ); ?> <small class="mc-sub"><?php echo $mn ? $mn . '줄 · ' : ''; ?>눌러서 보기</small></summary>
+			<summary class="mc-block__h"><?php echo esc_html( $f['memo'][0] ); ?> <?php if ( $mn ) : /* v9.81 · 참고사항이 있을 때만 「눌러서 보기」 (원장 지시) */ ?><small class="mc-sub"><?php echo (int) $mn; ?>줄 · 눌러서 보기</small><?php endif; ?></summary>
 			<?php md_mc_addform( $r, 'memo', '참고사항입력 (날짜없이)' ); ?>
 			<?php md_mc_inline_block( $r, $d, 'memo', true ); /* v9.20 · 예전 참고사항도 눌러서 고치기 (원장 지시) */ ?>
 		</details>
-		<?php if ( $d ) : ?><p class="mc-chart__meta mc-dwnote">덴트웹 자료 <?php echo esc_html( md_mc_short_date( $d['_synced'] ) . ' ' . date( 'H:i', strtotime( $d['_synced'] ) ) ); ?> 기준 (30분마다 새로 받음)</p><?php endif; ?>
+		<?php if ( $d ) : ?><p class="mc-chart__meta mc-dwnote">덴트웹 자료 <?php echo esc_html( md_mc_short_date( $d['_synced'] ) . ' ' . date( 'H:i', strtotime( $d['_synced'] ) ) ); ?> 기준 (오늘 접수한 환자는 1분 · 나머지는 10분마다 새로 받음)</p><?php endif; ?>
 		</div></div><?php /* /.mc-cols */ ?>
 
 		<div class="mc-chart__foot">
