@@ -471,7 +471,7 @@ document.addEventListener('click', function (e) {
       /* v9.22 · 직접 적은 줄 — 지우면 바로 사라지고, 고치면 바로 바뀐다 (서버 대답이 오면 전체를 다시 맞춘다) */
       var w = form.closest('.mc-tl__ownw');
       if (w && kind === 'owndel') { w.classList.add('is-gone'); }
-      else if (w) { var nt = form.querySelector('textarea').value.trim(); var sp = w.querySelector('.mc-tl__own'); form.hidden = true; if (sp) { sp.classList.add('is-pending'); var segs = sp.querySelectorAll('.mc-seg'); if (segs.length) { Array.prototype.forEach.call(segs, function (g, gi) { if (gi) g.remove(); }); var tt = segs[0].querySelector('.mc-seg__t'); if (tt) tt.textContent = nt; } else if (sp.childNodes[0] && sp.childNodes[0].nodeType === 3) { sp.childNodes[0].nodeValue = (sp.childNodes[0].nodeValue.indexOf('✎') === 0 ? '✎ ' : '') + nt + ' '; } } } /* v9.67 · 치식 칸이 있는 줄도 (서버 대답이 오면 다시 그림) */
+      else if (w) { var nt = form.querySelector('textarea').value.trim(); var sp = w.querySelector('.mc-tl__own'); form.hidden = true; if (sp) { sp.classList.add('is-pending'); sp.childNodes[0].nodeValue = (sp.childNodes[0].nodeValue.indexOf('✎') === 0 ? '✎ ' : '') + nt + ' '; } }
     }
     var btns = form.querySelectorAll('button[type=submit], button:not([type])');
     Array.prototype.forEach.call(btns, function (b) { b.disabled = true; });
