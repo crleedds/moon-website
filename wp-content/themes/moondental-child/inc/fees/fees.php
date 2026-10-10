@@ -55,14 +55,55 @@ function md_fees_csv_url() {
 	return 'https://docs.google.com/spreadsheets/d/' . md_fees_sheet_id() . '/export?format=csv&gid=0';
 }
 
-/** 시트 → 줄 배열 (첫 줄 = 머리). 10분 캐시, 못 읽으면 마지막으로 읽은 것 */
-function md_fees_rows( $fresh = false ) {
-	$key = 'md_fees_rows_' . md5( md_fees_csv_url() );
+/* ============================================================
+ * v9.64 · 탭 전부 (원장 지시 — 직원 화면에서 다른 탭이 안 보임)
+ *  시트는 「제한됨」이라 시트 ID 로는 못 읽는다(401) → 「파일 › 공유 › 웹에 게시 › 문서 전체」 주소(…/d/e/2PACX…/pubhtml)를
+ *  관리자 화면에 넣으면 pubhtml 에서 탭 이름 · gid 를 읽고, 탭마다 pub?gid=…&single=true&output=csv 로 읽는다.
+ * ============================================================ */
+function md_fees_pub_base() {
+	$u = trim( (string) get_option( 'md_fees_csv_url', '' ) );
+	return preg_match( '#^https://docs\.google\.com/spreadsheets/d/e/([A-Za-z0-9_-]{20,})/#', $u, $m ) ? 'https://docs.google.com/spreadsheets/d/e/' . $m[1] . '/' : '';
+}
+
+/** 탭 목록 [ [ 'gid' => '0', 'name' => '…' ], … ] — 웹에 게시 주소가 없으면 빈 배열(예전처럼 첫 탭만) */
+function md_fees_tabs( $fresh = false ) {
+	$base = md_fees_pub_base();
+	if ( '' === $base ) { return array(); }
+	$key = 'md_fees_tabs_' . md5( $base );
 	if ( ! $fresh ) { $c = get_transient( $key ); if ( is_array( $c ) ) { return $c; } }
-	$r = wp_remote_get( md_fees_csv_url(), array( 'timeout' => 12, 'redirection' => 5 ) );
+	$r    = wp_remote_get( $base . 'pubhtml', array( 'timeout' => 12, 'redirection' => 5 ) );
+	$html = is_wp_error( $r ) || 200 !== (int) wp_remote_retrieve_response_code( $r ) ? '' : (string) wp_remote_retrieve_body( $r );
+	$tabs = array();
+	if ( preg_match_all( '#id="sheet-button-(\d+)"[^>]*>\s*<a[^>]*>(.*?)</a>#s', $html, $mm, PREG_SET_ORDER ) ) {
+		foreach ( $mm as $m ) { $tabs[ $m[1] ] = array( 'gid' => $m[1], 'name' => trim( html_entity_decode( wp_strip_all_tags( $m[2] ), ENT_QUOTES, 'UTF-8' ) ) ); }
+	}
+	if ( ! $tabs && preg_match_all( '#name:\s*"((?:[^"\\\\]|\\\\.)*)"[^}]*?gid:\s*"(\d+)"#s', $html, $mm, PREG_SET_ORDER ) ) {
+		foreach ( $mm as $m ) { $tabs[ $m[2] ] = array( 'gid' => $m[2], 'name' => json_decode( '"' . $m[1] . '"' ) ); }
+	}
+	$tabs = array_values( $tabs );
+	if ( '' === $html ) { $last = get_option( 'md_fees_tabs_last' ); return is_array( $last ) ? $last : array(); }
+	set_transient( $key, $tabs, 10 * MINUTE_IN_SECONDS );
+	update_option( 'md_fees_tabs_last', $tabs, false );
+	return $tabs;
+}
+
+/** 읽을 CSV 주소 — 탭(gid)을 고르면 그 탭 */
+function md_fees_tab_csv_url( $gid = null ) {
+	$base = md_fees_pub_base();
+	if ( '' !== $base ) { return $base . 'pub?' . ( null !== $gid && '' !== $gid ? 'gid=' . rawurlencode( (string) $gid ) . '&single=true&' : '' ) . 'output=csv'; }
+	return md_fees_csv_url();
+}
+
+/** 시트 → 줄 배열 (첫 줄 = 머리). 1분 캐시, 못 읽으면 마지막으로 읽은 것 (v9.64 · 탭마다) */
+function md_fees_rows( $fresh = false, $gid = null ) {
+	$url = md_fees_tab_csv_url( $gid );
+	$key = 'md_fees_rows_' . md5( $url );
+	$opt = null === $gid ? 'md_fees_rows_last' : 'md_fees_rows_last_' . md5( $url );
+	if ( ! $fresh ) { $c = get_transient( $key ); if ( is_array( $c ) ) { return $c; } }
+	$r = wp_remote_get( $url, array( 'timeout' => 12, 'redirection' => 5 ) );
 	$body = is_wp_error( $r ) || 200 !== (int) wp_remote_retrieve_response_code( $r ) ? '' : (string) wp_remote_retrieve_body( $r );
 	if ( '' === $body || false !== stripos( substr( $body, 0, 300 ), '<html' ) ) {
-		$last = get_option( 'md_fees_rows_last' );
+		$last = get_option( $opt );
 		return is_array( $last ) ? array_merge( $last, array( '_stale' => 1 ) ) : array( 'rows' => array(), 'at' => '', '_err' => 1 );
 	}
 	$body = preg_replace( '/^\xEF\xBB\xBF/', '', $body );
@@ -77,7 +118,7 @@ function md_fees_rows( $fresh = false ) {
 	fclose( $fh );
 	$out = array( 'rows' => $rows, 'at' => current_time( 'Y-m-d H:i' ) );
 	set_transient( $key, $out, MINUTE_IN_SECONDS ); /* v9.62 · 시트를 고치면 1분 안에 직원 화면에 (원장 지시) */
-	update_option( 'md_fees_rows_last', $out, false );
+	update_option( $opt, $out, false );
 	return $out;
 }
 
@@ -91,6 +132,7 @@ function md_fees_handle_post() {
 		$u = trim( esc_url_raw( wp_unslash( $_POST['csv_url'] ?? '' ) ) );
 		if ( '' === $u || preg_match( '#^https://docs\.google\.com/spreadsheets/#', $u ) ) { update_option( 'md_fees_csv_url', $u, false ); }
 	}
+	foreach ( md_fees_tabs( true ) as $tb ) { md_fees_rows( true, $tb['gid'] ); }
 	md_fees_rows( true );
 	wp_safe_redirect( add_query_arg( 'fr', 1, md_sup_url( array( 'app' => 'fees' ) ) ) );
 	exit;
@@ -99,7 +141,23 @@ add_action( 'template_redirect', 'md_fees_handle_post', 5 );
 
 /** 일반 직원 화면 — 서버가 그린 표 (시트 주소 · 다운로드 없음) */
 function md_fees_render_table() {
-	$d    = md_fees_rows();
+	/* v9.64 · 탭 — 주소 ?ft=gid (웹에 게시 주소가 있을 때만) */
+	$tabs = md_fees_tabs();
+	$gid  = null;
+	if ( $tabs ) {
+		$want = isset( $_GET['ft'] ) ? preg_replace( '/\D/', '', (string) wp_unslash( $_GET['ft'] ) ) : '';
+		$gid  = $tabs[0]['gid'];
+		foreach ( $tabs as $tb ) { if ( $tb['gid'] === $want ) { $gid = $want; } }
+	}
+	if ( count( $tabs ) > 1 ) {
+		echo '<nav class="mdfee__tabs" aria-label="진료비 탭">';
+		foreach ( $tabs as $tb ) {
+			$on = $tb['gid'] === $gid;
+			echo '<a class="mdfee__tab' . ( $on ? ' is-on' : '' ) . '"' . ( $on ? ' aria-current="page"' : '' ) . ' href="' . esc_url( md_sup_url( array( 'app' => 'fees', 'ft' => $tb['gid'] ) ) ) . '">' . esc_html( '' !== $tb['name'] ? $tb['name'] : '탭' ) . '</a>';
+		}
+		echo '</nav><style>.mdfee__tabs{display:flex;gap:6px;overflow-x:auto;margin:0 0 10px;padding-bottom:2px;-webkit-overflow-scrolling:touch}.mdfee__tab{flex:0 0 auto;padding:7px 14px;border:1px solid var(--color-border,#E8DDD3);border-radius:999px;background:#fff;color:inherit;text-decoration:none;font-weight:700;font-size:.9rem;white-space:nowrap}.mdfee__tab.is-on{background:#2F2621;border-color:#2F2621;color:#fff}</style>';
+	}
+	$d    = md_fees_rows( false, $gid );
 	$rows = $d['rows'] ?? array();
 	if ( ! $rows ) { echo '<div class="mds-card"><div class="mds-empty">진료비 표를 불러오지 못했습니다. 경영지원실에 알려 주세요.</div></div>'; return; }
 	$head = array_shift( $rows );
@@ -174,6 +232,26 @@ function md_fees_render() {
 			<div class="mdeq__actions">
 				<a class="mds-btn mds-btn--fill" href="<?php echo esc_url( md_fees_url( 'open' ) ); ?>" target="_blank" rel="noopener">새 창에서 열기 · 수정</a>
 			</div>
+		</div>
+		<?php /* v9.64 · 직원 화면 탭 — 웹에 게시 주소 (원장 지시) */
+		$pub  = md_fees_pub_base();
+		$tabs = '' !== $pub ? md_fees_tabs( true ) : array();
+		if ( '' !== $pub ) { foreach ( $tabs as $tb ) { delete_transient( 'md_fees_rows_' . md5( md_fees_tab_csv_url( $tb['gid'] ) ) ); } } ?>
+		<?php $ok = '' !== $pub && $tabs; ?>
+		<div class="mds-card">
+			<?php if ( isset( $_GET['fr'] ) ) : ?><div class="mds-notice mds-notice--ok">저장하고 다시 읽었습니다.</div><?php endif; ?>
+			<details<?php echo $ok ? '' : ' open'; ?>>
+				<summary class="mds-hint" style="cursor:pointer">
+					<?php if ( $ok ) : ?>직원 화면 탭 <?php echo count( $tabs ); ?>개: <?php echo esc_html( implode( ' · ', wp_list_pluck( $tabs, 'name' ) ) ); ?> <small>(주소 바꾸기)</small>
+					<?php elseif ( '' === $pub ) : ?>직원 화면에는 지금 첫 탭만 보입니다 — 시트 › 파일 › 공유 › <b>웹에 게시</b> › 「문서 전체」 · 「웹페이지」로 게시한 주소를 넣으면 탭이 모두 보입니다.
+					<?php else : ?><b>탭 목록을 읽지 못했습니다</b> — 「문서 전체」로 게시했는지 확인해 주세요. 지금은 게시된 첫 탭만 보입니다.<?php endif; ?>
+				</summary>
+				<form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
+					<?php wp_nonce_field( 'md_fees', 'md_fees_nonce' ); ?><input type="hidden" name="md_fees_act" value="csv">
+					<input type="url" name="csv_url" aria-label="웹에 게시 주소" value="<?php echo esc_attr( (string) get_option( 'md_fees_csv_url', '' ) ); ?>" placeholder="https://docs.google.com/spreadsheets/d/e/2PACX-…/pubhtml" style="flex:1 1 320px;min-height:38px;padding:6px 10px;font-size:16px">
+					<button type="submit" class="mds-btn mds-btn--fill">저장 · 다시 읽기</button>
+				</form>
+			</details>
 		</div>
 		<div class="mds-card mdeq__frame">
 			<iframe
