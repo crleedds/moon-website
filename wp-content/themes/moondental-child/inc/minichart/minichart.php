@@ -1945,7 +1945,7 @@ function md_mc_render_edit( $id, $kind ) {
 			<?php
 			md_mc_field( 'chart_no', $f['chart_no'][0], $v( 'chart_no' ), array( 'req' => true, 'input' => true, 'attrs' => 'required inputmode="numeric" maxlength="60" autocomplete="off"' . ( $r ? '' : ' autofocus' ) ) );
 			md_mc_field( 'pname', $f['pname'][0], $v( 'pname' ), array( 'req' => true, 'input' => true, 'attrs' => 'required maxlength="250" autocomplete="off"' ) );
-			md_mc_field( 'salute', $f['salute'][0], $v( 'salute' ), array( 'input' => true, 'hint' => '부를 때 쓰는 말 (예: 선교사님 · 외국인 호명)', 'attrs' => 'maxlength="120" autocomplete="off" placeholder="예: 선교사님"' ) ); /* v9.24 */
+			md_mc_field( 'salute', $f['salute'][0], $v( 'salute' ), array( 'input' => true, 'attrs' => 'maxlength="120" autocomplete="off" placeholder="예: 선교사님 · 외국인 호명"' ) ); /* v9.24 · v9.62.1 안내 문구 없이 빈 칸에 예시 (원장 지시) */
 			if ( ! $r ) { echo '<div class="mc-dw-prev" hidden aria-live="polite"></div>'; } /* v8.1 · 새 환자 — 덴트웹에서 가져온 것 미리 보기 */
 			foreach ( array( 'addr', 'mhx', 'referral' ) as $k ) {
 				$na = ! empty( $vals['na'][ $k ] ) || ( '' !== $v( $k ) && md_mc_is_na( $v( $k ) ) );
