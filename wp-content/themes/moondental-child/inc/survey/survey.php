@@ -1117,8 +1117,11 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 			array( '담당직원', '' !== trim( (string) $staff ) ? md_survey_staff_title( $staff ) : '', '' !== trim( (string) $staff ) ? md_survey_person_photo( $staff, 'staff' ) : '' ),
 			array( '데스크 직원', '' !== trim( (string) $desk ) ? md_survey_staff_title( $desk ) : '', '' !== trim( (string) $desk ) ? md_survey_person_photo( $desk, 'staff' ) : '' ), /* v4.23 · 접수 · 수납 (덴트웹 체어 칸) */
 		);
+		/* v4.26 · 덴트웹 가상 의사 「예방과」 — 의사가 아니라 이순민 이사가 진료. 담당의사 카드 · 「원장」 말을 빼고 1번은 「예방과 진료」로 (원장 지시 2026-10-10) */
+		$prev = $docs && '예방과' === md_survey_name_key( $docs[0] );
+		if ( $prev ) { array_shift( $people ); }
 		?>
-		<div class="sv-people">
+		<div class="sv-people"<?php echo $prev ? ' style="grid-template-columns:1fr 1fr"' : ''; ?>>
 			<?php foreach ( $people as $p ) : ?>
 				<figure class="sv-person">
 					<span class="sv-person__ph<?php echo $p[2] ? '' : ' is-noimg'; ?>"><?php if ( $p[2] ) : ?><img src="<?php echo esc_url( $p[2] ); ?>" alt="" loading="lazy"><?php endif; ?><em><?php echo esc_html( '' !== $p[1] ? mb_substr( $p[1], 0, 1 ) : '?' ); ?></em></span>
@@ -1129,8 +1132,13 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 
 		<?php $qn++; /* v4.21.18 · 담당의사가 엑셀에 없어도 문항은 항상 */ ?>
 		<div class="sv-q">
+			<?php if ( $prev ) : ?>
+			<h2><?php echo $qn; ?>. 오늘 예방과 진료받으시는 동안 마음이 편안하셨나요? <small class="sv-opt">선택</small></h2>
+			<?php $scale( 'q_doctor', '예방과', '조금 불편했어요', '아주 편안했어요', false, true ); ?>
+			<?php else : ?>
 			<h2><?php echo $qn; ?>. 오늘 <?php echo ( $doc_titles && false !== strpos( $doc_titles[0], '병원장님' ) ) ? '병원장님' : '원장님'; ?>께 진료받으시는 동안 마음이 편안하셨나요? <small class="sv-opt">선택</small></h2>
 			<?php $scale( 'q_doctor', '담당의사', '조금 불편했어요', '아주 편안했어요', false, true ); ?>
+			<?php endif; ?>
 		</div>
 
 		<?php $qn++; /* v4.21.18 · 담당직원이 엑셀에 없어도 문항은 항상 (원장 지시) */ ?>
