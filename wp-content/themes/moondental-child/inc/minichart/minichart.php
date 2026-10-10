@@ -717,9 +717,11 @@ function md_mc_import( $path, $mode = 'replace' ) {
 	$rows = null;
 	foreach ( $book as $sheet ) {
 		$head = isset( $sheet[0] ) ? array_map( 'trim', $sheet[0] ) : array();
-		if ( in_array( 'chart', $head, true ) && in_array( 'name', $head, true ) ) { $rows = md_inv_sheet_assoc( $sheet ); break; }
+		if ( in_array( 'chart', $head, true ) && in_array( 'name', $head, true ) ) { $rows = md_inv_sheet_assoc( $sheet ); break; } /* 예전 AppSheet 시트 파일 */
+		$cols = array_map( 'md_mc_xl_col', $head );
+		if ( in_array( 'chart', $cols, true ) ) { return md_mc_import_excel( md_inv_sheet_assoc( $sheet ), $mode ); } /* v9.59 · Export 로 받은 엑셀 그대로 */
 	}
-	if ( null === $rows ) { return new WP_Error( 'mc', '「chart · name」 열이 있는 시트를 찾지 못했습니다. 미니차트 시트를 엑셀로 받은 파일인지 확인해 주세요.' ); }
+	if ( null === $rows ) { return new WP_Error( 'mc', '「차트번호」 열이 있는 시트를 찾지 못했습니다. 미니차트 「Export」로 받은 엑셀인지, 첫 줄 열 이름을 바꾸지 않았는지 확인해 주세요.' ); }
 
 	$t   = md_mc_t();
 	$now = current_time( 'mysql' );
@@ -798,27 +800,109 @@ function md_mc_import( $path, $mode = 'replace' ) {
 	return $res;
 }
 
+/** v9.59 · 엑셀 열 이름 → 칸 (띄어쓰기 · 「·」 · 괄호 무시, 예전 이름도 읽음). 모르는 열은 '' */
+function md_mc_xl_col( $h ) {
+	$n = preg_replace( '/[\s·\/\(\)\.]+/u', '', mb_strtolower( (string) $h ) );
+	$map = array(
+		'구분' => 'kind', '차트번호노트제목' => 'chart', '차트번호' => 'chart', '성명' => 'pname', '이름' => 'pname', '호칭호명' => 'salute', '호칭' => 'salute',
+		'지역' => 'addr', '병력상세' => 'mhx', '병력' => 'mhx', '내원경로가족협력기관' => 'referral', '내원경로' => 'referral', '담당의사' => 'dr', '담당의' => 'dr',
+		'치료계획' => 'tx_plan', '주요치과치료이력' => 'tx_hist', '진료기록' => 'tx_hist', '참고사항' => 'memo', '노트본문' => 'body', '상단고정' => 'pin',
+	);
+	return $map[ $n ] ?? '';
+}
+
+/**
+ * v9.59 · Export 로 받은 엑셀(고친 것)을 다시 올리기 (원장 지시 — AppSheet · 구글 시트 없이 엑셀만)
+ *   환자는 차트번호(앞 0 무시), 노트는 제목으로 맞춘다. 파일에 있는 열만 바꾸고, 덴트웹 숨김 · 열람 기록 등은 그대로.
+ *   merge   = 같은 차트는 파일 내용으로 고치고, 없는 것은 새로 만든다. 파일에 없는 차트는 그대로.
+ *   replace = 위와 같고, 파일에 없는 차트 · 노트는 휴지통으로 (되살릴 수 있음).
+ */
+function md_mc_import_excel( $rows, $mode ) {
+	global $wpdb;
+	$t   = md_mc_t();
+	$now = current_time( 'mysql' );
+	$me  = md_mc_me();
+	$res = array( 'patient' => 0, 'note' => 0, 'updated' => 0, 'same' => 0, 'trashed' => 0, 'skipped' => 0 );
+	$all = $wpdb->get_results( "SELECT * FROM $t WHERE deleted_at IS NULL ORDER BY id ASC" );
+	$wpdb->insert( md_mc_t( 'log' ), array( 'rec_id' => 0, 'act' => 'backup', 'who' => $me, 'at' => $now, 'snap' => wp_json_encode( $all, JSON_UNESCAPED_UNICODE ) ) );
+	$kp = function ( $c ) { $c = preg_replace( '/\s+/', '', (string) $c ); $k = ltrim( $c, '0' ); return '' === $k ? $c : $k; };
+	$byChart = array(); $byTitle = array();
+	foreach ( $all as $r ) {
+		if ( 'patient' === $r->kind ) { $byChart[ $kp( $r->chart_no ) ][] = $r; } else { $byTitle[ trim( (string) $r->title ) ][] = $r; } /* 같은 차트번호가 두 줄인 환자도 있어 목록으로 — 파일 줄과 순서대로 하나씩 짝짓는다 */
+	}
+	$seen = array();
+	$text = array( 'pname', 'salute', 'addr', 'mhx', 'referral', 'dr', 'tx_plan', 'tx_hist', 'memo', 'body' );
+	foreach ( $rows as $a ) {
+		$v = array();
+		foreach ( $a as $h => $val ) { $c = md_mc_xl_col( $h ); if ( '' !== $c && ! isset( $v[ $c ] ) ) { $v[ $c ] = str_replace( "\r\n", "\n", (string) $val ); } }
+		$chart = preg_replace( '/^(\d+)\.0+$/', '$1', trim( $v['chart'] ?? '' ) ); /* 엑셀이 숫자로 바꾼 차트번호 */
+		if ( '' === $chart ) { $res['skipped']++; continue; }
+		$note = isset( $v['kind'] ) && '' !== trim( $v['kind'] ) ? ( false !== mb_strpos( $v['kind'], '노트' ) ) : ! preg_match( '/^\d+$/', $chart );
+		$row  = array();
+		foreach ( $text as $k ) {
+			if ( ! array_key_exists( $k, $v ) ) { continue; }
+			if ( $note ? 'body' !== $k : 'body' === $k ) { continue; }
+			$row[ $k ] = $v[ $k ];
+		}
+		if ( array_key_exists( 'pin', $v ) ) { $p = trim( $v['pin'] ); $row['pin'] = ( ! $note && '' !== $p && ! in_array( strtoupper( $p ), array( 'FALSE', '0', 'N', 'X' ), true ) ) ? 1 : 0; }
+		$ex = null;
+		foreach ( ( $note ? ( $byTitle[ $chart ] ?? array() ) : ( $byChart[ $kp( $chart ) ] ?? array() ) ) as $c ) { if ( ! isset( $seen[ (int) $c->id ] ) ) { $ex = $c; break; } }
+		if ( $ex ) {
+			$seen[ (int) $ex->id ] = 1;
+			$diff = array();
+			foreach ( $row as $k => $val ) { if ( trim( str_replace( "\r\n", "\n", (string) $ex->$k ) ) !== trim( (string) $val ) ) { $diff[ $k ] = $val; } } /* 엑셀은 앞뒤 빈칸을 지우므로 그것만 다른 건 같은 것으로 */
+			if ( ! $diff ) { $res['same']++; continue; }
+			if ( isset( $diff['pname'] ) ) { $diff['cho'] = md_mc_cho( $diff['pname'] ); } /* 글이 바뀐 것만 다시 계산 — 덴트웹이 고친 최근 내원일을 덮지 않게 */
+			if ( isset( $diff['tx_hist'] ) ) { $lv = md_mc_last_visit( $diff['tx_hist'] ); if ( $lv && $lv > (string) $ex->last_visit ) { $diff['last_visit'] = $lv; } }
+			$diff['rev'] = (int) $ex->rev + 1; $diff['updated_at'] = $now; $diff['updated_by'] = $me;
+			$wpdb->update( $t, $diff, array( 'id' => (int) $ex->id ) );
+			md_mc_log( $ex->id, 'import', $ex );
+			$res['updated']++;
+		} else {
+			if ( ! $note && '' === trim( $row['pname'] ?? '' ) ) { $res['skipped']++; continue; }
+			$base = array( 'kind' => $note ? 'note' : 'patient', 'chart_no' => $note ? '' : $chart, 'title' => $note ? mb_substr( $chart, 0, 250 ) : '', 'pname' => '', 'salute' => '', 'addr' => '', 'mhx' => '', 'referral' => '', 'dr' => '', 'tx_plan' => '', 'tx_hist' => '', 'memo' => '', 'body' => '', 'pin' => 0, 'uid' => '' );
+			$ins  = array_merge( $base, $row, array( 'created_at' => $now, 'updated_at' => $now, 'updated_by' => $me, 'rev' => 1, 'deleted_at' => null ) );
+			$ins['cho'] = md_mc_cho( $note ? $ins['title'] : $ins['pname'] );
+			if ( ! $note ) { $ins['last_visit'] = md_mc_last_visit( $ins['tx_hist'] ); }
+			$wpdb->insert( $t, $ins );
+			$id = (int) $wpdb->insert_id;
+			$seen[ $id ] = 1;
+			$res[ $note ? 'note' : 'patient' ]++;
+		}
+	}
+	if ( 'replace' === $mode ) {
+		foreach ( $all as $r ) {
+			if ( isset( $seen[ (int) $r->id ] ) ) { continue; }
+			$wpdb->update( $t, array( 'deleted_at' => $now, 'updated_by' => $me ), array( 'id' => (int) $r->id ) );
+			md_mc_log( $r->id, 'delete', $r );
+			$res['trashed']++;
+		}
+	}
+	update_option( 'md_mc_imported', array( 'at' => $now, 'who' => $me, 'mode' => $mode, 'res' => $res ), false );
+	return $res;
+}
+
 function md_mc_export_xlsx() {
 	global $wpdb;
 	$rows = $wpdb->get_results( 'SELECT * FROM ' . md_mc_t() . " WHERE deleted_at IS NULL ORDER BY kind DESC, pin DESC, updated_at DESC, id ASC" );
 	$f    = md_mc_fields();
 	$head = array( '구분', '차트번호 · 노트 제목', '성명', '호칭 · 호명' );
 	foreach ( array( 'addr', 'mhx', 'referral', 'dr', 'tx_plan', 'tx_hist', 'memo' ) as $k ) { $head[] = $f[ $k ][0]; }
-	array_push( $head, '노트 본문', '상단고정', '마지막 수정', '수정한 사람', 'AppSheet id' );
+	array_push( $head, '노트 본문', '상단고정', '마지막 수정', '수정한 사람' ); /* v9.59 · 다시 올릴 때 「구분 ~ 상단고정」 열을 읽는다 (마지막 수정 · 수정한 사람은 참고용) */
 	$data = array();
 	foreach ( $rows as $r ) {
 		$note   = 'note' === $r->kind;
 		$data[] = array(
 			$note ? '노트' : '환자', $note ? $r->title : $r->chart_no, $r->pname, (string) $r->salute,
 			(string) $r->addr, (string) $r->mhx, (string) $r->referral, (string) $r->dr, (string) $r->tx_plan, (string) $r->tx_hist, (string) $r->memo,
-			(string) $r->body, $r->pin ? '📌' : '', (string) $r->updated_at, (string) $r->updated_by, (string) $r->uid,
+			(string) $r->body, $r->pin ? '📌' : '', (string) $r->updated_at, (string) $r->updated_by,
 		);
 	}
 	return md_inv_xlsx( array( array(
 		'title' => '미니차트',
 		'head'  => $head,
 		'rows'  => $data,
-		'width' => array( 6, 14, 12, 14, 20, 30, 24, 18, 30, 50, 50, 50, 6, 18, 12, 10 ),
+		'width' => array( 6, 14, 12, 14, 20, 30, 24, 18, 30, 50, 50, 50, 6, 18, 12 ),
 	) ) );
 }
 
@@ -1430,7 +1514,7 @@ function md_mc_render_list() {
 	}
 	if ( ! $c['patient'] && ! $c['note'] ) {
 		echo '<div class="mds-card mc-empty-start"><p>아직 미니차트 자료가 없습니다.</p>'
-			. ( md_mc_is_owner() ? '<p><a class="mds-btn mds-btn--fill" href="' . esc_url( md_mc_url( array( 'mv' => 'admin' ) ) ) . '">Import (AppSheet 자료 가져오기)</a></p>' : '<p>원장 계정으로 AppSheet 자료를 가져오면 여기에 보입니다.</p>' )
+			. ( md_mc_is_owner() ? '<p><a class="mds-btn mds-btn--fill" href="' . esc_url( md_mc_url( array( 'mv' => 'admin' ) ) ) . '">Import (엑셀 올리기)</a></p>' : '<p>원장 계정으로 엑셀을 올리면 여기에 보입니다.</p>' )
 			. '</div>';
 	}
 	?>
@@ -1618,7 +1702,7 @@ function md_mc_render_patient( $id ) {
 			<?php /* v9.53 · 「최근 내원」 · 고친 사람 · 「변경 기록」 없앰, 첫 등록 대신 첫 내원일 (원장 지시) */
 			$fv = $d ? (string) ( $d['first_visit'] ?? '' ) : '';
 			if ( '' === $fv && $d && ! empty( $d['visits'] ) ) { foreach ( $d['visits'] as $vv ) { if ( '' === $fv || $vv['d'] < $fv ) { $fv = $vv['d']; } } } ?>
-			<p class="mc-chart__meta"><?php if ( '' !== $fv ) : ?>첫 내원 <?php echo esc_html( md_mc_short_date( $fv ) ); ?> · <?php endif; ?>마지막 수정 <?php echo esc_html( $r->updated_at ? md_mc_short_date( $r->updated_at ) . ' ' . date( 'H:i', strtotime( $r->updated_at ) ) : '—' ); ?></p>
+			<?php if ( '' !== $fv ) : /* v9.59 · 「첫 내원일」만 — 마지막 수정은 없앰 (원장 지시) */ ?><p class="mc-chart__meta">첫 내원일 <?php echo esc_html( md_mc_short_date( $fv ) ); ?></p><?php endif; ?>
 			<?php if ( $d && '' !== $nm && false === mb_strpos( preg_replace( '/\s+/u', '', (string) $r->pname ), $nm ) ) : ?>
 				<p class="mds-notice mds-notice--warn">덴트웹 이름은 「<?php echo esc_html( $d['name'] ); ?>」입니다 — 차트번호를 확인해 주세요.</p>
 			<?php elseif ( ! $d && get_option( 'md_mc_dw_last' ) ) : ?>
@@ -1992,22 +2076,22 @@ function md_mc_render_admin() {
 	$c    = md_mc_counts();
 	if ( isset( $_GET['imported'] ) && is_array( $last ) ) {
 		$r = $last['res'];
-		echo '<div class="mds-notice mds-notice--ok">가져왔습니다 — 환자 ' . (int) $r['patient'] . '명 · 노트 ' . (int) $r['note'] . '장' . ( $r['updated'] ? ' · 덮어씀 ' . (int) $r['updated'] . '건' : '' ) . ( $r['skipped'] ? ' · 빈 줄 ' . (int) $r['skipped'] : '' ) . '</div>';
+		echo '<div class="mds-notice mds-notice--ok">올렸습니다 — 새 환자 ' . (int) $r['patient'] . '명 · 새 노트 ' . (int) $r['note'] . '장' . ( $r['updated'] ? ' · 고침 ' . (int) $r['updated'] . '건' : '' ) . ( ! empty( $r['same'] ) ? ' · 그대로 ' . (int) $r['same'] . '건' : '' ) . ( ! empty( $r['trashed'] ) ? ' · 휴지통으로 ' . (int) $r['trashed'] . '건' : '' ) . ( $r['skipped'] ? ' · 건너뜀(차트번호 · 성명 없음) ' . (int) $r['skipped'] : '' ) . '</div>';
 	}
 	?>
 	<section class="mds-card mc-admin">
-		<h2 class="mc-form__h">Import <small>AppSheet 구글 시트에서 가져오기</small></h2>
+		<h2 class="mc-form__h">Import <small>엑셀 올리기</small></h2>
 		<ol class="mc-steps">
-			<li>구글 시트 「Mini Chart」를 엽니다 (moondentaldigital 계정).</li>
-			<li>파일 › 다운로드 › <b>Microsoft Excel (.xlsx)</b></li>
-			<li>받은 파일을 아래에서 고르고 「Import」</li>
+			<li>아래 「Export」로 엑셀을 받아 고칩니다 — 첫 줄 열 이름은 그대로 두세요.</li>
+			<li>고친 파일을 고르고 「Import」</li>
 		</ol>
-		<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( md_mc_url() ); ?>" onsubmit="return this.mode.value!=='replace' || confirm('지금 있는 미니차트 <?php echo (int) ( $c['patient'] + $c['note'] ); ?>건을 지우고 파일 내용으로 바꿀까요? (지운 내용은 백업으로 남습니다)');">
+		<p class="mds-hint">환자는 차트번호, 노트는 제목으로 맞춥니다. 파일에 있는 열만 바뀌고, 올리기 전 내용은 백업으로 남습니다.</p>
+		<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( md_mc_url() ); ?>" onsubmit="return this.mode.value!=='replace' || confirm('파일에 없는 차트 · 노트는 휴지통으로 옮깁니다. 계속할까요? (휴지통에서 되살릴 수 있습니다)');">
 			<?php md_mc_nonce_fields( 'import' ); ?>
 			<input type="file" name="file" accept=".xlsx" required class="mc-file">
 			<fieldset class="mc-modes">
-				<label><input type="radio" name="mode" value="replace" checked> <span><b>전부 바꾸기</b> — 라운지 내용을 지우고 파일대로</span></label>
-				<label><input type="radio" name="mode" value="merge"> <span><b>합치기</b> — 같은 AppSheet id 는 파일 내용으로 덮어쓰고, 없는 것은 추가</span></label>
+				<label><input type="radio" name="mode" value="merge" checked> <span><b>합치기</b> — 같은 차트는 파일 내용으로 고치고, 없는 차트는 새로 추가 (파일에 없는 차트는 그대로)</span></label>
+				<label><input type="radio" name="mode" value="replace"> <span><b>전부 바꾸기</b> — 합치기 + 파일에 없는 차트 · 노트는 휴지통으로</span></label>
 			</fieldset>
 			<button type="submit" class="mds-btn mds-btn--fill">Import</button>
 		</form>
