@@ -307,19 +307,17 @@ function md_acc_login_links( $html ) {
  * v9.46 · 비밀유지 서약 (회원가입 필수 동의, 원장 지시)
  *  문구를 고치면 MD_ACC_SECRET_VER 를 올린다 — 누가 어느 판에 동의했는지 md_acc_secret 사용자 메타에 남는다
  * ============================================================ */
-define( 'MD_ACC_SECRET_VER', '2026-10-10' );
+define( 'MD_ACC_SECRET_VER', '2026-10-10b' ); /* v9.46.2 · 문구 고침 */
 function md_acc_secret_text() {
+	/* v9.46.2 · 원장이 고친 문구 그대로 */
 	return '<div class="mda-secret__body">'
-		. '<p>저는 문치과병원 직원 라운지를 쓰면서 아래 내용을 지키겠습니다.</p>'
+		. '<p>직원 라운지에는 환자분들의 개인정보와 병원 내부 자료가 함께 담겨 있어 법적 책임이 수반됩니다.<br>아래 내용을 함께 지켜 주세요.</p>'
 		. '<ol>'
-		. '<li><b>환자 정보</b> — 업무를 하며 알게 된 환자의 이름 · 연락처 · 진료 내용 · 사진 등 모든 정보를 업무 밖에서 쓰거나 다른 사람에게 알리지 않습니다.<br><small>의료법 제19조(정보 누설 금지): 의료기관 종사자는 업무를 하면서 알게 된 다른 사람의 정보를 누설하거나 발표하지 못합니다. 어기면 같은 법 제88조에 따라 처벌받을 수 있습니다.</small></li>'
-		. '<li><b>개인정보</b> — 업무상 알게 된 개인정보를 누설하거나, 권한 없이 다른 사람이 이용하게 하지 않습니다.<br><small>개인정보 보호법 제59조(금지행위) — 어기면 같은 법 제71조에 따라 처벌받을 수 있습니다.</small></li>'
-		. '<li><b>병원 내부 자료</b> — 경영 · 매출 · 재고 · 진료비 · 양식 · 임상 자료 등 라운지의 내용은 병원의 영업비밀입니다. 외부에 알리거나 사용하지 않습니다.<br><small>부정경쟁방지 및 영업비밀보호에 관한 법률 — 영업비밀을 누설하면 형사처벌 및 손해배상 책임을 질 수 있습니다.</small></li>'
-		. '<li><b>반출 금지</b> — 화면 캡처 · 사진 촬영 · 파일 내려받기 · 인쇄물 · 메신저 · SNS 등 어떤 방법으로도 업무 목적 밖으로 옮기거나 공유하지 않습니다.</li>'
-		. '<li><b>계정 관리</b> — 내 계정과 비밀번호를 다른 사람과 나눠 쓰지 않고, 공용 기기에서는 쓰고 나면 로그아웃합니다.</li>'
-		. '<li><b>퇴사 후에도</b> — 이 약속은 퇴사한 뒤에도 지키며, 가지고 있던 병원 자료는 돌려주거나 지웁니다.</li>'
+		. '<li>업무 중 알게 된 환자분의 정보는 업무에만 사용하고, 다른 사람에게 이야기하지 않습니다.</li>'
+		. '<li>라운지의 자료는 병원 밖으로 공유하지 않습니다.</li>'
+		. '<li>캡처, 사진, 파일, 메신저, SNS 등으로 외부에 옮기지 않습니다.</li>'
+		. '<li>내 계정은 나만 사용하고 병원 외부에 공유하지 않습니다.</li>'
 		. '</ol>'
-		. '<p>이를 어겨 병원이나 환자에게 손해가 생기면 관련 법에 따른 민 · 형사상 책임을 질 수 있음을 알고 있습니다.</p>'
 		. '</div>';
 }
 add_filter( 'login_form_bottom', 'md_acc_login_links', 20 );
@@ -451,8 +449,8 @@ function md_acc_render_join() {
 			<label class="mda-agree mds-check"><input type="checkbox" name="agree" value="1" required <?php checked( ! empty( $_POST['agree'] ) ); ?>> 개인정보 수집 · 이용에 동의합니다 <b>*</b></label><?php echo $er( 'agree' ); // phpcs:ignore ?>
 
 			<?php /* v9.46 · 비밀유지 서약 (원장 지시) */ ?>
-			<details class="mda-privacy mda-secret"><summary>비밀유지 서약 (꼭 읽어 주세요)</summary><?php echo md_acc_secret_text(); // phpcs:ignore -- 고정 문구 ?></details>
-			<label class="mda-agree mds-check"><input type="checkbox" name="secret" value="1" required <?php checked( ! empty( $_POST['secret'] ) ); ?>> 위 비밀유지 서약을 읽었고, 재직 중은 물론 퇴사 후에도 지키겠습니다 <b>*</b></label><?php echo $er( 'secret' ); // phpcs:ignore ?>
+			<details class="mda-privacy mda-secret" open><summary>비밀유지 서약</summary><?php echo md_acc_secret_text(); // phpcs:ignore -- 고정 문구 ?></details>
+			<label class="mda-agree mds-check"><input type="checkbox" name="secret" value="1" required <?php checked( ! empty( $_POST['secret'] ) ); ?>> 위 비밀유지 서약을 읽었고, 지키겠습니다 <b>*</b></label><?php echo $er( 'secret' ); // phpcs:ignore ?>
 
 			<button type="submit" class="mds-btn mds-btn--fill mda-wide">신청하기</button>
 			<a class="mda-back" href="<?php echo esc_url( md_acc_lounge_url() ); ?>">← 로그인 화면으로</a>
