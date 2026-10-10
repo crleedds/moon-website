@@ -426,11 +426,10 @@ function md_mc_labs_html( $labs ) {
 /** 입력 칸 — 수정 화면 · 병력 바로 고치기 */
 function md_mc_labs_fields( $labs ) {
 	/* v9.69 · 숫자 키패드(inputmode) · 단위 고정 · 혈압은 [수축기] / [이완기] */
-	echo '<div class="mc-labs-in"><span class="mc-field__l">최근 검사 수치 <small>숫자만 · 날짜를 비우면 오늘</small></span><div class="mc-labs-in__grid">';
+	echo '<div class="mc-labs-in"><span class="mc-field__l">최근 검사 수치 <small>숫자만 · 날짜 비우면 오늘</small></span><div class="mc-labs-in__grid">';
 	foreach ( md_mc_labs_keys() as $k => $x ) {
 		$v = (string) ( $labs[ $k ]['v'] ?? '' ); $d = $labs[ $k ]['d'] ?? '';
-		$unit = '' !== $x[1] ? '<i class="mc-labs-in__u">' . esc_html( $x[1] ) . '</i>' : '';
-		echo '<div class="mc-labs-in__row"><span>' . esc_html( $x[0] ) . '</span><span class="mc-labs-in__val' . ( 'bp' === $k ? ' mc-labs-in__val--bp' : '' ) . '">';
+		echo '<div class="mc-labs-in__row"><span class="mc-labs-in__name"><b>' . esc_html( $x[0] ) . '</b>' . ( '' !== $x[1] ? '<small>' . esc_html( $x[1] ) . '</small>' : '' ) . '</span><span class="mc-labs-in__val' . ( 'bp' === $k ? ' mc-labs-in__val--bp' : '' ) . '">'; /* v9.70 · 단위는 이름 아래 */
 		if ( 'bp' === $k ) {
 			$p = preg_match( '/(\d+)\D+(\d+)/', $v, $m ) ? array( $m[1], $m[2] ) : array( md_mc_lab_num( $v, false ), '' );
 			echo '<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" name="lab[bp][s]" value="' . esc_attr( $p[0] ) . '" placeholder="130" aria-label="수축기 혈압" autocomplete="off" data-mc-num>'
@@ -439,7 +438,7 @@ function md_mc_labs_fields( $labs ) {
 		} else {
 			echo '<input type="text" inputmode="' . ( $x[2] ? 'decimal' : 'numeric' ) . '" maxlength="6" name="lab[' . esc_attr( $k ) . '][v]" value="' . esc_attr( md_mc_lab_num( $v, $x[2] ) ) . '" placeholder="' . esc_attr( array( 'glu' => '110', 'a1c' => '6.5', 'inr' => '2.3' )[ $k ] ?? '' ) . '" aria-label="' . esc_attr( $x[0] ) . '" autocomplete="off" data-mc-num="' . ( $x[2] ? 'dec' : '' ) . '">';
 		}
-		echo $unit . '</span><input type="date" name="lab[' . esc_attr( $k ) . '][d]" value="' . esc_attr( $d ) . '" aria-label="' . esc_attr( $x[0] . ' 검사 날짜' ) . '"></div>'; // phpcs:ignore
+		echo '</span><input type="date" name="lab[' . esc_attr( $k ) . '][d]" value="' . esc_attr( $d ) . '" aria-label="' . esc_attr( $x[0] . ' 검사 날짜' ) . '"></div>'; // phpcs:ignore
 	}
 	echo '</div></div>';
 }

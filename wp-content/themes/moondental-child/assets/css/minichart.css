@@ -661,40 +661,45 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 .mc-lab { display: inline-flex; align-items: baseline; gap: 4px; padding: 3px 10px; border: 1px solid var(--mc-line); border-radius: 999px; background: #fff; font-size: .86rem; line-height: 1.5; }
 .mc-lab small { color: var(--mc-sub); font-weight: 700; font-size: .76rem; }
 .mc-lab time { color: var(--mc-mute); font-size: .76rem; }
-/* v9.68 · 검사 수치 입력 — 칸 너비(컨테이너)에 맞춰: 좁으면 세로, 보통이면 한 줄, 넓으면 두 수치씩 (원장 지시) */
-.mc-labs-in { container-type: inline-size; margin: 12px 0 14px; padding: 10px 12px 12px; border: 1px solid var(--mc-line); border-radius: 12px; background: rgba(255,255,255,.7); }
-.mc-labs-in > .mc-field__l { display: block; margin: 0 0 8px; }
-.mc-labs-in .mc-field__l small { display: block; margin: 2px 0 0; font-weight: 500; color: var(--mc-mute); }
-.mc-labs-in__grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
-/* 좁은 칸(기본): 이름 위 · 값 · 날짜 아래로 */
-.mc-labs-in__row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 0 0 8px; border-bottom: 1px dashed var(--mc-line); }
-.mc-labs-in__row:last-child { padding-bottom: 0; border-bottom: 0; }
-.mc-labs-in__row span { font-size: .8rem; font-weight: 800; color: var(--mc-sub); }
-.mc-labs-in__row input { box-sizing: border-box; width: 100%; min-width: 0; min-height: 36px; padding: 5px 8px; border: 1px solid var(--mc-line); border-radius: 8px; font: inherit; font-size: 15px; background: #fff; }
-.mc-labs-in__row input[type=date] { color: var(--mc-sub); }
-/* 보통 칸: 한 줄에 이름 · 값 · 날짜 */
-@container (min-width: 290px) {
-  .mc-labs-in__row { grid-template-columns: 3.9em minmax(0, 1fr) 8.6em; align-items: center; gap: 8px; }
-}
-/* 넓은 칸: 두 수치씩 */
-@container (min-width: 660px) {
-  .mc-labs-in__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; }
-  .mc-labs-in__row:nth-last-child(2) { padding-bottom: 0; border-bottom: 0; }
-}
 .mc-note-row .mc-note-pin { margin-right: 4px; }
 .mc-note__head .mc-pinbtn { margin-left: auto; }
 
 /* v9.69 · 검사 수치 — 단위 고정 · 혈압 [ ] / [ ] · 「직접」 꼬리표 */
-.mc-labs-in__val { display: flex; align-items: center; gap: 4px; min-width: 0; }
-.mc-labs-in__val input { flex: 1 1 0; min-width: 0; text-align: right; font-variant-numeric: tabular-nums; }
-.mc-labs-in__val--bp input { max-width: 4.2em; }
-.mc-labs-in__slash { flex: none; color: var(--mc-sub); font-weight: 800; }
-.mc-labs-in__u { flex: none; font-style: normal; font-size: .78rem; color: var(--mc-mute); white-space: nowrap; }
-.mc-labs-in__row > span:first-child { white-space: nowrap; }
 .mc-lab__u { color: var(--mc-mute); font-size: .74rem; margin-left: 1px; }
-@container (min-width: 290px) and (max-width: 420px) {
-  .mc-labs-in__row { grid-template-columns: 3.6em minmax(0, 1fr); gap: 5px 8px; }
-  .mc-labs-in__row input[type=date] { grid-column: 2; }
-}
-.mc-labs-in__val--bp input { min-width: 2.7em; padding-left: 4px; padding-right: 4px; text-align: center; }
 .mc-tl__tag { display: inline-block; margin-right: 5px; padding: 0 6px; border-radius: 6px; background: rgba(184, 99, 71, .12); color: var(--color-primary-dark, #B86347); font-size: .7rem; font-weight: 800; line-height: 1.6; vertical-align: 1px; }
+
+/* v9.70 · 최근 검사 수치 — 한 줄에 이름(단위) · 같은 폭 값 칸 · 날짜, 연한 테두리 (원장 「좀더 디자인적으로」). 칸 너비(컨테이너) 기준 */
+.mc-labs-in { container-type: inline-size; margin: 12px 0 14px; padding: 10px 14px 8px; border: 1px solid var(--mc-line); border-radius: 12px; background: rgba(255, 255, 255, .78); }
+.mc-labs-in > .mc-field__l { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 4px; }
+.mc-labs-in > .mc-field__l small { margin: 0; font-size: .72rem; font-weight: 500; color: var(--mc-mute); }
+.mc-labs-in__grid { display: grid; grid-template-columns: minmax(0, 1fr); }
+.mc-labs-in__row { display: grid; grid-template-columns: 4.8em 7.6em minmax(0, 1fr); align-items: center; gap: 10px; padding: 7px 0; border-top: 1px solid rgba(61, 47, 38, .07); }
+.mc-labs-in__row:first-child { border-top: 0; }
+.mc-labs-in__name { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+.mc-labs-in__name b { font-size: .86rem; font-weight: 800; color: var(--mc-sub); white-space: nowrap; }
+.mc-labs-in__name small { margin-top: 2px; font-size: .7rem; font-weight: 600; color: var(--mc-mute); white-space: nowrap; }
+.mc-labs-in__val { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.mc-edit__form .mc-labs-in input, .mc-form .mc-labs-in input { box-sizing: border-box; width: 100%; min-width: 0; height: 34px; min-height: 34px; padding: 4px 8px; border: 1px solid var(--mc-line); border-radius: 8px; background: #fff; font: inherit; font-size: 15px; line-height: 1.2; box-shadow: none; }
+.mc-edit__form .mc-labs-in input:focus, .mc-form .mc-labs-in input:focus { outline: none; border-color: var(--color-primary, #D88062); box-shadow: 0 0 0 3px rgba(216, 128, 98, .16); }
+.mc-labs-in .mc-labs-in__val input { text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.mc-labs-in .mc-labs-in__val input::placeholder { font-weight: 500; color: #C9BCB1; }
+.mc-labs-in .mc-labs-in__val--bp input { flex: 1 1 0; padding: 4px 2px; }
+.mc-labs-in__slash { flex: none; color: var(--mc-mute); font-weight: 700; }
+.mc-labs-in input[type=date] { font-size: 13px; color: var(--mc-sub); padding: 4px 6px; }
+/* 아주 좁은 칸: 이름(단위) 한 줄 위, 그 아래 값 · 날짜 */
+@container (max-width: 400px) {
+  .mc-labs-in__row { grid-template-columns: 3.9em 6.2em minmax(0, 1fr); gap: 8px; }
+  .mc-labs-in input[type=date] { font-size: 12.5px; padding: 4px 3px; }
+}
+@container (max-width: 300px) {
+  .mc-labs-in > .mc-field__l { flex-wrap: wrap; }
+  .mc-labs-in__row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .mc-labs-in__name { flex-direction: row; align-items: baseline; gap: 6px; }
+  .mc-labs-in__name small { margin-top: 0; }
+  .mc-labs-in input[type=date] { font-size: 13px; }
+}
+/* 넓은 칸: 두 수치씩 */
+@container (min-width: 720px) {
+  .mc-labs-in__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; }
+  .mc-labs-in__row:nth-child(2) { border-top: 0; }
+}
