@@ -255,11 +255,11 @@ window.mcInits.push(function () {
   }
   /* v9.55 · 「혈압」 「간염」처럼 종류를 고르는 칩 — 누르면 칩 아래에 고르는 칸, 다 고르면 「혈압(고혈압 · 아스피린 복용)」으로 넣는다 */
   function closePick(box) { var pk = box.querySelector('.mc-chips__pick'); if (pk) pk.remove(); }
-  function openPick(box, b, done) {
+  function openPick(box, b, done, fmt, title0) { /* v9.74 · fmt: 고른 값들 → 넣을 글 (없으면 「이름(가 · 나)」), title0: 칸 제목 */
     closePick(box);
     var groups = JSON.parse(b.getAttribute('data-opts') || '[]'), sel = groups.map(function () { return ''; }), fill = groups.map(function () { return null; });
     var pk = document.createElement('div'); pk.className = 'mc-chips__pick';
-    var title = document.createElement('b'); title.textContent = b.getAttribute('data-chip'); pk.appendChild(title);
+    var title = document.createElement('b'); title.textContent = title0 || b.getAttribute('data-chip'); pk.appendChild(title);
     var ok = document.createElement('button'); ok.type = 'button'; ok.className = 'mds-btn mds-btn--fill mds-btn--sm'; ok.textContent = '넣기'; ok.disabled = true;
     groups.forEach(function (g, gi) {
       var row = document.createElement('span'); row.className = 'mc-chips__pickrow';
@@ -288,7 +288,7 @@ window.mcInits.push(function () {
       ev.preventDefault(); ev.stopPropagation();
       if (ok.disabled) return;
       var out = sel.map(function (s0, k) { var t = fill[k] ? fill[k].value.replace(/[,，()]/g, ' ').trim() : ''; return t ? s0 + ': ' + t : s0; });
-      closePick(box); done(b.getAttribute('data-chip') + '(' + out.join(' · ') + ')');
+      closePick(box); done(fmt ? fmt(out) : b.getAttribute('data-chip') + '(' + out.join(' · ') + ')');
     });
     no.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); closePick(box); });
     var bar = document.createElement('span'); bar.className = 'mc-chips__pickbar'; bar.appendChild(ok); bar.appendChild(no); pk.appendChild(bar);
@@ -305,7 +305,13 @@ window.mcInits.push(function () {
     no.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); closePick(box); });
     var bar = document.createElement('span'); bar.className = 'mc-chips__pickbar'; bar.appendChild(no); pk.appendChild(bar);
     var seq = 0, timer = null, label = b.getAttribute('data-chip');
-    function pick(name, chart) { closePick(box); done(label + ' ' + name + (chart ? '(#' + chart + ')' : '')); }
+    function pick(name, chart) {
+      closePick(box);
+      var who = label + ' ' + name + (chart ? '(#' + chart + ')' : '');
+      /* v9.74 · 가족이면 관계도 고르기 → 「가족(본원 환자): 이석구(#091003) · 배우자」 */
+      if (b.hasAttribute('data-opts')) { openPick(box, b, done, function (out) { return who + ' · ' + out.join(' · '); }, name + ' 님과의 관계'); return; }
+      done(who);
+    }
     function find() {
       var v = inp.value.trim(); ul.innerHTML = ''; if (!v) return;
       var my = ++seq, u = new URL(b.getAttribute('data-pick'), location.href);
