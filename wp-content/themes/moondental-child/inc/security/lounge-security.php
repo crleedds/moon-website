@@ -99,7 +99,7 @@ function md_sec_raw_apps() {
 function md_sec_tab_list() {
 	$out = array();
 	foreach ( md_sec_raw_apps() as $k => $a ) {
-		if ( in_array( $k, array( 'me', 'access', 'survey' ), true ) ) { continue; } /* v9.16 · 접수수납목록은 타일을 없앴으니(v7.9) 권한 표에서도 뺌 — 관리자 비상용 주소만 (원장 지적) */
+		if ( in_array( $k, array( 'me', 'access', 'survey', 'calendar' ), true ) ) { continue; } /* v9.49 · 달력은 모든 계정에 늘 열림 — 권한 표에서 뺌 (원장 지시) */ /* v9.16 · 접수수납목록은 타일을 없앴으니(v7.9) 권한 표에서도 뺌 — 관리자 비상용 주소만 (원장 지적) */
 		$out[ $k ] = $a;
 	}
 	return $out;
@@ -125,7 +125,7 @@ function md_sec_user_tabs( $u ) {
 
 function md_sec_can_tab( $k, $u = null ) {
 	$u = $u ? $u : wp_get_current_user();
-	if ( in_array( $k, array( 'me' ), true ) ) { return true; }
+	if ( in_array( $k, array( 'me', 'calendar' ), true ) ) { return true; } /* v9.49 · 달력은 누구나 */
 	$t = md_sec_user_tabs( $u );
 	return null === $t || in_array( $k, $t, true );
 }
