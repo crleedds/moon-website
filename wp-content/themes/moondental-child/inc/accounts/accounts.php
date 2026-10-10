@@ -209,6 +209,20 @@ function md_acc_auto_login() {
 	return $l;
 }
 
+/** v9.47 · 공용 계정 이름(지금 이름 · 공용 줄 이름 · 「직원공용」)인가 — 같은 이름의 개인 계정이 다시 생기지 않게 (원장 지시) */
+function md_acc_is_shared_name( $name ) {
+	$k = md_acc_name_key( $name );
+	if ( '' === $k ) { return false; }
+	if ( defined( 'MD_SUP_STAFF_NAME' ) && $k === md_acc_name_key( MD_SUP_STAFF_NAME ) ) { return true; }
+	if ( defined( 'MD_SUP_STAFF_LOGIN' ) && ( $su = get_user_by( 'login', MD_SUP_STAFF_LOGIN ) ) && $k === md_acc_name_key( $su->display_name ) ) { return true; }
+	if ( function_exists( 'md_staff_shared_sid' ) && md_staff_shared_sid() ) {
+		global $wpdb;
+		$rn = (string) $wpdb->get_var( $wpdb->prepare( 'SELECT name FROM ' . md_staff_table() . ' WHERE id = %d', md_staff_shared_sid() ) );
+		if ( '' !== $rn && $k === md_acc_name_key( $rn ) ) { return true; }
+	}
+	return false;
+}
+
 function md_acc_name_taken_msg( $name ) {
 	return '「' . $name . '」 이름의 계정이 이미 있습니다. 이름으로 로그인하므로 「' . $name . 'B」처럼 구분해 주세요.';
 }
@@ -354,6 +368,7 @@ function md_acc_join_submit() {
 	$name = mb_substr( $f['jname'], 0, 20 );
 	if ( mb_strlen( $name ) < 2 ) { $err['name'] = '이름을 적어 주세요.'; }
 	elseif ( md_acc_users_by_name( $name ) ) { $err['name'] = md_acc_name_taken_msg( $name ); }
+	elseif ( md_acc_is_shared_name( $name ) ) { $err['name'] = '「' . $name . '」은(는) 병원 공용 계정 이름이라 쓸 수 없습니다. 본인 이름으로 신청해 주세요.'; } /* v9.47 */
 	/* 생년월일 · 입사일은 덴트웹 직원정보에서 연동되므로 가입 때 받지 않는다 (inc/staff · md_staff_dw_sync) */
 	$bd = ''; $hired = '';
 	$email = sanitize_email( $f['email'] );
@@ -618,6 +633,7 @@ function md_acc_handle() {
 			$login = md_acc_auto_login(); /* v7.1 · 아이디는 자동, 로그인은 이름으로 */
 			if ( ! $row ) { md_acc_flash( 'err', '직원을 다시 골라 주세요.' ); break; }
 			if ( isset( $map[ $sid ] ) ) { md_acc_flash( 'err', $row->name . ' 님은 이미 계정이 있습니다.' ); break; }
+			if ( ( function_exists( 'md_staff_is_shared' ) && md_staff_is_shared( $row ) ) || md_acc_is_shared_name( $row->name ) ) { md_acc_flash( 'err', '「' . $row->name . '」은(는) 공용 계정 줄이라 개인 계정을 따로 만들 수 없습니다.' ); $back .= '#s' . $sid; break; } /* v9.47 */
 			if ( md_acc_users_by_name( $row->name ) ) { md_acc_flash( 'err', md_acc_name_taken_msg( $row->name ) . ' (직원 정보에서 이름을 고친 뒤 만들어 주세요)' ); $back .= '#s' . $sid; break; }
 			$email = ( $row->email && is_email( $row->email ) && ! email_exists( $row->email ) ) ? $row->email : '';
 			$tp  = md_acc_temp_pass();

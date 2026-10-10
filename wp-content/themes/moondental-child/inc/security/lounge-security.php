@@ -684,6 +684,26 @@ add_action( 'init', function () {
 	update_option( 'md_sec_staffmail_v3', current_time( 'mysql' ) . ' · 전: ' . $u->user_email . ( $other && (int) $other !== (int) $u->ID ? ' · 같은 주소 계정 #' . $other : '' ), false );
 }, 31 );
 
+/* v9.47 · 공용 계정 이름 「문치과병원」으로 잘못 만들어진 개인 계정(운영 #187 staff426650, 2026-10-09) 지우기 — 원장 지시 「공용 계정이 아닌 것은 없애줘」.
+   공용 계정(staffcommon) · 관리자 계정은 건드리지 않고, 공용 이름과 같은 이름의 개인 계정만. 한 번만, 결과는 옵션 md_sec_dupshared_v1 */
+add_action( 'init', function () {
+	if ( get_option( 'md_sec_dupshared_v1' ) || ! defined( 'MD_SUP_STAFF_LOGIN' ) || ! function_exists( 'md_acc_users_by_name' ) || ! function_exists( 'md_acc_is_shared_name' ) ) { return; }
+	$su = get_user_by( 'login', MD_SUP_STAFF_LOGIN );
+	if ( ! $su ) { return; }
+	require_once ABSPATH . 'wp-admin/includes/user.php';
+	$log = array();
+	foreach ( array_unique( array( $su->display_name, '문치과병원' ) ) as $nm ) {
+		if ( ! md_acc_is_shared_name( $nm ) ) { continue; }
+		foreach ( md_acc_users_by_name( $nm, $su->ID ) as $u ) {
+			if ( user_can( $u, 'manage_options' ) || user_can( $u, 'md_supply_manage' ) ) { $log[] = '#' . $u->ID . ' ' . $u->user_login . ' (관리자 등급이라 그대로)'; continue; }
+			$log[] = '#' . $u->ID . ' ' . $u->user_login . ' · ' . $u->user_email . ' · 가입 ' . $u->user_registered;
+			wp_delete_user( $u->ID );
+		}
+	}
+	if ( function_exists( 'md_acc_log' ) && $log ) { md_acc_log( '중복 계정 삭제', implode( ' / ', $log ) ); }
+	update_option( 'md_sec_dupshared_v1', current_time( 'mysql' ) . ' · ' . ( $log ? implode( ' / ', $log ) : '해당 없음' ), false );
+}, 41 );
+
 /* v9.41 · 「문치과병원」 계정(예전 공용 계정 moondentalhospital · 이름이 「문치과병원」인 계정)의 이메일도 moondental1995@naver.com (원장 지시 2026-10-09).
    직원공용과 같은 주소라 워드프레스가 바꾸기를 거절하므로 DB 에 직접 넣는다. 홈페이지 관리자(manage_options) 계정은 건드리지 않는다. 전 주소는 옵션에 남김 */
 add_action( 'init', function () {
