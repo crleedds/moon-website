@@ -160,11 +160,33 @@ function md_mc_dw_clean( $p ) {
 		if ( ! $d ) { continue; }
 		$o['appts'][] = array( 'd' => $d, 't' => strlen( $at ) >= 12 ? substr( $at, 8, 2 ) . ':' . substr( $at, 10, 2 ) : '', 'dr' => md_mc_dw_txt( $a['doctor'] ?? '', 30 ), 'what' => md_mc_dw_txt( $a['what'] ?? '', 200 ), 'memo' => md_mc_dw_txt( $a['memo'] ?? '', 300 ) );
 	}
+	/* v9.59 · 보험 (원장 지시) — 덴트웹 진료비 내역의 가장 최근 「0 이 아닌」 보험구분 + 보훈 · 본인부담 면제 · 지원금. 안 보낸 묶음은 null → 예전 값 유지 */
+	$o['ins'] = null;
+	if ( ! empty( $p['ins'] ) && is_array( $p['ins'] ) && isset( $p['ins']['k'] ) && is_numeric( $p['ins']['k'] ) ) {
+		$o['ins'] = array( 'k' => (int) $p['ins']['k'], 'd' => md_mc_dw_date( $p['ins']['d'] ?? '' ), 'bh' => ! empty( $p['ins']['bh'] ), 'ex' => ! empty( $p['ins']['ex'] ), 'sup' => ! empty( $p['ins']['sup'] ) );
+	}
 	/* 최근 내원 = 덴트웹 최종 내원일과 진료 기록의 가장 늦은 날 중 늦은 것 (오늘 이후는 버림) */
 	$today = current_time( 'Y-m-d' );
 	foreach ( $o['visits'] as $v ) { if ( $v['d'] <= $today && $v['d'] > $o['last'] ) { $o['last'] = $v['d']; } }
 	if ( $o['last'] > $today ) { $o['last'] = ''; }
 	return $o;
+}
+
+/** v9.59 · 덴트웹 보험구분 → 차트 머리 표시 (원장 지시). 건강보험(2)은 대부분이라 표시하지 않고, 눈여겨볼 것만.
+ *  번호 뜻은 2024년 이후 수납 통계(본인부담 비율)로 추정 — 2 건강보험 36% · 3 5.9% · 4 14.8% · 5 0% · 6·7 구분 1(보험사 부담). 다르면 여기만 고치면 된다. */
+function md_mc_dw_ins_labels() {
+	return (array) apply_filters( 'md_mc_dw_ins_labels', array( 1 => '일반(비보험)', 3 => '의료급여 1종', 4 => '의료급여 2종', 5 => '본인부담 면제', 6 => '자보·산재', 7 => '자보·산재' ) );
+}
+/** 표시할 말들 (없으면 빈 배열) */
+function md_mc_dw_ins_tags( $d ) {
+	$i = ( $d && ! empty( $d['ins'] ) && is_array( $d['ins'] ) ) ? $d['ins'] : null;
+	if ( ! $i ) { return array(); }
+	$map = md_mc_dw_ins_labels(); $out = array();
+	if ( isset( $map[ (int) $i['k'] ] ) ) { $out[] = $map[ (int) $i['k'] ]; }
+	if ( ! empty( $i['bh'] ) )  { $out[] = '보훈'; }
+	if ( ! empty( $i['ex'] ) && ! in_array( '본인부담 면제', $out, true ) ) { $out[] = '본인부담 면제'; }
+	if ( ! empty( $i['sup'] ) ) { $out[] = '지원금'; }
+	return $out;
 }
 
 /** v9.50 · 예전에 받아 둔 예약 + 이번에 받은 예약 — appt_from 날부터는 이번 것으로 바꾸고(고침 · 취소 반영), 그 전 것은 그대로 둔다 */
@@ -225,6 +247,7 @@ function md_mc_dw_rest_save( $request ) {
 		else {
 			$old_json = $wpdb->get_var( $wpdb->prepare( "SELECT data FROM $t WHERE chart_key = %s", $key ) );
 			$data['appts'] = md_mc_dw_merge_appts( $old_json, $data ); /* v9.50 */
+			if ( null === $data['ins'] ) { $oj = json_decode( (string) $old_json, true ); $data['ins'] = is_array( $oj ) && ! empty( $oj['ins'] ) ? $oj['ins'] : null; } /* v9.59 · 보험을 안 보낸 묶음은 예전 값 유지 */
 			if ( '' === $data['first_visit'] ) { $oj = json_decode( (string) $old_json, true ); $data['first_visit'] = is_array( $oj ) ? (string) ( $oj['first_visit'] ?? '' ) : ''; } /* v9.53 · 첫 내원일을 안 보낸 묶음(빠른 길 · 예전 스크립트)은 예전 값 유지 */
 		}
 		unset( $data['appt_from'] );

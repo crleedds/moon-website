@@ -1604,6 +1604,7 @@ function md_mc_render_patient( $id ) {
 				<h2 class="mc-chart__name"><?php echo esc_html( $r->pname ); ?></h2>
 				<?php md_mc_inline_block( $r, $d, 'salute', true ); /* v9.24 · 호칭 · 호명 — 눌러서 바로 고치기 */ ?>
 				<?php if ( $sex || '' !== $age ) : ?><span class="mc-tag"><?php echo esc_html( trim( $sex . ( '' !== $age ? ' ' . $age . '세' : '' ) ) ); ?></span><?php endif; ?>
+				<?php if ( function_exists( 'md_mc_dw_ins_tags' ) ) { foreach ( md_mc_dw_ins_tags( $d ) as $it ) { /* v9.59 · 보험 (덴트웹 마지막 보험 진료 기준) */ ?><span class="mc-tag mc-tag--ins" title="<?php echo esc_attr( '덴트웹 보험구분 ' . (int) $d['ins']['k'] . ( $d['ins']['d'] ? ' · ' . $d['ins']['d'] . ' 진료 기준' : '' ) ); ?>"><?php echo esc_html( $it ); ?></span><?php } } ?>
 				<?php if ( $r->pin ) : ?><span class="mc-tag mc-tag--pin">📌 상단고정</span><?php endif; ?>
 			</div>
 			<div class="mc-chart__acts">

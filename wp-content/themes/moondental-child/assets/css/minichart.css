@@ -66,6 +66,7 @@ mark.mc-alert { background: rgba(180,68,46,.16); color: var(--mc-alert); font-we
 .mc-chart__name { margin: 0; font-size: 1.6rem; font-weight: 800; line-height: 1.25; }
 .mc-tag { font-size: .82rem; font-weight: 800; padding: 3px 10px; border-radius: 999px; }
 .mc-tag--pin { background: rgba(216,128,98,.14); color: var(--color-primary-dark, #B86347); }
+.mc-tag--ins { background: rgba(52,120,200,.13); color: #22598f; } /* v9.59 · 보험 */
 .mc-chart__acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .mc-chart__acts .mds-btn { min-height: 44px; padding: 0 16px; }
 .mc-inline { display: inline; margin: 0; }
