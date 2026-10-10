@@ -1683,13 +1683,13 @@ function md_mc_render_patient( $id ) {
 	?>
 	<article class="mc-chart" data-mc-id="<?php echo (int) $r->id; ?>" data-mc-label="<?php echo esc_attr( $r->chart_no . ' ' . $r->pname ); ?>">
 		<header class="mds-card mc-chart__head">
+			<?php /* v9.62 · 머리 배열 (원장 「위치를 이상적으로」) — 첫 줄: 이름 · 호칭 | 고정 단추 / 둘째 줄: 차트번호 · 성별 나이 · 보험 · 첫 내원일 을 같은 모양 작은 칸으로 */ ?>
+			<?php /* v9.53 · 「최근 내원」 · 고친 사람 · 「변경 기록」 없앰, 첫 등록 대신 첫 내원일 (원장 지시) */
+			$fv = $d ? (string) ( $d['first_visit'] ?? '' ) : '';
+			if ( '' === $fv && $d && ! empty( $d['visits'] ) ) { foreach ( $d['visits'] as $vv ) { if ( '' === $fv || $vv['d'] < $fv ) { $fv = $vv['d']; } } } ?>
 			<div class="mc-chart__id">
-				<button type="button" class="mc-copy" data-copy="<?php echo esc_attr( $r->chart_no ); ?>" title="차트번호 복사"><?php echo esc_html( $r->chart_no ); ?></button>
 				<h2 class="mc-chart__name"><?php echo esc_html( $r->pname ); ?></h2>
 				<?php md_mc_inline_block( $r, $d, 'salute', true ); /* v9.24 · 호칭 · 호명 — 눌러서 바로 고치기 */ ?>
-				<?php if ( $sex || '' !== $age ) : ?><span class="mc-tag"><?php echo esc_html( trim( $sex . ( '' !== $age ? ' ' . $age . '세' : '' ) ) ); ?></span><?php endif; ?>
-				<?php if ( function_exists( 'md_mc_dw_ins_tags' ) ) { foreach ( md_mc_dw_ins_tags( $d ) as $it ) { /* v9.59 · 보험 (덴트웹 마지막 보험 진료 기준) */ ?><span class="mc-tag mc-tag--ins" title="<?php echo esc_attr( '덴트웹 보험구분 ' . (int) $d['ins']['k'] . ( $d['ins']['d'] ? ' · ' . $d['ins']['d'] . ' 진료 기준' : '' ) ); ?>"><?php echo esc_html( $it ); ?></span><?php } } ?>
-				<?php if ( $r->pin ) : ?><span class="mc-tag mc-tag--pin">📌 상단고정</span><?php endif; ?>
 			</div>
 			<div class="mc-chart__acts">
 				<?php /* v9.23 · 맨 위 「수정」 버튼 없앰 — 칸마다 눌러서 고치므로. 이름 · 차트번호는 맨 아래 링크 (원장 지시) */ ?>
@@ -1698,11 +1698,13 @@ function md_mc_render_patient( $id ) {
 					<button type="submit" class="mds-btn mc-pinbtn" title="<?php echo $r->pin ? '목록 맨 위 고정 풀기' : '목록 맨 위에 고정'; ?>"><?php echo $r->pin ? '📌 고정 해제' : '📌 고정'; ?></button>
 				</form>
 			</div>
-			<?php /* v9.52 · 이름 밑 「다음 예약」 한 줄은 없앰 — 치료계획 위 「다음 예약」 칸으로 (원장 지시) */ ?>
-			<?php /* v9.53 · 「최근 내원」 · 고친 사람 · 「변경 기록」 없앰, 첫 등록 대신 첫 내원일 (원장 지시) */
-			$fv = $d ? (string) ( $d['first_visit'] ?? '' ) : '';
-			if ( '' === $fv && $d && ! empty( $d['visits'] ) ) { foreach ( $d['visits'] as $vv ) { if ( '' === $fv || $vv['d'] < $fv ) { $fv = $vv['d']; } } } ?>
-			<?php if ( '' !== $fv ) : /* v9.59 · 「첫 내원일」만 — 마지막 수정은 없앰 (원장 지시) */ ?><p class="mc-chart__meta">첫 내원일 <?php echo esc_html( md_mc_short_date( $fv ) ); ?></p><?php endif; ?>
+			<div class="mc-chart__facts">
+				<button type="button" class="mc-copy" data-copy="<?php echo esc_attr( $r->chart_no ); ?>" title="차트번호 복사"><?php echo esc_html( $r->chart_no ); ?></button>
+				<?php if ( $sex || '' !== $age ) : ?><span class="mc-tag"><?php echo esc_html( trim( $sex . ( '' !== $age ? ' ' . $age . '세' : '' ) ) ); ?></span><?php endif; ?>
+				<?php if ( function_exists( 'md_mc_dw_ins_tags' ) ) { foreach ( md_mc_dw_ins_tags( $d ) as $it ) { /* v9.59 · 보험 (덴트웹 마지막 보험 진료 기준) */ ?><span class="mc-tag mc-tag--ins" title="<?php echo esc_attr( '덴트웹 보험구분 ' . (int) $d['ins']['k'] . ( $d['ins']['d'] ? ' · ' . $d['ins']['d'] . ' 진료 기준' : '' ) ); ?>"><?php echo esc_html( $it ); ?></span><?php } } ?>
+				<?php if ( '' !== $fv ) : ?><span class="mc-fact" title="덴트웹 진료비 내역의 첫 진료일">첫 내원 <b><?php echo esc_html( md_mc_short_date( $fv ) ); ?></b></span><?php endif; ?>
+				<?php if ( $r->pin ) : ?><span class="mc-tag mc-tag--pin">📌 상단고정</span><?php endif; ?>
+			</div>
 			<?php if ( $d && '' !== $nm && false === mb_strpos( preg_replace( '/\s+/u', '', (string) $r->pname ), $nm ) ) : ?>
 				<p class="mds-notice mds-notice--warn">덴트웹 이름은 「<?php echo esc_html( $d['name'] ); ?>」입니다 — 차트번호를 확인해 주세요.</p>
 			<?php elseif ( ! $d && get_option( 'md_mc_dw_last' ) ) : ?>
