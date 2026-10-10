@@ -670,3 +670,15 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 @media (max-width: 760px) { .mc-labs-in__grid { grid-template-columns: 1fr; } .mc-labs-in__row { grid-template-columns: 4.2em minmax(0, 1fr) 8.6em; } }
 .mc-note-row .mc-note-pin { margin-right: 4px; }
 .mc-note__head .mc-pinbtn { margin-left: auto; }
+
+/* v9.67 · 치식 십자 칸 (덴트웹처럼) */
+.mc-seg { display: flex; align-items: center; gap: 8px; padding: 1px 0; }
+.mc-seg + .mc-seg { border-top: 1px dotted var(--color-border, #E8DDD3); }
+.mc-seg__t { min-width: 0; }
+.mc-tooth { flex: 0 0 auto; display: inline-grid; grid-template-columns: 30px 30px; grid-template-rows: 13px 13px; font-size: .68rem; font-weight: 700; line-height: 13px; font-variant-numeric: tabular-nums; color: var(--color-text, #3D2F26); letter-spacing: .02em; }
+.mc-tooth i { font-style: normal; white-space: nowrap; overflow: hidden; }
+.mc-tooth__ur, .mc-tooth__lr { text-align: right; padding-right: 3px; border-right: 1.5px solid currentColor; }
+.mc-tooth__ul, .mc-tooth__ll { text-align: left; padding-left: 3px; }
+.mc-tooth__ur, .mc-tooth__ul { border-bottom: 1.5px solid currentColor; }
+.mc-tl__ownw .mc-seg { display: inline-flex; }
+@media (max-width: 599px) { .mc-tooth { grid-template-columns: 24px 24px; font-size: .62rem; } }

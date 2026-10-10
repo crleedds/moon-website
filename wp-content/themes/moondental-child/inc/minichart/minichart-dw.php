@@ -393,7 +393,7 @@ function md_mc_dw_timeline( $r, $d ) {
 		}
 		if ( '' !== $x['dw'] ) {
 			$nf = function ( $act ) use ( $r ) { return '<input type="hidden" name="md_mc_action" value="' . $act . '"><input type="hidden" name="md_mc_nonce" value="' . esc_attr( wp_create_nonce( 'md_mc_' . $act ) ) . '"><input type="hidden" name="mid" value="' . (int) $r->id . '">'; };
-			$h .= '<span class="mc-tl__dw">' . esc_html( $x['dw'] )
+			$h .= '<span class="mc-tl__dw">' . md_mc_tooth_text_html( $x['dw'] ) /* v9.67 · 덴트웹처럼 치식 십자 칸 */
 				. ' <span class="mc-tl__acts"><button type="button" class="mc-tl__btn" data-mc-dwedit title="이 줄 고치기">✎</button>'
 				. '<form method="post" class="mc-inline" action="' . esc_url( md_mc_url() ) . '" data-mc-fast="dwhide">' . $nf( 'dwhide' ) . '<input type="hidden" name="dwkey" value="' . esc_attr( $x['dwk'] ) . '"><button class="mc-tl__btn" title="이 줄 지우기">✕</button></form></span></span>'
 				. '<form method="post" class="mc-tl__edit" action="' . esc_url( md_mc_url() ) . '" data-mc-fast="dwedit" hidden>' . $nf( 'dwedit' ) . '<input type="hidden" name="dwkey" value="' . esc_attr( $x['dwk'] ) . '"><textarea name="text" rows="2">' . esc_textarea( $x['dw'] ) . '</textarea><span><button class="mds-btn mds-btn--fill">저장</button> <button type="button" class="mds-btn mds-btn--ghost" data-mc-dwedit-cancel>취소</button></span></form>';
@@ -415,13 +415,51 @@ function md_mc_dw_timeline( $r, $d ) {
 	return $h;
 }
 
+/* ============================================================
+ * v9.67 · 치식 십자 칸 (원장 「덴트웹처럼」) — 글 안의 「#36」 「#15,24」 「#17~14」 「#36, 37, 47」 에서 치아 번호를 읽어
+ *   덴트웹처럼 십자 칸에 끝자리를 넣는다: 왼쪽 위 1x(5x) · 오른쪽 위 2x(6x) · 왼쪽 아래 4x(8x) · 오른쪽 아래 3x(7x).
+ *   글은 그대로 두고 앞에 칸만 붙인다 (덴트웹 원본 · 직접 적은 기록 모두). 덴트웹 진료 내역 「 / 」 마다 따로.
+ * ============================================================ */
+function md_mc_teeth_in( $text ) {
+	$out = array();
+	if ( ! preg_match_all( '/#\s*((?:[1-8][1-8](?:\s*[~\-]\s*[1-8][1-8])?)(?:\s*[,，.·]\s*(?:[1-8][1-8](?:\s*[~\-]\s*[1-8][1-8])?))*)/u', (string) $text, $m ) ) { return $out; }
+	foreach ( $m[1] as $grp ) {
+		foreach ( preg_split( '/\s*[,，.·]\s*/u', $grp ) as $part ) {
+			if ( preg_match( '/^([1-8])([1-8])\s*[~\-]\s*([1-8])([1-8])$/', $part, $r ) && $r[1] === $r[3] ) {
+				$a = (int) $r[2]; $b = (int) $r[4];
+				for ( $t = min( $a, $b ); $t <= max( $a, $b ); $t++ ) { $out[ $r[1] . $t ] = true; }
+			} elseif ( preg_match( '/^([1-8][1-8])/', $part, $r ) ) { $out[ $r[1] ] = true; }
+		}
+	}
+	return array_keys( $out );
+}
+function md_mc_tooth_cross( $teeth ) {
+	if ( ! $teeth ) { return ''; }
+	$q = array( 'ur' => array(), 'ul' => array(), 'lr' => array(), 'll' => array() );
+	$where = array( '1' => 'ur', '5' => 'ur', '2' => 'ul', '6' => 'ul', '4' => 'lr', '8' => 'lr', '3' => 'll', '7' => 'll' );
+	foreach ( $teeth as $t ) { $t = (string) $t; $q[ $where[ $t[0] ] ][] = (int) $t[1]; }
+	foreach ( $q as $k => $v ) { $v = array_unique( $v ); in_array( $k, array( 'ur', 'lr' ), true ) ? rsort( $v ) : sort( $v ); $q[ $k ] = implode( '', $v ); } /* 오른쪽(1 · 4)은 큰 수부터, 왼쪽(2 · 3)은 작은 수부터 — 가운데 쪽이 가까이 */
+	return '<span class="mc-tooth" title="' . esc_attr( '#' . implode( ', ', $teeth ) ) . '"><i class="mc-tooth__ur">' . $q['ur'] . '</i><i class="mc-tooth__ul">' . $q['ul'] . '</i><i class="mc-tooth__lr">' . $q['lr'] . '</i><i class="mc-tooth__ll">' . $q['ll'] . '</i></span>';
+}
+/** 글 → 「 / 」 로 나눈 마디마다 [십자 칸] 글 (번호가 없는 마디는 글만) */
+function md_mc_tooth_text_html( $text ) {
+	$parts = preg_split( '/\s+\/\s+/u', (string) $text );
+	$any = false; $h = array();
+	foreach ( $parts as $p ) {
+		$cross = md_mc_tooth_cross( md_mc_teeth_in( $p ) );
+		if ( '' !== $cross ) { $any = true; }
+		$h[] = '<span class="mc-seg">' . $cross . '<span class="mc-seg__t">' . esc_html( $p ) . '</span></span>';
+	}
+	return $any ? implode( '', $h ) : esc_html( (string) $text );
+}
+
 /** v9.22 · 직접 적은 진료기록 한 줄 — ✎ 고치기 · ✕ 지우기 (원장 지시 「날짜 없는 기록도 바로 수정」). $o = ['t' => 글, 'i' => tx_hist 줄 번호] */
 function md_mc_own_line_html( $r, $o, $undated = false ) {
 	$nf = function ( $act ) use ( $r, $o ) {
 		return '<input type="hidden" name="md_mc_action" value="' . $act . '"><input type="hidden" name="md_mc_nonce" value="' . esc_attr( wp_create_nonce( 'md_mc_' . $act ) ) . '"><input type="hidden" name="mid" value="' . (int) $r->id . '">'
 			. '<input type="hidden" name="oi" value="' . (int) $o['i'] . '"><input type="hidden" name="otext" value="' . esc_attr( $o['t'] ) . '">';
 	};
-	return '<span class="mc-tl__ownw' . ( $undated ? ' mc-tl__ownw--undated' : '' ) . '"><span class="mc-tl__own" title="미니차트에 직접 적은 기록">' . ( $undated ? '' : '✎ ' ) . esc_html( $o['t'] )
+	return '<span class="mc-tl__ownw' . ( $undated ? ' mc-tl__ownw--undated' : '' ) . '"><span class="mc-tl__own" title="미니차트에 직접 적은 기록">' . ( $undated ? '' : '✎ ' ) . md_mc_tooth_text_html( $o['t'] )
 		. ' <span class="mc-tl__acts"><button type="button" class="mc-tl__btn" data-mc-dwedit title="이 줄 고치기">✎</button>'
 		. '<form method="post" class="mc-inline" action="' . esc_url( md_mc_url() ) . '" data-mc-fast="owndel">' . $nf( 'owndel' ) . '<button class="mc-tl__btn" title="이 줄 지우기">✕</button></form></span></span>'
 		. '<form method="post" class="mc-tl__edit" action="' . esc_url( md_mc_url() ) . '" data-mc-fast="ownedit" hidden>' . $nf( 'ownedit' ) . '<textarea name="text" rows="2">' . esc_textarea( $o['t'] ) . '</textarea><span><button class="mds-btn mds-btn--fill">저장</button> <button type="button" class="mds-btn mds-btn--ghost" data-mc-dwedit-cancel>취소</button></span></form></span>';
