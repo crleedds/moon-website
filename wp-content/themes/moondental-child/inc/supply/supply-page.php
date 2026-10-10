@@ -943,6 +943,37 @@ function md_sup_render_login() {
 				var sync = function () { p.setAttribute('inputmode', /^[A-Za-z0-9._@\-]+$/.test(u.value.trim()) ? 'text' : 'numeric'); };
 				u.addEventListener('input', sync); sync();
 			})();
+			/* v9.48 · 비밀번호 숫자 키패드 (원장 지시) — 화면 키패드를 마우스 · 손가락으로 눌러도 되고, 키보드로 쳐도 된다 */
+			(function () {
+				var p = document.getElementById('user_pass');
+				if (!p || document.querySelector('.mds-keypad')) { return; }
+				var row = p.closest('p') || p.parentNode;
+				var pad = document.createElement('div');
+				pad.className = 'mds-keypad'; pad.setAttribute('role', 'group'); pad.setAttribute('aria-label', '비밀번호 숫자 키패드');
+				var keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'clear', '0', 'back'];
+				keys.forEach(function (k) {
+					var b = document.createElement('button');
+					b.type = 'button'; b.className = 'mds-keypad__k' + (k.length > 1 ? ' mds-keypad__k--fn' : '');
+					b.setAttribute('data-k', k);
+					b.textContent = k === 'clear' ? '전체 지움' : (k === 'back' ? '⌫' : k);
+					b.setAttribute('aria-label', k === 'clear' ? '전체 지우기' : (k === 'back' ? '한 글자 지우기' : k));
+					pad.appendChild(b);
+				});
+				row.parentNode.insertBefore(pad, row.nextSibling);
+				var touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+				/* 누르는 동안 비밀번호 칸의 커서를 빼앗지 않게 (마우스로 누르고 바로 키보드로 이어 칠 수 있게) */
+				pad.addEventListener('mousedown', function (e) { if (e.target.closest('.mds-keypad__k')) { e.preventDefault(); } });
+				pad.addEventListener('click', function (e) {
+					var b = e.target.closest('.mds-keypad__k'); if (!b) { return; }
+					var k = b.getAttribute('data-k');
+					if (k === 'clear') { p.value = ''; }
+					else if (k === 'back') { p.value = p.value.slice(0, -1); }
+					else { p.value += k; }
+					p.dispatchEvent(new Event('input', { bubbles: true }));
+					b.classList.add('is-hit'); setTimeout(function () { b.classList.remove('is-hit'); }, 120);
+					if (!touch) { p.focus(); try { p.setSelectionRange(p.value.length, p.value.length); } catch (er) {} } /* 휴대폰은 화면 자판이 올라오지 않게 초점을 주지 않음 */
+				});
+			})();
 			</script>
 		</div>
 	</div>

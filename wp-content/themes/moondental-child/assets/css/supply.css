@@ -1187,3 +1187,12 @@ body.mds-page-body button { font-family: inherit; }
 
 /* v4.22 · 라운지에는 환자용 고정 헤더가 없다 — 테마가 그 자리로 비워 둔 body 위 여백(휴대폰 72px)을 없앤다 */
 body.mds-page-body { padding-top: 0 !important; }
+
+/* v9.48 · 로그인 비밀번호 숫자 키패드 */
+.mds-keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: -4px 0 16px; }
+.mds-keypad__k { min-height: 52px; border: 1px solid var(--color-border, #E8DDD3); border-radius: 12px; background: var(--color-surface, #FBF2E8); color: var(--color-text, #3D2F26); font: inherit; font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; transition: background .08s, transform .08s; }
+.mds-keypad__k:hover { background: #F3E6D8; }
+.mds-keypad__k:focus-visible { outline: 2px solid var(--color-primary, #D88062); outline-offset: 2px; }
+.mds-keypad__k.is-hit, .mds-keypad__k:active { background: var(--color-primary, #D88062); border-color: var(--color-primary, #D88062); color: #fff; transform: scale(.97); }
+.mds-keypad__k--fn { font-size: .9rem; font-weight: 600; color: var(--color-text-sub, #7A6B5F); }
+@media (max-width: 380px) { .mds-keypad__k { min-height: 46px; font-size: 1.2rem; } }
