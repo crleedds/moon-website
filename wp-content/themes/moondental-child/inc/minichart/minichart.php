@@ -1000,10 +1000,10 @@ function md_mc_handle_post() {
 			$back = md_mc_url( array( 'mv' => 'p', 'mid' => $id, 'saved' => 1 ) ) . '#f-tx_plan';
 			break;
 
-		case 'plan_add': /* v9.33 · 치료계획 한 줄씩 따로 적기 (원장 지시) */
+		case 'plan_add': /* v9.33 · 치료계획 한 줄씩 따로 적기 (원장 지시) · v9.58 새 줄은 맨 위에 (원장 지시) */
 			$t = trim( str_replace( array( "\r", "\n" ), ' ', sanitize_textarea_field( (string) ( $post['text'] ?? '' ) ) ) );
 			if ( '' === $t ) { $back = $err( '치료계획을 적어 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
-			$res  = md_mc_plan_update( $id, function ( $lines ) use ( $t ) { $lines[] = $t; return $lines; } );
+			$res  = md_mc_plan_update( $id, function ( $lines ) use ( $t ) { array_unshift( $lines, $t ); return $lines; } );
 			$back = is_wp_error( $res ) ? $err( $res->get_error_message(), array( 'mv' => 'p', 'mid' => $id ) ) : md_mc_url( array( 'mv' => 'p', 'mid' => $id ) ) . '#f-tx_plan';
 			break;
 
