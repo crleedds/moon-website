@@ -3,7 +3,7 @@
  * v6.2 · 미니차트 — 직원 라운지(/직원/?app=minichart)
  *
  *  AppSheet 「Mini Chart」(구글 시트 Mini Chart · Sheet1)를 라운지로 옮긴 것.
- *  한 줄 = 환자 한 명(차트번호 · 성명 · 주소 · 병력 · 소개 · 담당의 · 치료계획 · 치료이력 · 참고사항)
+ *  한 줄 = 환자 한 명(차트번호 · 성명 · 주소 · 병력 · 소개 · 담당의사 · 치료계획 · 치료이력 · 참고사항)
  *  또는 팀 노트 한 장(팀 피드 · 팀 수칙 · 프로토콜 · 처방전 · 개인노트 …).
  *
  *  AppSheet 에서 달라진 점
@@ -13,7 +13,7 @@
  *    - 별표항목은 차트번호 · 성명만 반드시, 나머지는 비어 있으면 「미입력」 표시 (「.」 로 때우지 않게)
  *    - 두 사람이 같은 차트를 동시에 고치면 뒤에 저장한 사람에게 알린다 (덮어쓰지 않는다)
  *    - 고칠 때마다 이전 내용을 남긴다 → 「변경 기록」에서 되돌리기, 지운 차트는 휴지통에서 되살리기
- *    - 태블릿 보기(큰 글씨) — 담당의 호출 전 체어 태블릿에 띄우는 화면
+ *    - 태블릿 보기(큰 글씨) — 담당의사 호출 전 체어 태블릿에 띄우는 화면
  *
  *  환자 정보는 공개 저장소에 넣지 않는다 — 처음 데이터는 관리자가 「가져오기」에서
  *  구글 시트를 엑셀로 받아 올린다.
@@ -49,7 +49,7 @@ function md_mc_fields() {
 		'addr'     => array( '지역', true, '지역' ),
 		'mhx'      => array( '병력 (상세)', false, '병력' ), /* v9.9 · 병력 · 내원경로는 필수 아님 (원장 지시) */
 		'referral' => array( '내원경로 / 가족 / 협력기관', false, '내원경로 / 가족 / 협력기관' ),
-		'dr'       => array( '담당의', true, '담당의' ),
+		'dr'       => array( '담당의사', true, '담당의사' ),
 		'tx_plan'  => array( '치료계획', false, '치료계획' ),
 		'tx_hist'  => array( '주요치과치료이력', false, '주요치과치료이력' ),
 		'memo'     => array( '참고사항', false, '참고사항' ),
@@ -139,7 +139,7 @@ function md_mc_maybe_install() {
 		$lv = md_mc_last_visit( $r->tx_hist );
 		if ( $lv ) { $wpdb->update( md_mc_t(), array( 'last_visit' => $lv ), array( 'id' => (int) $r->id ) ); }
 	}
-	/* v6.5 · 담당의 칸에 교정 (원장 지시) — 이미 칸을 저장해 둔 경우에도 넣는다 */
+	/* v6.5 · 담당의사 칸에 교정 (원장 지시) — 이미 칸을 저장해 둔 경우에도 넣는다 */
 	$st = get_option( 'md_mc_settings', array() );
 	if ( is_array( $st ) && ! empty( $st['roles'] ) && is_array( $st['roles'] ) && ! in_array( '교정', $st['roles'], true ) ) {
 		$st['roles'][] = '교정';
@@ -312,7 +312,7 @@ function md_mc_mark_alerts( $html, $words ) {
 }
 
 /* ============================================================
- * v6.4 · 담당의 — 원장님 이름은 목록에서 고른다. 목록과 칸(임플란트 · 보철 …)은 관리자가 고친다.
+ * v6.4 · 담당의사 — 원장님 이름은 목록에서 고른다. 목록과 칸(임플란트 · 보철 …)은 관리자가 고친다.
  *   저장은 AppSheet 그대로 글 한 칸: 「임플란트: 문은수\n보철: 이창률」
  * ============================================================ */
 
@@ -324,7 +324,7 @@ function md_mc_settings() {
 /** 원장님 목록 — 저장된 것이 없으면 경영지원실 요청의 「Dr. ○○○팀」에서 처음 목록을 만든다 */
 function md_mc_doctors() {
 	$s = md_mc_settings();
-	if ( isset( $s['doctors'] ) && is_array( $s['doctors'] ) ) { return $s['doctors']; }
+	if ( isset( $s['doctors'] ) && is_array( $s['doctors'] ) ) { return array_values( array_unique( array_map( function ( $x ) { return '대표' === trim( (string) $x ) ? '문은수' : $x; }, $s['doctors'] ) ) ); } /* v9.47 · 「대표」 선택지 없음 — 문은수로 */
 	$out = array();
 	if ( function_exists( 'md_support_teams' ) ) {
 		foreach ( md_support_teams() as $t ) {
@@ -334,16 +334,16 @@ function md_mc_doctors() {
 	return $out ? $out : array( '문은수', '이창률' );
 }
 
-/** 담당의 칸 이름 — AppSheet 처음 값 「임플란트: / 보철:」 + v6.5 교정 */
+/** 담당의사 칸 이름 — AppSheet 처음 값 「임플란트: / 보철:」 + v6.5 교정 */
 function md_mc_dr_roles() {
 	$s = md_mc_settings();
 	return isset( $s['roles'] ) && is_array( $s['roles'] ) && $s['roles'] ? $s['roles'] : array( '임플란트', '보철', '교정' );
 }
 
 /**
- * v6.8 · 담당의 글 → [ 기본 담당의, [ [과, 이름] … ], 나머지 줄 ]
- *   「이창률」처럼 과 없이 이름만 있는 줄 = 기본 담당의 (예전 자료 247명이 이 모양)
- *   「임플란트: 문은수」 = 과 · 담당의. 「보철: 」처럼 이름이 빈 줄(AppSheet 처음 값)은 버린다.
+ * v6.8 · 담당의사 글 → [ 기본 담당의사, [ [과, 이름] … ], 나머지 줄 ]
+ *   「이창률」처럼 과 없이 이름만 있는 줄 = 기본 담당의사 (예전 자료 247명이 이 모양)
+ *   「임플란트: 문은수」 = 과 · 담당의사. 「보철: 」처럼 이름이 빈 줄(AppSheet 처음 값)은 버린다.
  */
 function md_mc_dr_parse( $dr ) {
 	$main  = '';
@@ -355,7 +355,7 @@ function md_mc_dr_parse( $dr ) {
 			$role = trim( $m[1] );
 			$name = trim( $m[2] );
 			if ( '' === $name ) { continue; }
-			if ( in_array( $role, array( '기본', '기본 담당의', '담당', '담당의' ), true ) && '' === $main ) { $main = $name; continue; }
+			if ( in_array( $role, array( '기본', '기본 담당의', '기본 담당의사', '담당', '담당의', '담당의사' ), true ) && '' === $main ) { $main = $name; continue; }
 			$pairs[] = array( $role, $name );
 			continue;
 		}
@@ -367,12 +367,12 @@ function md_mc_dr_parse( $dr ) {
 
 function md_mc_dr_compose( $main, $depts, $docs, $extra, $main_dept = '' ) {
 	$lines = array();
-	$main  = trim( sanitize_text_field( (string) $main ) );
+	$main  = trim( md_mc_daepyo_name( sanitize_text_field( (string) $main ) ) ); /* v9.47 */
 	$md    = trim( sanitize_text_field( (string) $main_dept ) );
-	if ( '' !== $main ) { $lines[] = '' !== $md ? $md . ': ' . $main : $main; } /* v8.3 · 첫 담당의도 과를 고를 수 있다 */
+	if ( '' !== $main ) { $lines[] = '' !== $md ? $md . ': ' . $main : $main; } /* v8.3 · 첫 담당의사도 과를 고를 수 있다 */
 	foreach ( array_values( (array) $depts ) as $i => $dept ) {
 		$dept = trim( sanitize_text_field( (string) $dept ) );
-		$doc  = trim( sanitize_text_field( (string) ( array_values( (array) $docs )[ $i ] ?? '' ) ) );
+		$doc  = trim( md_mc_daepyo_name( sanitize_text_field( (string) ( array_values( (array) $docs )[ $i ] ?? '' ) ) ) ); /* v9.47 */
 		if ( '' === $doc ) { continue; }
 		$lines[] = ( '' !== $dept ? $dept : '담당' ) . ': ' . $doc;
 	}
@@ -381,7 +381,40 @@ function md_mc_dr_compose( $main, $depts, $docs, $extra, $main_dept = '' ) {
 	return implode( "\n", $lines );
 }
 
-/** 읽기 화면용 — 기본 담당의는 굵게 */
+/**
+ * v9.47 · 「대표」 → 「문은수」 (원장 지시 — 의사 이름으로 적힌 「대표」를 모두 문은수로, 「대표」 선택지는 없앰)
+ *   한 번만 돈다(옵션 md_mc_daepyo_done). 담당의사 칸의 이름 「대표」와 진료기록의 「(대표)」 표시만 바꾼다 —
+ *   참고사항 등의 「기업체 대표님」 · 「국가대표」 같은 글은 건드리지 않는다.
+ */
+function md_mc_daepyo_name( $s ) {
+	return preg_replace( '/(?<![가-힣A-Za-z])대표(?:\s*원장(?:님)?)?(?![가-힣A-Za-z])/u', '문은수', (string) $s );
+}
+function md_mc_fix_daepyo() {
+	if ( get_option( 'md_mc_daepyo_done' ) || (int) get_option( 'md_mc_schema', 0 ) < 1 ) { return; }
+	update_option( 'md_mc_daepyo_done', 'running ' . current_time( 'mysql' ), false );
+	global $wpdb;
+	$t = md_mc_t();
+	$n = 0; $bak = array();
+	foreach ( (array) $wpdb->get_results( "SELECT id, dr, tx_hist, rev FROM $t WHERE dr LIKE '%대표%' OR tx_hist LIKE '%(대표)%'" ) as $r ) {
+		$dr = md_mc_daepyo_name( $r->dr );
+		$tx = str_replace( array( '(대표원장님)', '(대표원장)', '(대표)' ), '(문은수)', (string) $r->tx_hist );
+		if ( $dr === (string) $r->dr && $tx === (string) $r->tx_hist ) { continue; }
+		$bak[ (int) $r->id ] = array( 'dr' => (string) $r->dr, 'tx_hist' => (string) $r->tx_hist ); /* 되돌릴 수 있게 원래 값 보관 */
+		$wpdb->update( $t, array( 'dr' => $dr, 'tx_hist' => $tx, 'rev' => (int) $r->rev + 1 ), array( 'id' => (int) $r->id ) );
+		$n++;
+	}
+	update_option( 'md_mc_daepyo_backup', array( 'at' => current_time( 'mysql' ), 'rows' => $bak, 'settings' => md_mc_settings() ), false );
+	$s = md_mc_settings();
+	foreach ( array( 'doctors', 'roles' ) as $k ) {
+		if ( isset( $s[ $k ] ) && is_array( $s[ $k ] ) ) { $s[ $k ] = array_values( array_filter( $s[ $k ], function ( $x ) { return '대표' !== trim( (string) $x ); } ) ); }
+	}
+	if ( isset( $s['doctors'] ) && is_array( $s['doctors'] ) && ! in_array( '문은수', $s['doctors'], true ) ) { array_unshift( $s['doctors'], '문은수' ); }
+	update_option( 'md_mc_settings', $s );
+	update_option( 'md_mc_daepyo_done', current_time( 'mysql' ) . ' · ' . $n . '명', false );
+}
+add_action( 'init', 'md_mc_fix_daepyo', 25 );
+
+/** 읽기 화면용 — 기본 담당의사는 굵게 */
 function md_mc_dr_html( $dr ) {
 	if ( '' === trim( (string) $dr ) ) { return '<span class="mc-none">—</span>'; }
 	list( $main, $pairs, $extra ) = md_mc_dr_parse( $dr );
@@ -829,13 +862,13 @@ function md_mc_handle_post() {
 			$kind = 'note' === ( $post['kind'] ?? '' ) ? 'note' : 'patient';
 			$data = $post;
 			$data['pin'] = ! empty( $post['pin'] );
-			/* v6.4 · 담당의는 칸마다 고른 원장님 + 그 밖의 줄 */
+			/* v6.4 · 담당의사는 칸마다 고른 원장님 + 그 밖의 줄 */
 			if ( 'patient' === $kind && isset( $post['dr_main'] ) ) {
 				$data['dr'] = md_mc_dr_compose( $post['dr_main'], $post['dr_dept'] ?? array(), $post['dr_doc'] ?? array(), $post['dr_extra'] ?? '', $post['dr_main_dept'] ?? '' );
 			}
 			/* v6.8 · 「해당없음」 체크 → 그 칸은 「해당없음」 */
 			if ( 'patient' === $kind ) {
-				foreach ( array( 'addr', 'mhx', 'referral' ) as $nk ) {
+				foreach ( array( 'mhx', 'referral' ) as $nk ) { /* v9.47 · 지역은 「해당없음」 없음 (원장 지시) */
 					if ( ! empty( $post['na'][ $nk ] ) ) { $data[ $nk ] = MD_MC_NA; }
 				}
 			}
@@ -892,7 +925,7 @@ function md_mc_handle_post() {
 			$back = md_mc_url( array( 'mv' => 'p', 'mid' => $id ) ) . '#f-tx_hist';
 			break;
 
-		case 'dwhidedr': /* v9.25 · 담당의 칸의 「덴트웹 ○○○」 줄 — 미니차트에서만 숨김 (원장 지시 「고치거나 삭제」; 고치기는 담당의 칸을 바로 고치면 된다) */
+		case 'dwhidedr': /* v9.25 · 담당의사 칸의 「덴트웹 ○○○」 줄 — 미니차트에서만 숨김 (원장 지시 「고치거나 삭제」; 고치기는 담당의사 칸을 바로 고치면 된다) */
 			$cur = md_mc_get( $id );
 			if ( ! $cur || 'patient' !== $cur->kind ) { $back = md_mc_url(); break; }
 			$hide = json_decode( (string) $cur->dw_hide, true ); $hide = is_array( $hide ) ? $hide : array();
@@ -925,16 +958,16 @@ function md_mc_handle_post() {
 			$back = md_mc_url( array( 'mv' => 'p', 'mid' => $id ) ) . '#f-tx_hist';
 			break;
 
-		case 'field': /* v9.19 · 차트 화면에서 칸 하나(병력 · 지역 · 담당의 · 내원경로)만 바로 고치기 */
+		case 'field': /* v9.19 · 차트 화면에서 칸 하나(병력 · 지역 · 담당의사 · 내원경로)만 바로 고치기 */
 			$cur = md_mc_get( $id );
 			$fld = sanitize_key( (string) ( $post['field'] ?? '' ) );
 			if ( ! $cur || 'patient' !== $cur->kind || ! in_array( $fld, array( 'mhx', 'addr', 'referral', 'dr', 'memo', 'salute' ), true ) ) { $back = md_mc_url(); break; }
 			if ( (int) ( $post['rev'] ?? 0 ) !== (int) $cur->rev ) { $back = $err( '그 사이 다른 분이 이 차트를 고쳤습니다. 최신 내용을 보고 다시 고쳐 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
 			if ( 'dr' === $fld ) {
 				$val = md_mc_dr_compose( $post['dr_main'] ?? '', $post['dr_dept'] ?? array(), $post['dr_doc'] ?? array(), $post['dr_extra'] ?? '', $post['dr_main_dept'] ?? '' );
-				if ( '' === trim( (string) $val ) ) { $back = $err( '담당의를 한 분 이상 골라 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
+				if ( '' === trim( (string) $val ) ) { $back = $err( '담당의사를 한 분 이상 골라 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
 			} else {
-				$val = ! empty( $post['na'][ $fld ] ) ? MD_MC_NA : ( 'memo' === $fld ? trim( sanitize_textarea_field( (string) ( $post['memo'] ?? '' ) ) ) : ( 'salute' === $fld ? mb_substr( trim( sanitize_text_field( (string) ( $post['salute'] ?? '' ) ) ), 0, 120 ) : sanitize_textarea_field( (string) ( $post[ $fld ] ?? '' ) ) ) );
+				$val = ( ! empty( $post['na'][ $fld ] ) && 'addr' !== $fld ) ? MD_MC_NA : ( 'memo' === $fld ? trim( sanitize_textarea_field( (string) ( $post['memo'] ?? '' ) ) ) : ( 'salute' === $fld ? mb_substr( trim( sanitize_text_field( (string) ( $post['salute'] ?? '' ) ) ), 0, 120 ) : sanitize_textarea_field( (string) ( $post[ $fld ] ?? '' ) ) ) );
 				if ( 'addr' === $fld && '' === trim( $val ) ) { $back = $err( '지역을 적어 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
 			}
 			if ( (string) $val !== (string) $cur->$fld ) {
@@ -1029,7 +1062,7 @@ function md_mc_handle_post() {
 			$back = is_wp_error( $res ) ? $err( $res->get_error_message(), array( 'mv' => 'log', 'mid' => $id ) ) : md_mc_url( array( 'mv' => $rec && 'note' === $rec->kind ? 'note' : 'p', 'mid' => $res, 'reverted' => 1 ) );
 			break;
 
-		case 'settings': /* v6.4 · 담당의 목록 · 칸 (관리자) */
+		case 'settings': /* v6.4 · 담당의사 목록 · 칸 (관리자) */
 			if ( md_mc_can_manage() ) {
 				$clean = function ( $txt ) {
 					$out = array();
@@ -1102,7 +1135,7 @@ function md_mc_fast_reply( $action, $id, $back ) {
 	$out = array( 'ok' => true, 'rev' => (int) $r->rev );
 	$field = in_array( $action, array( 'add', 'field' ), true ) ? sanitize_key( wp_unslash( $_POST['field'] ?? '' ) ) : '';
 	if ( 'field' === $action ) {
-		/* v9.19 · 그 칸의 보기 부분만 — 담당의는 고르는 칸을 다시 그려야 해서 화면이 새로 불러온다 */
+		/* v9.19 · 그 칸의 보기 부분만 — 담당의사는 고르는 칸을 다시 그려야 해서 화면이 새로 불러온다 */
 		$d  = function_exists( 'md_mc_dw_get' ) ? md_mc_dw_get( $r->chart_no ) : null;
 		$vw = md_mc_inline_view( $r, $d, $field );
 		$out += array( 'target' => $field, 'html' => $vw['html'], 'head' => $vw['head'], 'cls' => $vw['cls'], 'value' => md_mc_is_na( $r->$field ) ? '' : (string) $r->$field, 'na' => md_mc_is_na( $r->$field ), 'reload' => 'dr' === $field );
@@ -1203,7 +1236,7 @@ add_action( 'template_redirect', 'md_mc_find_json', 2 );
 function md_mc_find_deep_json( $q, $k ) {
 	global $wpdb;
 	$t    = md_mc_t();
-	$cols = array( 'salute' => '호칭', 'tx_hist' => '진료기록', 'memo' => '참고사항', 'tx_plan' => '치료계획', 'mhx' => '병력', 'referral' => '내원경로', 'addr' => '지역', 'dr' => '담당의' );
+	$cols = array( 'salute' => '호칭', 'tx_hist' => '진료기록', 'memo' => '참고사항', 'tx_plan' => '치료계획', 'mhx' => '병력', 'referral' => '내원경로', 'addr' => '지역', 'dr' => '담당의사' );
 	$likeQ = '%' . $wpdb->esc_like( $q ) . '%';
 	$likeK = '%' . $wpdb->esc_like( $k ) . '%';
 	$or   = array(); $args = array();
@@ -1405,15 +1438,15 @@ function md_mc_render_list() {
 			<?php foreach ( $sorts as $k => $label ) { md_mc_chip( $label, md_mc_url( array( 'mf' => $filter, 'mq' => $q, 'md' => $doc, 'ms' => 'viewed' === $k ? '' : $k ) ), $sort === $k ); } ?>
 		</div>
 		<?php $docs = md_mc_doctors(); if ( $docs ) : ?>
-			<div class="mc-chips mc-chips--doc" aria-label="담당의">
-				<span class="mc-chips__label">담당의</span>
+			<div class="mc-chips mc-chips--doc" aria-label="담당의사">
+				<span class="mc-chips__label">담당의사</span>
 				<?php foreach ( $docs as $dn ) { md_mc_chip( $dn, md_mc_url( array( 'mf' => $filter, 'mq' => $q, 'md' => $doc === $dn ? '' : $dn, 'ms' => $ms ) ), $doc === $dn ); } ?>
 			</div>
 		<?php endif; ?>
 	</div>
 	<?php md_mc_install_help(); /* v10.0 · 홈 화면에 추가 */ ?>
 	<?php if ( '' !== $q || '' !== $doc ) : ?>
-		<p class="mc-found"><?php echo '' !== $q ? '「' . esc_html( $q ) . '」 ' : ''; ?><?php echo '' !== $doc ? '담당의 ' . esc_html( $doc ) . ' · ' : ''; ?><?php echo count( $rows ); ?>명 · <a href="<?php echo esc_url( md_mc_url( array( 'mf' => $filter, 'ms' => $ms ) ) ); ?>">지우기</a></p>
+		<p class="mc-found"><?php echo '' !== $q ? '「' . esc_html( $q ) . '」 ' : ''; ?><?php echo '' !== $doc ? '담당의사 ' . esc_html( $doc ) . ' · ' : ''; ?><?php echo count( $rows ); ?>명 · <a href="<?php echo esc_url( md_mc_url( array( 'mf' => $filter, 'ms' => $ms ) ) ); ?>">지우기</a></p>
 	<?php endif; ?>
 	<?php if ( ! $rows ) : ?>
 		<div class="mds-card"><div class="mds-empty"><?php echo '' !== $q ? '찾는 환자가 없습니다.' : '해당하는 환자가 없습니다.'; ?></div></div>
@@ -1498,7 +1531,7 @@ function md_mc_inline_block( $r, $d, $field, $bare = false ) {
 			<?php else :
 				$na  = '' !== (string) $r->$field && md_mc_is_na( $r->$field );
 				$lab = 'addr' === $field ? '지역 메모' : $f[ $field ][0];
-				md_mc_field( $field, $lab, $na ? '' : (string) $r->$field, array( 'rows' => 'mhx' === $field ? 2 : 1, 'na' => $na, 'attrs' => 'autocomplete="off"' ) );
+				md_mc_field( $field, $lab, $na ? '' : (string) $r->$field, array( 'rows' => 'mhx' === $field ? 2 : 1, 'na' => 'addr' === $field ? null : $na, 'attrs' => 'autocomplete="off"' ) ); /* v9.47 · 지역은 「해당없음」 체크 없음 */
 				if ( 'mhx' === $field ) { echo md_mc_mhx_chips(); } // phpcs:ignore
 				if ( 'referral' === $field ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「가족 …」 「협력기관 …」을 누르면 이름을 바로 이어 적습니다' ); } // phpcs:ignore
 			endif; ?>
@@ -1579,7 +1612,7 @@ function md_mc_render_patient( $id ) {
 		<div class="mc-cols"><div class="mc-col mc-col--a">
 		<div class="mc-grid mc-grid--info">
 			<?php
-			/* v9.19 · 병력 · 주소(지역 메모) · 담당의 · 내원경로도 눌러서 바로 고친다 (원장 지시) · v9.21 · 넓은 화면에서는 네 칸이 한 줄 (원장 「한 화면에 더 많이」)
+			/* v9.19 · 병력 · 주소(지역 메모) · 담당의사 · 내원경로도 눌러서 바로 고친다 (원장 지시) · v9.21 · 넓은 화면에서는 네 칸이 한 줄 (원장 「한 화면에 더 많이」)
 			 * v9.20 · 연락처는 미니차트에 두지 않는다 (원장 지시 — 덴트웹에서 보면 된다) */
 			md_mc_inline_block( $r, $d, 'mhx' );
 			md_mc_inline_block( $r, $d, 'addr' );
@@ -1667,15 +1700,15 @@ function md_mc_select( $name, $opts, $cur, $empty ) {
 	return $h . '</select>';
 }
 
-/** 과 · 담당의 한 줄 */
+/** 과 · 담당의사 한 줄 */
 function md_mc_dr_pair_html( $dept, $doc ) {
 	return '<div class="mc-dr__pair">'
 		. md_mc_select( 'dr_dept[]', md_mc_dr_roles(), $dept, '과 선택' )
-		. md_mc_select( 'dr_doc[]', md_mc_doctors(), $doc, '담당의 선택' )
+		. md_mc_select( 'dr_doc[]', md_mc_doctors(), $doc, '담당의사 선택' )
 		. '<button type="button" class="mc-dr__rm" data-mc-dr-rm aria-label="이 줄 빼기">✕</button></div>';
 }
 
-/** v6.8 · 담당의 — 기본 담당의 한 분 + 「담당의 추가」로 과 · 담당의 줄 (원장 지시) */
+/** v6.8 · 담당의사 — 기본 담당의사 한 분 + 「담당의사 추가」로 과 · 담당의사 줄 (원장 지시) */
 function md_mc_dr_field( $vals ) {
 	$main_dept = '';
 	if ( isset( $vals['dr_main'] ) ) {
@@ -1689,23 +1722,23 @@ function md_mc_dr_field( $vals ) {
 		$extra = (string) ( $vals['dr_extra'] ?? '' );
 	} else {
 		list( $main, $pairs, $extra ) = md_mc_dr_parse( $vals['dr'] ?? '' );
-		/* v8.3 · 과가 붙은 첫 줄도 첫 담당의로 */
+		/* v8.3 · 과가 붙은 첫 줄도 첫 담당의사로 */
 		if ( '' === $main && $pairs ) { list( $main_dept, $main ) = array_shift( $pairs ); }
 	}
 	?>
 	<div class="mc-field mc-dr" data-mc-dr>
-		<span class="mc-field__l"><em class="mc-req">*</em>담당의</span>
+		<span class="mc-field__l"><em class="mc-req">*</em>담당의사</span>
 		<div class="mc-dr__pair mc-dr__first">
 			<?php echo md_mc_select( 'dr_main_dept', md_mc_dr_roles(), $main_dept, '과 선택' ); // phpcs:ignore ?>
-			<?php echo md_mc_select( 'dr_main', md_mc_doctors(), $main, '담당의 선택' ); // phpcs:ignore ?>
+			<?php echo md_mc_select( 'dr_main', md_mc_doctors(), $main, '담당의사 선택' ); // phpcs:ignore ?>
 		</div>
 		<div class="mc-dr__list" data-mc-dr-list>
 			<?php foreach ( $pairs as $pr ) { echo md_mc_dr_pair_html( $pr[0], $pr[1] ); } // phpcs:ignore ?>
 		</div>
 		<template data-mc-dr-tpl><?php echo md_mc_dr_pair_html( '', '' ); // phpcs:ignore ?></template>
-		<button type="button" class="mds-btn mc-dr__add" data-mc-dr-add>＋ 담당의 추가</button>
+		<button type="button" class="mds-btn mc-dr__add" data-mc-dr-add>＋ 담당의사 추가</button>
 		<?php if ( '' !== trim( $extra ) ) : ?>
-			<textarea name="dr_extra" rows="1" data-grow aria-label="담당의 그 밖의 내용"><?php echo esc_textarea( $extra ); ?></textarea>
+			<textarea name="dr_extra" rows="1" data-grow aria-label="담당의사 그 밖의 내용"><?php echo esc_textarea( $extra ); ?></textarea>
 		<?php endif; ?>
 	</div>
 	<?php
@@ -1749,7 +1782,7 @@ function md_mc_render_edit( $id, $kind ) {
 	if ( $conflict ) {
 		echo '<div class="mds-notice mds-notice--warn">아래는 방금 적으신 내용입니다. 다른 분이 저장한 최신 내용은 각 칸 아래 「저장된 최신 내용」에서 확인하고, 합쳐서 다시 저장해 주세요.</div>';
 	}
-	/* v8.1 · 담당의가 비었으면 덴트웹 담당의를 기본으로 */
+	/* v8.1 · 담당의사가 비었으면 덴트웹 담당의사를 기본으로 */
 	if ( $r && 'patient' === $kind && ! isset( $vals['dr_main'] ) && function_exists( 'md_mc_dw_get' ) ) {
 		$dwd = md_mc_dw_get( $r->chart_no );
 		if ( $dwd && '' !== $dwd['doctor'] ) { list( $m0, $p0 ) = md_mc_dr_parse( $vals['dr'] ?? '' ); if ( '' === $m0 && ! $p0 ) { $vals['dr'] = trim( $dwd['doctor'] . "\n" . (string) ( $vals['dr'] ?? '' ) ); } }
@@ -1782,6 +1815,7 @@ function md_mc_render_edit( $id, $kind ) {
 			foreach ( array( 'addr', 'mhx', 'referral' ) as $k ) {
 				$na = ! empty( $vals['na'][ $k ] ) || ( '' !== $v( $k ) && md_mc_is_na( $v( $k ) ) );
 				$req = $f[ $k ][1]; /* v9.9 · 별표는 md_mc_fields 대로 (지역만) */
+				if ( 'addr' === $k ) { md_mc_field( $k, $f[ $k ][0], md_mc_is_na( $v( $k ) ) ? '' : $v( $k ), array( 'req' => $req, 'rows' => 1, 'attrs' => $req ? 'required' : '' ) ); continue; } /* v9.47 · 지역은 「해당없음」 체크 없음 (원장 지시) */
 				md_mc_field( $k, $f[ $k ][0], $v( $k ), array( 'req' => $req, 'rows' => 'mhx' === $k ? 2 : 1, 'attrs' => $req ? 'required' : '', 'na' => $na ) );
 				if ( 'mhx' === $k ) { echo md_mc_mhx_chips(); } // phpcs:ignore
 				if ( 'referral' === $k ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「가족 …」 「협력기관 …」을 누르면 이름을 바로 이어 적습니다 (예: 가족: 홍길동 #12345)' ); } // phpcs:ignore
@@ -1979,7 +2013,7 @@ function md_mc_render_trash() {
 	<?php if ( ! $manage ) : ?><p class="mds-hint">휴지통 비우기 · 영구 삭제는 홈페이지 관리자가 합니다.</p><?php endif;
 }
 
-/** v6.5 · 설정 (관리자만) — 담당의 목록 · 담당의 칸 · 병력 주의 단어 · 휴지통 */
+/** v6.5 · 설정 (관리자만) — 담당의사 목록 · 담당의사 칸 · 병력 주의 단어 · 휴지통 */
 function md_mc_render_settings() {
 	if ( isset( $_GET['saved'] ) )  { echo '<div class="mds-notice mds-notice--ok">저장했습니다.</div>'; }
 	if ( isset( $_GET['purged'] ) ) { echo '<div class="mds-notice mds-notice--ok">휴지통을 비웠습니다.</div>'; }
@@ -1988,8 +2022,8 @@ function md_mc_render_settings() {
 	<form method="post" class="mds-card mc-form mc-settings" action="<?php echo esc_url( md_mc_url() ); ?>">
 		<?php md_mc_nonce_fields( 'settings' ); ?>
 		<h2 class="mc-form__h">설정 <small>라운지 관리자 · 원장 계정만 볼 수 있습니다</small></h2>
-		<?php md_mc_field( 'doctors', '담당의 목록 (원장님 이름)', implode( "\n", md_mc_doctors() ), array( 'rows' => 8, 'hint' => '한 줄에 한 분 · 이 순서대로 고르기 · 목록 위 담당의 버튼에 나옵니다' ) ); ?>
-		<?php md_mc_field( 'roles', '과 목록', implode( "\n", md_mc_dr_roles() ), array( 'rows' => 4, 'hint' => '담당의 추가할 때 고르는 과 · 한 줄에 하나 · 예) 임플란트 · 보철 · 교정' ) ); ?>
+		<?php md_mc_field( 'doctors', '담당의사 목록 (원장님 이름)', implode( "\n", md_mc_doctors() ), array( 'rows' => 8, 'hint' => '한 줄에 한 분 · 이 순서대로 고르기 · 목록 위 담당의사 버튼에 나옵니다' ) ); ?>
+		<?php md_mc_field( 'roles', '과 목록', implode( "\n", md_mc_dr_roles() ), array( 'rows' => 4, 'hint' => '담당의사 추가할 때 고르는 과 · 한 줄에 하나 · 예) 임플란트 · 보철 · 교정' ) ); ?>
 		<?php md_mc_field( 'alert_words', '병력 주의 단어', implode( "\n", md_mc_alert_words() ), array( 'rows' => 8, 'hint' => '병력에 이 단어가 있으면 붉게 표시 · 한 줄에 하나 · 뒤에 x · 없음이 붙으면 표시하지 않음' ) ); ?>
 		<label class="mc-check"><input type="checkbox" name="alert_reset" value="1"> 병력 주의 단어를 처음 값으로 되돌리기</label>
 		<?php md_mc_field( 'mhx_chips', '병력 — 눌러서 넣는 목록', implode( "\n", md_mc_chip_list( 'mhx' ) ), array( 'rows' => 8, 'hint' => '새 환자 · 수정 화면의 병력 버튼 · 한 줄에 하나 · 비우면 처음 값' ) ); ?>

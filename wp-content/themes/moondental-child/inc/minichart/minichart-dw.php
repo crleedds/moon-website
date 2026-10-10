@@ -3,8 +3,8 @@
  * v7.0 · 미니차트 ← 덴트웹 자동 연동 (원장 지시 2026-10-06 「읽기 전용 DB 계정으로 완전 자동」)
  *
  *   병원 PC 의 mc-sync.ps1 이 덴트웹 읽기 전용 계정(dwpublic)으로 공개 뷰만 읽어 보낸다:
- *     PUB_V환자정보(성별 · 생년월일 · 주소 → 지역만 · 담당의 · 등록일 · 최종 내원일)
- *     PUB_V진료비내역(진료일 · 담당의 · 치료내용 — 금액은 보내지 않음)
+ *     PUB_V환자정보(성별 · 생년월일 · 주소 → 지역만 · 담당의사 · 등록일 · 최종 내원일)
+ *     PUB_V진료비내역(진료일 · 담당의사 · 치료내용 — 금액은 보내지 않음)
  *     PUB_V예약정보(다음 예약) · PUB_P접수목록 · PUB_V직원정보(의사 번호 → 이름)
  *   덴트웹에는 병력 · 치료계획 뷰가 없어 그 칸은 지금처럼 손으로 적는다.
  *
@@ -345,7 +345,7 @@ function md_mc_own_line_html( $r, $o, $undated = false ) {
 		. '<form method="post" class="mc-tl__edit" action="' . esc_url( md_mc_url() ) . '" data-mc-fast="ownedit" hidden>' . $nf( 'ownedit' ) . '<textarea name="text" rows="2">' . esc_textarea( $o['t'] ) . '</textarea><span><button class="mds-btn mds-btn--fill">저장</button> <button type="button" class="mds-btn mds-btn--ghost" data-mc-dwedit-cancel>취소</button></span></form></span>';
 }
 
-/** v8.1 · 담당의 — 미니차트 기본 담당의가 비었으면 덴트웹 담당의, 다르면 둘 다 */
+/** v8.1 · 담당의사 — 미니차트 기본 담당의사가 비었으면 덴트웹 담당의사, 다르면 둘 다 */
 function md_mc_dw_dr_html( $r, $d ) {
 	list( $main, $pairs, $extra ) = md_mc_dr_parse( $r->dr );
 	$dw  = $d ? (string) $d['doctor'] : '';
@@ -356,11 +356,11 @@ function md_mc_dw_dr_html( $r, $d ) {
 	foreach ( $pairs as $pr ) { $out[] = '<span class="mc-dr__pairv"><small>' . esc_html( $pr[0] ) . '</small> <b>' . esc_html( $pr[1] ) . '</b></span>'; }
 	$hide = json_decode( (string) ( $r->dw_hide ?? '' ), true );
 	if ( '' !== $dw && ! in_array( $dw, $names, true ) && $dw !== $main && empty( $hide['dr'] ) ) {
-		/* v9.25 · ✎ 는 담당의 칸 고치기를 열고, ✕ 는 이 줄을 미니차트에서 숨긴다 (원장 지시) */
-		/* 담당의 칸 자체가 폼이라 안에 폼을 또 넣을 수 없다 — ✕ 는 단추만 두고 화면(JS)이 직접 보낸다 */
+		/* v9.25 · ✎ 는 담당의사 칸 고치기를 열고, ✕ 는 이 줄을 미니차트에서 숨긴다 (원장 지시) */
+		/* 담당의사 칸 자체가 폼이라 안에 폼을 또 넣을 수 없다 — ✕ 는 단추만 두고 화면(JS)이 직접 보낸다 */
 		$out[] = '<span class="mc-dr__pairv mc-dr__dw"><small>덴트웹</small> ' . esc_html( $dw )
-			. ' <span class="mc-tl__acts"><button type="button" class="mc-tl__btn" data-mc-open-dr title="담당의 고치기">✎</button>'
-			. '<button type="button" class="mc-tl__btn" data-mc-dwhidedr="' . esc_attr( wp_create_nonce( 'md_mc_dwhidedr' ) ) . '" data-mid="' . (int) $r->id . '" data-url="' . esc_url( md_mc_url() ) . '" title="덴트웹 담당의 표시 지우기">✕</button></span></span>';
+			. ' <span class="mc-tl__acts"><button type="button" class="mc-tl__btn" data-mc-open-dr title="담당의사 고치기">✎</button>'
+			. '<button type="button" class="mc-tl__btn" data-mc-dwhidedr="' . esc_attr( wp_create_nonce( 'md_mc_dwhidedr' ) ) . '" data-mid="' . (int) $r->id . '" data-url="' . esc_url( md_mc_url() ) . '" title="덴트웹 담당의사 표시 지우기">✕</button></span></span>';
 	}
 	if ( '' !== $extra ) { $out[] = md_mc_text( $extra ); }
 	return $out ? implode( '<br>', $out ) : '<span class="mc-none">—</span>';

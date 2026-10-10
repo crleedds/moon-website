@@ -1,4 +1,4 @@
-/* 직원 라운지 · 미니차트 (v6.2 · v6.8) — 없어도 화면은 모두 동작한다. 바로 찾기 · 더 보기 · 칸 늘리기 · 복사 · 담당의 확인
+/* 직원 라운지 · 미니차트 (v6.2 · v6.8) — 없어도 화면은 모두 동작한다. 바로 찾기 · 더 보기 · 칸 늘리기 · 복사 · 담당의사 확인
    v10.3 · 화면마다 붙이는 코드는 window.mcInits 에 넣는다 — 목록 ↔ 차트를 페이지를 다시 불러오지 않고 바꿀 때(맨 아래) 다시 돌린다 */
 window.mcInits = window.mcInits || [];
 window.mcGo = window.mcGo || function (url) { location.href = url; };
@@ -116,7 +116,7 @@ window.mcInits.push(function () {
     window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
   }
 
-  /* v6.8 · 담당의 — 「＋ 담당의 추가」로 과 · 담당의 줄, ✕ 로 빼기. 저장 전 한 분 이상 확인 */
+  /* v6.8 · 담당의사 — 「＋ 담당의사 추가」로 과 · 담당의사 줄, ✕ 로 빼기. 저장 전 한 분 이상 확인 */
   var drBox = document.querySelector('[data-mc-dr]');
   if (drBox) {
     var drList = drBox.querySelector('[data-mc-dr-list]');
@@ -139,7 +139,7 @@ window.mcInits.push(function () {
         var any = Array.prototype.some.call(drBox.querySelectorAll('select[name="dr_main"], select[name="dr_doc[]"], textarea[name="dr_extra"]'), function (el) { return el.value.trim() !== ''; });
         if (!any) {
           e.preventDefault(); e.stopImmediatePropagation();
-          alert('담당의를 한 분 이상 골라 주세요.');
+          alert('담당의사를 한 분 이상 골라 주세요.');
           var sel = drBox.querySelector('select[name="dr_main"]'); if (sel) { sel.focus(); }
         }
       }, true);
@@ -155,7 +155,7 @@ window.mcInits.push(function () {
   });
 });
 
-/* v8.1 · 새 환자 — 차트번호만 넣으면 덴트웹에서 성명 · 지역 · 담당의를 채우고 연락처 · 주소 · 성별 · 나이를 보여 준다.
+/* v8.1 · 새 환자 — 차트번호만 넣으면 덴트웹에서 성명 · 지역 · 담당의사를 채우고 연락처 · 주소 · 성별 · 나이를 보여 준다.
    아직 받아 둔 게 없으면 병원 PC 가 1분 안에 찾아 온다 (5초마다 다시 물음). 번호를 바꾸면 자동으로 채운 값(손대지 않은 것)만 지운다. */
 (function () {
   'use strict';
@@ -189,13 +189,13 @@ window.mcInits.push(function () {
     if (fill('addr', d.region || d.addr)) done.push('지역');
     var sel = form.querySelector('[name=dr_main]');
     if (sel && !sel.value && d.doctor) {
-      Array.prototype.some.call(sel.options, function (o) { if (o.value && (o.value === d.doctor || o.textContent.indexOf(d.doctor) > -1)) { sel.value = o.value; auto.dr_main = o.value; done.push('담당의'); return true; } return false; });
+      Array.prototype.some.call(sel.options, function (o) { if (o.value && (o.value === d.doctor || o.textContent.indexOf(d.doctor) > -1)) { sel.value = o.value; auto.dr_main = o.value; done.push('담당의사'); return true; } return false; });
     }
     hint.textContent = '덴트웹: ' + d.name + (done.length ? ' — ' + done.join(' · ') + ' 채움' : '');
     hint.hidden = false;
     if (prev) {
       var age = (d.age !== '' && d.age != null) ? ' ' + d.age + '세' : '';
-      var rows = [['성명', d.name], ['성별 · 나이', (d.sex === 'M' ? '남' : d.sex === 'F' ? '여' : '') + age], ['주소', d.addr], ['담당의', d.doctor], ['첫 등록', d.first], ['최근 내원', d.last]];
+      var rows = [['성명', d.name], ['성별 · 나이', (d.sex === 'M' ? '남' : d.sex === 'F' ? '여' : '') + age], ['주소', d.addr], ['담당의사', d.doctor], ['첫 등록', d.first], ['최근 내원', d.last]];
       prev.innerHTML = '<b class="mc-dw-prev__h">덴트웹에서 가져온 정보</b><dl>' + rows.filter(function (r) { return r[1] && String(r[1]).trim(); }).map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>'; }).join('') + '</dl>';
       prev.hidden = false;
     }
@@ -354,11 +354,11 @@ document.addEventListener('click', function (e) {
   /* v9.10 · 서버가 저장했는지 알 수 없을 때는 폼을 다시 보내지 않는다(두 번 저장 방지) — 화면을 새로 불러와 실제 상태를 보여 준다 */
   function recover(msg) { toast(msg || '저장 결과를 확인합니다…', true); setTimeout(function () { location.reload(); }, 900); }
   var busy = false;
-  /* v9.25 · 담당의 칸의 「덴트웹 ○○○」 ✕ — 단추만 있고(칸이 폼이라 폼을 겹칠 수 없음) 여기서 바로 보낸다 */
+  /* v9.25 · 담당의사 칸의 「덴트웹 ○○○」 ✕ — 단추만 있고(칸이 폼이라 폼을 겹칠 수 없음) 여기서 바로 보낸다 */
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-mc-dwhidedr]');
     if (!b) return;
-    if (!window.confirm('덴트웹 담당의 표시를 이 차트에서 지울까요? (덴트웹 원본은 그대로)')) return;
+    if (!window.confirm('덴트웹 담당의사 표시를 이 차트에서 지울까요? (덴트웹 원본은 그대로)')) return;
     var line = b.closest('.mc-dr__dw'); if (line) line.remove();
     var fd = new FormData(); fd.append('md_mc_action', 'dwhidedr'); fd.append('md_mc_nonce', b.getAttribute('data-mc-dwhidedr')); fd.append('mid', b.getAttribute('data-mid')); fd.append('md_fast', '1');
     fetch(b.getAttribute('data-url') || location.href, { method: 'POST', body: fd, credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } })
