@@ -683,3 +683,18 @@ html.mc-loading body::before { content: ""; position: fixed; z-index: 9999; top:
 }
 .mc-note-row .mc-note-pin { margin-right: 4px; }
 .mc-note__head .mc-pinbtn { margin-left: auto; }
+
+/* v9.69 · 검사 수치 — 단위 고정 · 혈압 [ ] / [ ] · 「직접」 꼬리표 */
+.mc-labs-in__val { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.mc-labs-in__val input { flex: 1 1 0; min-width: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.mc-labs-in__val--bp input { max-width: 4.2em; }
+.mc-labs-in__slash { flex: none; color: var(--mc-sub); font-weight: 800; }
+.mc-labs-in__u { flex: none; font-style: normal; font-size: .78rem; color: var(--mc-mute); white-space: nowrap; }
+.mc-labs-in__row > span:first-child { white-space: nowrap; }
+.mc-lab__u { color: var(--mc-mute); font-size: .74rem; margin-left: 1px; }
+@container (min-width: 290px) and (max-width: 420px) {
+  .mc-labs-in__row { grid-template-columns: 3.6em minmax(0, 1fr); gap: 5px 8px; }
+  .mc-labs-in__row input[type=date] { grid-column: 2; }
+}
+.mc-labs-in__val--bp input { min-width: 2.7em; padding-left: 4px; padding-right: 4px; text-align: center; }
+.mc-tl__tag { display: inline-block; margin-right: 5px; padding: 0 6px; border-radius: 6px; background: rgba(184, 99, 71, .12); color: var(--color-primary-dark, #B86347); font-size: .7rem; font-weight: 800; line-height: 1.6; vertical-align: 1px; }

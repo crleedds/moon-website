@@ -464,14 +464,14 @@ document.addEventListener('click', function (e) {
       var t = form.querySelector('textarea').value.trim();
       var dw2 = li.querySelector('.mc-tl__dw'); if (dw2) dw2.remove();
       form.hidden = true;
-      if (t) { var o = document.createElement('span'); o.className = 'mc-tl__own is-pending'; o.textContent = '✎ ' + t; li.querySelector('.mc-tl__tx').appendChild(o); }
+      if (t) { var o = document.createElement('span'); o.className = 'mc-tl__own is-pending'; o.innerHTML = '<span class="mc-tl__tag">직접</span><span class="mc-tl__t"></span>'; o.querySelector('.mc-tl__t').textContent = t; /* v9.69 */ li.querySelector('.mc-tl__tx').appendChild(o); }
     } else if (kind === 'dwunhide') {
       Array.prototype.forEach.call(form.querySelectorAll(extra ? 'li' : 'input[name="dwkeys[]"]:checked'), function (x) { (x.closest('li') || x).classList.add('is-gone'); });
     } else if (kind === 'owndel' || kind === 'ownedit') {
       /* v9.22 · 직접 적은 줄 — 지우면 바로 사라지고, 고치면 바로 바뀐다 (서버 대답이 오면 전체를 다시 맞춘다) */
       var w = form.closest('.mc-tl__ownw');
       if (w && kind === 'owndel') { w.classList.add('is-gone'); }
-      else if (w) { var nt = form.querySelector('textarea').value.trim(); var sp = w.querySelector('.mc-tl__own'); form.hidden = true; if (sp) { sp.classList.add('is-pending'); sp.childNodes[0].nodeValue = (sp.childNodes[0].nodeValue.indexOf('✎') === 0 ? '✎ ' : '') + nt + ' '; } }
+      else if (w) { var nt = form.querySelector('textarea').value.trim(); var sp = w.querySelector('.mc-tl__own'); form.hidden = true; if (sp) { sp.classList.add('is-pending'); var tt = sp.querySelector('.mc-tl__t'); if (tt) { tt.textContent = nt; } else if (sp.firstChild && sp.firstChild.nodeType === 3) { sp.firstChild.nodeValue = nt + ' '; } /* v9.69 */ } }
     }
     var btns = form.querySelectorAll('button[type=submit], button:not([type])');
     Array.prototype.forEach.call(btns, function (b) { b.disabled = true; });
@@ -784,5 +784,17 @@ window.mcInits.push(function () {
     if (!t || !t.classList || !t.classList.contains('mc-plan__ta')) return;
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); var f = t.form; if (f.requestSubmit) f.requestSubmit(); else f.submit(); }
     if (e.key === 'Escape') { var li = t.closest('.mc-plan__item'); li.querySelector('.mc-plan__edit').reset(); open(li, false); }
+  });
+})();
+
+/* v9.69 · 검사 수치 칸 — 숫자 말고는 바로 지운다(소수 칸은 점 하나), 혈압 수축기 3자리면 이완기로 */
+(function () {
+  'use strict';
+  document.addEventListener('input', function (e) {
+    var t = e.target; if (!t.matches || !t.matches('input[data-mc-num]')) return;
+    var dec = t.getAttribute('data-mc-num') === 'dec', v = t.value.replace(dec ? /[^0-9.]/g : /[^0-9]/g, '');
+    if (dec) { var i = v.indexOf('.'); if (i >= 0) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, ''); }
+    if (v !== t.value) t.value = v;
+    if (t.name === 'lab[bp][s]' && v.length >= 3) { var n = t.parentNode.querySelector('input[name="lab[bp][t]"]'); if (n && !n.value) n.focus(); }
   });
 })();

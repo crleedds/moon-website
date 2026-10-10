@@ -421,7 +421,7 @@ function md_mc_own_line_html( $r, $o, $undated = false ) {
 		return '<input type="hidden" name="md_mc_action" value="' . $act . '"><input type="hidden" name="md_mc_nonce" value="' . esc_attr( wp_create_nonce( 'md_mc_' . $act ) ) . '"><input type="hidden" name="mid" value="' . (int) $r->id . '">'
 			. '<input type="hidden" name="oi" value="' . (int) $o['i'] . '"><input type="hidden" name="otext" value="' . esc_attr( $o['t'] ) . '">';
 	};
-	return '<span class="mc-tl__ownw' . ( $undated ? ' mc-tl__ownw--undated' : '' ) . '"><span class="mc-tl__own" title="미니차트에 직접 적은 기록">' . ( $undated ? '' : '✎ ' ) . esc_html( $o['t'] )
+	return '<span class="mc-tl__ownw' . ( $undated ? ' mc-tl__ownw--undated' : '' ) . '"><span class="mc-tl__own" title="미니차트에 직접 적은 기록">' . ( $undated ? '' : '<span class="mc-tl__tag">직접</span>' ) . '<span class="mc-tl__t">' . esc_html( $o['t'] ) . '</span>'
 		. ' <span class="mc-tl__acts"><button type="button" class="mc-tl__btn" data-mc-dwedit title="이 줄 고치기">✎</button>'
 		. '<form method="post" class="mc-inline" action="' . esc_url( md_mc_url() ) . '" data-mc-fast="owndel">' . $nf( 'owndel' ) . '<button class="mc-tl__btn" title="이 줄 지우기">✕</button></form></span></span>'
 		. '<form method="post" class="mc-tl__edit" action="' . esc_url( md_mc_url() ) . '" data-mc-fast="ownedit" hidden>' . $nf( 'ownedit' ) . '<textarea name="text" rows="2">' . esc_textarea( $o['t'] ) . '</textarea><span><button class="mds-btn mds-btn--fill">저장</button> <button type="button" class="mds-btn mds-btn--ghost" data-mc-dwedit-cancel>취소</button></span></form></span>';

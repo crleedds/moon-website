@@ -369,12 +369,19 @@ function md_mc_dr_parse( $dr ) {
  * v9.66 · 최근 검사 수치 — 혈압 · 혈당 · HbA1c · INR, 값마다 날짜 (원장 지시). 열 labs = JSON {key:{v,d}}
  * ============================================================ */
 function md_mc_labs_keys() {
+	/* v9.69 · 단위는 미리 붙여 두고 숫자만 받는다 (원장 지시) — [이름, 단위, 소수 허용] */
 	return array(
-		'bp'  => array( '혈압', '예: 130/85' ),
-		'glu' => array( '혈당', '예: 110 (공복)' ),
-		'a1c' => array( 'HbA1c', '예: 6.5%' ),
-		'inr' => array( 'INR', '예: 2.3' ),
+		'bp'  => array( '혈압', 'mmHg', false ),
+		'glu' => array( '혈당', 'mg/dL', false ),
+		'a1c' => array( 'HbA1c', '%', true ),
+		'inr' => array( 'INR', '', true ),
 	);
+}
+/** v9.69 · 숫자만 (소수 허용이면 점 하나) */
+function md_mc_lab_num( $s, $dec ) {
+	$s = preg_replace( $dec ? '/[^0-9.]/' : '/[^0-9]/', '', (string) $s );
+	if ( $dec && substr_count( $s, '.' ) > 1 ) { $p = explode( '.', $s ); $s = array_shift( $p ) . '.' . implode( '', $p ); }
+	return trim( $s, '.' );
 }
 /** 저장된 값 → [key => [v, d]] (레코드 객체 · 배열 · JSON 글 모두) */
 function md_mc_labs_get( $r ) {
@@ -392,7 +399,12 @@ function md_mc_labs_get( $r ) {
 function md_mc_labs_from_post( $lab ) {
 	$out = array();
 	foreach ( md_mc_labs_keys() as $k => $x ) {
-		$v = isset( $lab[ $k ]['v'] ) ? mb_substr( trim( sanitize_text_field( (string) $lab[ $k ]['v'] ) ), 0, 40 ) : '';
+		if ( 'bp' === $k ) {
+			$sys = md_mc_lab_num( $lab['bp']['s'] ?? '', false ); $dia = md_mc_lab_num( $lab['bp']['t'] ?? '', false );
+			$v = ( '' !== $sys && '' !== $dia ) ? $sys . '/' . $dia : ( isset( $lab['bp']['v'] ) ? mb_substr( trim( sanitize_text_field( (string) $lab['bp']['v'] ) ), 0, 40 ) : '' ); /* 둘 다 적어야 혈압 · 예전 한 칸(v)도 받음 */
+		} else {
+			$v = md_mc_lab_num( $lab[ $k ]['v'] ?? '', $x[2] );
+		}
 		if ( '' === $v ) { continue; }
 		$d = isset( $lab[ $k ]['d'] ) ? trim( (string) $lab[ $k ]['d'] ) : '';
 		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) ) { $d = current_time( 'Y-m-d' ); }
@@ -407,16 +419,27 @@ function md_mc_labs_html( $labs ) {
 	foreach ( $labs as $k => $x ) {
 		$dd = '';
 		if ( '' !== $x['d'] ) { $t = strtotime( $x['d'] ); $dd = $t ? ( date( 'Y', $t ) === $y ? date( 'n/j', $t ) : date( 'y.n.j', $t ) ) : $x['d']; }
-		$h[] = '<span class="mc-lab"><small>' . esc_html( $keys[ $k ][0] ) . '</small> <b>' . esc_html( $x['v'] ) . '</b>' . ( '' !== $dd ? ' <time>' . esc_html( $dd ) . '</time>' : '' ) . '</span>';
+		$h[] = '<span class="mc-lab"><small>' . esc_html( $keys[ $k ][0] ) . '</small> <b>' . esc_html( $x['v'] ) . '</b>' . ( '' !== $keys[ $k ][1] && false === mb_strpos( $x['v'], $keys[ $k ][1] ) && preg_match( '/^[0-9.\/]+$/', $x['v'] ) ? '<small class="mc-lab__u">' . esc_html( $keys[ $k ][1] ) . '</small>' : '' ) . ( '' !== $dd ? ' <time>' . esc_html( $dd ) . '</time>' : '' ) . '</span>';
 	}
 	return '<div class="mc-labs">' . implode( '', $h ) . '</div>';
 }
 /** 입력 칸 — 수정 화면 · 병력 바로 고치기 */
 function md_mc_labs_fields( $labs ) {
-	echo '<div class="mc-labs-in"><span class="mc-field__l">최근 검사 수치 <small>값과 날짜 · 날짜를 비우면 오늘</small></span><div class="mc-labs-in__grid">';
+	/* v9.69 · 숫자 키패드(inputmode) · 단위 고정 · 혈압은 [수축기] / [이완기] */
+	echo '<div class="mc-labs-in"><span class="mc-field__l">최근 검사 수치 <small>숫자만 · 날짜를 비우면 오늘</small></span><div class="mc-labs-in__grid">';
 	foreach ( md_mc_labs_keys() as $k => $x ) {
-		$v = $labs[ $k ]['v'] ?? ''; $d = $labs[ $k ]['d'] ?? '';
-		echo '<label class="mc-labs-in__row"><span>' . esc_html( $x[0] ) . '</span><input type="text" name="lab[' . esc_attr( $k ) . '][v]" value="' . esc_attr( $v ) . '" placeholder="' . esc_attr( $x[1] ) . '" maxlength="40" autocomplete="off"><input type="date" name="lab[' . esc_attr( $k ) . '][d]" value="' . esc_attr( $d ) . '" aria-label="' . esc_attr( $x[0] . ' 검사 날짜' ) . '"></label>';
+		$v = (string) ( $labs[ $k ]['v'] ?? '' ); $d = $labs[ $k ]['d'] ?? '';
+		$unit = '' !== $x[1] ? '<i class="mc-labs-in__u">' . esc_html( $x[1] ) . '</i>' : '';
+		echo '<div class="mc-labs-in__row"><span>' . esc_html( $x[0] ) . '</span><span class="mc-labs-in__val' . ( 'bp' === $k ? ' mc-labs-in__val--bp' : '' ) . '">';
+		if ( 'bp' === $k ) {
+			$p = preg_match( '/(\d+)\D+(\d+)/', $v, $m ) ? array( $m[1], $m[2] ) : array( md_mc_lab_num( $v, false ), '' );
+			echo '<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" name="lab[bp][s]" value="' . esc_attr( $p[0] ) . '" placeholder="130" aria-label="수축기 혈압" autocomplete="off" data-mc-num>'
+				. '<b class="mc-labs-in__slash">/</b>'
+				. '<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" name="lab[bp][t]" value="' . esc_attr( $p[1] ) . '" placeholder="85" aria-label="이완기 혈압" autocomplete="off" data-mc-num>';
+		} else {
+			echo '<input type="text" inputmode="' . ( $x[2] ? 'decimal' : 'numeric' ) . '" maxlength="6" name="lab[' . esc_attr( $k ) . '][v]" value="' . esc_attr( md_mc_lab_num( $v, $x[2] ) ) . '" placeholder="' . esc_attr( array( 'glu' => '110', 'a1c' => '6.5', 'inr' => '2.3' )[ $k ] ?? '' ) . '" aria-label="' . esc_attr( $x[0] ) . '" autocomplete="off" data-mc-num="' . ( $x[2] ? 'dec' : '' ) . '">';
+		}
+		echo $unit . '</span><input type="date" name="lab[' . esc_attr( $k ) . '][d]" value="' . esc_attr( $d ) . '" aria-label="' . esc_attr( $x[0] . ' 검사 날짜' ) . '"></div>'; // phpcs:ignore
 	}
 	echo '</div></div>';
 }
@@ -1807,7 +1830,7 @@ function md_mc_render_patient( $id ) {
 		</div><div class="mc-col mc-col--b">
 
 		<section class="mc-block mc-block--log" id="f-tx_hist">
-			<h3 class="mc-block__h">진료기록 <small class="mc-sub"><?php echo $d ? '덴트웹 치료내용 + ✎ 직접 적은 기록' : '✎ 직접 적은 기록'; ?></small></h3>
+			<h3 class="mc-block__h">진료기록 <small class="mc-sub"><?php echo $d ? '덴트웹 치료내용 + <span class="mc-tl__tag">직접</span>미니차트에 적은 기록' : '<span class="mc-tl__tag">직접</span>미니차트에 적은 기록'; /* v9.69 */ ?></small></h3>
 			<?php md_mc_addform( $r, 'tx_hist', '진료기록 직접 입력 (날짜 고를 수 있음)' ); ?>
 			<div class="mc-block__b"><?php echo function_exists( 'md_mc_dw_timeline' ) ? md_mc_dw_timeline( $r, $d ) : md_mc_text( $r->tx_hist ); // phpcs:ignore ?></div>
 		</section>
