@@ -129,6 +129,7 @@ function md_mc_dw_clean( $p ) {
 		'addr'   => md_mc_addr_short( md_mc_dw_txt( $p['addr'] ?? '', 150 ) ), /* v9.8 · 세부 주소는 받지도 두지도 않는다 */
 		'doctor' => md_mc_dw_txt( $p['doctor'] ?? '', 30 ),
 		'first'  => md_mc_dw_date( $p['first'] ?? '' ),
+		'first_visit' => md_mc_dw_date( $p['first_visit'] ?? '' ), /* v9.53 · 첫 내원일 (덴트웹 진료비 내역의 가장 이른 날) */
 		'last'   => md_mc_dw_date( $p['last'] ?? '' ),
 		'next'   => null,
 		'visits' => array(),
@@ -167,21 +168,21 @@ function md_mc_dw_clean( $p ) {
 }
 
 /** v9.50 · 예전에 받아 둔 예약 + 이번에 받은 예약 — appt_from 날부터는 이번 것으로 바꾸고(고침 · 취소 반영), 그 전 것은 그대로 둔다 */
-/** v9.51 · 치료계획 칸 아래 「다음 예약」 목록 — 내일부터의 덴트웹 예약 (원장 지시) */
+/** v9.52 · 치료계획 위 「다음 예약」 칸 — 내일부터의 덴트웹 예약, 먼 것이 위 · 가까운 것이 아래 (원장 지시). 올해가 아니면 연도도 */
 function md_mc_dw_next_list_html( $d ) {
 	$today = current_time( 'Y-m-d' ); $list = array();
 	foreach ( ( $d && ! empty( $d['appts'] ) ) ? (array) $d['appts'] : array() as $a ) { if ( is_array( $a ) && ( $a['d'] ?? '' ) > $today ) { $list[] = $a; } }
 	if ( ! $list ) { return ''; }
-	usort( $list, function ( $x, $y ) { return strcmp( $x['d'] . $x['t'], $y['d'] . $y['t'] ); } );
-	$wd = array( '일', '월', '화', '수', '목', '금', '토' );
-	$h = '<div class="mc-nextlist"><b class="mc-nextlist__h">📅 다음 예약</b><ul>';
-	foreach ( $list as $i => $a ) {
+	usort( $list, function ( $x, $y ) { return strcmp( $y['d'] . $y['t'], $x['d'] . $x['t'] ); } );
+	$wd = array( '일', '월', '화', '수', '목', '금', '토' ); $yr = current_time( 'Y' );
+	$h = '<section class="mc-block mc-nextlist" id="f-next"><h3 class="mc-block__h">다음 예약</h3><ul>';
+	foreach ( $list as $a ) {
 		$ts = strtotime( $a['d'] );
+		$ds = ( date( 'Y', $ts ) !== $yr ? date( 'Y', $ts ) . '. ' : '' ) . date( 'n/j', $ts ) . '(' . $wd[ (int) date( 'w', $ts ) ] . ')';
 		$bits = array_filter( array( $a['t'], $a['dr'], $a['what'] ), 'strlen' );
-		$h .= '<li' . ( $i >= 5 ? ' class="mc-nextlist__more" hidden' : '' ) . '><span class="mc-nextlist__d">' . esc_html( date( 'n/j', $ts ) . '(' . $wd[ (int) date( 'w', $ts ) ] . ')' ) . '</span> ' . esc_html( implode( ' · ', $bits ) ) . ( '' !== $a['memo'] ? ' <small>(' . esc_html( $a['memo'] ) . ')</small>' : '' ) . '</li>';
+		$h .= '<li><span class="mc-nextlist__d">' . esc_html( $ds ) . '</span><span class="mc-nextlist__tx">' . esc_html( implode( ' · ', $bits ) ) . ( '' !== $a['memo'] ? ' <small>(' . esc_html( $a['memo'] ) . ')</small>' : '' ) . '</span></li>';
 	}
-	$h .= '</ul>' . ( count( $list ) > 5 ? '<button type="button" class="mc-nextlist__btn" onclick="this.previousElementSibling.querySelectorAll(\'.mc-nextlist__more\').forEach(function(x){x.hidden=false});this.remove()">' . ( count( $list ) - 5 ) . '건 더 보기</button>' : '' ) . '</div>';
-	return $h;
+	return $h . '</ul></section>';
 }
 
 function md_mc_dw_merge_appts( $old_json, $data ) {
@@ -221,7 +222,11 @@ function md_mc_dw_rest_save( $request ) {
 		$in   = isset( $mc[ $key ] ) ? 1 : 0;
 		$data = md_mc_dw_clean( $p );
 		if ( ! $in && ! isset( $reqd[ $key ] ) ) { $data['visits'] = array(); $data['next'] = null; $data['appts'] = array(); $data['appt_from'] = ''; } /* 미니차트에 없는 환자는 기본 정보만 (새 차트에서 찾은 환자 빼고) */
-		else { $data['appts'] = md_mc_dw_merge_appts( $wpdb->get_var( $wpdb->prepare( "SELECT data FROM $t WHERE chart_key = %s", $key ) ), $data ); } /* v9.50 · 덴트웹 예약표는 한 달 남짓만 보이므로 지난 예약은 여기 쌓아 둔다 */
+		else {
+			$old_json = $wpdb->get_var( $wpdb->prepare( "SELECT data FROM $t WHERE chart_key = %s", $key ) );
+			$data['appts'] = md_mc_dw_merge_appts( $old_json, $data ); /* v9.50 */
+			if ( '' === $data['first_visit'] ) { $oj = json_decode( (string) $old_json, true ); $data['first_visit'] = is_array( $oj ) ? (string) ( $oj['first_visit'] ?? '' ) : ''; } /* v9.53 · 첫 내원일을 안 보낸 묶음(빠른 길 · 예전 스크립트)은 예전 값 유지 */
+		}
 		unset( $data['appt_from'] );
 		$wpdb->replace( $t, array( 'chart_key' => $key, 'chart_no' => $chart, 'data' => wp_json_encode( $data, JSON_UNESCAPED_UNICODE ), 'in_mc' => $in, 'synced_at' => $now ) );
 		$n++;

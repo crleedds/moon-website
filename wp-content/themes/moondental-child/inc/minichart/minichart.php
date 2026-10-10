@@ -1613,10 +1613,11 @@ function md_mc_render_patient( $id ) {
 					<button type="submit" class="mds-btn"><?php echo $r->pin ? '상단고정 해제' : '📌 상단고정'; ?></button>
 				</form>
 			</div>
-			<?php if ( $d && $d['next'] ) : $nx = $d['next']; ?>
-				<p class="mc-next"><b>다음 예약</b> <?php echo esc_html( $nx['at'] . ( '' !== $nx['doctor'] ? ' · ' . $nx['doctor'] : '' ) . ( '' !== $nx['what'] ? ' · ' . $nx['what'] : '' ) ); ?><?php echo '' !== $nx['memo'] ? '<small> — ' . esc_html( $nx['memo'] ) . '</small>' : ''; ?></p>
-			<?php endif; ?>
-			<p class="mc-chart__meta"><?php if ( $lv ) : ?>최근 내원 <?php echo esc_html( md_mc_short_date( $lv ) ); ?> · <?php endif; ?><?php if ( $d && $d['first'] ) : ?>첫 등록 <?php echo esc_html( md_mc_short_date( $d['first'] ) ); ?> · <?php endif; ?>마지막 수정 <?php echo esc_html( $r->updated_at ? md_mc_short_date( $r->updated_at ) . ' ' . date( 'H:i', strtotime( $r->updated_at ) ) : '—' ); ?><?php echo $r->updated_by ? ' · ' . esc_html( $r->updated_by ) : ''; ?> · <a href="<?php echo esc_url( md_mc_url( array( 'mv' => 'log', 'mid' => $r->id ) ) ); ?>">변경 기록</a></p>
+			<?php /* v9.52 · 이름 밑 「다음 예약」 한 줄은 없앰 — 치료계획 위 「다음 예약」 칸으로 (원장 지시) */ ?>
+			<?php /* v9.53 · 「최근 내원」 · 고친 사람 · 「변경 기록」 없앰, 첫 등록 대신 첫 내원일 (원장 지시) */
+			$fv = $d ? (string) ( $d['first_visit'] ?? '' ) : '';
+			if ( '' === $fv && $d && ! empty( $d['visits'] ) ) { foreach ( $d['visits'] as $vv ) { if ( '' === $fv || $vv['d'] < $fv ) { $fv = $vv['d']; } } } ?>
+			<p class="mc-chart__meta"><?php if ( '' !== $fv ) : ?>첫 내원 <?php echo esc_html( md_mc_short_date( $fv ) ); ?> · <?php endif; ?>마지막 수정 <?php echo esc_html( $r->updated_at ? md_mc_short_date( $r->updated_at ) . ' ' . date( 'H:i', strtotime( $r->updated_at ) ) : '—' ); ?></p>
 			<?php if ( $d && '' !== $nm && false === mb_strpos( preg_replace( '/\s+/u', '', (string) $r->pname ), $nm ) ) : ?>
 				<p class="mds-notice mds-notice--warn">덴트웹 이름은 「<?php echo esc_html( $d['name'] ); ?>」입니다 — 차트번호를 확인해 주세요.</p>
 			<?php elseif ( ! $d && get_option( 'md_mc_dw_last' ) ) : ?>
@@ -1637,6 +1638,7 @@ function md_mc_render_patient( $id ) {
 			?>
 		</div>
 		<?php /* v9.33 · 치료계획은 한 줄에 하나씩 따로 적고, 한 줄을 누르면 날짜를 골라 진료기록으로 옮긴다 (원장 지시). 한꺼번에 고치기(v8.6 자동 저장 칸)는 접어 둠 */ ?>
+		<?php echo function_exists( 'md_mc_dw_next_list_html' ) ? md_mc_dw_next_list_html( $d ) : ''; // phpcs:ignore -- v9.52 · 치료계획 위 「다음 예약」 칸 ?>
 		<section class="mc-block mc-block--plan mc-plan" id="f-tx_plan">
 			<h3 class="mc-block__h"><?php echo esc_html( $f['tx_plan'][0] ); ?></h3>
 			<form method="post" class="mc-add mc-add--plan" data-mc-fast="plan_add" action="<?php echo esc_url( md_mc_url() ); ?>">
@@ -1645,7 +1647,6 @@ function md_mc_render_patient( $id ) {
 				<button type="submit" class="mds-btn mds-btn--fill mc-add__btn">추가</button>
 			</form>
 			<div class="mc-block__b"><?php echo md_mc_plan_list_html( $r ); // phpcs:ignore ?></div>
-			<?php echo function_exists( 'md_mc_dw_next_list_html' ) ? md_mc_dw_next_list_html( $d ) : ''; // phpcs:ignore -- v9.51 · 다음 예약 목록 (원장 지시) ?>
 			<?php /* v9.34 · 「한꺼번에 고치기」 칸은 없앰 (원장 지시) — 줄마다 ▲▼ 순서 · 「진료기록으로」 단추 */ ?>
 		</section>
 		</div><div class="mc-col mc-col--b">
