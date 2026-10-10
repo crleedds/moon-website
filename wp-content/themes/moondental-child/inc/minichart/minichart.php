@@ -26,7 +26,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'MD_MC_SCHEMA', 5 ); /* v9.24 · 5 = 호칭 · 호명 (salute) */ // /* v6.4 · 2 = 팀 노트 고정 해제 · v6.5 · 3 = 최근 본 시각 · 최근 내원일 열 · v8.7 · 4 = 덴트웹 진료기록 숨김 · 고침 (dw_hide) */
+define( 'MD_MC_SCHEMA', 6 ); /* v9.66 · 6 = 최근 검사 수치 (labs) */ /* v9.24 · 5 = 호칭 · 호명 (salute) */ // /* v6.4 · 2 = 팀 노트 고정 해제 · v6.5 · 3 = 최근 본 시각 · 최근 내원일 열 · v8.7 · 4 = 덴트웹 진료기록 숨김 · 고침 (dw_hide) */
 
 /* ============================================================
  * 테이블
@@ -117,6 +117,7 @@ function md_mc_maybe_install() {
 		viewed_at DATETIME NULL,
 		last_visit DATE NULL,
 		dw_hide TEXT NULL,
+		labs TEXT NULL,
 		PRIMARY KEY  (id),
 		KEY kind (kind),
 		KEY chart_no (chart_no),
@@ -132,8 +133,7 @@ function md_mc_maybe_install() {
 		PRIMARY KEY  (id),
 		KEY rec_id (rec_id)
 	) $c;" );
-	/* v6.4 · 팀 노트는 환자 목록 위에 고정하지 않는다 — 팀 노트 탭에만 */
-	$wpdb->query( 'UPDATE ' . md_mc_t() . " SET pin = 0 WHERE kind = 'note'" );
+	/* v9.66 · 팀 노트도 고정할 수 있다 (원장 지시) — 예전에 업그레이드마다 노트 고정을 풀던 줄은 없앰 */
 	/* v6.5 · 최근 내원일 = 주요치과치료이력에서 가장 늦은 「YYMMDD:」 날짜 */
 	foreach ( (array) $wpdb->get_results( 'SELECT id, tx_hist FROM ' . md_mc_t() . " WHERE kind = 'patient' AND last_visit IS NULL" ) as $r ) {
 		$lv = md_mc_last_visit( $r->tx_hist );
@@ -365,6 +365,62 @@ function md_mc_dr_parse( $dr ) {
 	return array( $main, $pairs, implode( "\n", $extra ) );
 }
 
+/* ============================================================
+ * v9.66 · 최근 검사 수치 — 혈압 · 혈당 · HbA1c · INR, 값마다 날짜 (원장 지시). 열 labs = JSON {key:{v,d}}
+ * ============================================================ */
+function md_mc_labs_keys() {
+	return array(
+		'bp'  => array( '혈압', '예: 130/85' ),
+		'glu' => array( '혈당', '예: 110 (공복)' ),
+		'a1c' => array( 'HbA1c', '예: 6.5%' ),
+		'inr' => array( 'INR', '예: 2.3' ),
+	);
+}
+/** 저장된 값 → [key => [v, d]] (레코드 객체 · 배열 · JSON 글 모두) */
+function md_mc_labs_get( $r ) {
+	$raw = is_object( $r ) ? ( $r->labs ?? '' ) : ( is_array( $r ) ? ( $r['labs'] ?? '' ) : $r );
+	$j   = is_array( $raw ) ? $raw : json_decode( (string) $raw, true );
+	$out = array();
+	foreach ( md_mc_labs_keys() as $k => $x ) {
+		$v = isset( $j[ $k ]['v'] ) ? trim( (string) $j[ $k ]['v'] ) : '';
+		$d = isset( $j[ $k ]['d'] ) ? trim( (string) $j[ $k ]['d'] ) : '';
+		if ( '' !== $v ) { $out[ $k ] = array( 'v' => $v, 'd' => $d ); }
+	}
+	return $out;
+}
+/** 폼(lab[key][v] · lab[key][d]) → JSON 글. 값을 적고 날짜를 비우면 오늘 */
+function md_mc_labs_from_post( $lab ) {
+	$out = array();
+	foreach ( md_mc_labs_keys() as $k => $x ) {
+		$v = isset( $lab[ $k ]['v'] ) ? mb_substr( trim( sanitize_text_field( (string) $lab[ $k ]['v'] ) ), 0, 40 ) : '';
+		if ( '' === $v ) { continue; }
+		$d = isset( $lab[ $k ]['d'] ) ? trim( (string) $lab[ $k ]['d'] ) : '';
+		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) ) { $d = current_time( 'Y-m-d' ); }
+		$out[ $k ] = array( 'v' => $v, 'd' => $d );
+	}
+	return $out ? wp_json_encode( $out, JSON_UNESCAPED_UNICODE ) : '';
+}
+/** 보기 — 병력 칸 아래 한 줄 */
+function md_mc_labs_html( $labs ) {
+	if ( ! $labs ) { return ''; }
+	$keys = md_mc_labs_keys(); $y = current_time( 'Y' ); $h = array();
+	foreach ( $labs as $k => $x ) {
+		$dd = '';
+		if ( '' !== $x['d'] ) { $t = strtotime( $x['d'] ); $dd = $t ? ( date( 'Y', $t ) === $y ? date( 'n/j', $t ) : date( 'y.n.j', $t ) ) : $x['d']; }
+		$h[] = '<span class="mc-lab"><small>' . esc_html( $keys[ $k ][0] ) . '</small> <b>' . esc_html( $x['v'] ) . '</b>' . ( '' !== $dd ? ' <time>' . esc_html( $dd ) . '</time>' : '' ) . '</span>';
+	}
+	return '<div class="mc-labs">' . implode( '', $h ) . '</div>';
+}
+/** 입력 칸 — 수정 화면 · 병력 바로 고치기 */
+function md_mc_labs_fields( $labs ) {
+	echo '<div class="mc-labs-in"><span class="mc-field__l">최근 검사 수치 <small>값과 날짜 · 날짜를 비우면 오늘</small></span><div class="mc-labs-in__grid">';
+	foreach ( md_mc_labs_keys() as $k => $x ) {
+		$v = $labs[ $k ]['v'] ?? ''; $d = $labs[ $k ]['d'] ?? '';
+		echo '<label class="mc-labs-in__row"><span>' . esc_html( $x[0] ) . '</span><input type="text" name="lab[' . esc_attr( $k ) . '][v]" value="' . esc_attr( $v ) . '" placeholder="' . esc_attr( $x[1] ) . '" maxlength="40" autocomplete="off"><input type="date" name="lab[' . esc_attr( $k ) . '][d]" value="' . esc_attr( $d ) . '" aria-label="' . esc_attr( $x[0] . ' 검사 날짜' ) . '"></label>';
+	}
+	echo '</div></div>';
+}
+
 function md_mc_dr_compose( $main, $depts, $docs, $extra, $main_dept = '' ) {
 	$lines = array();
 	$main  = trim( md_mc_daepyo_name( sanitize_text_field( (string) $main ) ) ); /* v9.47 */
@@ -465,7 +521,8 @@ function md_mc_save( $id, $kind, $data, $rev = 0 ) {
 		$row['cho']        = md_mc_cho( $row['pname'] );
 		$row['last_visit'] = md_mc_last_visit( $row['tx_hist'] );
 	}
-	if ( isset( $data['pin'] ) ) { $row['pin'] = $data['pin'] && 'patient' === $kind ? 1 : 0; }
+	if ( isset( $data['pin'] ) ) { $row['pin'] = $data['pin'] ? 1 : 0; } /* v9.66 · 노트도 고정 */
+	if ( isset( $data['labs'] ) && 'patient' === $kind ) { $row['labs'] = (string) $data['labs']; } /* v9.66 */
 	$row['updated_at'] = $now;
 	$row['updated_by'] = md_mc_me();
 
@@ -685,7 +742,7 @@ function md_mc_notes( $q = '' ) {
 		$like = '%' . $wpdb->esc_like( $q ) . '%';
 		$sql  = $wpdb->prepare( $sql . ' AND (title LIKE %s OR body LIKE %s)', $like, $like );
 	}
-	return (array) $wpdb->get_results( $sql . ' ORDER BY updated_at IS NULL, updated_at DESC, id ASC' ); /* v6.4 · 고정 없이 최근 고친 순 */
+	return (array) $wpdb->get_results( $sql . ' ORDER BY pin DESC, updated_at IS NULL, updated_at DESC, id ASC' ); /* v9.66 · 고정한 노트가 맨 위, 그다음 최근 고친 순 */
 }
 
 function md_mc_counts() {
@@ -973,6 +1030,7 @@ function md_mc_handle_post() {
 					if ( ! empty( $post['na'][ $nk ] ) ) { $data[ $nk ] = MD_MC_NA; }
 				}
 			}
+			if ( 'patient' === $kind && isset( $post['lab'] ) && is_array( $post['lab'] ) ) { $data['labs'] = md_mc_labs_from_post( $post['lab'] ); } /* v9.66 */
 			/* v6.4 · 「치료입력 · 참고사항입력 (날짜없이)」 — 오늘 날짜를 붙여 맨 위로 (AppSheet 와 같은 방식) */
 			if ( 'patient' === $kind ) {
 				foreach ( array( 'tx_new' => 'tx_hist', 'memo_new' => 'memo' ) as $in => $to ) {
@@ -1071,9 +1129,11 @@ function md_mc_handle_post() {
 				$val = ( ! empty( $post['na'][ $fld ] ) && 'addr' !== $fld ) ? MD_MC_NA : ( 'memo' === $fld ? trim( sanitize_textarea_field( (string) ( $post['memo'] ?? '' ) ) ) : ( 'salute' === $fld ? mb_substr( trim( sanitize_text_field( (string) ( $post['salute'] ?? '' ) ) ), 0, 120 ) : sanitize_textarea_field( (string) ( $post[ $fld ] ?? '' ) ) ) );
 				if ( 'addr' === $fld && '' === trim( $val ) ) { $back = $err( '지역을 적어 주세요.', array( 'mv' => 'p', 'mid' => $id ) ); break; }
 			}
-			if ( (string) $val !== (string) $cur->$fld ) {
+			$lab_upd = array(); /* v9.66 · 병력 칸에서 검사 수치도 */
+			if ( 'mhx' === $fld && isset( $post['lab'] ) && is_array( $post['lab'] ) ) { $lj = md_mc_labs_from_post( $post['lab'] ); if ( $lj !== (string) ( $cur->labs ?? '' ) ) { $lab_upd['labs'] = $lj; } }
+			if ( (string) $val !== (string) $cur->$fld || $lab_upd ) {
 				global $wpdb;
-				$ok = $wpdb->update( md_mc_t(), array( $fld => $val, 'rev' => (int) $cur->rev + 1, 'updated_at' => current_time( 'mysql' ), 'updated_by' => md_mc_me() ), array( 'id' => (int) $id, 'rev' => (int) $cur->rev ) );
+				$ok = $wpdb->update( md_mc_t(), $lab_upd + array( $fld => $val, 'rev' => (int) $cur->rev + 1, 'updated_at' => current_time( 'mysql' ), 'updated_by' => md_mc_me() ), array( 'id' => (int) $id, 'rev' => (int) $cur->rev ) );
 				if ( $ok ) { md_mc_log( $id, 'edit', $cur ); }
 			}
 			$back = md_mc_url( array( 'mv' => 'p', 'mid' => $id, 'saved' => 1 ) ) . '#f-' . $fld;
@@ -1590,7 +1650,7 @@ function md_mc_inline_view( $r, $d, $field ) {
 	$f = md_mc_fields();
 	if ( 'mhx' === $field ) {
 		$alrt = md_mc_alerts( $r->mhx );
-		return array( 'head' => $f['mhx'][2] . ( $alrt ? ' — 주의: ' . implode( ', ', $alrt ) : '' ), 'html' => md_mc_mark_alerts( md_mc_text( $r->mhx ), $alrt ), 'cls' => md_mc_mhx_real( $r->mhx ) ? 'mc-block--alert' : '' );
+		return array( 'head' => $f['mhx'][2] . ( $alrt ? ' — 주의: ' . implode( ', ', $alrt ) : '' ), 'html' => md_mc_mark_alerts( md_mc_text( $r->mhx ), $alrt ) . md_mc_labs_html( md_mc_labs_get( $r ) ), 'cls' => md_mc_mhx_real( $r->mhx ) ? 'mc-block--alert' : '' );
 	}
 	if ( 'addr' === $field ) {
 		/* 주소 — 덴트웹 주소가 있으면 그것, 미니차트 「지역」이 그 안에 이미 들어 있으면 한 번만 */
@@ -1635,7 +1695,7 @@ function md_mc_inline_block( $r, $d, $field, $bare = false ) {
 				$na  = '' !== (string) $r->$field && md_mc_is_na( $r->$field );
 				$lab = 'addr' === $field ? '' : $f[ $field ][0]; /* v9.54 · 지역 고치기 칸에 「지역 메모」 글자 없음 */
 				md_mc_field( $field, $lab, ( $na && 'referral' !== $field ) ? '' : (string) $r->$field, array( 'rows' => 'mhx' === $field ? 2 : 1, 'na' => in_array( $field, array( 'addr', 'referral' ), true ) ? null : $na, 'attrs' => 'autocomplete="off"' ) ); /* v9.47 · 지역 · v9.55 내원경로는 「해당없음」 체크 없음 (원장 지시) */
-				if ( 'mhx' === $field ) { echo md_mc_mhx_chips(); } // phpcs:ignore
+				if ( 'mhx' === $field ) { echo md_mc_mhx_chips(); md_mc_labs_fields( md_mc_labs_get( $r ) ); } // phpcs:ignore
 				if ( 'referral' === $field ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「…」 붙은 것은 누르면 이름을 이어 적습니다' ); } // phpcs:ignore
 			endif; ?>
 			<div class="mc-edit__bar"><button type="submit" class="mds-btn mds-btn--fill">저장</button><button type="button" class="mds-btn mds-btn--ghost" data-mc-edit-cancel>취소</button></div>
@@ -1960,6 +2020,7 @@ function md_mc_render_edit( $id, $kind ) {
 			<?php md_mc_field( 'title', '제목', $v( 'title' ), array( 'req' => true, 'input' => true, 'attrs' => 'required maxlength="250"' ) ); ?>
 			<?php md_mc_field( 'body', '본문', $v( 'body' ), array( 'rows' => 14 ) ); ?>
 			<?php $latest( 'body' ); ?>
+			<div class="mc-field"><label class="mc-check"><input type="checkbox" name="pin" value="1" <?php checked( (bool) ( $vals['pin'] ?? 0 ) ); ?>> 📌 고정 <small>(팀 노트 맨 위에)</small></label></div><?php /* v9.66 */ ?>
 		<?php else : ?>
 			<?php
 			/* v9.64 · 수정 화면 정리 (원장 지시)
@@ -1989,7 +2050,7 @@ function md_mc_render_edit( $id, $kind ) {
 			foreach ( array( 'mhx', 'referral' ) as $k ) {
 				$na = ! empty( $vals['na'][ $k ] ) || ( '' !== $v( $k ) && md_mc_is_na( $v( $k ) ) );
 				md_mc_field( $k, $f[ $k ][0], $v( $k ), array( 'req' => $f[ $k ][1], 'rows' => 'mhx' === $k ? 2 : 1, 'attrs' => $f[ $k ][1] ? 'required' : '', 'na' => 'referral' === $k ? null : $na ) ); /* v9.55 · 내원경로는 「해당없음」 없음 */
-				if ( 'mhx' === $k ) { echo md_mc_mhx_chips(); } // phpcs:ignore
+				if ( 'mhx' === $k ) { echo md_mc_mhx_chips(); md_mc_labs_fields( md_mc_labs_get( $vals ) ); } // phpcs:ignore
 				if ( 'referral' === $k ) { echo md_mc_chips( 'referral', 'ref', '여러 개 고를 수 있습니다 · 「…」 붙은 것은 누르면 이름을 이어 적습니다 (예: 직원 소개: 민종기)' ); } // phpcs:ignore
 				$latest( $k );
 			}
@@ -2040,7 +2101,7 @@ function md_mc_render_notes() {
 	echo '<ul class="mc-notes">';
 	foreach ( $notes as $n ) {
 		$first = trim( (string) strtok( (string) $n->body, "\n" ) );
-		echo '<li><a class="mc-note-row" href="' . esc_url( md_mc_url( array( 'mv' => 'note', 'mid' => $n->id ) ) ) . '"><b>' . esc_html( $n->title ) . '</b><span>' . esc_html( mb_substr( $first, 0, 80 ) ) . '</span><time>' . esc_html( md_mc_short_date( $n->updated_at ) ) . '</time></a></li>';
+		echo '<li><a class="mc-note-row" href="' . esc_url( md_mc_url( array( 'mv' => 'note', 'mid' => $n->id ) ) ) . '"><b>' . ( (int) $n->pin ? '<span class="mc-note-pin" title="고정">📌</span>' : '' ) . esc_html( $n->title ) . '</b><span>' . esc_html( mb_substr( $first, 0, 80 ) ) . '</span><time>' . esc_html( md_mc_short_date( $n->updated_at ) ) . '</time></a></li>';
 	}
 	echo '</ul>';
 }
@@ -2054,6 +2115,7 @@ function md_mc_render_note( $id ) {
 	<article class="mds-card mc-note">
 		<header class="mc-note__head">
 			<h2><?php echo esc_html( $r->title ); ?></h2>
+			<form method="post" class="mc-inline" action="<?php echo esc_url( md_mc_url() ); ?>"><?php md_mc_nonce_fields( 'pin', $r->id ); ?><input type="hidden" name="on" value="<?php echo $r->pin ? '' : '1'; ?>"><button type="submit" class="mds-btn mc-pinbtn" title="<?php echo $r->pin ? '고정 풀기' : '팀 노트 맨 위에 고정'; ?>"><?php echo $r->pin ? '📌 고정 해제' : '📌 고정'; ?></button></form><?php /* v9.66 */ ?>
 			<a class="mds-btn mds-btn--fill" href="<?php echo esc_url( md_mc_url( array( 'mv' => 'edit', 'mid' => $r->id ) ) ); ?>">수정</a>
 		</header>
 		<p class="mc-chart__meta">마지막 수정 <?php echo esc_html( $r->updated_at ? md_mc_short_date( $r->updated_at ) . ' ' . date( 'H:i', strtotime( $r->updated_at ) ) : '—' ); ?><?php echo $r->updated_by ? ' · ' . esc_html( $r->updated_by ) : ''; ?> · <a href="<?php echo esc_url( md_mc_url( array( 'mv' => 'log', 'mid' => $r->id ) ) ); ?>">변경 기록</a></p>
